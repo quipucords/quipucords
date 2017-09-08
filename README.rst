@@ -106,7 +106,7 @@ Unit Testing
 
 To run the unit tests with the interpreter available as ``python``, use::
 
-    make tests
+    make test
 
 -------------
 Issues

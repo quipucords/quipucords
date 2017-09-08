@@ -30,10 +30,10 @@ clean:
 install: build
 	$(PYTHON) setup.py install -f
 
-tests:
+test:
 	@cd quipucords;$(PYTHON) manage.py test
 
-tests-coverage:
+test-coverage:
 	@cd quipucords;coverage run --source=. manage.py test -v 2;coverage report -m
 
 lint-flake8:
