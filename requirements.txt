@@ -1,0 +1,19 @@
+Django==1.11.5
+django-factory-boy==1.0.0
+django-filter==1.0.4
+django-rest-assured==0.2.1
+djangorestframework==3.6.4
+dnspython==1.15.0
+drf-generators==0.3.0
+email-validator==1.0.2
+Faker==0.8.3
+idna==2.6
+Markdown==2.6.9
+py==1.4.34
+python-dateutil==2.6.1
+pytz==2017.2
+six==1.10.0
+
+# These requirements are for DEVELOPMENT ONLY!
+-r dev-requirements.txt
+--editable .
