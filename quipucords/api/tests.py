@@ -15,7 +15,6 @@ from django.core.urlresolvers import reverse
 from . import models
 
 
-
 class HostCredentialTest(TestCase):
 
     def create_hostcredential(self, name="test_cred",
@@ -30,7 +29,6 @@ class HostCredentialTest(TestCase):
         self.assertTrue(isinstance(hc, models.HostCredential))
 
     def test_hostcred_list_view(self):
-        hc = self.create_hostcredential()
         url = reverse("hostcred-list")
         resp = self.client.get(url)
 

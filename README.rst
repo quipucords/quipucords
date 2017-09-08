@@ -63,7 +63,7 @@ simplicity the instructions below will specify `pip`.
 Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^
 You may wish to isolate your development using a virtual environment. Run the
-following command to setup an virtual environment:
+following command to setup an virtual environment::
 
     virtualenv -p python3 venv
     source venv/bin/activate
