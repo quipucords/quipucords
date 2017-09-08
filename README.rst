@@ -1,3 +1,8 @@
+.. image:: https://travis-ci.org/quipucords/quipucords.svg?branch=master
+    :target: https://travis-ci.org/quipucords/quipucords
+.. image:: https://coveralls.io/repos/github/quipucords/quipucords/badge.svg?branch=master
+    :target: https://coveralls.io/github/quipucords/quipucords?branch=master
+
 
 ==========================================================================================================
 quipucords - Tool for discovery, inspection, collection/deduplication, and reporting on an IT environment
