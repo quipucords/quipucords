@@ -19,13 +19,13 @@ help:
 	@echo "  server-init    to run server initializion steps"
 	@echo "  serve          to run the server"
 
-all: build tests-coverage
+all: build lint tests-coverage
 
 build: clean
 	$(PYTHON) setup.py build -f
 
 clean:
-	-rm -rf dist/ build/
+	-rm -rf dist/ build/ quipucords.egg-info/
 
 install: build
 	$(PYTHON) setup.py install -f
@@ -40,7 +40,7 @@ lint-flake8:
 	flake8 . --ignore D203
 
 lint-pylint:
-	pylint --disable=duplicate-code */*.py
+	$(PYTHON) -m pylint --load-plugins=pylint_django quipucords/*/*.py
 
 lint: lint-flake8 lint-pylint
 

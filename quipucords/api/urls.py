@@ -8,15 +8,17 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Describes the urls and patterns for the API application"""
 
 from rest_framework.routers import SimpleRouter
 from api import views
 
 
-router = SimpleRouter()
+ROUTER = SimpleRouter()
 
-router.register(r'credentials/hosts',
+ROUTER.register(r'credentials/hosts',
                 views.HostCredentialViewSet,
                 base_name='hostcred')
 
-urlpatterns = router.urls
+# pylint: disable=invalid-name
+urlpatterns = ROUTER.urls

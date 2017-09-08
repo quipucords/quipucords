@@ -8,24 +8,26 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Defines the models used with the API application.
+   These models are used in the REST definitions
+"""
 
 from django.db import models
 
 
 class Credential(models.Model):
+    """The base credential model, all of which will have a name"""
     name = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Credentials'
 
 
 class HostCredential(Credential):
+    """The host credential for connecting to host systems via ssh"""
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=128)
     sudo_password = models.CharField(max_length=128)
