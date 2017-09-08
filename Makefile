@@ -31,10 +31,10 @@ install: build
 	$(PYTHON) setup.py install -f
 
 test:
-	@cd quipucords;$(PYTHON) manage.py test
+	$(PYTHON) quipucords/manage.py test
 
 test-coverage:
-	@cd quipucords;coverage run --source=. manage.py test -v 2;coverage report -m
+	coverage run --source=quipucords/ 	quipucords/manage.py test -v 2;coverage report -m
 
 lint-flake8:
 	flake8 . --ignore D203
@@ -45,7 +45,7 @@ lint-pylint:
 lint: lint-flake8 lint-pylint
 
 server-init:
-	@cd quipucords;$(PYTHON) manage.py makemigrations; $(PYTHON) manage.py migrate
+	$(PYTHON) quipucords/manage.py makemigrations; $(PYTHON) quipucords/manage.py migrate
 
 serve:
-	@cd quipucords;$(PYTHON) manage.py runserver
+	$(PYTHON) quipucords/manage.py runserver
