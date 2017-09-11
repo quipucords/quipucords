@@ -10,6 +10,7 @@ install:
 # command to run tests
 script:
   - make build
+  - make lint
   - make server-init
   - make test-coverage
 after_success:

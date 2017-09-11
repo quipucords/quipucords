@@ -8,9 +8,11 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Apps module for Django server application"""
 
 from django.apps import AppConfig
 
 
 class ApiConfig(AppConfig):
+    """Defines the api application configuration"""
     name = 'api'

@@ -8,17 +8,21 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Describes the views associatd with the API models"""
 
 from rest_framework.viewsets import ModelViewSet
 from api.serializers import CredentialSerializer, HostCredentialSerializer
 from api.models import Credential, HostCredential
 
 
+# pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
+    """A view set for the Credential model"""
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
 
 
 class HostCredentialViewSet(ModelViewSet):
+    """A view set for the HostCredential model"""
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer

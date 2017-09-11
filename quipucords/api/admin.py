@@ -8,6 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Admin module for Django server application"""
 
 from django.contrib import admin
 from api.models import HostCredential
