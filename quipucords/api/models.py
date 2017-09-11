@@ -13,14 +13,12 @@
 """
 
 from django.db import models
+from api.vault import encrypt_data_as_unicode
 
 
 class Credential(models.Model):
     """The base credential model, all of which will have a name"""
-    name = models.CharField(max_length=32)
-
-    def __str__(self):
-        return self.name
+    name = models.CharField(max_length=64, unique=True)
 
     class Meta:
         verbose_name_plural = 'Credentials'
@@ -29,11 +27,17 @@ class Credential(models.Model):
 class HostCredential(Credential):
     """The host credential for connecting to host systems via ssh"""
     username = models.CharField(max_length=64)
-    password = models.CharField(max_length=128)
-    sudo_password = models.CharField(max_length=128)
-    ssh_keyfile = models.CharField(max_length=1024)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    password = models.CharField(max_length=1024, null=True)
+    sudo_password = models.CharField(max_length=1024, null=True)
+    ssh_keyfile = models.CharField(max_length=1024, null=True)
+
+    # pylint: disable=arguments-differ
+    def save(self, *args, **kwargs):
+        if self.password:
+            self.password = encrypt_data_as_unicode(self.password)
+        if self.sudo_password:
+            self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
+        super(HostCredential, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Host Credentials'
