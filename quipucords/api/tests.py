@@ -11,9 +11,18 @@
 """Test the API application"""
 
 from django.test import TestCase
-from django.utils import timezone
 from django.core.urlresolvers import reverse
 from . import models
+from . import vault
+
+
+class VaultTest(TestCase):
+    """Tests against the vault class"""
+
+    def test_encrypt_data_as_unicode(self):
+        """Tests the encryption of sensitive data using SECRET_KEY"""
+        value = vault.encrypt_data_as_unicode('encrypted data')
+        self.assertTrue(isinstance(value, str))
 
 
 class HostCredentialTest(TestCase):
@@ -30,8 +39,7 @@ class HostCredentialTest(TestCase):
         """
         return models.HostCredential.objects.create(name=name,
                                                     username=username,
-                                                    password=password,
-                                                    created=timezone.now())
+                                                    password=password)
 
     def test_hostcred_creation(self):
         """Tests the creation of a HostCredential model and asserts its type"""
