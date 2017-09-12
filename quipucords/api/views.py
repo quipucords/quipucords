@@ -11,6 +11,7 @@
 """Describes the views associatd with the API models"""
 
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from api.serializers import CredentialSerializer, HostCredentialSerializer
@@ -52,8 +53,28 @@ class HostCredentialViewSet(ModelViewSet):
             cred = mask_credential(cred)
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        cred = mask_credential(serializer.data)
+        return Response(cred, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         host_cred = get_object_or_404(self.queryset, pk=pk)
         serializer = HostCredentialSerializer(host_cred)
+        cred = mask_credential(serializer.data)
+        return Response(cred)
+
+    # pylint: disable=unused-argument
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
         cred = mask_credential(serializer.data)
         return Response(cred)
