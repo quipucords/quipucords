@@ -12,6 +12,7 @@
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from rest_framework import status
 from . import models
 from . import vault
 
@@ -45,6 +46,19 @@ class HostCredentialTest(TestCase):
         """Tests the creation of a HostCredential model and asserts its type"""
         host_cred = self.create_hostcredential()
         self.assertTrue(isinstance(host_cred, models.HostCredential))
+
+    def test_hostcred_create(self):
+        """
+        Ensure we can create a new host credential object via API.
+        """
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'pass1'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(models.HostCredential.objects.count(), 1)
+        self.assertEqual(models.HostCredential.objects.get().name, 'cred1')
 
     def test_hostcred_list_view(self):
         """Tests the list view set of the HostCredential API"""
