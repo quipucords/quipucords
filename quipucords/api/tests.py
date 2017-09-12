@@ -10,6 +10,7 @@
 #
 """Test the API application"""
 
+import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
@@ -64,5 +65,27 @@ class HostCredentialTest(TestCase):
         """Tests the list view set of the HostCredential API"""
         url = reverse("hostcred-list")
         resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(resp.status_code, 200)
+    def test_hostcred_update_view(self):
+        """Tests the update view set of the HostCredential API"""
+        cred = models.HostCredential(name='cred2', username='user2',
+                                     password='pass2')
+        cred.save()
+        data = {'name': 'cred2',
+                'username': 'user2',
+                'password': 'pass3'}
+        url = reverse("hostcred-detail", args=(cred.pk,))
+        resp = self.client.put(url, json.dumps(data),
+                               content_type='application/json',
+                               format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_hostcred_delete_view(self):
+        """Tests the delete view set of the HostCredential API"""
+        cred = models.HostCredential(name='cred2', username='user2',
+                                     password='pass2')
+        cred.save()
+        url = reverse("hostcred-detail", args=(cred.pk,))
+        resp = self.client.delete(url, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
