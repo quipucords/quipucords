@@ -31,13 +31,28 @@ class HostCredential(Credential):
     sudo_password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
 
-    # pylint: disable=arguments-differ
-    def save(self, *args, **kwargs):
+    def encrypt_fields(self):
+        """Encrypt the sensitive fields of the object"""
         if self.password:
             self.password = encrypt_data_as_unicode(self.password)
         if self.sudo_password:
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
-        super(HostCredential, self).save(*args, **kwargs)
+
+    def perform_create(self, serializer):
+        """Create model object
+
+        :param serializer: model serializer
+        """
+        self.encrypt_fields()
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """Update model object
+
+        :param serializer: model serializer
+        """
+        self.encrypt_fields()
+        serializer.save()
 
     class Meta:
         verbose_name_plural = 'Host Credentials'

@@ -61,6 +61,61 @@ class HostCredentialTest(TestCase):
         self.assertEqual(models.HostCredential.objects.count(), 1)
         self.assertEqual(models.HostCredential.objects.get().name, 'cred1')
 
+    def test_hc_create_err_name(self):
+        """
+        Ensure we cannot create a new host credential object without a name.
+        """
+        expected_error = {'name': ['This field is required.']}
+        url = reverse("hostcred-list")
+        data = {'username': 'user1',
+                'password': 'pass1'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_err_username(self):
+        """
+        Ensure we cannot create a new host credential object without a
+        username.
+        """
+        expected_error = {'username': ['This field is required.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'password': 'pass1'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_err_p_or_ssh(self):
+        """
+        Ensure we cannot create a new host credential object without a password
+        or an ssh_keyfile.
+        """
+        expected_error = {'non_field_errors': ['A host credential must have '
+                                               'either a password or an '
+                                               'ssh_keyfile.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_err_ssh_bad(self):
+        """
+        Ensure we cannot create a new host credential object an ssh_keyfile
+        that cannot be found on the server.
+        """
+        expected_error = {'non_field_errors': ['ssh_keyfile, blah, is not a '
+                                               'valid file on the system.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'ssh_keyfile': 'blah'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
     def test_hostcred_list_view(self):
         """Tests the list view set of the HostCredential API"""
         url = reverse("hostcred-list")
