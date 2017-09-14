@@ -38,21 +38,17 @@ class HostCredential(Credential):
         if self.sudo_password:
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
 
-    def perform_create(self, serializer):
-        """Create model object
-
-        :param serializer: model serializer
+    def save(self, *args, **kwargs):
+        """Save the model object
         """
         self.encrypt_fields()
-        serializer.save()
+        super(HostCredential, self).save(*args, **kwargs)
 
-    def perform_update(self, serializer):
-        """Update model object
-
-        :param serializer: model serializer
+    def update(self, request, *args, **kwargs):
+        """Update the model object
         """
         self.encrypt_fields()
-        serializer.save()
+        super(HostCredential, self).update(request, *args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Host Credentials'
