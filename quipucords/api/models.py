@@ -43,13 +43,13 @@ class HostCredential(Credential):
         """Save the model object
         """
         self.encrypt_fields()
-        super(HostCredential, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         """Update the model object
         """
         self.encrypt_fields()
-        super(HostCredential, self).update(request, *args, **kwargs)
+        super().update(request, *args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Host Credentials'
