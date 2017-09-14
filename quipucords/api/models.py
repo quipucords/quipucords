@@ -38,6 +38,7 @@ class HostCredential(Credential):
         if self.sudo_password:
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
 
+    # pylint: disable=arguments-differ
     def save(self, *args, **kwargs):
         """Save the model object
         """
