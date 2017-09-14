@@ -10,7 +10,9 @@
 #
 """Module for serializing all model object for database storage"""
 
-from rest_framework.serializers import ModelSerializer
+import os
+from django.utils.translation import ugettext as _
+from rest_framework.serializers import ModelSerializer, ValidationError
 from api.models import Credential, HostCredential
 
 
@@ -26,3 +28,14 @@ class HostCredentialSerializer(ModelSerializer):
     class Meta:
         model = HostCredential
         fields = '__all__'
+
+    def validate(self, attrs):
+        ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
+        password = 'password' in attrs and attrs['password']
+        if not (password or ssh_keyfile):
+            raise ValidationError(_('A host credential must have either' +
+                                    ' a password or an ssh_keyfile.'))
+        if ssh_keyfile and not os.path.isfile(ssh_keyfile):
+            raise ValidationError(_('ssh_keyfile, %s, is not a valid file'
+                                    ' on the system.' % (ssh_keyfile)))
+        return attrs
