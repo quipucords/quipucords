@@ -135,6 +135,124 @@ paths:
           description: "Host credential deleted"
         404:
           description: "Host credential not found"
+  /profiles/networks:
+    post:
+      tags:
+        - "Network Profile"
+      summary: "Add a new network profile"
+      description: "Create a new network profile for scanning."
+      operationId: "addNetworkProfile"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "JSON object representing new network profile"
+          required: true
+          schema:
+            $ref: "#/definitions/NetworkProfile"
+          responses:
+            201:
+              description: "Network profile created"
+            400:
+              description: "Invalid input"
+    get:
+      tags:
+        - "Network Profile"
+      summary: "List network profiles"
+      description: "List all network profiles available for scanning."
+      operationId: "listNetworkProfiles"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Network profiles retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/NetworkProfileExt"
+  /profiles/networks/{network_profile_id}:
+    get:
+      tags:
+        - "Network profile"
+      summary: "Get a network profile"
+      description: "Get a network profile."
+      operationId: "getNetworkProfile"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "network_profile_id"
+          in: "path"
+          description: "ID of network profile to retrieve"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Network profile returned"
+          schema:
+            $ref: "#/definitions/NetworkProfileExt"
+        404:
+          description: "Network profile not found"
+    put:
+      tags:
+        - "Network profile"
+      summary: "Update an existing network profile"
+      description: "Update an existing network profile"
+      operationId: "updateNetworkProfile"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "network_profile_id"
+          in: "path"
+          description: "ID of network profile to update"
+          required: true
+          format: "int64"
+        - name: "body"
+          in: "body"
+          description: "Network profile object to be modified"
+          required: true
+          schema:
+            $ref: "#/definitions/NetworkProfile"
+      responses:
+        200:
+          description: "Network profile updated"
+          schema:
+            $ref: "#/definitions/NetworkProfileExt"
+        400:
+          description: "Invalid input"
+        404:
+          description: "No network profile found"
+    delete:
+      tags:
+        - "Network profile"
+      summary: "Delete an existing network profile"
+      description: "Delete an existing network profile"
+      operationId: "deleteNetworkProfile"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "network_profile_id"
+          in: "path"
+          description: "ID of network profile to delete"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        204:
+          description: "Network profile deleted"
+        404:
+          description: "Network profile not found"
 
 definitions:
   HostCredential:
@@ -163,6 +281,42 @@ definitions:
   HostCredentialExt:
     allOf:
       - $ref: "#/definitions/HostCredential"
+      - type: "object"
+        required:
+          - id
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+  NetworkProfile:
+    type: "object"
+    required:
+      - name
+      - hosts
+      - ssh_port
+      - credential_ids
+    properties:
+      name:
+        type: "string"
+        description: "The name of the network profile"
+      hosts:
+        type: "array"
+        items:
+          type: "string"
+        description: "The hosts on the network, as hostnames or IP ranges."
+      ssh_port:
+        type: "integer"
+        format: "int32"
+        description: "The SSH port to use on the hosts."
+      credential_ids:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+        description: "The host credentials to try with these hosts."
+  NetworkProfileExt:
+    allOf:
+      - $ref: "#/definitions/NetworkProfile"
       - type: "object"
         required:
           - id
