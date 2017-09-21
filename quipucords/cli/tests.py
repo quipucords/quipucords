@@ -10,31 +10,11 @@
 #
 """Test the CLI module"""
 
-import contextlib
 import unittest
 import sys
 import six
 from cli.cli import CLI
-
-
-# pylint: disable=too-few-public-methods
-class HushUpStderr(object):
-    """Class used to quiet standard error output"""
-    def write(self, stream):
-        """Ignore standard error output"""
-        pass
-
-
-@contextlib.contextmanager
-def redirect_stdout(stream):
-    """Run a code block, capturing stdout to the given stream"""
-
-    old_stdout = sys.stdout
-    try:
-        sys.stdout = stream
-        yield
-    finally:
-        sys.stdout = old_stdout
+from cli.tests_utilities import HushUpStderr, redirect_stdout
 
 
 class CliTests(unittest.TestCase):

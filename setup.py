@@ -26,7 +26,6 @@ setup(
     packages=find_packages(exclude=["test*.py"]),
     package_data={'': ['LICENSE']},
     url='https://github.com/quipucords/quipucords',
-    # non-python scripts go here
     scripts=[
         'bin/qpc',
     ],

@@ -21,7 +21,7 @@ from . import __version__
 # pylint: disable=too-few-public-methods
 class CLI(object):
     """Class responsible for displaying ussage or matching inputs
-    to the valid set of commands supported by rho.
+    to the valid set of commands supported by qpc.
     """
     def __init__(self, name="cli", usage=None, shortdesc=None,
                  description=None):
