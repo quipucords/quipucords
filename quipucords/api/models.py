@@ -53,3 +53,16 @@ class HostCredential(Credential):
 
     class Meta:
         verbose_name_plural = 'Host Credentials'
+
+
+class NetworkProfile(models.Model):
+    """A network profile connects a list of credentials and a list of hosts."""
+    name = models.CharField(max_length=64, unique=True)
+    # Comma-separated list of host specifiers
+    hosts = models.CharField(max_length=1024)
+    ssh_port = models.IntegerField()
+    # Comma-separated list of credential names. We identify
+    # credentials by name, not ID, to support the behavior where a
+    # user creates a credential of a given name, deletes it, and makes
+    # a new one of the same name.
+    credentials = models.CharField(max_length=1024)

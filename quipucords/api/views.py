@@ -14,8 +14,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from api.serializers import CredentialSerializer, HostCredentialSerializer
-from api.models import Credential, HostCredential
+from api.serializers import CredentialSerializer, HostCredentialSerializer, \
+    NetworkProfileSerializer
+from api.models import Credential, HostCredential, NetworkProfile
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
@@ -78,3 +79,37 @@ class HostCredentialViewSet(ModelViewSet):
         self.perform_update(serializer)
         cred = mask_credential(serializer.data)
         return Response(cred)
+
+
+class NetworkProfileViewSet(ModelViewSet):
+    """A view set for NetworkProfiles"""
+
+    queryset = NetworkProfile.objects.all()
+    serializer_class = NetworkProfileSerializer
+
+    def list(self, request):  # pylint: disable=unused-argument
+        serializer = NetworkProfileSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    # pylint: disable=unused-argument
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
+    def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
+        network_profile = get_object_or_404(self.queryset, pk=pk)
+        serializer = NetworkProfileSerializer(network_profile)
+        return Response(serializer.data)
+
+    # pylint: disable=unused-argument
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=kwargs.get('partial', False))
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
