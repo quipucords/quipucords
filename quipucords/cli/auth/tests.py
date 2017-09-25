@@ -13,8 +13,8 @@
 import unittest
 import sys
 import os
+from io import StringIO
 from argparse import ArgumentParser, Namespace
-import six
 import requests
 import requests_mock
 from cli.cli import CLI
@@ -56,7 +56,7 @@ class AuthCliTests(unittest.TestCase):
         """Testing the add auth command when providing an invalid path for
         the sshkeyfile.
         """
-        auth_out = six.StringIO()
+        auth_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(auth_out):
                 sys.argv = ['/bin/qpc', 'auth', 'add', '--name', 'auth1',
@@ -66,7 +66,7 @@ class AuthCliTests(unittest.TestCase):
     def test_add_auth_name_dup(self):
         """Testing the add auth command duplicate name
         """
-        auth_out = six.StringIO()
+        auth_out = StringIO()
         url = BASE_URL + AUTH_URI_POST
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
@@ -85,7 +85,7 @@ class AuthCliTests(unittest.TestCase):
     def test_add_auth_ssl_err(self):
         """Testing the add auth command with a connection error
         """
-        auth_out = six.StringIO()
+        auth_out = StringIO()
         url = BASE_URL + AUTH_URI_POST
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
@@ -101,7 +101,7 @@ class AuthCliTests(unittest.TestCase):
     def test_add_auth_conn_err(self):
         """Testing the add auth command with a connection error
         """
-        auth_out = six.StringIO()
+        auth_out = StringIO()
         url = BASE_URL + AUTH_URI_POST
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
@@ -117,7 +117,7 @@ class AuthCliTests(unittest.TestCase):
     def test_add_auth(self):
         """Testing the add auth command successfully
         """
-        auth_out = six.StringIO()
+        auth_out = StringIO()
         url = BASE_URL + AUTH_URI_POST
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
