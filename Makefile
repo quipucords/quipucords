@@ -7,6 +7,8 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help           to show this message"
@@ -34,7 +36,7 @@ test:
 	$(PYTHON) quipucords/manage.py test -v 2 quipucords/
 
 test-coverage:
-	coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/;coverage report -m
+	coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/;coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
 	flake8 . --ignore D203

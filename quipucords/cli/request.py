@@ -37,3 +37,14 @@ def post(path, data):
     """
     url = BASE_URL + path
     return requests.post(url, json=data)
+
+
+def get(path, params=None):
+    """Get JSON data from the given path with the configured server location
+
+    :param path: uri path after server and port (i.e. /api/v1/credentias/hosts)
+    :param params: uri encoding params (i.e. ?param1=hello&param2=world)
+    :returns: reponse object
+    """
+    url = BASE_URL + path
+    return requests.get(url, params=params)

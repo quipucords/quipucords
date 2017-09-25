@@ -14,6 +14,7 @@
 from __future__ import print_function
 import logging
 import os
+import json
 from xdg.BaseDirectory import xdg_data_home, xdg_config_home
 
 QPC_PATH = 'qpc'
@@ -82,3 +83,13 @@ def handle_error_response(response_data):
     for _, err_cases in response_data.items():
         for err_msg in err_cases:
             log.error(err_msg)
+
+
+def pretty_print(json_data):
+    """Provide pretty printing of output json data
+
+    :param json_data: the json data to pretty print
+    :returns: the pretty print string of the json data
+    """
+    return json.dumps(json_data, sort_keys=True, indent=4,
+                      separators=(',', ': '))

@@ -14,6 +14,8 @@
 
 SUBCOMMAND = 'auth'
 ADD = 'add'
+LIST = 'list'
 
 
 AUTH_URI_POST = '/api/v1/credentials/hosts/'
+AUTH_URI_GET_LIST = AUTH_URI_POST
