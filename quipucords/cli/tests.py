@@ -12,7 +12,7 @@
 
 import unittest
 import sys
-import six
+from io import StringIO
 from cli.cli import CLI
 from cli.tests_utilities import HushUpStderr, redirect_stdout
 
@@ -31,7 +31,7 @@ class CliTests(unittest.TestCase):
 
     def test_version(self):
         """Testing the verion argument"""
-        version_out = six.StringIO()
+        version_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(version_out):
                 sys.argv = ['/bin/qpc', '--version']

@@ -14,6 +14,8 @@
 from __future__ import print_function
 from argparse import ArgumentParser
 import cli.auth as auth
+from cli.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
+    setup_logging
 from cli.auth.add import AuthAddCommand
 from . import __version__
 
@@ -31,12 +33,17 @@ class CLI(object):
         self.parser = ArgumentParser(usage=usage, description=description)
         self.parser.add_argument('--version', action='version',
                                  version=__version__)
-
+        self.parser.add_argument('-v', dest='verbosity', action='count',
+                                 help='Verbose mode. Use up to -vvvv for '
+                                 'more verbosity.')
         self.subparsers = self.parser.add_subparsers(dest='subcommand')
         self.name = name
         self.args = None
         self.subcommands = {}
         self._add_subcommand(auth.SUBCOMMAND, [AuthAddCommand])
+
+        ensure_data_dir_exists()
+        ensure_config_dir_exists()
 
     def _add_subcommand(self, subcommand, actions):
         subcommand_parser = self.subparsers.add_parser(subcommand)
@@ -53,6 +60,7 @@ class CLI(object):
         usage is displayed
         """
         self.args = self.parser.parse_args()
+        setup_logging(self.args.verbosity)
 
         if self.args.subcommand in self.subcommands:
             subcommand = self.subcommands[self.args.subcommand]

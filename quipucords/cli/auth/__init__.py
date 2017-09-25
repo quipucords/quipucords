@@ -14,3 +14,6 @@
 
 SUBCOMMAND = 'auth'
 ADD = 'add'
+
+
+AUTH_URI_POST = '/api/v1/credentials/hosts/'
