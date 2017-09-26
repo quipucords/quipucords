@@ -17,11 +17,10 @@ from __future__ import print_function
 import sys
 import os
 from getpass import getpass
-import requests
-from cli.utils import log, handle_error_response
+from requests import codes
+from cli.request import POST
 from cli.clicommand import CliCommand
 import cli.auth as auth
-from cli.request import post, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 
 
 # pylint: disable=too-few-public-methods
@@ -34,8 +33,10 @@ class AuthAddCommand(CliCommand):
     ACTION = auth.ADD
 
     def __init__(self, subparsers):
-        CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION)
-        self.parser = subparsers.add_parser(self.ACTION)
+        # pylint: disable=no-member
+        CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
+                            subparsers.add_parser(self.ACTION), POST,
+                            auth.AUTH_URI_POST, [codes.created])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help='auth credential name', required=True)
         self.parser.add_argument('--username', dest='username',
@@ -71,57 +72,32 @@ class AuthAddCommand(CliCommand):
                 # set filename to the resolved keyfile_path
                 self.args.filename = keyfile_path
 
-    def _get_password(self, data):
+    def _get_password(self):
         """Collect the password value and place in auth dictionary.
 
-        :param data: a dictionary representing the auth being added
         """
         if self.args.password:
             print('Provide connection password.')
             pass_prompt = getpass()
-            data['password'] = pass_prompt or None
+            self.req_payload['password'] = pass_prompt or None
         else:
-            data['password'] = None
+            self.req_payload['password'] = None
         if self.args.sudo_password:
             print('Provide password for sudo.')
             pass_prompt = getpass()
-            data['sudo_password'] = pass_prompt or None
+            self.req_payload['sudo_password'] = pass_prompt or None
         else:
-            data['sudo_password'] = None
+            self.req_payload['sudo_password'] = None
 
-    def _make_auth(self):
+    def _build_data(self):
         """Construct the dictionary auth given our arguments.
 
         :returns: a dictionsary representing the auth being added
         """
-        data = {'name': self.args.name,
-                'username': self.args.username}
-        data['ssh_keyfile'] = self.args.filename or None
-        self._get_password(data)
+        self.req_payload = {'name': self.args.name,
+                            'username': self.args.username}
+        self.req_payload['ssh_keyfile'] = self.args.filename or None
+        self._get_password()
 
-        return data
-
-    def _do_command(self):
-        data = self._make_auth()
-
-        try:
-            response = post(auth.AUTH_URI_POST, data)
-            # pylint: disable=no-member
-            if response.status_code != requests.codes.created:
-                # handle error cases
-                r_data = response.json()
-                handle_error_response(r_data)
-                self.parser.print_help()
-                sys.exit(1)
-            else:
-                print('Auth "%s" was added' % self.args.name)
-        except requests.exceptions.SSLError as ssl_error:
-            print(SSL_ERROR_MSG)
-            log.error(ssl_error)
-            self.parser.print_help()
-            sys.exit(1)
-        except requests.exceptions.ConnectionError as conn_err:
-            print(CONNECTION_ERROR_MSG)
-            log.error(conn_err)
-            self.parser.print_help()
-            sys.exit(1)
+    def _handle_response_success(self):
+        print('Auth "%s" was added' % self.args.name)
