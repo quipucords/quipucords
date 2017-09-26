@@ -16,6 +16,7 @@ SUBCOMMAND = 'auth'
 ADD = 'add'
 LIST = 'list'
 EDIT = 'edit'
+SHOW = 'show'
 
 
 AUTH_URI = '/api/v1/credentials/hosts/'
