@@ -34,7 +34,7 @@ class AuthListCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            auth.AUTH_URI_GET_LIST, [codes.ok])
+                            auth.AUTH_URI, [codes.ok])
 
     def _handle_response_success(self):
         json_data = self.response.json()

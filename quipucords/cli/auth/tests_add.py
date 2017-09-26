@@ -20,17 +20,16 @@ import requests_mock
 from cli.cli import CLI
 from cli.tests_utilities import HushUpStderr, redirect_stdout
 from cli.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from cli.auth import AUTH_URI_POST, AUTH_URI_GET_LIST
+from cli.auth import AUTH_URI
 from cli.auth.add import AuthAddCommand
-from cli.auth.list import AuthListCommand
 
 TMP_KEY = "/tmp/testkey"
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
-class AuthCliTests(unittest.TestCase):
-    """Class for testing the auth cli commands for qpc"""
+class AuthAddCliTests(unittest.TestCase):
+    """Class for testing the auth add commands for qpc"""
     def setUp(self):
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
@@ -68,7 +67,7 @@ class AuthCliTests(unittest.TestCase):
         """Testing the add auth command duplicate name
         """
         auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_POST
+        url = BASE_URL + AUTH_URI
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=400, json=error)
@@ -87,7 +86,7 @@ class AuthCliTests(unittest.TestCase):
         """Testing the add auth command with a connection error
         """
         auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_POST
+        url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
             aac = AuthAddCommand(SUBPARSER)
@@ -103,7 +102,7 @@ class AuthCliTests(unittest.TestCase):
         """Testing the add auth command with a connection error
         """
         auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_POST
+        url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
             aac = AuthAddCommand(SUBPARSER)
@@ -119,7 +118,7 @@ class AuthCliTests(unittest.TestCase):
         """Testing the add auth command successfully
         """
         auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_POST
+        url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = AuthAddCommand(SUBPARSER)
@@ -129,78 +128,3 @@ class AuthCliTests(unittest.TestCase):
                 aac.main(args)
                 self.assertEqual(auth_out.getvalue(),
                                  'Auth "auth1" was added\n')
-
-    def test_list_auth_ssl_err(self):
-        """Testing the list auth command with a connection error
-        """
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_GET_LIST
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.SSLError)
-            alc = AuthListCommand(SUBPARSER)
-            args = Namespace()
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
-                    alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
-
-    def test_list_auth_conn_err(self):
-        """Testing the list auth command with a connection error
-        """
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_GET_LIST
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            alc = AuthListCommand(SUBPARSER)
-            args = Namespace()
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
-                    alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
-
-    def test_list_auth_internal_err(self):
-        """Testing the list auth command with an internal error
-        """
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_GET_LIST
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            alc = AuthListCommand(SUBPARSER)
-            args = Namespace()
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
-                    alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), 'Server Error')
-
-    def test_list_auth_empty(self):
-        """Testing the list auth command successfully with empty data
-        """
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_GET_LIST
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
-            alc = AuthListCommand(SUBPARSER)
-            args = Namespace()
-            with redirect_stdout(auth_out):
-                alc.main(args)
-                self.assertEqual(auth_out.getvalue(),
-                                 'No credentials exist yet.\n')
-
-    def test_list_auth_data(self):
-        """Testing the list auth command successfully with stubbed data
-        """
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI_GET_LIST
-        auth_entry = {'id': 1, 'name': 'auth1', 'username': 'root',
-                      'password': '********'}
-        data = [auth_entry]
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=data)
-            alc = AuthListCommand(SUBPARSER)
-            args = Namespace()
-            with redirect_stdout(auth_out):
-                alc.main(args)
-                expected = '[{"id":1,"name":"auth1","password":"********",' \
-                    '"username":"root"}]'
-                self.assertEqual(auth_out.getvalue().replace('\n', '')
-                                 .replace(' ', '').strip(), expected)

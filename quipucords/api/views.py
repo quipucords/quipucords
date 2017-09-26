@@ -14,6 +14,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+from filters import mixins
 from api.serializers import CredentialSerializer, HostCredentialSerializer
 from api.models import Credential, HostCredential
 
@@ -42,13 +44,16 @@ class CredentialViewSet(ModelViewSet):
     serializer_class = CredentialSerializer
 
 
-class HostCredentialViewSet(ModelViewSet):
+class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     """A view set for the HostCredential model"""
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument
-        serializer = HostCredentialSerializer(self.queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = HostCredentialSerializer(queryset, many=True)
         for cred in serializer.data:
             cred = mask_credential(cred)
         return Response(serializer.data)
