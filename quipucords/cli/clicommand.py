@@ -13,9 +13,8 @@
 
 from __future__ import print_function
 import sys
-import requests
-from cli.utils import log, handle_error_response
-from cli.request import request, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from cli.utils import handle_error_response
+from cli.request import request
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
@@ -77,31 +76,15 @@ class CliCommand(object):
         """
         self._build_req_params()
         self._build_data()
-
-        try:
-            self.response = request(method=self.req_method, path=self.req_path,
-                                    params=self.req_params,
-                                    payload=self.req_payload)
-            # pylint: disable=no-member
-            if self.response.status_code not in self.success_codes:
-                # handle error cases
-                self._handle_response_error()
-            else:
-                self._handle_response_success()
-        except AssertionError as assert_err:
-            log.error(assert_err)
-            self.parser.print_help()
-            sys.exit(1)
-        except requests.exceptions.SSLError as ssl_error:
-            print(SSL_ERROR_MSG)
-            log.error(ssl_error)
-            self.parser.print_help()
-            sys.exit(1)
-        except requests.exceptions.ConnectionError as conn_err:
-            print(CONNECTION_ERROR_MSG)
-            log.error(conn_err)
-            self.parser.print_help()
-            sys.exit(1)
+        self.response = request(method=self.req_method, path=self.req_path,
+                                params=self.req_params,
+                                payload=self.req_payload)
+        # pylint: disable=no-member
+        if self.response.status_code not in self.success_codes:
+            # handle error cases
+            self._handle_response_error()
+        else:
+            self._handle_response_success()
 
     def main(self, args):
         """

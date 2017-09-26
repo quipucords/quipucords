@@ -18,6 +18,7 @@ from cli.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
     setup_logging
 from cli.auth.add import AuthAddCommand
 from cli.auth.list import AuthListCommand
+from cli.auth.edit import AuthEditCommand
 from . import __version__
 
 
@@ -42,7 +43,8 @@ class CLI(object):
         self.args = None
         self.subcommands = {}
         self._add_subcommand(auth.SUBCOMMAND,
-                             [AuthAddCommand, AuthListCommand])
+                             [AuthAddCommand, AuthListCommand,
+                              AuthEditCommand])
 
         ensure_data_dir_exists()
         ensure_config_dir_exists()
