@@ -16,6 +16,12 @@ import requests
 # Need to determine how we get this information; config file at install?
 BASE_URL = 'http://127.0.0.1:8000'
 
+POST = 'POST'
+GET = 'GET'
+PUT = 'PUT'
+DELETE = 'DELETE'
+
+
 UNKNOWN_ERROR_MSG = 'An unknown error occurred while attempting to create' \
                     ' the host credential.'
 
@@ -28,15 +34,15 @@ SSL_ERROR_MSG = 'A connection error has occurred attempting to' \
                 ' configuration and/or the status of the server.'
 
 
-def post(path, data):
-    """Post JSON data to the given path with the configured server location
+def post(path, payload):
+    """Post JSON payload to the given path with the configured server location
 
     :param path: uri path after server and port (i.e. /api/v1/credentias/hosts)
-    :param data: dicatonary of data to be posted
+    :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
     url = BASE_URL + path
-    return requests.post(url, json=data)
+    return requests.post(url, json=payload)
 
 
 def get(path, params=None):
@@ -48,3 +54,21 @@ def get(path, params=None):
     """
     url = BASE_URL + path
     return requests.get(url, params=params)
+
+
+def request(method, path, params=None, payload=None):
+    """Generic handler for passing to specific request methods.
+
+    :param method: the request method to execute
+    :param path: uri path after server and port (i.e. /api/v1/credentias/hosts)
+    :param params: uri encoding params (i.e. ?param1=hello&param2=world)
+    :param payload: dictionary of payload to be posted
+    :returns: reponse object
+    :raises: AssertionError error if method is not supported
+    """
+    if method == POST:
+        return post(path, payload)
+    elif method == GET:
+        return get(path, params)
+    else:
+        raise AssertionError('Unsupported request method %s' % (method))

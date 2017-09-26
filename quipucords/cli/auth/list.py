@@ -14,12 +14,11 @@ for system access
 """
 
 from __future__ import print_function
-import sys
-import requests
-from cli.utils import log, handle_error_response, pretty_print
+from requests import codes
+from cli.utils import pretty_print
 from cli.clicommand import CliCommand
 import cli.auth as auth
-from cli.request import get, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from cli.request import GET
 
 
 # pylint: disable=too-few-public-methods
@@ -32,33 +31,15 @@ class AuthListCommand(CliCommand):
     ACTION = auth.LIST
 
     def __init__(self, subparsers):
-        CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION)
-        self.parser = subparsers.add_parser(self.ACTION)
+        # pylint: disable=no-member
+        CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
+                            subparsers.add_parser(self.ACTION), GET,
+                            auth.AUTH_URI_GET_LIST, [codes.ok])
 
-    def _do_command(self):
-        try:
-            response = get(auth.AUTH_URI_GET_LIST)
-            # pylint: disable=no-member
-            if response.status_code != requests.codes.ok:
-                # handle error cases
-                r_data = response.json()
-                handle_error_response(r_data)
-                self.parser.print_help()
-                sys.exit(1)
-            else:
-                json_data = response.json()
-                if json_data == []:
-                    print('No credentials exist yet.')
-                else:
-                    data = pretty_print(json_data)
-                    print(data)
-        except requests.exceptions.SSLError as ssl_error:
-            print(SSL_ERROR_MSG)
-            log.error(ssl_error)
-            self.parser.print_help()
-            sys.exit(1)
-        except requests.exceptions.ConnectionError as conn_err:
-            print(CONNECTION_ERROR_MSG)
-            log.error(conn_err)
-            self.parser.print_help()
-            sys.exit(1)
+    def _handle_response_success(self):
+        json_data = self.response.json()
+        if json_data == []:
+            print('No credentials exist yet.')
+        else:
+            data = pretty_print(json_data)
+            print(data)
