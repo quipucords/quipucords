@@ -38,7 +38,7 @@ class AuthShowCliTests(unittest.TestCase):
         sys.stderr = self.orig_stderr
 
     def test_show_auth_ssl_err(self):
-        """Testing the list auth command with a connection error
+        """Testing the show auth command with a connection error
         """
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI + '?name=auth1'
@@ -52,7 +52,7 @@ class AuthShowCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
 
     def test_show_auth_conn_err(self):
-        """Testing the list auth command with a connection error
+        """Testing the show auth command with a connection error
         """
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI + '?name=auth1'
@@ -66,7 +66,7 @@ class AuthShowCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_show_auth_internal_err(self):
-        """Testing the list auth command with an internal error
+        """Testing the show auth command with an internal error
         """
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI + '?name=auth1'
@@ -80,7 +80,7 @@ class AuthShowCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), 'Server Error')
 
     def test_show_auth_empty(self):
-        """Testing the list auth command successfully with empty data
+        """Testing the show auth command successfully with empty data
         """
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI + '?name=auth1'
@@ -95,7 +95,7 @@ class AuthShowCliTests(unittest.TestCase):
                                      'Auth "auth1" does not exist\n')
 
     def test_show_auth_data(self):
-        """Testing the list auth command successfully with stubbed data
+        """Testing the show auth command successfully with stubbed data
         """
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI + '?name=auth1'

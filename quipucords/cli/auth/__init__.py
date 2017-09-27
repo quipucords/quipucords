@@ -17,6 +17,7 @@ ADD = 'add'
 LIST = 'list'
 EDIT = 'edit'
 SHOW = 'show'
+CLEAR = 'clear'
 
 
 AUTH_URI = '/api/v1/credentials/hosts/'

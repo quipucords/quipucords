@@ -20,6 +20,7 @@ from cli.auth.add import AuthAddCommand
 from cli.auth.list import AuthListCommand
 from cli.auth.edit import AuthEditCommand
 from cli.auth.show import AuthShowCommand
+from cli.auth.clear import AuthClearCommand
 from . import __version__
 
 
@@ -45,7 +46,8 @@ class CLI(object):
         self.subcommands = {}
         self._add_subcommand(auth.SUBCOMMAND,
                              [AuthAddCommand, AuthListCommand,
-                              AuthEditCommand, AuthShowCommand])
+                              AuthEditCommand, AuthShowCommand,
+                              AuthClearCommand])
 
         ensure_data_dir_exists()
         ensure_config_dir_exists()
