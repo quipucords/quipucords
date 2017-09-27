@@ -85,7 +85,7 @@ class AuthClearCommand(CliCommand):
                     remove_error.append(entry['name'])
             if remove_error != []:
                 cred_err = ','.join(remove_error)
-                print('Some credentials were removed, however and error'
+                print('Some credentials were removed, however an error'
                       ' occurred removing the following credentials: %s'
                       % cred_err)
                 sys.exit(1)
