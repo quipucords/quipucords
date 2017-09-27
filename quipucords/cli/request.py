@@ -59,7 +59,7 @@ def get(path, params=None):
 
 
 def patch(path, payload):
-    """Put JSON payload to the given path with the configured server location
+    """Patch JSON payload to the given path with the configured server location
 
     :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
     :param payload: dictionary of payload to be posted
@@ -67,6 +67,16 @@ def patch(path, payload):
     """
     url = BASE_URL + path
     return requests.patch(url, json=payload)
+
+
+def delete(path):
+    """Delete the item with the given path with the configured server location
+
+    :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
+    :returns: reponse object
+    """
+    url = BASE_URL + path
+    return requests.delete(url)
 
 
 def request(method, path, params=None, payload=None, parser=None):
@@ -87,6 +97,8 @@ def request(method, path, params=None, payload=None, parser=None):
             return get(path, params)
         elif method == PATCH:
             return patch(path, payload)
+        elif method == DELETE:
+            return delete(path)
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()
