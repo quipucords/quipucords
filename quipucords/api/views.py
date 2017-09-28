@@ -14,7 +14,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import (DjangoFilterBackend, Filter,
+                                           FilterSet)
 from filters import mixins
 from api.serializers import CredentialSerializer, HostCredentialSerializer
 from api.models import Credential, HostCredential
@@ -37,6 +38,30 @@ def mask_credential(cred):
     return cred
 
 
+class ListFilter(Filter):
+    """Add query filter capability to provide a list of filter values.
+    """
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # For django-filter versions < 0.13,
+        # use lookup_type instead of lookup_expr
+        self.lookup_expr = 'in'
+        values = value.split(',')
+        return super(ListFilter, self).filter(qs, values)
+
+
+class HostCredentialFilter(FilterSet):
+    """Filter for host credentials by name"""
+    name = ListFilter(name='name')
+
+    class Meta:
+        model = HostCredential
+        fields = ['name']
+
+
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model"""
@@ -49,7 +74,8 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('name',)
+    # filter_fields = ('name',)
+    filter_class = HostCredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
         queryset = self.filter_queryset(self.get_queryset())
