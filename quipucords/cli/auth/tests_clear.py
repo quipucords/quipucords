@@ -44,11 +44,11 @@ class AuthClearCliTests(unittest.TestCase):
         url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
 
     def test_clear_auth_conn_err(self):
@@ -58,11 +58,11 @@ class AuthClearCliTests(unittest.TestCase):
         url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_clear_auth_internal_err(self):
@@ -72,11 +72,11 @@ class AuthClearCliTests(unittest.TestCase):
         url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     self.assertEqual(auth_out.getvalue(), 'Server Error')
 
     def test_clear_auth_empty(self):
@@ -86,11 +86,11 @@ class AuthClearCliTests(unittest.TestCase):
         url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     self.assertEqual(auth_out.getvalue(),
                                      'Auth "auth1"  was not found\n')
 
@@ -107,10 +107,10 @@ class AuthClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with redirect_stdout(auth_out):
-                asc.main(args)
+                acc.main(args)
                 expected = 'Auth "auth1" was removed\n'
                 self.assertEqual(auth_out.getvalue(), expected)
 
@@ -128,11 +128,11 @@ class AuthClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=500, json=err_data)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name='auth1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     expected = 'Failed to remove credential "auth1"'
                     self.assertTrue(expected in auth_out.getvalue())
 
@@ -144,11 +144,11 @@ class AuthClearCliTests(unittest.TestCase):
         get_url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=[])
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     expected = 'No credentials exist to be removed\n'
                     self.assertEqual(auth_out.getvalue(), expected)
 
@@ -166,11 +166,11 @@ class AuthClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=500, json=err_data)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
-                    asc.main(args)
+                    acc.main(args)
                     expected = 'Some credentials were removed, however and' \
                                ' error occurred removing the following' \
                                ' credentials:'
@@ -189,9 +189,9 @@ class AuthClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
-            asc = AuthClearCommand(SUBPARSER)
+            acc = AuthClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with redirect_stdout(auth_out):
-                asc.main(args)
+                acc.main(args)
                 expected = 'All credentials were removed\n'
                 self.assertEqual(auth_out.getvalue(), expected)

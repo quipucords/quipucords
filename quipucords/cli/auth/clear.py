@@ -25,8 +25,7 @@ from cli.request import GET, DELETE, request
 # pylint: disable=too-few-public-methods
 class AuthClearCommand(CliCommand):
     """
-    This command is for showing an auth which can be later associated with
-    profiles to gather facts.
+    This command is for clearing a specific credential or all credentials.
     """
     SUBCOMMAND = auth.SUBCOMMAND
     ACTION = auth.CLEAR
