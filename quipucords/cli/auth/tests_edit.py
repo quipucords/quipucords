@@ -47,18 +47,18 @@ class AuthEditCliTests(unittest.TestCase):
             os.remove(TMP_KEY)
 
     def test_edit_req_args_err(self):
-        """Testing the add edit command required flags"""
+        """Testing the auth edit command required flags"""
         auth_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(auth_out):
                 sys.argv = ['/bin/qpc', 'auth', 'edit', '--name', 'auth1']
                 CLI().main()
                 self.assertEqual(auth_out.getvalue(),
-                                 'No arguments provided to edit for '
+                                 'No arguments provided to edit '
                                  'credential auth1')
 
     def test_edit_bad_key(self):
-        """Testing the add edit command when providing an invalid path for
+        """Testing the auth edit command when providing an invalid path for
         the sshkeyfile.
         """
         auth_out = StringIO()
@@ -86,10 +86,10 @@ class AuthEditCliTests(unittest.TestCase):
                 with redirect_stdout(auth_out):
                     aec.main(args)
                     aec.main(args)
-                    self.assertTrue('credential with this name already exists.'
+                    self.assertTrue('Auth "auth_none" does not exist'
                                     in auth_out.getvalue())
 
-    def test_add_edit_ssl_err(self):
+    def test_edit_auth_ssl_err(self):
         """Testing the edit auth command with a connection error
         """
         auth_out = StringIO()

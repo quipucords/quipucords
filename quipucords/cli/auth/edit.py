@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" AuthAddCommand is used to add authentication credentials
+""" AuthEditCommand is used to edit existing authentication credentials
 for system access
 """
 
@@ -59,7 +59,7 @@ class AuthEditCommand(CliCommand):
 
         if not(self.args.username or self.args.password or
                self.args.sudo_password or self.args.filename):
-            print('No arguments provided to edit for credential %s' %
+            print('No arguments provided to edit credential %s' %
                   (self.args.name))
             self.parser.print_help()
             sys.exit(1)
