@@ -42,3 +42,27 @@ def validate_port(arg):
                                 ' in the valid range (0-65535)' % arg)
 
     return arg
+
+
+def build_profile_payload(args, add_none=True):
+    """Construct payload from command line arguments
+
+    :param args: the command line arguments
+    :param add_none: add None for a key if True vs. not in dictionary
+    :returns: the dictionary for the request payload
+    """
+    req_payload = {'name': args.name}
+    if args.hosts:
+        req_payload['hosts'] = args.hosts
+    elif add_none:
+        req_payload['hosts'] = None
+    if args.ssh_port:
+        req_payload['ssh_port'] = args.ssh_port
+    elif add_none:
+        req_payload['ssh_port'] = None
+    if args.credential_ids:
+        req_payload['credential_ids'] = args.credential_ids
+    elif add_none:
+        req_payload['credential_ids'] = None
+
+    return req_payload

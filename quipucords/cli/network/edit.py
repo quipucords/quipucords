@@ -9,43 +9,44 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" NetworkAddCommand is used to add network profiles for system scans
+""" NetworkEditCommand is used to edit existing network profiles
+for system scans
 """
 
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.request import POST, GET, request
+from cli.request import PATCH, GET, request
 from cli.clicommand import CliCommand
+import cli.auth as auth
 import cli.network as network
 from cli.network.utils import validate_port, build_profile_payload
-import cli.auth as auth
 
 
 # pylint: disable=too-few-public-methods
-class NetworkAddCommand(CliCommand):
+class NetworkEditCommand(CliCommand):
     """
-    This command is for creating new network profiles which can be later used
-    with scans to gather facts.
+    This command is for editing existing network profiles  which can be used
+    for system scans to gather facts.
     """
     SUBCOMMAND = network.SUBCOMMAND
-    ACTION = network.ADD
+    ACTION = network.EDIT
 
     def __init__(self, subparsers):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
-                            subparsers.add_parser(self.ACTION), POST,
-                            network.NETWORK_URI, [codes.created])
+                            subparsers.add_parser(self.ACTION), PATCH,
+                            network.NETWORK_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help='profile name', required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help='IP range to scan.'
                                       ' See "man qpc" for supported formats.',
-                                 required=True)
+                                 required=False)
         self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
                                  nargs='+', default=[], help='credentials to '
-                                 'associate with profile', required=True)
+                                 'associate with profile', required=False)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
                                  help='SSHPORT for connection; default=22',
@@ -53,6 +54,29 @@ class NetworkAddCommand(CliCommand):
 
     def _validate_args(self):
         CliCommand._validate_args(self)
+
+        if not(self.args.hosts or self.args.auth):
+            print('No arguments provided to edit profile %s' %
+                  (self.args.name))
+            self.parser.print_help()
+            sys.exit(1)
+
+        # check for existence of profile
+        response = request(parser=self.parser, method=GET,
+                           path=network.NETWORK_URI,
+                           params={'name': self.args.name},
+                           payload=None)
+        if response.status_code == codes.ok:  # pylint: disable=no-member
+            json_data = response.json()
+            if len(json_data) == 1:
+                profile_entry = json_data[0]
+                self.req_path = self.req_path + str(profile_entry['id']) + '/'
+            else:
+                print('Profile "%s" does not exist' % self.args.name)
+                sys.exit(1)
+        else:
+            print('Profile "%s" does not exist' % self.args.name)
+            sys.exit(1)
 
         # check for valid auth values
         auth_list = ','.join(self.args.auth)
@@ -83,9 +107,9 @@ class NetworkAddCommand(CliCommand):
     def _build_data(self):
         """Construct the dictionary auth given our arguments.
 
-        :returns: a dictionary representing the network profile being added
+        :returns: a dictionary representing the auth being added
         """
-        self.req_payload = build_profile_payload(self.args)
+        self.req_payload = build_profile_payload(self.args, add_none=False)
 
     def _handle_response_success(self):
-        print('Profile "%s" was added' % self.args.name)
+        print('Profile "%s" was updated' % self.args.name)
