@@ -58,8 +58,7 @@ class CliCommand(object):
         """
         Sub-commands can override this method to perform error handling.
         """
-        r_data = self.response.json()
-        handle_error_response(r_data)
+        handle_error_response(self.response)
         self.parser.print_help()
         sys.exit(1)
 

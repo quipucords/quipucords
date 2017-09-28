@@ -14,6 +14,7 @@
 from __future__ import print_function
 from argparse import ArgumentParser
 import cli.auth as auth
+import cli.network as network
 from cli.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
     setup_logging
 from cli.auth.add import AuthAddCommand
@@ -21,6 +22,7 @@ from cli.auth.list import AuthListCommand
 from cli.auth.edit import AuthEditCommand
 from cli.auth.show import AuthShowCommand
 from cli.auth.clear import AuthClearCommand
+from cli.network.add import NetworkAddCommand
 from . import __version__
 
 
@@ -48,7 +50,8 @@ class CLI(object):
                              [AuthAddCommand, AuthListCommand,
                               AuthEditCommand, AuthShowCommand,
                               AuthClearCommand])
-
+        self._add_subcommand(network.SUBCOMMAND,
+                             [NetworkAddCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

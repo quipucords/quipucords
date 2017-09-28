@@ -57,8 +57,7 @@ class AuthClearCommand(CliCommand):
             if print_out:
                 print('Auth "%s" was removed' % name)
         else:
-            r_data = response.json()
-            handle_error_response(r_data)
+            handle_error_response(response)
             if print_out:
                 print('Failed to remove credential "%s"' % name)
         return deleted

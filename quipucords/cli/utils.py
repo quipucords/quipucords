@@ -75,14 +75,19 @@ def setup_logging(verbosity):
     log.addHandler(stderr_handler)
 
 
-def handle_error_response(response_data):
+def handle_error_response(response):
     """Print errors from response data
 
-    :param response_data: a dictionary of keys and lists of errors
+    :param response: The response object with a dictionary of keys and
+        lists of errors
     """
-    for _, err_cases in response_data.items():
-        for err_msg in err_cases:
-            log.error(err_msg)
+    try:
+        response_data = response.json()
+        for _, err_cases in response_data.items():
+            for err_msg in err_cases:
+                log.error(err_msg)
+    except json.decoder.JSONDecodeError:
+        pass
 
 
 def pretty_print(json_data):
