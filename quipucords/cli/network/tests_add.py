@@ -89,13 +89,13 @@ class NetworkAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, status_code=200, json=get_auth_data)
             mocker.post(post_network_url, status_code=400, json=error)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net_dup', auth=['auth1'], hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(net_out):
-                    aac.main(args)
-                    aac.main(args)
+                    nac.main(args)
+                    nac.main(args)
                     self.assertTrue('profile with this name already exists.'
                                     in net_out.getvalue())
 
@@ -107,13 +107,13 @@ class NetworkAddCliTests(unittest.TestCase):
         get_auth_data = [{'id': 1, 'name': 'auth1'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, status_code=200, json=get_auth_data)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net1', auth=['auth1', 'auth2'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(net_out):
-                    aac.main(args)
+                    nac.main(args)
                     self.assertTrue('An error occurred while processing '
                                     'the "--auth" input'
                                     in net_out.getvalue())
@@ -125,13 +125,13 @@ class NetworkAddCliTests(unittest.TestCase):
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, status_code=500)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net1', auth=['auth1', 'auth2'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(net_out):
-                    aac.main(args)
+                    nac.main(args)
                     self.assertTrue('An error occurred while processing '
                                     'the "--auth" input'
                                     in net_out.getvalue())
@@ -143,12 +143,12 @@ class NetworkAddCliTests(unittest.TestCase):
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, exc=requests.exceptions.SSLError)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net1', auth=['auth1'], hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(net_out):
-                    aac.main(args)
+                    nac.main(args)
                     self.assertEqual(net_out.getvalue(), SSL_ERROR_MSG)
 
     def test_add_network_conn_err(self):
@@ -158,12 +158,12 @@ class NetworkAddCliTests(unittest.TestCase):
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, exc=requests.exceptions.ConnectTimeout)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net1', auth=['auth1'], hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(net_out):
-                    aac.main(args)
+                    nac.main(args)
                     self.assertEqual(net_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_add_network(self):
@@ -176,10 +176,10 @@ class NetworkAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_auth_url, status_code=200, json=get_auth_data)
             mocker.post(post_network_url, status_code=201)
-            aac = NetworkAddCommand(SUBPARSER)
+            nac = NetworkAddCommand(SUBPARSER)
             args = Namespace(name='net1', auth=['auth1'], hosts=['1.2.3.4'],
                              ssh_port=22)
             with redirect_stdout(net_out):
-                aac.main(args)
+                nac.main(args)
                 self.assertEqual(net_out.getvalue(),
                                  'Profile "net1" was added\n')
