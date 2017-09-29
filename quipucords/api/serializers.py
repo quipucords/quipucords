@@ -98,8 +98,8 @@ class NetworkProfileSerializer(ModelSerializer):
             HostRange.objects.create(network_profile=netprof,
                                      **host_data)
 
-        for cred_id in credentials:
-            netprof.credentials.add(cred_id)
+        for credential in credentials:
+            netprof.credentials.add(credential)
 
         return netprof
 
