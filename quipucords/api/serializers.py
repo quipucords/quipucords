@@ -14,7 +14,7 @@ import os
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import ModelSerializer, ValidationError, \
-    SlugRelatedField
+    SlugRelatedField, PrimaryKeyRelatedField
 from api.models import Credential, HostCredential, HostRange, NetworkProfile
 
 
@@ -57,6 +57,17 @@ class HostRangeField(SlugRelatedField):
         return {'host_range': data}
 
 
+class CredentialsField(PrimaryKeyRelatedField):
+    def to_internal_value(self, data):
+        return HostCredential.objects.get(pk=data['id'])
+
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'name': instance.name
+        }
+
+
 class NetworkProfileSerializer(ModelSerializer):
     """Serializer for the NetworkProfile model"""
 
@@ -64,6 +75,10 @@ class NetworkProfileSerializer(ModelSerializer):
         many=True,
         slug_field='host_range',
         queryset=HostRange.objects.all())
+
+    credentials = CredentialsField(
+        many=True,
+        queryset=HostCredential.objects.all())
 
     class Meta:
         model = NetworkProfile
@@ -75,7 +90,7 @@ class NetworkProfileSerializer(ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         hosts_data = validated_data.pop('hosts')
-        credential_ids = validated_data.pop('credential_ids')
+        credentials = validated_data.pop('credentials')
 
         netprof = NetworkProfile.objects.create(**validated_data)
 
@@ -83,8 +98,8 @@ class NetworkProfileSerializer(ModelSerializer):
             HostRange.objects.create(network_profile=netprof,
                                      **host_data)
 
-        for cred_id in credential_ids:
-            netprof.credential_ids.add(cred_id)
+        for cred_id in credentials:
+            netprof.credentials.add(cred_id)
 
         return netprof
 
@@ -95,7 +110,7 @@ class NetworkProfileSerializer(ModelSerializer):
         # not supplied.
 
         hosts_data = validated_data.pop('hosts', None)
-        credential_ids = validated_data.pop('credential_ids', None)
+        credentials = validated_data.pop('credentials', None)
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -112,10 +127,10 @@ class NetworkProfileSerializer(ModelSerializer):
                 for host_data in hosts_data]
             instance.hosts.set(new_hosts)
 
-        # credential_ids is safe to use as a flag for the same reason as
+        # credentials is safe to use as a flag for the same reason as
         # hosts_data above.
-        if credential_ids:
-            instance.credential_ids.set(credential_ids)
+        if credentials:
+            instance.credentials.set(credentials)
 
         return instance
 
@@ -146,10 +161,10 @@ class NetworkProfileSerializer(ModelSerializer):
         return ssh_port
 
     @staticmethod
-    def validate_credential_ids(credential_ids):
-        """Make sure the credential_ids list is present."""
-        if not credential_ids:
+    def validate_credentials(credentials):
+        """Make sure the credentials list is present."""
+        if not credentials:
             raise ValidationError('NetworkProfile must have at least one set '
                                   'of credentials.')
 
-        return credential_ids
+        return credentials
