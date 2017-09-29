@@ -75,7 +75,7 @@ class NetworkProfileSerializer(ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         hosts_data = validated_data.pop('hosts')
-        credentials = validated_data.pop('credentials')
+        credential_ids = validated_data.pop('credential_ids')
 
         netprof = NetworkProfile.objects.create(**validated_data)
 
@@ -83,8 +83,8 @@ class NetworkProfileSerializer(ModelSerializer):
             HostRange.objects.create(network_profile=netprof,
                                      **host_data)
 
-        for cred_id in credentials:
-            netprof.credentials.add(cred_id)
+        for cred_id in credential_ids:
+            netprof.credential_ids.add(cred_id)
 
         return netprof
 
@@ -95,7 +95,7 @@ class NetworkProfileSerializer(ModelSerializer):
         # not supplied.
 
         hosts_data = validated_data.pop('hosts', None)
-        credentials = validated_data.pop('credentials', None)
+        credential_ids = validated_data.pop('credential_ids', None)
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -112,10 +112,10 @@ class NetworkProfileSerializer(ModelSerializer):
                 for host_data in hosts_data]
             instance.hosts.set(new_hosts)
 
-        # credentials is safe to use as a flag for the same reason as
+        # credential_ids is safe to use as a flag for the same reason as
         # hosts_data above.
-        if credentials:
-            instance.credentials.set(credentials)
+        if credential_ids:
+            instance.credential_ids.set(credential_ids)
 
         return instance
 
@@ -146,10 +146,10 @@ class NetworkProfileSerializer(ModelSerializer):
         return ssh_port
 
     @staticmethod
-    def validate_credentials(credentials):
-        """Make sure the credentials list is present."""
-        if not credentials:
+    def validate_credential_ids(credential_ids):
+        """Make sure the credential_ids list is present."""
+        if not credential_ids:
             raise ValidationError('NetworkProfile must have at least one set '
                                   'of credentials.')
 
-        return credentials
+        return credential_ids
