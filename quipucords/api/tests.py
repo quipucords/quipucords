@@ -149,6 +149,14 @@ class HostCredentialTest(TestCase):
 class NetworkProfileTest(TestCase):
     """Test the basic NetworkProfile infrastructure."""
 
+    def setUp(self):
+        self.cred = models.HostCredential.objects.create(
+            username='username',
+            password='password',
+            sudo_password=None,
+            ssh_keyfile=None)
+        self.cred_id = self.cred.id
+
     def create(self, data):
         """Utility function to call the create endpoint."""
 
@@ -161,17 +169,31 @@ class NetworkProfileTest(TestCase):
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def create_expect_201(self, data):
+        """Create a network profile, return the response as a dict."""
+
+        response = self.create(data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return json.loads(response.content)
+
     def test_successful_create(self):
         """A valid create request should succeed."""
 
         data = {'name': 'netprof1',
-                'hosts': '1.2.3.4',
+                'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
-                'credentials': 'cred1'}
-        response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(models.NetworkProfile.objects.count(), 1)
-        self.assertEqual(models.NetworkProfile.objects.get().name, 'netprof1')
+                'credentials': [self.cred_id]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_create_multiple_hosts(self):
+        """A valid create request with two hosts."""
+
+        data = {'name': 'netprof1',
+                'hosts': ['1.2.3.4', '1.2.3.5'],
+                'ssh_port': '22',
+                'credentials': [self.cred_id]}
+        response = self.create_expect_201(data)
 
     def test_create_no_name(self):
         """A create request must have a name."""
@@ -179,7 +201,7 @@ class NetworkProfileTest(TestCase):
         self.create_expect_400(
             {'hosts': '1.2.3.4',
              'ssh_port': '22',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_unprintable_name(self):
         """The NetworkProfile name must be printable."""
@@ -188,7 +210,7 @@ class NetworkProfileTest(TestCase):
             {'name': '\r\n',
              'hosts': '1.2.3.4',
              'ssh_port': '22',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_no_host(self):
         """A NetworkProfile needs a host."""
@@ -196,16 +218,16 @@ class NetworkProfileTest(TestCase):
         self.create_expect_400(
             {'name': 'netprof1',
              'ssh_port': '22',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_empty_host(self):
         """An empty string is not a host identifier."""
 
         self.create_expect_400(
             {'name': 'netprof1',
-             'hosts': '',
+             'hosts': [],
              'ssh_port': '22',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_no_ssh_port(self):
         """A NetworkProfile needs an ssh port."""
@@ -213,7 +235,7 @@ class NetworkProfileTest(TestCase):
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_bad_ssh_port(self):
         """-1 is not a valid ssh port."""
@@ -222,7 +244,7 @@ class NetworkProfileTest(TestCase):
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
              'ssh_port': '-1',
-             'credentials': 'cred1'})
+             'credentials': [self.cred_id]})
 
     def test_create_no_credentials(self):
         """A NetworkProfile needs credentials."""
@@ -239,7 +261,7 @@ class NetworkProfileTest(TestCase):
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
              'ssh_port': '22',
-             'credentials': ''})
+             'credentials': []})
 
     def test_list(self):
         """List all NetworkProfile objects."""
@@ -251,13 +273,13 @@ class NetworkProfileTest(TestCase):
     def test_retrieve(self):
         """Get details on a specific NetworkProfile by primary key."""
 
-        netprof = models.NetworkProfile(name='netprof1',
-                                        hosts='1.2.3.4',
-                                        ssh_port='22',
-                                        credentials='cred1')
-        netprof.save()
+        initial = self.create_expect_201({
+            'name': 'netprof1',
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.cred_id]})
 
-        url = reverse('networkprofile-detail', args=(netprof.pk,))
+        url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -266,17 +288,17 @@ class NetworkProfileTest(TestCase):
     def test_update(self):
         """Completely update a NetworkProfile."""
 
-        netprof = models.NetworkProfile(name='netprof2',
-                                        hosts='1.2.3.4',
-                                        ssh_port='22',
-                                        credentials='cred1')
-        netprof.save()
+        initial = self.create_expect_201({
+            'name': 'netprof2',
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.cred_id]})
 
         data = {'name': 'netprof2-new',
-                'hosts': '1.2.3.5',
+                'hosts': ['1.2.3.5'],
                 'ssh_port': '22',
-                'credentials': 'cred1'}
-        url = reverse('networkprofile-detail', args=(netprof.pk,))
+                'credentials': [self.cred_id]}
+        url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
                                    content_type='application/json',
@@ -286,16 +308,15 @@ class NetworkProfileTest(TestCase):
     def test_partial_update(self):
         """Partially update a NetworkProfile."""
 
-        netprof = models.NetworkProfile(name='netprof3',
-                                        hosts='1.2.3.4',
-                                        ssh_port='22',
-                                        credentials='cred1')
-        netprof.save()
+        initial = self.create_expect_201({
+            'name': 'netprof3',
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.cred_id]})
 
         data = {'name': 'netprof3-new',
-                'hosts': '1.2.3.5'}
-#                 'partial': 'true'}
-        url = reverse('networkprofile-detail', args=(netprof.pk,))
+                'hosts': ['1.2.3.5']}
+        url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.patch(url,
                                      json.dumps(data),
                                      content_type='application/json',
@@ -305,12 +326,12 @@ class NetworkProfileTest(TestCase):
     def test_delete(self):
         """Delete a NetworkProfile."""
 
-        netprof = models.NetworkProfile(name='netprof3',
-                                        hosts='1.2.3.4',
-                                        ssh_port='22',
-                                        credentials='cred1')
-        netprof.save()
+        data = {'name': 'netprof3',
+                'hosts': ['1.2.3.4'],
+                'ssh_port': '22',
+                'credentials': [self.cred_id]}
+        response = self.create_expect_201(data)
 
-        url = reverse('networkprofile-detail', args=(netprof.pk,))
+        url = reverse('networkprofile-detail', args=(response['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
