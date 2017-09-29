@@ -319,14 +319,21 @@ class NetworkProfileTest(TestCase):
 
         data = {'name': 'netprof2-new',
                 'hosts': ['1.2.3.5'],
-                'ssh_port': '22',
-                'credentials': [self.cred_for_upload]}
+                'ssh_port': 22,
+                'credentials': [{
+                    'id': self.cred.id,
+                    'name': self.cred.name}]}
         url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
                                    content_type='application/json',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # data should be a strict subset of the response, because the
+        # response adds an id field.
+        for key, value in data.items():
+            self.assertEqual(data[key], response.json()[key])
 
     def test_partial_update(self):
         """Partially update a NetworkProfile."""
@@ -345,6 +352,8 @@ class NetworkProfileTest(TestCase):
                                      content_type='application/json',
                                      format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['name'], 'netprof3-new')
+        self.assertEqual(response.json()['hosts'], ['1.2.3.5'])
 
     def test_delete(self):
         """Delete a NetworkProfile."""

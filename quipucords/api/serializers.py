@@ -121,11 +121,14 @@ class NetworkProfileSerializer(ModelSerializer):
         # this point, so it's safe to use hosts_data as an indicator
         # of whether to replace the hosts.
         if hosts_data:
+            old_hosts = list(instance.hosts.all())
             new_hosts = [
                 HostRange.objects.create(network_profile=instance,
                                          **host_data)
                 for host_data in hosts_data]
             instance.hosts.set(new_hosts)
+            for host in old_hosts:
+                host.delete()
 
         # credentials is safe to use as a flag for the same reason as
         # hosts_data above.
