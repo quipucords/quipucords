@@ -7,6 +7,8 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help           to show this message"
@@ -31,16 +33,16 @@ install: build
 	$(PYTHON) setup.py install -f
 
 test:
-	$(PYTHON) quipucords/manage.py test -v 2 quipucords
+	$(PYTHON) quipucords/manage.py test -v 2 quipucords/
 
 test-coverage:
-	coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords;coverage report -m
+	coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/;coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
 	flake8 . --ignore D203
 
 lint-pylint:
-	$(PYTHON) -m pylint --load-plugins=pylint_django quipucords/*/*.py
+	find . -name "*.py" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 

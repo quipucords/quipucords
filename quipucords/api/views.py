@@ -17,6 +17,9 @@ from rest_framework.viewsets import ModelViewSet
 from api.serializers import CredentialSerializer, HostCredentialSerializer, \
     NetworkProfileSerializer
 from api.models import Credential, HostCredential, NetworkProfile
+from django_filters.rest_framework import (DjangoFilterBackend, Filter,
+                                           FilterSet)
+from filters import mixins
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
@@ -36,6 +39,30 @@ def mask_credential(cred):
     return cred
 
 
+class ListFilter(Filter):
+    """Add query filter capability to provide a list of filter values.
+    """
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # For django-filter versions < 0.13,
+        # use lookup_type instead of lookup_expr
+        self.lookup_expr = 'in'
+        values = value.split(',')
+        return super(ListFilter, self).filter(qs, values)
+
+
+class HostCredentialFilter(FilterSet):
+    """Filter for host credentials by name"""
+    name = ListFilter(name='name')
+
+    class Meta:
+        model = HostCredential
+        fields = ['name']
+
+
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model"""
@@ -43,13 +70,17 @@ class CredentialViewSet(ModelViewSet):
     serializer_class = CredentialSerializer
 
 
-class HostCredentialViewSet(ModelViewSet):
+class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     """A view set for the HostCredential model"""
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
+    filter_backends = (DjangoFilterBackend,)
+    # filter_fields = ('name',)
+    filter_class = HostCredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
-        serializer = HostCredentialSerializer(self.queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = HostCredentialSerializer(queryset, many=True)
         for cred in serializer.data:
             cred = mask_credential(cred)
         return Response(serializer.data)
