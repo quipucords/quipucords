@@ -14,12 +14,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from api.serializers import CredentialSerializer, HostCredentialSerializer, \
-    NetworkProfileSerializer
-from api.models import Credential, HostCredential, NetworkProfile
 from django_filters.rest_framework import (DjangoFilterBackend, Filter,
                                            FilterSet)
 from filters import mixins
+from api.serializers import CredentialSerializer, HostCredentialSerializer, \
+    NetworkProfileSerializer
+from api.models import Credential, HostCredential, NetworkProfile
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
