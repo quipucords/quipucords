@@ -193,7 +193,7 @@ class NetworkProfileTest(TestCase):
                 'hosts': ['1.2.3.4', '1.2.3.5'],
                 'ssh_port': '22',
                 'credentials': [self.cred_id]}
-        response = self.create_expect_201(data)
+        self.create_expect_201(data)
 
     def test_create_no_name(self):
         """A create request must have a name."""

@@ -96,7 +96,7 @@ class NetworkProfileSerializer(ModelSerializer):
 
         hosts_data = validated_data.pop('hosts', None)
         credentials = validated_data.pop('credentials', None)
-                    
+
         for name, value in validated_data.items():
             setattr(instance, name, value)
         instance.save()
