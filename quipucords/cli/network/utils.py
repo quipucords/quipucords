@@ -52,17 +52,17 @@ def build_profile_payload(args, add_none=True):
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
-    if args.hosts:
+    if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
     elif add_none:
         req_payload['hosts'] = None
-    if args.ssh_port:
+    if hasattr(args, 'ssh_port') and args.ssh_port:
         req_payload['ssh_port'] = args.ssh_port
     elif add_none:
         req_payload['ssh_port'] = None
-    if args.credential_ids:
-        req_payload['credential_ids'] = args.credential_ids
+    if hasattr(args, 'credentials') and args.credentials:
+        req_payload['credentials'] = args.credentials
     elif add_none:
-        req_payload['credential_ids'] = None
+        req_payload['credentials'] = None
 
     return req_payload

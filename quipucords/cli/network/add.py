@@ -62,9 +62,9 @@ class NetworkAddCommand(CliCommand):
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
             if len(json_data) == len(self.args.auth):
-                self.args.credential_ids = []
+                self.args.credentials = []
                 for cred_entry in json_data:
-                    self.args.credential_ids.append(cred_entry['id'])
+                    self.args.credentials.append(cred_entry['id'])
             else:
                 for cred_entry in json_data:
                     cred_name = cred_entry['name']

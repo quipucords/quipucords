@@ -49,6 +49,11 @@ paths:
       - "application/json"
       produces:
       - "application/json"
+      parameters:
+        - name: "name"
+          in: "query"
+          description: "A list of names representing host credentials"
+          type: "string"
       responses:
         200:
           description: "Host credential retrieved"
@@ -153,11 +158,11 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/NetworkProfile"
-          responses:
-            201:
-              description: "Network profile created"
-            400:
-              description: "Invalid input"
+      responses:
+        201:
+          description: "Network profile created"
+        400:
+          description: "Invalid input"
     get:
       tags:
         - "Network Profile"
@@ -168,6 +173,11 @@ paths:
         - "application/json"
       produces:
         - "application/json"
+      parameters:
+        - name: "name"
+          in: "query"
+          description: "A list of names representing network profiles"
+          type: "string"
       responses:
         200:
           description: "Network profiles retrieved"
@@ -215,6 +225,7 @@ paths:
           in: "path"
           description: "ID of network profile to update"
           required: true
+          type: "number"
           format: "int64"
         - name: "body"
           in: "body"
@@ -294,7 +305,7 @@ definitions:
       - name
       - hosts
       - ssh_port
-      - credential_ids
+      - credentials
     properties:
       name:
         type: "string"
@@ -308,7 +319,7 @@ definitions:
         type: "integer"
         format: "int32"
         description: "The SSH port to use on the hosts."
-      credential_ids:
+      credentials:
         type: "array"
         items:
           type: "integer"
