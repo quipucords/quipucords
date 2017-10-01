@@ -17,8 +17,9 @@ from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import (DjangoFilterBackend, Filter,
                                            FilterSet)
 from filters import mixins
-from api.serializers import CredentialSerializer, HostCredentialSerializer
-from api.models import Credential, HostCredential
+from api.serializers import CredentialSerializer, HostCredentialSerializer, \
+    NetworkProfileSerializer
+from api.models import Credential, HostCredential, NetworkProfile
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
@@ -62,6 +63,15 @@ class HostCredentialFilter(FilterSet):
         fields = ['name']
 
 
+class NetworkProfileFilter(FilterSet):
+    """Filter for network profiles by name"""
+    name = ListFilter(name='name')
+
+    class Meta:
+        model = NetworkProfile
+        fields = ['name']
+
+
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model"""
@@ -74,7 +84,6 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
     filter_backends = (DjangoFilterBackend,)
-    # filter_fields = ('name',)
     filter_class = HostCredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
@@ -109,3 +118,40 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         self.perform_update(serializer)
         cred = mask_credential(serializer.data)
         return Response(cred)
+
+
+class NetworkProfileViewSet(ModelViewSet):
+    """A view set for NetworkProfiles"""
+
+    queryset = NetworkProfile.objects.all()
+    serializer_class = NetworkProfileSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = NetworkProfileFilter
+
+    def list(self, request):  # pylint: disable=unused-argument
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = NetworkProfileSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    # pylint: disable=unused-argument
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
+    def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
+        network_profile = get_object_or_404(self.queryset, pk=pk)
+        serializer = NetworkProfileSerializer(network_profile)
+        return Response(serializer.data)
+
+    # pylint: disable=unused-argument
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=kwargs.get('partial', False))
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)

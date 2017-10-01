@@ -19,6 +19,9 @@ ROUTER = SimpleRouter()
 ROUTER.register(r'credentials/hosts',
                 views.HostCredentialViewSet,
                 base_name='hostcred')
+ROUTER.register(r'profiles/networks',
+                views.NetworkProfileViewSet,
+                base_name='networkprofile')
 
 # pylint: disable=invalid-name
 urlpatterns = ROUTER.urls
