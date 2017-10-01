@@ -78,9 +78,10 @@ class NetworkEditCommand(CliCommand):
             sys.exit(1)
 
         # check for valid auth values
-        if len(self.args.auth) > 0:
+        if len(self.args.auth) > 0:  # pylint: disable=len-as-condition
             auth_list = ','.join(self.args.auth)
-            response = request(parser=self.parser, method=GET, path=auth.AUTH_URI,
+            response = request(parser=self.parser, method=GET,
+                               path=auth.AUTH_URI,
                                params={'name': auth_list},
                                payload=None)
             if response.status_code == codes.ok:  # pylint: disable=no-member
