@@ -63,6 +63,15 @@ class HostCredentialFilter(FilterSet):
         fields = ['name']
 
 
+class NetworkProfileFilter(FilterSet):
+    """Filter for network profiles by name"""
+    name = ListFilter(name='name')
+
+    class Meta:
+        model = NetworkProfile
+        fields = ['name']
+
+
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model"""
@@ -75,7 +84,6 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
     filter_backends = (DjangoFilterBackend,)
-    # filter_fields = ('name',)
     filter_class = HostCredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
@@ -117,9 +125,12 @@ class NetworkProfileViewSet(ModelViewSet):
 
     queryset = NetworkProfile.objects.all()
     serializer_class = NetworkProfileSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = NetworkProfileFilter
 
     def list(self, request):  # pylint: disable=unused-argument
-        serializer = NetworkProfileSerializer(self.queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = NetworkProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
     # pylint: disable=unused-argument

@@ -156,9 +156,7 @@ class NetworkProfileTest(TestCase):
             password='password',
             sudo_password=None,
             ssh_keyfile=None)
-        self.cred_for_upload = {
-            'id': self.cred.id
-        }
+        self.cred_for_upload = self.cred.id
 
     def create(self, data):
         """Utility function to call the create endpoint."""
@@ -302,9 +300,7 @@ class NetworkProfileTest(TestCase):
         self.assertIn('credentials', response.json())
         creds = response.json()['credentials']
 
-        self.assertEqual(creds,
-                         [{'id': self.cred.id,
-                           'name': self.cred.name}])
+        self.assertEqual(creds, [self.cred.id])
 
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
@@ -320,9 +316,7 @@ class NetworkProfileTest(TestCase):
         data = {'name': 'netprof2-new',
                 'hosts': ['1.2.3.5'],
                 'ssh_port': 22,
-                'credentials': [{
-                    'id': self.cred.id,
-                    'name': self.cred.name}]}
+                'credentials': [self.cred.id]}
         url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),

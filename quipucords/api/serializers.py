@@ -58,18 +58,24 @@ class HostRangeField(SlugRelatedField):
 
         return {'host_range': data}
 
+    def display_value(self, instance):
+        return instance.host_range
+
 
 class CredentialsField(PrimaryKeyRelatedField):
     """Representation of the credentials associated with a network profile
     """
     def to_internal_value(self, data):
-        return HostCredential.objects.get(pk=data['id'])
+        return HostCredential.objects.get(pk=data)
 
     def to_representation(self, value):
-        return {
-            'id': value.id,
-            'name': value.name
-        }
+        return value.id
+
+    def display_value(self, instance):
+        display = instance
+        if isinstance(instance, HostCredential):
+            display = 'Credential: %s' % instance.name
+        return display
 
 
 class NetworkProfileSerializer(ModelSerializer):
@@ -145,7 +151,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_name(name):
         """Validate the name of the NetworkProfile."""
         if not isinstance(name, str) or not name.isprintable():
-            raise ValidationError('NetworkProfile must have printable name.')
+            raise ValidationError('Network profile must have printable name.')
 
         return name
 
@@ -153,7 +159,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
         if not hosts:
-            raise ValidationError('NetworkProfile must have at least one '
+            raise ValidationError('Network profile must have at least one '
                                   'host.')
 
         return hosts
@@ -162,8 +168,8 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_ssh_port(ssh_port):
         """validate the ssh port."""
         if not ssh_port or ssh_port < 0 or ssh_port > 65536:
-            raise ValidationError('NetworkProfile must have ssh port in range '
-                                  '[0, 65535]')
+            raise ValidationError('Network profile must have ssh port in'
+                                  ' range [0, 65535]')
 
         return ssh_port
 
@@ -171,7 +177,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_credentials(credentials):
         """Make sure the credentials list is present."""
         if not credentials:
-            raise ValidationError('NetworkProfile must have at least one set '
+            raise ValidationError('Network profile must have at least one set '
                                   'of credentials.')
 
         return credentials
