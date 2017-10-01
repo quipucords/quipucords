@@ -188,7 +188,7 @@ paths:
   /profiles/networks/{network_profile_id}:
     get:
       tags:
-        - "Network profile"
+        - "Network Profile"
       summary: "Get a network profile"
       description: "Get a network profile."
       operationId: "getNetworkProfile"
@@ -212,7 +212,7 @@ paths:
           description: "Network profile not found"
     put:
       tags:
-        - "Network profile"
+        - "Network Profile"
       summary: "Update an existing network profile"
       description: "Update an existing network profile"
       operationId: "updateNetworkProfile"
@@ -244,7 +244,7 @@ paths:
           description: "No network profile found"
     delete:
       tags:
-        - "Network profile"
+        - "Network Profile"
       summary: "Delete an existing network profile"
       description: "Delete an existing network profile"
       operationId: "deleteNetworkProfile"
