@@ -178,7 +178,7 @@ class NetworkProfileTest(TestCase):
         """Create a network profile, return the response as a dict."""
 
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED) 
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
     def test_successful_create(self):
@@ -332,7 +332,7 @@ class NetworkProfileTest(TestCase):
 
         # data should be a strict subset of the response, because the
         # response adds an id field.
-        for key, value in data.items():
+        for key, value in data.items():  # pylint: disable=unused-variable
             self.assertEqual(data[key], response.json()[key])
 
     def test_partial_update(self):

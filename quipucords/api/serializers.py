@@ -44,6 +44,8 @@ class HostCredentialSerializer(ModelSerializer):
 
 
 class HostRangeField(SlugRelatedField):
+    """Representation of the host range with in a network profile
+    """
     # SlugRelatedField is *almost* what we want for HostRanges, but it
     # doesn't allow creating new HostRanges because it requires them
     # to already exist or else to_internal_value raises a
@@ -58,13 +60,15 @@ class HostRangeField(SlugRelatedField):
 
 
 class CredentialsField(PrimaryKeyRelatedField):
+    """Representation of the credentials associated with a network profile
+    """
     def to_internal_value(self, data):
         return HostCredential.objects.get(pk=data['id'])
 
-    def to_representation(self, instance):
+    def to_representation(self, value):
         return {
-            'id': instance.id,
-            'name': instance.name
+            'id': value.id,
+            'name': value.name
         }
 
 
