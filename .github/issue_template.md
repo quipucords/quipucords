@@ -1,4 +1,4 @@
-# Openning a new issue
+# Opening a new issue
 ___
 
 ## Specify type:

@@ -21,7 +21,7 @@ help:
 	@echo "  server-init    to run server initializion steps"
 	@echo "  serve          to run the server"
 
-all: build lint tests-coverage
+all: build lint test-coverage
 
 build: clean
 	$(PYTHON) setup.py build -f
