@@ -13,10 +13,12 @@
 """
 
 from __future__ import print_function
+import os
 import sys
 from requests import codes
 from cli.request import POST, GET, request
 from cli.clicommand import CliCommand
+from cli.utils import read_in_file
 import cli.network as network
 from cli.network.utils import validate_port, build_profile_payload
 import cli.auth as auth
@@ -53,6 +55,13 @@ class NetworkAddCommand(CliCommand):
 
     def _validate_args(self):
         CliCommand._validate_args(self)
+
+        if self.args.hosts and len(self.args.hosts) == 1:
+            # check if a file and read in values
+            filename = self.args.hosts[0]
+            input_path = os.path.expanduser(os.path.expandvars(filename))
+            if os.path.isfile(input_path):
+                self.args.hosts = read_in_file(input_path)
 
         # check for valid auth values
         auth_list = ','.join(self.args.auth)

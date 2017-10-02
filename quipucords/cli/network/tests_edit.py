@@ -11,6 +11,7 @@
 """Test the CLI module"""
 
 import unittest
+import os
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
@@ -18,11 +19,13 @@ import requests
 import requests_mock
 from cli.cli import CLI
 from cli.tests_utilities import HushUpStderr, redirect_stdout
+from cli.utils import read_in_file
 from cli.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from cli.auth import AUTH_URI
 from cli.network import NETWORK_URI
 from cli.network.edit import NetworkEditCommand
 
+TMP_HOSTFILE = "/tmp/testhostsfile"
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
@@ -34,10 +37,17 @@ class NetworkEditCliTests(unittest.TestCase):
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
+        if os.path.isfile(TMP_HOSTFILE):
+            os.remove(TMP_HOSTFILE)
+        with open(TMP_HOSTFILE, 'w') as test_hostfile:
+            test_hostfile.write('1.2.3.4\n')
+            test_hostfile.write('1.2.3.[1:10]\n')
 
     def tearDown(self):
         # Restore stderr
         sys.stderr = self.orig_stderr
+        if os.path.isfile(TMP_HOSTFILE):
+            os.remove(TMP_HOSTFILE)
 
     def test_edit_req_args_err(self):
         """Testing the add edit command required flags"""
@@ -50,6 +60,19 @@ class NetworkEditCliTests(unittest.TestCase):
                 self.assertEqual(network_out.getvalue(),
                                  'No arguments provided to edit '
                                  'profile profile1')
+
+    def test_edit_process_file(self):
+        """Testing the add network command process file"""
+        with self.assertRaises(SystemExit):
+            sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1',
+                        '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
+            CLI().main()
+
+    def test_read_input(self):
+        """Test the input reading mechanism"""
+        vals = read_in_file(TMP_HOSTFILE)
+        expected = ['1.2.3.4', '1.2.3.[1:10]']
+        self.assertEqual(expected, vals)
 
     def test_edit_profile_none(self):
         """Testing the edit auth command for none existing auth

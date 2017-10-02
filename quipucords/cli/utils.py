@@ -98,3 +98,20 @@ def pretty_print(json_data):
     """
     return json.dumps(json_data, sort_keys=True, indent=4,
                       separators=(',', ': '))
+
+
+# Read in a file and make it a list
+def read_in_file(filename):
+    """Read values from file into a list object. Expecting newline delimited.
+
+    :param filename: the filename to read
+    :returns: the list of values found in the file
+    """
+    result = None
+    input_path = os.path.expanduser(os.path.expandvars(filename))
+    try:
+        with open(input_path, 'r') as in_file:
+            result = in_file.read().splitlines()
+    except EnvironmentError as err:
+        log.error('Error reading from %s: %s', input_path, err)
+    return result
