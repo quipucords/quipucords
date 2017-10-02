@@ -14,7 +14,6 @@ for system scans
 """
 
 from __future__ import print_function
-import os
 import sys
 from requests import codes
 from cli.request import PATCH, GET, request
@@ -65,10 +64,10 @@ class NetworkEditCommand(CliCommand):
 
         if self.args.hosts and len(self.args.hosts) == 1:
             # check if a file and read in values
-            filename = self.args.hosts[0]
-            input_path = os.path.expanduser(os.path.expandvars(filename))
-            if os.path.isfile(input_path):
-                self.args.hosts = read_in_file(input_path)
+            try:
+                self.args.hosts = read_in_file(self.args.hosts[0])
+            except ValueError:
+                pass
 
         # check for existence of profile
         response = request(parser=self.parser, method=GET,

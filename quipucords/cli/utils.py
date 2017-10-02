@@ -106,12 +106,16 @@ def read_in_file(filename):
 
     :param filename: the filename to read
     :returns: the list of values found in the file
+    :raises: ValueError if incoming value is not a file that could be found
     """
     result = None
     input_path = os.path.expanduser(os.path.expandvars(filename))
-    try:
-        with open(input_path, 'r') as in_file:
-            result = in_file.read().splitlines()
-    except EnvironmentError as err:
-        log.error('Error reading from %s: %s', input_path, err)
-    return result
+    if os.path.isfile(input_path):
+        try:
+            with open(input_path, 'r') as in_file:
+                result = in_file.read().splitlines()
+        except EnvironmentError as err:
+            log.error('Error reading from %s: %s', input_path, err)
+        return result
+    else:
+        raise ValueError('Input %s was not a file.' % input_path)
