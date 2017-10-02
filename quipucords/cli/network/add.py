@@ -17,6 +17,7 @@ import sys
 from requests import codes
 from cli.request import POST, GET, request
 from cli.clicommand import CliCommand
+from cli.utils import read_in_file
 import cli.network as network
 from cli.network.utils import validate_port, build_profile_payload
 import cli.auth as auth
@@ -53,6 +54,13 @@ class NetworkAddCommand(CliCommand):
 
     def _validate_args(self):
         CliCommand._validate_args(self)
+
+        if self.args.hosts and len(self.args.hosts) == 1:
+            # check if a file and read in values
+            try:
+                self.args.hosts = read_in_file(self.args.hosts[0])
+            except ValueError:
+                pass
 
         # check for valid auth values
         auth_list = ','.join(self.args.auth)

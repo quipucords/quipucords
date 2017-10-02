@@ -18,6 +18,7 @@ import sys
 from requests import codes
 from cli.request import PATCH, GET, request
 from cli.clicommand import CliCommand
+from cli.utils import read_in_file
 import cli.auth as auth
 import cli.network as network
 from cli.network.utils import validate_port, build_profile_payload
@@ -51,6 +52,7 @@ class NetworkEditCommand(CliCommand):
                                  metavar='SSHPORT', type=validate_port,
                                  help='SSHPORT for connection; default=22')
 
+    # pylint: disable=too-many-branches
     def _validate_args(self):
         CliCommand._validate_args(self)
 
@@ -59,6 +61,13 @@ class NetworkEditCommand(CliCommand):
                   (self.args.name))
             self.parser.print_help()
             sys.exit(1)
+
+        if self.args.hosts and len(self.args.hosts) == 1:
+            # check if a file and read in values
+            try:
+                self.args.hosts = read_in_file(self.args.hosts[0])
+            except ValueError:
+                pass
 
         # check for existence of profile
         response = request(parser=self.parser, method=GET,

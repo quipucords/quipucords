@@ -11,6 +11,7 @@
 """Test the CLI module"""
 
 import unittest
+import os
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace, ArgumentTypeError
@@ -24,6 +25,7 @@ from cli.network import NETWORK_URI
 from cli.network.add import NetworkAddCommand
 from cli.network.utils import validate_port
 
+TMP_HOSTFILE = "/tmp/testhostsfile"
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
@@ -35,15 +37,29 @@ class NetworkAddCliTests(unittest.TestCase):
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
+        if os.path.isfile(TMP_HOSTFILE):
+            os.remove(TMP_HOSTFILE)
+        with open(TMP_HOSTFILE, 'w') as test_hostfile:
+            test_hostfile.write('1.2.3.4\n')
+            test_hostfile.write('1.2.3.[1:10]\n')
 
     def tearDown(self):
         # Restore stderr
         sys.stderr = self.orig_stderr
+        if os.path.isfile(TMP_HOSTFILE):
+            os.remove(TMP_HOSTFILE)
 
     def test_add_req_args_err(self):
         """Testing the add network command required flags"""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1']
+            CLI().main()
+
+    def test_add_process_file(self):
+        """Testing the add network command process file"""
+        with self.assertRaises(SystemExit):
+            sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1',
+                        '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
             CLI().main()
 
     def test_validate_port_string(self):
