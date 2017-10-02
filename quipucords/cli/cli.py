@@ -26,6 +26,7 @@ from cli.network.add import NetworkAddCommand
 from cli.network.list import NetworkListCommand
 from cli.network.show import NetworkShowCommand
 from cli.network.clear import NetworkClearCommand
+from cli.network.edit import NetworkEditCommand
 from . import __version__
 
 
@@ -55,7 +56,8 @@ class CLI(object):
                               AuthClearCommand])
         self._add_subcommand(network.SUBCOMMAND,
                              [NetworkAddCommand, NetworkListCommand,
-                              NetworkShowCommand, NetworkClearCommand])
+                              NetworkShowCommand, NetworkClearCommand,
+                              NetworkEditCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

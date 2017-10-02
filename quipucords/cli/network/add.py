@@ -18,7 +18,7 @@ from requests import codes
 from cli.request import POST, GET, request
 from cli.clicommand import CliCommand
 import cli.network as network
-from cli.network.utils import validate_port
+from cli.network.utils import validate_port, build_profile_payload
 import cli.auth as auth
 
 
@@ -37,7 +37,7 @@ class NetworkAddCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), POST,
                             network.NETWORK_URI, [codes.created])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='auth credential name', required=True)
+                                 help='profile name', required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help='IP range to scan.'
@@ -62,9 +62,9 @@ class NetworkAddCommand(CliCommand):
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
             if len(json_data) == len(self.args.auth):
-                self.args.credential_ids = []
+                self.args.credentials = []
                 for cred_entry in json_data:
-                    self.args.credential_ids.append(cred_entry['id'])
+                    self.args.credentials.append(cred_entry['id'])
             else:
                 for cred_entry in json_data:
                     cred_name = cred_entry['name']
@@ -85,10 +85,7 @@ class NetworkAddCommand(CliCommand):
 
         :returns: a dictionary representing the network profile being added
         """
-        self.req_payload = {'name': self.args.name,
-                            'hosts': self.args.hosts,
-                            'ssh_port': self.args.ssh_port,
-                            'credential_ids': self.args.credential_ids}
+        self.req_payload = build_profile_payload(self.args)
 
     def _handle_response_success(self):
         print('Profile "%s" was added' % self.args.name)
