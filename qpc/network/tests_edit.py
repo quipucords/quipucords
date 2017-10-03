@@ -17,13 +17,13 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
-from cli.cli import CLI
-from cli.tests_utilities import HushUpStderr, redirect_stdout
-from cli.utils import read_in_file
-from cli.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from cli.auth import AUTH_URI
-from cli.network import NETWORK_URI
-from cli.network.edit import NetworkEditCommand
+from qpc.cli import CLI
+from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.utils import read_in_file
+from qpc.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from qpc.auth import AUTH_URI
+from qpc.network import NETWORK_URI
+from qpc.network.edit import NetworkEditCommand
 
 TMP_HOSTFILE = "/tmp/testhostsfile"
 PARSER = ArgumentParser()

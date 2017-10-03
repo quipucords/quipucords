@@ -15,10 +15,10 @@ for system scans
 
 from __future__ import print_function
 from requests import codes
-from cli.utils import pretty_print
-from cli.clicommand import CliCommand
-import cli.network as network
-from cli.request import GET
+from qpc.utils import pretty_print
+from qpc.clicommand import CliCommand
+import qpc.network as network
+from qpc.request import GET
 
 
 # pylint: disable=too-few-public-methods

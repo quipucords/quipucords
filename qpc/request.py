@@ -13,7 +13,7 @@
 
 import sys
 import requests
-from cli.utils import log
+from qpc.utils import log
 
 # Need to determine how we get this information; config file at install?
 BASE_URL = 'http://127.0.0.1:8000'
