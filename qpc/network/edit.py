@@ -16,12 +16,12 @@ for system scans
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.request import PATCH, GET, request
-from cli.clicommand import CliCommand
-from cli.utils import read_in_file
-import cli.auth as auth
-import cli.network as network
-from cli.network.utils import validate_port, build_profile_payload
+from qpc.request import PATCH, GET, request
+from qpc.clicommand import CliCommand
+from qpc.utils import read_in_file
+import qpc.auth as auth
+import qpc.network as network
+from qpc.network.utils import validate_port, build_profile_payload
 
 
 # pylint: disable=too-few-public-methods

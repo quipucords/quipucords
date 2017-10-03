@@ -16,10 +16,10 @@
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.utils import handle_error_response
-from cli.clicommand import CliCommand
-import cli.network as network
-from cli.request import GET, DELETE, request
+from qpc.utils import handle_error_response
+from qpc.clicommand import CliCommand
+import qpc.network as network
+from qpc.request import GET, DELETE, request
 
 
 # pylint: disable=too-few-public-methods

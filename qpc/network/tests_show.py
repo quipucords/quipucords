@@ -16,10 +16,10 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
-from cli.tests_utilities import HushUpStderr, redirect_stdout
-from cli.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from cli.network import NETWORK_URI
-from cli.network.show import NetworkShowCommand
+from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from qpc.network import NETWORK_URI
+from qpc.network.show import NetworkShowCommand
 
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')

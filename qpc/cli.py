@@ -13,20 +13,20 @@
 
 from __future__ import print_function
 from argparse import ArgumentParser
-import cli.auth as auth
-import cli.network as network
-from cli.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
+import qpc.auth as auth
+import qpc.network as network
+from qpc.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
     setup_logging
-from cli.auth.add import AuthAddCommand
-from cli.auth.list import AuthListCommand
-from cli.auth.edit import AuthEditCommand
-from cli.auth.show import AuthShowCommand
-from cli.auth.clear import AuthClearCommand
-from cli.network.add import NetworkAddCommand
-from cli.network.list import NetworkListCommand
-from cli.network.show import NetworkShowCommand
-from cli.network.clear import NetworkClearCommand
-from cli.network.edit import NetworkEditCommand
+from qpc.auth.add import AuthAddCommand
+from qpc.auth.list import AuthListCommand
+from qpc.auth.edit import AuthEditCommand
+from qpc.auth.show import AuthShowCommand
+from qpc.auth.clear import AuthClearCommand
+from qpc.network.add import NetworkAddCommand
+from qpc.network.list import NetworkListCommand
+from qpc.network.show import NetworkShowCommand
+from qpc.network.clear import NetworkClearCommand
+from qpc.network.edit import NetworkEditCommand
 from . import __version__
 
 

@@ -13,8 +13,8 @@
 import unittest
 import sys
 from io import StringIO
-from cli.cli import CLI
-from cli.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.cli import CLI
+from qpc.tests_utilities import HushUpStderr, redirect_stdout
 
 
 class CliTests(unittest.TestCase):

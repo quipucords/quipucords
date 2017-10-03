@@ -16,10 +16,10 @@ for system access or all credentials
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.utils import handle_error_response
-from cli.clicommand import CliCommand
-import cli.auth as auth
-from cli.request import GET, DELETE, request
+from qpc.utils import handle_error_response
+from qpc.clicommand import CliCommand
+import qpc.auth as auth
+from qpc.request import GET, DELETE, request
 
 
 # pylint: disable=too-few-public-methods

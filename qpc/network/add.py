@@ -15,12 +15,12 @@
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.request import POST, GET, request
-from cli.clicommand import CliCommand
-from cli.utils import read_in_file
-import cli.network as network
-from cli.network.utils import validate_port, build_profile_payload
-import cli.auth as auth
+from qpc.request import POST, GET, request
+from qpc.clicommand import CliCommand
+from qpc.utils import read_in_file
+import qpc.network as network
+from qpc.network.utils import validate_port, build_profile_payload
+import qpc.auth as auth
 
 
 # pylint: disable=too-few-public-methods

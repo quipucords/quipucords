@@ -10,7 +10,7 @@ BASE_QPC_DIR = os.path.abspath(
         os.path.join(os.path.dirname(sys.argv[0]), '.')))
 sys.path.insert(0, os.path.join(BASE_QPC_DIR, 'quipucords'))
 # pylint: disable=wrong-import-position
-from cli import __version__  # noqa: E402
+from qpc import __version__  # noqa: E402
 
 setup(
     name='quipucords',
@@ -23,7 +23,7 @@ setup(
     ],
     include_package_data=True,
     license='GPLv3',
-    packages=find_packages(exclude=["test*.py"]),
+    packages=find_packages(exclude=['test*.py']),
     package_data={'': ['LICENSE']},
     url='https://github.com/quipucords/quipucords',
     scripts=[

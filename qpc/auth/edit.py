@@ -16,10 +16,10 @@ for system access
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.request import PATCH, GET, request
-from cli.clicommand import CliCommand
-import cli.auth as auth
-from cli.auth.utils import validate_sshkeyfile, build_credential_payload
+from qpc.request import PATCH, GET, request
+from qpc.clicommand import CliCommand
+import qpc.auth as auth
+from qpc.auth.utils import validate_sshkeyfile, build_credential_payload
 
 
 # pylint: disable=too-few-public-methods

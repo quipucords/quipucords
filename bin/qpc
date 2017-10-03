@@ -14,37 +14,15 @@
 import gettext
 import os
 import sys
-import site
-from distutils.sysconfig import get_python_lib
-
-
-def get_path_from_site(pkg_path):
-    """Find possible development location based on site package"""
-    link_path = os.path.join(pkg_path, 'quipucords.egg-link')
-    if os.path.isfile(link_path):
-        with open(link_path, 'r') as link_file:
-            result = link_file.read().splitlines()
-            for location in result:
-                code_path = os.path.join(location, 'quipucords')
-                sys.path.insert(0, os.path.join(code_path))
-
-
-get_path_from_site(get_python_lib())
-
-try:
-    for site_pkg in site.getsitepackages():
-        get_path_from_site(site_pkg)
-except AttributeError:
-    pass
 
 BASE_QPC_DIR = os.path.abspath(
     os.path.normpath(
         os.path.join(os.path.dirname(sys.argv[0]), '..')))
-
-sys.path.insert(0, os.path.join(BASE_QPC_DIR, 'quipucords'))
+QPC_PATH = os.path.join(BASE_QPC_DIR, 'quipucords')
+sys.path.insert(0, QPC_PATH)
 
 # pylint: disable=wrong-import-position
-from cli.cli import CLI  # noqa
+from qpc.cli import CLI  # noqa
 
 gettext.install('qpc')
 

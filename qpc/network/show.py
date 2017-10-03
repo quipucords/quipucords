@@ -9,35 +9,35 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" AuthShowCommand is used to show info on a specific credential
-for system access
+""" NetworkShowCommand is used to show info on a specific network profiles
+for system scans
 """
 
 from __future__ import print_function
 import sys
 from requests import codes
-from cli.utils import pretty_print
-from cli.clicommand import CliCommand
-import cli.auth as auth
-from cli.request import GET
+from qpc.utils import pretty_print
+from qpc.clicommand import CliCommand
+import qpc.network as network
+from qpc.request import GET
 
 
 # pylint: disable=too-few-public-methods
-class AuthShowCommand(CliCommand):
+class NetworkShowCommand(CliCommand):
     """
-    This command is for showing an auth which can be later associated with
-    profiles to gather facts.
+    This command is for showing a network which can later be used with a scan
+    to gather facts.
     """
-    SUBCOMMAND = auth.SUBCOMMAND
-    ACTION = auth.SHOW
+    SUBCOMMAND = network.SUBCOMMAND
+    ACTION = network.SHOW
 
     def __init__(self, subparsers):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            auth.AUTH_URI, [codes.ok])
+                            network.NETWORK_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='auth credential name', required=True)
+                                 help='profile name', required=True)
 
     def _build_req_params(self):
         self.req_params = {'name': self.args.name}
@@ -49,5 +49,5 @@ class AuthShowCommand(CliCommand):
             data = pretty_print(cred_entry)
             print(data)
         else:
-            print('Auth "%s" does not exist' % self.args.name)
+            print('Profile "%s" does not exist' % self.args.name)
             sys.exit(1)

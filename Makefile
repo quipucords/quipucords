@@ -33,10 +33,10 @@ install: build
 	$(PYTHON) setup.py install -f
 
 test:
-	$(PYTHON) quipucords/manage.py test -v 2 quipucords/
+	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/
 
 test-coverage:
-	coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/;coverage report -m --omit $(OMIT_PATTERNS)
+	coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/;coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
 	flake8 . --ignore D203

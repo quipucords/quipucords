@@ -13,8 +13,8 @@
 
 from __future__ import print_function
 import sys
-from cli.utils import handle_error_response
-from cli.request import request
+from qpc.utils import handle_error_response
+from qpc.request import request
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
