@@ -11,16 +11,17 @@
 """Describes the urls and patterns for the API application"""
 
 from rest_framework.routers import SimpleRouter
-from api import views
+from api import hostcredential_views
+from api import networkprofile_views
 
 
 ROUTER = SimpleRouter()
 
 ROUTER.register(r'credentials/hosts',
-                views.HostCredentialViewSet,
+                hostcredential_views.HostCredentialViewSet,
                 base_name='hostcred')
 ROUTER.register(r'profiles/networks',
-                views.NetworkProfileViewSet,
+                networkprofile_views.NetworkProfileViewSet,
                 base_name='networkprofile')
 
 # pylint: disable=invalid-name
