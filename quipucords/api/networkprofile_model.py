@@ -13,46 +13,7 @@
 """
 
 from django.db import models
-from api.vault import encrypt_data_as_unicode
-
-
-class Credential(models.Model):
-    """The base credential model, all of which will have a name"""
-    name = models.CharField(max_length=64, unique=True)
-
-    class Meta:
-        verbose_name_plural = 'Credentials'
-
-
-class HostCredential(Credential):
-    """The host credential for connecting to host systems via ssh"""
-    username = models.CharField(max_length=64)
-    password = models.CharField(max_length=1024, null=True)
-    sudo_password = models.CharField(max_length=1024, null=True)
-    ssh_keyfile = models.CharField(max_length=1024, null=True)
-
-    def encrypt_fields(self):
-        """Encrypt the sensitive fields of the object"""
-        if self.password:
-            self.password = encrypt_data_as_unicode(self.password)
-        if self.sudo_password:
-            self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
-
-    # pylint: disable=arguments-differ
-    def save(self, *args, **kwargs):
-        """Save the model object
-        """
-        self.encrypt_fields()
-        super().save(*args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """Update the model object
-        """
-        self.encrypt_fields()
-        super().update(request, *args, **kwargs)
-
-    class Meta:
-        verbose_name_plural = 'Host Credentials'
+from api.hostcredential_model import HostCredential
 
 
 class NetworkProfile(models.Model):

@@ -14,12 +14,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from django_filters.rest_framework import (DjangoFilterBackend, Filter,
-                                           FilterSet)
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from filters import mixins
-from api.serializers import CredentialSerializer, HostCredentialSerializer, \
-    NetworkProfileSerializer
-from api.models import Credential, HostCredential, NetworkProfile
+from api.filters import ListFilter
+from api.hostcredential_serializer import HostCredentialSerializer
+from api.hostcredential_model import HostCredential
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
@@ -39,21 +38,6 @@ def mask_credential(cred):
     return cred
 
 
-class ListFilter(Filter):
-    """Add query filter capability to provide a list of filter values.
-    """
-
-    def filter(self, qs, value):
-        if not value:
-            return qs
-
-        # For django-filter versions < 0.13,
-        # use lookup_type instead of lookup_expr
-        self.lookup_expr = 'in'
-        values = value.split(',')
-        return super(ListFilter, self).filter(qs, values)
-
-
 class HostCredentialFilter(FilterSet):
     """Filter for host credentials by name"""
     name = ListFilter(name='name')
@@ -63,22 +47,7 @@ class HostCredentialFilter(FilterSet):
         fields = ['name']
 
 
-class NetworkProfileFilter(FilterSet):
-    """Filter for network profiles by name"""
-    name = ListFilter(name='name')
-
-    class Meta:
-        model = NetworkProfile
-        fields = ['name']
-
-
 # pylint: disable=too-many-ancestors
-class CredentialViewSet(ModelViewSet):
-    """A view set for the Credential model"""
-    queryset = Credential.objects.all()
-    serializer_class = CredentialSerializer
-
-
 class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     """A view set for the HostCredential model"""
     queryset = HostCredential.objects.all()
@@ -118,40 +87,3 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         self.perform_update(serializer)
         cred = mask_credential(serializer.data)
         return Response(cred)
-
-
-class NetworkProfileViewSet(ModelViewSet):
-    """A view set for NetworkProfiles"""
-
-    queryset = NetworkProfile.objects.all()
-    serializer_class = NetworkProfileSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = NetworkProfileFilter
-
-    def list(self, request):  # pylint: disable=unused-argument
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = NetworkProfileSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    # pylint: disable=unused-argument
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
-
-    def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
-        network_profile = get_object_or_404(self.queryset, pk=pk)
-        serializer = NetworkProfileSerializer(network_profile)
-        return Response(serializer.data)
-
-    # pylint: disable=unused-argument
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data,
-                                         partial=kwargs.get('partial', False))
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)

@@ -8,11 +8,16 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Admin module for Django server application"""
+"""Test the API application"""
 
-from django.contrib import admin
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
+from django.test import TestCase
+from . import vault
 
-admin.site.register(HostCredential)
-admin.site.register(NetworkProfile)
+
+class VaultTest(TestCase):
+    """Tests against the vault class"""
+
+    def test_encrypt_data_as_unicode(self):
+        """Tests the encryption of sensitive data using SECRET_KEY"""
+        value = vault.encrypt_data_as_unicode('encrypted data')
+        self.assertTrue(isinstance(value, str))
