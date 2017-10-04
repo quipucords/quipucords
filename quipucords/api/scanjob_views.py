@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the views associatd with the API models"""
+"""Describes the views associated with the API models"""
 
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
@@ -55,5 +55,5 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def retrieve(self, request, pk=None):
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
-        cred = expand_network_profile(serializer.data)
-        return Response(cred)
+        scan_out = expand_network_profile(serializer.data)
+        return Response(scan_out)

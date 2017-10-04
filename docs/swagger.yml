@@ -37,6 +37,8 @@ paths:
       responses:
         201:
           description: "Host credential created"
+          schema:
+            $ref: "#/definitions/HostCredentialOut"
         400:
           description: "Invalid input"
     get:
@@ -58,7 +60,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/HostCredentialExt"
+              $ref: "#/definitions/HostCredentialOut"
   /credentials/hosts/{host_cred_id}:
     get:
       tags:
@@ -79,7 +81,7 @@ paths:
         200:
           description: "Host credential retrieved"
           schema:
-            $ref: "#/definitions/HostCredentialExt"
+            $ref: "#/definitions/HostCredentialOut"
         404:
           description: "Host credential not found"
     put:
@@ -109,7 +111,7 @@ paths:
         200:
           description: "Host credential updated"
           schema:
-            $ref: "#/definitions/HostCredentialExt"
+            $ref: "#/definitions/HostCredentialOut"
         400:
           description: "Invalid input"
         404:
@@ -151,10 +153,12 @@ paths:
           description: "JSON object representing new network profile"
           required: true
           schema:
-            $ref: "#/definitions/NetworkProfile"
+            $ref: "#/definitions/NetworkProfileIn"
       responses:
         201:
           description: "Network profile created"
+          schema:
+            $ref: "#/definitions/NetworkProfileOut"
         400:
           description: "Invalid input"
     get:
@@ -176,7 +180,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/NetworkProfileExt"
+              $ref: "#/definitions/NetworkProfileOut"
   /profiles/networks/{network_profile_id}:
     get:
       tags:
@@ -197,7 +201,7 @@ paths:
         200:
           description: "Network profile returned"
           schema:
-            $ref: "#/definitions/NetworkProfileExt"
+            $ref: "#/definitions/NetworkProfileOut"
         404:
           description: "Network profile not found"
     put:
@@ -222,12 +226,12 @@ paths:
           description: "Network profile object to be modified"
           required: true
           schema:
-            $ref: "#/definitions/NetworkProfile"
+            $ref: "#/definitions/NetworkProfileIn"
       responses:
         200:
           description: "Network profile updated"
           schema:
-            $ref: "#/definitions/NetworkProfileExt"
+            $ref: "#/definitions/NetworkProfileOut"
         400:
           description: "Invalid input"
         404:
@@ -269,10 +273,12 @@ paths:
         description: "Scan job object that tracks a scan"
         required: true
         schema:
-          $ref: "#/definitions/ScanJob"
+          $ref: "#/definitions/ScanJobIn"
       responses:
         201:
-          description: "Scan Job created"
+          description: "Scan job created"
+          schema:
+            $ref: "#/definitions/ScanJobOut"
         400:
           description: "Invalid input"
     get:
@@ -289,13 +295,13 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/ScanJobExt"
+              $ref: "#/definitions/ScanJobOut"
   /scans/{scan_job_id}:
     get:
       tags:
         - "Scan"
       summary: "Get an existing scan job"
-      description: "Get a scan jobs current status."
+      description: "Get a scan job's current status."
       operationId: "getScanJob"
       produces:
       - "application/json"
@@ -308,9 +314,9 @@ paths:
         format: "int64"
       responses:
         200:
-          description: "Scan Job retrieved"
+          description: "Scan job retrieved"
           schema:
-            $ref: "#/definitions/ScanJobExt"
+            $ref: "#/definitions/ScanJobOut"
         404:
           description: "Scan job not found"
 
@@ -338,7 +344,19 @@ definitions:
         sudo_password:
           type: "string"
           description: "The password for sudo permission escalation after connection for the host credential"
-  HostCredentialExt:
+  HostCredentialMin:
+    type: "object"
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        description: "The name of the host credential"
+  HostCredentialOut:
     allOf:
       - $ref: "#/definitions/HostCredential"
       - type: "object"
@@ -354,7 +372,6 @@ definitions:
       - name
       - hosts
       - ssh_port
-      - credentials
     properties:
       name:
         type: "string"
@@ -368,44 +385,78 @@ definitions:
         type: "integer"
         format: "int32"
         description: "The SSH port to use on the hosts."
-      credentials:
-        type: "array"
-        items:
-          type: "integer"
-          format: "int64"
-        description: "The host credentials to try with these hosts."
-  NetworkProfileExt:
+  NetworkProfileMin:
+    type: "object"
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        description: "The name of the network profile"
+  NetworkProfileIn:
+    allOf:
+      - $ref: "#/definitions/NetworkProfile"
+      - type: "object"
+        required:
+          - credentials
+        properties:
+          credentials:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+            description: "The host credentials to try with these hosts."
+  NetworkProfileOut:
     allOf:
       - $ref: "#/definitions/NetworkProfile"
       - type: "object"
         required:
           - id
+          - credentials
         properties:
           id:
             type: "integer"
             format: "int64"
+          credentials:
+            type: "array"
+            items:
+              $ref: "#/definitions/HostCredentialMin"
+            description: "The host credentials to try with these hosts."
   ScanJob:
     type: "object"
-    required:
-      - profile
     properties:
-        profile:
-          type: "integer"
-          format: "int64"
-          description: "The identifier of a network profile"
         scan_type:
           type: "string"
           description: "The type of scan. 'host' is the default."
           enum:
             - host
             - discovery
-  ScanJobExt:
+  ScanJobIn:
+    allOf:
+      - $ref: "#/definitions/ScanJob"
+      - type: "object"
+        required:
+          - profile
+        properties:
+          profile:
+            type: "integer"
+            format: "int64"
+            description: "The identifier of a network profile"
+  ScanJobOut:
     allOf:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
           - id
+          - profile
         properties:
           id:
             type: "integer"
             format: "int64"
+          profile:
+            $ref: "#/definitions/NetworkProfileMin"
+            description: "The identifier of a network profile"

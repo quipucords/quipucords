@@ -19,7 +19,7 @@ from api.hostcredential_model import HostCredential
 class NetworkProfile(models.Model):
     """A network profile connects a list of credentials and a list of hosts."""
     name = models.CharField(max_length=64, unique=True)
-    ssh_port = models.IntegerField()
+    ssh_port = models.IntegerField(default=22)
     credentials = models.ManyToManyField(HostCredential)
     # NetworkProfile also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
