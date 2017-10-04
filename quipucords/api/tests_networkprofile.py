@@ -205,10 +205,14 @@ class NetworkProfileTest(TestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        expected = {'name': 'netprof2-new',
+                    'hosts': ['1.2.3.5'],
+                    'ssh_port': 22,
+                    'credentials': [self.cred_for_response]}
         # data should be a strict subset of the response, because the
         # response adds an id field.
-        for key, value in data.items():  # pylint: disable=unused-variable
-            self.assertEqual(data[key], response.json()[key])
+        for key, value in expected.items():  # pylint: disable=unused-variable
+            self.assertEqual(expected[key], response.json()[key])
 
     def test_partial_update(self):
         """Partially update a NetworkProfile."""

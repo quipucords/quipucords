@@ -71,7 +71,8 @@ class NetworkProfileViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
+        network_profile_out = expand_host_credential(serializer.data)
+        return Response(network_profile_out, status=status.HTTP_201_CREATED,
                         headers=headers)
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
@@ -87,4 +88,5 @@ class NetworkProfileViewSet(ModelViewSet):
                                          partial=kwargs.get('partial', False))
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        network_profile_out = expand_host_credential(serializer.data)
+        return Response(network_profile_out)
