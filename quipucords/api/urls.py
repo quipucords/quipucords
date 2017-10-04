@@ -13,6 +13,7 @@
 from rest_framework.routers import SimpleRouter
 from api import hostcredential_views
 from api import networkprofile_views
+from api import scanjob_views
 
 
 ROUTER = SimpleRouter()
@@ -23,6 +24,9 @@ ROUTER.register(r'credentials/hosts',
 ROUTER.register(r'profiles/networks',
                 networkprofile_views.NetworkProfileViewSet,
                 base_name='networkprofile')
+ROUTER.register(r'scans',
+                scanjob_views.ScanJobViewSet,
+                base_name='scanjob')
 
 # pylint: disable=invalid-name
 urlpatterns = ROUTER.urls

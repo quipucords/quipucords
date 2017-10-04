@@ -13,6 +13,8 @@
 from django.contrib import admin
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile
+from api.scanjob_model import ScanJob
 
 admin.site.register(HostCredential)
 admin.site.register(NetworkProfile)
+admin.site.register(ScanJob)

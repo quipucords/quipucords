@@ -45,8 +45,6 @@ paths:
       summary: "List exsiting host credentials"
       description: "List all host credential for use when connecting to a target system."
       operationId: "listHostCredentials"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -68,8 +66,6 @@ paths:
       summary: "Get an existing host credential"
       description: "Get a host credential for use when connecting to a target system."
       operationId: "getHostCredential"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -124,8 +120,6 @@ paths:
       summary: "Delete an existing host credential"
       description: "Delete a host credential for use when connecting to a target system."
       operationId: "deleteHostCredential"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -169,8 +163,6 @@ paths:
       summary: "List network profiles"
       description: "List all network profiles available for scanning."
       operationId: "listNetworkProfiles"
-      consumes:
-        - "application/json"
       produces:
         - "application/json"
       parameters:
@@ -192,8 +184,6 @@ paths:
       summary: "Get a network profile"
       description: "Get a network profile."
       operationId: "getNetworkProfile"
-      consumes:
-        - "application/json"
       produces:
         - "application/json"
       parameters:
@@ -248,8 +238,6 @@ paths:
       summary: "Delete an existing network profile"
       description: "Delete an existing network profile"
       operationId: "deleteNetworkProfile"
-      consumes:
-        - "application/json"
       produces:
         - "application/json"
       parameters:
@@ -264,6 +252,67 @@ paths:
           description: "Network profile deleted"
         404:
           description: "Network profile not found"
+  /scans:
+    post:
+      tags:
+        - "Scan"
+      summary: "Trigger a scan"
+      description: "Create a new scan job."
+      operationId: "triggerScan"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Scan job object that tracks a scan"
+        required: true
+        schema:
+          $ref: "#/definitions/ScanJob"
+      responses:
+        201:
+          description: "Scan Job created"
+        400:
+          description: "Invalid input"
+    get:
+      tags:
+        - "Scan"
+      summary: "List exsiting scan jobs"
+      description: "List all scans."
+      operationId: "listScanJobs"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Scan jobs retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanJobExt"
+  /scans/{scan_job_id}:
+    get:
+      tags:
+        - "Scan"
+      summary: "Get an existing scan job"
+      description: "Get a scan jobs current status."
+      operationId: "getScanJob"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to retrieve"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan Job retrieved"
+          schema:
+            $ref: "#/definitions/ScanJobExt"
+        404:
+          description: "Scan job not found"
 
 definitions:
   HostCredential:
@@ -328,6 +377,31 @@ definitions:
   NetworkProfileExt:
     allOf:
       - $ref: "#/definitions/NetworkProfile"
+      - type: "object"
+        required:
+          - id
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+  ScanJob:
+    type: "object"
+    required:
+      - profile
+    properties:
+        profile:
+          type: "integer"
+          format: "int64"
+          description: "The identifier of a network profile"
+        scan_type:
+          type: "string"
+          description: "The type of scan. 'host' is the default."
+          enum:
+            - host
+            - discovery
+  ScanJobExt:
+    allOf:
+      - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
           - id
