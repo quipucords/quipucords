@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the views associatd with the API models"""
+"""Describes the views associated with the API models"""
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -18,6 +18,26 @@ from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.networkprofile_serializer import NetworkProfileSerializer
 from api.networkprofile_model import NetworkProfile
+from api.hostcredential_model import HostCredential
+
+
+CREDENTIALS_KEY = 'credentials'
+
+
+def expand_host_credential(profile):
+    """Take network profile object with credential id and pull object from db.
+    create slim dictionary version of the host credential with name an value
+    to return to user.
+    """
+    if profile[CREDENTIALS_KEY]:
+        credentials = profile[CREDENTIALS_KEY]
+        new_creds = []
+        for cred_id in credentials:
+            cred = HostCredential.objects.get(pk=cred_id)
+            slim_cred = {'id': cred_id, 'name': cred.name}
+            new_creds.append(slim_cred)
+        profile[CREDENTIALS_KEY] = new_creds
+    return profile
 
 
 class NetworkProfileFilter(FilterSet):
@@ -41,6 +61,8 @@ class NetworkProfileViewSet(ModelViewSet):
     def list(self, request):  # pylint: disable=unused-argument
         queryset = self.filter_queryset(self.get_queryset())
         serializer = NetworkProfileSerializer(queryset, many=True)
+        for profile in serializer.data:
+            profile = expand_host_credential(profile)
         return Response(serializer.data)
 
     # pylint: disable=unused-argument
@@ -55,7 +77,8 @@ class NetworkProfileViewSet(ModelViewSet):
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         network_profile = get_object_or_404(self.queryset, pk=pk)
         serializer = NetworkProfileSerializer(network_profile)
-        return Response(serializer.data)
+        network_profile_out = expand_host_credential(serializer.data)
+        return Response(network_profile_out)
 
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):

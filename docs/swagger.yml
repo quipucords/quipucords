@@ -272,7 +272,7 @@ paths:
           $ref: "#/definitions/ScanJob"
       responses:
         201:
-          description: "Scan Job created"
+          description: "Scan job created"
         400:
           description: "Invalid input"
     get:
@@ -295,7 +295,7 @@ paths:
       tags:
         - "Scan"
       summary: "Get an existing scan job"
-      description: "Get a scan jobs current status."
+      description: "Get a scan job's current status."
       operationId: "getScanJob"
       produces:
       - "application/json"
@@ -308,7 +308,7 @@ paths:
         format: "int64"
       responses:
         200:
-          description: "Scan Job retrieved"
+          description: "Scan job retrieved"
           schema:
             $ref: "#/definitions/ScanJobExt"
         404:

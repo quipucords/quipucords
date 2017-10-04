@@ -19,7 +19,7 @@ from api.scanjob_model import ScanJob
 
 
 class NetworkProfileField(PrimaryKeyRelatedField):
-    """Representation of the credentials associated with a network profile
+    """Representation of the network profile associated with a scan job
     """
 
     def display_value(self, instance):
