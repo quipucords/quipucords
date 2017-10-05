@@ -110,6 +110,7 @@ class NetworkProfileTest(TestCase):
         self.create_expect_201(
             {'name': 'netprof1',
              'hosts': ['10.10.181.9',
+                       '10.10.181.9/16',
                        '10.10.128.[1:25]',
                        '10.10.[1:20].25',
                        '10.10.[1:20].[1:25]',
@@ -127,6 +128,7 @@ class NetworkProfileTest(TestCase):
             {'name': 'netprof1',
              'hosts': ['192.1..2',
                        '192.01.5.10',
+                       '192.01.5.1/',
                        '192.01.5.[1:10]/10',
                        '192.3.4.455',
                        '192.3.4.455/16',

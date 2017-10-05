@@ -11,6 +11,7 @@
 """Module for serializing all model object for database storage"""
 
 import re
+import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import ModelSerializer, ValidationError, \
@@ -177,10 +178,6 @@ class NetworkProfileSerializer(ModelSerializer):
 
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
-            print(host_range)
-            print('IP match: {}'.format(str(ip_match)))
-            print('CIDR match: {}'.format(str(cidr_match)))
-            print('\n')
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
             if is_likely_ip or is_likely_cidr:
@@ -192,10 +189,9 @@ class NetworkProfileSerializer(ModelSerializer):
                         result = host
                         break
 
-                if result is None:
+                if result is None or is_likely_cidr:
                     # Attempt to convert CIDR to ansible range
                     if is_likely_cidr:
-                        print('CIDR')
                         try:
                             normalized_cidr = NetworkProfileSerializer \
                                 .cidr_to_ansible(host_range)
@@ -208,7 +204,6 @@ class NetworkProfileSerializer(ModelSerializer):
                         err_message = '{} is not a valid IP or CIDR pattern'
                         result = ValidationError(err_message
                                                  .format(host_range))
-                        print('Not CIDR')
             else:
                 # Possibly a host addr
                 for reg in host_regex_list:
@@ -223,10 +218,10 @@ class NetworkProfileSerializer(ModelSerializer):
             if isinstance(result, ValidationError):
                 host_errors.append(result)
             elif result is not None:
-                normalized_hosts.append(host)
+                normalized_hosts.append(result)
             else:
-                print('result should not be None')
-
+                logging.error('%s did not match a pattern or produce error',
+                              host_range)
         if len(host_errors) is 0:
             return normalized_hosts
         else:
@@ -250,7 +245,7 @@ class NetworkProfileSerializer(ModelSerializer):
         # use CIDR and we should give them a CIDR error message, and not
         # at all CIDR-like, in which case we tell the caller to parse it a
         # different way.
-        cidr_like = r'[0-9\.]*/[0-9]*'
+        cidr_like = r'[0-9\.]*/[0-9]+'
         if not re.match(cidr_like, ip_range):
             raise ValidationError(
                 '{} does not match CIDR {}'.format(ip_range, str(cidr_like)))
