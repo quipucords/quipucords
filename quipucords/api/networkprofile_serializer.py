@@ -133,7 +133,7 @@ class NetworkProfileSerializer(ModelSerializer):
 
         return name
 
-    # pylint: disable=too-many-locals, too-many-branches
+    # pylint: disable=too-many-locals, too-many-branches, too-many-statements
     @staticmethod
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
@@ -145,8 +145,8 @@ class NetworkProfileSerializer(ModelSerializer):
         # to see if it is like an IP/CIDR
         octet_regex = r'(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])'
         bit_range = r'(3[0-2]|[1-2][0-9]|[0-9])'
-        ip_like = r'[0-9.]*\.[0-9.]*\.[0-9.]*\.[0-9.]*'
-        cidr_like = r'[0-9.]*\.[0-9.]*\.[0-9.]*\.[0-9.]*\/[0-9]*'
+        relaxed_ip_pattern = r'[0-9]*\.[0-9]*\.[0-9\[\]:]*\.[0-9\[\]:]*'
+        relaxed_cidr_pattern = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*'
 
         # type IP:          192.168.0.1
         # type CIDR:        192.168.0.0/16
@@ -175,8 +175,12 @@ class NetworkProfileSerializer(ModelSerializer):
             result = None
             host_range = host['host_range']
 
-            ip_match = re.match(ip_like, host_range)
-            cidr_match = re.match(cidr_like, host_range)
+            ip_match = re.match(relaxed_ip_pattern, host_range)
+            cidr_match = re.match(relaxed_cidr_pattern, host_range)
+            print(host_range)
+            print('IP match: {}'.format(str(ip_match)))
+            print('CIDR match: {}'.format(str(cidr_match)))
+            print('\n')
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
             if is_likely_ip or is_likely_cidr:
@@ -190,14 +194,21 @@ class NetworkProfileSerializer(ModelSerializer):
 
                 if result is None:
                     # Attempt to convert CIDR to ansible range
-                    try:
-                        normalized_cidr = NetworkProfileSerializer \
-                            .cidr_to_ansible(host_range)
-                        normalized_cidr_host = {
-                            'host_range': normalized_cidr}
-                        result = normalized_cidr_host
-                    except ValidationError as validate_error:
-                        result = validate_error
+                    if is_likely_cidr:
+                        print('CIDR')
+                        try:
+                            normalized_cidr = NetworkProfileSerializer \
+                                .cidr_to_ansible(host_range)
+                            normalized_cidr_host = {
+                                'host_range': normalized_cidr}
+                            result = normalized_cidr_host
+                        except ValidationError as validate_error:
+                            result = validate_error
+                    else:
+                        err_message = '{} is not a valid IP or CIDR pattern'
+                        result = ValidationError(err_message
+                                                 .format(host_range))
+                        print('Not CIDR')
             else:
                 # Possibly a host addr
                 for reg in host_regex_list:
@@ -239,7 +250,7 @@ class NetworkProfileSerializer(ModelSerializer):
         # use CIDR and we should give them a CIDR error message, and not
         # at all CIDR-like, in which case we tell the caller to parse it a
         # different way.
-        cidr_like = r'[0-9.]*/[0-9]*'
+        cidr_like = r'[0-9\.]*/[0-9]*'
         if not re.match(cidr_like, ip_range):
             raise ValidationError(
                 '{} does not match CIDR {}'.format(ip_range, str(cidr_like)))
