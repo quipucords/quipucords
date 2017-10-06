@@ -124,22 +124,26 @@ class NetworkProfileTest(TestCase):
     def test_create_invalid_hosts(self):
         """Test invalid host patterns."""
 
-        self.create_expect_400(
+        hosts = ['192.1..2',
+                 '192.01.5.10',
+                 '192.1.5.1/',
+                 '192.01.5.[1:10]/10',
+                 '192.3.4.455',
+                 '192.3.4.455/16',
+                 '10.10.[181.9',
+                 '10.10.128.[a:25]',
+                 '10.10.[1-20].25',
+                 '1.1.1.1/33',
+                 'my_rhel[a:d].company.com',
+                 'my-rhel[a:400].company.com']
+
+        response = self.create(
             {'name': 'netprof1',
-             'hosts': ['192.1..2',
-                       '192.01.5.10',
-                       '192.01.5.1/',
-                       '192.01.5.[1:10]/10',
-                       '192.3.4.455',
-                       '192.3.4.455/16',
-                       '10.10.[181.9',
-                       '10.10.128.[a:25]',
-                       '10.10.[1-20].25',
-                       '1.1.1.1/33',
-                       'my_rhel[a:d].company.com',
-                       'my-rhel[a:400].company.com'],
+             'hosts': hosts,
              'ssh_port': '22',
              'credentials': [self.cred_for_upload]})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(response.data['hosts']), len(hosts))
 
     def test_create_no_ssh_port(self):
         """A NetworkProfile needs an ssh port."""

@@ -220,8 +220,10 @@ class NetworkProfileSerializer(ModelSerializer):
             elif result is not None:
                 normalized_hosts.append(result)
             else:
-                logging.error('%s did not match a pattern or produce error',
-                              host_range)
+                # This is an unexpected case. Allow/log for analysis
+                normalized_hosts.append(host)
+                logging.warning('%s did not match a pattern or produce error',
+                                host_range)
         if len(host_errors) is 0:
             return normalized_hosts
         else:
