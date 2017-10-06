@@ -122,7 +122,7 @@ class NetworkProfileTest(TestCase):
              'credentials': [self.cred_for_upload]})
 
     def test_create_invalid_hosts(self):
-        """An empty string is not a host identifier."""
+        """Test invalid host patterns."""
 
         self.create_expect_400(
             {'name': 'netprof1',
