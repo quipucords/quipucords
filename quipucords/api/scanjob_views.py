@@ -51,7 +51,6 @@ def expand_key_values(result_columns):
         for field_id in result_columns[COLUMN_KEY]:
             field_data = ResultKeyValue.objects.get(pk=field_id)
             serializer = ResultKeyValueSerializer(field_data)
-            print(serializer.data)
             field_out = {'key': serializer.data['key'],
                          'value': serializer.data['value']}
             fields_list.append(field_out)
