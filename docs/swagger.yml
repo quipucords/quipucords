@@ -16,7 +16,7 @@ tags:
   description: "API related to the Host Credential model"
 
 paths:
-  /credentials/hosts:
+  /credentials/hosts/:
     post:
       tags:
         - "Host Credential"
@@ -136,7 +136,7 @@ paths:
           description: "Host credential deleted"
         404:
           description: "Host credential not found"
-  /profiles/networks:
+  /profiles/networks/:
     post:
       tags:
         - "Network Profile"
@@ -256,7 +256,7 @@ paths:
           description: "Network profile deleted"
         404:
           description: "Network profile not found"
-  /scans:
+  /scans/:
     post:
       tags:
         - "Scan"
