@@ -10,7 +10,6 @@
 #
 """Test the discovery scanner capabilities"""
 
-from collections import namedtuple
 from unittest.mock import patch, Mock
 from django.test import TestCase
 from api.hostcredential_model import HostCredential
