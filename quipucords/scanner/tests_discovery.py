@@ -10,15 +10,18 @@
 #
 """Test the discovery scanner capabilities"""
 
-from unittest.mock import patch
+from collections import namedtuple
+from unittest.mock import patch, Mock
 from django.test import TestCase
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile, HostRange
 from api.hostcredential_serializer import HostCredentialSerializer
 from api.networkprofile_serializer import NetworkProfileSerializer
 from api.scanjob_model import ScanJob
-from scanner.utils import (_construct_vars, construct_inventory, connect)
+from scanner.utils import (_construct_vars, _process_connect_callback,
+                           construct_inventory, connect)
 from scanner.discovery import DiscoveryScanner
+from scanner.callback import ResultCallback
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -67,6 +70,32 @@ class DiscoveryScannerTest(TestCase):
         expected = {'ansible_port': 22, 'ansible_ssh_pass': 'password',
                     'ansible_user': 'username'}
         self.assertEqual(vars_dict, expected)
+
+    def test_populate_callback(self):
+        """Test the population of the callback object"""
+        callback = ResultCallback()
+        host = Mock(name='1.2.3.4')
+        result = Mock(_host=host, _results={'rc': 0})
+        callback.v2_runner_on_ok(result)
+        self.assertTrue(len(callback.results) == 1)
+        callback.v2_runner_on_failed(result)
+        self.assertTrue(len(callback.results) == 2)
+        callback.v2_runner_on_unreachable(result)
+        self.assertTrue(len(callback.results) == 3)
+
+    def test_process_connect_callback(self):
+        """Test callback processing logic"""
+        hc_serializer = HostCredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        callback = ResultCallback()
+        success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
+        failed_result = {'host': '1.2.3.5', 'result': {'rc': 1}}
+        callback.results.append(success_result)
+        callback.results.append(failed_result)
+        success, failed = _process_connect_callback(callback, cred)
+        del cred['password']
+        self.assertEqual(success, [('1.2.3.4', cred)])
+        self.assertEqual(failed, ['1.2.3.5'])
 
     def test_construct_inventory(self):
         """Test construct ansible inventory dictionary"""

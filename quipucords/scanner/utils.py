@@ -136,6 +136,33 @@ def run_playbook(inventory_file, callback, play, forks=50):
     return task_manager.run(playbook)
 
 
+def _process_connect_callback(callback, credential):
+    """Processes the callback information from a scan to create the success
+    and failed lists.
+
+    :param callback: The callback handler
+    :param credential: The credential used for connections
+    :returns: list of connected hosts credential tuples and
+              list of host that failed connection
+    """
+    success = []
+    failed = []
+    if isinstance(callback, ResultCallback):
+        for connection_result in callback.results:
+            if 'host' in connection_result:
+                host = connection_result['host']
+                if 'result' in connection_result:
+                    task_result = connection_result['result']
+                    if 'rc' in task_result and task_result['rc'] is 0:
+                        success.append((host, credential))
+                    else:
+                        failed.append(host)
+                else:
+                    failed.append(host)
+
+    return success, failed
+
+
 def connect(hosts, credential, connection_port):
     """Attempt to connect to hosts using the given credential.
 
@@ -151,7 +178,7 @@ def connect(hosts, credential, connection_port):
     inventory_file = write_inventory(inventory)
 
     # Instantiate our ResultCallback for handling results as they come in
-    results_callback = ResultCallback()
+    callback = ResultCallback()
 
     playbook = {'name': 'discovery play',
                 'hosts': 'all',
@@ -159,20 +186,10 @@ def connect(hosts, credential, connection_port):
                 'tasks': [{'action': {'module': 'raw',
                                       'args': parse_kv('echo "Hello"')}}]}
 
-    result = run_playbook(inventory_file, results_callback, playbook)
+    result = run_playbook(inventory_file, callback, playbook)
     if result != TaskQueueManager.RUN_OK:
         return success, hosts
 
-    for connection_result in results_callback.results:
-        if 'host' in connection_result:
-            host = connection_result['host']
-            if 'result' in connection_result:
-                task_result = connection_result['result']
-                if 'rc' in task_result and task_result['rc'] is 0:
-                    success.append((host, credential))
-                else:
-                    failed.append(host)
-            else:
-                failed.append(host)
+    success, failed = _process_connect_callback(callback, credential)
 
     return success, failed
