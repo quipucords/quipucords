@@ -10,7 +10,7 @@
 #
 """Describes the views associated with the API models"""
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from django.shortcuts import get_object_or_404
@@ -21,6 +21,7 @@ from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
 from api.scanresults_serializer import (ScanJobResultsSerializer,
                                         ResultsSerializer,
                                         ResultKeyValueSerializer)
+from scanner.discovery import DiscoveryScanner
 
 
 PROFILE_KEY = 'profile'
@@ -46,8 +47,8 @@ def expand_key_values(result_columns):
     """Take collection of result key value ids and pull objects from db.
     create slim dictionary version of key/value to return to user.
     """
+    fields_list = []
     if result_columns is not None and result_columns[COLUMN_KEY]:
-        fields_list = []
         for field_id in result_columns[COLUMN_KEY]:
             field_data = ResultKeyValue.objects.get(pk=field_id)
             serializer = ResultKeyValueSerializer(field_data)
@@ -83,6 +84,24 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer
+
+    # pylint: disable=unused-argument
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        scanjob = serializer.data
+        scan_type = scanjob['scan_type']
+        if scan_type == ScanJob.DISCOVERY:
+            scanjob_id = scanjob['id']
+            scanjob_profile_id = scanjob['profile']
+            scanjob_obj = ScanJob.objects.get(pk=scanjob_id)
+            profile = NetworkProfile.objects.get(pk=scanjob_profile_id)
+            scan = DiscoveryScanner(scanjob_obj, profile)
+            scan.start()
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
     def list(self, request):  # pylint: disable=unused-argument
         queryset = self.filter_queryset(self.get_queryset())
