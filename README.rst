@@ -79,6 +79,13 @@ Installing Dependencies
 From within the local clone root directory run the following command to install
 dependencies needed for development and testing purposes::
 
+First, you need to collect some packages available through either `yum` (RHEL)
+or `dnf` (fedora)::
+
+    sudo yum install python-tools
+
+The rest of the packages can be installed locally in your virtual environment::
+
     pip install -r requirements.txt
 
 ^^^^^^^
