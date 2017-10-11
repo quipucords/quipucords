@@ -19,7 +19,7 @@ from api.scanjob_model import ScanJob
 class ResultKeyValue(models.Model):
     """A key value pair of captured data"""
     key = models.CharField(max_length=64)
-    value = models.CharField(max_length=1024)
+    value = models.CharField(max_length=1024, null=True)
 
     class Meta:
         verbose_name_plural = 'Result Key Values'

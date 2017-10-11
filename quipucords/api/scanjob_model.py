@@ -20,13 +20,26 @@ class ScanJob(models.Model):
     """The host credential for connecting to host systems via ssh"""
     DISCOVERY = 'discovery'
     HOST = 'host'
-    SCAN_TYPE_CHOICES = ((DISCOVERY, 'discovery'), (HOST, 'host'))
+    SCAN_TYPE_CHOICES = ((HOST, HOST), (DISCOVERY, DISCOVERY))
+
+    PENDING = 'pending'
+    RUNNING = 'running'
+    PAUSED = 'paused'
+    CANCELED = 'canceled'
+    COMPLETED = 'completed'
+    STATUS_CHOICES = ((PENDING, PENDING), (RUNNING, RUNNING), (PAUSED, PAUSED),
+                      (COMPLETED, COMPLETED), (CANCELED, CANCELED))
 
     profile = models.ForeignKey(NetworkProfile, on_delete=models.CASCADE)
     scan_type = models.CharField(
         max_length=9,
         choices=SCAN_TYPE_CHOICES,
         default=HOST,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=PENDING,
     )
 
     class Meta:
