@@ -117,9 +117,9 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 1, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'host'},
+                     'scan_type': 'host', 'status': 'pending'},
                     {'id': 2, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'discovery'}]
+                     'scan_type': 'discovery', 'status': 'pending'}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)

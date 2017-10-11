@@ -13,7 +13,8 @@
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField,
-                                        ValidationError)
+                                        ValidationError,
+                                        ReadOnlyField)
 from api.networkprofile_model import NetworkProfile
 from api.scanjob_model import ScanJob
 
@@ -33,6 +34,7 @@ class ScanJobSerializer(ModelSerializer):
     """Serializer for the ScanJob model"""
 
     profile = NetworkProfileField(queryset=NetworkProfile.objects.all())
+    status = ReadOnlyField()
 
     class Meta:
         model = ScanJob
