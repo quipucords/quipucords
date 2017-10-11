@@ -18,7 +18,7 @@ from api.scanjob_model import ScanJob
 
 class ResultKeyValue(models.Model):
     """A key value pair of captured data"""
-    key = models.CharField(max_length=64, unique=True)
+    key = models.CharField(max_length=64)
     value = models.CharField(max_length=1024)
 
     class Meta:
@@ -27,7 +27,7 @@ class ResultKeyValue(models.Model):
 
 class Results(models.Model):
     """The captured results from a scan"""
-    row = models.CharField(max_length=64, unique=True)
+    row = models.CharField(max_length=64)
     columns = models.ManyToManyField(ResultKeyValue)
 
     class Meta:
