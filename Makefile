@@ -35,6 +35,10 @@ install: build
 test:
 	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/
 
+test-case:
+	echo $(pattern)
+	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/ -p $(pattern)
+
 test-coverage:
 	coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/;coverage report -m --omit $(OMIT_PATTERNS)
 

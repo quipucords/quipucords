@@ -20,6 +20,7 @@ from api.hostcredential_model import HostCredential
 class HostCredentialTest(TestCase):
     """ Tests against the HostCredential model and view set"""
     # pylint: disable= no-self-use
+
     def create_hostcredential(self, name="test_cred",
                               username="testuser", password="testpass"):
         """Creates a HostCredential model for use within test cases
@@ -46,7 +47,8 @@ class HostCredentialTest(TestCase):
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(HostCredential.objects.count(), 1)
         self.assertEqual(HostCredential.objects.get().name, 'cred1')
@@ -59,7 +61,8 @@ class HostCredentialTest(TestCase):
         url = reverse("hostcred-list")
         data = {'username': 'user1',
                 'password': 'pass1'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
@@ -72,7 +75,8 @@ class HostCredentialTest(TestCase):
         url = reverse("hostcred-list")
         data = {'name': 'cred1',
                 'password': 'pass1'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
@@ -87,7 +91,8 @@ class HostCredentialTest(TestCase):
         url = reverse("hostcred-list")
         data = {'name': 'cred1',
                 'username': 'user1'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
@@ -102,7 +107,8 @@ class HostCredentialTest(TestCase):
         data = {'name': 'cred1',
                 'username': 'user1',
                 'ssh_keyfile': 'blah'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
