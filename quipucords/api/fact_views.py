@@ -11,17 +11,16 @@
 
 """Viewset for system facts models"""
 
-
+from rest_framework import viewsets, mixins
 from api.fact_model import FactCollection
 from api.fact_serializer import FactCollectionSerializer
-from rest_framework.viewsets import ModelViewSet
 
 
 # pylint: disable=too-many-ancestors
-class FactViewSet(ModelViewSet):
+class FactViewSet(mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
     """
     List all facts, or create a new snippet.
     """
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
-    http_method_names = ['post']
