@@ -16,6 +16,31 @@ tags:
   description: "API related to the Host Credential model"
 
 paths:
+  /facts/:
+    post:
+      tags:
+        - "Fact"
+      summary: "Publish facts from an environment scan"
+      description: "Publish facts from environment scans"
+      operationId: "publishFacts"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Facts that need to be stored"
+        required: true
+        schema:
+          $ref: "#/definitions/FactCollectionIn"
+      responses:
+        201:
+          description: "Fact collection created"
+          schema:
+            $ref: "#/definitions/FactCollectionOut"
+        400:
+          description: "Invalid input"
   /credentials/hosts/:
     post:
       tags:
@@ -321,6 +346,52 @@ paths:
           description: "Scan job not found"
 
 definitions:
+  OSFact:
+    type: "object"
+    required:
+      - etc_release_name
+      - etc_release_release
+      - etc_release_version
+      - connection_uuid
+    properties:
+        etc_release_name:
+          type: "string"
+          description: "The name of the operation system"
+        etc_release_release:
+          type: "string"
+          description: "The release of the operating system"
+        etc_release_version:
+          type: "string"
+          description: "The version of the operating system"
+        connection_uuid:
+          type: "string"
+          description: "The UUID of the connection"
+  FactCollectionIn:
+    type: "object"
+    required:
+      - facts
+    properties:
+        facts:
+          type: "array"
+          items:
+            $ref: "#/definitions/OSFact"
+          description: "The facts obtained during a scan"
+  FactCollectionOut:
+    type: "object"
+    required:
+      - id
+      - facts
+    properties:
+        id:
+          type: "integer"
+          format: "int64"
+          description: "The fact collection identifier"
+        facts:
+          type: "array"
+          items:
+            $ref: "#/definitions/OSFact"
+          description: "The facts obtained during a scan"
+
   HostCredential:
     type: "object"
     required:
