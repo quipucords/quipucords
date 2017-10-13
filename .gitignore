@@ -102,3 +102,6 @@ ENV/
 
 # sqlite
 db.sqlite3
+
+# Migration
+migrations/

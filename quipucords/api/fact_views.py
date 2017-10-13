@@ -8,17 +8,19 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Admin module for Django server application"""
 
-from django.contrib import admin
+"""Viewset for system facts models"""
+
+from rest_framework import viewsets, mixins
 from api.fact_model import FactCollection
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
-from api.scanjob_model import ScanJob
-from api.scanresults_model import ScanJobResults
+from api.fact_serializer import FactCollectionSerializer
 
-admin.site.register(FactCollection)
-admin.site.register(HostCredential)
-admin.site.register(NetworkProfile)
-admin.site.register(ScanJob)
-admin.site.register(ScanJobResults)
+
+# pylint: disable=too-many-ancestors
+class FactViewSet(mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
+    """
+    List all facts, or create a new snippet.
+    """
+    queryset = FactCollection.objects.all()
+    serializer_class = FactCollectionSerializer
