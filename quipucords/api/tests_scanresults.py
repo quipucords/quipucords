@@ -51,20 +51,23 @@ class ScanJobResultsTest(TestCase):
     def test_get_results_empty(self):
         """Get empty results on a specific ScanJob by primary key."""
 
-        results = ScanJobResults(scan_job=self.scanjob)
+        results = ScanJobResults(scan_job=self.scanjob,
+                                 fact_collection_id=1)
         results.save()
 
         url = reverse('scanjob-detail', args=(self.scanjob.id,))
         url = url + 'results/'
         response = self.client.get(url)
-        expected = {'id': 1, 'scan_job': 1, 'results': []}
+        expected = {'fact_collection_id': 1, 'id': 1, 'scan_job': 1,
+                    'results': []}
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), expected)
 
     def test_get_results(self):
         """Get results on a specific ScanJob by primary key."""
 
-        results = ScanJobResults(scan_job=self.scanjob)
+        results = ScanJobResults(scan_job=self.scanjob,
+                                 fact_collection_id=1)
         results.save()
 
         row1 = Results(row='row1')
@@ -80,7 +83,7 @@ class ScanJobResultsTest(TestCase):
         url = reverse('scanjob-detail', args=(self.scanjob.id,))
         url = url + 'results/'
         response = self.client.get(url)
-        expected = {'id': 1,
+        expected = {'fact_collection_id': 1, 'id': 1,
                     'results': [{'columns': [{'key': 'key1',
                                               'value': 'value1'}],
                                  'row': 'row1'}],

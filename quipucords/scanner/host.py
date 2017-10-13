@@ -12,6 +12,7 @@
 import os
 import logging
 import uuid
+import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.networkprofile_serializer import NetworkProfileSerializer
@@ -35,45 +36,12 @@ class HostScanner(DiscoveryScanner):
     reachable. Collects the associated facts for the scanned systems
     """
 
-    def __init__(self, scanjob, network_profile):
+    def __init__(self, scanjob, network_profile, fact_endpoint):
         DiscoveryScanner.__init__(self, scanjob, network_profile)
         self.scanjob = scanjob
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data
-
-    def _store_host_scan_success(self, facts):
-        scan_results = ScanJobResults(scan_job=self.scanjob)
-        scan_results.save()
-        for fact in facts:
-            row = Results()
-            row.save()
-            for key, value in fact.items():
-                stored_fact = ResultKeyValue(key=key, value=value)
-                stored_fact.save()
-                row.columns.add(stored_fact)
-            row.save()
-        scan_results.results.add(row)
-        scan_results.save()
-        self.scanjob.status = ScanJob.COMPLETED
-        self.scanjob.save()
-        return scan_results
-
-    def run(self):
-        """Method via thread for triggering execution"""
-        facts = []
-        self.scanjob.status = ScanJob.RUNNING
-        self.scanjob.save()
-
-        try:
-            # Execute scan
-            facts = self.host_scan()
-            self.scanjob.status = ScanJob.COMPLETED
-            self.scanjob.save()
-        except AnsibleError as ansible_error:
-            logger.error(ansible_error)
-            self._store_error(ansible_error)
-
-        return facts
+        self.fact_endpoint = fact_endpoint
 
     # pylint: disable=too-many-locals
     def host_scan(self):
@@ -103,9 +71,63 @@ class HostScanner(DiscoveryScanner):
         for host, sys_fact in dict_facts.items():
             sys_fact['connection_port'] = connection_port
             sys_fact['connection_host'] = host
-            sys_fact['connection_uuid'] = uuid.uuid4()
+            sys_fact['connection_uuid'] = str(uuid.uuid4())
             facts.append(sys_fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
         logger.info('Host scan completed for %s.', self.scanjob)
+        return facts
+
+    def send_facts(self, facts):
+        """Send collected host scan facts to fact endpoint and get
+        associated id.
+
+        :param facts: The array of fact dictionaries
+        :returns: Identifer for the sent facts
+        """
+        payload = {'facts': facts}
+        response = requests.post(self.fact_endpoint, json=payload)
+        data = response.json()
+        msg = 'Failed to obtain fact_collection_id when reporting facts.'
+        assert 'id' in data, msg
+        return data['id']
+
+    def _store_host_scan_success(self, facts, fact_collection_id):
+        scan_results = ScanJobResults(scan_job=self.scanjob,
+                                      fact_collection_id=fact_collection_id)
+        scan_results.save()
+        for fact in facts:
+            row = Results()
+            row.save()
+            for key, value in fact.items():
+                stored_fact = ResultKeyValue(key=key, value=value)
+                stored_fact.save()
+                row.columns.add(stored_fact)
+            row.save()
+            scan_results.results.add(row)
+        scan_results.save()
+        self.scanjob.status = ScanJob.COMPLETED
+        self.scanjob.save()
+        return scan_results
+
+    def run(self):
+        """Method via thread for triggering execution"""
+        facts = []
+        self.scanjob.status = ScanJob.RUNNING
+        self.scanjob.save()
+
+        try:
+            # Execute scan
+            facts = self.host_scan()
+
+            # Send facts to fact endpoint
+            fact_collection_id = self.send_facts(facts)
+            self._store_host_scan_success(facts, fact_collection_id)
+        except AnsibleError as ansible_error:
+            logger.error(ansible_error)
+            self._store_error(ansible_error)
+        except AssertionError as assertion_error:
+            logger.error(assertion_error)
+            self._store_error(assertion_error)
+
         return facts
