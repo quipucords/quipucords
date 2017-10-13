@@ -10,10 +10,13 @@
 #
 """Describes the urls and patterns for the API application"""
 
+from django.conf.urls import url
 from rest_framework.routers import SimpleRouter
+from rest_framework.urlpatterns import format_suffix_patterns
 from api import hostcredential_views
 from api import fact_views
 from api import networkprofile_views
+from api import report_views
 from api import scanjob_views
 
 
@@ -32,6 +35,11 @@ ROUTER.register(r'scans',
                 scanjob_views.ScanJobViewSet,
                 base_name='scanjob')
 
+urlpatterns = [
+    url(r'^reports/$', report_views.ReportListView.as_view())
+]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
 
 # pylint: disable=invalid-name
-urlpatterns = ROUTER.urls
+urlpatterns += ROUTER.urls
