@@ -136,6 +136,27 @@ paths:
           description: "Host credential deleted"
         404:
           description: "Host credential not found"
+  /reports/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve list of reports for systems scanned"
+      description: "List reports for systems that have been scanned."
+      operationId: "listReports"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "fact_collection_id"
+          in: "query"
+          description: "The Fact Collection ID to be queried"
+          type: "string"
+      responses:
+        200:
+          description: "List of reports for scanned systems"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SystemReportOut"
   /profiles/networks/:
     post:
       tags:
@@ -366,6 +387,29 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+  SystemOSReport:
+    type: "object"
+    required:
+      - os_release
+      - count
+    properties:
+        os_release:
+          type: "string"
+          description: "The operating system release"
+        count:
+          type: "integer"
+          format: "int64"
+          description: "The number of times this operating system appears in the scanned environment"
+  SystemReportOut:
+    properties:
+        fact_collection_id:
+          type: "string"
+          description: "The fact collection id associate with report"
+        report:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemOSReport"
+          description: "The report for the systems that were scanned"
   NetworkProfile:
     type: "object"
     required:
