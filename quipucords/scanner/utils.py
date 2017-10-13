@@ -13,6 +13,7 @@
 from collections import namedtuple
 from django.conf import settings
 from ansible import constants as C
+from ansible.errors import AnsibleError
 from ansible.parsing.dataloader import DataLoader
 from ansible.parsing.splitter import parse_kv
 from ansible.vars import VariableManager
@@ -23,35 +24,57 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 from scanner.callback import ResultCallback
 
 
-def _construct_vars(credential, connection_port):
-    """Get the Ansible host vars that implement an auth.
+ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \
+    'Ansible playbook. See logs for further details.'
+ANSIBLE_FAILED_HOST_ERR_MSG = 'An error occurred while executing the ' \
+    'Ansible playbook. A task failed to execute properly on a remote host.' \
+    ' See logs for further details.'
+ANSIBLE_UNREACHABLE_HOST_ERR_MSG = 'An error occurred while executing the ' \
+    'Ansible playbook. Connection could not be made to the remote hosts.' \
+    ' See logs for further details.'
+ANSIBLE_PLAYBOOK_ERR_MSG = 'An error occurred while executing the ' \
+    'Ansible playbook. An issue exists in the playbook being executed.' \
+    ' See logs for further details.'
 
-    :param credential: The credential used for connections
-    :param connection_port: The connection port
-    :returns: a dict that can be used as the host variables in an
-        Ansible inventory.
-    """
 
+def _credential_vars(credential):
+    ansible_dict = {}
     username = credential['username']
     password = credential['password']
     ssh_keyfile = credential['ssh_keyfile']
     sudo_password = credential['sudo_password']
 
+    ansible_dict['ansible_user'] = username
+    if password:
+        ansible_dict['ansible_ssh_pass'] = \
+            decrypt_data_as_unicode(password)
+    if ssh_keyfile:
+        ansible_dict['ansible_ssh_private_key_file'] = ssh_keyfile
+    if sudo_password:
+        ansible_dict['ansible_become_pass'] = \
+            decrypt_data_as_unicode(sudo_password)
+    return ansible_dict
+
+
+def _construct_vars(connection_port, credential=None):
+    """Get the Ansible host vars that implement an auth.
+
+    :param connection_port: The connection port
+    :param credential: The credential used for connections
+    :returns: a dict that can be used as the host variables in an
+        Ansible inventory.
+    """
+
     ansible_vars = {'ansible_port': connection_port}
 
-    ansible_vars['ansible_user'] = username
-    if password:
-        ansible_vars['ansible_ssh_pass'] = decrypt_data_as_unicode(password)
-    if ssh_keyfile:
-        ansible_vars['ansible_ssh_private_key_file'] = ssh_keyfile
-    if sudo_password:
-        ansible_vars['ansible_become_pass'] = \
-            decrypt_data_as_unicode(sudo_password)
+    if credential is not None:
+        ansible_dict = _credential_vars(credential)
+        ansible_vars.update(ansible_dict)
 
     return ansible_vars
 
 
-def construct_inventory(hosts, credential, connection_port):
+def construct_connect_inventory(hosts, credential, connection_port):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
@@ -65,7 +88,27 @@ def construct_inventory(hosts, credential, connection_port):
     for host in hosts:
         hosts_dict[host] = None
 
-    vars_dict = _construct_vars(credential, connection_port)
+    vars_dict = _construct_vars(connection_port, credential)
+
+    inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
+    return inventory
+
+
+def construct_scan_inventory(hosts, connection_port):
+    """Create a dictionary inventory for Ansible to execute with.
+
+    :param hosts: The collection of hosts/credential tuples
+    :param connection_port: The connection port
+    :returns: A dictionary of the ansible invetory
+    """
+    inventory = None
+    hosts_dict = {}
+    for host in hosts:
+        host_vars = _credential_vars(host[1])
+        host_vars['ansible_host'] = host[0]
+        hosts_dict[host[0]] = host_vars
+
+    vars_dict = _construct_vars(connection_port)
 
     inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
     return inventory
@@ -163,6 +206,17 @@ def _process_connect_callback(callback, credential):
     return success, failed
 
 
+def _construct_error(return_code):
+    message = ANSIBLE_DEFAULT_ERR_MSG
+    if return_code == TaskQueueManager.RUN_FAILED_HOSTS:
+        message = ANSIBLE_FAILED_HOST_ERR_MSG
+    elif return_code == TaskQueueManager.RUN_UNREACHABLE_HOSTS:
+        message = ANSIBLE_UNREACHABLE_HOST_ERR_MSG
+    elif return_code == TaskQueueManager.RUN_FAILED_BREAK_PLAY:
+        message = ANSIBLE_PLAYBOOK_ERR_MSG
+    return AnsibleError(message=message)
+
+
 def connect(hosts, credential, connection_port):
     """Attempt to connect to hosts using the given credential.
 
@@ -174,10 +228,8 @@ def connect(hosts, credential, connection_port):
     """
     success = []
     failed = []
-    inventory = construct_inventory(hosts, credential, connection_port)
+    inventory = construct_connect_inventory(hosts, credential, connection_port)
     inventory_file = write_inventory(inventory)
-
-    # Instantiate our ResultCallback for handling results as they come in
     callback = ResultCallback()
 
     playbook = {'name': 'discovery play',
@@ -188,7 +240,7 @@ def connect(hosts, credential, connection_port):
 
     result = run_playbook(inventory_file, callback, playbook)
     if result != TaskQueueManager.RUN_OK:
-        return success, hosts
+        raise _construct_error(result)
 
     success, failed = _process_connect_callback(callback, credential)
 

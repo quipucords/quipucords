@@ -12,13 +12,19 @@
 
 from unittest.mock import patch, Mock
 from django.test import TestCase
+from ansible.errors import AnsibleError
+from ansible.executor.task_queue_manager import TaskQueueManager
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile, HostRange
 from api.hostcredential_serializer import HostCredentialSerializer
 from api.networkprofile_serializer import NetworkProfileSerializer
 from api.scanjob_model import ScanJob
 from scanner.utils import (_construct_vars, _process_connect_callback,
-                           construct_inventory, connect)
+                           _construct_error,
+                           construct_connect_inventory, connect,
+                           ANSIBLE_FAILED_HOST_ERR_MSG,
+                           ANSIBLE_UNREACHABLE_HOST_ERR_MSG,
+                           ANSIBLE_PLAYBOOK_ERR_MSG)
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 
@@ -41,8 +47,8 @@ class DiscoveryScannerTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password=None,
-            ssh_keyfile=None)
+            sudo_password='sudo',
+            ssh_keyfile='keyfile')
         self.cred.save()
 
         self.network_profile = NetworkProfile(
@@ -65,8 +71,10 @@ class DiscoveryScannerTest(TestCase):
         """Test constructing ansible vars dictionary"""
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
-        vars_dict = _construct_vars(cred, 22)
-        expected = {'ansible_port': 22, 'ansible_ssh_pass': 'password',
+        vars_dict = _construct_vars(22, cred)
+        expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
+                    'ansible_ssh_pass': 'password',
+                    'ansible_ssh_private_key_file': 'keyfile',
                     'ansible_user': 'username'}
         self.assertEqual(vars_dict, expected)
 
@@ -89,14 +97,16 @@ class DiscoveryScannerTest(TestCase):
         callback = ResultCallback()
         success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
         failed_result = {'host': '1.2.3.5', 'result': {'rc': 1}}
+        failed_result_format = {'host': '1.2.3.6'}
         callback.results.append(success_result)
         callback.results.append(failed_result)
+        callback.results.append(failed_result_format)
         success, failed = _process_connect_callback(callback, cred)
         del cred['password']
         self.assertEqual(success, [('1.2.3.4', cred)])
-        self.assertEqual(failed, ['1.2.3.5'])
+        self.assertEqual(failed, ['1.2.3.5', '1.2.3.6'])
 
-    def test_construct_inventory(self):
+    def test_connect_inventory(self):
         """Test construct ansible inventory dictionary"""
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
@@ -104,12 +114,24 @@ class DiscoveryScannerTest(TestCase):
         connection_port = profile['ssh_port']
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
-        inventory_dict = construct_inventory(hosts, cred, connection_port)
+        inventory_dict = construct_connect_inventory(hosts, cred,
+                                                     connection_port)
         expected = {'all': {'hosts': {'1.2.3.4': None},
-                            'vars': {'ansible_port': 22,
+                            'vars': {'ansible_become_pass': 'sudo',
+                                     'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
+                                     'ansible_ssh_private_key_file': 'keyfile',
                                      'ansible_user': 'username'}}}
         self.assertEqual(inventory_dict, expected)
+
+    def test_construct_error(self):
+        """Test the creation of different errors"""
+        error = _construct_error(TaskQueueManager.RUN_FAILED_HOSTS)
+        self.assertEqual(error.message, ANSIBLE_FAILED_HOST_ERR_MSG)
+        error = _construct_error(TaskQueueManager.RUN_UNREACHABLE_HOSTS)
+        self.assertEqual(error.message, ANSIBLE_UNREACHABLE_HOST_ERR_MSG)
+        error = _construct_error(TaskQueueManager.RUN_FAILED_BREAK_PLAY)
+        self.assertEqual(error.message, ANSIBLE_PLAYBOOK_ERR_MSG)
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     def test_connect_failure(self, mock_run):
@@ -121,10 +143,9 @@ class DiscoveryScannerTest(TestCase):
         connection_port = profile['ssh_port']
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
-        connected, failed = connect(hosts, cred, connection_port)
-        self.assertEqual(connected, [])
-        self.assertEqual(failed, ['1.2.3.4'])
-        mock_run.assert_called()
+        with self.assertRaises(AnsibleError):
+            connect(hosts, cred, connection_port)
+            mock_run.assert_called()
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
     def test_connect(self, mock_run):
@@ -149,3 +170,18 @@ class DiscoveryScannerTest(TestCase):
         conn_dict = scanner.run()
         mock_connect.assert_called()
         self.assertEqual(conn_dict, {'1.2.3.4': {'name': 'cred1'}})
+
+    def test_store_discovery_success(self):
+        """Test running a discovery scan with mocked connection"""
+        scanner = DiscoveryScanner(self.scanjob, self.network_profile)
+        hc_serializer = HostCredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        connected = [('1.2.3.4', cred)]
+        failed = ['1.2.3.5']
+        expected = {'1.2.3.4': {'name': 'cred1'},
+                    '1.2.3.5': None}
+        # pylint: disable=protected-access
+        result = scanner._store_discovery_success(connected, failed)
+        self.assertEqual(len(result), len(expected))
+        self.assertIn('1.2.3.5', result)
+        self.assertIsNone(result['1.2.3.5'])
