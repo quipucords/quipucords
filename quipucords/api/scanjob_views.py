@@ -13,6 +13,7 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from api.scanjob_model import ScanJob
 from api.scanjob_serializer import ScanJobSerializer
@@ -102,7 +103,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             scan = DiscoveryScanner(scanjob_obj, profile)
             scan.start()
         else:
-            scan = HostScanner(scanjob_obj, profile)
+            fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
+            scan = HostScanner(scanjob_obj, profile, fact_endpoint)
             scan.start()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED,
