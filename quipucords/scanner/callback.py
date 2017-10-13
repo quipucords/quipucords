@@ -10,7 +10,18 @@
 #
 """Scanner used for host connection discovery"""
 
+import logging
 from ansible.plugins.callback import CallbackBase
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def _construct_result(result):
+    """Construct result object"""
+    # pylint: disable=protected-access
+    host = result._host
+    return {'host': host.name, 'result': result._result}
 
 
 class ResultCallback(CallbackBase):
@@ -24,22 +35,32 @@ class ResultCallback(CallbackBase):
     def __init__(self, display=None):
         super().__init__(display=display)
         self.results = []
+        self.ansible_facts = {}
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result
         """
+        result_obj = _construct_result(result)
+        self.results.append(result_obj)
+        logger.debug("%s", result_obj)
         # pylint: disable=protected-access
         host = result._host
-        self.results.append({'host': host.name, 'result': result._result})
+        if (result._result is not None and isinstance(result._result, dict) and
+                'ansible_facts' in result._result):
+            facts = result._result['ansible_facts']
+            if host in self.ansible_facts:
+                self.ansible_facts[host].update(facts)
+            else:
+                self.ansible_facts[host] = result._result['ansible_facts']
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result
         """
-        # pylint: disable=protected-access
-        host = result._host
-        self.results.append({'host': host.name, 'result': result._result})
+        result_obj = _construct_result(result)
+        self.results.append(result_obj)
+        logger.warning("%s", result_obj)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
-        # pylint: disable=protected-access
-        host = result._host
-        self.results.append({'host': host.name, 'result': result._result})
+        result_obj = _construct_result(result)
+        self.results.append(result_obj)
+        logger.error("%s", result_obj)

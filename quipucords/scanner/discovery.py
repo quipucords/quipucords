@@ -11,9 +11,11 @@
 """Scanner used for host connection discovery"""
 import logging
 from threading import Thread
+from ansible.errors import AnsibleError
 from api.networkprofile_serializer import NetworkProfileSerializer
 from api.hostcredential_model import HostCredential
 from api.hostcredential_serializer import HostCredentialSerializer
+from api.scanjob_model import ScanJob
 from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
 from scanner.utils import connect
 
@@ -34,27 +36,8 @@ class DiscoveryScanner(Thread):
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data
 
-    # pylint: disable=too-many-locals
-    def run(self):
-        """Executes the discovery scan with the initialized network profile
-        """
+    def _store_discovery_success(self, connected, failed_hosts):
         result = {}
-        connected = []
-        remaining_hosts = self.network_profile['hosts']
-        credentials = self.network_profile['credentials']
-        connection_port = self.network_profile['ssh_port']
-
-        logger.info('Discovery scan started for %s.', self.scanjob)
-
-        for cred_id in credentials:
-            cred_obj = HostCredential.objects.get(pk=cred_id)
-            hc_serializer = HostCredentialSerializer(cred_obj)
-            cred = hc_serializer.data
-            connected, remaining_hosts = connect(remaining_hosts, cred,
-                                                 connection_port)
-            if remaining_hosts == []:
-                break
-
         success_row = Results(row='success')
         success_row.save()
         for success in connected:
@@ -66,7 +49,7 @@ class DiscoveryScanner(Thread):
 
         failed_row = Results(row='failed')
         failed_row.save()
-        for failed in remaining_hosts:
+        for failed in failed_hosts:
             result[failed] = None
             rkv1 = ResultKeyValue(key=failed, value=None)
             rkv1.save()
@@ -79,6 +62,62 @@ class DiscoveryScanner(Thread):
         scan_results.results.add(failed_row)
         scan_results.save()
 
-        logger.info('Discovery scan completed for %s.', self.scanjob)
+        self.scanjob.status = ScanJob.COMPLETED
+        self.scanjob.save()
+        return result
+
+    def _store_error(self, ansible_error):
+        self.scanjob.status = ScanJob.FAILED
+        scan_results = ScanJobResults(scan_job=self.scanjob)
+        scan_results.save()
+        error_row = Results(row='error')
+        error_row.save()
+        rkv1 = ResultKeyValue(key='message', value=ansible_error.message)
+        rkv1.save()
+        error_row.columns.add(rkv1)
+        scan_results.results.add(error_row)
+        scan_results.save()
+
+    def run(self):
+        """Method via thread for triggering execution"""
+        result = {}
+        self.scanjob.status = ScanJob.RUNNING
+        self.scanjob.save()
+        try:
+            connected, failed_hosts = self.discovery()
+            result = self._store_discovery_success(connected, failed_hosts)
+        except AnsibleError as ansible_error:
+            logger.error(ansible_error)
+            self._store_error(ansible_error)
 
         return result
+
+    # pylint: disable=too-many-locals
+    def discovery(self):
+        """Executes the discovery scan with the initialized network profile
+
+        :returns: list of connected hosts credential tuples and
+                  list of host that failed connection
+        """
+        connected = []
+        remaining = self.network_profile['hosts']
+        credentials = self.network_profile['credentials']
+        connection_port = self.network_profile['ssh_port']
+
+        logger.info('Discovery scan started for %s.', self.scanjob)
+
+        for cred_id in credentials:
+            cred_obj = HostCredential.objects.get(pk=cred_id)
+            hc_serializer = HostCredentialSerializer(cred_obj)
+            cred = hc_serializer.data
+            connected, remaining = connect(remaining, cred, connection_port)
+            if remaining == []:
+                break
+
+        logger.info('Discovery scan completed for %s.', self.scanjob)
+        logger.info('Successfully connected to %d systems.', len(connected))
+        if len(remaining) > 0:  # pylint: disable=len-as-condition
+            logger.warning('Failed to connect to %d systems.', len(remaining))
+            logger.debug('Failed systems: %s', remaining)
+
+        return connected, remaining

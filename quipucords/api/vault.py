@@ -14,6 +14,7 @@ import tempfile
 import yaml
 from django.conf import settings
 from ansible.parsing.vault import VaultLib
+from ansible.parsing.yaml.dumper import AnsibleDumper
 
 
 def represent_none(self, _):
@@ -112,7 +113,8 @@ class Vault(object):
         :param stream: If not None the location to write the encrypted data to.
         :returns: If stream is None then the encrypted bytes otherwise None.
         """
-        data = yaml.dump(obj, default_flow_style=False)
+        data = yaml.dump(obj, allow_unicode=True, default_flow_style=False,
+                         Dumper=AnsibleDumper)
         return self.dump(data, stream)
 
     def dump_as_yaml_to_tempfile(self, obj):
@@ -122,7 +124,7 @@ class Vault(object):
         :returns: The filepath to write data
         """
         with tempfile.NamedTemporaryFile(delete=False,
-                                         suffix='yaml') as data_temp:
+                                         suffix='.yaml') as data_temp:
             self.dump_as_yaml(obj, data_temp)
         data_temp.close()
         return data_temp.name

@@ -27,8 +27,10 @@ class ScanJob(models.Model):
     PAUSED = 'paused'
     CANCELED = 'canceled'
     COMPLETED = 'completed'
+    FAILED = 'failed'
     STATUS_CHOICES = ((PENDING, PENDING), (RUNNING, RUNNING), (PAUSED, PAUSED),
-                      (COMPLETED, COMPLETED), (CANCELED, CANCELED))
+                      (COMPLETED, COMPLETED), (CANCELED, CANCELED),
+                      (FAILED, FAILED))
 
     profile = models.ForeignKey(NetworkProfile, on_delete=models.CASCADE)
     scan_type = models.CharField(
@@ -41,6 +43,11 @@ class ScanJob(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING,
     )
+
+    def __str__(self):
+        return '{id:%s, scan_type:%s, profile:{%s}}' % (self.id,
+                                                        self.scan_type,
+                                                        self.profile)
 
     class Meta:
         verbose_name_plural = 'Scan Jobs'

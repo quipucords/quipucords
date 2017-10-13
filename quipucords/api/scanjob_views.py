@@ -22,6 +22,7 @@ from api.scanresults_serializer import (ScanJobResultsSerializer,
                                         ResultsSerializer,
                                         ResultKeyValueSerializer)
 from scanner.discovery import DiscoveryScanner
+from scanner.host import HostScanner
 
 
 PROFILE_KEY = 'profile'
@@ -93,13 +94,17 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         headers = self.get_success_headers(serializer.data)
         scanjob = serializer.data
         scan_type = scanjob['scan_type']
+        scanjob_id = scanjob['id']
+        scanjob_profile_id = scanjob['profile']
+        scanjob_obj = ScanJob.objects.get(pk=scanjob_id)
+        profile = NetworkProfile.objects.get(pk=scanjob_profile_id)
         if scan_type == ScanJob.DISCOVERY:
-            scanjob_id = scanjob['id']
-            scanjob_profile_id = scanjob['profile']
-            scanjob_obj = ScanJob.objects.get(pk=scanjob_id)
-            profile = NetworkProfile.objects.get(pk=scanjob_profile_id)
             scan = DiscoveryScanner(scanjob_obj, profile)
             scan.start()
+        else:
+            scan = HostScanner(scanjob_obj, profile)
+            scan.start()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)
 

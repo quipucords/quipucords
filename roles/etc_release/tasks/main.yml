@@ -1,0 +1,293 @@
+---
+
+- name: initialize etc_release.name
+  set_fact: etc_release_name=""
+
+- name: initialize etc_release.version
+  set_fact: etc_release_version=""
+
+- name: initialize etc_release.release
+  set_fact: etc_release_release=""
+
+- name: check if /etc/lsb-release file exists
+  raw: if [ -f /etc/lsb-release ]; then echo "Y"; else echo "N"; fi
+  register: lbs_release_found
+  ignore_errors: yes
+
+- name: check if /etc/debian_version file exists
+  raw: if [ -f /etc/debian_version ]; then echo "Y"; else echo "N"; fi
+  register: debian_version_found
+  ignore_errors: yes
+
+- name: check if /etc/redhat-release file exists
+  raw: if [ -f /etc/redhat-release ]; then echo "Y"; else echo "N"; fi
+  register: redhat_release_found
+  ignore_errors: yes
+
+- name: check if /etc/release file exists
+  raw: if [ -f /etc/release ]; then echo "Y"; else echo "N"; fi
+  register: etc_release_found
+  ignore_errors: yes
+
+- name: check if /etc/SuSE-release file exists
+  raw: if [ -f /etc/SuSE-release ]; then echo "Y"; else echo "N"; fi
+  register: SuSE_release_found
+  ignore_errors: yes
+
+- name: check if /etc/mandriva-release file exists
+  raw: if [ -f /etc/mandriva-release ]; then echo "Y"; else echo "N"; fi
+  register: mandriva_release_found
+  ignore_errors: yes
+
+- name: check if /etc/enterprise-release file exists
+  raw: if [ -f /etc/enterprise-release ]; then echo "Y"; else echo "N"; fi
+  register: enterprise_release_found
+  ignore_errors: yes
+
+- name: check if /etc/sun-release file exists
+  raw: if [ -f /etc/sun-release ]; then echo "Y"; else echo "N"; fi
+  register: sun_release_found
+  ignore_errors: yes
+
+- name: check if /etc/slackware-release file exists
+  raw: if [ -f /etc/slackware-release ]; then echo "Y"; else echo "N"; fi
+  register: slackware_release_found
+  ignore_errors: yes
+
+- name: check if /etc/ovs-release file exists
+  raw: if [ -f /etc/ovs-release ]; then echo "Y"; else echo "N"; fi
+  register: ovs_release_found
+  ignore_errors: yes
+
+- name: check if /etc/ovs-release file exists
+  raw: if [ -f /etc/ovs-release ]; then echo "Y"; else echo "N"; fi
+  register: arch_release_found
+  ignore_errors: yes
+
+- name: set os for etc_release data based on lbs_release_found
+  raw: . /etc/lsb-release; echo "$DISTRIB_ID";
+  register: lbs_release_found_os
+  ignore_errors: yes
+  when: 'lbs_release_found["stdout_lines"][0] == "Y"'
+
+- name: set ver for etc_release data based on lbs_release_found
+  raw: . /etc/lsb-release; echo "$DISTRIB_RELEASE";
+  register: lbs_release_found_ver
+  ignore_errors: yes
+  when: 'lbs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release data based on lbs_release_found
+  set_fact: etc_release_name=lbs_release_found_os["stdout_lines"][0]
+  when: 'lbs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on lbs_release_found
+  set_fact: etc_release_version=lbs_release_found_ver["stdout_lines"][0]
+  when: 'lbs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on lbs_release_found
+  set_fact: etc_release_release="{{ etc_release_name + " " + etc_release_version }}"
+  when: 'lbs_release_found["stdout_lines"][0] == "Y"'
+
+- name: set os for etc_release.name based on debian_version_found
+  set_fact: etc_release_name="Debian"
+  when: 'debian_version_found["stdout_lines"][0] == "Y"'
+
+- name: set ver for etc_release.version based on debian_version_found
+  raw: cat /etc/debian_version
+  register: debian_version_found_ver
+  ignore_errors: yes
+  when: 'debian_version_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on debian_version_found
+  set_fact: etc_release_version=debian_version_found_ver["stdout_lines"][0]
+  when: 'debian_version_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on debian_version_found
+  set_fact: etc_release_release="{{ etc_release_name + " " + etc_release_version }}"
+  when: 'debian_version_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on redhat_release_found
+  raw: cat /etc/redhat-release
+  register: redhat_release_found_release
+  ignore_errors: yes
+  when: 'redhat_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release data based on redhat_release_found_release
+  set_fact: etc_release_name="{{ redhat_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'redhat_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on redhat_release_found_release
+  set_fact: etc_release_version="{{ redhat_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'redhat_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on redhat_release_found_release
+  set_fact: etc_release_release="{{ redhat_release_found_release['stdout_lines'][0] }}"
+  when: 'redhat_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on etc_release_found
+  raw: cat /etc/release
+  register: etc_release_found_release
+  ignore_errors: yes
+  when: 'etc_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on etc_release_found
+  set_fact: etc_release_name="{{ etc_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'etc_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on etc_release_found
+  set_fact: etc_release_version="{{ etc_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'etc_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on etc_release_found
+  set_fact: etc_release_release="{{ etc_release_found_release['stdout_lines'][0] }}"
+  when: 'etc_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on SuSE_release_found
+  raw: cat /etc/SuSE-release
+  register: SuSE_release_found_release
+  ignore_errors: yes
+  when: 'SuSE_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on SuSE_release_found
+  set_fact: etc_release_name="{{ SuSE_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'SuSE_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on SuSE_release_found
+  set_fact: etc_release_version="{{ SuSE_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'SuSE_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on SuSE_release_found
+  set_fact: etc_release_release="{{ SuSE_release_found_release['stdout_lines'][0] }}"
+  when: 'SuSE_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on mandriva_release_found
+  raw: cat /etc/mandriva-release
+  register: mandriva_release_found_release
+  ignore_errors: yes
+  when: 'mandriva_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on mandriva_release_found
+  set_fact: etc_release_name="{{ mandriva_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'mandriva_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on mandriva_release_found
+  set_fact: etc_release_version="{{ mandriva_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'mandriva_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on mandriva_release_found
+  set_fact: etc_release_release="{{ mandriva_release_found_release['stdout_lines'][0] }}"
+  when: 'mandriva_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on enterprise_release_found
+  raw: cat /etc/enterprise-release
+  register: enterprise_release_found_release
+  ignore_errors: yes
+  when: 'enterprise_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on enterprise_release_found
+  set_fact: etc_release_name="{{ enterprise_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'enterprise_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on enterprise_release_found
+  set_fact: etc_release_version="{{ enterprise_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'enterprise_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on enterprise_release_found
+  set_fact: etc_release_release="{{ enterprise_release_found_release['stdout_lines'][0] }}"
+  when: 'enterprise_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on sun_release_found
+  raw: cat /etc/sun-release
+  register: sun_release_found_release
+  ignore_errors: yes
+  when: 'sun_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on sun_release_found
+  set_fact: etc_release_name="{{ sun_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'sun_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on sun_release_found
+  set_fact: etc_release_version="{{ sun_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'sun_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on sun_release_found
+  set_fact: etc_release_release="{{ sun_release_found_release['stdout_lines'][0] }}"
+  when: 'sun_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on slackware_release_found
+  raw: cat /etc/slackware-release
+  register: slackware_release_found_release
+  ignore_errors: yes
+  when: 'slackware_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on slackware_release_found
+  set_fact: etc_release_name="{{ slackware_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'slackware_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on slackware_release_found
+  set_fact: etc_release_version="{{ slackware_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'slackware_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on slackware_release_found
+  set_fact: etc_release_release="{{ slackware_release_found_release['stdout_lines'][0] }}"
+  when: 'slackware_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on ovs_release_found
+  raw: cat /etc/ovs-release
+  register: ovs_release_found_release
+  ignore_errors: yes
+  when: 'ovs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on ovs_release_found
+  set_fact: etc_release_name="{{ ovs_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'ovs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on ovs_release_found
+  set_fact: etc_release_version="{{ ovs_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'ovs_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on ovs_release_found
+  set_fact: etc_release_release="{{ ovs_release_found_release['stdout_lines'][0] }}"
+  when: 'ovs_release_found["stdout_lines"][0] == "Y"'
+
+- name: set rel for etc_release data based on arch_release_found
+  raw: cat /etc/arch-release
+  register: arch_release_found_release
+  ignore_errors: yes
+  when: 'arch_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.name based on arch_release_found
+  set_fact: etc_release_name="{{ arch_release_found_release['stdout_lines'][0].split('release')[0] }}"
+  when: 'arch_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.version based on arch_release_found
+  set_fact: etc_release_version="{{ arch_release_found_release['stdout_lines'][0].split('release')[1] }}"
+  when: 'arch_release_found["stdout_lines"][0] == "Y"'
+
+- name: gather etc_release.release based on arch_release_found
+  set_fact: etc_release_release="{{ arch_release_found_release['stdout_lines'][0] }}"
+  when: 'arch_release_found["stdout_lines"][0] == "Y"'
+
+- name: set os for etc_release.name using uname -s
+  raw: uname -s
+  register: etc_release_uname_os
+  ignore_errors: yes
+  when: 'etc_release_name == ""'
+
+- name: gather etc_release.name based on etc_release_uname_os
+  set_fact: etc_release_name='{{ etc_release_uname_os["stdout_lines"][0] | default('error') } }}'
+  when: 'etc_release_name == ""'
+
+- name: set ver for etc_release.version using uname -r
+  raw: uname -r
+  register: etc_release_uname_ver
+  ignore_errors: yes
+  when: 'etc_release_version == ""'
+
+- name: gather etc_release.version based on etc_release_uname_ver
+  set_fact: etc_release_version='{{ etc_release_uname_ver["stdout_lines"][0] | default('error') } }}'
+  when: 'etc_release_version == ""'
+
+- name: gather etc_release.release based on etc_release_uname_os and etc_release_uname_ver
+  set_fact: etc_release_release="{{ etc_release_name + " " + etc_release_version }}"
+  when: 'etc_release_release == ""'

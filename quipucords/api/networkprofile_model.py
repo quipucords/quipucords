@@ -24,6 +24,9 @@ class NetworkProfile(models.Model):
     # NetworkProfile also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
 
+    def __str__(self):
+        return 'id:%s, name:%s' % (self.id, self.name)
+
 
 class HostRange(models.Model):
     """A HostRange is a subset of a network to scan.
