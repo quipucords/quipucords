@@ -42,7 +42,8 @@ class ReportListView(APIView):
                     collection_report_list.append(report)
                 else:
                     logger.error(
-                        'fact_collection_id %s no longer exists',
+                        'System Fingerprint with fact_collection_id ' +
+                        '%s no longer exists',
                         fact_collection_id)
             return Response(collection_report_list)
         else:

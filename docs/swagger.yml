@@ -157,6 +157,8 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/SystemReportOut"
+        404:
+          description: "Report for fact collection id not found"
   /profiles/networks/:
     post:
       tags:
