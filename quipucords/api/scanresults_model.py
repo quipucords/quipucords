@@ -38,6 +38,7 @@ class ScanJobResults(models.Model):
     """The results of a scan job"""
     scan_job = models.ForeignKey(ScanJob, on_delete=models.CASCADE)
     results = models.ManyToManyField(Results)
+    fact_collection_id = models.IntegerField(null=True)
 
     class Meta:
         verbose_name_plural = 'Scan Results'

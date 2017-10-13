@@ -44,7 +44,7 @@ class ResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.debug("%s", result_obj)
         # pylint: disable=protected-access
-        host = result._host
+        host = str(result._host)
         if (result._result is not None and isinstance(result._result, dict) and
                 'ansible_facts' in result._result):
             facts = result._result['ansible_facts']

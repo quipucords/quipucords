@@ -12,6 +12,8 @@
 
 from unittest.mock import patch
 from django.test import TestCase
+from django.core.urlresolvers import reverse
+import requests_mock
 from ansible.errors import AnsibleError
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile, HostRange
@@ -65,13 +67,15 @@ class HostScannerTest(TestCase):
         self.scanjob = ScanJob(profile_id=self.network_profile.id,
                                scan_type=ScanJob.DISCOVERY)
         self.scanjob.save()
+        self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
     def test_store_host_scan_success(self):
         """Test success storage"""
-        scanner = HostScanner(self.scanjob, self.network_profile)
+        scanner = HostScanner(self.scanjob, self.network_profile,
+                              self.fact_endpoint)
         facts = [{'key1': 'value1', 'key2': 'value2'}]
         # pylint: disable=protected-access
-        result = scanner._store_host_scan_success(facts)
+        result = scanner._store_host_scan_success(facts, 1)
         self.assertTrue(isinstance(result, ScanJobResults))
         self.assertEqual(len(result.results.all()), 1)
 
@@ -94,7 +98,8 @@ class HostScannerTest(TestCase):
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     def test_host_scan_failure(self, mock_run):
         """Test scan flow with mocked manager and failure"""
-        scanner = HostScanner(self.scanjob, self.network_profile)
+        scanner = HostScanner(self.scanjob, self.network_profile,
+                              self.fact_endpoint)
         with self.assertRaises(AnsibleError):
             scanner.host_scan()
             mock_run.assert_called()
@@ -102,7 +107,8 @@ class HostScannerTest(TestCase):
     @patch('scanner.host.HostScanner.host_scan', side_effect=mock_scan_error)
     def test_host_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure"""
-        scanner = HostScanner(self.scanjob, self.network_profile)
+        scanner = HostScanner(self.scanjob, self.network_profile,
+                              self.fact_endpoint)
         facts = scanner.run()
         mock_scan.assert_called()
         self.assertEqual(facts, [])
@@ -112,7 +118,10 @@ class HostScannerTest(TestCase):
         """Test running a host scan with mocked connection"""
         expected = ([('1.2.3.4', {'name': 'cred1'})], [])
         mock_run.return_value = expected
-        scanner = HostScanner(self.scanjob, self.network_profile)
-        facts = scanner.run()
-        mock_run.assert_called()
-        self.assertEqual(facts, [])
+        with requests_mock.Mocker() as mocker:
+            mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
+            scanner = HostScanner(self.scanjob, self.network_profile,
+                                  self.fact_endpoint)
+            facts = scanner.run()
+            mock_run.assert_called()
+            self.assertEqual(facts, [])
