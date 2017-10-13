@@ -21,7 +21,25 @@ class Fact(models.Model):
     etc_release_version = models.CharField(max_length=64, unique=False)
     connection_uuid = models.UUIDField(unique=False)
 
+    def __str__(self):
+        return 'id:{}, etc_release_name:{}, '\
+            'etc_release_release:{}, '\
+            'etc_release_verison:{}, '\
+            'connection_uuid:{}'\
+            .format(self.id,
+                    self.etc_release_name,
+                    self.etc_release_release,
+                    self.etc_release_version,
+                    self.connection_uuid)
+
 
 class FactCollection(models.Model):
     """A reported set of facts"""
     facts = models.ManyToManyField(Fact)
+
+    def __str__(self):
+        result = '{ id:%s, facts: [' % (self.id)
+        for fact in self.facts.values():
+            result += '%s, ' % (str(fact))
+        result += ']}'
+        return result
