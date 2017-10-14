@@ -14,11 +14,13 @@ from django.contrib import admin
 from api.fact_model import FactCollection
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile
+from api.report_model import SystemFingerprint
 from api.scanjob_model import ScanJob
 from api.scanresults_model import ScanJobResults
 
 admin.site.register(FactCollection)
 admin.site.register(HostCredential)
 admin.site.register(NetworkProfile)
+admin.site.register(SystemFingerprint)
 admin.site.register(ScanJob)
 admin.site.register(ScanJobResults)
