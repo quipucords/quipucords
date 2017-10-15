@@ -367,9 +367,31 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         404:
           description: "Scan job not found"
-
+  /scans/{scan_job_id}/results/:
+    get:
+      tags:
+        - "Scan"
+      summary: "Get the results of existing scan job"
+      description: "Get the results of a scan."
+      operationId: "getScanResults"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to retrieve results for"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job results retrieved"
+          schema:
+            $ref: "#/definitions/ScanJobResultsOut"
+        404:
+          description: "Scan job results not found"
 definitions:
-  OSFact:
+  SystemFact:
     type: "object"
     required:
       - etc_release_name
@@ -397,7 +419,7 @@ definitions:
         facts:
           type: "array"
           items:
-            $ref: "#/definitions/OSFact"
+            $ref: "#/definitions/SystemFact"
           description: "The facts obtained during a scan"
   FactCollectionOut:
     type: "object"
@@ -412,7 +434,7 @@ definitions:
         facts:
           type: "array"
           items:
-            $ref: "#/definitions/OSFact"
+            $ref: "#/definitions/SystemFact"
           description: "The facts obtained during a scan"
 
   HostCredential:
@@ -460,7 +482,7 @@ definitions:
           id:
             type: "integer"
             format: "int64"
-  SystemOSReport:
+  SystemReport:
     type: "object"
     required:
       - os_release
@@ -481,7 +503,7 @@ definitions:
         report:
           type: "array"
           items:
-            $ref: "#/definitions/SystemOSReport"
+            $ref: "#/definitions/SystemReport"
           description: "The report for the systems that were scanned"
   NetworkProfile:
     type: "object"
@@ -577,3 +599,45 @@ definitions:
           profile:
             $ref: "#/definitions/NetworkProfileMin"
             description: "The identifier of a network profile"
+  ScanResultColumn:
+    type: "object"
+    required:
+      - key
+      - value
+    properties:
+        key:
+          type: "string"
+          description: "The name result data."
+        value:
+          type: "string"
+          description: "The value of the result data."
+  ScanResultRow:
+    type: "object"
+    required:
+      - columns
+    properties:
+      row:
+        type: "string"
+        description: "The name for the row of results."
+      columns:
+        type: "array"
+        items:
+          $ref: "#/definitions/ScanResultColumn"
+        description: "An array of key value pairs of result data."
+  ScanJobResultsOut:
+    type: "object"
+    required:
+      - scan_job
+      - results
+    properties:
+        scan_job:
+          type: "integer"
+          format: "int64"
+        fact_collection_id:
+          type: "integer"
+          format: "int64"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/ScanResultRow"
+          description: "The results of scan job."
