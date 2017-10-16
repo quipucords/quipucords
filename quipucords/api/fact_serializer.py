@@ -36,12 +36,12 @@ class FactCollectionSerializer(ModelSerializer):
 
     def create(self, validated_data):
         facts_data = validated_data.pop('facts')
-        report = FactCollection.objects.create(**validated_data)
+        fact_collection = FactCollection.objects.create(**validated_data)
         for fact_data in facts_data:
             new_fact = Fact.objects.create(**fact_data)
-            report.facts.add(new_fact)
-        report.save()
-        return report
+            fact_collection.facts.add(new_fact)
+        fact_collection.save()
+        return fact_collection
 
     @staticmethod
     def validate_facts(facts):
