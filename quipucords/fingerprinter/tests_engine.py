@@ -18,6 +18,7 @@ from fingerprinter.engine import BasicEngine
 
 class BasicEngineTest(TestCase):
     """Tests BasicEngine class"""
+    # pylint: disable= no-self-use
 
     def create_json_fc(self, etc_release_name='RHEL',
                        etc_release_release='RHEL 7.4 (Maipo)',
@@ -37,12 +38,16 @@ class BasicEngineTest(TestCase):
         engine = BasicEngine()
         fact_collection = self.create_json_fc()
         fact = fact_collection['facts'][0]
-        fingerprints = engine.process_facts(fact_collection['id'], fact_collection['facts'])
+        fingerprints = engine.process_facts(fact_collection['id'],
+                                            fact_collection['facts'])
         fingerprint = fingerprints[0]
-        self.assertEqual(fact_collection['id'], fingerprint['fact_collection_id'])
+        self.assertEqual(fact_collection['id'],
+                         fingerprint['fact_collection_id'])
         self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
-        self.assertEqual(fact['etc_release_release'], fingerprint['os_release'])
-        self.assertEqual(fact['etc_release_version'], fingerprint['os_version'])
+        self.assertEqual(fact['etc_release_release'],
+                         fingerprint['os_release'])
+        self.assertEqual(fact['etc_release_version'],
+                         fingerprint['os_version'])
 
     def test_process_fact(self):
         """ Test model creation not via API."""
@@ -50,7 +55,10 @@ class BasicEngineTest(TestCase):
         fact_collection = self.create_json_fc()
         fact = fact_collection['facts'][0]
         fingerprint = engine.process_fact(fact_collection['id'], fact)
-        self.assertEqual(fact_collection['id'], fingerprint['fact_collection_id'])
+        self.assertEqual(fact_collection['id'],
+                         fingerprint['fact_collection_id'])
         self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
-        self.assertEqual(fact['etc_release_release'], fingerprint['os_release'])
-        self.assertEqual(fact['etc_release_version'], fingerprint['os_version'])
+        self.assertEqual(fact['etc_release_release'],
+                         fingerprint['os_release'])
+        self.assertEqual(fact['etc_release_version'],
+                         fingerprint['os_version'])

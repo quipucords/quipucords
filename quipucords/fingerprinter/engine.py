@@ -21,14 +21,24 @@ class BasicEngine():
         pass
 
     def process_facts(self, fact_collection_id, facts):
-        """Process a set of facts"""
+        """Process facts and convert to fingerprints
+        :param fact_collection_id: id of fact collection
+        to process
+        :param facts: facts to process
+        :returns: fingerprints produced from facts
+        """
         fingerprints = []
         for fact in facts:
             fingerprints.append(self.process_fact(fact_collection_id, fact))
         return fingerprints
 
     def process_fact(self, fact_collection_id, fact):
-        """Process a fact"""
+        """Process a fact and convert to a fingerprint
+        :param fact_collection_id: id of fact collection
+        to process
+        :param facts: fact to process
+        :returns: fingerprint produced from fact
+        """
         fingerprint = {'fact_collection_id': fact_collection_id,
                        'os_name': fact['etc_release_name'],
                        'os_release': fact['etc_release_release'],
