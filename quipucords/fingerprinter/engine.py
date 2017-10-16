@@ -24,7 +24,7 @@ class BasicEngine():
     def process_facts(self, fact_collection_id, facts):
         """Process facts and convert to fingerprints
         :param fact_collection_id: id of fact collection
-        to process
+        associated with facts
         :param facts: facts to process
         :returns: fingerprints produced from facts
         """
@@ -36,7 +36,7 @@ class BasicEngine():
     def process_fact(self, fact_collection_id, fact):
         """Process a fact and convert to a fingerprint
         :param fact_collection_id: id of fact collection
-        to process
+        associated with facts
         :param facts: fact to process
         :returns: fingerprint produced from fact
         """
