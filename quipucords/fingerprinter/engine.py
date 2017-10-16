@@ -13,7 +13,8 @@
 
 
 class BasicEngine():
-    """Engine that produces fingerprints"""
+    """Engine that produces fingerprints from
+    facts"""
     # pylint: disable= no-self-use
 
     def __init__(self):
