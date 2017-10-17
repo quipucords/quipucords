@@ -9,26 +9,26 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Models to retrieve system reports."""
+"""Models system fingerprints."""
 
 from django.db import models
 from api.fact_model import FactCollection
 
 
 class SystemFingerprint(models.Model):
-    """Represents os installation count"""
-    fact_collection = models.ForeignKey(FactCollection,
-                                        models.CASCADE)
+    """Represents system fingerprint"""
+    fact_collection_id = models.ForeignKey(FactCollection,
+                                           models.CASCADE)
     os_name = models.CharField(max_length=128, unique=False)
     os_release = models.CharField(max_length=64, unique=False)
     os_version = models.CharField(max_length=64, unique=False)
 
     def __str__(self):
-        return 'id:{}, fact_collection:{}, ' \
+        return '{' + 'id:{}, fact_collection:{}, ' \
             'os_name:{}, os_release:{}, '\
             'os_version:{}' \
             .format(self.id,
-                    self.fact_collection,
+                    self.fact_collection_id,
                     self.os_name,
                     self.os_release,
-                    self.os_version)
+                    self.os_version) + '}'

@@ -13,7 +13,7 @@
 import uuid
 from django.test import TestCase
 from api.fact_model import FactCollection, Fact
-from api.report_model import SystemFingerprint
+from api.fingerprint_model import SystemFingerprint
 from rest_framework import status
 
 
@@ -50,7 +50,7 @@ class SystemReportTest(TestCase):
         fingerprints = []
         for fact in fact_collection.facts.all():
             fingerprint = SystemFingerprint \
-                .objects.create(fact_collection=fact_collection,
+                .objects.create(fact_collection_id=fact_collection,
                                 os_name=fact.etc_release_name,
                                 os_release=fact.etc_release_release,
                                 os_version=fact.etc_release_version)
