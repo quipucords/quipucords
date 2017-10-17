@@ -14,6 +14,8 @@
 
 SUBCOMMAND = 'scan'
 START = 'start'
+LIST = 'list'
+SHOW = 'show'
 
 
 SCAN_URI = '/api/v1/scans/'
