@@ -11,6 +11,7 @@
 
 """Viewset for system facts models"""
 
+import logging
 from rest_framework import viewsets, mixins
 from api.fact_model import FactCollection
 from api.fact_serializer import FactCollectionSerializer
@@ -24,6 +25,10 @@ class FactViewSet(mixins.CreateModelMixin,
     """
     ModelViewSet to publish system facts.
     """
+
+    # Get an instance of a logger
+    logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
 
@@ -35,6 +40,11 @@ class FactViewSet(mixins.CreateModelMixin,
         """
         Method to publish system facts, process facts,
         and persist resulting fingerprints
+
+        :param request: http request
+        :param args: original ModelViewSet args
+        :param kwargs: arg count
+        :returns: http response
         """
 
         response = super().create(request)
@@ -45,6 +55,10 @@ class FactViewSet(mixins.CreateModelMixin,
         """
         Method to process facts and persist
         resulting fingerprints
+
+        :param data: fact collection dict response
+        :returns: fingerprints produced from fact
+        collection
         """
 
         fact_collection_id = data['id']
@@ -56,7 +70,10 @@ class FactViewSet(mixins.CreateModelMixin,
         for fingerprint_dict in fingerprints_list:
             serializer = FingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
-                serializer.save()
-            fingerprint = serializer.save()
-            fingerprints.append(fingerprint)
+                fingerprint = serializer.save()
+                fingerprints.append(fingerprint)
+            else:
+                self.logger.error('%s could not persist fingerprints',
+                                  self.__class__)
+                self.logger.error(serializer.errors)
         return fingerprints
