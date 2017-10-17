@@ -27,7 +27,7 @@ build: clean
 	$(PYTHON) setup.py build -f
 
 clean:
-	-rm -rf dist/ build/ quipucords.egg-info/
+	-rm -rf dist/ build/ quipucords.egg-info/;rm -rf quipucords/api/migrations/*;rm quipucords/db.sqlite3
 
 install: build
 	$(PYTHON) setup.py install -f

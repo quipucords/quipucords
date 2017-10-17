@@ -12,9 +12,9 @@
 
 from django.contrib import admin
 from api.fact_model import FactCollection
+from api.fingerprint_model import SystemFingerprint
 from api.hostcredential_model import HostCredential
 from api.networkprofile_model import NetworkProfile
-from api.report_model import SystemFingerprint
 from api.scanjob_model import ScanJob
 from api.scanresults_model import ScanJobResults
 

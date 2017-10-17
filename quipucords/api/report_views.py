@@ -9,10 +9,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Viewset for system report models"""
+"""Viewset for system reports"""
 import logging
 from django.db.models import Count
-from api.report_model import SystemFingerprint
+from api.fingerprint_model import SystemFingerprint
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -32,11 +32,12 @@ class ReportListView(APIView):
             collection_report_list = []
             # Find all distinct fact_collection_ids
             fact_collection_value_set = SystemFingerprint.objects.all().values(
-                'fact_collection').distinct()
+                'fact_collection_id').distinct()
 
             # For each id, build a report and add to results array
             for fact_collection_value in fact_collection_value_set:
-                fact_collection_id = fact_collection_value['fact_collection']
+                fact_collection_id = fact_collection_value[
+                    'fact_collection_id']
                 report = self.build_report(fact_collection_id)
                 if report is not None:
                     collection_report_list.append(report)
@@ -57,8 +58,9 @@ class ReportListView(APIView):
         """Lookup system report by fact_collection_id."""
         # We want aggregate counts on the fact collection groups
         # Find all fingerprints with this fact_collection_id
+
         fc_fingerprints = SystemFingerprint.objects.filter(
-            fact_collection__id=fact_collection_id)
+            fact_collection_id__id=fact_collection_id)
 
         # Group by os_release and count
         counts_by_os = fc_fingerprints.values(
