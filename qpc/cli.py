@@ -29,6 +29,8 @@ from qpc.network.show import NetworkShowCommand
 from qpc.network.clear import NetworkClearCommand
 from qpc.network.edit import NetworkEditCommand
 from qpc.scan.start import ScanStartCommand
+from qpc.scan.list import ScanListCommand
+from qpc.scan.show import ScanShowCommand
 from . import __version__
 
 
@@ -61,7 +63,9 @@ class CLI(object):
                               NetworkShowCommand, NetworkClearCommand,
                               NetworkEditCommand])
 
-        self._add_subcommand(scan.SUBCOMMAND, [ScanStartCommand])
+        self._add_subcommand(scan.SUBCOMMAND,
+                             [ScanStartCommand, ScanListCommand,
+                              ScanShowCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 
