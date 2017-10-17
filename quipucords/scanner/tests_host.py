@@ -73,7 +73,9 @@ class HostScannerTest(TestCase):
         """Test success storage"""
         scanner = HostScanner(self.scanjob, self.network_profile,
                               self.fact_endpoint)
-        facts = [{'key1': 'value1', 'key2': 'value2'}]
+        facts = [{'connection_host': '1.2.3.4',
+                  'key1': 'value1',
+                  'key2': 'value2'}]
         # pylint: disable=protected-access
         result = scanner._store_host_scan_success(facts, 1)
         self.assertTrue(isinstance(result, ScanJobResults))
