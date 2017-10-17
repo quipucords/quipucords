@@ -15,9 +15,8 @@ import uuid
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.networkprofile_serializer import NetworkProfileSerializer
 from api.scanjob_model import ScanJob
-from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
+from api.scanresults_model import Results, ResultKeyValue
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,
@@ -38,9 +37,6 @@ class HostScanner(DiscoveryScanner):
 
     def __init__(self, scanjob, network_profile, fact_endpoint):
         DiscoveryScanner.__init__(self, scanjob, network_profile)
-        self.scanjob = scanjob
-        serializer = NetworkProfileSerializer(network_profile)
-        self.network_profile = serializer.data
         self.fact_endpoint = fact_endpoint
 
     # pylint: disable=too-many-locals
@@ -58,6 +54,7 @@ class HostScanner(DiscoveryScanner):
 
         logger.info('Host scan started for %s.', self.scanjob)
         connected, failed = self.discovery()  # pylint: disable=unused-variable
+        self._store_discovery_success(connected, failed, mark_complete=False)
 
         inventory = construct_scan_inventory(connected, connection_port)
         inventory_file = write_inventory(inventory)
@@ -93,22 +90,22 @@ class HostScanner(DiscoveryScanner):
         return data['id']
 
     def _store_host_scan_success(self, facts, fact_collection_id):
-        scan_results = ScanJobResults(scan_job=self.scanjob,
-                                      fact_collection_id=fact_collection_id)
-        scan_results.save()
+        self.scan_results.fact_collection_id = fact_collection_id
+        self.scan_results.save()
         for fact in facts:
-            row = Results()
+            host = fact['connection_host']
+            row = Results(row=host)
             row.save()
             for key, value in fact.items():
                 stored_fact = ResultKeyValue(key=key, value=value)
                 stored_fact.save()
                 row.columns.add(stored_fact)
             row.save()
-            scan_results.results.add(row)
-        scan_results.save()
+            self.scan_results.results.add(row)
+        self.scan_results.save()
         self.scanjob.status = ScanJob.COMPLETED
         self.scanjob.save()
-        return scan_results
+        return self.scan_results
 
     def run(self):
         """Method via thread for triggering execution"""

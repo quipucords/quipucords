@@ -35,8 +35,10 @@ class DiscoveryScanner(Thread):
         self.scanjob = scanjob
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data
+        self.scan_results = ScanJobResults(scan_job=self.scanjob)
 
-    def _store_discovery_success(self, connected, failed_hosts):
+    def _store_discovery_success(self, connected, failed_hosts,
+                                 mark_complete=True):
         result = {}
         success_row = Results(row='success')
         success_row.save()
@@ -56,27 +58,30 @@ class DiscoveryScanner(Thread):
             failed_row.columns.add(rkv1)
         failed_row.save()
 
-        scan_results = ScanJobResults(scan_job=self.scanjob)
-        scan_results.save()
-        scan_results.results.add(success_row)
-        scan_results.results.add(failed_row)
-        scan_results.save()
+        self.scan_results = ScanJobResults(scan_job=self.scanjob)
+        self.scan_results.save()
+        self.scan_results.results.add(success_row)
+        self.scan_results.results.add(failed_row)
+        self.scan_results.save()
 
-        self.scanjob.status = ScanJob.COMPLETED
-        self.scanjob.save()
+        if mark_complete:
+            self.scanjob.status = ScanJob.COMPLETED
+            self.scanjob.save()
+
         return result
 
     def _store_error(self, ansible_error):
         self.scanjob.status = ScanJob.FAILED
-        scan_results = ScanJobResults(scan_job=self.scanjob)
-        scan_results.save()
+        self.scanjob.save()
+        self.scan_results = ScanJobResults(scan_job=self.scanjob)
+        self.scan_results.save()
         error_row = Results(row='error')
         error_row.save()
         rkv1 = ResultKeyValue(key='message', value=ansible_error.message)
         rkv1.save()
         error_row.columns.add(rkv1)
-        scan_results.results.add(error_row)
-        scan_results.save()
+        self.scan_results.results.add(error_row)
+        self.scan_results.save()
 
     def run(self):
         """Method via thread for triggering execution"""
@@ -87,7 +92,8 @@ class DiscoveryScanner(Thread):
             connected, failed_hosts = self.discovery()
             result = self._store_discovery_success(connected, failed_hosts)
         except AnsibleError as ansible_error:
-            logger.error(ansible_error)
+            logger.error('Discovery scan failed for %s. %s', self.scanjob,
+                         ansible_error)
             self._store_error(ansible_error)
 
         return result

@@ -239,7 +239,8 @@ def connect(hosts, credential, connection_port):
                                       'args': parse_kv('echo "Hello"')}}]}
 
     result = run_playbook(inventory_file, callback, playbook)
-    if result != TaskQueueManager.RUN_OK:
+    if (result != TaskQueueManager.RUN_OK and
+            result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)
 
     success, failed = _process_connect_callback(callback, credential)
