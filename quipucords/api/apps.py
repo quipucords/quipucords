@@ -16,3 +16,7 @@ from django.apps import AppConfig
 class ApiConfig(AppConfig):
     """Defines the api application configuration"""
     name = 'api'
+
+    def ready(self):
+        # pylint: disable=W0612
+        import api.fact_collection_receiver  # noqa: F401
