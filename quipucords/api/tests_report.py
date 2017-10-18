@@ -48,7 +48,7 @@ class SystemReportTest(TestCase):
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
+        # Create a system fingerprint via fact collection receiver
         self.create_fact_collection(
             os_versions=['7.4', '7.4', '7.5'])
 
@@ -66,7 +66,7 @@ class SystemReportTest(TestCase):
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
+        # Create a system fingerprint via collection receiver
         self.create_fact_collection(
             os_versions=['7.4', '7.4', '7.5'])
 
@@ -83,7 +83,7 @@ class SystemReportTest(TestCase):
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
+        # Create a system fingerprint via collection receiver
         self.create_fact_collection(
             os_versions=['7.4', '7.4', '7.5'])
 

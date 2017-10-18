@@ -15,7 +15,6 @@ import logging
 from rest_framework import viewsets, mixins
 from api.fact_model import FactCollection
 from api.fact_serializer import FactCollectionSerializer
-from fingerprinter import Engine
 
 
 # pylint: disable=too-many-ancestors
@@ -30,7 +29,3 @@ class FactViewSet(mixins.CreateModelMixin,
 
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
-
-    def __init__(self, *args, **kwargs):
-        super(FactViewSet, self).__init__(*args, **kwargs)
-        self.engine = Engine()
