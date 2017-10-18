@@ -13,7 +13,6 @@
 import uuid
 from django.test import TestCase
 from api.fact_model import FactCollection, Fact
-from api.fingerprint_model import SystemFingerprint
 from rest_framework import status
 
 
@@ -44,35 +43,14 @@ class SystemReportTest(TestCase):
         fact_collection.save()
         return fact_collection
 
-    def create_fingerprints(self, fact_collection):
-        """Helper to create a SystemFingerprint for test."""
-
-        fingerprints = []
-        for fact in fact_collection.facts.all():
-            fingerprint = SystemFingerprint \
-                .objects.create(fact_collection_id=fact_collection,
-                                os_name=fact.etc_release_name,
-                                os_release=fact.etc_release_release,
-                                os_version=fact.etc_release_version)
-            fingerprints.append(fingerprint)
-
-        return fingerprints
-
-    def test_fc_creation(self):
-        """ Test model creation not via API."""
-        fingerprints = self.create_fingerprints(self.create_fact_collection())
-        for fingerprint in fingerprints:
-            self.assertTrue(isinstance(fingerprint, SystemFingerprint))
-            self.assertIsInstance(str(fingerprint), str)
-
     def test_get_report_list(self):
         """ Create fact collection object via API."""
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
-        self.create_fingerprints(self.create_fact_collection(
-            os_versions=['7.4', '7.4', '7.5']))
+        # Create a system fingerprint via fact collection receiver
+        self.create_fact_collection(
+            os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
         response = self.client.get(url)
@@ -88,9 +66,9 @@ class SystemReportTest(TestCase):
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
-        self.create_fingerprints(self.create_fact_collection(
-            os_versions=['7.4', '7.4', '7.5']))
+        # Create a system fingerprint via collection receiver
+        self.create_fact_collection(
+            os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
         response = self.client.get(url, {'fact_collection_id': 1})
@@ -105,9 +83,9 @@ class SystemReportTest(TestCase):
 
         url = '/api/v1/reports/'
 
-        # Create a system fingerprint
-        self.create_fingerprints(self.create_fact_collection(
-            os_versions=['7.4', '7.4', '7.5']))
+        # Create a system fingerprint via collection receiver
+        self.create_fact_collection(
+            os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
         response = self.client.get(url, {'fact_collection_id': 2})

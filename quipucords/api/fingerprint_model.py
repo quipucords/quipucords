@@ -28,7 +28,7 @@ class SystemFingerprint(models.Model):
             'os_name:{}, os_release:{}, '\
             'os_version:{}' \
             .format(self.id,
-                    self.fact_collection_id,
+                    self.fact_collection_id.id,
                     self.os_name,
                     self.os_release,
                     self.os_version) + '}'
