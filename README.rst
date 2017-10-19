@@ -109,6 +109,15 @@ In order to run the server execute the following command::
 
     make serve
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Piping data to Elasticsearch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Before starting the server, set the following environment variables::
+
+    USE_ELASTICSEARCH=True
+    ES_HOSTS=http://ES_HOST1,http://ES_HOST2
+
+
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Testing
 ^^^^^^^^^^^^^^^^^^^^^^^^
