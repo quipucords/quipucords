@@ -58,7 +58,10 @@ class FactCollectionTest(TestCase):
     def test_fc_creation(self):
         """ Test model creation not via API."""
         fact_collection = self.create_fc()
+        string_value = str(fact_collection)
+        self.assertIsInstance(string_value, str)
         self.assertTrue(isinstance(fact_collection, FactCollection))
+        self.assertIsInstance(str(fact_collection.facts.all()[0]), str)
 
     def test_fc_api_create(self):
         """ Create fact collection object via API."""
