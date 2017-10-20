@@ -45,9 +45,9 @@ class ScanJob(models.Model):
     )
 
     def __str__(self):
-        return '{id:%s, scan_type:%s, profile:{%s}}' % (self.id,
-                                                        self.scan_type,
-                                                        self.profile)
+        return '{id:%s, scan_type:%s, profile:%s}' % (self.id,
+                                                      self.scan_type,
+                                                      self.profile)
 
     class Meta:
         verbose_name_plural = 'Scan Jobs'

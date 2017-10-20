@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404
 from api.scanjob_model import ScanJob
 from api.scanjob_serializer import ScanJobSerializer
 from api.networkprofile_model import NetworkProfile
-from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
+from api.scanresults_model import ScanJobResults
 from api.scanresults_serializer import (ScanJobResultsSerializer,
                                         ResultsSerializer,
                                         ResultKeyValueSerializer)
@@ -32,49 +32,46 @@ COLUMN_KEY = 'columns'
 RESULTS_KEY = 'results'
 
 
-def expand_network_profile(scan):
+def expand_network_profile(scan, json_scan):
     """Take scan object with profile id and pull object from db.
     create slim dictionary version of profile with name an value
     to return to user.
     """
-    if scan[PROFILE_KEY]:
-        profile_id = scan[PROFILE_KEY]
-        profile = NetworkProfile.objects.get(pk=profile_id)
-        slim_profile = {'id': profile_id, 'name': profile.name}
-        scan[PROFILE_KEY] = slim_profile
-    return scan
+    if json_scan[PROFILE_KEY]:
+        profile = scan.profile
+        slim_profile = {'id': profile.id, 'name': profile.name}
+        json_scan[PROFILE_KEY] = slim_profile
 
 
-def expand_key_values(result_columns):
+def expand_key_values(result, json_result):
     """Take collection of result key value ids and pull objects from db.
     create slim dictionary version of key/value to return to user.
     """
-    fields_list = []
-    if result_columns is not None and result_columns[COLUMN_KEY]:
-        for field_id in result_columns[COLUMN_KEY]:
-            field_data = ResultKeyValue.objects.get(pk=field_id)
-            serializer = ResultKeyValueSerializer(field_data)
-            field_out = {'key': serializer.data['key'],
-                         'value': serializer.data['value']}
-            fields_list.append(field_out)
-    return fields_list
+    columns = []
+    if json_result is not None and json_result[COLUMN_KEY]:
+        for column in result.columns.all():
+            serializer = ResultKeyValueSerializer(column)
+            json_column = serializer.data
+            field_out = {'key': json_column['key'],
+                         'value': json_column['value']}
+            columns.append(field_out)
+    return columns
 
 
-def expand_scan_results(results):
-    """Take collection of results ids and pull objects from db.
+def expand_scan_results(job_scan_result, json_job_scan_result):
+    """Take collection of json_job_scan_result ids and pull objects from db.
     create slim dictionary version of rows of key/value to return to user.
     """
-    if results is not None and results[RESULTS_KEY]:
-        results_list = []
-        for results_id in results[RESULTS_KEY]:
-            results_data = Results.objects.get(pk=results_id)
-            serializer = ResultsSerializer(results_data)
-            columns_out = expand_key_values(serializer.data)
-            results_out = {ROW_KEY: serializer.data[ROW_KEY],
-                           COLUMN_KEY: columns_out}
-            results_list.append(results_out)
-        results[RESULTS_KEY] = results_list
-    return results
+    if json_job_scan_result is not None and json_job_scan_result[RESULTS_KEY]:
+        json_job_scan_result_list = []
+        for result in job_scan_result.results.all():
+            serializer = ResultsSerializer(result)
+            json_result = serializer.data
+            columns = expand_key_values(result, json_result)
+            json_job_scan_result_out = {ROW_KEY: json_result[ROW_KEY],
+                                        COLUMN_KEY: columns}
+            json_job_scan_result_list.append(json_job_scan_result_out)
+        json_job_scan_result[RESULTS_KEY] = json_job_scan_result_list
 
 
 # pylint: disable=too-many-ancestors
@@ -112,25 +109,31 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     def list(self, request):  # pylint: disable=unused-argument
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = ScanJobSerializer(queryset, many=True)
-        for scan in serializer.data:
-            scan = expand_network_profile(scan)
-        return Response(serializer.data)
+        result = []
+        for scan in queryset:
+            serializer = ScanJobSerializer(scan)
+            json_scan = serializer.data
+            expand_network_profile(scan, json_scan)
+            result.append(json_scan)
+        return Response(result)
 
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
-        scan_out = expand_network_profile(serializer.data)
-        return Response(scan_out)
+        json_scan = serializer.data
+        expand_network_profile(scan, json_scan)
+        return Response(json_scan)
 
-    # pylint: disable=unused-argument,invalid-name
+    # pylint: disable=unused-argument,invalid-name,no-self-use
     @detail_route(methods=['get'])
     def results(self, request, pk=None):
         """Get the results of a scan job"""
-        get_object_or_404(self.queryset, pk=pk)
-        results_queryset = ScanJobResults.objects.all()
-        results = get_object_or_404(results_queryset, scan_job=pk)
-        serializer = ScanJobResultsSerializer(results)
-        results_out = expand_scan_results(serializer.data)
-        return Response(results_out)
+        job_scan_result = ScanJobResults.objects.all() \
+            .filter(scan_job__id=pk).first()
+        if job_scan_result:
+            serializer = ScanJobResultsSerializer(job_scan_result)
+            json_job_scan_result = serializer.data
+            expand_scan_results(job_scan_result, json_job_scan_result)
+            return Response(json_job_scan_result)
+        return Response(status=404)

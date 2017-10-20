@@ -41,8 +41,6 @@ def expand_host_credential(profile, json_profile):
     if json_creds:
         json_profile[CREDENTIALS_KEY] = json_creds
 
-    return json_profile
-
 
 class NetworkProfileFilter(FilterSet):
     """Filter for network profiles by name"""

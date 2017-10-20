@@ -21,6 +21,11 @@ class ResultKeyValue(models.Model):
     key = models.CharField(max_length=64)
     value = models.CharField(max_length=1024, null=True)
 
+    def __str__(self):
+        return '{ id:%s, key:%s, value:%s }' % (self.id,
+                                                self.key,
+                                                self.value)
+
     class Meta:
         verbose_name_plural = 'Result Key Values'
 
@@ -29,6 +34,11 @@ class Results(models.Model):
     """The captured results from a scan"""
     row = models.CharField(max_length=64)
     columns = models.ManyToManyField(ResultKeyValue)
+
+    def __str__(self):
+        return '{ id:%s, row:%s, columns:%s }' % (self.id,
+                                                  self.row,
+                                                  self.columns)
 
     class Meta:
         verbose_name_plural = 'Results'
@@ -39,6 +49,13 @@ class ScanJobResults(models.Model):
     scan_job = models.ForeignKey(ScanJob, on_delete=models.CASCADE)
     results = models.ManyToManyField(Results)
     fact_collection_id = models.IntegerField(null=True)
+
+    def __str__(self):
+        return '{ id:%s, scan_job:%s, ' \
+            'fact_collection_id:%s, results:%s }' % (self.id,
+                                                     self.scan_job,
+                                                     self.fact_collection_id,
+                                                     self.results)
 
     class Meta:
         verbose_name_plural = 'Scan Results'
