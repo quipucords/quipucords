@@ -25,7 +25,7 @@ class NetworkProfile(models.Model):
     # ForeignKey in HostRange below.
 
     def __str__(self):
-        return 'id:%s, name:%s' % (self.id, self.name)
+        return '{ id:%s, name:%s }' % (self.id, self.name)
 
 
 class HostRange(models.Model):
