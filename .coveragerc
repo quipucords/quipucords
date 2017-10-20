@@ -1,0 +1,2 @@
+[report]
+omit = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receivers.py,*/settings.py,*/migrations/*

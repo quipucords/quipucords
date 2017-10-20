@@ -11,6 +11,7 @@
 """Apps module for Django server application"""
 
 from django.apps import AppConfig
+from django.conf import settings
 
 
 class ApiConfig(AppConfig):
@@ -20,3 +21,6 @@ class ApiConfig(AppConfig):
     def ready(self):
         # pylint: disable=W0612
         import api.fact_collection_receiver  # noqa: F401
+
+        if settings.USE_ELASTICSEARCH == 'True':
+            import api.es_receivers  # noqa: F401

@@ -164,6 +164,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
+        'api.es_receivers': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
         'scanner.discovery': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
@@ -177,4 +181,14 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
     },
+}
+
+# Elasticsearch env configuration
+USE_ELASTICSEARCH = os.environ.get('USE_ELASTICSEARCH', False)
+ES_HOSTS = os.environ.get('ES_HOSTS', 'http://localhost:9200')
+
+# Elasticsearch configuration
+ES_CONFIGURATION = {
+    'fingerprint_index_name': 'fingerprints_index',
+    'doc_type': 'fingerprint'
 }

@@ -12,6 +12,7 @@ dnspython==1.15.0
 drf-generators==0.3.0
 drf-url-filters==0.5.1
 email-validator==1.0.2
+elasticsearch-dsl==5.3.0
 factory-boy==2.9.2
 Faker==0.8.3
 idna==2.6
