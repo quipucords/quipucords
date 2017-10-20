@@ -1,0 +1,13 @@
+---
+
+- name: add connection.host to dictionary
+  set_fact:
+    connection_host: "{{ ansible_host }}"
+
+- name: add connection.port to dictionary
+  set_fact:
+    connection_port: "{{ ansible_ssh_port }}"
+
+- name: add connection.uuid to dictionary
+  set_fact:
+    connection_uuid: "{{ ansible_host | to_uuid }}"

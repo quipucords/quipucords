@@ -1,0 +1,73 @@
+---
+
+- name: gather internal_have_dmidecode_cmd
+  raw: command -v /usr/sbin/dmidecode
+  register: internal_have_dmidecode_cmd
+  ignore_errors: yes
+
+- name: set internal_have_dmidecode
+  set_fact:
+    internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.rc == 0 }}"
+
+- name: gather internal_have_tune2fs_cmd
+  raw: command -v tune2fs
+  register: internal_have_tune2fs_cmd
+  ignore_errors: yes
+
+- name: set internal_have_tune2fs
+  set_fact:
+    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.rc == 0 }}"
+
+- name: gather internal_have_yum_cmd
+  raw: command -v yum
+  register: internal_have_yum_cmd
+  ignore_errors: yes
+
+- name: set internal_have_yum
+  set_fact:
+    internal_have_yum: "{{ internal_have_yum_cmd.rc == 0 }}"
+
+- name: gather internal_have_java_cmd
+  raw: command -v java
+  register: internal_have_java_cmd
+  ignore_errors: yes
+
+- name: set internal_have_java
+  set_fact:
+    internal_have_java: "{{ internal_have_java_cmd.rc == 0 }}"
+
+- name: gather internal_have_rpm_cmd
+  raw: command -v rpm
+  register: internal_have_rpm_cmd
+  ignore_errors: yes
+
+- name: set internal_have_rpm
+  set_fact:
+    internal_have_rpm: "{{ internal_have_rpm_cmd.rc == 0 }}"
+
+- name: gather internal_have_subscription_manager_cmd
+  raw: command -v subscription-manager
+  register: internal_have_subscription_manager_cmd
+  ignore_errors: yes
+
+- name: set internal_have_subscription_manager
+  set_fact:
+    internal_have_subscription_manager: "{{ internal_have_subscription_manager_cmd.rc == 0 }}"
+
+- name: gather internal_have_virsh_cmd
+  raw: command -v virsh
+  register: internal_have_virsh_cmd
+  ignore_errors: yes
+
+- name: set internal_have_virsh
+  set_fact:
+    internal_have_virsh: "{{ internal_have_virsh_cmd.rc == 0 }}"
+
+- name: gather internal_have_virt_what_cmd
+  raw: command -v virt-what
+  register: internal_have_virt_what_cmd
+  ignore_errors: yes
+
+- name: set internal_have_virt_what
+  set_fact:
+    internal_have_virt_what: "{{ internal_have_virt_what_cmd.rc == 0 }}"

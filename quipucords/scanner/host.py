@@ -11,7 +11,6 @@
 """Scanner used for host inspection"""
 import os
 import logging
-import uuid
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -46,10 +45,13 @@ class HostScanner(DiscoveryScanner):
         :returns: An array of dictionaries of facts
         """
         facts = []
+        roles = ['check_dependencies', 'connection',
+                 'cpu', 'date', 'dmi', 'etc_release',
+                 'virt', 'virt_what']
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,
-                    'roles': ['etc_release']}
+                    'roles': roles}
         connection_port = self.network_profile['ssh_port']
 
         logger.info('Host scan started for %s.', self.scanjob)
@@ -65,10 +67,8 @@ class HostScanner(DiscoveryScanner):
             raise _construct_error(result)
 
         dict_facts = callback.ansible_facts
+        # pylint: disable=unused-variable
         for host, sys_fact in dict_facts.items():
-            sys_fact['connection_port'] = connection_port
-            sys_fact['connection_host'] = host
-            sys_fact['connection_uuid'] = str(uuid.uuid4())
             facts.append(sys_fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
