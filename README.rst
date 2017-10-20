@@ -117,12 +117,11 @@ Before starting the server, set the following environment variables::
     USE_ELASTICSEARCH=True
     ES_HOSTS=http://ES_HOST1,http://ES_HOST2
 
-Additionally, there is a `docker-compose.yml` file located in the `elasticsearch` directory.
-To start a local docker image do the following:
-* Ensure you have docker and docker-compose installed
-* Open a terminal window and switch to the `elasticsearch` folder
-* Run `docker-compose up` to start Elasticsearch and Kibana
-* Run `docker-compose down` to stop Elasticsearch and Kibana
+Additionally, there is a `docker-compose.yml` file located in the `elasticsearch` directory. To start a local docker image do the following:
+ * Ensure you have docker and docker-compose installed
+ * Open a terminal window and switch to the `elasticsearch` folder
+ * Run `docker-compose up` to start Elasticsearch and Kibana
+ * Run `docker-compose down` to stop Elasticsearch and Kibana
 
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Testing
