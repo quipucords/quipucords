@@ -75,7 +75,7 @@ class ScanJobResultsTest(TestCase):
 
         rkv1 = ResultKeyValue(key='key1', value='value1')
         rkv1.save()
-        self.assertIsInstance(str(rkv1),str)
+        self.assertIsInstance(str(rkv1), str)
         row1.columns.add(rkv1)
         row1.save()
         results.results.add(row1)
@@ -91,6 +91,6 @@ class ScanJobResultsTest(TestCase):
                     'scan_job': 1}
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), expected)
-        self.assertIsInstance(str(rkv1),str)
-        self.assertIsInstance(str(row1),str)
-        self.assertIsInstance(str(results),str)
+        self.assertIsInstance(str(rkv1), str)
+        self.assertIsInstance(str(row1), str)
+        self.assertIsInstance(str(results), str)
