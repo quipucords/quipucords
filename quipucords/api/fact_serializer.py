@@ -11,13 +11,13 @@
 
 """Serializer for system facts models"""
 
-from rest_framework.serializers import ModelSerializer,\
-    ValidationError,\
-    IntegerField,\
-    CharField,\
-    UUIDField,\
-    DateField,\
-    NullBooleanField
+from rest_framework.serializers import (ModelSerializer,
+                                        ValidationError,
+                                        IntegerField,
+                                        CharField,
+                                        UUIDField,
+                                        DateField,
+                                        NullBooleanField)
 from api.fact_model import Fact, FactCollection
 from django.utils.translation import ugettext as _
 
