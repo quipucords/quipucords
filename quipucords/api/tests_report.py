@@ -33,7 +33,7 @@ class SystemReportTest(TestCase):
         fact_collection.facts = []
         for version in os_versions:
             release = '{} {}'.format(os_name, version)
-            fact = Fact.objects.create(connection_host='10.10.181.175',
+            fact = Fact.objects.create(connection_host='1.2.3.4',
                                        connection_port=22,
                                        connection_uuid=str(uuid.uuid4()),
                                        cpu_count=2,

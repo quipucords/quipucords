@@ -27,7 +27,7 @@ class FactCollectionTest(TestCase):
     # Helper function
     ################################################################
     def create_json_fc(self,
-                       connection_host='10.10.181.175',
+                       connection_host='1.2.3.4',
                        connection_port=22,
                        connection_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
                        cpu_count=2,
