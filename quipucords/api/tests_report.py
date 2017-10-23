@@ -31,13 +31,27 @@ class SystemReportTest(TestCase):
             os_versions = ['7.3', '7.4']
 
         fact_collection.facts = []
-
         for version in os_versions:
             release = '{} {}'.format(os_name, version)
-            fact = Fact.objects.create(etc_release_name=os_name,
+            fact = Fact.objects.create(connection_host='10.10.181.175',
+                                       connection_port=22,
+                                       connection_uuid=str(uuid.uuid4()),
+                                       cpu_count=2,
+                                       cpu_core_per_socket=1,
+                                       cpu_siblings=1,
+                                       cpu_hyperthreading=False,
+                                       cpu_socket_count=2,
+                                       cpu_core_count=2,
+                                       date_anaconda_log='2017-07-18',
+                                       date_yum_history='2017-07-18',
+                                       etc_release_name=os_name,
                                        etc_release_version=version,
                                        etc_release_release=release,
-                                       connection_uuid=str(uuid.uuid4()))
+                                       virt_virt='virt-guest',
+                                       virt_type='vmware',
+                                       virt_num_guests=1,
+                                       virt_num_running_guests=1,
+                                       virt_what_type='vt')
             fact_collection.facts.add(fact)
 
         fact_collection.save()
