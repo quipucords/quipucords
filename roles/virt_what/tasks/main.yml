@@ -1,0 +1,27 @@
+---
+
+- name: set virt-what.type fact if virt-what not found
+  set_fact: virt_what_type='N/A (virt-what not found)'
+  when: 'not internal_have_virt_what'
+
+- name: execute virt-what
+  raw: virt-what;echo $?
+  register: internal_virt_what_output
+  ignore_errors: yes
+  become: yes
+  when: 'internal_have_virt_what'
+
+- name: extract virt-what error code
+  set_fact:
+    internal_virt_what_error: '{{ internal_virt_what_output["stdout"].split("\r\n")[-1] | int }}'
+  when: 'internal_have_virt_what'
+
+- name: set virt-what.type fact to bare metal if virt-what errored
+  set_fact:
+    virt_what_type: "bare metal"
+  when: 'internal_have_virt_what and (not internal_virt_what_error|int  == 0)'
+
+- name: set virt-what.type fact if virt-what ran successfully
+  set_fact:
+    virt_what_type: '{{ ";".join(internal_virt_what_output["stdout"].split("\r\n")[:-1]) }}'
+  when: 'internal_have_virt_what and (internal_virt_what_error|int == 0)'

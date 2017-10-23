@@ -47,11 +47,16 @@ class ResultCallback(CallbackBase):
         host = str(result._host)
         if (result._result is not None and isinstance(result._result, dict) and
                 'ansible_facts' in result._result):
-            facts = result._result['ansible_facts']
+            host_facts = result._result['ansible_facts']
+            facts = {}
+            for key, value in host_facts.items():
+                if not key.startswith('internal'):
+                    facts[key] = value
+
             if host in self.ansible_facts:
                 self.ansible_facts[host].update(facts)
             else:
-                self.ansible_facts[host] = result._result['ansible_facts']
+                self.ansible_facts[host] = facts
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result
