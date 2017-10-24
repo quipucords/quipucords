@@ -13,10 +13,11 @@
 
 from datetime import datetime
 
+
 class Engine():
     """Engine that produces fingerprints from
     facts"""
-    # pylint: disable= no-self-use
+    # pylint: disable= no-self-use,too-many-branches,too-many-statements
 
     def process_facts(self, fact_collection_id, facts):
         """Process facts and convert to fingerprints
@@ -73,7 +74,7 @@ class Engine():
         if fact['cpu_siblings']:
             fingerprint['cpu_siblings'] = fact['cpu_siblings']
 
-        if fact['cpu_hyperthreading']:
+        if fact['cpu_hyperthreading'] is not None:
             fingerprint['cpu_hyperthreading'] = fact['cpu_hyperthreading']
 
         if fact['cpu_socket_count']:
@@ -85,10 +86,12 @@ class Engine():
         # Determine system_creation_date
         system_creation_date = None
         if fact['date_anaconda_log']:
-            system_creation_date = datetime.strptime(fact['date_anaconda_log'], '%Y-%m-%d')
+            system_creation_date = datetime.strptime(
+                fact['date_anaconda_log'], '%Y-%m-%d')
 
         if system_creation_date and fact['date_yum_history']:
-            date_yum_history = datetime.strptime(fact['date_yum_history'], '%Y-%m-%d')
+            date_yum_history = datetime.strptime(
+                fact['date_yum_history'], '%Y-%m-%d')
             if date_yum_history < system_creation_date:
                 system_creation_date = date_yum_history
 
@@ -96,27 +99,30 @@ class Engine():
             fingerprint['system_creation_date'] = system_creation_date.date()
 
         # Determine if running on VM or bare metal
-        if fact['virt_what_type'] or fact['virt_type']:
-            if fact['virt_what_type'] is 'bare metal':
+        if 'virt_what_type' in fact or 'virt_type' in fact:
+            if fact['virt_what_type'] == 'bare metal':
                 fingerprint['infrastructure_type'] = 'bare_metal'
-            elif fact['virt_type']:
+            elif 'virt_type' in fact:
                 fingerprint['infrastructure_type'] = 'virtualized'
             else:
-                # virt_what_type is not bare metal or None (since both cannot be)
+                # virt_what_type is not bare metal or None
+                # (since both cannot be)
                 fingerprint['infrastructure_type'] = 'unknown'
         else:
             fingerprint['infrastructure_type'] = 'unknown'
 
         # Determine if VM facts
-        fingerprint['virtualized_is_guest'] = True if fact['virt_virt'] is 'virt-guest' else False
+        fingerprint['virtualized_is_guest'] = bool(
+            fact['virt_virt'] == 'virt-guest')
 
-        if fact['virt_type']:
+        if 'virt_type' in fact:
             fingerprint['virtualized_type'] = fact['virt_type']
 
         if fact['virt_num_guests']:
             fingerprint['virtualized_num_guests'] = fact['virt_num_guests']
 
         if fact['virt_num_running_guests']:
-            fingerprint['virtualized_num_running_guests'] = fact['virt_num_running_guests']
+            fingerprint['virtualized_num_running_guests'] =\
+                fact['virt_num_running_guests']
 
         return fingerprint

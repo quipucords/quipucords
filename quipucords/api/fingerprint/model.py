@@ -19,7 +19,8 @@ class SystemFingerprint(models.Model):
     """Represents system fingerprint"""
 
     INFRASTRUCTURE_TYPE = (
-        ('bare_metal', 'Bare Metal'), ('virtualized', 'Virtualized'), ('unknown', 'Unknown')
+        ('bare_metal', 'Bare Metal'), ('virtualized',
+                                       'Virtualized'), ('unknown', 'Unknown')
     )
 
     fact_collection_id = models.ForeignKey(FactCollection,

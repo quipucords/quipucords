@@ -11,15 +11,15 @@
 
 """Test the fact engine API."""
 
-import uuid
+from datetime import datetime
 from django.test import TestCase
-from api.models import Fact, FactCollection
 from fingerprinter import Engine
 
 
 class EngineTest(TestCase):
     """Tests Engine class"""
-    # pylint: disable= no-self-use, too-many-arguments
+    # pylint: disable=no-self-use,too-many-arguments
+    # pylint: disable=too-many-locals,too-many-branches
 
     ################################################################
     # Helper function
@@ -35,7 +35,7 @@ class EngineTest(TestCase):
                        cpu_hyperthreading=False,
                        cpu_socket_count=2,
                        cpu_core_count=2,
-                       date_anaconda_log='2017-07-18',
+                       date_anaconda_log='2017-06-17',
                        date_yum_history='2017-07-18',
                        etc_release_name='RHEL',
                        etc_release_version='7.4 (Maipo)',
@@ -98,13 +98,8 @@ class EngineTest(TestCase):
         fingerprints = engine.process_facts(fact_collection['id'],
                                             fact_collection['facts'])
         fingerprint = fingerprints[0]
-        self.assertEqual(fact_collection['id'],
-                         fingerprint['fact_collection_id'])
-        self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
-        self.assertEqual(fact['etc_release_release'],
-                         fingerprint['os_release'])
-        self.assertEqual(fact['etc_release_version'],
-                         fingerprint['os_version'])
+        self.validate_result(
+            fact_collection['id'], fingerprint, fact)
 
     def test_basic_engine_process_fact(self):
         """ Test basic engine process_fact."""
@@ -112,10 +107,82 @@ class EngineTest(TestCase):
         fact_collection = self.create_json_fc()
         fact = fact_collection['facts'][0]
         fingerprint = engine.process_fact(fact_collection['id'], fact)
-        self.assertEqual(fact_collection['id'],
+        self.validate_result(
+            fact_collection['id'], fingerprint, fact)
+
+    def test_create_yum(self):
+        """ Test basic engine process_fact."""
+        engine = Engine()
+        fact_collection = self.create_json_fc(date_yum_history='2015-07-18')
+        fact = fact_collection['facts'][0]
+        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fact_date = datetime.strptime(fact['date_yum_history'], '%Y-%m-%d')
+        fact_date = fact_date.date()
+        self.assertEqual(fact_date, fingerprint['system_creation_date'])
+
+    def test_infrastructure_baremetal(self):
+        """ Test basic engine process_fact."""
+        engine = Engine()
+        fact_collection = self.create_json_fc(virt_what_type='bare metal')
+        fact = fact_collection['facts'][0]
+        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        self.assertEqual('bare_metal', fingerprint['infrastructure_type'])
+
+    def test_infrastructure_unknown(self):
+        """ Test basic engine process_fact."""
+        engine = Engine()
+        fact_collection = self.create_json_fc(
+            virt_what_type='foobar', virt_type=None)
+        fact = fact_collection['facts'][0]
+        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        self.assertEqual('unknown', fingerprint['infrastructure_type'])
+
+    def test_infrastructure_missing(self):
+        """ Test basic engine process_fact."""
+        engine = Engine()
+        fact_collection = self.create_json_fc(
+            virt_what_type=None, virt_type=None)
+        fact = fact_collection['facts'][0]
+        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        self.assertEqual('unknown', fingerprint['infrastructure_type'])
+
+    def validate_result(self, fc_id, fingerprint, fact):
+        """ Helper method to validate fields"""
+        self.assertEqual(fc_id,
                          fingerprint['fact_collection_id'])
+
         self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
         self.assertEqual(fact['etc_release_release'],
                          fingerprint['os_release'])
         self.assertEqual(fact['etc_release_version'],
                          fingerprint['os_version'])
+
+        self.assertEqual(fact['connection_host'],
+                         fingerprint['connection_host'])
+        self.assertEqual(fact['connection_port'],
+                         fingerprint['connection_port'])
+        self.assertEqual(fact['connection_uuid'],
+                         fingerprint['connection_uuid'])
+
+        self.assertEqual(fact['cpu_count'], fingerprint['cpu_count'])
+        self.assertEqual(fact['cpu_core_per_socket'],
+                         fingerprint['cpu_core_per_socket'])
+        self.assertEqual(fact['cpu_siblings'], fingerprint['cpu_siblings'])
+        self.assertEqual(fact['cpu_hyperthreading'],
+                         fingerprint['cpu_hyperthreading'])
+        self.assertEqual(fact['cpu_socket_count'],
+                         fingerprint['cpu_socket_count'])
+        self.assertEqual(fact['cpu_core_count'], fingerprint['cpu_core_count'])
+
+        fact_date = datetime.strptime(fact['date_anaconda_log'], '%Y-%m-%d')
+        fact_date = fact_date.date()
+
+        self.assertEqual(fact_date, fingerprint['system_creation_date'])
+        self.assertEqual('virtualized', fingerprint['infrastructure_type'])
+        self.assertTrue(fingerprint['virtualized_is_guest'])
+
+        self.assertEqual(fact['virt_type'], fingerprint['virtualized_type'])
+        self.assertEqual(fact['virt_num_guests'],
+                         fingerprint['virtualized_num_guests'])
+        self.assertEqual(fact['virt_num_running_guests'],
+                         fingerprint['virtualized_num_running_guests'])
