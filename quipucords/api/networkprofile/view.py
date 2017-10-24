@@ -15,8 +15,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
-from api.networkprofile_serializer import NetworkProfileSerializer
-from api.networkprofile_model import NetworkProfile
+from api.serializers import NetworkProfileSerializer
+from api.models import NetworkProfile
 
 
 CREDENTIALS_KEY = 'credentials'

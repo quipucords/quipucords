@@ -11,7 +11,7 @@
 """Module for serializing all model object for database storage"""
 
 from rest_framework.serializers import ModelSerializer, CharField
-from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
+from api.models import ScanJobResults, Results, ResultKeyValue
 
 
 class ResultKeyValueSerializer(ModelSerializer):

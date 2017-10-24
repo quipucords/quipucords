@@ -13,7 +13,7 @@
 """
 
 from django.db import models
-from api.hostcredential_model import HostCredential
+from api.hostcredential.model import HostCredential
 
 
 class NetworkProfile(models.Model):

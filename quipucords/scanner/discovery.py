@@ -12,11 +12,9 @@
 import logging
 from threading import Thread
 from ansible.errors import AnsibleError
-from api.networkprofile_serializer import NetworkProfileSerializer
-from api.hostcredential_model import HostCredential
-from api.hostcredential_serializer import HostCredentialSerializer
-from api.scanjob_model import ScanJob
-from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
+from api.serializers import NetworkProfileSerializer, HostCredentialSerializer
+from api.models import (HostCredential, ScanJob, ScanJobResults,
+                        Results, ResultKeyValue)
 from scanner.utils import connect
 
 

@@ -13,12 +13,9 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
-from api.scanjob_model import ScanJob
-from api.scanresults_model import (ScanJobResults, Results, ResultKeyValue)
-from api.scanresults_serializer import (ResultKeyValueSerializer,
-                                        ResultsSerializer)
+from api.models import (HostCredential, NetworkProfile, ScanJob,
+                        ScanJobResults, Results, ResultKeyValue)
+from api.serializers import (ResultKeyValueSerializer, ResultsSerializer)
 
 
 class ScanJobResultsTest(TestCase):

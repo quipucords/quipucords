@@ -11,12 +11,8 @@
 """Admin module for Django server application"""
 
 from django.contrib import admin
-from api.fact_model import FactCollection
-from api.fingerprint_model import SystemFingerprint
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
-from api.scanjob_model import ScanJob
-from api.scanresults_model import ScanJobResults
+from api.models import (FactCollection, SystemFingerprint, HostCredential,
+                        NetworkProfile, ScanJob, ScanJobResults)
 
 admin.site.register(FactCollection)
 admin.site.register(HostCredential)

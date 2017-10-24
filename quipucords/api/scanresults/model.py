@@ -13,7 +13,7 @@
 """
 
 from django.db import models
-from api.scanjob_model import ScanJob
+from api.scanjob.model import ScanJob
 
 
 class ResultKeyValue(models.Model):

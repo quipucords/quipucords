@@ -16,7 +16,7 @@ import logging
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from api.fingerprint_model import SystemFingerprint
+from api.models import SystemFingerprint
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import DocType, Date, Keyword, Index
 from elasticsearch.exceptions import RequestError

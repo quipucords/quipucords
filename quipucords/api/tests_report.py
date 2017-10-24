@@ -12,7 +12,7 @@
 
 import uuid
 from django.test import TestCase
-from api.fact_model import FactCollection, Fact
+from api.models import FactCollection, Fact
 from rest_framework import status
 
 

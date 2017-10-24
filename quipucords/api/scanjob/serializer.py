@@ -15,8 +15,7 @@ from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField,
                                         ValidationError,
                                         ReadOnlyField)
-from api.networkprofile_model import NetworkProfile
-from api.scanjob_model import ScanJob
+from api.models import NetworkProfile, ScanJob
 
 
 class NetworkProfileField(PrimaryKeyRelatedField):
