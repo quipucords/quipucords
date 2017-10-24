@@ -45,51 +45,51 @@ class Engine():
         fingerprint = {'fact_collection_id': fact_collection_id}
 
         # Set OS information
-        if fact['etc_release_name']:
+        if 'etc_release_name' in fact:
             fingerprint['os_name'] = fact['etc_release_name']
 
-        if fact['etc_release_version']:
+        if 'etc_release_version' in fact:
             fingerprint['os_version'] = fact['etc_release_version']
 
-        if fact['etc_release_release']:
+        if 'etc_release_release' in fact:
             fingerprint['os_release'] = fact['etc_release_release']
 
         # Set connection information
-        if fact['connection_uuid']:
+        if 'connection_uuid' in fact:
             fingerprint['connection_uuid'] = fact['connection_uuid']
 
-        if fact['connection_host']:
+        if 'connection_host' in fact:
             fingerprint['connection_host'] = fact['connection_host']
 
-        if fact['connection_port']:
+        if 'connection_port' in fact:
             fingerprint['connection_port'] = fact['connection_port']
 
         # Set CPU facts
-        if fact['cpu_count']:
+        if 'cpu_count' in fact:
             fingerprint['cpu_count'] = fact['cpu_count']
 
-        if fact['cpu_core_per_socket']:
+        if 'cpu_core_per_socket' in fact:
             fingerprint['cpu_core_per_socket'] = fact['cpu_core_per_socket']
 
-        if fact['cpu_siblings']:
+        if 'cpu_siblings' in fact:
             fingerprint['cpu_siblings'] = fact['cpu_siblings']
 
-        if fact['cpu_hyperthreading'] is not None:
+        if 'cpu_hyperthreading' in fact:
             fingerprint['cpu_hyperthreading'] = fact['cpu_hyperthreading']
 
-        if fact['cpu_socket_count']:
+        if 'cpu_socket_count' in fact:
             fingerprint['cpu_socket_count'] = fact['cpu_socket_count']
 
-        if fact['cpu_core_count']:
+        if 'cpu_core_count' in fact:
             fingerprint['cpu_core_count'] = fact['cpu_core_count']
 
         # Determine system_creation_date
         system_creation_date = None
-        if fact['date_anaconda_log']:
+        if 'date_anaconda_log' in fact:
             system_creation_date = datetime.strptime(
                 fact['date_anaconda_log'], '%Y-%m-%d')
 
-        if system_creation_date and fact['date_yum_history']:
+        if system_creation_date and 'date_yum_history' in fact:
             date_yum_history = datetime.strptime(
                 fact['date_yum_history'], '%Y-%m-%d')
             if date_yum_history < system_creation_date:
@@ -118,10 +118,10 @@ class Engine():
         if 'virt_type' in fact:
             fingerprint['virtualized_type'] = fact['virt_type']
 
-        if fact['virt_num_guests']:
+        if 'virt_num_guests' in fact:
             fingerprint['virtualized_num_guests'] = fact['virt_num_guests']
 
-        if fact['virt_num_running_guests']:
+        if 'virt_num_running_guests' in fact:
             fingerprint['virtualized_num_running_guests'] =\
                 fact['virt_num_running_guests']
 
