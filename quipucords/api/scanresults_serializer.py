@@ -10,12 +10,14 @@
 #
 """Module for serializing all model object for database storage"""
 
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, CharField
 from api.scanresults_model import ScanJobResults, Results, ResultKeyValue
 
 
 class ResultKeyValueSerializer(ModelSerializer):
     """Serializer for the ResultKeyValue model"""
+    key = CharField(required=True, max_length=64)
+    value = CharField(required=False, max_length=1024)
 
     class Meta:
         model = ResultKeyValue
@@ -24,6 +26,7 @@ class ResultKeyValueSerializer(ModelSerializer):
 
 class ResultsSerializer(ModelSerializer):
     """Serializer for the Results model"""
+    row = CharField(required=False, max_length=64)
 
     class Meta:
         model = Results

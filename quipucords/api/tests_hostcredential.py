@@ -112,6 +112,87 @@ class HostCredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
+    def test_hc_create_long_name(self):
+        """
+        Ensure we cannot create a new host credential object with a
+        long name.
+        """
+        expected_error = {'name': ['Ensure this field has no more than '
+                                   '64 characters.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'A' * 100,
+                'username': 'user1',
+                'password': 'pass1'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_long_user(self):
+        """
+        Ensure we cannot create a new host credential object with a
+        long username.
+        """
+        expected_error = {'username': ['Ensure this field has no more than '
+                                       '64 characters.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'A' * 100,
+                'password': 'pass1'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_long_password(self):
+        """
+        Ensure we cannot create a new host credential object with a
+        long password.
+        """
+        expected_error = {'password': ['Ensure this field has no more than '
+                                       '1024 characters.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'A' * 2000}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_long_sudo(self):
+        """
+        Ensure we cannot create a new host credential object with a
+        long sudo_password.
+        """
+        expected_error = {'sudo_password': ['Ensure this field has no more '
+                                            'than 1024 characters.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'pass1',
+                'sudo_password': 'A' * 2000}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_hc_create_long_ssh(self):
+        """
+        Ensure we cannot create a new host credential object with a
+        long ssh_keyfile.
+        """
+        expected_error = {'ssh_keyfile': ['Ensure this field has no more than '
+                                          '1024 characters.']}
+        url = reverse("hostcred-list")
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'ssh_keyfile': 'A' * 2000}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
     def test_hostcred_list_view(self):
         """Tests the list view set of the HostCredential API"""
         url = reverse("hostcred-list")
