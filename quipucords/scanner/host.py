@@ -14,8 +14,7 @@ import logging
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.scanjob_model import ScanJob
-from api.scanresults_model import Results, ResultKeyValue
+from api.models import ScanJob, Results, ResultKeyValue
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,

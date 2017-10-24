@@ -15,13 +15,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from api.scanjob_model import ScanJob
-from api.scanjob_serializer import ScanJobSerializer
-from api.networkprofile_model import NetworkProfile
-from api.scanresults_model import ScanJobResults
-from api.scanresults_serializer import (ScanJobResultsSerializer,
-                                        ResultsSerializer,
-                                        ResultKeyValueSerializer)
+from api.models import ScanJob, NetworkProfile, ScanJobResults
+from api.serializers import (ScanJobSerializer,
+                             ScanJobResultsSerializer,
+                             ResultsSerializer,
+                             ResultKeyValueSerializer)
 from scanner.discovery import DiscoveryScanner
 from scanner.host import HostScanner
 

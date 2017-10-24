@@ -12,7 +12,7 @@
 """Viewset for system reports"""
 import logging
 from django.db.models import Count
-from api.fingerprint_model import SystemFingerprint
+from api.models import SystemFingerprint
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status

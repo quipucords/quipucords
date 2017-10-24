@@ -13,7 +13,7 @@
 """
 
 from django.db import models
-from api.networkprofile_model import NetworkProfile
+from api.networkprofile.model import NetworkProfile
 
 
 class ScanJob(models.Model):

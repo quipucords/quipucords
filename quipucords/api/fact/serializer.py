@@ -18,7 +18,7 @@ from rest_framework.serializers import (ModelSerializer,
                                         UUIDField,
                                         DateField,
                                         NullBooleanField)
-from api.fact_model import Fact, FactCollection
+from api.models import Fact, FactCollection
 from django.utils.translation import ugettext as _
 
 

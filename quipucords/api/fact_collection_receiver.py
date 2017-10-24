@@ -15,9 +15,8 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from fingerprinter import Engine
-from api.fingerprint_serializer import FingerprintSerializer
-from api.fact_model import FactCollection
-from api.fact_serializer import FactCollectionSerializer
+from api.serializers import FingerprintSerializer, FactCollectionSerializer
+from api.models import FactCollection
 
 ENGINE = Engine()
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

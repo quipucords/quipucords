@@ -14,7 +14,7 @@ import os
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         CharField)
-from api.hostcredential_model import HostCredential
+from api.models import HostCredential
 
 
 def expand_filepath(filepath):

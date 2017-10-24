@@ -12,7 +12,7 @@
 """Serializer for system fingerprint models"""
 
 from rest_framework.serializers import ModelSerializer
-from api.fingerprint_model import SystemFingerprint
+from api.models import SystemFingerprint
 
 
 class FingerprintSerializer(ModelSerializer):

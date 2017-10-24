@@ -13,8 +13,8 @@
 import json
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from api.fact_model import FactCollection
-from api.fact_serializer import FactCollectionSerializer
+from api.models import FactCollection
+from api.serializers import FactCollectionSerializer
 from rest_framework import status
 
 

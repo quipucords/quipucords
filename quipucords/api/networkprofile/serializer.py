@@ -18,8 +18,7 @@ from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import HostRange, NetworkProfile
+from api.models import HostCredential, HostRange, NetworkProfile
 
 
 class HostRangeField(SlugRelatedField):

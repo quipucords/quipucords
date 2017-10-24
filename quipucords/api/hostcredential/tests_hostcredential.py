@@ -14,7 +14,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.hostcredential_model import HostCredential
+from api.models import HostCredential
 
 
 class HostCredentialTest(TestCase):

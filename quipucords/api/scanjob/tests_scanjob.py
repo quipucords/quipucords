@@ -15,8 +15,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
+from api.models import HostCredential, NetworkProfile
 
 
 def dummy_start():
@@ -63,7 +62,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_successful_create(self, start):  # pylint: disable=unused-argument
         """A valid create request should succeed."""
 
@@ -85,7 +84,7 @@ class ScanJobTest(TestCase):
                 'scan_type': 'foo'}
         self.create_expect_400(data)
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     # pylint: disable=unused-argument
     def test_create_default_host_type(self, start):
         """A valid create request should succeed with defaulted type."""
@@ -102,7 +101,7 @@ class ScanJobTest(TestCase):
         self.create_expect_400(
             {'profile': -1})
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_list(self, start):  # pylint: disable=unused-argument
         """List all ScanJob objects."""
         data_default = {'profile': self.network_profile.id}
@@ -122,7 +121,7 @@ class ScanJobTest(TestCase):
                      'scan_type': 'discovery', 'status': 'pending'}]
         self.assertEqual(content, expected)
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_retrieve(self, start):  # pylint: disable=unused-argument
         """Get details on a specific ScanJob by primary key."""
 
@@ -138,7 +137,7 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(profile, {'id': 1, 'name': 'profile1'})
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     # pylint: disable=unused-argument
     def test_update_not_allowed(self, start):
         """Completely update a NetworkProfile."""
@@ -157,7 +156,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_partial_update(self, start):  # pylint: disable=unused-argument
         """Partially update a ScanJob is not supported."""
 
@@ -174,7 +173,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob_views.DiscoveryScanner.start', side_effect=dummy_start)
+    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_delete(self, start):  # pylint: disable=unused-argument
         """Delete a ScanJob is not supported."""
 

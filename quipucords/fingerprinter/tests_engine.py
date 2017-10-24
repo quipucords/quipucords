@@ -13,7 +13,7 @@
 
 import uuid
 from django.test import TestCase
-from api.fact_model import Fact, FactCollection
+from api.models import Fact, FactCollection
 from fingerprinter import Engine
 
 
