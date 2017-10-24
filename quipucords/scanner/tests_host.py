@@ -15,12 +15,9 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile, HostRange
-from api.hostcredential_serializer import HostCredentialSerializer
-from api.networkprofile_serializer import NetworkProfileSerializer
-from api.scanjob_model import ScanJob
-from api.scanresults_model import ScanJobResults
+from api.models import (HostCredential, NetworkProfile, HostRange,
+                        ScanJob, ScanJobResults)
+from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
 

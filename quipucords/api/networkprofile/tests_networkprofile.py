@@ -14,7 +14,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.hostcredential_model import HostCredential
+from api.models import HostCredential
 
 
 class NetworkProfileTest(TestCase):
@@ -102,6 +102,24 @@ class NetworkProfileTest(TestCase):
             {'name': 'netprof1',
              'hosts': [],
              'ssh_port': '22',
+             'credentials': [self.cred_for_upload]})
+
+    def test_create_long_name(self):
+        """An long profile name."""
+
+        self.create_expect_400(
+            {'name': 'A' * 100,
+             'hosts': ['1.2.3.4'],
+             'ssh_port': '22',
+             'credentials': [self.cred_for_upload]})
+
+    def test_create_negative_port(self):
+        """An long profile name."""
+
+        self.create_expect_400(
+            {'name': 'netprof1',
+             'hosts': ['1.2.3.4'],
+             'ssh_port': -1,
              'credentials': [self.cred_for_upload]})
 
     def test_create_valid_hosts(self):

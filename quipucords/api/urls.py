@@ -13,30 +13,27 @@
 from django.conf.urls import url
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
-from api import hostcredential_views
-from api import fact_views
-from api import networkprofile_views
-from api import report_views
-from api import scanjob_views
+from api.views import (HostCredentialViewSet, FactViewSet,
+                       NetworkProfileViewSet, ScanJobViewSet, ReportListView)
 
 
 ROUTER = SimpleRouter()
 
 ROUTER.register(r'credentials/hosts',
-                hostcredential_views.HostCredentialViewSet,
+                HostCredentialViewSet,
                 base_name='hostcred')
 ROUTER.register(r'facts',
-                fact_views.FactViewSet,
+                FactViewSet,
                 base_name='facts')
 ROUTER.register(r'profiles/networks',
-                networkprofile_views.NetworkProfileViewSet,
+                NetworkProfileViewSet,
                 base_name='networkprofile')
 ROUTER.register(r'scans',
-                scanjob_views.ScanJobViewSet,
+                ScanJobViewSet,
                 base_name='scanjob')
 
 urlpatterns = [
-    url(r'^reports/$', report_views.ReportListView.as_view())
+    url(r'^reports/$', ReportListView.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

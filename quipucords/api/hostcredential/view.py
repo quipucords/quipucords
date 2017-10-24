@@ -17,8 +17,8 @@ from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from filters import mixins
 from api.filters import ListFilter
-from api.hostcredential_serializer import HostCredentialSerializer
-from api.hostcredential_model import HostCredential
+from api.serializers import HostCredentialSerializer
+from api.models import HostCredential
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'

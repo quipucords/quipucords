@@ -14,10 +14,11 @@ import re
 import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import ModelSerializer, ValidationError, \
-    SlugRelatedField, PrimaryKeyRelatedField
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import HostRange, NetworkProfile
+from rest_framework.serializers import (ModelSerializer, ValidationError,
+                                        SlugRelatedField,
+                                        PrimaryKeyRelatedField, CharField,
+                                        IntegerField)
+from api.models import HostCredential, HostRange, NetworkProfile
 
 
 class HostRangeField(SlugRelatedField):
@@ -58,7 +59,8 @@ class CredentialsField(PrimaryKeyRelatedField):
 
 class NetworkProfileSerializer(ModelSerializer):
     """Serializer for the NetworkProfile model"""
-
+    name = CharField(required=True, max_length=64)
+    ssh_port = IntegerField(required=False, min_value=0)
     hosts = HostRangeField(
         many=True,
         slug_field='host_range',

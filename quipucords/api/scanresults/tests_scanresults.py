@@ -13,10 +13,9 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile
-from api.scanjob_model import ScanJob
-from api.scanresults_model import (ScanJobResults, Results, ResultKeyValue)
+from api.models import (HostCredential, NetworkProfile, ScanJob,
+                        ScanJobResults, Results, ResultKeyValue)
+from api.serializers import (ResultKeyValueSerializer, ResultsSerializer)
 
 
 class ScanJobResultsTest(TestCase):
@@ -47,6 +46,27 @@ class ScanJobResultsTest(TestCase):
         url = url + 'results/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_validate_resultkeyvalue(self):
+        """Check results key value constraints."""
+        data = {'key': 'A' * 65,
+                'value': 'value'}
+        serializer = ResultKeyValueSerializer(data=data)
+        serializer.is_valid()
+        self.assertTrue(len(serializer.errors) > 0)
+
+        data = {'key': 'key1',
+                'value': 'A' * 2000}
+        serializer = ResultKeyValueSerializer(data=data)
+        serializer.is_valid()
+        self.assertTrue(len(serializer.errors) > 0)
+
+    def test_validate_results(self):
+        """Check results constraints."""
+        data = {'row': 'A' * 65}
+        serializer = ResultsSerializer(data=data)
+        serializer.is_valid()
+        self.assertTrue(len(serializer.errors) > 0)
 
     def test_get_results_empty(self):
         """Get empty results on a specific ScanJob by primary key."""

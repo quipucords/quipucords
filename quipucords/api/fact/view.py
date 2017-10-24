@@ -13,8 +13,8 @@
 
 import logging
 from rest_framework import viewsets, mixins
-from api.fact_model import FactCollection
-from api.fact_serializer import FactCollectionSerializer
+from api.models import FactCollection
+from api.serializers import FactCollectionSerializer
 
 
 # pylint: disable=too-many-ancestors

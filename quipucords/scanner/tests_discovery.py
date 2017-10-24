@@ -14,11 +14,8 @@ from unittest.mock import patch, Mock
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.hostcredential_model import HostCredential
-from api.networkprofile_model import NetworkProfile, HostRange
-from api.hostcredential_serializer import HostCredentialSerializer
-from api.networkprofile_serializer import NetworkProfileSerializer
-from api.scanjob_model import ScanJob
+from api.models import HostCredential, NetworkProfile, HostRange, ScanJob
+from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (_construct_vars, _process_connect_callback,
                            _construct_error,
                            construct_connect_inventory, connect,

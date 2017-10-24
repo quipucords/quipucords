@@ -12,8 +12,9 @@
 
 import os
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import ModelSerializer, ValidationError
-from api.hostcredential_model import HostCredential
+from rest_framework.serializers import (ModelSerializer, ValidationError,
+                                        CharField)
+from api.models import HostCredential
 
 
 def expand_filepath(filepath):
@@ -30,6 +31,12 @@ def expand_filepath(filepath):
 
 class HostCredentialSerializer(ModelSerializer):
     """Serializer for the HostCredential model"""
+    name = CharField(required=True, max_length=64)
+    username = CharField(required=True, max_length=64)
+    password = CharField(required=False, max_length=1024)
+    sudo_password = CharField(required=False, max_length=1024)
+    ssh_keyfile = CharField(required=False, max_length=1024)
+
     class Meta:
         model = HostCredential
         fields = '__all__'
