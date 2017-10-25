@@ -17,7 +17,7 @@ from api.models import ScanJobResults, Results, ResultKeyValue
 class ResultKeyValueSerializer(ModelSerializer):
     """Serializer for the ResultKeyValue model"""
     key = CharField(required=True, max_length=64)
-    value = CharField(required=False, max_length=1024)
+    value = CharField(required=False, max_length=1024, allow_null=True)
 
     class Meta:
         model = ResultKeyValue

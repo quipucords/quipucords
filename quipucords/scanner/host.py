@@ -68,7 +68,11 @@ class HostScanner(DiscoveryScanner):
         dict_facts = callback.ansible_facts
         # pylint: disable=unused-variable
         for host, sys_fact in dict_facts.items():
-            facts.append(sys_fact)
+            new_sys_fact = {}
+            for fact_key, fact_value in sys_fact.items():
+                if fact_value:
+                    new_sys_fact[fact_key] = fact_value
+            facts.append(new_sys_fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
         logger.info('Host scan completed for %s.', self.scanjob)
