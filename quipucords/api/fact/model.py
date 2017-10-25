@@ -31,8 +31,8 @@ class Fact(models.Model):
     etc_release_name = models.CharField(max_length=64, unique=False)
     etc_release_version = models.CharField(max_length=64, unique=False)
     etc_release_release = models.CharField(max_length=128, unique=False)
-    virt_virt = models.CharField(max_length=64, unique=False)
-    virt_type = models.CharField(max_length=64, unique=False)
+    virt_virt = models.CharField(max_length=64, unique=False, null=True)
+    virt_type = models.CharField(max_length=64, unique=False, null=True)
     virt_num_guests = models.PositiveIntegerField(unique=False, null=True)
     virt_num_running_guests = models.PositiveIntegerField(
         unique=False, null=True)
