@@ -19,7 +19,7 @@ from fingerprinter import Engine
 class EngineTest(TestCase):
     """Tests Engine class"""
     # pylint: disable=no-self-use,too-many-arguments
-    # pylint: disable=too-many-locals,too-many-branches
+    # pylint: disable=too-many-locals,too-many-branches,invalid-name
 
     ################################################################
     # Helper function
