@@ -53,4 +53,4 @@ def process_fact_collection(sender, instance, **kwargs):
         else:
             logger.error('%s could not persist fingerprint. Fact: %s',
                          __name__, fingerprint_dict)
-            logger.error(serializer.errors)
+            logger.error('Errors: %s', serializer.errors)
