@@ -32,7 +32,7 @@
 
 - name: extract or default cpu.count fact
   set_fact:
-    cpu_count: "{{ internal_cpu_count_cmd['stdout_lines'][0] | default('Not Found')}}"
+    cpu_count: "{{ internal_cpu_count_cmd['stdout_lines'][0] | default(None)}}"
 
 - name: gather cpu.core_per_socket fact
   raw: cat /proc/cpuinfo | grep '^cpu cores\s*.' | sed -n -e 's/^.*cpu cores\s*.\s*//p'
@@ -41,7 +41,7 @@
 
 - name: extract or default cpu.core_per_socket fact
   set_fact:
-    cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd['stdout_lines'][0] | default('Not Found')}}"
+    cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd['stdout_lines'][0] | default(None)}}"
 
 - name: gather cpu.siblings fact
   raw: cat /proc/cpuinfo | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p'
@@ -50,11 +50,11 @@
 
 - name: extract or default cpu.siblings fact
   set_fact:
-    cpu_siblings: "{{ internal_cpu_siblings_cmd['stdout_lines'][0] | default('Not Found')}}"
+    cpu_siblings: "{{ internal_cpu_siblings_cmd['stdout_lines'][0] | default(None)}}"
 
 - name: determine cpu.hyperthreading fact
   set_fact:
-    cpu_hyperthreading: "{{ cpu_siblings != 'Not Found' and (cpu_siblings | int) == ((cpu_core_per_socket | int) * 2) }}"
+    cpu_hyperthreading: "{{ cpu_siblings != None and (cpu_siblings | int) == ((cpu_core_per_socket | int) * 2) }}"
 
 - name: initialize cpu.socket_count fact
   set_fact:

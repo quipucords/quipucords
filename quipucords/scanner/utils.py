@@ -123,7 +123,7 @@ def write_inventory(inventory):
     return write_to_yaml(inventory)
 
 
-def create_ansible_objects(inventory_file, forks=50):
+def create_ansible_objects(inventory_file, forks=5):
     """ Created the default ansible objects needed to run a playbook.
 
     :param inventory_file: The path to the inventory file

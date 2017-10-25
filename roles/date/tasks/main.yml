@@ -41,10 +41,6 @@
 
 - name: extract result value for date.yum_history
   set_fact:
-    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first | default('error') if internal_have_yum else 'N/A (yum not found)' }}"
+    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first | default(None) if internal_have_yum else 'N/A (yum not found)' }}"
   when: '"stdout_lines" in internal_date_yum_history_cmd'
 
-- name: handle failure value for date.yum_history
-  set_fact:
-    date_yum_history: "{{ 'error' if internal_have_yum else 'N/A (yum not found)' }}"
-  when: '"stdout_lines" not in internal_date_yum_history_cmd'

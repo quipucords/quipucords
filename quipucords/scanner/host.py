@@ -89,7 +89,9 @@ class HostScanner(DiscoveryScanner):
         response = requests.post(self.fact_endpoint, json=payload)
         data = response.json()
         msg = 'Failed to obtain fact_collection_id when reporting facts.'
-        assert 'id' in data, msg
+        if response.status_code != 201:
+            logger.error('Could not create facts. Errors: %s', data)
+            assert 'id' in data, msg
         return data['id']
 
     def _store_host_scan_success(self, facts, fact_collection_id):
