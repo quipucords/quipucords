@@ -150,6 +150,8 @@ class NetworkProfileSerializer(ModelSerializer):
         bit_range = r'(3[0-2]|[1-2][0-9]|[0-9])'
         relaxed_ip_pattern = r'[0-9]*\.[0-9]*\.[0-9\[\]:]*\.[0-9\[\]:]*'
         relaxed_cidr_pattern = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*'
+        relaxed_invalid_ip_range = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*-' \
+                                   r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*'
 
         # type IP:          192.168.0.1
         # type CIDR:        192.168.0.0/16
@@ -180,9 +182,20 @@ class NetworkProfileSerializer(ModelSerializer):
 
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
+            invalid_ip_range_match = re.match(relaxed_invalid_ip_range,
+                                              host_range)
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
-            if is_likely_ip or is_likely_cidr:
+            is_likely_invalid_ip_range = (invalid_ip_range_match and
+                                          invalid_ip_range_match.end() ==
+                                          len(host_range))
+
+            if is_likely_invalid_ip_range:
+                err_message = '{} is not a valid IP range format'
+                result = ValidationError(err_message
+                                         .format(host_range))
+
+            elif is_likely_ip or is_likely_cidr:
                 # This is formatted like an IP or CIDR
                 # (e.g. #.#.#.# or #.#.#.#/#)
                 for reg in ip_regex_list:

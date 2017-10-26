@@ -163,6 +163,19 @@ class NetworkProfileTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(response.data['hosts']), len(hosts))
 
+    def test_create_bad_host_pattern(self):
+        """Test a invalid host pattern."""
+
+        hosts = ['10.1.1.1-10.1.1.254']
+
+        response = self.create(
+            {'name': 'netprof1',
+             'hosts': hosts,
+             'ssh_port': '22',
+             'credentials': [self.cred_for_upload]})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(response.data['hosts']), len(hosts))
+
     def test_create_no_ssh_port(self):
         """A NetworkProfile needs an ssh port."""
 
