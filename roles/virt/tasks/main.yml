@@ -173,7 +173,7 @@
   when: 'internal_have_virsh'
 
 - name: extract output virt.num_guests fact
-  set_fact: virt_num_guests="{{ virt_num_guests['stdout_lines'][0] if internal_have_virsh else 'N/A (virsh not found)' }}"
+  set_fact: virt_num_guests="{{ virt_num_guests['stdout_lines'][0] if internal_have_virsh else None }}"
 
 - name: gather virt.num_running_guests fact
   raw: virsh -c qemu:///system --readonly list --uuid | wc -l
@@ -182,4 +182,4 @@
   when: 'internal_have_virsh'
 
 - name: extract output virt.num_running_guests fact
-  set_fact: virt_num_running_guests="{{ internal_virt_num_running_guests['stdout_lines'][0] if internal_have_virsh else 'N/A (virsh not found)' }}"
+  set_fact: virt_num_running_guests="{{ internal_virt_num_running_guests['stdout_lines'][0] if internal_have_virsh else None }}"
