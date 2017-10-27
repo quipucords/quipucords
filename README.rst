@@ -77,7 +77,7 @@ following command to setup an virtual environment::
 Installing Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^
 From within the local clone root directory run the following command to install
-dependencies needed for development and testing purposes::
+dependencies needed for development and testing purposes:
 
 First, you need to collect some packages available through either `yum` (RHEL)
 or `dnf` (fedora)::
@@ -108,6 +108,8 @@ Running Server
 In order to run the server execute the following command::
 
     make serve
+
+Note if you are running on Mac OS, you need to increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Piping data to Elasticsearch
