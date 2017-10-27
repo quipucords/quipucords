@@ -47,9 +47,7 @@ def process_fact_collection(sender, instance, **kwargs):
     for fingerprint_dict in fingerprints_list:
         serializer = FingerprintSerializer(data=fingerprint_dict)
         if serializer.is_valid():
-            fingerprint = serializer.save()
-            logger.debug('%s persisted fingerprint: %s',
-                         __name__, fingerprint)
+            serializer.save()
         else:
             logger.error('%s could not persist fingerprint. Fact: %s',
                          __name__, fingerprint_dict)

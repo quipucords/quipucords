@@ -45,6 +45,10 @@ def index_fingerprint(sender, instance, **kwargs):
     :returns: None
     """
     # pylint: disable=unused-argument
+
+    timestamp = time.time()
+    timestamp = int(round(timestamp * 1000))
+
     es_fingerprint = FingerPrintIndex(
         fact_collection=instance.id,
         connection_host=instance.connection_host,
@@ -65,12 +69,10 @@ def index_fingerprint(sender, instance, **kwargs):
         virtualized_type=instance.virtualized_type,
         virtualized_num_guests=instance.virtualized_num_guests,
         virtualized_num_running_guests=instance.virtualized_num_running_guests,
-        timestamp=int(round(time.time() * 1000)))
+        timestamp=timestamp)
 
     try:
         es_fingerprint.save()
-        logger.debug('%s persisted fingerprint in ES: %s',
-                     __name__, es_fingerprint)
     except RequestError as error:
         logger.error('%s failed to persist fingerprint: %s\n%s',
                      __name__, es_fingerprint, error)
