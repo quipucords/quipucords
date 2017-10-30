@@ -15,6 +15,7 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         CharField)
 from api.models import HostCredential
+import api.messages as messages
 
 
 def expand_filepath(filepath):
@@ -45,19 +46,16 @@ class HostCredentialSerializer(ModelSerializer):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         if not (password or ssh_keyfile):
-            raise ValidationError(_('A host credential must have either'
-                                    ' a password or an ssh_keyfile.'))
+            raise ValidationError(_(messages.HC_PWD_OR_KEYFILE))
 
         if password and ssh_keyfile:
-            raise ValidationError(_('A host credential must have either'
-                                    ' a password or an ssh_keyfile, not '
-                                    'both.'))
+            raise ValidationError(_(messages.HC_NOT_BOTH))
 
         if ssh_keyfile:
             keyfile = expand_filepath(ssh_keyfile)
             if not os.path.isfile(keyfile):
-                raise ValidationError(_('ssh_keyfile, %s, is not a valid file'
-                                        ' on the system.' % (ssh_keyfile)))
+                raise ValidationError(_(messages.HC_KEY_INVALID
+                                        % (ssh_keyfile)))
             else:
                 attrs['ssh_keyfile'] = keyfile
 

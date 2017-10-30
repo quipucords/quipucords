@@ -19,6 +19,7 @@ from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
 from api.models import HostCredential, HostRange, NetworkProfile
+import api.messages as messages
 
 
 class HostRangeField(SlugRelatedField):
@@ -32,7 +33,7 @@ class HostRangeField(SlugRelatedField):
 
     def to_internal_value(self, data):
         if not isinstance(data, str):
-            raise ValidationError('A host range must be a string.')
+            raise ValidationError(_(messages.NP_HOST_AS_STRING))
 
         return {'host_range': data}
 
@@ -53,7 +54,7 @@ class CredentialsField(PrimaryKeyRelatedField):
     def display_value(self, instance):
         display = instance
         if isinstance(instance, HostCredential):
-            display = 'Credential: %s' % instance.name
+            display = _(messages.NP_CRED_DISPLAY % instance.name)
         return display
 
 
@@ -131,8 +132,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_name(name):
         """Validate the name of the NetworkProfile."""
         if not isinstance(name, str) or not name.isprintable():
-            raise ValidationError(_('Network profile must have printable'
-                                    ' name.'))
+            raise ValidationError(_(messages.NP_NAME_VALIDATION))
 
         return name
 
@@ -141,8 +141,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
         if not hosts:
-            raise ValidationError(_('Network profile must have at least one '
-                                    'host.'))
+            raise ValidationError(_(messages.NP_MIN_HOST))
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
@@ -191,9 +190,9 @@ class NetworkProfileSerializer(ModelSerializer):
                                           len(host_range))
 
             if is_likely_invalid_ip_range:
-                err_message = '{} is not a valid IP range format'
-                result = ValidationError(err_message
-                                         .format(host_range))
+                err_message = _(messages.NP_INVALID_RANGE_FORMAT %
+                                (host_range,))
+                result = ValidationError(err_message)
 
             elif is_likely_ip or is_likely_cidr:
                 # This is formatted like an IP or CIDR
@@ -216,9 +215,9 @@ class NetworkProfileSerializer(ModelSerializer):
                         except ValidationError as validate_error:
                             result = validate_error
                     else:
-                        err_message = '{} is not a valid IP or CIDR pattern'
-                        result = ValidationError(err_message
-                                                 .format(host_range))
+                        err_message = _(messages.NP_INVALID_RANGE_CIDR %
+                                        (host_range,))
+                        result = ValidationError(err_message)
             else:
                 # Possibly a host addr
                 for reg in host_regex_list:
@@ -227,8 +226,8 @@ class NetworkProfileSerializer(ModelSerializer):
                         result = host
                         break
                 if result is None:
-                    result = ValidationError(
-                        '{} is invalid host'.format(host_range))
+                    err_message = _(messages.NP_INVALID_HOST % (host_range,))
+                    result = ValidationError(err_message)
 
             if isinstance(result, ValidationError):
                 host_errors.append(result)
@@ -264,39 +263,38 @@ class NetworkProfileSerializer(ModelSerializer):
         # different way.
         cidr_like = r'[0-9\.]*/[0-9]+'
         if not re.match(cidr_like, ip_range):
-            raise ValidationError(
-                '{} does not match CIDR {}'.format(ip_range, str(cidr_like)))
+            err_msg = _(messages.NP_NO_CIDR_MATCH % (ip_range, str(cidr_like)))
+            raise ValidationError(err_msg)
 
         try:
             base_address, prefix_bits = ip_range.split('/')
         except ValueError:
-            err_msg = '{} has invalid format.'.format(ip_range)
+            err_msg = _(messages.NP_CIDR_INVALID % (ip_range,))
             raise ValidationError(err_msg)
 
         prefix_bits = int(prefix_bits)
 
         if prefix_bits < 0 or prefix_bits > 32:
-            err_msg = '{0} has bit mask length {1}. {1} is not in ' \
-                'the valid range [0,32].'.format(ip_range, prefix_bits)
+            err_msg = _(messages.NP_CIDR_BIT_MASK %
+                        {'ip_range': ip_range, 'prefix_bits': prefix_bits})
             raise ValidationError(err_msg)
 
         octet_strings = base_address.split('.')
         if len(octet_strings) != 4:
-            err_msg = '{} does not have exactly 4 octets'.format(ip_range)
+            err_msg = _(messages.NP_FOUR_OCTETS % (ip_range,))
             raise ValidationError(err_msg)
 
         octets = [None] * 4
         for i in range(4):
             if not octet_strings[i]:
-                err_msg = '{} has an empty octet'.format(ip_range)
+                err_msg = _(messages.NP_EMPTY_OCTET % (ip_range,))
                 raise ValidationError(err_msg)
 
             val = int(octet_strings[i])
             if val < 0 or val > 255:
                 # pylint: disable=too-many-locals
-                err_msg = ('{0} has invalid octet value of {1}.'
-                           ' {1} is not in the range [0,255]')\
-                    .format(ip_range, val)
+                err_msg = _(messages.NP_CIDR_RANGE %
+                            {'ip_range': ip_range, 'octet': val})
                 raise ValidationError(err_msg)
             octets[i] = val
 
@@ -331,8 +329,7 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_ssh_port(ssh_port):
         """validate the ssh port."""
         if not ssh_port or ssh_port < 0 or ssh_port > 65536:
-            raise ValidationError(_('Network profile must have ssh port in'
-                                    ' range [0, 65535]'))
+            raise ValidationError(_(messages.NP_INVALID_PORT))
 
         return ssh_port
 
@@ -340,7 +337,6 @@ class NetworkProfileSerializer(ModelSerializer):
     def validate_credentials(credentials):
         """Make sure the credentials list is present."""
         if not credentials:
-            raise ValidationError(_('Network profile must have at least one'
-                                    'set of credentials.'))
+            raise ValidationError(_(messages.NP_MIN_CREDS))
 
         return credentials

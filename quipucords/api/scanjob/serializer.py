@@ -16,6 +16,7 @@ from rest_framework.serializers import (ModelSerializer,
                                         ValidationError,
                                         ChoiceField)
 from api.models import NetworkProfile, ScanJob
+import api.messages as messages
 
 
 class NetworkProfileField(PrimaryKeyRelatedField):
@@ -45,6 +46,6 @@ class ScanJobSerializer(ModelSerializer):
     def validate_profile(profile):
         """Make sure the profile is present."""
         if not profile:
-            raise ValidationError(_('Scan must have a network profile.'))
+            raise ValidationError(_(messages.SJ_REQ_PROFILE))
 
         return profile

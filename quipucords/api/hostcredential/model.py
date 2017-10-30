@@ -12,8 +12,10 @@
    These models are used in the REST definitions
 """
 
+from django.utils.translation import ugettext as _
 from django.db import models
 from api.vault import encrypt_data_as_unicode
+import api.messages as messages
 
 
 class HostCredential(models.Model):
@@ -45,4 +47,4 @@ class HostCredential(models.Model):
         super().update(request, *args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Host Credentials'
+        verbose_name_plural = _(messages.PLURAL_HOST_CREDENTIALS_MSG)

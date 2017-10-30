@@ -12,8 +12,10 @@
    These models are used in the REST definitions
 """
 
+from django.utils.translation import ugettext as _
 from django.db import models
 from api.scanjob.model import ScanJob
+import api.messages as messages
 
 
 class ResultKeyValue(models.Model):
@@ -27,7 +29,7 @@ class ResultKeyValue(models.Model):
                                                 self.value)
 
     class Meta:
-        verbose_name_plural = 'Result Key Values'
+        verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
 class Results(models.Model):
@@ -41,7 +43,7 @@ class Results(models.Model):
                                                   self.columns)
 
     class Meta:
-        verbose_name_plural = 'Results'
+        verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
 class ScanJobResults(models.Model):
@@ -58,4 +60,4 @@ class ScanJobResults(models.Model):
                                                      self.results)
 
     class Meta:
-        verbose_name_plural = 'Scan Results'
+        verbose_name_plural = _(messages.PLURAL_SCAN_RESULTS_MSG)
