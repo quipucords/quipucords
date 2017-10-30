@@ -187,6 +187,9 @@ LOGGING = {
 USE_ELASTICSEARCH = os.environ.get('USE_ELASTICSEARCH', False)
 ES_HOSTS = os.environ.get('ES_HOSTS', 'http://localhost:9200')
 
+# Reverse default behavior to avoid host key checking
+os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
+
 # Elasticsearch configuration
 ES_CONFIGURATION = {
     'fingerprint_index_name': 'fingerprints_index',
