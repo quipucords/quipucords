@@ -19,6 +19,7 @@ from rest_framework.serializers import (ModelSerializer,
                                         DateField,
                                         NullBooleanField)
 from api.models import Fact, FactCollection
+import api.messages as messages
 from django.utils.translation import ugettext as _
 
 
@@ -72,5 +73,5 @@ class FactCollectionSerializer(ModelSerializer):
     def validate_facts(facts):
         """Make sure the facts list is present."""
         if not facts:
-            raise ValidationError(_('A least one fact is required.'))
+            raise ValidationError(_(messages.VALIDATE_FACTS_MSG))
         return facts

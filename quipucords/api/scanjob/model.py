@@ -11,9 +11,10 @@
 """Defines the models used with the API application.
    These models are used in the REST definitions
 """
-
+from django.utils.translation import ugettext as _
 from django.db import models
 from api.networkprofile.model import NetworkProfile
+import api.messages as messages
 
 
 class ScanJob(models.Model):
@@ -50,4 +51,4 @@ class ScanJob(models.Model):
                                                       self.profile)
 
     class Meta:
-        verbose_name_plural = 'Scan Jobs'
+        verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
