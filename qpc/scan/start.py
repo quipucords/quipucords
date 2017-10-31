@@ -20,6 +20,8 @@ from qpc.request import POST, GET, request
 from qpc.clicommand import CliCommand
 import qpc.network as network
 import qpc.scan as scan
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -38,7 +40,8 @@ class ScanStartCommand(CliCommand):
                             scan.SCAN_URI, [codes.created])
         self.parser.add_argument('--profile', dest='profile',
                                  metavar='PROFILE',
-                                 help='profile name', required=True)
+                                 help=_(messages.PROFILE_NAME_HELP),
+                                 required=True)
         self.profile_id = None
 
     def _validate_args(self):
@@ -55,10 +58,10 @@ class ScanStartCommand(CliCommand):
                 profile_entry = json_data[0]
                 self.profile_id = profile_entry['id']
             else:
-                print('Profile "%s" does not exist' % self.args.profile)
+                print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.profile))
                 sys.exit(1)
         else:
-            print('Profile "%s" does not exist' % self.args.profile)
+            print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.profile))
             sys.exit(1)
 
     def _build_data(self):
@@ -73,4 +76,4 @@ class ScanStartCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        print('Scan "%s" started' % json_data['id'])
+        print(_(messages.SCAN_STARTED % json_data['id']))

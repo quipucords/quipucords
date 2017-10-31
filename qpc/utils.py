@@ -16,6 +16,8 @@ import logging
 import os
 import json
 from xdg.BaseDirectory import xdg_data_home, xdg_config_home
+from qpc.translation import _ as t
+import qpc.messages as messages
 
 QPC_PATH = 'qpc'
 CONFIG_DIR = os.path.join(xdg_config_home, QPC_PATH)
@@ -115,7 +117,8 @@ def read_in_file(filename):
             with open(input_path, 'r') as in_file:
                 result = in_file.read().splitlines()
         except EnvironmentError as err:
-            log.error('Error reading from %s: %s', input_path, err)
+            err_msg = t(messages.READ_FILE_ERROR % (input_path, err))
+            log.error(err_msg)
         return result
     else:
-        raise ValueError('Input %s was not a file.' % input_path)
+        raise ValueError(t(messages.NOT_A_FILE % input_path))
