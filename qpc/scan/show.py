@@ -19,6 +19,8 @@ from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
 from qpc.request import GET
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -36,7 +38,7 @@ class ScanShowCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), GET,
                             scan.SCAN_URI, [codes.ok])
         self.parser.add_argument('--id', dest='id', metavar='ID',
-                                 help='scan identifier', required=True)
+                                 help=_(messages.SCAN_ID_HELP), required=True)
 
     def _validate_args(self):
         CliCommand._validate_args(self)
@@ -49,5 +51,5 @@ class ScanShowCommand(CliCommand):
         print(data)
 
     def _handle_response_error(self):
-        print('Scan "%s" does not exist' % self.args.id)
+        print(_(messages.SCAN_DOES_NOT_EXIST % self.args.id))
         sys.exit(1)

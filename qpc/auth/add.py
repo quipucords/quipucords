@@ -19,6 +19,8 @@ from qpc.request import POST
 from qpc.clicommand import CliCommand
 import qpc.auth as auth
 from qpc.auth.utils import validate_sshkeyfile, build_credential_payload
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -36,22 +38,22 @@ class AuthAddCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), POST,
                             auth.AUTH_URI, [codes.created])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='auth credential name', required=True)
+                                 help=_(messages.AUTH_NAME_HELP),
+                                 required=True)
         self.parser.add_argument('--username', dest='username',
                                  metavar='USERNAME',
-                                 help='user name for authenticating'
-                                      ' against target system', required=True)
+                                 help=_(messages.AUTH_USER_HELP),
+                                 required=True)
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--password', dest='password',
                            action='store_true',
-                           help='password for authenticating against'
-                                ' target system')
+                           help=_(messages.AUTH_PWD_HELP))
         group.add_argument('--sshkeyfile', dest='filename',
                            metavar='FILENAME',
-                           help='file containing SSH key')
+                           help=_(messages.AUTH_SSH_HELP))
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
-                                 help='password for running sudo')
+                                 help=_(messages.AUTH_SUDO_HELP))
 
     def _validate_args(self):
         CliCommand._validate_args(self)
@@ -69,4 +71,4 @@ class AuthAddCommand(CliCommand):
         self.req_payload = build_credential_payload(self.args)
 
     def _handle_response_success(self):
-        print('Auth "%s" was added' % self.args.name)
+        print(_(messages.AUTH_ADDED % self.args.name))

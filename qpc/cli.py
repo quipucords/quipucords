@@ -31,6 +31,8 @@ from qpc.network.edit import NetworkEditCommand
 from qpc.scan.start import ScanStartCommand
 from qpc.scan.list import ScanListCommand
 from qpc.scan.show import ScanShowCommand
+from qpc.translation import _
+import qpc.messages as messages
 from . import __version__
 
 
@@ -48,8 +50,7 @@ class CLI(object):
         self.parser.add_argument('--version', action='version',
                                  version=__version__)
         self.parser.add_argument('-v', dest='verbosity', action='count',
-                                 help='Verbose mode. Use up to -vvvv for '
-                                 'more verbosity.')
+                                 help=_(messages.VERBOSITY_HELP))
         self.subparsers = self.parser.add_subparsers(dest='subcommand')
         self.name = name
         self.args = None

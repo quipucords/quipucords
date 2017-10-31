@@ -19,6 +19,8 @@ from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
 import qpc.network as network
 from qpc.request import GET
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -39,7 +41,7 @@ class NetworkListCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         if json_data == []:
-            print('No profiles exist yet.')
+            print(_(messages.PROFILE_LIST_NO_PROFILES))
         else:
             data = pretty_print(json_data)
             print(data)
