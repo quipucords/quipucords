@@ -34,8 +34,10 @@ class HostCredentialSerializer(ModelSerializer):
     """Serializer for the HostCredential model"""
     name = CharField(required=True, max_length=64)
     username = CharField(required=True, max_length=64)
-    password = CharField(required=False, max_length=1024, allow_null=True)
-    sudo_password = CharField(required=False, max_length=1024, allow_null=True)
+    password = CharField(required=False, max_length=1024, allow_null=True,
+                         style={'input_type': 'password'})
+    sudo_password = CharField(required=False, max_length=1024, allow_null=True,
+                              style={'input_type': 'password'})
     ssh_keyfile = CharField(required=False, max_length=1024, allow_null=True)
 
     class Meta:
