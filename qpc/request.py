@@ -14,6 +14,8 @@
 import sys
 import requests
 from qpc.utils import log
+from qpc.translation import _
+from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
 
 # Need to determine how we get this information; config file at install?
 BASE_URL = 'http://127.0.0.1:8000'
@@ -22,18 +24,6 @@ POST = 'POST'
 GET = 'GET'
 PATCH = 'PATCH'
 DELETE = 'DELETE'
-
-
-UNKNOWN_ERROR_MSG = 'An unknown error occurred while attempting to create' \
-                    ' the host credential.'
-
-CONNECTION_ERROR_MSG = 'A connection error has occurred attempting to' \
-                       ' communicate with the server. Check the ' \
-                       'configuration and/or the status of the server.'
-
-SSL_ERROR_MSG = 'A connection error has occurred attempting to' \
-                ' communicate with the server over "https". Check the' \
-                ' configuration and/or the status of the server.'
 
 
 def post(path, payload):
@@ -104,13 +94,13 @@ def request(method, path, params=None, payload=None, parser=None):
             parser.print_help()
             sys.exit(1)
     except requests.exceptions.SSLError as ssl_error:
-        print(SSL_ERROR_MSG)
+        print(_(SSL_ERROR_MSG))
         log.error(ssl_error)
         if parser is not None:
             parser.print_help()
         sys.exit(1)
     except requests.exceptions.ConnectionError as conn_err:
-        print(CONNECTION_ERROR_MSG)
+        print(_(CONNECTION_ERROR_MSG))
         log.error(conn_err)
         if parser is not None:
             parser.print_help()

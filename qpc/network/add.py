@@ -21,6 +21,8 @@ from qpc.utils import read_in_file
 import qpc.network as network
 from qpc.network.utils import validate_port, build_profile_payload
 import qpc.auth as auth
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -38,18 +40,19 @@ class NetworkAddCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), POST,
                             network.NETWORK_URI, [codes.created])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='profile name', required=True)
+                                 help=_(messages.PROFILE_NAME_HELP),
+                                 required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
-                                 help='IP range to scan.'
-                                      ' See "man qpc" for supported formats.',
+                                 help=_(messages.PROFILE_HOSTS_HELP),
                                  required=True)
         self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
-                                 nargs='+', default=[], help='credentials to '
-                                 'associate with profile', required=True)
+                                 nargs='+', default=[],
+                                 help=_(messages.PROFILE_AUTHS_HELP),
+                                 required=True)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
-                                 help='SSHPORT for connection; default=22',
+                                 help=_(messages.PROFILE_SSH_PORT_HELP),
                                  default=22)
 
     def _validate_args(self):
@@ -78,14 +81,11 @@ class NetworkAddCommand(CliCommand):
                     cred_name = cred_entry['name']
                     self.args.auth.remove(cred_name)
                 not_found_str = ','.join(self.args.auth)
-                print('An error occurred while processing the "--auth" input'
-                      ' values. References for the following auth could not'
-                      ' be found: %s. Failed to add profile "%s".'
-                      % (not_found_str, self.args.name))
+                print(_(messages.PROFILE_ADD_AUTHS_NOT_FOUND %
+                        (not_found_str, self.args.name)))
                 sys.exit(1)
         else:
-            print('An error occurred while processing the "--auth" input'
-                  ' values. Failed to add profile "%s"' % self.args.name)
+            print(_(messages.PROFILE_ADD_AUTH_PROCESS_ERR % self.args.name))
             sys.exit(1)
 
     def _build_data(self):
@@ -96,4 +96,4 @@ class NetworkAddCommand(CliCommand):
         self.req_payload = build_profile_payload(self.args)
 
     def _handle_response_success(self):
-        print('Profile "%s" was added' % self.args.name)
+        print(_(messages.PROFILE_ADDED % self.args.name))

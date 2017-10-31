@@ -20,6 +20,8 @@ from qpc.utils import handle_error_response
 from qpc.clicommand import CliCommand
 import qpc.network as network
 from qpc.request import GET, DELETE, request
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -38,9 +40,9 @@ class NetworkClearCommand(CliCommand):
                             network.NETWORK_URI, [codes.ok])
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--name', dest='name', metavar='NAME',
-                           help='profile name')
+                           help=_(messages.PROFILE_NAME_HELP))
         group.add_argument('--all', dest='all', action='store_true',
-                           help='remove all network profiles')
+                           help=_(messages.PROFILE_CLEAR_ALL_HELP))
 
     def _build_req_params(self):
         if self.args.name:
@@ -55,18 +57,18 @@ class NetworkClearCommand(CliCommand):
         if response.status_code == codes.no_content:
             deleted = True
             if print_out:
-                print('Profile "%s" was removed' % name)
+                print(_(messages.PROFILE_REMOVED % name))
         else:
             handle_error_response(response)
             if print_out:
-                print('Failed to remove profile "%s"' % name)
+                print(_(messages.PROFILE_FAILED_TO_REMOVE % name))
         return deleted
 
     def _handle_response_success(self):
         json_data = self.response.json()
         response_len = len(json_data)
         if self.args.name and response_len == 0:
-            print('Profile "%s" was not found' % self.args.name)
+            print(_(messages.PROFILE_NOT_FOUND % self.args.name))
             sys.exit(1)
         elif self.args.name and response_len == 1:
             # delete single credential
@@ -74,7 +76,7 @@ class NetworkClearCommand(CliCommand):
             if self._delete_entry(entry) is False:
                 sys.exit(1)
         elif response_len == 0:
-            print("No profiles exist to be removed")
+            print(_(messages.PROFILE_NO_PROFILES_TO_REMOVE))
             sys.exit(1)
         else:
             # remove all entries
@@ -84,9 +86,7 @@ class NetworkClearCommand(CliCommand):
                     remove_error.append(entry['name'])
             if remove_error != []:
                 cred_err = ','.join(remove_error)
-                print('Some profiles were removed, however an error'
-                      ' occurred removing the following profiles: %s'
-                      % cred_err)
+                print(_(messages.PROFILE_PARTIAL_REMOVE % cred_err))
                 sys.exit(1)
             else:
-                print('All profiles were removed')
+                print(messages.PROFILE_CLEAR_ALL_SUCCESS)

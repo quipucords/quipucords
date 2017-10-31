@@ -20,6 +20,8 @@ from qpc.utils import handle_error_response
 from qpc.clicommand import CliCommand
 import qpc.auth as auth
 from qpc.request import GET, DELETE, request
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -37,9 +39,9 @@ class AuthClearCommand(CliCommand):
                             auth.AUTH_URI, [codes.ok])
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--name', dest='name', metavar='NAME',
-                           help='auth credential name')
+                           help=_(messages.AUTH_NAME_HELP))
         group.add_argument('--all', dest='all', action='store_true',
-                           help='remove all credentials')
+                           help=_(messages.AUTH_CLEAR_ALL_HELP))
 
     def _build_req_params(self):
         if self.args.name:
@@ -54,18 +56,18 @@ class AuthClearCommand(CliCommand):
         if response.status_code == codes.no_content:
             deleted = True
             if print_out:
-                print('Auth "%s" was removed' % name)
+                print(_(messages.AUTH_REMOVED % name))
         else:
             handle_error_response(response)
             if print_out:
-                print('Failed to remove credential "%s"' % name)
+                print(_(messages.AUTH_FAILED_TO_REMOVE % name))
         return deleted
 
     def _handle_response_success(self):
         json_data = self.response.json()
         response_len = len(json_data)
         if self.args.name and response_len == 0:
-            print('Auth "%s" was not found' % self.args.name)
+            print(_(messages.AUTH_NOT_FOUND % self.args.name))
             sys.exit(1)
         elif self.args.name and response_len == 1:
             # delete single credential
@@ -73,7 +75,7 @@ class AuthClearCommand(CliCommand):
             if self._delete_entry(entry) is False:
                 sys.exit(1)
         elif response_len == 0:
-            print("No credentials exist to be removed")
+            print(_(messages.AUTH_NO_CREDS_TO_REMOVE))
             sys.exit(1)
         else:
             # remove all entries
@@ -83,9 +85,7 @@ class AuthClearCommand(CliCommand):
                     remove_error.append(entry['name'])
             if remove_error != []:
                 cred_err = ','.join(remove_error)
-                print('Some credentials were removed, however an error'
-                      ' occurred removing the following credentials: %s'
-                      % cred_err)
+                print(_(messages.AUTH_PARTIAL_REMOVE % cred_err))
                 sys.exit(1)
             else:
-                print('All credentials were removed')
+                print(_(messages.AUTH_CLEAR_ALL_SUCCESS))
