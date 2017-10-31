@@ -22,6 +22,8 @@ from qpc.utils import read_in_file
 import qpc.auth as auth
 import qpc.network as network
 from qpc.network.utils import validate_port, build_profile_payload
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -39,26 +41,26 @@ class NetworkEditCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), PATCH,
                             network.NETWORK_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='profile name', required=True)
+                                 help=_(messages.PROFILE_NAME_HELP),
+                                 required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
-                                 help='IP range to scan.'
-                                      ' See "man qpc" for supported formats.',
+                                 help=_(messages.PROFILE_HOSTS_HELP),
                                  required=False)
         self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
-                                 nargs='+', default=[], help='credentials to '
-                                 'associate with profile', required=False)
+                                 nargs='+', default=[],
+                                 help=_(messages.PROFILE_AUTHS_HELP),
+                                 required=False)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
-                                 help='SSHPORT for connection; default=22')
+                                 help=_(messages.PROFILE_SSH_PORT_HELP))
 
     # pylint: disable=too-many-branches
     def _validate_args(self):
         CliCommand._validate_args(self)
 
         if not(self.args.hosts or self.args.auth or self.args.ssh_port):
-            print('No arguments provided to edit profile %s' %
-                  (self.args.name))
+            print(_(messages.PROFILE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
 
@@ -80,10 +82,10 @@ class NetworkEditCommand(CliCommand):
                 profile_entry = json_data[0]
                 self.req_path = self.req_path + str(profile_entry['id']) + '/'
             else:
-                print('Profile "%s" does not exist' % self.args.name)
+                print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.name))
                 sys.exit(1)
         else:
-            print('Profile "%s" does not exist' % self.args.name)
+            print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
 
         # check for valid auth values
@@ -104,14 +106,12 @@ class NetworkEditCommand(CliCommand):
                         cred_name = cred_entry['name']
                         self.args.auth.remove(cred_name)
                     not_found_str = ','.join(self.args.auth)
-                    print('An error occurred while processing the "--auth" '
-                          'input  values. References for the following auth '
-                          'could not be found: %s. Failed to edit profile '
-                          '"%s".' % (not_found_str, self.args.name))
+                    print(_(messages.PROFILE_EDIT_AUTHS_NOT_FOUND %
+                            (not_found_str, self.args.name)))
                     sys.exit(1)
             else:
-                print('An error occurred while processing the "--auth" input'
-                      ' values. Failed to edit profile "%s"' % self.args.name)
+                print(_(messages.PROFILE_EDIT_AUTH_PROCESS_ERR %
+                        self.args.name))
                 sys.exit(1)
 
     def _build_data(self):
@@ -122,4 +122,4 @@ class NetworkEditCommand(CliCommand):
         self.req_payload = build_profile_payload(self.args, add_none=False)
 
     def _handle_response_success(self):
-        print('Profile "%s" was updated' % self.args.name)
+        print(_(messages.PROFILE_UPDATED % self.args.name))

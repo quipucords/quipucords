@@ -20,6 +20,8 @@ from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
 import qpc.auth as auth
 from qpc.auth.utils import validate_sshkeyfile, build_credential_payload
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -37,30 +39,29 @@ class AuthEditCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), PATCH,
                             auth.AUTH_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='auth credential name', required=True)
+                                 help=_(messages.AUTH_NAME_HELP),
+                                 required=True)
         self.parser.add_argument('--username', dest='username',
                                  metavar='USERNAME',
-                                 help='user name for authenticating'
-                                      ' against target system', required=False)
+                                 help=_(messages.AUTH_USER_HELP),
+                                 required=False)
         group = self.parser.add_mutually_exclusive_group(required=False)
         group.add_argument('--password', dest='password',
                            action='store_true',
-                           help='password for authenticating against'
-                                ' target system')
+                           help=_(messages.AUTH_PWD_HELP))
         group.add_argument('--sshkeyfile', dest='filename',
                            metavar='FILENAME',
-                           help='file containing SSH key')
+                           help=_(messages.AUTH_SSH_HELP))
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
-                                 help='password for running sudo')
+                                 help=_(messages.AUTH_SUDO_HELP))
 
     def _validate_args(self):
         CliCommand._validate_args(self)
 
         if not(self.args.username or self.args.password or
                self.args.sudo_password or self.args.filename):
-            print('No arguments provided to edit credential %s' %
-                  (self.args.name))
+            print(_(messages.AUTH_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
 
@@ -79,10 +80,10 @@ class AuthEditCommand(CliCommand):
                 cred_entry = json_data[0]
                 self.req_path = self.req_path + str(cred_entry['id']) + '/'
             else:
-                print('Auth "%s" does not exist' % self.args.name)
+                print(_(messages.AUTH_DOES_NOT_EXIST % self.args.name))
                 sys.exit(1)
         else:
-            print('Auth "%s" does not exist' % self.args.name)
+            print(_(messages.AUTH_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
 
     def _build_data(self):
@@ -93,4 +94,4 @@ class AuthEditCommand(CliCommand):
         self.req_payload = build_credential_payload(self.args, add_none=False)
 
     def _handle_response_success(self):
-        print('Auth "%s" was updated' % self.args.name)
+        print(_(messages.AUTH_UPDATED % self.args.name))

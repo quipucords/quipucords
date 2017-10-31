@@ -20,6 +20,8 @@ from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
 import qpc.network as network
 from qpc.request import GET
+from qpc.translation import _
+import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
@@ -37,7 +39,8 @@ class NetworkShowCommand(CliCommand):
                             subparsers.add_parser(self.ACTION), GET,
                             network.NETWORK_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help='profile name', required=True)
+                                 help=_(messages.PROFILE_NAME_HELP),
+                                 required=True)
 
     def _build_req_params(self):
         self.req_params = {'name': self.args.name}
@@ -49,5 +52,5 @@ class NetworkShowCommand(CliCommand):
             data = pretty_print(cred_entry)
             print(data)
         else:
-            print('Profile "%s" does not exist' % self.args.name)
+            print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)

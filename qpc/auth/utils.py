@@ -15,6 +15,8 @@ from __future__ import print_function
 import os
 import sys
 from getpass import getpass
+from qpc.translation import _
+import qpc.messages as messages
 
 
 def validate_sshkeyfile(keyfile, parser):
@@ -26,9 +28,7 @@ def validate_sshkeyfile(keyfile, parser):
     """
     keyfile_path = os.path.abspath(os.path.normpath(keyfile))
     if not os.path.isfile(keyfile_path):
-        print('The file path provided, %s, could not be found on the '
-              'system. Please provide a valid location for the '
-              '"--sshkeyfile" argument.' % (keyfile))
+        print(_(messages.VALIDATE_SSHKEY % (keyfile)))
         parser.print_help()
         sys.exit(1)
     else:
@@ -45,13 +45,13 @@ def get_password(args, req_payload, add_none=True):
     :returns: the updated dictionary
     """
     if args.password:
-        print('Provide connection password.')
+        print(_(messages.CONN_PASSWORD))
         pass_prompt = getpass()
         req_payload['password'] = pass_prompt or None
     elif add_none:
         req_payload['password'] = None
     if args.sudo_password:
-        print('Provide password for sudo.')
+        print(_(messages.SUDO_PASSWORD))
         pass_prompt = getpass()
         req_payload['sudo_password'] = pass_prompt or None
     elif add_none:
