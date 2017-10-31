@@ -50,13 +50,13 @@ The python packages required for running quipucords on a system can be found in
  quipucords from source can be found in the ``requirements.txt`` and
  ``dev-requirements.txt`` files.
 
- Command Syntax & Usage
- ----------------------
- The complete list of options for each command and subcommand are listed in the
- qpc manpage with other usage examples.
+Command Syntax & Usage
+----------------------
+The complete list of options for each command and subcommand are listed in the
+qpc manpage with other usage examples.
 
- For expanded information on auth entries, profiles, scanning, and output read
- the `syntax and usage document <docs/source/man.rst>`_.
+For expanded information on auth entries, profiles, scanning, and output read
+the `syntax and usage document <docs/source/man.rst>`_.
 
 Development
 -----------
