@@ -44,11 +44,11 @@ class ScanJob(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING,
     )
+    max_concurrency = models.PositiveIntegerField(default=50)
 
     def __str__(self):
-        return '{id:%s, scan_type:%s, profile:%s}' % (self.id,
-                                                      self.scan_type,
-                                                      self.profile)
+        return '{id:%s, scan_type:%s, profile:%s, max_concurrency: %d}' % \
+            (self.id, self.scan_type, self.profile, self.max_concurrency)
 
     class Meta:
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)

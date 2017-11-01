@@ -110,11 +110,13 @@ class DiscoveryScanner(Thread):
 
         logger.info('Discovery scan started for %s.', self.scanjob)
 
+        forks = self.scanjob.max_concurrency
         for cred_id in credentials:
             cred_obj = HostCredential.objects.get(pk=cred_id)
             hc_serializer = HostCredentialSerializer(cred_obj)
             cred = hc_serializer.data
-            connected, remaining = connect(remaining, cred, connection_port)
+            connected, remaining = connect(remaining, cred, connection_port,
+                                           forks=forks)
             if remaining == []:
                 break
 

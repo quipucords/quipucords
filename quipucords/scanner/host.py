@@ -60,7 +60,8 @@ class HostScanner(DiscoveryScanner):
         inventory = construct_scan_inventory(connected, connection_port)
         inventory_file = write_inventory(inventory)
         callback = ResultCallback()
-        result = run_playbook(inventory_file, callback, playbook)
+        forks = self.scanjob.max_concurrency
+        result = run_playbook(inventory_file, callback, playbook, forks=forks)
 
         if result != TaskQueueManager.RUN_OK:
             raise _construct_error(result)

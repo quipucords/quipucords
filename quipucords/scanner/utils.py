@@ -218,12 +218,13 @@ def _construct_error(return_code):
     return AnsibleError(message=message)
 
 
-def connect(hosts, credential, connection_port):
+def connect(hosts, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
     :param credential: The credential used for connections
     :param connection_port: The connection port
+    :param forks: number of forks to run with, default of 50
     :returns: list of connected hosts credential tuples and
               list of host that failed connection
     """
@@ -239,7 +240,7 @@ def connect(hosts, credential, connection_port):
                 'tasks': [{'action': {'module': 'raw',
                                       'args': parse_kv('echo "Hello"')}}]}
 
-    result = run_playbook(inventory_file, callback, playbook)
+    result = run_playbook(inventory_file, callback, playbook, forks=forks)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)
