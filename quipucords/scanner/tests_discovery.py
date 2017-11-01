@@ -36,6 +36,11 @@ def mock_run_failed(play):  # pylint: disable=unused-argument
     return 255
 
 
+def mock_handle_ssh(cred):  # pylint: disable=unused-argument
+    """Mock for handling ssh passphrase setting"""
+    pass
+
+
 class DiscoveryScannerTest(TestCase):
     """Tests against the DiscoveryScanner class and functions"""
 
@@ -131,7 +136,8 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(error.message, ANSIBLE_PLAYBOOK_ERR_MSG)
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
-    def test_connect_failure(self, mock_run):
+    @patch('scanner.utils._handle_ssh_passphrase', side_effect=mock_handle_ssh)
+    def test_connect_failure(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure"""
 
         serializer = NetworkProfileSerializer(self.network_profile)
@@ -143,6 +149,7 @@ class DiscoveryScannerTest(TestCase):
         with self.assertRaises(AnsibleError):
             connect(hosts, cred, connection_port)
             mock_run.assert_called()
+            mock_ssh_pass.assert_called()
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
     def test_connect(self, mock_run):

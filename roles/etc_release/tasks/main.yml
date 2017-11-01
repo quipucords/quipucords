@@ -275,7 +275,7 @@
   when: 'etc_release_name == ""'
 
 - name: gather etc_release.name based on etc_release_uname_os
-  set_fact: etc_release_name='{{ etc_release_uname_os["stdout_lines"][0] | default('error') } }}'
+  set_fact: etc_release_name='{{ etc_release_uname_os["stdout_lines"][0] | default('error') }}'
   when: 'etc_release_name == ""'
 
 - name: set ver for etc_release.version using uname -r
@@ -285,7 +285,7 @@
   when: 'etc_release_version == ""'
 
 - name: gather etc_release.version based on etc_release_uname_ver
-  set_fact: etc_release_version='{{ etc_release_uname_ver["stdout_lines"][0] | default('error') } }}'
+  set_fact: etc_release_version='{{ etc_release_uname_ver["stdout_lines"][0] | default('error') }}'
   when: 'etc_release_version == ""'
 
 - name: gather etc_release.release based on etc_release_uname_os and etc_release_uname_ver

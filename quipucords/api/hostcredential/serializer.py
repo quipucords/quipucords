@@ -39,6 +39,9 @@ class HostCredentialSerializer(ModelSerializer):
     sudo_password = CharField(required=False, max_length=1024, allow_null=True,
                               style={'input_type': 'password'})
     ssh_keyfile = CharField(required=False, max_length=1024, allow_null=True)
+    ssh_passphrase = CharField(required=False, max_length=1024,
+                               allow_null=True,
+                               style={'input_type': 'password'})
 
     class Meta:
         model = HostCredential
@@ -47,6 +50,7 @@ class HostCredentialSerializer(ModelSerializer):
     def validate(self, attrs):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
+        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
         if not (password or ssh_keyfile):
             raise ValidationError(_(messages.HC_PWD_OR_KEYFILE))
 
@@ -61,4 +65,6 @@ class HostCredentialSerializer(ModelSerializer):
             else:
                 attrs['ssh_keyfile'] = keyfile
 
+        if ssh_passphrase and not ssh_keyfile:
+            raise ValidationError(_(messages.HC_NO_KEY_W_PASS))
         return attrs

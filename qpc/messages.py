@@ -16,6 +16,7 @@ AUTH_NAME_HELP = 'auth credential name'
 AUTH_USER_HELP = 'user name for authenticating against target system'
 AUTH_PWD_HELP = 'password for authenticating against target system'
 AUTH_SSH_HELP = 'file containing SSH key'
+AUTH_SSH_PSPH_HELP = 'ssh passphrase for authenticating against target system'
 AUTH_SUDO_HELP = 'password for running sudo'
 AUTH_CLEAR_ALL_HELP = 'remove all credentials'
 
@@ -90,3 +91,4 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
 
 CONN_PASSWORD = 'Provide connection password.'
 SUDO_PASSWORD = 'Provide password for sudo.'
+SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'

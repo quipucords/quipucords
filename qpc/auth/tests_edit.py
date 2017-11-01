@@ -134,7 +134,8 @@ class AuthEditCliTests(unittest.TestCase):
             mocker.patch(url_patch, status_code=200)
             aec = AuthEditCommand(SUBPARSER)
             args = Namespace(name='auth1', username='root', filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
             with redirect_stdout(auth_out):
                 aec.main(args)
                 self.assertEqual(auth_out.getvalue(),
