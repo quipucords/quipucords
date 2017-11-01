@@ -85,9 +85,12 @@ def handle_error_response(response):
     """
     try:
         response_data = response.json()
-        for _, err_cases in response_data.items():
+        for err_key, err_cases in response_data.items():
+            error_context = 'Error'
+            if err_key != 'non_field_errors':
+                error_context = err_key
             for err_msg in err_cases:
-                log.error(err_msg)
+                log.error('%s: %s', error_context, err_msg)
     except json.decoder.JSONDecodeError:
         pass
 

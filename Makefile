@@ -23,11 +23,14 @@ help:
 
 all: build lint test-coverage
 
-build: clean
+build: clean-cli
 	$(PYTHON) setup.py build -f
 
-clean:
-	-rm -rf dist/ build/ quipucords.egg-info/;rm -rf quipucords/api/migrations/*;rm quipucords/db.sqlite3
+clean-cli:
+	-rm -rf dist/ build/ quipucords.egg-info/
+
+clean: clean-cli
+	rm -rf quipucords/api/migrations/*;rm quipucords/db.sqlite3
 
 install: build
 	$(PYTHON) setup.py install -f

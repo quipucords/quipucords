@@ -42,6 +42,10 @@ class ScanStartCommand(CliCommand):
                                  metavar='PROFILE',
                                  help=_(messages.PROFILE_NAME_HELP),
                                  required=True)
+        self.parser.add_argument('--max-concurrency', dest='max_concurrency',
+                                 metavar='MAX_CONCURRENCY',
+                                 type=int, default=50,
+                                 help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.profile_id = None
 
     def _validate_args(self):
@@ -71,7 +75,8 @@ class ScanStartCommand(CliCommand):
         """
         self.req_payload = {
             'profile': self.profile_id,
-            'scan_type': scan.SCAN_TYPE_HOST
+            'scan_type': scan.SCAN_TYPE_HOST,
+            'max_concurrency': self.args.max_concurrency
         }
 
     def _handle_response_success(self):
