@@ -66,6 +66,7 @@ PROFILE_UPDATED = 'Profile "%s" was updated'
 PROFILE_LIST_NO_PROFILES = 'No profiles exist yet.'
 
 SCAN_ID_HELP = 'scan identifier'
+SCAN_MAX_CONCURRENCY_HELP = 'number of concurrent scans; default=50'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist'
 SCAN_LIST_NO_SCANS = 'No scans exist yet.'
 SCAN_STARTED = 'Scan "%s" started'

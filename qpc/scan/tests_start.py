@@ -102,7 +102,7 @@ class ScanStartCliTests(unittest.TestCase):
             mocker.get(url_get_network, status_code=200, json=network_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(profile='profile1')
+            args = Namespace(profile='profile1', max_concurrency=4)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
