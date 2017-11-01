@@ -101,6 +101,12 @@ class ScanJobTest(TestCase):
         self.create_expect_400(
             {'profile': -1})
 
+    def test_create_invalid_forks(self):
+        """Test valid number of forks"""
+        data = {'profile': self.network_profile.id,
+                'max_concurrency': -5}
+        self.create_expect_400(data)
+
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_list(self, start):  # pylint: disable=unused-argument
         """List all ScanJob objects."""
@@ -116,9 +122,11 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 1, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'host', 'status': 'pending'},
+                     'scan_type': 'host', 'status': 'pending',
+                     'max_concurrency': 50},
                     {'id': 2, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'discovery', 'status': 'pending'}]
+                     'scan_type': 'discovery', 'status': 'pending',
+                     'max_concurrency': 50}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)

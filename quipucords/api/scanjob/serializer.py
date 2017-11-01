@@ -14,7 +14,8 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField,
                                         ValidationError,
-                                        ChoiceField)
+                                        ChoiceField,
+                                        IntegerField)
 from api.models import NetworkProfile, ScanJob
 import api.messages as messages
 
@@ -37,6 +38,7 @@ class ScanJobSerializer(ModelSerializer):
     scan_type = ChoiceField(required=False, choices=ScanJob.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanJob.STATUS_CHOICES)
+    max_concurrency = IntegerField(required=False, min_value=1)
 
     class Meta:
         model = ScanJob
