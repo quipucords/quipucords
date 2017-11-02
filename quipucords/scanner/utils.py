@@ -97,7 +97,6 @@ def construct_connect_inventory(hosts, credential, connection_port):
 
 def construct_scan_inventory(hosts,
                              connection_port,
-                             group_prefix,
                              concurrency_count):
     """Create a dictionary inventory for Ansible to execute with.
 
@@ -125,7 +124,7 @@ def construct_scan_inventory(hosts,
             host_vars['ansible_host'] = host[0]
             hosts_dict[host[0]] = host_vars
 
-        group_name = group_prefix + str(i)
+        group_name = 'group_{}'.format(i)
         i += 1
         group_names.append(group_name)
         children[group_name] = {'hosts': hosts_dict}

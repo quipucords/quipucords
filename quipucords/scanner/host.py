@@ -54,9 +54,8 @@ class HostScanner(DiscoveryScanner):
         self._store_discovery_success(connected, failed, mark_complete=False)
 
         forks = self.scanjob.max_concurrency
-        inventory_group_prefix = 'group_'
         group_names, inventory = construct_scan_inventory(
-            connected, connection_port, inventory_group_prefix, forks)
+            connected, connection_port, forks)
         inventory_file = write_inventory(inventory)
         for group_name in group_names:
             callback = ResultCallback()

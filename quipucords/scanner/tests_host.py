@@ -87,7 +87,6 @@ class HostScannerTest(TestCase):
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
                                                   connection_port,
-                                                  'group_',
                                                   50)
         expected = {
             'all': {
@@ -123,7 +122,6 @@ class HostScannerTest(TestCase):
                 ('1.2.3.4', cred)
             ],
             connection_port,
-            'group_',
             1)
         expected = {
             'all': {
