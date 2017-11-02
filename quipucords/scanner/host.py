@@ -53,6 +53,11 @@ class HostScanner(DiscoveryScanner):
         connected, failed = self.discovery()  # pylint: disable=unused-variable
         self._store_discovery_success(connected, failed, mark_complete=False)
 
+        # Save counts
+        self.scanjob.systems_count = len(connected)
+        self.scanjob.systems_scanned = 0
+        self.scanjob.save()
+
         forks = self.scanjob.max_concurrency
         group_names, inventory = construct_scan_inventory(
             connected, connection_port, forks)
@@ -68,6 +73,11 @@ class HostScanner(DiscoveryScanner):
 
             if result != TaskQueueManager.RUN_OK:
                 raise _construct_error(result)
+
+            # Update scan counts and save
+            self.scanjob.systems_scanned += forks
+            self.scanjob.save()
+
             dict_facts = callback.ansible_facts
             # pylint: disable=unused-variable
             for host, sys_fact in dict_facts.items():
@@ -127,6 +137,11 @@ class HostScanner(DiscoveryScanner):
 
             # Send facts to fact endpoint
             fact_collection_id = self.send_facts(facts)
+
+            # Save the fact collection id to scanjob
+            self.scanjob.fact_collection_id = fact_collection_id
+            self.scanjob.save()
+
             self._store_host_scan_success(facts, fact_collection_id)
         except AnsibleError as ansible_error:
             logger.error(ansible_error)
