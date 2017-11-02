@@ -8,16 +8,16 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the reusable filters"""
+"""Describes the reusable filters."""
 
 from django_filters.rest_framework import Filter
 
 
 class ListFilter(Filter):
-    """Add query filter capability to provide a list of filter values.
-    """
+    """Add query filter capability to provide a list of filter values."""
 
     def filter(self, qs, value):
+        """Filter based on query string and value."""
         if not value:
             return qs
 

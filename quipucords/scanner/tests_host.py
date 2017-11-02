@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the host scanner capabilities"""
+"""Test the host scanner capabilities."""
 
 from unittest.mock import patch
 from django.test import TestCase
@@ -23,24 +23,25 @@ from scanner.host import HostScanner
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with success"""
+    """Mock for TaskQueueManager run method with success."""
     return 0
 
 
 def mock_run_failed(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with failure"""
+    """Mock for TaskQueueManager run method with failure."""
     return 255
 
 
 def mock_scan_error():
-    """Throws error"""
-    raise AnsibleError("an error")
+    """Throws error."""
+    raise AnsibleError('an error')
 
 
 class HostScannerTest(TestCase):
-    """Tests against the HostScanner class and functions"""
+    """Tests against the HostScanner class and functions."""
 
     def setUp(self):
+        """Create test case setup."""
         self.cred = HostCredential(
             name='cred1',
             username='username',
@@ -67,7 +68,7 @@ class HostScannerTest(TestCase):
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
     def test_store_host_scan_success(self):
-        """Test success storage"""
+        """Test success storage."""
         scanner = HostScanner(self.scanjob, self.network_profile,
                               self.fact_endpoint)
         facts = [{'connection_host': '1.2.3.4',
@@ -79,7 +80,7 @@ class HostScannerTest(TestCase):
         self.assertEqual(len(result.results.all()), 1)
 
     def test_scan_inventory(self):
-        """Test construct ansible inventory dictionary"""
+        """Test construct ansible inventory dictionary."""
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         connection_port = profile['ssh_port']
@@ -168,7 +169,7 @@ class HostScannerTest(TestCase):
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     def test_host_scan_failure(self, mock_run):
-        """Test scan flow with mocked manager and failure"""
+        """Test scan flow with mocked manager and failure."""
         scanner = HostScanner(self.scanjob, self.network_profile,
                               self.fact_endpoint)
         with self.assertRaises(AnsibleError):
@@ -177,7 +178,7 @@ class HostScannerTest(TestCase):
 
     @patch('scanner.host.HostScanner.host_scan', side_effect=mock_scan_error)
     def test_host_scan_error(self, mock_scan):
-        """Test scan flow with mocked manager and failure"""
+        """Test scan flow with mocked manager and failure."""
         scanner = HostScanner(self.scanjob, self.network_profile,
                               self.fact_endpoint)
         facts = scanner.run()
@@ -186,7 +187,7 @@ class HostScannerTest(TestCase):
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
     def test_host_scan(self, mock_run):
-        """Test running a host scan with mocked connection"""
+        """Test running a host scan with mocked connection."""
         expected = ([('1.2.3.4', {'name': 'cred1'})], [])
         mock_run.return_value = expected
         with requests_mock.Mocker() as mocker:

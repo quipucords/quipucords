@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -26,20 +26,22 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class ScanShowCliTests(unittest.TestCase):
-    """Class for testing the scan show commands for qpc"""
+    """Class for testing the scan show commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_show_scan_ssl_err(self):
-        """Testing the show scan command with a connection error
-        """
+        """Testing the show scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/'
         with requests_mock.Mocker() as mocker:
@@ -52,8 +54,7 @@ class ScanShowCliTests(unittest.TestCase):
                     self.assertEqual(scan_out.getvalue(), SSL_ERROR_MSG)
 
     def test_show_scan_conn_err(self):
-        """Testing the show scan command with a connection error
-        """
+        """Testing the show scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/'
         with requests_mock.Mocker() as mocker:
@@ -67,8 +68,7 @@ class ScanShowCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_show_scan_internal_err(self):
-        """Testing the show scan command with an internal error
-        """
+        """Testing the show scan command with an internal error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/'
         with requests_mock.Mocker() as mocker:
@@ -81,8 +81,7 @@ class ScanShowCliTests(unittest.TestCase):
                     self.assertEqual(scan_out.getvalue(), 'Server Error')
 
     def test_show_scan_data(self):
-        """Testing the show scan command successfully with stubbed data
-        """
+        """Testing the show scan command successfully with stubbed data."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/'
         scan_entry = {'id': 1,

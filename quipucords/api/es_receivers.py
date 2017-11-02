@@ -37,7 +37,7 @@ logger.debug('ES Connection Status:\n%s',
 
 @receiver(post_save, sender=SystemFingerprint)
 def index_fingerprint(sender, instance, **kwargs):
-    """Process facts using engine and convert to fingerprints
+    """Process facts using engine and convert to fingerprints.
 
     :param sender: Class that was saved
     :param instance: SystemFingerprint that was saved
@@ -79,7 +79,8 @@ def index_fingerprint(sender, instance, **kwargs):
 
 
 class FingerPrintIndex(DocType):
-    """Represents the elasticsearch fingerprint index"""
+    """Represents the elasticsearch fingerprint index."""
+
     fact_collection_id = Keyword()
     os_name = Keyword()
     os_release = Keyword()
@@ -107,12 +108,14 @@ class FingerPrintIndex(DocType):
     timestamp = Date()
 
     def __init__(self, *args, **kwargs):
+        """Create a receiver."""
         super().__init__(*args, **kwargs)
         self.index = Index(settings.ES_CONFIGURATION['fingerprint_index_name'])
         if not self.index.exists():
             self.index.create()
 
     def __str__(self):
+        """Covert to string."""
         return '{' + \
             'fact_collection_id:{}, '\
             'connection_host:{}, '\
@@ -157,6 +160,7 @@ class FingerPrintIndex(DocType):
 
     class Meta:
         """FingerPrintIndex Meta class."""
+
         # pylint: disable=too-few-public-methods
         index = 'fingerprints_index'
         doc_type = 'fingerprint'

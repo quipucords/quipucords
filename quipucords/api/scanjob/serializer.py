@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Module for serializing all model object for database storage"""
+"""Module for serializing all model object for database storage."""
 
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer,
@@ -21,10 +21,10 @@ import api.messages as messages
 
 
 class NetworkProfileField(PrimaryKeyRelatedField):
-    """Representation of the network profile associated with a scan job
-    """
+    """Representation of the network profile associated with a scan job."""
 
     def display_value(self, instance):
+        """Create display value."""
         display = instance
         if isinstance(instance, NetworkProfile):
             display = 'NetworkProfile: %s' % instance.name
@@ -32,7 +32,7 @@ class NetworkProfileField(PrimaryKeyRelatedField):
 
 
 class ScanJobSerializer(ModelSerializer):
-    """Serializer for the ScanJob model"""
+    """Serializer for the ScanJob model."""
 
     profile = NetworkProfileField(queryset=NetworkProfile.objects.all())
     scan_type = ChoiceField(required=False, choices=ScanJob.SCAN_TYPE_CHOICES)
@@ -44,6 +44,8 @@ class ScanJobSerializer(ModelSerializer):
     fact_collection_id = IntegerField(read_only=True)
 
     class Meta:
+        """Metadata for serializer."""
+
         model = ScanJob
         fields = '__all__'
 

@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the views associated with the API models"""
+"""Describes the views associated with the API models."""
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -42,23 +42,28 @@ def mask_credential(cred):
 
 
 class HostCredentialFilter(FilterSet):
-    """Filter for host credentials by name"""
+    """Filter for host credentials by name."""
+
     name = ListFilter(name='name')
 
     class Meta:
+        """Metadata for filterset."""
+
         model = HostCredential
         fields = ['name']
 
 
 # pylint: disable=too-many-ancestors
 class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
-    """A view set for the HostCredential model"""
+    """A view set for the HostCredential model."""
+
     queryset = HostCredential.objects.all()
     serializer_class = HostCredentialSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = HostCredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
+        """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
         serializer = HostCredentialSerializer(queryset, many=True)
         for cred in serializer.data:
@@ -66,6 +71,7 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
+        """Create a host credential."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -75,6 +81,7 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
                         headers=headers)
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
+        """Get a host credential."""
         host_cred = get_object_or_404(self.queryset, pk=pk)
         serializer = HostCredentialSerializer(host_cred)
         cred = mask_credential(serializer.data)
@@ -82,6 +89,7 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
+        """Update a host credential."""
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data,

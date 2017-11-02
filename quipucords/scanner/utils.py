@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Scanner used for host connection discovery"""
+"""Scanner used for host connection discovery."""
 
 from collections import namedtuple
 import pexpect
@@ -65,7 +65,6 @@ def _construct_vars(connection_port, credential=None):
     :returns: a dict that can be used as the host variables in an
         Ansible inventory.
     """
-
     ansible_vars = {'ansible_port': connection_port}
 
     if credential is not None:
@@ -104,7 +103,6 @@ def construct_scan_inventory(hosts,
     :param connection_port: The connection port
     :returns: A dictionary of the ansible invetory
     """
-
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,
                                                        len(hosts),
@@ -133,7 +131,7 @@ def construct_scan_inventory(hosts,
 
 
 def write_inventory(inventory):
-    """Write the inventory to a temporary file
+    """Write the inventory to a temporary file.
 
     :param inventory: A ansible inventory dictionary
     :returns: The path of the temporary failed
@@ -142,7 +140,7 @@ def write_inventory(inventory):
 
 
 def create_ansible_objects(inventory_file, forks=50):
-    """ Created the default ansible objects needed to run a playbook.
+    """Create the default ansible objects needed to run a playbook.
 
     :param inventory_file: The path to the inventory file
     :param forks: number of forks to run with, default of 50
@@ -171,7 +169,7 @@ def create_ansible_objects(inventory_file, forks=50):
 
 
 def run_playbook(inventory_file, callback, play, forks=50):
-    """Run an ansible playbook
+    """Run an ansible playbook.
 
     :param inventory_file: The path to the inventory file
     :param callback: The callback handler
@@ -199,8 +197,9 @@ def run_playbook(inventory_file, callback, play, forks=50):
 
 
 def _process_connect_callback(callback, credential):
-    """Processes the callback information from a scan to create the success
-    and failed lists.
+    """Process the callback information from a scan.
+
+     Create the success and failed lists from callback data.
 
     :param callback: The callback handler
     :param credential: The credential used for connections

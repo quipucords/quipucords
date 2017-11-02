@@ -9,7 +9,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Defines the models used with the API application.
-   These models are used in the REST definitions
+
+These models are used in the REST definitions
 """
 
 from django.db import models
@@ -18,6 +19,7 @@ from api.hostcredential.model import HostCredential
 
 class NetworkProfile(models.Model):
     """A network profile connects a list of credentials and a list of hosts."""
+
     name = models.CharField(max_length=64, unique=True)
     ssh_port = models.IntegerField(default=22)
     credentials = models.ManyToManyField(HostCredential)
@@ -25,6 +27,7 @@ class NetworkProfile(models.Model):
     # ForeignKey in HostRange below.
 
     def __str__(self):
+        """Convert to string."""
         return '{ id:%s, name:%s }' % (self.id, self.name)
 
 

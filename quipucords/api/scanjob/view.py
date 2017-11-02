@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the views associated with the API models"""
+"""Describes the views associated with the API models."""
 
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
@@ -31,7 +31,9 @@ RESULTS_KEY = 'results'
 
 
 def expand_network_profile(scan, json_scan):
-    """Take scan object with profile id and pull object from db.
+    """Expand the network profile.
+
+    Take scan object with profile id and pull object from db.
     create slim dictionary version of profile with name an value
     to return to user.
     """
@@ -42,7 +44,9 @@ def expand_network_profile(scan, json_scan):
 
 
 def expand_key_values(result, json_result):
-    """Take collection of result key value ids and pull objects from db.
+    """Expand the key values.
+
+    Take collection of result key value ids and pull objects from db.
     create slim dictionary version of key/value to return to user.
     """
     columns = []
@@ -57,7 +61,9 @@ def expand_key_values(result, json_result):
 
 
 def expand_scan_results(job_scan_result, json_job_scan_result):
-    """Take collection of json_job_scan_result ids and pull objects from db.
+    """Expand the scan results.
+
+    Take collection of json_job_scan_result ids and pull objects from db.
     create slim dictionary version of rows of key/value to return to user.
     """
     if json_job_scan_result is not None and json_job_scan_result[RESULTS_KEY]:
@@ -77,13 +83,14 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
-    """A view set for ScanJob"""
+    """A view set for ScanJob."""
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
+        """Create a scanjob."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -106,6 +113,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                         headers=headers)
 
     def list(self, request):  # pylint: disable=unused-argument
+        """List the collection of scan jobs."""
         queryset = self.filter_queryset(self.get_queryset())
         result = []
         for scan in queryset:
@@ -117,6 +125,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
+        """Get a scan job."""
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
@@ -126,7 +135,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     # pylint: disable=unused-argument,invalid-name,no-self-use
     @detail_route(methods=['get'])
     def results(self, request, pk=None):
-        """Get the results of a scan job"""
+        """Get the results of a scan job."""
         job_scan_result = ScanJobResults.objects.all() \
             .filter(scan_job__id=pk).first()
         if job_scan_result:

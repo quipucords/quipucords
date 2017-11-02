@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""API models for import organization"""
+"""API models for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
 from api.fact.model import Fact, FactCollection

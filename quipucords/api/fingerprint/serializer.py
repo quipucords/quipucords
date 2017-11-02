@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Serializer for system fingerprint models"""
+"""Serializer for system fingerprint models."""
 
 from rest_framework.serializers import (ModelSerializer,
                                         IntegerField,
@@ -50,5 +50,6 @@ class FingerprintSerializer(ModelSerializer):
 
     class Meta:
         """Meta class for FingerprintSerializer."""
+
         model = SystemFingerprint
         fields = '__all__'

@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Common module for handling request calls to the server"""
+"""Common module for handling request calls to the server."""
 
 import sys
 import requests
@@ -27,7 +27,7 @@ DELETE = 'DELETE'
 
 
 def post(path, payload):
-    """Post JSON payload to the given path with the configured server location
+    """Post JSON payload to the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials/hosts)
     :param payload: dictionary of payload to be posted
@@ -38,7 +38,7 @@ def post(path, payload):
 
 
 def get(path, params=None):
-    """Get JSON data from the given path with the configured server location
+    """Get JSON data from the given path with the configured server location.
 
     :param path:  path after server and port (i.e. /api/v1/credentials/hosts)
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
@@ -49,7 +49,7 @@ def get(path, params=None):
 
 
 def patch(path, payload):
-    """Patch JSON payload to the given path with the configured server location
+    """Patch JSON payload to the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
     :param payload: dictionary of payload to be posted
@@ -60,7 +60,7 @@ def patch(path, payload):
 
 
 def delete(path):
-    """Delete the item with the given path with the configured server location
+    """Delete the item with the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
     :returns: reponse object
@@ -70,7 +70,7 @@ def delete(path):
 
 
 def request(method, path, params=None, payload=None, parser=None):
-    """Generic handler for passing to specific request methods.
+    """Create a generic handler for passing to specific request methods.
 
     :param method: the request method to execute
     :param path: path after server and port (i.e. /api/v1/credentials/hosts)

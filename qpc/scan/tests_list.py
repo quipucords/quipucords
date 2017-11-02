@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -26,20 +26,22 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class ScanListCliTests(unittest.TestCase):
-    """Class for testing the scan list commands for qpc"""
+    """Class for testing the scan list commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_list_scan_ssl_err(self):
-        """Testing the list scan command with a connection error
-        """
+        """Testing the list scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         with requests_mock.Mocker() as mocker:
@@ -52,8 +54,7 @@ class ScanListCliTests(unittest.TestCase):
                     self.assertEqual(scan_out.getvalue(), SSL_ERROR_MSG)
 
     def test_list_scan_conn_err(self):
-        """Testing the list scan command with a connection error
-        """
+        """Testing the list scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         with requests_mock.Mocker() as mocker:
@@ -67,8 +68,7 @@ class ScanListCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_list_scan_internal_err(self):
-        """Testing the list scan command with an internal error
-        """
+        """Testing the list scan command with an internal error."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         with requests_mock.Mocker() as mocker:
@@ -81,8 +81,7 @@ class ScanListCliTests(unittest.TestCase):
                     self.assertEqual(scan_out.getvalue(), 'Server Error')
 
     def test_list_scan_empty(self):
-        """Testing the list scan command successfully with empty data
-        """
+        """Testing the list scan command successfully with empty data."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         with requests_mock.Mocker() as mocker:
@@ -95,8 +94,7 @@ class ScanListCliTests(unittest.TestCase):
                                  'No scans exist yet.\n')
 
     def test_list_scan_data(self):
-        """Testing the list scan command successfully with stubbed data
-        """
+        """Testing the list scan command successfully with stubbed data."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         scan_entry = {'id': 1,

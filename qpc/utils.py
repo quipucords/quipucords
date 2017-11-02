@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" Quipucords Command Line utilities """
+"""Quipucords Command Line utilities."""
 
 from __future__ import print_function
 import logging
@@ -56,7 +56,6 @@ def setup_logging(verbosity):
     :param verbosity: verbosity level, as measured in -v's on the command line.
         Can be None for default.
     """
-
     if verbosity is None:
         log_level = logging.WARNING
     elif verbosity == 1:
@@ -78,7 +77,7 @@ def setup_logging(verbosity):
 
 
 def handle_error_response(response):
-    """Print errors from response data
+    """Print errors from response data.
 
     :param response: The response object with a dictionary of keys and
         lists of errors
@@ -96,7 +95,7 @@ def handle_error_response(response):
 
 
 def pretty_print(json_data):
-    """Provide pretty printing of output json data
+    """Provide pretty printing of output json data.
 
     :param json_data: the json data to pretty print
     :returns: the pretty print string of the json data

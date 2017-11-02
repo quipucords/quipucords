@@ -9,9 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" AuthEditCommand is used to edit existing authentication credentials
-for system access
-"""
+"""AuthEditCommand is used to edit existing authentication credentials."""
 
 from __future__ import print_function
 import sys
@@ -26,14 +24,17 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class AuthEditCommand(CliCommand):
-    """
+    """Defines the edit command.
+
     This command is for editing existing auths which can be later associated
     with profiles to gather facts.
     """
+
     SUBCOMMAND = auth.SUBCOMMAND
     ACTION = auth.EDIT
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PATCH,

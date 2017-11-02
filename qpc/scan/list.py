@@ -9,8 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" ScanListCommand is used to list system scans
-"""
+"""ScanListCommand is used to list system scans."""
 
 from __future__ import print_function
 from requests import codes
@@ -24,13 +23,16 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class ScanListCommand(CliCommand):
-    """
+    """Defines the list command.
+
     This command is for listing profiles scans used to gather system facts.
     """
+
     SUBCOMMAND = scan.SUBCOMMAND
     ACTION = scan.LIST
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,

@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the fact API"""
+"""Test the fact API."""
 
 import uuid
 from django.test import TestCase
@@ -17,14 +17,14 @@ from rest_framework import status
 
 
 class SystemReportTest(TestCase):
-    """ Tests against the System reports function."""
+    """Tests against the System reports function."""
+
     # pylint: disable= no-self-use
 
     def create_fact_collection(self,
                                os_name='RHEL',
                                os_versions=None):
-        """Helper to create a FactCollection for test."""
-
+        """Create a FactCollection for test."""
         fact_collection = FactCollection.objects.create()
 
         if os_versions is None:
@@ -58,8 +58,7 @@ class SystemReportTest(TestCase):
         return fact_collection
 
     def test_get_report_list(self):
-        """ Create fact collection object via API."""
-
+        """Create fact collection object via API."""
         url = '/api/v1/reports/'
 
         # Create a system fingerprint via fact collection receiver
@@ -76,8 +75,7 @@ class SystemReportTest(TestCase):
         self.assertEqual(report_list[0]['report'][1]['count'], 1)
 
     def test_get_fact_collection_report(self):
-        """ Create fact collection object via API."""
-
+        """Create fact collection object via API."""
         url = '/api/v1/reports/'
 
         # Create a system fingerprint via collection receiver
@@ -93,8 +91,7 @@ class SystemReportTest(TestCase):
         self.assertEqual(report['report'][1]['count'], 1)
 
     def test_get_fact_collection_404(self):
-        """ Create fact collection object via API."""
-
+        """Create fact collection object via API."""
         url = '/api/v1/reports/'
 
         # Create a system fingerprint via collection receiver

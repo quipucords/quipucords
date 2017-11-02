@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" Vault is used to read and write data securely using the Ansible vault """
+"""Vault is used to read and write data securely using the Ansible vault."""
 
 import tempfile
 import yaml
@@ -18,7 +18,7 @@ from ansible.parsing.yaml.dumper import AnsibleDumper
 
 
 def represent_none(self, _):
-    """ Render None with nothing in yaml string when dumped """
+    """Render None with nothing in yaml string when dumped."""
     return self.represent_scalar('tag:yaml.org,2002:null', '')
 
 
@@ -26,7 +26,7 @@ yaml.add_representer(type(None), represent_none)
 
 
 def encrypt_data(data):
-    """Encrypt the incoming data using SECRET_KEY
+    """Encrypt the incoming data using SECRET_KEY.
 
     :param data: string data to be encrypted
     :returns: vault encrypted data as binary
@@ -36,7 +36,7 @@ def encrypt_data(data):
 
 
 def decrypt_data(data):
-    """Decrypt the incoming data using SECRET_KEY
+    """Decrypt the incoming data using SECRET_KEY.
 
     :param data: string data to be decrypted
     :returns: vault decrypted data as string
@@ -46,7 +46,7 @@ def decrypt_data(data):
 
 
 def encrypt_data_as_unicode(data):
-    """Encrypt data and return as unicode string
+    """Encrypt data and return as unicode string.
 
     :param data: string data to be encrypted
     :returns: unicode string of encrypted data using vault
@@ -55,7 +55,7 @@ def encrypt_data_as_unicode(data):
 
 
 def decrypt_data_as_unicode(data):
-    """Decrypt data and return as unicode string
+    """Decrypt data and return as unicode string.
 
     :param data: string data to be decrypted
     :returns: unicode string of decrypted data using vault
@@ -64,16 +64,17 @@ def decrypt_data_as_unicode(data):
 
 
 def write_to_yaml(data):
-    """Write data to temp yaml file and return the file"""
+    """Write data to temp yaml file and return the file."""
     vault = Vault(settings.SECRET_KEY)
     return vault.dump_as_yaml_to_tempfile(data)
 
 
 # pylint: disable=too-few-public-methods
 class Vault(object):
-    """ Read and write data using the Ansible vault"""
+    """Read and write data using the Ansible vault."""
 
     def __init__(self, password):
+        """Create a vault."""
         self.password = password
         try:
             from ansible.parsing.vault import VaultSecret
@@ -86,7 +87,7 @@ class Vault(object):
             self.vault = VaultLib(password)
 
     def dump(self, data, stream=None):
-        """ Encrypt data and print stdout or write to stream
+        """Encrypt data and print stdout or write to stream.
 
         :param data: The information to be encrypted
         :param stream: If not None the location to write the encrypted data to.
@@ -99,7 +100,7 @@ class Vault(object):
             return encrypted
 
     def load(self, stream):
-        """ Read vault steam and return python object
+        """Read vault steam and return python object.
 
         :param stream: The stream to read data from
         :returns: The decrypted data
@@ -107,7 +108,7 @@ class Vault(object):
         return self.vault.decrypt(stream)
 
     def dump_as_yaml(self, obj, stream=None):
-        """ Convert object to yaml and encrypt the data.
+        """Convert object to yaml and encrypt the data.
 
         :param obj: Python object to convert to yaml
         :param stream: If not None the location to write the encrypted data to.
@@ -118,7 +119,7 @@ class Vault(object):
         return self.dump(data, stream)
 
     def dump_as_yaml_to_tempfile(self, obj):
-        """ Convert object to yaml and encrypt the data.
+        """Convert object to yaml and encrypt the data.
 
         :param obj: Python object to convert to yaml
         :returns: The filepath to write data

@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import os
@@ -25,14 +25,16 @@ from qpc.auth import AUTH_URI
 from qpc.network import NETWORK_URI
 from qpc.network.edit import NetworkEditCommand
 
-TMP_HOSTFILE = "/tmp/testhostsfile"
+TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class NetworkEditCliTests(unittest.TestCase):
-    """Class for testing the network profile edit commands for qpc"""
+    """Class for testing the network profile edit commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -44,13 +46,14 @@ class NetworkEditCliTests(unittest.TestCase):
             test_hostfile.write('1.2.3.[1:10]\n')
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
         if os.path.isfile(TMP_HOSTFILE):
             os.remove(TMP_HOSTFILE)
 
     def test_edit_req_args_err(self):
-        """Testing the add edit command required flags"""
+        """Testing the add edit command required flags."""
         network_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(network_out):
@@ -62,21 +65,20 @@ class NetworkEditCliTests(unittest.TestCase):
                                  'profile profile1')
 
     def test_edit_process_file(self):
-        """Testing the add network command process file"""
+        """Testing the add network command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1',
                         '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
             CLI().main()
 
     def test_read_input(self):
-        """Test the input reading mechanism"""
+        """Test the input reading mechanism."""
         vals = read_in_file(TMP_HOSTFILE)
         expected = ['1.2.3.4', '1.2.3.[1:10]']
         self.assertEqual(expected, vals)
 
     def test_edit_profile_none(self):
-        """Testing the edit auth command for none existing auth
-        """
+        """Testing the edit auth command for none existing auth."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile_none'
         with requests_mock.Mocker() as mocker:
@@ -92,8 +94,7 @@ class NetworkEditCliTests(unittest.TestCase):
                                     in network_out.getvalue())
 
     def test_edit_profile_ssl_err(self):
-        """Testing the edit profile command with a connection error
-        """
+        """Testing the edit profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -107,8 +108,7 @@ class NetworkEditCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
 
     def test_edit_profile_conn_err(self):
-        """Testing the edit profile command with a connection error
-        """
+        """Testing the edit profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -123,8 +123,7 @@ class NetworkEditCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_edit_profile(self):
-        """Testing the edit profile command successfully
-        """
+        """Testing the edit profile command successfully."""
         network_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1'
         url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
@@ -146,8 +145,7 @@ class NetworkEditCliTests(unittest.TestCase):
                                  'Profile "profile1" was updated\n')
 
     def test_edit_profile_no_val(self):
-        """Testing the edit profile command with profile doesn't exist
-        """
+        """Testing the edit profile command with profile doesn't exist."""
         network_out = StringIO()
         url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -162,8 +160,7 @@ class NetworkEditCliTests(unittest.TestCase):
                                      'Profile "profile1" does not exist\n')
 
     def test_edit_profile_auth_nf(self):
-        """Testing the edit profile command where auth is not found
-        """
+        """Testing the edit profile command where auth is not found."""
         network_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
         url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
@@ -185,8 +182,7 @@ class NetworkEditCliTests(unittest.TestCase):
                                     in network_out.getvalue())
 
     def test_edit_profile_auth_err(self):
-        """Testing the edit profile command where auth request hits error
-        """
+        """Testing the edit profile command where auth request hits error."""
         network_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
         url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'

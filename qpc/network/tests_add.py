@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import os
@@ -25,14 +25,16 @@ from qpc.network import NETWORK_URI
 from qpc.network.add import NetworkAddCommand
 from qpc.network.utils import validate_port
 
-TMP_HOSTFILE = "/tmp/testhostsfile"
+TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class NetworkAddCliTests(unittest.TestCase):
-    """Class for testing the network profile add commands for qpc"""
+    """Class for testing the network profile add commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -44,26 +46,27 @@ class NetworkAddCliTests(unittest.TestCase):
             test_hostfile.write('1.2.3.[1:10]\n')
 
     def tearDown(self):
+        """Remove test case setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
         if os.path.isfile(TMP_HOSTFILE):
             os.remove(TMP_HOSTFILE)
 
     def test_add_req_args_err(self):
-        """Testing the add network command required flags"""
+        """Testing the add network command required flags."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1']
             CLI().main()
 
     def test_add_process_file(self):
-        """Testing the add network command process file"""
+        """Testing the add network command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1',
                         '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
             CLI().main()
 
     def test_validate_port_string(self):
-        """Testing the add network command with port validation non-integer"""
+        """Testing the add network command with port validation non-integer."""
         net_out = StringIO()
         with self.assertRaises(ArgumentTypeError):
             with redirect_stdout(net_out):
@@ -72,7 +75,7 @@ class NetworkAddCliTests(unittest.TestCase):
                                 in net_out.getvalue())
 
     def test_validate_port_bad_type(self):
-        """Testing the add network command with port validation bad type"""
+        """Testing the add network command with port validation bad type."""
         net_out = StringIO()
         with self.assertRaises(ArgumentTypeError):
             with redirect_stdout(net_out):
@@ -81,7 +84,7 @@ class NetworkAddCliTests(unittest.TestCase):
                                 in net_out.getvalue())
 
     def test_validate_port_range_err(self):
-        """Testing the add network command with port validation out of range"""
+        """Test the add network command with port validation out of range."""
         net_out = StringIO()
         with self.assertRaises(ArgumentTypeError):
             with redirect_stdout(net_out):
@@ -90,13 +93,12 @@ class NetworkAddCliTests(unittest.TestCase):
                                 in net_out.getvalue())
 
     def test_validate_port_good(self):
-        """Testing the add network command with port validation success"""
+        """Testing the add network command with port validation success."""
         val = validate_port('80')
         self.assertEqual(80, val)
 
     def test_add_network_name_dup(self):
-        """Testing the add network command duplicate name
-        """
+        """Testing the add network command duplicate name."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         get_auth_data = [{'id': 1, 'name': 'auth1'}]
@@ -116,8 +118,7 @@ class NetworkAddCliTests(unittest.TestCase):
                                     in net_out.getvalue())
 
     def test_add_network_auth_less(self):
-        """Testing the add network command with a some invalid auth
-        """
+        """Testing the add network command with a some invalid auth."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
         get_auth_data = [{'id': 1, 'name': 'auth1'}]
@@ -135,8 +136,7 @@ class NetworkAddCliTests(unittest.TestCase):
                                     in net_out.getvalue())
 
     def test_add_network_auth_err(self):
-        """Testing the add network command with an auth err
-        """
+        """Testing the add network command with an auth err."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
         with requests_mock.Mocker() as mocker:
@@ -153,8 +153,7 @@ class NetworkAddCliTests(unittest.TestCase):
                                     in net_out.getvalue())
 
     def test_add_network_ssl_err(self):
-        """Testing the add network command with a connection error
-        """
+        """Testing the add network command with a connection error."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
@@ -168,8 +167,7 @@ class NetworkAddCliTests(unittest.TestCase):
                     self.assertEqual(net_out.getvalue(), SSL_ERROR_MSG)
 
     def test_add_network_conn_err(self):
-        """Testing the add network command with a connection error
-        """
+        """Testing the add network command with a connection error."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         with requests_mock.Mocker() as mocker:
@@ -183,8 +181,7 @@ class NetworkAddCliTests(unittest.TestCase):
                     self.assertEqual(net_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_add_network(self):
-        """Testing the add network command successfully
-        """
+        """Testing the add network command successfully."""
         net_out = StringIO()
         get_auth_url = BASE_URL + AUTH_URI + '?name=auth1'
         get_auth_data = [{'id': 1, 'name': 'auth1'}]

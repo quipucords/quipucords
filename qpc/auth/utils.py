@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" Utilities for the auth credentials module"""
+"""Utilities for the auth credentials module."""
 
 from __future__ import print_function
 import os
@@ -20,7 +20,7 @@ import qpc.messages as messages
 
 
 def validate_sshkeyfile(keyfile, parser):
-    """Checks if keyfile is present on the system exits if its not found
+    """Check if keyfile is present on the system exits if its not found.
 
     :param keyfile: the path to the keyfile
     :param parser: the cli parser to provide help information
@@ -67,7 +67,7 @@ def get_password(args, req_payload, add_none=True):
 
 
 def build_credential_payload(args, add_none=True):
-    """Construct payload from command line arguments
+    """Construct payload from command line arguments.
 
     :param args: the command line arguments
     :param add_none: add None for a key if True vs. not in dictionary

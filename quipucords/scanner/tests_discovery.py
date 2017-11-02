@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the discovery scanner capabilities"""
+"""Test the discovery scanner capabilities."""
 
 from unittest.mock import patch, Mock
 from django.test import TestCase
@@ -27,24 +27,25 @@ from scanner.callback import ResultCallback
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with success"""
+    """Mock for TaskQueueManager run method with success."""
     return 0
 
 
 def mock_run_failed(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with failure"""
+    """Mock for TaskQueueManager run method with failure."""
     return 255
 
 
 def mock_handle_ssh(cred):  # pylint: disable=unused-argument
-    """Mock for handling ssh passphrase setting"""
+    """Mock for handling ssh passphrase setting."""
     pass
 
 
 class DiscoveryScannerTest(TestCase):
-    """Tests against the DiscoveryScanner class and functions"""
+    """Tests against the DiscoveryScanner class and functions."""
 
     def setUp(self):
+        """Create test case setup."""
         self.cred = HostCredential(
             name='cred1',
             username='username',
@@ -70,7 +71,7 @@ class DiscoveryScannerTest(TestCase):
         self.scanjob.save()
 
     def test_construct_vars(self):
-        """Test constructing ansible vars dictionary"""
+        """Test constructing ansible vars dictionary."""
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
         vars_dict = _construct_vars(22, cred)
@@ -81,7 +82,7 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(vars_dict, expected)
 
     def test_populate_callback(self):
-        """Test the population of the callback object"""
+        """Test the population of the callback object."""
         callback = ResultCallback()
         host = Mock(name='1.2.3.4')
         result = Mock(_host=host, _results={'rc': 0})
@@ -93,7 +94,7 @@ class DiscoveryScannerTest(TestCase):
         self.assertTrue(len(callback.results) == 3)
 
     def test_process_connect_callback(self):
-        """Test callback processing logic"""
+        """Test callback processing logic."""
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
         callback = ResultCallback()
@@ -109,7 +110,7 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(failed, ['1.2.3.5', '1.2.3.6'])
 
     def test_connect_inventory(self):
-        """Test construct ansible inventory dictionary"""
+        """Test construct ansible inventory dictionary."""
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         hosts = profile['hosts']
@@ -127,7 +128,7 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(inventory_dict, expected)
 
     def test_construct_error(self):
-        """Test the creation of different errors"""
+        """Test the creation of different errors."""
         error = _construct_error(TaskQueueManager.RUN_FAILED_HOSTS)
         self.assertEqual(error.message, ANSIBLE_FAILED_HOST_ERR_MSG)
         error = _construct_error(TaskQueueManager.RUN_UNREACHABLE_HOSTS)
@@ -138,8 +139,7 @@ class DiscoveryScannerTest(TestCase):
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     @patch('scanner.utils._handle_ssh_passphrase', side_effect=mock_handle_ssh)
     def test_connect_failure(self, mock_run, mock_ssh_pass):
-        """Test connect flow with mocked manager and failure"""
-
+        """Test connect flow with mocked manager and failure."""
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         hosts = profile['hosts']
@@ -153,7 +153,7 @@ class DiscoveryScannerTest(TestCase):
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
     def test_connect(self, mock_run):
-        """Test connect flow with mocked manager """
+        """Test connect flow with mocked manager."""
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         hosts = profile['hosts']
@@ -167,7 +167,7 @@ class DiscoveryScannerTest(TestCase):
 
     @patch('scanner.discovery.connect')
     def test_discovery(self, mock_connect):
-        """Test running a discovery scan with mocked connection"""
+        """Test running a discovery scan with mocked connection."""
         expected = ([('1.2.3.4', {'name': 'cred1'})], [])
         mock_connect.return_value = expected
         scanner = DiscoveryScanner(self.scanjob, self.network_profile)
@@ -176,7 +176,7 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(conn_dict, {'1.2.3.4': {'name': 'cred1'}})
 
     def test_store_discovery_success(self):
-        """Test running a discovery scan with mocked connection"""
+        """Test running a discovery scan with mocked connection."""
         scanner = DiscoveryScanner(self.scanjob, self.network_profile)
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data

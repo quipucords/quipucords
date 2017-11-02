@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -28,26 +28,28 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class ScanStartCliTests(unittest.TestCase):
-    """Class for testing the scan start commands for qpc"""
+    """Class for testing the scan start commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Tear down test case setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_start_req_args_err(self):
-        """Testing the scan start command required flags"""
+        """Testing the scan start command required flags."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'scan', 'start']
             CLI().main()
 
     def test_scan_profile_none(self):
-        """Testing the scan start command for none existing profile
-        """
+        """Testing the scan start command for none existing profile."""
         scan_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile_none'
         with requests_mock.Mocker() as mocker:
@@ -62,8 +64,7 @@ class ScanStartCliTests(unittest.TestCase):
                                     in scan_out.getvalue())
 
     def test_start_scan_ssl_err(self):
-        """Testing the start scan command with a connection error
-        """
+        """Testing the start scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -76,8 +77,7 @@ class ScanStartCliTests(unittest.TestCase):
                     self.assertEqual(scan_out.getvalue(), SSL_ERROR_MSG)
 
     def test_start_scan_conn_err(self):
-        """Testing the start scan command with a connection error
-        """
+        """Testing the start scan command with a connection error."""
         scan_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -91,8 +91,7 @@ class ScanStartCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_start_scan(self):
-        """Testing the start scan command successfully
-        """
+        """Testing the start scan command successfully."""
         scan_out = StringIO()
         url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
         url_post = BASE_URL + SCAN_URI

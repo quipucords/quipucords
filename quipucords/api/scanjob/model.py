@@ -9,7 +9,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Defines the models used with the API application.
-   These models are used in the REST definitions
+
+These models are used in the REST definitions.
 """
 from django.utils.translation import ugettext as _
 from django.db import models
@@ -18,7 +19,8 @@ import api.messages as messages
 
 
 class ScanJob(models.Model):
-    """The host credential for connecting to host systems via ssh"""
+    """The host credential for connecting to host systems via ssh."""
+
     DISCOVERY = 'discovery'
     HOST = 'host'
     SCAN_TYPE_CHOICES = ((HOST, HOST), (DISCOVERY, DISCOVERY))
@@ -50,6 +52,7 @@ class ScanJob(models.Model):
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
+        """Convert to string."""
         return '{' + 'id:{}, '\
             'scan_type:{}, '\
             'profile:{}, '\
@@ -65,4 +68,6 @@ class ScanJob(models.Model):
                                             self.fact_collection_id) + '}'
 
     class Meta:
+        """Metadata for model."""
+
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)

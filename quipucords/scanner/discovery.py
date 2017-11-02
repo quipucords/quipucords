@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Scanner used for host connection discovery"""
+"""Scanner used for host connection discovery."""
 import logging
 from threading import Thread
 from ansible.errors import AnsibleError
@@ -23,12 +23,15 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class DiscoveryScanner(Thread):
-    """Attempts connections to a network profile using a list of credentials
+    """Discovery system connection capabilities.
+
+    Attempts connections to a network profile using a list of credentials
     and gathers the set of successes (host/ip, credential) and
     failures (host/ip).
     """
 
     def __init__(self, scanjob, network_profile):
+        """Create discovery scanner."""
         Thread.__init__(self)
         self.scanjob = scanjob
         serializer = NetworkProfileSerializer(network_profile)
@@ -82,7 +85,7 @@ class DiscoveryScanner(Thread):
         self.scan_results.save()
 
     def run(self):
-        """Method via thread for triggering execution"""
+        """Trigger thread execution."""
         result = {}
         self.scanjob.status = ScanJob.RUNNING
         self.scanjob.save()
@@ -98,7 +101,7 @@ class DiscoveryScanner(Thread):
 
     # pylint: disable=too-many-locals
     def discovery(self):
-        """Executes the discovery scan with the initialized network profile
+        """Execute the discovery scan with the initialized network profile.
 
         :returns: list of connected hosts credential tuples and
                   list of host that failed connection

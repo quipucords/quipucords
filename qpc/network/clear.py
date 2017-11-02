@@ -9,9 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" NetworkClearCommand is used to clear specific network profile
- or all network profiles
-"""
+"""NetworkClearCommand is used to clear a or all network profiles."""
 
 from __future__ import print_function
 import sys
@@ -26,14 +24,17 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class NetworkClearCommand(CliCommand):
-    """
+    """Defines the clear command.
+
     This command is for clearing a specific network profile or all network
     profiles.
     """
+
     SUBCOMMAND = network.SUBCOMMAND
     ACTION = network.CLEAR
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,

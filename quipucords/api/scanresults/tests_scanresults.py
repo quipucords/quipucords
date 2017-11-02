@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the API application"""
+"""Test the API application."""
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -22,6 +22,7 @@ class ScanJobResultsTest(TestCase):
     """Test the basic ScanJobResults infrastructure."""
 
     def setUp(self):
+        """Create test setup."""
         self.cred = HostCredential.objects.create(
             name='cred1',
             username='username',
@@ -41,7 +42,6 @@ class ScanJobResultsTest(TestCase):
 
     def test_get_results_not_present(self):
         """Get results on a specific ScanJob by primary key."""
-
         url = reverse('scanjob-detail', args=(self.scanjob.id,))
         url = url + 'results/'
         response = self.client.get(url)
@@ -70,7 +70,6 @@ class ScanJobResultsTest(TestCase):
 
     def test_get_results_empty(self):
         """Get empty results on a specific ScanJob by primary key."""
-
         results = ScanJobResults(scan_job=self.scanjob,
                                  fact_collection_id=1)
         results.save()
@@ -85,7 +84,6 @@ class ScanJobResultsTest(TestCase):
 
     def test_get_results(self):
         """Get results on a specific ScanJob by primary key."""
-
         results = ScanJobResults(scan_job=self.scanjob,
                                  fact_collection_id=1)
         results.save()

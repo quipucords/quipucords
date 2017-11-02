@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -26,20 +26,22 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class NetworkShowCliTests(unittest.TestCase):
-    """Class for testing the profile show commands for qpc"""
+    """Class for testing the profile show commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_show_network_ssl_err(self):
-        """Testing the show profile command with a connection error
-        """
+        """Testing the show profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -52,8 +54,7 @@ class NetworkShowCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
 
     def test_show_network_conn_err(self):
-        """Testing the show profile command with a connection error
-        """
+        """Testing the show profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -67,8 +68,7 @@ class NetworkShowCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_show_network_internal_err(self):
-        """Testing the show profile command with an internal error
-        """
+        """Testing the show profile command with an internal error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -81,8 +81,7 @@ class NetworkShowCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), 'Server Error')
 
     def test_show_network_empty(self):
-        """Testing the show profile command successfully with empty data
-        """
+        """Testing the show profile command successfully with empty data."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -96,8 +95,7 @@ class NetworkShowCliTests(unittest.TestCase):
                                      'Profile "profile1" does not exist\n')
 
     def test_show_network_data(self):
-        """Testing the show profile command successfully with stubbed data
-        """
+        """Testing the show profile command successfully with stubbed data."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         auth_entry = {'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],

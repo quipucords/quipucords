@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the API application"""
+"""Test the API application."""
 
 import yaml
 from django.test import TestCase
@@ -16,24 +16,22 @@ from . import vault
 
 
 class VaultTest(TestCase):
-    """Tests against the vault class"""
+    """Tests against the vault class."""
 
     def test_encrypt_data_as_unicode(self):
-        """Tests the encryption of sensitive data using SECRET_KEY"""
+        """Tests the encryption of sensitive data using SECRET_KEY."""
         value = vault.encrypt_data_as_unicode('encrypted data')
         self.assertTrue(isinstance(value, str))
 
     def test_decrypt_data(self):
-        """Test the decryption of data using SECRET_KEY"""
+        """Test the decryption of data using SECRET_KEY."""
         raw = 'encrypted data'
         encrypted = vault.encrypt_data_as_unicode(raw)
         decrypted = vault.decrypt_data_as_unicode(encrypted)
         self.assertEqual(raw, decrypted)
 
     def test_dump_yaml(self):
-        """Test the writing of dictionary data to a yaml file encrypted
-        via the vault
-        """
+        """Test the writing of dictionary data to a yaml file encrypted."""
         data = {'all': {'hosts': {'1.2.3.4': None},
                         'vars': {'ansible_port': 22,
                                  'ansible_ssh_pass': 'password',

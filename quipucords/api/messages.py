@@ -10,7 +10,7 @@
 #
 #
 
-"""API messages for translation"""
+"""API messages for translation."""
 
 # fact messages
 VALIDATE_FACTS_MSG = 'A least one fact is required.'

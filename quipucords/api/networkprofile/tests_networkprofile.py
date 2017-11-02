@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the API application"""
+"""Test the API application."""
 
 import json
 from django.test import TestCase
@@ -21,6 +21,7 @@ class NetworkProfileTest(TestCase):
     """Test the basic NetworkProfile infrastructure."""
 
     def setUp(self):
+        """Create test case setup."""
         self.cred = HostCredential.objects.create(
             name='cred1',
             username='username',
@@ -31,8 +32,7 @@ class NetworkProfileTest(TestCase):
         self.cred_for_response = {'id': self.cred.id, 'name': self.cred.name}
 
     def create(self, data):
-        """Utility function to call the create endpoint."""
-
+        """Call the create endpoint."""
         url = reverse('networkprofile-list')
         return self.client.post(url,
                                 json.dumps(data),
@@ -40,20 +40,17 @@ class NetworkProfileTest(TestCase):
 
     def create_expect_400(self, data):
         """We will do a lot of create tests that expect HTTP 400s."""
-
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def create_expect_201(self, data):
         """Create a network profile, return the response as a dict."""
-
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
     def test_successful_create(self):
         """A valid create request should succeed."""
-
         data = {'name': 'netprof1',
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
@@ -63,7 +60,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""
-
         data = {'name': 'netprof1',
                 'hosts': ['1.2.3.4', '1.2.3.5'],
                 'ssh_port': '22',
@@ -72,7 +68,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_no_name(self):
         """A create request must have a name."""
-
         self.create_expect_400(
             {'hosts': '1.2.3.4',
              'ssh_port': '22',
@@ -80,7 +75,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_unprintable_name(self):
         """The NetworkProfile name must be printable."""
-
         self.create_expect_400(
             {'name': '\r\n',
              'hosts': '1.2.3.4',
@@ -89,7 +83,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_no_host(self):
         """A NetworkProfile needs a host."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'ssh_port': '22',
@@ -97,7 +90,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_empty_host(self):
         """An empty string is not a host identifier."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': [],
@@ -106,7 +98,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_long_name(self):
         """An long profile name."""
-
         self.create_expect_400(
             {'name': 'A' * 100,
              'hosts': ['1.2.3.4'],
@@ -115,7 +106,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_negative_port(self):
         """An long profile name."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': ['1.2.3.4'],
@@ -124,7 +114,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_valid_hosts(self):
         """Test valid host patterns."""
-
         self.create_expect_201(
             {'name': 'netprof1',
              'hosts': ['10.10.181.9',
@@ -141,7 +130,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_invalid_hosts(self):
         """Test invalid host patterns."""
-
         hosts = ['192.1..2',
                  '192.01.5.10',
                  '192.1.5.1/',
@@ -165,7 +153,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_bad_host_pattern(self):
         """Test a invalid host pattern."""
-
         hosts = ['10.1.1.1-10.1.1.254']
 
         response = self.create(
@@ -178,7 +165,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_no_ssh_port(self):
         """A NetworkProfile needs an ssh port."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
@@ -186,7 +172,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_bad_ssh_port(self):
         """-1 is not a valid ssh port."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
@@ -195,7 +180,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_no_credentials(self):
         """A NetworkProfile needs credentials."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
@@ -203,7 +187,6 @@ class NetworkProfileTest(TestCase):
 
     def test_create_empty_credentials(self):
         """The empty string is not a valid credential list."""
-
         self.create_expect_400(
             {'name': 'netprof1',
              'hosts': '1.2.3.4',
@@ -212,7 +195,6 @@ class NetworkProfileTest(TestCase):
 
     def test_list(self):
         """List all NetworkProfile objects."""
-
         data = {'name': 'netprof',
                 'ssh_port': '22',
                 'hosts': ['1.2.3.4'],
@@ -240,7 +222,6 @@ class NetworkProfileTest(TestCase):
 
     def test_retrieve(self):
         """Get details on a specific NetworkProfile by primary key."""
-
         initial = self.create_expect_201({
             'name': 'netprof1',
             'hosts': ['1.2.3.4'],
@@ -259,7 +240,6 @@ class NetworkProfileTest(TestCase):
     # because the validation code is shared between create and update.
     def test_update(self):
         """Completely update a NetworkProfile."""
-
         initial = self.create_expect_201({
             'name': 'netprof2',
             'hosts': ['1.2.3.4'],
@@ -288,7 +268,6 @@ class NetworkProfileTest(TestCase):
 
     def test_partial_update(self):
         """Partially update a NetworkProfile."""
-
         initial = self.create_expect_201({
             'name': 'netprof3',
             'hosts': ['1.2.3.4'],
@@ -308,7 +287,6 @@ class NetworkProfileTest(TestCase):
 
     def test_delete(self):
         """Delete a NetworkProfile."""
-
         data = {'name': 'netprof3',
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',

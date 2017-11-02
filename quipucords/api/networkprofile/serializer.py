@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Module for serializing all model object for database storage"""
+"""Module for serializing all model object for database storage."""
 
 import re
 import logging
@@ -23,8 +23,8 @@ import api.messages as messages
 
 
 class HostRangeField(SlugRelatedField):
-    """Representation of the host range with in a network profile
-    """
+    """Representation of the host range with in a network profile."""
+
     # SlugRelatedField is *almost* what we want for HostRanges, but it
     # doesn't allow creating new HostRanges because it requires them
     # to already exist or else to_internal_value raises a
@@ -32,26 +32,30 @@ class HostRangeField(SlugRelatedField):
     # to_internal_value() before it calls our custom create() method.
 
     def to_internal_value(self, data):
+        """Create internal value."""
         if not isinstance(data, str):
             raise ValidationError(_(messages.NP_HOST_AS_STRING))
 
         return {'host_range': data}
 
     def display_value(self, instance):
+        """Create display value."""
         return instance.host_range
 
 
 class CredentialsField(PrimaryKeyRelatedField):
-    """Representation of the credentials associated with a network profile
-    """
+    """Representation of the credentials associated with a network profile."""
 
     def to_internal_value(self, data):
+        """Create internal value."""
         return HostCredential.objects.get(pk=data)
 
     def to_representation(self, value):
+        """Create output representation."""
         return value.id
 
     def display_value(self, instance):
+        """Create display value."""
         display = instance
         if isinstance(instance, HostCredential):
             display = _(messages.NP_CRED_DISPLAY % instance.name)
@@ -59,7 +63,8 @@ class CredentialsField(PrimaryKeyRelatedField):
 
 
 class NetworkProfileSerializer(ModelSerializer):
-    """Serializer for the NetworkProfile model"""
+    """Serializer for the NetworkProfile model."""
+
     name = CharField(required=True, max_length=64)
     ssh_port = IntegerField(required=False, min_value=0, default=22)
     hosts = HostRangeField(
@@ -72,6 +77,8 @@ class NetworkProfileSerializer(ModelSerializer):
         queryset=HostCredential.objects.all())
 
     class Meta:
+        """Metadata for the serializer."""
+
         model = NetworkProfile
         fields = '__all__'
 
@@ -80,6 +87,7 @@ class NetworkProfileSerializer(ModelSerializer):
     # http://www.django-rest-framework.org/api-guide/relations/
     @transaction.atomic
     def create(self, validated_data):
+        """Create a network profile."""
         hosts_data = validated_data.pop('hosts')
         credentials = validated_data.pop('credentials')
 
@@ -96,6 +104,7 @@ class NetworkProfileSerializer(ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        """Update a network profile."""
         # If we ever add optional fields to NetworkProfile, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
@@ -255,7 +264,6 @@ class NetworkProfileSerializer(ModelSerializer):
             notation. If it does look like CIDR but isn't quite right, print
             out error messages and exit.
         """
-
         # In the case of an input error, we want to distinguish between
         # strings that are "CIDR-like", so the user probably intended to
         # use CIDR and we should give them a CIDR error message, and not
@@ -327,7 +335,7 @@ class NetworkProfileSerializer(ModelSerializer):
 
     @staticmethod
     def validate_ssh_port(ssh_port):
-        """validate the ssh port."""
+        """Validate the ssh port."""
         if not ssh_port or ssh_port < 0 or ssh_port > 65536:
             raise ValidationError(_(messages.NP_INVALID_PORT))
 

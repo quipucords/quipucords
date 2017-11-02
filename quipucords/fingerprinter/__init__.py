@@ -9,32 +9,30 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Fingerprint engine ingests raw facts and produces system finger prints"""
+"""Fingerprint engine ingests raw facts and produces system finger prints."""
 
 from datetime import datetime
 
 
 class Engine():
-    """Engine that produces fingerprints from
-    facts"""
-    # pylint: disable= no-self-use,too-many-branches,too-many-statements
+    """Engine that produces fingerprints from facts."""
 
+    # pylint: disable= no-self-use,too-many-branches,too-many-statements
     def process_facts(self, fact_collection_id, facts):
-        """Process facts and convert to fingerprints
+        """Process facts and convert to fingerprints.
 
         :param fact_collection_id: id of fact collection
         associated with facts
         :param facts: facts to process
         :returns: fingerprints produced from facts
         """
-
         fingerprints = []
         for fact in facts:
             fingerprints.append(self.process_fact(fact_collection_id, fact))
         return fingerprints
 
     def process_fact(self, fact_collection_id, fact):
-        """Process a fact and convert to a fingerprint
+        """Process a fact and convert to a fingerprint.
 
         :param fact_collection_id: id of fact collection
         associated with facts

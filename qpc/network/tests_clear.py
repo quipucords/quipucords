@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -26,20 +26,22 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class NetworkClearCliTests(unittest.TestCase):
-    """Class for testing the profile clear commands for qpc"""
+    """Class for testing the profile clear commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_clear_network_ssl_err(self):
-        """Testing the clear profile command with a connection error
-        """
+        """Testing the clear profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -52,8 +54,7 @@ class NetworkClearCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
 
     def test_clear_network_conn_err(self):
-        """Testing the clear profile command with a connection error
-        """
+        """Testing the clear profile command with a connection error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -67,8 +68,7 @@ class NetworkClearCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_clear_network_internal_err(self):
-        """Testing the clear profile command with an internal error
-        """
+        """Testing the clear profile command with an internal error."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -81,8 +81,7 @@ class NetworkClearCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), 'Server Error')
 
     def test_clear_network_empty(self):
-        """Testing the clear profile command successfully with empty data
-        """
+        """Testing the clear profile command successfully with empty data."""
         network_out = StringIO()
         url = BASE_URL + NETWORK_URI + '?name=profile1'
         with requests_mock.Mocker() as mocker:
@@ -96,8 +95,9 @@ class NetworkClearCliTests(unittest.TestCase):
                                      'Profile "profile1" was not found\n')
 
     def test_clear_by_name(self):
-        """Testing the clear profile command successfully with stubbed data
-        when specifying a name
+        """Testing the clear profile command.
+
+        Successfully with stubbed data when specifying a name
         """
         network_out = StringIO()
         get_url = BASE_URL + NETWORK_URI + '?name=profile1'
@@ -116,8 +116,9 @@ class NetworkClearCliTests(unittest.TestCase):
                 self.assertEqual(network_out.getvalue(), expected)
 
     def test_clear_by_name_err(self):
-        """Testing the clear profile command successfully with stubbed data
-        when specifying a name with an error response
+        """Test the clear profile command successfully.
+
+        With stubbed data when specifying a name with an error response
         """
         network_out = StringIO()
         get_url = BASE_URL + NETWORK_URI + '?name=profile1'
@@ -138,8 +139,9 @@ class NetworkClearCliTests(unittest.TestCase):
                     self.assertTrue(expected in network_out.getvalue())
 
     def test_clear_all_empty(self):
-        """Testing the clear profile command successfully with stubbed data
-        empty list of profiles
+        """Test the clear profile command successfully.
+
+        With stubbed data empty list of profiles
         """
         network_out = StringIO()
         get_url = BASE_URL + NETWORK_URI
@@ -154,8 +156,9 @@ class NetworkClearCliTests(unittest.TestCase):
                     self.assertEqual(network_out.getvalue(), expected)
 
     def test_clear_all_with_error(self):
-        """Testing the clear profile command successfully with stubbed data
-        a list of profiles with delete error
+        """Testing the clear profile command successfully.
+
+        With stubbed data list of profiles with delete error
         """
         network_out = StringIO()
         get_url = BASE_URL + NETWORK_URI
@@ -178,9 +181,7 @@ class NetworkClearCliTests(unittest.TestCase):
                     self.assertTrue(expected in network_out.getvalue())
 
     def test_clear_all(self):
-        """Testing the clear profile command successfully with stubbed data
-        a list of profiles
-        """
+        """Testing the clear profile command successfully with stubbed data."""
         network_out = StringIO()
         get_url = BASE_URL + NETWORK_URI
         delete_url = BASE_URL + NETWORK_URI + '1/'

@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Scanner used for host inspection"""
+"""Scanner used for host inspection."""
 import os
 import logging
 import requests
@@ -27,19 +27,22 @@ PLAYBOOK_PATH = os.path.abspath(os.path.normpath(
 
 
 class HostScanner(DiscoveryScanner):
-    """Attempts connections to a network profile using a list of credentials
+    """Scan target systems to collect facts.
+
+    Attempts connections to a network profile using a list of credentials
     and gathers the set of successes (host/ip, credential) and
     failures (host/ip). Runs a host scan on the set of systems that are
     reachable. Collects the associated facts for the scanned systems
     """
 
     def __init__(self, scanjob, network_profile, fact_endpoint):
+        """Create host scanner."""
         DiscoveryScanner.__init__(self, scanjob, network_profile)
         self.fact_endpoint = fact_endpoint
 
     # pylint: disable=too-many-locals
     def host_scan(self):
-        """Executes the host scan with the initialized network profile
+        """Execute the host scan with the initialized network profile.
 
         :returns: An array of dictionaries of facts
         """
@@ -92,8 +95,7 @@ class HostScanner(DiscoveryScanner):
         return facts
 
     def send_facts(self, facts):
-        """Send collected host scan facts to fact endpoint and get
-        associated id.
+        """Send collected host scan facts to fact endpoint.
 
         :param facts: The array of fact dictionaries
         :returns: Identifer for the sent facts
@@ -126,7 +128,7 @@ class HostScanner(DiscoveryScanner):
         return self.scan_results
 
     def run(self):
-        """Method via thread for triggering execution"""
+        """Trigger thread execution."""
         facts = []
         self.scanjob.status = ScanJob.RUNNING
         self.scanjob.save()

@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -18,19 +18,22 @@ from qpc.tests_utilities import HushUpStderr, redirect_stdout
 
 
 class CliTests(unittest.TestCase):
-    """Class for testing the base cli arguments for qpc"""
+    """Class for testing the base cli arguments for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Tear down test case setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_version(self):
-        """Testing the verion argument"""
+        """Testing the verion argument."""
         version_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(version_out):

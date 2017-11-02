@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the views associated with the API models"""
+"""Describes the views associated with the API models."""
 
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -23,7 +23,9 @@ CREDENTIALS_KEY = 'credentials'
 
 
 def expand_host_credential(profile, json_profile):
-    """Take network profile object with credential id and pull object from db.
+    """Expand host credentials.
+
+    Take network profile object with credential id and pull object from db.
     create slim dictionary version of the host credential with name an value
     to return to user.
     """
@@ -43,17 +45,20 @@ def expand_host_credential(profile, json_profile):
 
 
 class NetworkProfileFilter(FilterSet):
-    """Filter for network profiles by name"""
+    """Filter for network profiles by name."""
+
     name = ListFilter(name='name')
 
     class Meta:
+        """Metadata for filterset."""
+
         model = NetworkProfile
         fields = ['name']
 
 
 # pylint: disable=too-many-ancestors
 class NetworkProfileViewSet(ModelViewSet):
-    """A view set for NetworkProfiles"""
+    """A view set for NetworkProfiles."""
 
     queryset = NetworkProfile.objects.all()
     serializer_class = NetworkProfileSerializer
@@ -61,7 +66,7 @@ class NetworkProfileViewSet(ModelViewSet):
     filter_class = NetworkProfileFilter
 
     def list(self, request):  # pylint: disable=unused-argument
-
+        """List the network profiles."""
         # List objects
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -79,7 +84,7 @@ class NetworkProfileViewSet(ModelViewSet):
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
-        # Create object
+        """Create a network profile."""
         response = super().create(request, args, kwargs)
 
         # Modify json for response
@@ -91,7 +96,7 @@ class NetworkProfileViewSet(ModelViewSet):
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
-        # Get object
+        """Get a network profile."""
         profile = get_object_or_404(self.queryset, pk=pk)
         serializer = NetworkProfileSerializer(profile)
         json_profile = serializer.data
@@ -103,7 +108,7 @@ class NetworkProfileViewSet(ModelViewSet):
 
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
-        # Update profile
+        """Update a network profile."""
         profile = self.get_object()
         serializer = self.get_serializer(profile, data=request.data,
                                          partial=kwargs.get('partial', False))
