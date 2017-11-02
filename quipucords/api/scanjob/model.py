@@ -45,10 +45,22 @@ class ScanJob(models.Model):
         default=PENDING,
     )
     max_concurrency = models.PositiveIntegerField(default=50)
+    systems_count = models.PositiveIntegerField(null=True)
+    systems_scanned = models.PositiveIntegerField(null=True)
+    fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
-        return '{id:%s, scan_type:%s, profile:%s, max_concurrency: %d}' % \
-            (self.id, self.scan_type, self.profile, self.max_concurrency)
+        return '{' + 'id:{}, '\
+            'scan_type:{}, '\
+            'profile:{}, '\
+            'max_concurrency: {}, '\
+            'systems_count: {}, '\
+            'systems_scanned: {}'.format(self.id,
+                                         self.scan_type,
+                                         self.profile,
+                                         self.max_concurrency,
+                                         self.systems_count,
+                                         self.systems_scanned) + '}'
 
     class Meta:
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)

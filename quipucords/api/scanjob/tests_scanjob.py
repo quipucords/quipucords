@@ -121,12 +121,23 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'host', 'status': 'pending',
-                     'max_concurrency': 50},
-                    {'id': 2, 'profile': {'id': 1, 'name': 'profile1'},
-                     'scan_type': 'discovery', 'status': 'pending',
-                     'max_concurrency': 50}]
+        print(content)
+        expected = [{'id': 1,
+                     'profile': {'id': 1, 'name': 'profile1'},
+                     'scan_type': 'host',
+                     'status': 'pending',
+                     'max_concurrency': 50,
+                     'systems_count': None,
+                     'systems_scanned': None,
+                     'fact_collection_id': None},
+                    {'id': 2,
+                     'profile': {'id': 1, 'name': 'profile1'},
+                     'scan_type': 'discovery',
+                     'status': 'pending',
+                     'max_concurrency': 50,
+                     'systems_count': None,
+                     'systems_scanned': None,
+                     'fact_collection_id': None}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
