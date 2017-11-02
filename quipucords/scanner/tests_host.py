@@ -117,9 +117,9 @@ class HostScannerTest(TestCase):
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory(
             [
-                ('1.2.3.4', cred),
-                ('1.2.3.4', cred),
-                ('1.2.3.4', cred),
+                ('1.2.3.1', cred),
+                ('1.2.3.2', cred),
+                ('1.2.3.3', cred),
                 ('1.2.3.4', cred)
             ],
             connection_port,
@@ -130,26 +130,26 @@ class HostScannerTest(TestCase):
                 'children': {
                     'group_0': {
                         'hosts': {
-                            '1.2.3.4': {
+                            '1.2.3.1': {
                                 'ansible_user': 'username',
                                 'ansible_ssh_pass': 'password',
-                                'ansible_host': '1.2.3.4'}
+                                'ansible_host': '1.2.3.1'}
                         }
                     },
                     'group_1': {
                         'hosts': {
-                            '1.2.3.4': {
+                            '1.2.3.2': {
                                 'ansible_user': 'username',
                                 'ansible_ssh_pass': 'password',
-                                'ansible_host': '1.2.3.4'}
+                                'ansible_host': '1.2.3.2'}
                         }
                     },
                     'group_2': {
                         'hosts': {
-                            '1.2.3.4': {
+                            '1.2.3.3': {
                                 'ansible_user': 'username',
                                 'ansible_ssh_pass': 'password',
-                                'ansible_host': '1.2.3.4'}
+                                'ansible_host': '1.2.3.3'}
                         }
                     },
                     'group_3': {
