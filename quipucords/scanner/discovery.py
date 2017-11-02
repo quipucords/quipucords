@@ -120,8 +120,9 @@ class DiscoveryScanner(Thread):
 
             # Update the scan counts
             if self.scanjob.scan_type == ScanJob.DISCOVERY:
-                if  self.scanjob.systems_count is None:
-                    self.scanjob.systems_count = len(connected) + len(remaining)
+                if self.scanjob.systems_count is None:
+                    self.scanjob.systems_count = len(
+                        connected) + len(remaining)
                     self.scanjob.systems_scanned = 0
                 self.scanjob.systems_scanned += len(connected)
                 self.scanjob.save()
