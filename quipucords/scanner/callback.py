@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Scanner used for host connection discovery"""
+"""Callback object for capturing ansible task execution."""
 
 import logging
 from ansible.plugins.callback import CallbackBase
@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def _construct_result(result):
-    """Construct result object"""
+    """Construct result object."""
     # pylint: disable=protected-access
     host = result._host
     return {'host': host.name, 'result': result._result}
 
 
 class ResultCallback(CallbackBase):
-    """A sample callback plugin used for performing an action as results come in
+    """A sample callback plugin used for performing an action.
 
     If you want to collect all results into a single object for processing at
     the end of the execution, look into utilizing the ``json`` callback plugin
@@ -33,16 +33,16 @@ class ResultCallback(CallbackBase):
     """
 
     def __init__(self, display=None):
+        """Create result callback."""
         super().__init__(display=display)
         self.results = []
         self.ansible_facts = {}
 
     def v2_runner_on_ok(self, result):
-        """Print a json representation of the result
-        """
+        """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        logger.debug("%s", result_obj)
+        logger.debug('%s', result_obj)
         # pylint: disable=protected-access
         host = str(result._host)
         if (result._result is not None and isinstance(result._result, dict) and
@@ -59,13 +59,13 @@ class ResultCallback(CallbackBase):
                 self.ansible_facts[host] = facts
 
     def v2_runner_on_unreachable(self, result):
-        """Print a json representation of the result
-        """
+        """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        logger.warning("%s", result_obj)
+        logger.warning('%s', result_obj)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
+        """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        logger.error("%s", result_obj)
+        logger.error('%s', result_obj)

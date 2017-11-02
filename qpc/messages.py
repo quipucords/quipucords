@@ -10,7 +10,7 @@
 #
 #
 
-"""CLI messages for translation"""
+"""CLI messages for translation."""
 
 AUTH_NAME_HELP = 'auth credential name'
 AUTH_USER_HELP = 'user name for authenticating against target system'
@@ -25,7 +25,7 @@ AUTH_ADDED = 'Auth "%s" was added'
 AUTH_REMOVED = 'Auth "%s" was removed'
 AUTH_FAILED_TO_REMOVE = 'Failed to remove auth "%s"'
 AUTH_NOT_FOUND = 'Auth "%s" was not found'
-AUTH_NO_CREDS_TO_REMOVE = "No credentials exist to be removed"
+AUTH_NO_CREDS_TO_REMOVE = 'No credentials exist to be removed'
 AUTH_PARTIAL_REMOVE = 'Some credentials were removed, however an error' \
     ' occurred removing the following credentials: %s'
 AUTH_CLEAR_ALL_SUCCESS = 'All credentials were removed'
@@ -51,7 +51,7 @@ PROFILE_CLEAR_ALL_HELP = 'remove all network profiles'
 PROFILE_REMOVED = 'Profile "%s" was removed'
 PROFILE_FAILED_TO_REMOVE = 'Failed to remove profile "%s"'
 PROFILE_NOT_FOUND = 'Profile "%s" was not found'
-PROFILE_NO_PROFILES_TO_REMOVE = "No profiles exist to be removed"
+PROFILE_NO_PROFILES_TO_REMOVE = 'No profiles exist to be removed'
 PROFILE_PARTIAL_REMOVE = 'Some profiles were removed, however an error' \
     ' occurred removing the following profiles: %s'
 PROFILE_CLEAR_ALL_SUCCESS = 'All profiles were removed'

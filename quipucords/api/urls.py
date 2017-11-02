@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Describes the urls and patterns for the API application"""
+"""Describes the urls and patterns for the API application."""
 
 from django.conf.urls import url
 from rest_framework.routers import SimpleRouter

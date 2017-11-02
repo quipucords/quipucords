@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the API application"""
+"""Test the API application."""
 
 import json
 from unittest.mock import patch
@@ -19,7 +19,7 @@ from api.models import HostCredential, NetworkProfile
 
 
 def dummy_start():
-    """Dummy method for testing"""
+    """Create a dummy method for testing."""
     pass
 
 
@@ -27,6 +27,7 @@ class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
     def setUp(self):
+        """Create test setup."""
         self.cred = HostCredential.objects.create(
             name='cred1',
             username='username',
@@ -42,8 +43,7 @@ class ScanJobTest(TestCase):
         self.network_profile.credentials.add(self.cred)
 
     def create(self, data):
-        """Utility function to call the create endpoint."""
-
+        """Call the create endpoint."""
         url = reverse('scanjob-list')
         return self.client.post(url,
                                 json.dumps(data),
@@ -51,13 +51,11 @@ class ScanJobTest(TestCase):
 
     def create_expect_400(self, data):
         """We will do a lot of create tests that expect HTTP 400s."""
-
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def create_expect_201(self, data):
         """Create a network profile, return the response as a dict."""
-
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
@@ -65,7 +63,6 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_successful_create(self, start):  # pylint: disable=unused-argument
         """A valid create request should succeed."""
-
         data = {'profile': self.network_profile.id,
                 'scan_type': 'discovery'}
         response = self.create_expect_201(data)
@@ -73,13 +70,11 @@ class ScanJobTest(TestCase):
 
     def test_create_no_profile(self):
         """A create request must have a profile."""
-
         self.create_expect_400(
             {})
 
     def test_create_invalid_scan_type(self):
         """A create request must have a valid scan_type."""
-
         data = {'profile': self.network_profile.id,
                 'scan_type': 'foo'}
         self.create_expect_400(data)
@@ -88,7 +83,6 @@ class ScanJobTest(TestCase):
     # pylint: disable=unused-argument
     def test_create_default_host_type(self, start):
         """A valid create request should succeed with defaulted type."""
-
         data = {'profile': self.network_profile.id}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
@@ -97,12 +91,11 @@ class ScanJobTest(TestCase):
 
     def test_create_invalid_profile(self):
         """The NetworkProfile name must valid."""
-
         self.create_expect_400(
             {'profile': -1})
 
     def test_create_invalid_forks(self):
-        """Test valid number of forks"""
+        """Test valid number of forks."""
         data = {'profile': self.network_profile.id,
                 'max_concurrency': -5}
         self.create_expect_400(data)
@@ -143,7 +136,6 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_retrieve(self, start):  # pylint: disable=unused-argument
         """Get details on a specific ScanJob by primary key."""
-
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
@@ -160,7 +152,6 @@ class ScanJobTest(TestCase):
     # pylint: disable=unused-argument
     def test_update_not_allowed(self, start):
         """Completely update a NetworkProfile."""
-
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
@@ -178,7 +169,6 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_partial_update(self, start):  # pylint: disable=unused-argument
         """Partially update a ScanJob is not supported."""
-
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
@@ -195,7 +185,6 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
     def test_delete(self, start):  # pylint: disable=unused-argument
         """Delete a ScanJob is not supported."""
-
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
         response = self.create_expect_201(data_discovery)

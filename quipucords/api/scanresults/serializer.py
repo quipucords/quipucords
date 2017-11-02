@@ -8,34 +8,42 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Module for serializing all model object for database storage"""
+"""Module for serializing all model object for database storage."""
 
 from rest_framework.serializers import ModelSerializer, CharField
 from api.models import ScanJobResults, Results, ResultKeyValue
 
 
 class ResultKeyValueSerializer(ModelSerializer):
-    """Serializer for the ResultKeyValue model"""
+    """Serializer for the ResultKeyValue model."""
+
     key = CharField(required=True, max_length=64)
     value = CharField(required=False, max_length=1024, allow_null=True)
 
     class Meta:
+        """Metadata for serialzer."""
+
         model = ResultKeyValue
         fields = '__all__'
 
 
 class ResultsSerializer(ModelSerializer):
-    """Serializer for the Results model"""
+    """Serializer for the Results model."""
+
     row = CharField(required=False, max_length=64)
 
     class Meta:
+        """Metadata for serialzer."""
+
         model = Results
         fields = '__all__'
 
 
 class ScanJobResultsSerializer(ModelSerializer):
-    """Serializer for the ScanJobResults model"""
+    """Serializer for the ScanJobResults model."""
 
     class Meta:
+        """Metadata for serialzer."""
+
         model = ScanJobResults
         fields = '__all__'

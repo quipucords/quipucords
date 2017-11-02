@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 @receiver(post_save, sender=FactCollection)
 def process_fact_collection(sender, instance, **kwargs):
-    """Process facts using engine and convert to fingerprints
+    """Process facts using engine and convert to fingerprints.
 
     :param sender: Class that was saved
     :param instance: FactCollection that was saved

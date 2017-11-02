@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Serializer for system facts models"""
+"""Serializer for system facts models."""
 
 from rest_framework.serializers import (ModelSerializer,
                                         ValidationError,
@@ -25,6 +25,7 @@ from django.utils.translation import ugettext as _
 
 class FactSerializer(ModelSerializer):
     """Serializer for the Fact model."""
+
     connection_host = CharField(required=False, max_length=256)
     connection_port = IntegerField(required=False, min_value=0)
     connection_uuid = UUIDField(required=True)
@@ -47,20 +48,24 @@ class FactSerializer(ModelSerializer):
 
     class Meta:
         """Meta class for FactSerializer."""
+
         model = Fact
         exclude = ('id',)
 
 
 class FactCollectionSerializer(ModelSerializer):
-    """Serializer for the FactCollection model"""
+    """Serializer for the FactCollection model."""
+
     facts = FactSerializer(many=True)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""
+
         model = FactCollection
         fields = '__all__'
 
     def create(self, validated_data):
+        """Create the fact collection."""
         facts_data = validated_data.pop('facts')
         fact_collection = FactCollection.objects.create(**validated_data)
         for fact_data in facts_data:

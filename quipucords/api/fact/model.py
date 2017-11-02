@@ -15,7 +15,8 @@ from django.db import models
 
 
 class Fact(models.Model):
-    """Represents a system fact"""
+    """Represents a system fact."""
+
     connection_host = models.CharField(
         max_length=256, unique=False, blank=True, null=True)
     connection_port = models.PositiveIntegerField(unique=False, null=True)
@@ -39,6 +40,7 @@ class Fact(models.Model):
     virt_what_type = models.CharField(max_length=64, unique=False, null=True)
 
     def __str__(self):
+        """Convert to string."""
         return 'id:{}, '\
             'connection_host:{}'\
             'connection_port:{}'\
@@ -82,10 +84,12 @@ class Fact(models.Model):
 
 
 class FactCollection(models.Model):
-    """A reported set of facts"""
+    """A reported set of facts."""
+
     facts = models.ManyToManyField(Fact)
 
     def __str__(self):
+        """Convert to string."""
         result = '{ id:%s, facts: [' % (self.id)
         for fact in self.facts.values():
             result += '%s, ' % (str(fact))

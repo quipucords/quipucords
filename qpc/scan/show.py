@@ -9,8 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" ScanShowCommand is used to show info on a specific system scan
-"""
+"""ScanShowCommand is used to show info on a specific system scan."""
 
 from __future__ import print_function
 import sys
@@ -25,14 +24,17 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class ScanShowCommand(CliCommand):
-    """
+    """Defines the show command.
+
     This command is for showing the status of a specific scan
     to gather facts.
     """
+
     SUBCOMMAND = scan.SUBCOMMAND
     ACTION = scan.SHOW
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,

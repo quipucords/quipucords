@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" Utilities for the network profile module"""
+"""Utilities for the network profile module."""
 
 from __future__ import print_function
 from argparse import ArgumentTypeError
@@ -22,7 +22,6 @@ def validate_port(arg):
     :returns: The arg, as an integer.
     :raises: ValueError, if arg is not a valid port.
     """
-
     if isinstance(arg, str):
         try:
             arg = int(arg)
@@ -45,7 +44,7 @@ def validate_port(arg):
 
 
 def build_profile_payload(args, add_none=True):
-    """Construct payload from command line arguments
+    """Construct payload from command line arguments.
 
     :param args: the command line arguments
     :param add_none: add None for a key if True vs. not in dictionary

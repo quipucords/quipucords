@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test utilities for the CLI module"""
+"""Test utilities for the CLI module."""
 
 import contextlib
 import sys
@@ -16,16 +16,16 @@ import sys
 
 # pylint: disable=too-few-public-methods
 class HushUpStderr(object):
-    """Class used to quiet standard error output"""
+    """Class used to quiet standard error output."""
+
     def write(self, stream):
-        """Ignore standard error output"""
+        """Ignore standard error output."""
         pass
 
 
 @contextlib.contextmanager
 def redirect_stdout(stream):
-    """Run a code block, capturing stdout to the given stream"""
-
+    """Run a code block, capturing stdout to the given stream."""
     old_stdout = sys.stdout
     try:
         sys.stdout = stream

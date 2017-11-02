@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Viewset for system facts models"""
+"""Viewset for system facts models."""
 
 import logging
 from rest_framework import viewsets, mixins
@@ -20,9 +20,7 @@ from api.serializers import FactCollectionSerializer
 # pylint: disable=too-many-ancestors
 class FactViewSet(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
-    """
-    ModelViewSet to publish system facts.
-    """
+    """ModelViewSet to publish system facts."""
 
     # Get an instance of a logger
     logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

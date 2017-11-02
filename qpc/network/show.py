@@ -9,9 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" NetworkShowCommand is used to show info on a specific network profiles
-for system scans
-"""
+"""NetworkShowCommand is used to show network profiles for system scans."""
 
 from __future__ import print_function
 import sys
@@ -26,14 +24,17 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class NetworkShowCommand(CliCommand):
-    """
+    """Defines the show command.
+
     This command is for showing a network which can later be used with a scan
     to gather facts.
     """
+
     SUBCOMMAND = network.SUBCOMMAND
     ACTION = network.SHOW
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,

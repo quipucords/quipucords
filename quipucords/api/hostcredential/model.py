@@ -9,7 +9,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Defines the models used with the API application.
-   These models are used in the REST definitions
+
+These models are used in the REST definitions
 """
 
 from django.utils.translation import ugettext as _
@@ -19,7 +20,8 @@ import api.messages as messages
 
 
 class HostCredential(models.Model):
-    """The host credential for connecting to host systems via ssh"""
+    """The host credential for connecting to host systems via ssh."""
+
     name = models.CharField(max_length=64, unique=True)
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=1024, null=True)
@@ -28,7 +30,7 @@ class HostCredential(models.Model):
     ssh_passphrase = models.CharField(max_length=1024, null=True)
 
     def encrypt_fields(self):
-        """Encrypt the sensitive fields of the object"""
+        """Encrypt the sensitive fields of the object."""
         if self.password:
             self.password = encrypt_data_as_unicode(self.password)
         if self.sudo_password:
@@ -38,16 +40,16 @@ class HostCredential(models.Model):
 
     # pylint: disable=arguments-differ
     def save(self, *args, **kwargs):
-        """Save the model object
-        """
+        """Save the model object."""
         self.encrypt_fields()
         super().save(*args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        """Update the model object
-        """
+        """Update the model object."""
         self.encrypt_fields()
         super().update(request, *args, **kwargs)
 
     class Meta:
+        """Metadata for the model."""
+
         verbose_name_plural = _(messages.PLURAL_HOST_CREDENTIALS_MSG)

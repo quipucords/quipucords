@@ -9,7 +9,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Defines the models used with the API application.
-   These models are used in the REST definitions
+
+These models are used in the REST definitions
 """
 
 from django.utils.translation import ugettext as _
@@ -19,40 +20,50 @@ import api.messages as messages
 
 
 class ResultKeyValue(models.Model):
-    """A key value pair of captured data"""
+    """A key value pair of captured data."""
+
     key = models.CharField(max_length=64)
     value = models.CharField(max_length=1024, null=True)
 
     def __str__(self):
+        """Convert to string."""
         return '{ id:%s, key:%s, value:%s }' % (self.id,
                                                 self.key,
                                                 self.value)
 
     class Meta:
+        """Metadata for model."""
+
         verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
 class Results(models.Model):
-    """The captured results from a scan"""
+    """The captured results from a scan."""
+
     row = models.CharField(max_length=64)
     columns = models.ManyToManyField(ResultKeyValue)
 
     def __str__(self):
+        """Convert to string."""
         return '{ id:%s, row:%s, columns:%s }' % (self.id,
                                                   self.row,
                                                   self.columns)
 
     class Meta:
+        """Metadata for model."""
+
         verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
 class ScanJobResults(models.Model):
-    """The results of a scan job"""
+    """The results of a scan job."""
+
     scan_job = models.ForeignKey(ScanJob, on_delete=models.CASCADE)
     results = models.ManyToManyField(Results)
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
+        """Convert to string."""
         return '{ id:%s, scan_job:%s, ' \
             'fact_collection_id:%s, results:%s }' % (self.id,
                                                      self.scan_job,
@@ -60,4 +71,6 @@ class ScanJobResults(models.Model):
                                                      self.results)
 
     class Meta:
+        """Metadata for model."""
+
         verbose_name_plural = _(messages.PLURAL_SCAN_RESULTS_MSG)

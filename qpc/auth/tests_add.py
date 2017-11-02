@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -23,14 +23,16 @@ from qpc.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.auth import AUTH_URI
 from qpc.auth.add import AuthAddCommand
 
-TMP_KEY = "/tmp/testkey"
+TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class AuthAddCliTests(unittest.TestCase):
-    """Class for testing the auth add commands for qpc"""
+    """Class for testing the auth add commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -41,20 +43,22 @@ class AuthAddCliTests(unittest.TestCase):
             test_sshkey.write('fake ssh keyfile.')
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
         if os.path.isfile(TMP_KEY):
             os.remove(TMP_KEY)
 
     def test_add_req_args_err(self):
-        """Testing the add auth command required flags"""
+        """Testing the add auth command required flags."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'auth', 'add', '--name', 'auth1']
             CLI().main()
 
     def test_add_bad_key(self):
-        """Testing the add auth command when providing an invalid path for
-        the sshkeyfile.
+        """Testing the add auth command.
+
+        When providing an invalid path for the sshkeyfile.
         """
         auth_out = StringIO()
         with self.assertRaises(SystemExit):
@@ -64,8 +68,7 @@ class AuthAddCliTests(unittest.TestCase):
                 CLI().main()
 
     def test_add_auth_name_dup(self):
-        """Testing the add auth command duplicate name
-        """
+        """Testing the add auth command duplicate name."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         error = {'name': ['credential with this name already exists.']}
@@ -84,8 +87,7 @@ class AuthAddCliTests(unittest.TestCase):
                                     in auth_out.getvalue())
 
     def test_add_auth_ssl_err(self):
-        """Testing the add auth command with a connection error
-        """
+        """Testing the add auth command with a connection error."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -101,8 +103,7 @@ class AuthAddCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
 
     def test_add_auth_conn_err(self):
-        """Testing the add auth command with a connection error
-        """
+        """Testing the add auth command with a connection error."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -118,8 +119,7 @@ class AuthAddCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_add_auth(self):
-        """Testing the add auth command successfully
-        """
+        """Testing the add auth command successfully."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:

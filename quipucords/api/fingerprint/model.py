@@ -16,7 +16,7 @@ from api.fact.model import FactCollection
 
 
 class SystemFingerprint(models.Model):
-    """Represents system fingerprint"""
+    """Represents system fingerprint."""
 
     INFRASTRUCTURE_TYPE = (
         ('bare_metal', 'Bare Metal'), ('virtualized',
@@ -54,6 +54,7 @@ class SystemFingerprint(models.Model):
         unique=False, null=True)
 
     def __str__(self):
+        """Convert to string."""
         return '{' + 'id:{}, '\
             'fact_collection:{}, ' \
             'connection_host:{} '\

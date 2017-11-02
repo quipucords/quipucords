@@ -10,7 +10,7 @@
 #
 #
 
-""" Translation initalization utility """
+"""Translation initalization utility."""
 
 
 import gettext

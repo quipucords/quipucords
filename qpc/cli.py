@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" Quipucords Command Line Interface """
+"""Quipucords Command Line Interface."""
 
 from __future__ import print_function
 from argparse import ArgumentParser
@@ -38,11 +38,15 @@ from . import __version__
 
 # pylint: disable=too-few-public-methods
 class CLI(object):
-    """Class responsible for displaying ussage or matching inputs
+    """Defines the CLI class.
+
+    Class responsible for displaying ussage or matching inputs
     to the valid set of commands supported by qpc.
     """
-    def __init__(self, name="cli", usage=None, shortdesc=None,
+
+    def __init__(self, name='cli', usage=None, shortdesc=None,
                  description=None):
+        """Create main command line handler."""
         self.shortdesc = shortdesc
         if shortdesc is not None and description is None:
             description = shortdesc
@@ -80,7 +84,9 @@ class CLI(object):
             action_dic[action.ACTION] = action_inst
 
     def main(self):
-        """Method determine whether to display usage or pass input
+        """Execute of subcommand operation.
+
+        Method determine whether to display usage or pass input
         to find the best command match. If no match is found the
         usage is displayed
         """

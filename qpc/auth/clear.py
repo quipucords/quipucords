@@ -9,9 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" AuthClearCommand is used to clear specific credential
-for system access or all credentials
-"""
+"""AuthClearCommand is used to clear a or all credentials."""
 
 from __future__ import print_function
 import sys
@@ -26,13 +24,16 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class AuthClearCommand(CliCommand):
-    """
+    """Defines the clear command.
+
     This command is for clearing a specific credential or all credentials.
     """
+
     SUBCOMMAND = auth.SUBCOMMAND
     ACTION = auth.CLEAR
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,

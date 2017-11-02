@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""API serializers for import organization"""
+"""API serializers for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
 from api.fact.serializer import FactCollectionSerializer, FactSerializer

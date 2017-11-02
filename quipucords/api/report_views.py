@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Viewset for system reports"""
+"""Viewset for system reports."""
 import logging
 from django.db.models import Count
 from api.models import SystemFingerprint

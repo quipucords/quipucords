@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Module for serializing all model object for database storage"""
+"""Module for serializing all model object for database storage."""
 
 import os
 from django.utils.translation import ugettext as _
@@ -19,8 +19,7 @@ import api.messages as messages
 
 
 def expand_filepath(filepath):
-    """Expand the ssh_keyfile filepath if necessary.
-    """
+    """Expand the ssh_keyfile filepath if necessary."""
     if filepath is not None:
         expanded = os.path.abspath(
             os.path.normpath(
@@ -31,7 +30,8 @@ def expand_filepath(filepath):
 
 
 class HostCredentialSerializer(ModelSerializer):
-    """Serializer for the HostCredential model"""
+    """Serializer for the HostCredential model."""
+
     name = CharField(required=True, max_length=64)
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
@@ -44,10 +44,13 @@ class HostCredentialSerializer(ModelSerializer):
                                style={'input_type': 'password'})
 
     class Meta:
+        """Metadata for the serializer."""
+
         model = HostCredential
         fields = '__all__'
 
     def validate(self, attrs):
+        """Validate the attributes."""
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']

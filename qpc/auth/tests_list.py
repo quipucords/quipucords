@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the CLI module"""
+"""Test the CLI module."""
 
 import unittest
 import sys
@@ -26,20 +26,22 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class AuthListCliTests(unittest.TestCase):
-    """Class for testing the auth list commands for qpc"""
+    """Class for testing the auth list commands for qpc."""
+
     def setUp(self):
+        """Create test setup."""
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
 
     def tearDown(self):
+        """Remove test setup."""
         # Restore stderr
         sys.stderr = self.orig_stderr
 
     def test_list_auth_ssl_err(self):
-        """Testing the list auth command with a connection error
-        """
+        """Testing the list auth command with a connection error."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -52,8 +54,7 @@ class AuthListCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
 
     def test_list_auth_conn_err(self):
-        """Testing the list auth command with a connection error
-        """
+        """Testing the list auth command with a connection error."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -66,8 +67,7 @@ class AuthListCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
 
     def test_list_auth_internal_err(self):
-        """Testing the list auth command with an internal error
-        """
+        """Testing the list auth command with an internal error."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -80,8 +80,7 @@ class AuthListCliTests(unittest.TestCase):
                     self.assertEqual(auth_out.getvalue(), 'Server Error')
 
     def test_list_auth_empty(self):
-        """Testing the list auth command successfully with empty data
-        """
+        """Testing the list auth command successfully with empty data."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         with requests_mock.Mocker() as mocker:
@@ -94,8 +93,7 @@ class AuthListCliTests(unittest.TestCase):
                                  'No credentials exist yet.\n')
 
     def test_list_auth_data(self):
-        """Testing the list auth command successfully with stubbed data
-        """
+        """Testing the list auth command successfully with stubbed data."""
         auth_out = StringIO()
         url = BASE_URL + AUTH_URI
         auth_entry = {'id': 1, 'name': 'auth1', 'username': 'root',

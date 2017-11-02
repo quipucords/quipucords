@@ -9,9 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-""" ScanStartCommand is used to trigger a host scan against a created
-network profile
-"""
+"""ScanStartCommand is used to trigger a host scan."""
 
 from __future__ import print_function
 import sys
@@ -26,14 +24,17 @@ import qpc.messages as messages
 
 # pylint: disable=too-few-public-methods
 class ScanStartCommand(CliCommand):
-    """
+    """Defines the start command.
+
     This command is for triggering host scans with a profile to gather system
     facts.
     """
+
     SUBCOMMAND = scan.SUBCOMMAND
     ACTION = scan.START
 
     def __init__(self, subparsers):
+        """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
