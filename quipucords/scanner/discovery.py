@@ -117,6 +117,14 @@ class DiscoveryScanner(Thread):
             cred = hc_serializer.data
             connected, remaining = connect(remaining, cred, connection_port,
                                            forks=forks)
+
+            # Update the scan counts
+            if self.scanjob.systems_count is None:
+                self.scanjob.systems_count = len(connected) + len(remaining)
+                self.scanjob.systems_scanned = 0
+            self.scanjob.systems_scanned += len(connected)
+            self.scanjob.save()
+
             if remaining == []:
                 break
 
