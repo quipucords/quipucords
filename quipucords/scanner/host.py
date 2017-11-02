@@ -47,33 +47,36 @@ class HostScanner(DiscoveryScanner):
         roles = ['check_dependencies', 'connection',
                  'cpu', 'date', 'dmi', 'etc_release',
                  'virt', 'virt_what']
-        playbook = {'name': 'scan systems for product fingerprint facts',
-                    'hosts': 'all',
-                    'gather_facts': False,
-                    'roles': roles}
         connection_port = self.network_profile['ssh_port']
 
         logger.info('Host scan started for %s.', self.scanjob)
         connected, failed = self.discovery()  # pylint: disable=unused-variable
         self._store_discovery_success(connected, failed, mark_complete=False)
 
-        inventory = construct_scan_inventory(connected, connection_port)
-        inventory_file = write_inventory(inventory)
-        callback = ResultCallback()
         forks = self.scanjob.max_concurrency
-        result = run_playbook(inventory_file, callback, playbook, forks=forks)
+        inventory_group_prefix = 'group_'
+        group_names, inventory = construct_scan_inventory(
+            connected, connection_port, inventory_group_prefix, forks)
+        inventory_file = write_inventory(inventory)
+        for group_name in group_names:
+            callback = ResultCallback()
+            playbook = {'name': 'scan systems for product fingerprint facts',
+                        'hosts': group_name,
+                        'gather_facts': False,
+                        'roles': roles}
+            result = run_playbook(
+                inventory_file, callback, playbook, forks=forks)
 
-        if result != TaskQueueManager.RUN_OK:
-            raise _construct_error(result)
-
-        dict_facts = callback.ansible_facts
-        # pylint: disable=unused-variable
-        for host, sys_fact in dict_facts.items():
-            new_sys_fact = {}
-            for fact_key, fact_value in sys_fact.items():
-                if fact_value:
-                    new_sys_fact[fact_key] = fact_value
-            facts.append(new_sys_fact)
+            if result != TaskQueueManager.RUN_OK:
+                raise _construct_error(result)
+            dict_facts = callback.ansible_facts
+            # pylint: disable=unused-variable
+            for host, sys_fact in dict_facts.items():
+                new_sys_fact = {}
+                for fact_key, fact_value in sys_fact.items():
+                    if fact_value:
+                        new_sys_fact[fact_key] = fact_value
+                facts.append(new_sys_fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
         logger.info('Host scan completed for %s.', self.scanjob)

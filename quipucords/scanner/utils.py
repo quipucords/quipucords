@@ -95,24 +95,42 @@ def construct_connect_inventory(hosts, credential, connection_port):
     return inventory
 
 
-def construct_scan_inventory(hosts, connection_port):
+def construct_scan_inventory(hosts,
+                             connection_port,
+                             group_prefix,
+                             concurrency_count):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts/credential tuples
     :param connection_port: The connection port
     :returns: A dictionary of the ansible invetory
     """
-    inventory = None
-    hosts_dict = {}
-    for host in hosts:
-        host_vars = _credential_vars(host[1])
-        host_vars['ansible_host'] = host[0]
-        hosts_dict[host[0]] = host_vars
+
+    concurreny_groups = list(
+        [hosts[i:i + concurrency_count] for i in range(0,
+                                                       len(hosts),
+                                                       concurrency_count)])
+
+    # inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
 
     vars_dict = _construct_vars(connection_port)
+    children = {}
+    inventory = {'all': {'children': children, 'vars': vars_dict}}
+    i = 0
+    group_names = []
+    for concurreny_group in concurreny_groups:
+        hosts_dict = {}
+        for host in concurreny_group:
+            host_vars = _credential_vars(host[1])
+            host_vars['ansible_host'] = host[0]
+            hosts_dict[host[0]] = host_vars
 
-    inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
-    return inventory
+        group_name = group_prefix + str(i)
+        i += 1
+        group_names.append(group_name)
+        children[group_name] = {'hosts': hosts_dict}
+
+    return group_names, inventory
 
 
 def write_inventory(inventory):
@@ -220,7 +238,7 @@ def _construct_error(return_code):
 
 
 def _handle_ssh_passphrase(credential):
-    """ Attempt to setup loggin via passphrase if necessary
+    """Attempt to setup loggin via passphrase if necessary.
 
     :param credential: The credential used for connections
     """
@@ -230,7 +248,7 @@ def _handle_ssh_passphrase(credential):
         passphrase = \
             decrypt_data_as_unicode(credential['ssh_passphrase'])
         cmd_string = 'ssh-add {}'.format(keyfile)
-        print(cmd_string)
+
         try:
             child = pexpect.spawn(cmd_string, timeout=12)
             phrase = [pexpect.EOF, 'Enter passphrase for .*:']
