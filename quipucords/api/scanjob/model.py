@@ -55,12 +55,14 @@ class ScanJob(models.Model):
             'profile:{}, '\
             'max_concurrency: {}, '\
             'systems_count: {}, '\
-            'systems_scanned: {}'.format(self.id,
-                                         self.scan_type,
-                                         self.profile,
-                                         self.max_concurrency,
-                                         self.systems_count,
-                                         self.systems_scanned) + '}'
+            'systems_scanned: {}'\
+            'fact_collection_id: {}'.format(self.id,
+                                            self.scan_type,
+                                            self.profile,
+                                            self.max_concurrency,
+                                            self.systems_count,
+                                            self.systems_scanned,
+                                            self.fact_collection_id) + '}'
 
     class Meta:
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
