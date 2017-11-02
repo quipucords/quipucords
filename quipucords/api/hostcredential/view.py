@@ -22,6 +22,7 @@ from api.models import HostCredential
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
+SSH_PASSPHRASE_KEY = 'ssh_passphrase'
 PASSWORD_MASK = '********'
 
 
@@ -35,6 +36,8 @@ def mask_credential(cred):
         cred[PASSWORD_KEY] = PASSWORD_MASK
     if cred[SUDO_PASSWORD_KEY]:
         cred[SUDO_PASSWORD_KEY] = PASSWORD_MASK
+    if cred[SSH_PASSPHRASE_KEY]:
+        cred[SSH_PASSPHRASE_KEY] = PASSWORD_MASK
     return cred
 
 

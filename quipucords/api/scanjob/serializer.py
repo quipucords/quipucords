@@ -38,7 +38,7 @@ class ScanJobSerializer(ModelSerializer):
     scan_type = ChoiceField(required=False, choices=ScanJob.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanJob.STATUS_CHOICES)
-    max_concurrency = IntegerField(required=False, min_value=1)
+    max_concurrency = IntegerField(required=False, min_value=1, default=50)
 
     class Meta:
         model = ScanJob

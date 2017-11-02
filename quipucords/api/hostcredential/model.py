@@ -25,6 +25,7 @@ class HostCredential(models.Model):
     password = models.CharField(max_length=1024, null=True)
     sudo_password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
+    ssh_passphrase = models.CharField(max_length=1024, null=True)
 
     def encrypt_fields(self):
         """Encrypt the sensitive fields of the object"""
@@ -32,6 +33,8 @@ class HostCredential(models.Model):
             self.password = encrypt_data_as_unicode(self.password)
         if self.sudo_password:
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
+        if self.ssh_passphrase:
+            self.ssh_passphrase = encrypt_data_as_unicode(self.ssh_passphrase)
 
     # pylint: disable=arguments-differ
     def save(self, *args, **kwargs):

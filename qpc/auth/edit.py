@@ -52,6 +52,9 @@ class AuthEditCommand(CliCommand):
         group.add_argument('--sshkeyfile', dest='filename',
                            metavar='FILENAME',
                            help=_(messages.AUTH_SSH_HELP))
+        self.parser.add_argument('--sshpassphrase', dest='ssh_passphrase',
+                                 action='store_true',
+                                 help=_(messages.AUTH_SSH_PSPH_HELP))
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.AUTH_SUDO_HELP))
@@ -60,7 +63,8 @@ class AuthEditCommand(CliCommand):
         CliCommand._validate_args(self)
 
         if not(self.args.username or self.args.password or
-               self.args.sudo_password or self.args.filename):
+               self.args.sudo_password or self.args.filename or
+               self.args.ssh_passphrase):
             print(_(messages.AUTH_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

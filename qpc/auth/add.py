@@ -51,6 +51,9 @@ class AuthAddCommand(CliCommand):
         group.add_argument('--sshkeyfile', dest='filename',
                            metavar='FILENAME',
                            help=_(messages.AUTH_SSH_HELP))
+        self.parser.add_argument('--sshpassphrase', dest='ssh_passphrase',
+                                 action='store_true',
+                                 help=_(messages.AUTH_SSH_PSPH_HELP))
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.AUTH_SUDO_HELP))

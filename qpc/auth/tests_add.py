@@ -74,7 +74,8 @@ class AuthAddCliTests(unittest.TestCase):
             aac = AuthAddCommand(SUBPARSER)
             args = Namespace(name='auth_dup', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
                     aac.main(args)
@@ -92,7 +93,8 @@ class AuthAddCliTests(unittest.TestCase):
             aac = AuthAddCommand(SUBPARSER)
             args = Namespace(name='auth1', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
                     aac.main(args)
@@ -108,7 +110,8 @@ class AuthAddCliTests(unittest.TestCase):
             aac = AuthAddCommand(SUBPARSER)
             args = Namespace(name='auth1', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(auth_out):
                     aac.main(args)
@@ -123,7 +126,8 @@ class AuthAddCliTests(unittest.TestCase):
             mocker.post(url, status_code=201)
             aac = AuthAddCommand(SUBPARSER)
             args = Namespace(name='auth1', username='root', filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
             with redirect_stdout(auth_out):
                 aac.main(args)
                 self.assertEqual(auth_out.getvalue(),

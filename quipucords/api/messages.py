@@ -22,6 +22,8 @@ HC_PWD_OR_KEYFILE = 'A host credential must have either' \
 HC_NOT_BOTH = 'A host credential must have either' \
               ' a password or an ssh_keyfile, not both.'
 HC_KEY_INVALID = 'ssh_keyfile, %s, is not a valid file on the system.'
+HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
+    ' a ssh_passphrase is provided.'
 
 # network profile messages
 NP_HOST_AS_STRING = 'A host range must be a string.'

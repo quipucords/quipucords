@@ -62,7 +62,7 @@ Creating and Editing Authentication Profiles
 
 To create an authentication profile, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate authentication profile entry.
 
-**qpc auth add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sudo-password]**
+**qpc auth add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 ``--name=name``
 
@@ -80,6 +80,10 @@ To create an authentication profile, supply SSH credentials as either a username
 
   Sets the path of the file that contains the private SSH key for the ``--username`` identity. Mutually exclusive with the ``--password`` option.
 
+``--sshpassphrase``
+
+  Prompts for the passphrase to be used when connecting using an ssh keyfile that requires a passphrase. Can only be used with the ``--sshkeyfile`` option.
+
 ``--sudo-password``
 
   Prompts for the password to be used when running a command that uses sudo on the systems to be scanned.
@@ -87,7 +91,7 @@ To create an authentication profile, supply SSH credentials as either a username
 
 The information in an authentication profile, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc auth edit`` command to change the SSH credential information in an authentication profile. The parameters for ``qpc auth edit`` are the same as those for ``qpc auth add``.
 
-**qpc auth edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sudo-password]**
+**qpc auth edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 Listing and Showing Authentication Profiles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -227,11 +231,15 @@ Scanning
 Use the ``qpc scan`` command to run discovery and inspection scans on the network. This command scans all of the host names or IP addresses that are defined in the supplied network profile, and then writes the report information to a comma separated values (CSV) file. Note: Any ssh-agent connection setup for a target host '
               'will be used as a fallback if it exists.
 
-**qpc scan --profile=** *profile_name*
+**qpc scan --profile=** *profile_name* **[--max-concurrency=** *concurrency* **]**
 
 ``--profile=profile_name``
 
-  Contains the name of the network profile to use to run the scan.
+  Required. Contains the name of the network profile to use to run the scan.
+
+  ``--max-concurrency=concurrency``
+
+    The number of parallel system scans. If not provided the default of 50 is utilized.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

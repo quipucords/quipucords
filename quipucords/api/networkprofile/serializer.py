@@ -61,7 +61,7 @@ class CredentialsField(PrimaryKeyRelatedField):
 class NetworkProfileSerializer(ModelSerializer):
     """Serializer for the NetworkProfile model"""
     name = CharField(required=True, max_length=64)
-    ssh_port = IntegerField(required=False, min_value=0)
+    ssh_port = IntegerField(required=False, min_value=0, default=22)
     hosts = HostRangeField(
         many=True,
         slug_field='host_range',

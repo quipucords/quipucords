@@ -11,6 +11,7 @@
 """Scanner used for host connection discovery"""
 
 from collections import namedtuple
+import pexpect
 from django.conf import settings
 from ansible import constants as C
 from ansible.errors import AnsibleError
@@ -218,6 +219,29 @@ def _construct_error(return_code):
     return AnsibleError(message=message)
 
 
+def _handle_ssh_passphrase(credential):
+    """ Attempt to setup loggin via passphrase if necessary
+
+    :param credential: The credential used for connections
+    """
+    if (credential['ssh_keyfile'] is not None and
+            credential['ssh_passphrase'] is not None):
+        keyfile = credential['ssh_keyfile']
+        passphrase = \
+            decrypt_data_as_unicode(credential['ssh_passphrase'])
+        cmd_string = 'ssh-add {}'.format(keyfile)
+        print(cmd_string)
+        try:
+            child = pexpect.spawn(cmd_string, timeout=12)
+            phrase = [pexpect.EOF, 'Enter passphrase for .*:']
+            i = child.expect(phrase)
+            child.sendline(passphrase)
+            while i:
+                i = child.expect(phrase)
+        except pexpect.exceptions.TIMEOUT:
+            pass
+
+
 def connect(hosts, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
 
@@ -240,6 +264,7 @@ def connect(hosts, credential, connection_port, forks=50):
                 'tasks': [{'action': {'module': 'raw',
                                       'args': parse_kv('echo "Hello"')}}]}
 
+    _handle_ssh_passphrase(credential)
     result = run_playbook(inventory_file, callback, playbook, forks=forks)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
