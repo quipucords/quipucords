@@ -15,13 +15,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from api.models import ScanJob, NetworkProfile, ScanJobResults
+from api.models import ScanJob, ScanJobResults
 from api.serializers import (ScanJobSerializer,
                              ScanJobResultsSerializer,
                              ResultsSerializer,
                              ResultKeyValueSerializer)
-from scanner.discovery import DiscoveryScanner
-from scanner.host import HostScanner
+from api.signals.scanjob_signal import start_scan
 
 
 PROFILE_KEY = 'profile'
@@ -95,19 +94,10 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        scanjob = serializer.data
-        scan_type = scanjob['scan_type']
-        scanjob_id = scanjob['id']
-        scanjob_profile_id = scanjob['profile']
-        scanjob_obj = ScanJob.objects.get(pk=scanjob_id)
-        profile = NetworkProfile.objects.get(pk=scanjob_profile_id)
-        if scan_type == ScanJob.DISCOVERY:
-            scan = DiscoveryScanner(scanjob_obj, profile)
-            scan.start()
-        else:
-            fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
-            scan = HostScanner(scanjob_obj, profile, fact_endpoint)
-            scan.start()
+        scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
+        fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
+        start_scan.send(sender=self.__class__, instance=scanjob_obj,
+                        fact_endpoint=fact_endpoint)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)

@@ -69,8 +69,7 @@ class HostScannerTest(TestCase):
 
     def test_store_host_scan_success(self):
         """Test success storage."""
-        scanner = HostScanner(self.scanjob, self.network_profile,
-                              self.fact_endpoint)
+        scanner = HostScanner(self.scanjob, self.fact_endpoint)
         facts = [{'connection_host': '1.2.3.4',
                   'key1': 'value1',
                   'key2': 'value2'}]
@@ -98,8 +97,7 @@ class HostScannerTest(TestCase):
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     def test_host_scan_failure(self, mock_run):
         """Test scan flow with mocked manager and failure."""
-        scanner = HostScanner(self.scanjob, self.network_profile,
-                              self.fact_endpoint)
+        scanner = HostScanner(self.scanjob, self.fact_endpoint)
         with self.assertRaises(AnsibleError):
             scanner.host_scan()
             mock_run.assert_called()
@@ -107,8 +105,7 @@ class HostScannerTest(TestCase):
     @patch('scanner.host.HostScanner.host_scan', side_effect=mock_scan_error)
     def test_host_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure."""
-        scanner = HostScanner(self.scanjob, self.network_profile,
-                              self.fact_endpoint)
+        scanner = HostScanner(self.scanjob, self.fact_endpoint)
         facts = scanner.run()
         mock_scan.assert_called()
         self.assertEqual(facts, [])
@@ -120,8 +117,7 @@ class HostScannerTest(TestCase):
         mock_run.return_value = expected
         with requests_mock.Mocker() as mocker:
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
-            scanner = HostScanner(self.scanjob, self.network_profile,
-                                  self.fact_endpoint)
+            scanner = HostScanner(self.scanjob, self.fact_endpoint)
             facts = scanner.run()
             mock_run.assert_called()
             self.assertEqual(facts, [])

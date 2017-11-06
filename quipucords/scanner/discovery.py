@@ -30,10 +30,11 @@ class DiscoveryScanner(Thread):
     failures (host/ip).
     """
 
-    def __init__(self, scanjob, network_profile):
+    def __init__(self, scanjob):
         """Create discovery scanner."""
         Thread.__init__(self)
         self.scanjob = scanjob
+        network_profile = scanjob.profile
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data
         self.scan_results = ScanJobResults(scan_job=self.scanjob)
