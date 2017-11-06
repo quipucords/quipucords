@@ -35,9 +35,9 @@ class HostScanner(DiscoveryScanner):
     reachable. Collects the associated facts for the scanned systems
     """
 
-    def __init__(self, scanjob, network_profile, fact_endpoint):
+    def __init__(self, scanjob, fact_endpoint):
         """Create host scanner."""
-        DiscoveryScanner.__init__(self, scanjob, network_profile)
+        DiscoveryScanner.__init__(self, scanjob)
         self.fact_endpoint = fact_endpoint
 
     # pylint: disable=too-many-locals

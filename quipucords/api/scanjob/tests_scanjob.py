@@ -11,7 +11,6 @@
 """Test the API application."""
 
 import json
-from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
@@ -60,8 +59,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    def test_successful_create(self, start):  # pylint: disable=unused-argument
+    def test_successful_create(self):
         """A valid create request should succeed."""
         data = {'profile': self.network_profile.id,
                 'scan_type': 'discovery'}
@@ -79,9 +77,7 @@ class ScanJobTest(TestCase):
                 'scan_type': 'foo'}
         self.create_expect_400(data)
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    # pylint: disable=unused-argument
-    def test_create_default_host_type(self, start):
+    def test_create_default_host_type(self):
         """A valid create request should succeed with defaulted type."""
         data = {'profile': self.network_profile.id}
         response = self.create_expect_201(data)
@@ -100,8 +96,7 @@ class ScanJobTest(TestCase):
                 'max_concurrency': -5}
         self.create_expect_400(data)
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    def test_list(self, start):  # pylint: disable=unused-argument
+    def test_list(self):
         """List all ScanJob objects."""
         data_default = {'profile': self.network_profile.id}
         data_discovery = {'profile': self.network_profile.id,
@@ -133,8 +128,7 @@ class ScanJobTest(TestCase):
                      'fact_collection_id': None}]
         self.assertEqual(content, expected)
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    def test_retrieve(self, start):  # pylint: disable=unused-argument
+    def test_retrieve(self):
         """Get details on a specific ScanJob by primary key."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -148,9 +142,7 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(profile, {'id': 1, 'name': 'profile1'})
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    # pylint: disable=unused-argument
-    def test_update_not_allowed(self, start):
+    def test_update_not_allowed(self):
         """Completely update a NetworkProfile."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -166,8 +158,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    def test_partial_update(self, start):  # pylint: disable=unused-argument
+    def test_partial_update(self):
         """Partially update a ScanJob is not supported."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -182,8 +173,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.DiscoveryScanner.start', side_effect=dummy_start)
-    def test_delete(self, start):  # pylint: disable=unused-argument
+    def test_delete(self):
         """Delete a ScanJob is not supported."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}

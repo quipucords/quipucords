@@ -170,14 +170,14 @@ class DiscoveryScannerTest(TestCase):
         """Test running a discovery scan with mocked connection."""
         expected = ([('1.2.3.4', {'name': 'cred1'})], [])
         mock_connect.return_value = expected
-        scanner = DiscoveryScanner(self.scanjob, self.network_profile)
+        scanner = DiscoveryScanner(self.scanjob)
         conn_dict = scanner.run()
         mock_connect.assert_called()
         self.assertEqual(conn_dict, {'1.2.3.4': {'name': 'cred1'}})
 
     def test_store_discovery_success(self):
         """Test running a discovery scan with mocked connection."""
-        scanner = DiscoveryScanner(self.scanjob, self.network_profile)
+        scanner = DiscoveryScanner(self.scanjob)
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected = [('1.2.3.4', cred)]
