@@ -32,9 +32,10 @@ class ResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, display=None):
+    def __init__(self, scanjob=None, display=None):
         """Create result callback."""
         super().__init__(display=display)
+        self.scanjob = scanjob
         self.results = []
         self.ansible_facts = {}
 
@@ -50,7 +51,15 @@ class ResultCallback(CallbackBase):
             host_facts = result._result['ansible_facts']
             facts = {}
             for key, value in host_facts.items():
-                if not key.startswith('internal'):
+                if key == 'host_done':
+                    logger.debug('host scan complete for %s', host)
+
+                    # Update scan counts and save
+                    if self.scanjob is not None:
+                        self.scanjob.systems_scanned += 1
+                        self.scanjob.save()
+
+                elif not key.startswith('internal'):
                     facts[key] = value
 
             if host in self.ansible_facts:

@@ -1,0 +1,5 @@
+---
+
+- name: extract virt-what error code
+  set_fact:
+    host_done: 'True'

@@ -94,40 +94,24 @@ def construct_connect_inventory(hosts, credential, connection_port):
     return inventory
 
 
-def construct_scan_inventory(hosts,
-                             connection_port,
-                             concurrency_count):
+def construct_scan_inventory(hosts, connection_port):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts/credential tuples
     :param connection_port: The connection port
     :returns: A dictionary of the ansible invetory
     """
-    concurreny_groups = list(
-        [hosts[i:i + concurrency_count] for i in range(0,
-                                                       len(hosts),
-                                                       concurrency_count)])
-
-    # inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
+    inventory = None
+    hosts_dict = {}
+    for host in hosts:
+        host_vars = _credential_vars(host[1])
+        host_vars['ansible_host'] = host[0]
+        hosts_dict[host[0]] = host_vars
 
     vars_dict = _construct_vars(connection_port)
-    children = {}
-    inventory = {'all': {'children': children, 'vars': vars_dict}}
-    i = 0
-    group_names = []
-    for concurreny_group in concurreny_groups:
-        hosts_dict = {}
-        for host in concurreny_group:
-            host_vars = _credential_vars(host[1])
-            host_vars['ansible_host'] = host[0]
-            hosts_dict[host[0]] = host_vars
 
-        group_name = 'group_{}'.format(i)
-        i += 1
-        group_names.append(group_name)
-        children[group_name] = {'hosts': hosts_dict}
-
-    return group_names, inventory
+    inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
+    return inventory
 
 
 def write_inventory(inventory):
