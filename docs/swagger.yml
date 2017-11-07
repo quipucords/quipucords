@@ -390,6 +390,31 @@ paths:
             $ref: "#/definitions/ScanJobResultsOut"
         404:
           description: "Scan job results not found"
+  /scans/{scan_job_id}/pause/:
+    put:
+      tags:
+        - "Scan"
+      summary: "Pauses an existing scan job"
+      description: "Pauses a scan if its currently running, fails otherwise."
+      operationId: "pauseScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to pause"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job paused"
+          schema:
+            $ref: "#/definitions/ScanJobOut"
+        400:
+          description: "Scan job not running"
+        404:
+          description: "Scan job not found"
 definitions:
   SystemFact:
     type: "object"
@@ -574,6 +599,31 @@ definitions:
           enum:
             - host
             - discovery
+        status:
+          type: "string"
+          description: "The status of the scan."
+          enum:
+            - pending
+            - running
+            - paused
+            - canceled
+            - failed
+        max_concurrency:
+          type: "integer"
+          format: "int64"
+          description: "The maximum concurrent host scans. default is 50."
+        systems_count:
+          type: "integer"
+          format: "int64"
+          description: "The total number of hosts to be scanned."
+        systems_scanned:
+          type: "integer"
+          format: "int64"
+          description: "The total number of hosts that have been scanned."
+        fact_collection_id:
+          type: "integer"
+          format: "int64"
+          description: "The identifier of the sent fact collection."
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"

@@ -183,3 +183,14 @@ class ScanJobTest(TestCase):
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_pause_bad_state(self):
+        """Pause a scanjob."""
+        data_host = {'profile': self.network_profile.id, 'scan_type': 'host'}
+        response = self.create_expect_201(data_host)
+
+        url = reverse('scanjob-detail', args=(response['id'],))
+        pause_url = '{}pause/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
