@@ -23,7 +23,7 @@ from api.serializers import (ScanJobSerializer,
                              ScanJobResultsSerializer,
                              ResultsSerializer,
                              ResultKeyValueSerializer)
-from api.signals.scanjob_signal import start_scan, pause_scan
+from api.signals.scanjob_signal import start_scan, pause_scan, cancel_scan
 
 
 PROFILE_KEY = 'profile'
@@ -153,3 +153,21 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
         err_msg = _(messages.NO_PAUSE)
         return JsonResponse({'message': err_msg}, status=400)
+
+    @detail_route(methods=['put'])
+    def cancel(self, request, pk=None):
+        """Cancel the running scan."""
+        scan = get_object_or_404(self.queryset, pk=pk)
+        if (scan.scan_type == ScanJob.COMPLETED or
+                scan.scan_type == ScanJob.FAILED or
+                scan.scan_type == ScanJob.CANCELED):
+            err_msg = _(messages.NO_CANCEL)
+            return JsonResponse({'message': err_msg}, status=400)
+
+        cancel_scan.send(sender=self.__class__, instance=scan)
+        scan.status = ScanJob.CANCELED
+        scan.save()
+        serializer = ScanJobSerializer(scan)
+        json_scan = serializer.data
+        expand_network_profile(scan, json_scan)
+        return Response(json_scan, status=200)
