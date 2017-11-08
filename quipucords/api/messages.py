@@ -52,3 +52,6 @@ SJ_REQ_PROFILE = 'Scan must have a network profile.'
 PLURAL_SCAN_RESULTS_MSG = 'Scan Results'
 PLURAL_KEY_VALUES_MSG = 'Result Key Values'
 PLURAL_RESULTS_MSG = 'Results'
+
+NO_PAUSE = 'Scan cannot be paused. ' \
+    'The scan must be running for it to be paused.'

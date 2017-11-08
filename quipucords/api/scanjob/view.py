@@ -13,14 +13,17 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from django.http import JsonResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
+import api.messages as messages
 from api.models import ScanJob, ScanJobResults
 from api.serializers import (ScanJobSerializer,
                              ScanJobResultsSerializer,
                              ResultsSerializer,
                              ResultKeyValueSerializer)
-from api.signals.scanjob_signal import start_scan
+from api.signals.scanjob_signal import start_scan, pause_scan
 
 
 PROFILE_KEY = 'profile'
@@ -134,3 +137,19 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             expand_scan_results(job_scan_result, json_job_scan_result)
             return Response(json_job_scan_result)
         return Response(status=404)
+
+    @detail_route(methods=['put'])
+    def pause(self, request, pk=None):
+        """Pause the running scan."""
+        scan = get_object_or_404(self.queryset, pk=pk)
+        if scan.scan_type == ScanJob.RUNNING:
+            pause_scan.send(sender=self.__class__, instance=scan)
+            scan.status = ScanJob.PAUSED
+            scan.save()
+            serializer = ScanJobSerializer(scan)
+            json_scan = serializer.data
+            expand_network_profile(scan, json_scan)
+            return Response(json_scan, status=200)
+
+        err_msg = _(messages.NO_PAUSE)
+        return JsonResponse({'message': err_msg}, status=400)
