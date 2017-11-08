@@ -10,6 +10,7 @@
 #
 """Test the API application."""
 
+from unittest.mock import patch
 import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -22,6 +23,7 @@ def dummy_start():
     pass
 
 
+# pylint: disable=unused-argument
 class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
@@ -59,7 +61,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def test_successful_create(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
         data = {'profile': self.network_profile.id,
                 'scan_type': 'discovery'}
@@ -77,7 +80,8 @@ class ScanJobTest(TestCase):
                 'scan_type': 'foo'}
         self.create_expect_400(data)
 
-    def test_create_default_host_type(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_create_default_host_type(self, start_scan):
         """A valid create request should succeed with defaulted type."""
         data = {'profile': self.network_profile.id}
         response = self.create_expect_201(data)
@@ -96,7 +100,8 @@ class ScanJobTest(TestCase):
                 'max_concurrency': -5}
         self.create_expect_400(data)
 
-    def test_list(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_list(self, start_scan):
         """List all ScanJob objects."""
         data_default = {'profile': self.network_profile.id}
         data_discovery = {'profile': self.network_profile.id,
@@ -128,7 +133,8 @@ class ScanJobTest(TestCase):
                      'fact_collection_id': None}]
         self.assertEqual(content, expected)
 
-    def test_retrieve(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_retrieve(self, start_scan):
         """Get details on a specific ScanJob by primary key."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -142,7 +148,8 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(profile, {'id': 1, 'name': 'profile1'})
 
-    def test_update_not_allowed(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_update_not_allowed(self, start_scan):
         """Completely update a NetworkProfile."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -158,7 +165,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_partial_update(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_partial_update(self, start_scan):
         """Partially update a ScanJob is not supported."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -173,7 +181,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_delete(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_delete(self, start_scan):
         """Delete a ScanJob is not supported."""
         data_discovery = {'profile': self.network_profile.id,
                           'scan_type': 'discovery'}
@@ -184,7 +193,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_pause_bad_state(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_pause_bad_state(self, start_scan):
         """Pause a scanjob."""
         data_host = {'profile': self.network_profile.id, 'scan_type': 'host'}
         response = self.create_expect_201(data_host)
@@ -195,7 +205,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
-    def test_cancel(self):
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_cancel(self, start_scan):
         """Cancel a scanjob."""
         data_host = {'profile': self.network_profile.id, 'scan_type': 'host'}
         response = self.create_expect_201(data_host)
@@ -205,3 +216,15 @@ class ScanJobTest(TestCase):
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_restart_bad_state(self, start_scan):
+        """Restart a scanjob."""
+        data_host = {'profile': self.network_profile.id, 'scan_type': 'host'}
+        response = self.create_expect_201(data_host)
+
+        url = reverse('scanjob-detail', args=(response['id'],))
+        pause_url = '{}restart/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)

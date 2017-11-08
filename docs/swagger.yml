@@ -433,11 +433,36 @@ paths:
         format: "int64"
       responses:
         200:
-          description: "Scan job cancel"
+          description: "Scan job canceled"
           schema:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Scan job has already finished"
+        404:
+          description: "Scan job not found"
+  /scans/{scan_job_id}/restart/:
+    put:
+      tags:
+        - "Scan"
+      summary: "Restarts an existing scan job"
+      description: "Restarts a scan if its has been paused, fails otherwise."
+      operationId: "restartScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to restart"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job restarted"
+          schema:
+            $ref: "#/definitions/ScanJobOut"
+        400:
+          description: "Scan job was not in paused state"
         404:
           description: "Scan job not found"
 definitions:

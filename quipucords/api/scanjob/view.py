@@ -23,7 +23,8 @@ from api.serializers import (ScanJobSerializer,
                              ScanJobResultsSerializer,
                              ResultsSerializer,
                              ResultKeyValueSerializer)
-from api.signals.scanjob_signal import start_scan, pause_scan, cancel_scan
+from api.signals.scanjob_signal import (start_scan, pause_scan,
+                                        cancel_scan, restart_scan)
 
 
 PROFILE_KEY = 'profile'
@@ -171,3 +172,19 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         json_scan = serializer.data
         expand_network_profile(scan, json_scan)
         return Response(json_scan, status=200)
+
+    @detail_route(methods=['put'])
+    def restart(self, request, pk=None):
+        """Restart a paused scan."""
+        scan = get_object_or_404(self.queryset, pk=pk)
+        if scan.scan_type == ScanJob.PAUSED:
+            restart_scan.send(sender=self.__class__, instance=scan)
+            scan.status = ScanJob.RUNNING
+            scan.save()
+            serializer = ScanJobSerializer(scan)
+            json_scan = serializer.data
+            expand_network_profile(scan, json_scan)
+            return Response(json_scan, status=200)
+
+        err_msg = _(messages.NO_RESTART)
+        return JsonResponse({'message': err_msg}, status=400)
