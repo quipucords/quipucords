@@ -415,6 +415,31 @@ paths:
           description: "Scan job not running"
         404:
           description: "Scan job not found"
+  /scans/{scan_job_id}/cancel/:
+    put:
+      tags:
+        - "Scan"
+      summary: "Cancels an existing scan job"
+      description: "Cancels a scan if its has not finished, fails otherwise."
+      operationId: "cancelScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to cancel"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job cancel"
+          schema:
+            $ref: "#/definitions/ScanJobOut"
+        400:
+          description: "Scan job has already finished"
+        404:
+          description: "Scan job not found"
 definitions:
   SystemFact:
     type: "object"

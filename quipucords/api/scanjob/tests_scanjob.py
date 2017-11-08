@@ -194,3 +194,14 @@ class ScanJobTest(TestCase):
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
+
+    def test_cancel(self):
+        """Cancel a scanjob."""
+        data_host = {'profile': self.network_profile.id, 'scan_type': 'host'}
+        response = self.create_expect_201(data_host)
+
+        url = reverse('scanjob-detail', args=(response['id'],))
+        pause_url = '{}cancel/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)

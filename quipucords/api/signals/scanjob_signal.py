@@ -67,11 +67,23 @@ def scan_pause(sender, instance, **kwargs):
     scan_action(sender, instance, PAUSE, **kwargs)
 
 
+def scan_cancel(sender, instance, **kwargs):
+    """Cancel a scan.
+
+    :param sender: Class that was saved
+    :param instance: ScanJob that was saved
+    :param kwargs: Other args
+    :returns: None
+    """
+    scan_action(sender, instance, CANCEL, **kwargs)
+
+
 # pylint: disable=C0103
 start_scan = django.dispatch.Signal(providing_args=['instance',
                                                     'fact_endpoint'])
-pause_scan = django.dispatch.Signal(providing_args=['instance',
-                                                    'action'])
+pause_scan = django.dispatch.Signal(providing_args=['instance'])
+cancel_scan = django.dispatch.Signal(providing_args=['instance'])
 
 start_scan.connect(handle_scan)
 pause_scan.connect(scan_pause)
+cancel_scan.connect(scan_cancel)
