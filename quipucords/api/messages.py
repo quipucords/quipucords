@@ -58,3 +58,6 @@ NO_PAUSE = 'Scan cannot be paused. ' \
 
 NO_CANCEL = 'Scan cannot be canceled. ' \
     'The scan has already finished or been canceled.'
+
+NO_RESTART = 'Scan cannot be restarted. ' \
+    'The scan must be paused for it to be restarted.'
