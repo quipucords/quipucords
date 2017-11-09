@@ -237,9 +237,9 @@ Use the ``qpc scan`` command to run discovery and inspection scans on the networ
 
   Required. Contains the name of the network profile to use to run the scan.
 
-  ``--max-concurrency=concurrency``
+``--max-concurrency=concurrency``
 
-    The number of parallel system scans. If not provided the default of 50 is utilized.
+  The number of parallel system scans. If not provided the default of 50 is utilized.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,6 +256,29 @@ The ``qpc scan show`` command is the same as the ``qpc scan list`` command, exce
 ``--id=scan_identifier``
 
   Required. Contains the scan identifier to display.
+
+
+Controlling Scans
+~~~~~~~~~~~~~~~~~
+
+When scans are queued and running you may have the need to control the execution of scans due to various factors.
+
+The ``qpc scan pause`` command will hault the execution of a scan, but allow for it to be restarted at a later time.
+
+**qpc scan pause --id=** *scan_identifier*
+
+``--id=scan_identifier``
+
+  Required. Contains the scan identifier to pause.
+
+
+The ``qpc scan cancel`` command will cancel the execution of a scan.
+
+**qpc scan cancel --id=** *scan_identifier*
+
+``--id=scan_identifier``
+
+  Required. Contains the scan identifier to cancel.
 
 
 Options for All Commands

@@ -32,6 +32,7 @@ from qpc.scan.start import ScanStartCommand
 from qpc.scan.list import ScanListCommand
 from qpc.scan.show import ScanShowCommand
 from qpc.scan.pause import ScanPauseCommand
+from qpc.scan.cancel import ScanCancelCommand
 from qpc.translation import _
 import qpc.messages as messages
 from . import __version__
@@ -71,7 +72,8 @@ class CLI(object):
 
         self._add_subcommand(scan.SUBCOMMAND,
                              [ScanStartCommand, ScanListCommand,
-                              ScanShowCommand, ScanPauseCommand])
+                              ScanShowCommand, ScanPauseCommand,
+                              ScanCancelCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 
