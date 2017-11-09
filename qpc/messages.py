@@ -71,6 +71,7 @@ SCAN_MAX_CONCURRENCY_HELP = 'number of concurrent scans; default=50'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist'
 SCAN_LIST_NO_SCANS = 'No scans exist yet.'
 SCAN_STARTED = 'Scan "%s" started'
+SCAN_PAUSED = 'Scan "%s" paused'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
 

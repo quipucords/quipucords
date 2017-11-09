@@ -153,7 +153,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return Response(json_scan, status=200)
 
         err_msg = _(messages.NO_PAUSE)
-        return JsonResponse({'message': err_msg}, status=400)
+        return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
     @detail_route(methods=['put'])
     def cancel(self, request, pk=None):
@@ -163,7 +163,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                 scan.scan_type == ScanJob.FAILED or
                 scan.scan_type == ScanJob.CANCELED):
             err_msg = _(messages.NO_CANCEL)
-            return JsonResponse({'message': err_msg}, status=400)
+            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
         cancel_scan.send(sender=self.__class__, instance=scan)
         scan.status = ScanJob.CANCELED
@@ -187,4 +187,4 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return Response(json_scan, status=200)
 
         err_msg = _(messages.NO_RESTART)
-        return JsonResponse({'message': err_msg}, status=400)
+        return JsonResponse({'non_field_errors': [err_msg]}, status=400)

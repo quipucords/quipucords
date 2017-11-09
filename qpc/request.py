@@ -24,6 +24,7 @@ POST = 'POST'
 GET = 'GET'
 PATCH = 'PATCH'
 DELETE = 'DELETE'
+PUT = 'PUT'
 
 
 def post(path, payload):
@@ -69,6 +70,17 @@ def delete(path):
     return requests.delete(url)
 
 
+def put(path, payload):
+    """Put JSON payload to the given path with the configured server location.
+
+    :param path: path after server and port (i.e. /api/v1/credentials/hosts)
+    :param payload: dictionary of payload to be posted
+    :returns: reponse object
+    """
+    url = BASE_URL + path
+    return requests.put(url, json=payload)
+
+
 def request(method, path, params=None, payload=None, parser=None):
     """Create a generic handler for passing to specific request methods.
 
@@ -89,6 +101,8 @@ def request(method, path, params=None, payload=None, parser=None):
             return patch(path, payload)
         elif method == DELETE:
             return delete(path)
+        elif method == PUT:
+            return put(path, payload)
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()
