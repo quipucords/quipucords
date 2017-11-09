@@ -16,6 +16,7 @@ START = 'start'
 LIST = 'list'
 SHOW = 'show'
 PAUSE = 'pause'
+CANCEL = 'cancel'
 
 
 SCAN_URI = '/api/v1/scans/'
