@@ -272,6 +272,15 @@ The ``qpc scan pause`` command will hault the execution of a scan, but allow for
   Required. Contains the scan identifier to pause.
 
 
+The ``qpc scan restart`` command will restart the execution of a scan that had previously been paused.
+
+**qpc scan restart --id=** *scan_identifier*
+
+``--id=scan_identifier``
+
+  Required. Contains the scan identifier to restart.
+
+
 The ``qpc scan cancel`` command will cancel the execution of a scan.
 
 **qpc scan cancel --id=** *scan_identifier*

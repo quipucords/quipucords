@@ -72,6 +72,7 @@ SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist'
 SCAN_LIST_NO_SCANS = 'No scans exist yet.'
 SCAN_STARTED = 'Scan "%s" started'
 SCAN_PAUSED = 'Scan "%s" paused'
+SCAN_RESTARTED = 'Scan "%s" restarted'
 SCAN_CANCELED = 'Scan "%s" canceled'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
