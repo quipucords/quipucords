@@ -18,21 +18,15 @@ import qpc.network as network
 import qpc.scan as scan
 from qpc.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
     setup_logging
-from qpc.auth.add import AuthAddCommand
-from qpc.auth.list import AuthListCommand
-from qpc.auth.edit import AuthEditCommand
-from qpc.auth.show import AuthShowCommand
-from qpc.auth.clear import AuthClearCommand
-from qpc.network.add import NetworkAddCommand
-from qpc.network.list import NetworkListCommand
-from qpc.network.show import NetworkShowCommand
-from qpc.network.clear import NetworkClearCommand
-from qpc.network.edit import NetworkEditCommand
-from qpc.scan.start import ScanStartCommand
-from qpc.scan.list import ScanListCommand
-from qpc.scan.show import ScanShowCommand
-from qpc.scan.pause import ScanPauseCommand
-from qpc.scan.cancel import ScanCancelCommand
+from qpc.auth.commands import (AuthAddCommand, AuthListCommand,
+                               AuthEditCommand, AuthShowCommand,
+                               AuthClearCommand)
+from qpc.network.commands import (NetworkAddCommand, NetworkListCommand,
+                                  NetworkShowCommand, NetworkClearCommand,
+                                  NetworkEditCommand)
+from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
+                               ScanShowCommand, ScanPauseCommand,
+                               ScanCancelCommand, ScanRestartCommand)
 from qpc.translation import _
 import qpc.messages as messages
 from . import __version__
@@ -73,7 +67,7 @@ class CLI(object):
         self._add_subcommand(scan.SUBCOMMAND,
                              [ScanStartCommand, ScanListCommand,
                               ScanShowCommand, ScanPauseCommand,
-                              ScanCancelCommand])
+                              ScanCancelCommand, ScanRestartCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

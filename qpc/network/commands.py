@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (c) 2017 Red Hat, Inc.
 #
@@ -9,18 +8,12 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Constants for the Scan commands."""
 
-SUBCOMMAND = 'scan'
-START = 'start'
-LIST = 'list'
-SHOW = 'show'
-PAUSE = 'pause'
-CANCEL = 'cancel'
-RESTART = 'restart'
-
-
-SCAN_URI = '/api/v1/scans/'
-
-SCAN_TYPE_DISCOVERY = 'discovery'
-SCAN_TYPE_HOST = 'host'
+"""Commands for import organization."""
+# flake8: noqa
+# pylint: disable=unused-import
+from qpc.network.add import NetworkAddCommand
+from qpc.network.list import NetworkListCommand
+from qpc.network.show import NetworkShowCommand
+from qpc.network.clear import NetworkClearCommand
+from qpc.network.edit import NetworkEditCommand
