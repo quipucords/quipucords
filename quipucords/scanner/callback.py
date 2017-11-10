@@ -12,6 +12,7 @@
 
 import logging
 from ansible.plugins.callback import CallbackBase
+from api.models import Results, ResultKeyValue
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -32,10 +33,11 @@ class ResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, scanjob=None, display=None):
+    def __init__(self, scanjob=None, scan_results=None, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.scanjob = scanjob
+        self.scan_results = scan_results
         self.results = []
         self.ansible_facts = {}
 
@@ -52,12 +54,26 @@ class ResultCallback(CallbackBase):
             facts = {}
             for key, value in host_facts.items():
                 if key == 'host_done':
-                    logger.debug('host scan complete for %s', host)
+                    facts = self.ansible_facts[host]
+                    logger.debug('host scan complete for %s with facts %s',
+                                 host, facts)
 
                     # Update scan counts and save
                     if self.scanjob is not None:
                         self.scanjob.systems_scanned += 1
                         self.scanjob.save()
+
+                    # Save facts for host
+                    row = Results(row=host)
+                    row.save()
+                    for result_key, result_value in facts.items():
+                        stored_fact = ResultKeyValue(key=result_key,
+                                                     value=result_value)
+                        stored_fact.save()
+                        row.columns.add(stored_fact)
+                    row.save()
+                    self.scan_results.results.add(row)
+                    self.scan_results.save()
 
                 elif not key.startswith('internal'):
                     facts[key] = value

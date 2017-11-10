@@ -14,7 +14,7 @@ import logging
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import ScanJob, Results, ResultKeyValue
+from api.models import ScanJob
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,
@@ -60,10 +60,6 @@ class HostScanner(DiscoveryScanner):
         logger.info('Host scan started for %s.', self.scanjob)
         connected, failed = self.discovery()  # pylint: disable=unused-variable
         self._store_discovery_success(connected, failed, mark_complete=False)
-
-        inventory = construct_scan_inventory(connected, connection_port)
-        inventory_file = write_inventory(inventory)
-        callback = ResultCallback(scanjob=self.scanjob)
         forks = self.scanjob.max_concurrency
 
         # Save counts
@@ -71,19 +67,31 @@ class HostScanner(DiscoveryScanner):
         self.scanjob.systems_scanned = 0
         self.scanjob.save()
 
-        result = run_playbook(inventory_file, callback, playbook, forks=forks)
+        forks = self.scanjob.max_concurrency
+        group_names, inventory = construct_scan_inventory(
+            connected, connection_port, forks)
+        inventory_file = write_inventory(inventory)
+        for group_name in group_names:
+            callback = ResultCallback(scanjob=self.scanjob,
+                                      scan_results=self.scan_results)
+            playbook = {'name': 'scan systems for product fingerprint facts',
+                        'hosts': group_name,
+                        'gather_facts': False,
+                        'roles': roles}
+            result = run_playbook(
+                inventory_file, callback, playbook, forks=forks)
 
-        if result != TaskQueueManager.RUN_OK:
-            raise _construct_error(result)
+            if result != TaskQueueManager.RUN_OK:
+                raise _construct_error(result)
 
-        dict_facts = callback.ansible_facts
-        # pylint: disable=unused-variable
-        for host, sys_fact in dict_facts.items():
-            new_sys_fact = {}
-            for fact_key, fact_value in sys_fact.items():
-                if fact_value:
-                    new_sys_fact[fact_key] = fact_value
-            facts.append(new_sys_fact)
+            dict_facts = callback.ansible_facts
+            # pylint: disable=unused-variable
+            for host, sys_fact in dict_facts.items():
+                new_sys_fact = {}
+                for fact_key, fact_value in sys_fact.items():
+                    if fact_value:
+                        new_sys_fact[fact_key] = fact_value
+                facts.append(new_sys_fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
         logger.info('Host scan completed for %s.', self.scanjob)
@@ -104,19 +112,8 @@ class HostScanner(DiscoveryScanner):
             assert 'id' in data, msg
         return data['id']
 
-    def _store_host_scan_success(self, facts, fact_collection_id):
+    def _store_host_scan_success(self, fact_collection_id):
         self.scan_results.fact_collection_id = fact_collection_id
-        self.scan_results.save()
-        for fact in facts:
-            host = fact['connection_host']
-            row = Results(row=host)
-            row.save()
-            for key, value in fact.items():
-                stored_fact = ResultKeyValue(key=key, value=value)
-                stored_fact.save()
-                row.columns.add(stored_fact)
-            row.save()
-            self.scan_results.results.add(row)
         self.scan_results.save()
         self.scanjob.status = ScanJob.COMPLETED
         self.scanjob.save()
@@ -139,7 +136,7 @@ class HostScanner(DiscoveryScanner):
             self.scanjob.fact_collection_id = fact_collection_id
             self.scanjob.save()
 
-            self._store_host_scan_success(facts, fact_collection_id)
+            self._store_host_scan_success(fact_collection_id)
         except AnsibleError as ansible_error:
             logger.error(ansible_error)
             self._store_error(ansible_error)

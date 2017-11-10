@@ -70,13 +70,10 @@ class HostScannerTest(TestCase):
     def test_store_host_scan_success(self):
         """Test success storage."""
         scanner = HostScanner(self.scanjob, self.fact_endpoint)
-        facts = [{'connection_host': '1.2.3.4',
-                  'key1': 'value1',
-                  'key2': 'value2'}]
         # pylint: disable=protected-access
-        result = scanner._store_host_scan_success(facts, 1)
+        result = scanner._store_host_scan_success(1)
         self.assertTrue(isinstance(result, ScanJobResults))
-        self.assertEqual(len(result.results.all()), 1)
+        self.assertEqual(result.fact_collection_id, 1)
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -86,13 +83,85 @@ class HostScannerTest(TestCase):
         hc_serializer = HostCredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
-                                                  connection_port)
-        expected = {'all': {'hosts':
-                            {'1.2.3.4': {'ansible_host': '1.2.3.4',
-                                         'ansible_ssh_pass': 'password',
-                                         'ansible_user': 'username'}},
-                            'vars': {'ansible_port': 22}}}
-        self.assertEqual(inventory_dict, expected)
+                                                  connection_port,
+                                                  50)
+        expected = {
+            'all': {
+                'children': {
+                    'group_0': {
+                        'hosts': {
+                            '1.2.3.4': {
+                                'ansible_user': 'username',
+                                'ansible_ssh_pass': 'password',
+                                'ansible_host': '1.2.3.4'}
+                        }
+                    }
+                },
+                'vars': {
+                    'ansible_port': 22}
+            }
+        }
+
+        self.assertEqual(inventory_dict[1], expected)
+
+    def test_scan_inventory_grouping(self):
+        """Test construct ansible inventory dictionary."""
+        serializer = NetworkProfileSerializer(self.network_profile)
+        profile = serializer.data
+        connection_port = profile['ssh_port']
+        hc_serializer = HostCredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        inventory_dict = construct_scan_inventory(
+            [
+                ('1.2.3.1', cred),
+                ('1.2.3.2', cred),
+                ('1.2.3.3', cred),
+                ('1.2.3.4', cred)
+            ],
+            connection_port,
+            1)
+        expected = {
+            'all': {
+                'children': {
+                    'group_0': {
+                        'hosts': {
+                            '1.2.3.1': {
+                                'ansible_user': 'username',
+                                'ansible_ssh_pass': 'password',
+                                'ansible_host': '1.2.3.1'}
+                        }
+                    },
+                    'group_1': {
+                        'hosts': {
+                            '1.2.3.2': {
+                                'ansible_user': 'username',
+                                'ansible_ssh_pass': 'password',
+                                'ansible_host': '1.2.3.2'}
+                        }
+                    },
+                    'group_2': {
+                        'hosts': {
+                            '1.2.3.3': {
+                                'ansible_user': 'username',
+                                'ansible_ssh_pass': 'password',
+                                'ansible_host': '1.2.3.3'}
+                        }
+                    },
+                    'group_3': {
+                        'hosts': {
+                            '1.2.3.4': {
+                                'ansible_user': 'username',
+                                'ansible_ssh_pass': 'password',
+                                'ansible_host': '1.2.3.4'}
+                        }
+                    }
+                },
+                'vars': {
+                    'ansible_port': 22}
+            }
+        }
+
+        self.assertEqual(inventory_dict[1], expected)
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
     def test_host_scan_failure(self, mock_run):

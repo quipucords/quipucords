@@ -10,7 +10,7 @@
 #
 """Scanner used for host connection discovery."""
 import logging
-from threading import Thread
+from multiprocessing import Process
 from ansible.errors import AnsibleError
 from api.serializers import NetworkProfileSerializer, HostCredentialSerializer
 from api.models import (HostCredential, ScanJob, ScanJobResults,
@@ -22,7 +22,7 @@ from scanner.utils import connect
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class DiscoveryScanner(Thread):
+class DiscoveryScanner(Process):
     """Discovery system connection capabilities.
 
     Attempts connections to a network profile using a list of credentials
@@ -32,8 +32,9 @@ class DiscoveryScanner(Thread):
 
     def __init__(self, scanjob):
         """Create discovery scanner."""
-        Thread.__init__(self)
+        Process.__init__(self)
         self.scanjob = scanjob
+        self.identifier = scanjob.id
         network_profile = scanjob.profile
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data

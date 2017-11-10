@@ -16,6 +16,7 @@ import django.dispatch
 from api.models import ScanJob
 from scanner.discovery import DiscoveryScanner
 from scanner.host import HostScanner
+from scanner.manager import SCAN_MANAGER
 
 
 # Get an instance of a logger
@@ -36,12 +37,18 @@ def handle_scan(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    scan = None
     if instance.scan_type == ScanJob.DISCOVERY:
         scan = DiscoveryScanner(instance)
-        scan.start()
     else:
         scan = HostScanner(instance, fact_endpoint)
-        scan.start()
+
+    if not SCAN_MANAGER.is_alive():
+        SCAN_MANAGER.start()
+        # Don't add the scan as it will be picked up
+        # by the manager startup, looking for pending/running scans.
+    else:
+        SCAN_MANAGER.put(scan)
 
 
 def scan_action(sender, instance, action, **kwargs):
@@ -54,6 +61,8 @@ def scan_action(sender, instance, action, **kwargs):
     :returns: None
     """
     logger.info('Handling %s action on scan %s', action, instance)
+    if action == PAUSE or action == CANCEL:
+        SCAN_MANAGER.kill(instance.id)
 
 
 def scan_pause(sender, instance, **kwargs):
