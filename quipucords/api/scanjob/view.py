@@ -143,7 +143,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def pause(self, request, pk=None):
         """Pause the running scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if scan.scan_type == ScanJob.RUNNING:
+        if scan.status == ScanJob.RUNNING:
             pause_scan.send(sender=self.__class__, instance=scan)
             scan.status = ScanJob.PAUSED
             scan.save()
@@ -159,9 +159,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if (scan.scan_type == ScanJob.COMPLETED or
-                scan.scan_type == ScanJob.FAILED or
-                scan.scan_type == ScanJob.CANCELED):
+        if (scan.status == ScanJob.COMPLETED or
+                scan.status == ScanJob.FAILED or
+                scan.status == ScanJob.CANCELED):
             err_msg = _(messages.NO_CANCEL)
             return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
@@ -177,7 +177,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def restart(self, request, pk=None):
         """Restart a paused scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if scan.scan_type == ScanJob.PAUSED:
+        if scan.status == ScanJob.PAUSED:
             restart_scan.send(sender=self.__class__, instance=scan)
             scan.status = ScanJob.RUNNING
             scan.save()
