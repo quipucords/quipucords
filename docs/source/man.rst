@@ -117,7 +117,7 @@ As the network infrastructure changes, it might be necessary to delete some auth
 
 **IMPORTANT:** Remove or change the authentication profile from any network profile that uses it *before* clearing an authentication profile. Otherwise, any attempt to use the network profile to run a scan runs the command with a nonexistent authentication profile, an action that causes the ``qpc`` command to fail.
 
-**qpc auth clear (--name** *name* **| --all)
+**qpc auth clear (--name** *name* **| --all)**
 
 ``--name=name``
 
@@ -184,7 +184,7 @@ The information in a network profile might change as the structure of the networ
 
 Although ``qpc profile`` options can accept more than one value, the ``qpc profile edit`` command is not additive. To edit a network profile and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc profile edit`` command. Options that are not included are not changed.
 
-**qpc profile edit --name** *name* **[--hosts** *ip_address* **] [--auth** *auth_profile* **] [--sshport=** *ssh_port* **]
+**qpc profile edit --name** *name* **[--hosts** *ip_address* **] [--auth** *auth_profile* **] [--sshport=** *ssh_port* **]**
 
 For example, if a network profile contains a value of ``server1creds`` for the ``--auth`` option, and you want to change that network profile to use both the ``server1creds`` and ``server2creds`` authentication profiles, you would edit the network profile as follows:
 

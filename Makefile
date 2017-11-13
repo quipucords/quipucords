@@ -7,7 +7,7 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*,*/docs/*
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -20,6 +20,7 @@ help:
 	@echo "  test-coverage  to run unit tests and measure test coverage"
 	@echo "  server-init    to run server initializion steps"
 	@echo "  serve          to run the server"
+	@echo "  manpage        to build the manpage"
 
 all: build lint test-coverage
 
@@ -46,10 +47,10 @@ test-coverage:
 	coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/;coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude */migrations/*
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 
@@ -58,3 +59,6 @@ server-init:
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver
+
+manpage:
+	@cd docs; $(MAKE) man
