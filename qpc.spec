@@ -40,7 +40,7 @@ make manpage
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__python3} setup.py install --skip-build --root $RPM_BUILD_ROOT
-install -D -p -m 644 build/man/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
+install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
