@@ -1,4 +1,4 @@
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python3_sitelib: %define python3_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: qpc
 Version: 0.0.1
@@ -8,7 +8,7 @@ Summary: A tool for discovery and inspection of an IT environment.
 Group: Applications/Internet
 License: GPLv3
 URL: http://github.com/quipucords/quipucords
-Source0: http://github.com/quipucords/quipucords/archive/master.tar.gz
+Source0: http://github.com/quipucords/quipucords/archive/copr.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch: noarch
@@ -27,12 +27,12 @@ QPC is tool for discovery and inspection of an IT environment.
 %setup -q
 
 %build
-%{__python} setup.py build
+%{__python3} setup.py build
 make manpage
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
+%{__python3} setup.py install --skip-build --root $RPM_BUILD_ROOT
 install -D -p -m 644 docs/build/man/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 
 %clean
@@ -42,7 +42,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc README.rst AUTHORS.rst
 %{_bindir}/qpc
-%{python_sitelib}/*
+%{python3_sitelib}/*
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
