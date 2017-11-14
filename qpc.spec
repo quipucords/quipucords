@@ -15,13 +15,21 @@ BuildArch: noarch
 
 %if 0%{?rhel}%{?el6}%{?el7}
 BuildRequires: epel-release
+BuildRequires: python34-devel
+BuildRequires: python34-setuptools
 %endif
+%if 0%{?fedora} >= 26
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
+%endif
 BuildRequires: pandoc
-%{?rhel:Requires: epel-release}
-Requires: python3-devel
-Requires: python3-setuptools
+%if 0%{?rhel}%{?el6}%{?el7}
+Requires: epel-release
+Requires: python34
+%endif
+%if 0%{?fedora} >= 26
+Requires: python3
+%endif
 Requires: pyxdg
 Requires: python3-requests
 
