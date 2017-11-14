@@ -21,6 +21,8 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 BuildRequires: pandoc
 %{?rhel:Requires: epel-release}
+Requires: python3-devel
+Requires: python3-setuptools
 Requires: %{py3_dist future}
 Requires: %{py3_dist pyxdg}
 Requires: %{py3_dist requests}
@@ -38,7 +40,7 @@ make manpage
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__python3} setup.py install --skip-build --root $RPM_BUILD_ROOT
-install -D -p -m 644 docs/build/man/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
+install -D -p -m 644 build/man/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
