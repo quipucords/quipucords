@@ -16,16 +16,14 @@ BuildArch: noarch
 %if 0%{?rhel}%{?el6}%{?el7}
 BuildRequires: epel-release
 %endif
-
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 BuildRequires: pandoc
 %{?rhel:Requires: epel-release}
 Requires: python3-devel
 Requires: python3-setuptools
-Requires: %{py3_dist future}
-Requires: %{py3_dist pyxdg}
-Requires: %{py3_dist requests}
+Requires: pyxdg
+Requires: python3-requests
 
 %description
 QPC is tool for discovery and inspection of an IT environment.
