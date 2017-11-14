@@ -12,9 +12,14 @@ Source0: http://github.com/quipucords/quipucords/archive/copr.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch: noarch
+
+%if 0%{?rhel}%{?el6}%{?el7}
+BuildRequires: epel-release
+%endif
+
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
-BuildRequires: %{py3_dist Sphinx}
+BuildRequires: pandoc
 %{?rhel:Requires: epel-release}
 Requires: %{py3_dist future}
 Requires: %{py3_dist pyxdg}
