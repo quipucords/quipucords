@@ -30,7 +30,7 @@ class DiscoveryScanner(Process):
     failures (host/ip).
     """
 
-    def __init__(self, scanjob):
+    def __init__(self, scanjob, scan_results=None):
         """Create discovery scanner."""
         Process.__init__(self)
         self.scanjob = scanjob
@@ -38,7 +38,12 @@ class DiscoveryScanner(Process):
         network_profile = scanjob.profile
         serializer = NetworkProfileSerializer(network_profile)
         self.network_profile = serializer.data
-        self.scan_results = ScanJobResults(scan_job=self.scanjob)
+        if scan_results is None:
+            self.scan_results = ScanJobResults(scan_job=self.scanjob)
+            self.scan_restart = False
+        else:
+            self.scan_results = scan_results
+            self.scan_restart = True
 
     def _store_discovery_success(self, connected, failed_hosts,
                                  mark_complete=True):
@@ -61,7 +66,6 @@ class DiscoveryScanner(Process):
             failed_row.columns.add(rkv1)
         failed_row.save()
 
-        self.scan_results = ScanJobResults(scan_job=self.scanjob)
         self.scan_results.save()
         self.scan_results.results.add(success_row)
         self.scan_results.results.add(failed_row)
@@ -76,7 +80,6 @@ class DiscoveryScanner(Process):
     def _store_error(self, ansible_error):
         self.scanjob.status = ScanJob.FAILED
         self.scanjob.save()
-        self.scan_results = ScanJobResults(scan_job=self.scanjob)
         self.scan_results.save()
         error_row = Results(row='error')
         error_row.save()

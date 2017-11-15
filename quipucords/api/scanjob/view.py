@@ -151,6 +151,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             json_scan = serializer.data
             expand_network_profile(scan, json_scan)
             return Response(json_scan, status=200)
+        elif scan.status == ScanJob.PAUSED:
+            err_msg = _(messages.ALREADY_PAUSED)
+            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
         err_msg = _(messages.NO_PAUSE)
         return JsonResponse({'non_field_errors': [err_msg]}, status=400)
@@ -178,13 +181,19 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         """Restart a paused scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanJob.PAUSED:
-            restart_scan.send(sender=self.__class__, instance=scan)
+            fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
+            restart_scan.send(sender=self.__class__,
+                              instance=scan,
+                              fact_endpoint=fact_endpoint)
             scan.status = ScanJob.RUNNING
             scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_network_profile(scan, json_scan)
             return Response(json_scan, status=200)
+        elif scan.status == ScanJob.RUNNING:
+            err_msg = _(messages.ALREADY_RUNNING)
+            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
         err_msg = _(messages.NO_RESTART)
         return JsonResponse({'non_field_errors': [err_msg]}, status=400)
