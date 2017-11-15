@@ -114,7 +114,9 @@ In order to run the server execute the following command::
 
     make serve
 
-Note if you are running on Mac OS, you need to increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
+If you intend to run on Mac OS there are several more steps required.
+- You need to increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
+- Install sshpass as described `here <https://github.com/ansible-tw/AMA/issues/21>`_.
 
 
 Piping data to Elasticsearch
