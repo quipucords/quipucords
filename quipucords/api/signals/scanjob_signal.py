@@ -13,11 +13,10 @@
 
 import logging
 import django.dispatch
-from api.models import ScanJob
 from scanner.discovery import DiscoveryScanner
 from scanner.host import HostScanner
 from scanner.manager import SCAN_MANAGER
-
+from api.models import (ScanJob, ScanJobResults)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -87,7 +86,7 @@ def scan_cancel(sender, instance, **kwargs):
     scan_action(sender, instance, CANCEL, **kwargs)
 
 
-def scan_restart(sender, instance, **kwargs):
+def scan_restart(sender, instance, fact_endpoint, **kwargs):
     """Restart a scan.
 
     :param sender: Class that was saved
@@ -95,7 +94,20 @@ def scan_restart(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scan_action(sender, instance, RESTART, **kwargs)
+    scan_results = ScanJobResults.objects.get(scan_job=instance.id)
+
+    scan = None
+    if instance.scan_type == ScanJob.DISCOVERY:
+        scan = DiscoveryScanner(instance, scan_results=scan_results)
+    else:
+        scan = HostScanner(instance, fact_endpoint, scan_results=scan_results)
+
+    if not SCAN_MANAGER.is_alive():
+        SCAN_MANAGER.start()
+        # Don't add the scan as it will be picked up
+        # by the manager startup, looking for pending/running scans.
+    else:
+        SCAN_MANAGER.put(scan)
 
 
 # pylint: disable=C0103
@@ -103,7 +115,8 @@ start_scan = django.dispatch.Signal(providing_args=['instance',
                                                     'fact_endpoint'])
 pause_scan = django.dispatch.Signal(providing_args=['instance'])
 cancel_scan = django.dispatch.Signal(providing_args=['instance'])
-restart_scan = django.dispatch.Signal(providing_args=['instance'])
+restart_scan = django.dispatch.Signal(providing_args=['instance',
+                                                      'fact_endpoint'])
 
 start_scan.connect(handle_scan)
 pause_scan.connect(scan_pause)

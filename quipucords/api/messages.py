@@ -56,8 +56,14 @@ PLURAL_RESULTS_MSG = 'Results'
 NO_PAUSE = 'Scan cannot be paused. ' \
     'The scan must be running for it to be paused.'
 
+ALREADY_PAUSED = 'Scan cannot be paused. ' \
+    'The scan is already paused.'
+
 NO_CANCEL = 'Scan cannot be canceled. ' \
     'The scan has already finished or been canceled.'
 
 NO_RESTART = 'Scan cannot be restarted. ' \
     'The scan must be paused for it to be restarted.'
+
+ALREADY_RUNNING = 'Scan cannot be restarted. ' \
+    'The scan is already running.'
