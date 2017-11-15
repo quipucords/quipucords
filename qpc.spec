@@ -26,12 +26,14 @@ BuildRequires: pandoc
 %if 0%{?rhel}%{?el6}%{?el7}
 Requires: epel-release
 Requires: python34
+Requires: python34-requests
+Requires: python34-pyxdg
 %endif
 %if 0%{?fedora} >= 26
 Requires: python3
-%endif
-Requires: pyxdg
 Requires: python3-requests
+Requires: python3-pyxdg
+%endif
 
 %description
 QPC is tool for discovery and inspection of an IT environment.
