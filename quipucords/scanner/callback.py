@@ -12,7 +12,7 @@
 
 import logging
 from ansible.plugins.callback import CallbackBase
-from api.models import Results, ResultKeyValue
+from api.models import Results, ResultKeyValue, ScanJob
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -38,6 +38,8 @@ class ResultCallback(CallbackBase):
         super().__init__(display=display)
         self.scanjob = scanjob
         self.scan_results = scan_results
+        self.success_results = None
+        self.failed_results = None
         self.results = []
         self._ansible_facts = {}
 
@@ -87,7 +89,50 @@ class ResultCallback(CallbackBase):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
+        self._update_reachable_hosts(result_obj)
+        self.scanjob.failed_scans += 1
+        self.scanjob.status = ScanJob.FAILED
+        self.scanjob.save()
         logger.warning('%s', result_obj)
+
+    def _update_reachable_hosts(self, result_obj):
+        if self.scanjob.scan_type != ScanJob.HOST:
+            # Don't update for discovery scan.
+            return
+
+        unreachable_host = result_obj['host']
+        logger.error(
+            'Host %s is no longer reachable.  Moving host to failed results',
+            unreachable_host)
+
+        # cache success and failed results for future use in scan
+        if self.failed_results is None or self.success_results is None:
+            for scan_result in self.scan_results.results.all():
+                if scan_result.row == 'success':
+                    self.success_results = scan_result
+                elif scan_result.row == 'failed':
+                    self.failed_results = scan_result
+
+        # remove host from success if there
+        for column in self.success_results.columns.all():
+            if column.key == unreachable_host:
+                self.success_results.columns.remove(column)
+                column.delete()
+                self.success_results.save()
+                break
+
+        # Add host to failed if not there
+        failed_column = None
+        for column in self.failed_results.columns.all():
+            if column.key == unreachable_host:
+                failed_column = column
+                break
+
+        if failed_column is None:
+            failed_column = ResultKeyValue(key=unreachable_host, value=None)
+            failed_column.save()
+            self.failed_results.columns.add(failed_column)
+            self.failed_results.save()
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""

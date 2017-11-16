@@ -122,6 +122,7 @@ class ScanJobTest(TestCase):
                      'max_concurrency': 50,
                      'systems_count': None,
                      'systems_scanned': None,
+                     'failed_scans': None,
                      'fact_collection_id': None},
                     {'id': 2,
                      'profile': {'id': 1, 'name': 'profile1'},
@@ -130,6 +131,7 @@ class ScanJobTest(TestCase):
                      'max_concurrency': 50,
                      'systems_count': None,
                      'systems_scanned': None,
+                     'failed_scans': None,
                      'fact_collection_id': None}]
         self.assertEqual(content, expected)
 

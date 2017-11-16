@@ -68,6 +68,7 @@ class DiscoveryScannerTest(TestCase):
 
         self.scanjob = ScanJob(profile_id=self.network_profile.id,
                                scan_type=ScanJob.DISCOVERY)
+        self.scanjob.failed_scans = 0
         self.scanjob.save()
 
     def test_construct_vars(self):
@@ -83,7 +84,7 @@ class DiscoveryScannerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object."""
-        callback = ResultCallback()
+        callback = ResultCallback(scanjob=self.scanjob)
         host = Mock(name='1.2.3.4')
         result = Mock(_host=host, _results={'rc': 0})
         callback.v2_runner_on_ok(result)
