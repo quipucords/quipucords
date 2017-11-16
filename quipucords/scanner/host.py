@@ -14,7 +14,7 @@ import logging
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import ScanJob
+from api.models import ScanJob, HostCredential
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,
@@ -35,9 +35,9 @@ class HostScanner(DiscoveryScanner):
     reachable. Collects the associated facts for the scanned systems
     """
 
-    def __init__(self, scanjob, fact_endpoint):
+    def __init__(self, scanjob, fact_endpoint, scan_results=None):
         """Create host scanner."""
-        DiscoveryScanner.__init__(self, scanjob)
+        DiscoveryScanner.__init__(self, scanjob, scan_results)
         self.fact_endpoint = fact_endpoint
 
     # pylint: disable=too-many-locals
@@ -57,10 +57,24 @@ class HostScanner(DiscoveryScanner):
                     'roles': roles}
         connection_port = self.network_profile['ssh_port']
 
-        logger.info('Host scan started for %s.', self.scanjob)
-        connected, failed = self.discovery()  # pylint: disable=unused-variable
-        self._store_discovery_success(connected, failed, mark_complete=False)
+        connected, failed, completed = self.obtain_discovery_data()
         forks = self.scanjob.max_concurrency
+
+        num_completed = len(completed)
+        num_remaining = len(connected)
+        num_total = num_remaining + num_completed
+        num_failed = len(failed)
+
+        if self.scan_restart:
+            logger.info('Host scan restarted for %s.',
+                        self.scanjob)
+        else:
+            logger.info('Host scan started for %s.',
+                        self.scanjob)
+        log_msg = '%d total connected, %d completed, %d'\
+            ' remaining, and make %d failed hosts'
+        logger.info(log_msg,
+                    num_total, num_completed, num_remaining, num_failed)
 
         # Save counts
         self.scanjob.systems_count = len(connected)
@@ -84,18 +98,72 @@ class HostScanner(DiscoveryScanner):
             if result != TaskQueueManager.RUN_OK:
                 raise _construct_error(result)
 
-            dict_facts = callback.ansible_facts
-            # pylint: disable=unused-variable
-            for host, sys_fact in dict_facts.items():
-                new_sys_fact = {}
-                for fact_key, fact_value in sys_fact.items():
-                    if fact_value:
-                        new_sys_fact[fact_key] = fact_value
-                facts.append(new_sys_fact)
+        # Process all results that were save to db
+        for scan_result in self.scan_results.results.all():
+            if scan_result.row == 'success' or scan_result.row == 'failed':
+                continue
+            fact = {}
+            for column in scan_result.columns.all():
+                if column.value is None or column.value == '':
+                    continue
+                fact[column.key] = column.value
+            facts.append(fact)
 
         logger.debug('Facts obtained from host scan: %s', facts)
         logger.info('Host scan completed for %s.', self.scanjob)
         return facts
+
+    def obtain_discovery_data(self):
+        """Obtain discover scan data.  Either via new scan or paused scan.
+
+        :returns: List of connected and failed.
+        """
+        if self.scan_restart:
+            result_map = {}
+            for result in self.scan_results.results.all():
+                result_map[result.row] = result
+
+            connected = self.create_host_list(result_map['success'], True)
+            del result_map['success']
+            failed = self.create_host_list(result_map['failed'], False)
+            del result_map['failed']
+
+            # Remove scanned systems from the set
+            completed = set(result_map.keys())
+            connected = [
+                host for host in connected if host[0] not in completed]
+
+            return connected, failed, completed
+
+        connected, failed = self.discovery()
+        completed = []
+        self._store_discovery_success(
+            connected, failed, mark_complete=False)
+        return connected, failed, completed
+
+    # pylint: disable=no-self-use
+    def create_host_list(self, scan_result, lookup_creds):
+        """Convert a scan_result into a host list.
+
+        :param scan_result: The scan_result to inspect
+        :param lookup_creds: Whether creds should be included in result
+        :returns: List of connected and failed.  Optionally include creds.
+        """
+        ip_list = []
+        for column in scan_result.columns.all():
+            credential = None
+            if lookup_creds and column.value is not None:
+                host_cred = HostCredential.objects.get(name=column.value)
+                credential = {'name': host_cred.name,
+                              'username': host_cred.username,
+                              'password': host_cred.password,
+                              'sudo_password': host_cred.sudo_password,
+                              'ssh_keyfile': host_cred.ssh_keyfile,
+                              'ssh_passphrase': host_cred.ssh_passphrase}
+                ip_list.append((column.key, credential))
+            else:
+                ip_list.append(column.key)
+        return ip_list
 
     def send_facts(self, facts):
         """Send collected host scan facts to fact endpoint.

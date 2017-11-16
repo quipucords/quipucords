@@ -39,7 +39,7 @@ class ResultCallback(CallbackBase):
         self.scanjob = scanjob
         self.scan_results = scan_results
         self.results = []
-        self.ansible_facts = {}
+        self._ansible_facts = {}
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
@@ -54,7 +54,7 @@ class ResultCallback(CallbackBase):
             facts = {}
             for key, value in host_facts.items():
                 if key == 'host_done':
-                    facts = self.ansible_facts[host]
+                    facts = self._ansible_facts[host]
                     logger.debug('host scan complete for %s with facts %s',
                                  host, facts)
 
@@ -78,10 +78,10 @@ class ResultCallback(CallbackBase):
                 elif not key.startswith('internal'):
                     facts[key] = value
 
-            if host in self.ansible_facts:
-                self.ansible_facts[host].update(facts)
+            if host in self._ansible_facts:
+                self._ansible_facts[host].update(facts)
             else:
-                self.ansible_facts[host] = facts
+                self._ansible_facts[host] = facts
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""

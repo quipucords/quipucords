@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
 from api.models import (HostCredential, NetworkProfile, HostRange,
-                        ScanJob, ScanJobResults)
+                        ScanJob, ScanJobResults, Results, ResultKeyValue)
 from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
@@ -40,6 +40,7 @@ def mock_scan_error():
 class HostScannerTest(TestCase):
     """Tests against the HostScanner class and functions."""
 
+    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         self.cred = HostCredential(
@@ -66,6 +67,30 @@ class HostScannerTest(TestCase):
                                scan_type=ScanJob.DISCOVERY)
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
+
+        self.scan_results = ScanJobResults(scan_job=self.scanjob,
+                                           fact_collection_id=1)
+        self.scan_results.save()
+
+        self.success_row = Results(row='success')
+        self.success_row.save()
+
+        success_cols = ResultKeyValue(key='1.1.1.1', value='cred1')
+        success_cols.save()
+        self.success_row.columns.add(success_cols)
+        self.success_row.save()
+        self.scan_results.results.add(self.success_row)
+
+        self.failed_row = Results(row='failed')
+        self.failed_row.save()
+
+        failed_cols = ResultKeyValue(key='1.1.1.2', value='None')
+        failed_cols.save()
+        self.failed_row.columns.add(failed_cols)
+        self.failed_row.save()
+        self.scan_results.results.add(self.failed_row)
+
+        self.scan_results.save()
 
     def test_store_host_scan_success(self):
         """Test success storage."""
@@ -187,6 +212,21 @@ class HostScannerTest(TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
             scanner = HostScanner(self.scanjob, self.fact_endpoint)
+            facts = scanner.run()
+            mock_run.assert_called()
+            self.assertEqual(facts, [])
+
+    @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
+    def test_host_scan_restart(self, mock_run):
+        """Test restarting a host scan with mocked connection."""
+        expected = ([('1.2.3.4', {'name': 'cred1'})], [])
+        mock_run.return_value = expected
+        with requests_mock.Mocker() as mocker:
+            mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
+            scanner = HostScanner(
+                self.scanjob,
+                self.fact_endpoint,
+                scan_results=self.scan_results)
             facts = scanner.run()
             mock_run.assert_called()
             self.assertEqual(facts, [])

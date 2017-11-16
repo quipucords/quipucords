@@ -58,7 +58,7 @@ class ScanJob(models.Model):
             'profile:{}, '\
             'max_concurrency: {}, '\
             'systems_count: {}, '\
-            'systems_scanned: {}'\
+            'systems_scanned: {}, '\
             'fact_collection_id: {}'.format(self.id,
                                             self.scan_type,
                                             self.profile,
