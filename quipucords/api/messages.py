@@ -43,6 +43,8 @@ NP_CIDR_RANGE = '%(ip_range)s has invalid octet value of %(octet)s.' \
                 ' %(octet)s is not in the range [0,255]'
 NP_INVALID_PORT = 'Network profile must have ssh port in range [0, 65535]'
 NP_MIN_CREDS = 'Network profile must have at least one set of credentials.'
+HOST_CRED_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
+    ' found in database.'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'

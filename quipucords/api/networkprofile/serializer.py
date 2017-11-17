@@ -48,7 +48,10 @@ class CredentialsField(PrimaryKeyRelatedField):
 
     def to_internal_value(self, data):
         """Create internal value."""
-        return HostCredential.objects.get(pk=data)
+        actual_cred = HostCredential.objects.filter(id=data).first()
+        if actual_cred is None:
+            raise ValidationError(_(messages.HOST_CRED_DO_NOT_EXIST % data))
+        return actual_cred
 
     def to_representation(self, value):
         """Create output representation."""

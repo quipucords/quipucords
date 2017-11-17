@@ -193,6 +193,14 @@ class NetworkProfileTest(TestCase):
              'ssh_port': '22',
              'credentials': []})
 
+    def test_create_invalid_credentials(self):
+        """A random int is not a valid credential."""
+        self.create_expect_400(
+            {'name': 'netprof1',
+             'hosts': '1.2.3.4',
+             'ssh_port': '22',
+             'credentials': [42]})
+
     def test_list(self):
         """List all NetworkProfile objects."""
         data = {'name': 'netprof',
