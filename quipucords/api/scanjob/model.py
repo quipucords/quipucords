@@ -56,6 +56,7 @@ class ScanJob(models.Model):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'scan_type:{}, '\
+            'status:{}, '\
             'profile:{}, '\
             'max_concurrency: {}, '\
             'systems_count: {}, '\
@@ -63,6 +64,7 @@ class ScanJob(models.Model):
             'failed_scans: {}, '\
             'fact_collection_id: {}'.format(self.id,
                                             self.scan_type,
+                                            self.status,
                                             self.profile,
                                             self.max_concurrency,
                                             self.systems_count,
