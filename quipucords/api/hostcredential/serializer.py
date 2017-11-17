@@ -49,6 +49,37 @@ class HostCredentialSerializer(ModelSerializer):
         model = HostCredential
         fields = '__all__'
 
+    def create(self, validated_data):
+        """Create host credential."""
+        HostCredentialSerializer.check_for_existing_name(
+            name=validated_data.get('name'))
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """Update a host credential."""
+        HostCredentialSerializer.check_for_existing_name(
+            name=validated_data.get('name'),
+            cred_id=instance.id)
+
+        return super().update(instance, validated_data)
+
+    @staticmethod
+    def check_for_existing_name(name, cred_id=None):
+        """Look for existing (different object) with same name.
+
+        :param name: Name of credential to look for
+        :param cred_id: Host credential to exclude
+        """
+        if id is None:
+            # Look for existing with same name (create)
+            existing = HostCredential.objects.filter(name=name).first()
+        else:
+            # Look for existing.  Same name, different id (update)
+            existing = HostCredential.objects.filter(
+                name=name).exclude(id=cred_id).first()
+        if existing is not None:
+            raise ValidationError(_(messages.HC_NAME_ALREADY_EXISTS % name))
+
     def validate(self, attrs):
         """Validate the attributes."""
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
