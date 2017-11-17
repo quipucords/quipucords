@@ -16,6 +16,7 @@ basic usage, known issues, and best practices.
 
 - `Intro to quipucords`_
 - `Requirements & Assumptions`_
+- `Installation`_
 - `Command Syntax & Usage`_
 - `Development`_
 - `Issues`_
@@ -49,6 +50,26 @@ The python packages required for running quipucords on a system can be found in
  the ``requirements.txt`` file. The python packages required to build & test
  quipucords from source can be found in the ``requirements.txt`` and
  ``dev-requirements.txt`` files.
+
+Installation
+------------
+
+qpc is available for `download <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_ from fedora COPR.
+
+1. First, make sure that the EPEL repo is enabled for the server.
+You can find the appropriate architecture and version on the `EPEL wiki <https://fedoraproject.org/wiki/EPEL>`_::
+
+ rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+2. Next, add the COPR repo to your server.
+You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_::
+
+ wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
+
+3. Then, install the qpc package:
+
+``yum -y install qpc``
+
 
 Command Syntax & Usage
 ----------------------
