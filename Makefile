@@ -61,4 +61,10 @@ serve:
 	$(PYTHON) quipucords/manage.py runserver
 
 manpage:
-	@cd docs; $(MAKE) man
+	@mkdir -p build
+	pandoc docs/source/man.rst \
+	  --standalone -t man -o build/qpc.1 \
+	  --variable=section:1 \
+	  --variable=date:'November 14, 2017' \
+	  --variable=footer:'version 0.0.1' \
+	  --variable=header:'QPC Command Line Guide'
