@@ -10,7 +10,7 @@
 #
 """Test the host scanner capabilities."""
 
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 import requests_mock
@@ -20,6 +20,7 @@ from api.models import (HostCredential, NetworkProfile, HostRange,
 from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
+from scanner.callback import ResultCallback
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -64,7 +65,8 @@ class HostScannerTest(TestCase):
         self.network_profile.hosts.add(self.host)
 
         self.scanjob = ScanJob(profile_id=self.network_profile.id,
-                               scan_type=ScanJob.DISCOVERY)
+                               scan_type=ScanJob.HOST)
+        self.scanjob.failed_scans = 0
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
@@ -75,7 +77,7 @@ class HostScannerTest(TestCase):
         self.success_row = Results(row='success')
         self.success_row.save()
 
-        success_cols = ResultKeyValue(key='1.1.1.1', value='cred1')
+        success_cols = ResultKeyValue(key='1.2.3.4', value='cred1')
         success_cols.save()
         self.success_row.columns.add(success_cols)
         self.success_row.save()
@@ -230,3 +232,36 @@ class HostScannerTest(TestCase):
             facts = scanner.run()
             mock_run.assert_called()
             self.assertEqual(facts, [])
+
+    def test_populate_callback(self):
+        """Test the population of the callback object for host scan."""
+        callback = ResultCallback(
+            scanjob=self.scanjob, scan_results=self.scan_results)
+        host = Mock()
+        host.name = '1.2.3.4'
+        result = Mock(_host=host, _results={'rc': 3})
+
+        success_result = self.scan_results.results.all()[0]
+        failed_result = self.scan_results.results.all()[1]
+
+        self.assertEqual(_is_host_in_result(
+            host.name, success_result), True)
+        self.assertEqual(_is_host_in_result(
+            host.name, failed_result), False)
+
+        callback.v2_runner_on_unreachable(result)
+
+        self.assertEqual(_is_host_in_result(
+            host.name, success_result), False)
+        self.assertEqual(_is_host_in_result(
+            host.name, failed_result), True)
+
+
+def _is_host_in_result(host, result):
+    found = False
+    for column in result.columns.all():
+        if column.key == host:
+            found = True
+            break
+
+    return found

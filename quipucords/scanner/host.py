@@ -18,7 +18,8 @@ from api.models import ScanJob, HostCredential
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,
-                           run_playbook, _construct_error)
+                           run_playbook,
+                           _construct_error_msg)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -79,12 +80,15 @@ class HostScanner(DiscoveryScanner):
         # Save counts
         self.scanjob.systems_count = len(connected)
         self.scanjob.systems_scanned = 0
+        self.scanjob.failed_scans = 0
         self.scanjob.save()
 
         forks = self.scanjob.max_concurrency
         group_names, inventory = construct_scan_inventory(
             connected, connection_port, forks)
         inventory_file = write_inventory(inventory)
+
+        error_msg = ''
         for group_name in group_names:
             callback = ResultCallback(scanjob=self.scanjob,
                                       scan_results=self.scan_results)
@@ -96,7 +100,12 @@ class HostScanner(DiscoveryScanner):
                 inventory_file, callback, playbook, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
-                raise _construct_error(result)
+                new_error_msg = _construct_error_msg(result)
+                logger.error(new_error_msg)
+                error_msg += '{}\n'.format(new_error_msg)
+
+        if error_msg != '':
+            raise AnsibleError(error_msg)
 
         # Process all results that were save to db
         for scan_result in self.scan_results.results.all():
