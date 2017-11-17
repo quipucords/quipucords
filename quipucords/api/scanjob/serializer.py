@@ -41,6 +41,7 @@ class ScanJobSerializer(ModelSerializer):
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
+    failed_scans = IntegerField(required=False, min_value=0, read_only=True)
     fact_collection_id = IntegerField(read_only=True)
 
     class Meta:
