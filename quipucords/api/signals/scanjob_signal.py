@@ -13,10 +13,8 @@
 
 import logging
 import django.dispatch
-from scanner.discovery import DiscoveryScanner
-from scanner.host import HostScanner
 from scanner.manager import SCAN_MANAGER
-from api.models import (ScanJob, ScanJobResults)
+from api.scanjob.utils import create_scanner_for_job
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -25,8 +23,9 @@ PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
 
-
 # pylint: disable=W0613
+
+
 def handle_scan(sender, instance, fact_endpoint, **kwargs):
     """Handle incoming scan.
 
@@ -36,18 +35,13 @@ def handle_scan(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scan = None
-    if instance.scan_type == ScanJob.DISCOVERY:
-        scan = DiscoveryScanner(instance)
-    else:
-        scan = HostScanner(instance, fact_endpoint)
-
+    scanner = create_scanner_for_job(instance, fact_endpoint)
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
     else:
-        SCAN_MANAGER.put(scan)
+        SCAN_MANAGER.put(scanner)
 
 
 def scan_action(sender, instance, action, **kwargs):
@@ -94,20 +88,14 @@ def scan_restart(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scan_results = ScanJobResults.objects.get(scan_job=instance.id)
-
-    scan = None
-    if instance.scan_type == ScanJob.DISCOVERY:
-        scan = DiscoveryScanner(instance, scan_results=scan_results)
-    else:
-        scan = HostScanner(instance, fact_endpoint, scan_results=scan_results)
+    scanner = create_scanner_for_job(instance, fact_endpoint)
 
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
     else:
-        SCAN_MANAGER.put(scan)
+        SCAN_MANAGER.put(scanner)
 
 
 # pylint: disable=C0103

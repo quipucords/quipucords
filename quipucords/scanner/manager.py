@@ -14,6 +14,11 @@
 import logging
 from time import sleep
 from threading import Thread
+from api.models import ScanJob
+from api.scanjob.utils import create_scanner_for_job
+from django.db.models import Q
+from django.core.urlresolvers import reverse
+from quipucords.settings import SERVER_URL
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -78,8 +83,28 @@ class Manager(Thread):
                              task_id)
             return killed
 
+    def look_for_incomplete_scans(self):
+        """Look for incomplete scans."""
+        logger.debug('Scan manager searching for incomplete scans')
+
+        incomplete_scans = ScanJob.objects.filter(
+            Q(status=ScanJob.RUNNING) | Q(status=ScanJob.PENDING)
+        ).order_by('-status')
+        fact_endpoint = SERVER_URL + reverse('facts-list')
+        restarted_scan_count = 0
+        for scanjob in incomplete_scans:
+            scanner = create_scanner_for_job(scanjob, fact_endpoint)
+            logger.debug('Adding ScanJob(id=%d, status=%s, scan_type=%s)',
+                         scanjob.id, scanjob.status, scanjob.scan_type)
+            self.put(scanner)
+            restarted_scan_count += 1
+
+        if restarted_scan_count == 0:
+            logger.debug('No running or pending scan jobs to start')
+
     def run(self):
         """Trigger thread execution."""
+        self.look_for_incomplete_scans()
         logger.debug('Scan manager started.')
         while self.running:
             queue_len = len(self.scan_queue)
