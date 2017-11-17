@@ -70,7 +70,7 @@ class HostCredentialSerializer(ModelSerializer):
         :param name: Name of credential to look for
         :param cred_id: Host credential to exclude
         """
-        if id is None:
+        if cred_id is None:
             # Look for existing with same name (create)
             existing = HostCredential.objects.filter(name=name).first()
         else:

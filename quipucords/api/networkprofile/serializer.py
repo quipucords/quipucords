@@ -153,7 +153,7 @@ class NetworkProfileSerializer(ModelSerializer):
         :param name: Name of profile to look for
         :param profile_id: Network profile to exclude
         """
-        if id is None:
+        if profile_id is None:
             # Look for existing with same name (create)
             existing = NetworkProfile.objects.filter(name=name).first()
         else:
