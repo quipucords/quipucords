@@ -221,7 +221,7 @@ def _process_connect_callback(callback, credential):
     return success, failed
 
 
-def _construct_error(return_code):
+def _construct_error_msg(return_code):
     message = ANSIBLE_DEFAULT_ERR_MSG
     if return_code == TaskQueueManager.RUN_FAILED_HOSTS:
         message = ANSIBLE_FAILED_HOST_ERR_MSG
@@ -229,7 +229,11 @@ def _construct_error(return_code):
         message = ANSIBLE_UNREACHABLE_HOST_ERR_MSG
     elif return_code == TaskQueueManager.RUN_FAILED_BREAK_PLAY:
         message = ANSIBLE_PLAYBOOK_ERR_MSG
-    return AnsibleError(message=message)
+    return message
+
+
+def _construct_error(return_code):
+    return AnsibleError(message=_construct_error_msg(return_code))
 
 
 def _handle_ssh_passphrase(credential):

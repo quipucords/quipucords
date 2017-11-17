@@ -49,6 +49,7 @@ class ScanJob(models.Model):
     max_concurrency = models.PositiveIntegerField(default=50)
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
+    failed_scans = models.PositiveIntegerField(null=True)
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
@@ -59,12 +60,14 @@ class ScanJob(models.Model):
             'max_concurrency: {}, '\
             'systems_count: {}, '\
             'systems_scanned: {}, '\
+            'failed_scans: {}, '\
             'fact_collection_id: {}'.format(self.id,
                                             self.scan_type,
                                             self.profile,
                                             self.max_concurrency,
                                             self.systems_count,
                                             self.systems_scanned,
+                                            self.failed_scans,
                                             self.fact_collection_id) + '}'
 
     class Meta:
