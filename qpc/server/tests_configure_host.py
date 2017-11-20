@@ -64,7 +64,7 @@ class ConfigureHostTests(unittest.TestCase):
         self.assertEqual(config['port'], 8000)
 
     def test_invalid_configuration(self):
-        """Test reading bad JSON on start."""
+        """Test reading bad JSON on cli start."""
         write_server_config({})
 
         sys.argv = ['/bin/qpc', 'server', 'config',
