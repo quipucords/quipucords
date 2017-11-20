@@ -24,6 +24,7 @@ HC_NOT_BOTH = 'A host credential must have either' \
 HC_KEY_INVALID = 'ssh_keyfile, %s, is not a valid file on the system.'
 HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
     ' a ssh_passphrase is provided.'
+HC_NAME_ALREADY_EXISTS = 'Host credential with name=%s already exists'
 
 # network profile messages
 NP_HOST_AS_STRING = 'A host range must be a string.'
@@ -43,8 +44,9 @@ NP_CIDR_RANGE = '%(ip_range)s has invalid octet value of %(octet)s.' \
                 ' %(octet)s is not in the range [0,255]'
 NP_INVALID_PORT = 'Network profile must have ssh port in range [0, 65535]'
 NP_MIN_CREDS = 'Network profile must have at least one set of credentials.'
-HOST_CRED_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
+NP_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
     ' found in database.'
+NP_NAME_ALREADY_EXISTS = 'Network profile with name=%s already exists'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
