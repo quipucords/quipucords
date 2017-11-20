@@ -51,7 +51,6 @@ def get_server_location():
 
     :returns: The URI to the sonar server.
     """
-
     config = read_server_config()
     if config is None:
         # No configuration written to server.config
@@ -67,6 +66,7 @@ def read_server_config():
 
     :returns: The validate dictionary with configuration
     """
+    # pylint: disable=too-many-return-statements
     if not os.path.exists(QPC_SERVER_CONFIG):
         return None
 
@@ -98,11 +98,10 @@ def read_server_config():
 
 
 def write_server_config(server_config):
-    """Write server configuration to server.config
+    """Write server configuration to server.config.
 
     :param server_config: dict containing server configuration
     """
-
     with open(QPC_SERVER_CONFIG, 'w') as configFile:
         json.dump(server_config, configFile)
 

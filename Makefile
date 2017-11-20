@@ -47,7 +47,7 @@ test-coverage:
 	coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/;coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build
 
 lint-pylint:
 	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code

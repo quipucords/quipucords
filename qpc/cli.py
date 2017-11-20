@@ -13,6 +13,7 @@
 
 from __future__ import print_function
 from argparse import ArgumentParser
+import sys
 import qpc.server as server
 import qpc.auth as auth
 import qpc.network as network
@@ -97,13 +98,15 @@ class CLI(object):
         self.args = self.parser.parse_args()
         setup_logging(self.args.verbosity)
 
-        if self.args.subcommand is not None and self.args.subcommand != server.SUBCOMMAND:
+        if self.args.subcommand is not None \
+                and self.args.subcommand != server.SUBCOMMAND:
             # Before attempting to run command, check server location
             server_location = get_server_location()
             if server_location is None or server_location == '':
-                log.error('Please configure server location using command below.')
+                log.error(
+                    'Please configure server location using command below.')
                 log.error('qpc server config --host <127.0.0.1> --port <8000>')
-                return
+                sys.exit(1)
 
         if self.args.subcommand in self.subcommands:
             subcommand = self.subcommands[self.args.subcommand]

@@ -12,9 +12,9 @@
 """ConfigureHostCommand is used to set target host and port server."""
 
 from __future__ import print_function
-import sys
 from qpc.clicommand import CliCommand
 import qpc.server as config
+from qpc.network.utils import validate_port
 from qpc.utils import write_server_config
 from qpc.translation import _
 import qpc.messages as messages
@@ -40,22 +40,12 @@ class ConfigureHostCommand(CliCommand):
         self.parser.add_argument('--host', dest='host', metavar='HOST',
                                  help=_(messages.SERVER_CONFIG_HOST_HELP),
                                  required=True)
-        self.parser.add_argument('--port', dest='port', metavar='HOSTS', default=8000,
+        self.parser.add_argument('--port', dest='port', metavar='PORT',
+                                 type=validate_port, default=8000,
                                  help=_(messages.SERVER_CONFIG_PORT_HELP),
                                  required=False)
 
     def _do_command(self):
-        """Persist the server configuration.
-        """
-
+        """Persist the server configuration."""
         server_config = {'host': self.args.host, 'port': int(self.args.port)}
         write_server_config(server_config)
-
-    def _validate_args(self):
-        CliCommand._validate_args(self)
-
-        try:
-            int(self.args.port)
-        except ValueError:
-            print(_(messages.SERVER_CONFIG_PORT_ERROR))
-            sys.exit(1)
