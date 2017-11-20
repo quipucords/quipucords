@@ -102,6 +102,8 @@ def write_server_config(server_config):
 
     :param server_config: dict containing server configuration
     """
+    ensure_config_dir_exists()
+
     with open(QPC_SERVER_CONFIG, 'w') as configFile:
         json.dump(server_config, configFile)
 
