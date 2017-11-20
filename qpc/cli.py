@@ -105,7 +105,7 @@ class CLI(object):
             if server_location is None or server_location == '':
                 log.error(
                     'Please configure server location using command below.')
-                log.error('qpc server config --host <127.0.0.1> --port <8000>')
+                log.error('qpc server config --host HOST --port PORT')
                 sys.exit(1)
 
         if self.args.subcommand in self.subcommands:
