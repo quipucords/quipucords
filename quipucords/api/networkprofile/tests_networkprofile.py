@@ -58,6 +58,16 @@ class NetworkProfileTest(TestCase):
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
+    def test_double_create(self):
+        """A duplicate create should fail."""
+        data = {'name': 'netprof1',
+                'hosts': ['1.2.3.4'],
+                'ssh_port': '22',
+                'credentials': [self.cred_for_upload]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+        response = self.create_expect_400(data)
+
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""
         data = {'name': 'netprof1',
@@ -254,9 +264,9 @@ class NetworkProfileTest(TestCase):
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
-        data = {'name': 'netprof2-new',
+        data = {'name': 'netprof2',
                 'hosts': ['1.2.3.5'],
-                'ssh_port': 22,
+                'ssh_port': 23,
                 'credentials': [self.cred.id]}
         url = reverse('networkprofile-detail', args=(initial['id'],))
         response = self.client.put(url,
@@ -265,14 +275,39 @@ class NetworkProfileTest(TestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected = {'name': 'netprof2-new',
+        expected = {'name': 'netprof2',
                     'hosts': ['1.2.3.5'],
-                    'ssh_port': 22,
+                    'ssh_port': 23,
                     'credentials': [self.cred_for_response]}
         # data should be a strict subset of the response, because the
         # response adds an id field.
         for key, value in expected.items():  # pylint: disable=unused-variable
             self.assertEqual(expected[key], response.json()[key])
+
+    def test_update_collide(self):
+        """Fail update due to name conflict."""
+        self.create_expect_201({
+            'name': 'netprof2-double',
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.cred_for_upload]})
+
+        initial = self.create_expect_201({
+            'name': 'netprof2',
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.cred_for_upload]})
+
+        data = {'name': 'netprof2-double',
+                'hosts': ['1.2.3.5'],
+                'ssh_port': 23,
+                'credentials': [self.cred.id]}
+        url = reverse('networkprofile-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_partial_update(self):
         """Partially update a NetworkProfile."""

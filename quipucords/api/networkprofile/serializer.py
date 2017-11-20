@@ -50,7 +50,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         """Create internal value."""
         actual_cred = HostCredential.objects.filter(id=data).first()
         if actual_cred is None:
-            raise ValidationError(_(messages.HOST_CRED_DO_NOT_EXIST % data))
+            raise ValidationError(_(messages.NP_HC_DO_NOT_EXIST % data))
         return actual_cred
 
     def to_representation(self, value):
@@ -91,6 +91,9 @@ class NetworkProfileSerializer(ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a network profile."""
+        NetworkProfileSerializer.check_for_existing_name(
+            name=validated_data.get('name'))
+
         hosts_data = validated_data.pop('hosts')
         credentials = validated_data.pop('credentials')
 
@@ -111,6 +114,9 @@ class NetworkProfileSerializer(ModelSerializer):
         # If we ever add optional fields to NetworkProfile, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
+        NetworkProfileSerializer.check_for_existing_name(
+            name=validated_data.get('name'),
+            profile_id=instance.id)
 
         hosts_data = validated_data.pop('hosts', None)
         credentials = validated_data.pop('credentials', None)
@@ -139,6 +145,23 @@ class NetworkProfileSerializer(ModelSerializer):
             instance.credentials.set(credentials)
 
         return instance
+
+    @staticmethod
+    def check_for_existing_name(name, profile_id=None):
+        """Look for existing (different object) with same name.
+
+        :param name: Name of profile to look for
+        :param profile_id: Network profile to exclude
+        """
+        if profile_id is None:
+            # Look for existing with same name (create)
+            existing = NetworkProfile.objects.filter(name=name).first()
+        else:
+            # Look for existing.  Same name, different id (update)
+            existing = NetworkProfile.objects.filter(
+                name=name).exclude(id=profile_id).first()
+        if existing is not None:
+            raise ValidationError(_(messages.NP_NAME_ALREADY_EXISTS % name))
 
     @staticmethod
     def validate_name(name):

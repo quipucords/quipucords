@@ -34,6 +34,24 @@ class HostCredentialTest(TestCase):
                                              username=username,
                                              password=password)
 
+    def create(self, data):
+        """Call the create endpoint."""
+        url = reverse('hostcred-list')
+        return self.client.post(url,
+                                json.dumps(data),
+                                'application/json')
+
+    def create_expect_400(self, data):
+        """We will do a lot of create tests that expect HTTP 400s."""
+        response = self.create(data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def create_expect_201(self, data):
+        """Create a network profile, return the response as a dict."""
+        response = self.create(data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
     def test_hostcred_creation(self):
         """Tests the creation of a HostCredential model."""
         host_cred = self.create_hostcredential()
@@ -41,15 +59,23 @@ class HostCredentialTest(TestCase):
 
     def test_hostcred_create(self):
         """Ensure we can create a new host credential object via API."""
-        url = reverse('hostcred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1'}
-        response = self.client.post(url, json.dumps(data),
-                                    'application/json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.create_expect_201(data)
         self.assertEqual(HostCredential.objects.count(), 1)
         self.assertEqual(HostCredential.objects.get().name, 'cred1')
+
+    def test_hostcred_create_double(self):
+        """Create with duplicate name should fail."""
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(HostCredential.objects.count(), 1)
+        self.assertEqual(HostCredential.objects.get().name, 'cred1')
+
+        self.create_expect_400(data)
 
     def test_hc_create_err_name(self):
         """Test create without name.
@@ -208,17 +234,47 @@ class HostCredentialTest(TestCase):
 
     def test_hostcred_update_view(self):
         """Tests the update view set of the HostCredential API."""
-        cred = HostCredential(name='cred2', username='user2',
-                              password='pass2')
-        cred.save()
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+
         data = {'name': 'cred2',
                 'username': 'user2',
-                'password': 'pass3'}
-        url = reverse('hostcred-detail', args=(cred.pk,))
+                'password': 'pass2'}
+        self.create_expect_201(data)
+
+        data = {'name': 'cred2',
+                'username': 'user23',
+                'password': 'pass2'}
+        url = reverse('hostcred-detail', args=(2,))
         resp = self.client.put(url, json.dumps(data),
                                content_type='application/json',
                                format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_hostcred_update_double(self):
+        """Update to new name that conflicts with other should fail."""
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+
+        data = {'name': 'cred2',
+                'username': 'user2',
+                'password': 'pass2'}
+        self.create_expect_201(data)
+
+        data = {'name': 'cred1',
+                'username': 'user2',
+                'password': 'pass2'}
+        url = reverse('hostcred-detail', args=(2,))
+        resp = self.client.put(url, json.dumps(data),
+                               content_type='application/json',
+                               format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_hostcred_delete_view(self):
         """Tests the delete view set of the HostCredential API."""
