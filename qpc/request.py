@@ -16,9 +16,10 @@ import requests
 from qpc.utils import log
 from qpc.translation import _
 from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
+from qpc.utils import get_server_location
 
 # Need to determine how we get this information; config file at install?
-BASE_URL = 'http://127.0.0.1:8000'
+BASE_URL = get_server_location()
 
 POST = 'POST'
 GET = 'GET'

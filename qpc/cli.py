@@ -13,11 +13,16 @@
 
 from __future__ import print_function
 from argparse import ArgumentParser
+import qpc.server as server
 import qpc.auth as auth
 import qpc.network as network
 import qpc.scan as scan
-from qpc.utils import ensure_config_dir_exists, ensure_data_dir_exists, \
-    setup_logging
+from qpc.utils import (ensure_config_dir_exists,
+                       get_server_location,
+                       ensure_data_dir_exists,
+                       setup_logging,
+                       log)
+from qpc.server.commands import ConfigureHostCommand
 from qpc.auth.commands import (AuthAddCommand, AuthListCommand,
                                AuthEditCommand, AuthShowCommand,
                                AuthClearCommand)
@@ -55,6 +60,8 @@ class CLI(object):
         self.name = name
         self.args = None
         self.subcommands = {}
+        self._add_subcommand(server.SUBCOMMAND,
+                             [ConfigureHostCommand])
         self._add_subcommand(auth.SUBCOMMAND,
                              [AuthAddCommand, AuthListCommand,
                               AuthEditCommand, AuthShowCommand,
@@ -89,6 +96,14 @@ class CLI(object):
         """
         self.args = self.parser.parse_args()
         setup_logging(self.args.verbosity)
+
+        if self.args.subcommand is not None and self.args.subcommand != server.SUBCOMMAND:
+            # Before attempting to run command, check server location
+            server_location = get_server_location()
+            if server_location is None or server_location == '':
+                log.error('Please configure server location using command below.')
+                log.error('qpc server config --host <127.0.0.1> --port <8000>')
+                return
 
         if self.args.subcommand in self.subcommands:
             subcommand = self.subcommands[self.args.subcommand]
