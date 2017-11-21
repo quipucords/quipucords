@@ -19,15 +19,19 @@ import requests
 import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
-from qpc.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.auth import AUTH_URI
 from qpc.network import NETWORK_URI
 from qpc.network.add import NetworkAddCommand
 from qpc.network.utils import validate_port
+from qpc.utils import get_server_location, write_server_config
 
 TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
+
+write_server_config({'host': '127.0.0.1', 'port': 8000})
+BASE_URL = get_server_location()
 
 
 class NetworkAddCliTests(unittest.TestCase):

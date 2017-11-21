@@ -18,13 +18,17 @@ import requests
 import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
-from qpc.request import BASE_URL, CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
 from qpc.network import NETWORK_URI
 from qpc.scan.start import ScanStartCommand
+from qpc.utils import get_server_location, write_server_config
 
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
+
+write_server_config({'host': '127.0.0.1', 'port': 8000})
+BASE_URL = get_server_location()
 
 
 class ScanStartCliTests(unittest.TestCase):

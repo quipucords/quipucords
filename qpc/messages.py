@@ -47,6 +47,9 @@ PROFILE_ADD_AUTH_PROCESS_ERR = 'An error occurred while processing the' \
     ' "--auth" input values. Failed to add profile "%s"'
 PROFILE_ADDED = 'Profile "%s" was added'
 
+SERVER_CONFIG_HOST_HELP = 'host or ip address'
+SERVER_CONFIG_PORT_HELP = 'port number; default=8000'
+
 PROFILE_CLEAR_ALL_HELP = 'remove all network profiles'
 PROFILE_REMOVED = 'Profile "%s" was removed'
 PROFILE_FAILED_TO_REMOVE = 'Failed to remove profile "%s"'

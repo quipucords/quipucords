@@ -23,6 +23,10 @@ QPC_PATH = 'qpc'
 CONFIG_DIR = os.path.join(xdg_config_home, QPC_PATH)
 DATA_DIR = os.path.join(xdg_data_home, QPC_PATH)
 QPC_LOG = os.path.join(DATA_DIR, 'qpc.log')
+QPC_SERVER_CONFIG = os.path.join(CONFIG_DIR, 'server.config')
+
+CONFIG_HOST_KEY = 'host'
+CONFIG_PORT_KEY = 'port'
 
 
 # 'log' is a convenience for getting the appropriate logger from the
@@ -40,6 +44,68 @@ def ensure_config_dir_exists():
     """Ensure the qpc configuration directory exists."""
     if not os.path.exists(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
+
+
+def get_server_location():
+    """Build URI from server configuration.
+
+    :returns: The URI to the sonar server.
+    """
+    config = read_server_config()
+    if config is None:
+        # No configuration written to server.config
+        return None
+
+    server_locataion = 'http://{}:{}'.format(
+        config[CONFIG_HOST_KEY], config[CONFIG_PORT_KEY])
+    return server_locataion
+
+
+def read_server_config():
+    """Retrieve configuration for sonar server.
+
+    :returns: The validate dictionary with configuration
+    """
+    # pylint: disable=too-many-return-statements
+    if not os.path.exists(QPC_SERVER_CONFIG):
+        return None
+
+    with open(QPC_SERVER_CONFIG) as server_config_file:
+        try:
+            config = json.load(server_config_file)
+        except json.decoder.JSONDecodeError:
+            return None
+
+        if CONFIG_HOST_KEY not in config or CONFIG_PORT_KEY not in config:
+            return None
+
+        host = config[CONFIG_HOST_KEY]
+        port = config[CONFIG_PORT_KEY]
+
+        if host is None or host == '':
+            return None
+
+        if port is None or port == '':
+            return None
+
+        if not isinstance(host, str):
+            return None
+
+        if not isinstance(port, int):
+            return None
+
+        return {CONFIG_HOST_KEY: host, CONFIG_PORT_KEY: port}
+
+
+def write_server_config(server_config):
+    """Write server configuration to server.config.
+
+    :param server_config: dict containing server configuration
+    """
+    ensure_config_dir_exists()
+
+    with open(QPC_SERVER_CONFIG, 'w') as configFile:
+        json.dump(server_config, configFile)
 
 
 def ensure_data_dir_exists():

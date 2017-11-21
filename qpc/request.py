@@ -16,9 +16,9 @@ import requests
 from qpc.utils import log
 from qpc.translation import _
 from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
+from qpc.utils import get_server_location
 
 # Need to determine how we get this information; config file at install?
-BASE_URL = 'http://127.0.0.1:8000'
 
 POST = 'POST'
 GET = 'GET'
@@ -34,7 +34,7 @@ def post(path, payload):
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = BASE_URL + path
+    url = get_server_location() + path
     return requests.post(url, json=payload)
 
 
@@ -45,7 +45,7 @@ def get(path, params=None):
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
     :returns: reponse object
     """
-    url = BASE_URL + path
+    url = get_server_location() + path
     return requests.get(url, params=params)
 
 
@@ -56,7 +56,7 @@ def patch(path, payload):
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = BASE_URL + path
+    url = get_server_location() + path
     return requests.patch(url, json=payload)
 
 
@@ -66,7 +66,7 @@ def delete(path):
     :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
     :returns: reponse object
     """
-    url = BASE_URL + path
+    url = get_server_location() + path
     return requests.delete(url)
 
 
@@ -77,7 +77,7 @@ def put(path, payload):
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = BASE_URL + path
+    url = get_server_location() + path
     return requests.put(url, json=payload)
 
 
