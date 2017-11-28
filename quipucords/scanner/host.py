@@ -27,6 +27,19 @@ PLAYBOOK_PATH = os.path.abspath(os.path.normpath(
     os.path.join(os.path.curdir, 'playbooks', 'host_scan_playbook.yaml')))
 
 
+class ScannerException(Exception):
+    """Exception for issues detected during scans."""
+
+    def __init__(self, message=''):
+        """Exception for issues detected during scans.
+
+        :param message: An error message describing the problem encountered
+        during scan.
+        """
+        self.message = 'Scan failed.  Error: {}'.format(message)
+        super().__init__(self.message)
+
+
 class HostScanner(DiscoveryScanner):
     """Scan target systems to collect facts.
 
@@ -65,6 +78,10 @@ class HostScanner(DiscoveryScanner):
         num_remaining = len(connected)
         num_total = num_remaining + num_completed
         num_failed = len(failed)
+
+        if num_total == 0:
+            msg = 'Inventory provided no reachable hosts.'
+            raise ScannerException(msg)
 
         if self.scan_restart:
             logger.info('Host scan restarted for %s.',
@@ -185,8 +202,7 @@ class HostScanner(DiscoveryScanner):
         data = response.json()
         msg = 'Failed to obtain fact_collection_id when reporting facts.'
         if response.status_code != 201:
-            logger.error('Could not create facts. Errors: %s', data)
-            assert 'id' in data, msg
+            raise ScannerException('{} Error: {}'.format(msg, data))
         return data['id']
 
     def _store_host_scan_success(self, fact_collection_id):
@@ -207,6 +223,12 @@ class HostScanner(DiscoveryScanner):
             facts = self.host_scan()
 
             # Send facts to fact endpoint
+            fact_size = len(facts)
+            if facts is None or fact_size == 0:
+                msg = 'Fact set is empty.  '\
+                    'No results will be reported to fact endpoint.'
+                raise ScannerException(msg)
+
             fact_collection_id = self.send_facts(facts)
 
             # Save the fact collection id to scanjob
@@ -220,5 +242,7 @@ class HostScanner(DiscoveryScanner):
         except AssertionError as assertion_error:
             logger.error(assertion_error)
             self._store_error(assertion_error)
-
+        except ScannerException as scan_error:
+            logger.error(scan_error)
+            self._store_error(scan_error)
         return facts

@@ -89,10 +89,11 @@ class ResultCallback(CallbackBase):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        self._update_reachable_hosts(result_obj)
-        self.scanjob.failed_scans += 1
-        self.scanjob.status = ScanJob.FAILED
-        self.scanjob.save()
+        if self.scanjob is not None:
+            self._update_reachable_hosts(result_obj)
+            self.scanjob.failed_scans += 1
+            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.save()
         logger.warning('%s', result_obj)
 
     def _update_reachable_hosts(self, result_obj):
