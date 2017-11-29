@@ -1,5 +1,8 @@
 FROM python:3.6
 
+# Add sshpass
+RUN apt-get update && apt-get install -y sshpass
+
 # Setup dependencies
 COPY requirements.txt /tmp/reqs.txt
 # Remove last 2 lines
