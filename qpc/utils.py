@@ -61,6 +61,12 @@ def get_server_location():
     return server_locataion
 
 
+try:
+    exception_class = json.decoder.JSONDecodeError
+except AttributeError:
+    exception_class = ValueError
+
+
 def read_server_config():
     """Retrieve configuration for sonar server.
 
@@ -73,7 +79,7 @@ def read_server_config():
     with open(QPC_SERVER_CONFIG) as server_config_file:
         try:
             config = json.load(server_config_file)
-        except json.decoder.JSONDecodeError:
+        except exception_class:
             return None
 
         if CONFIG_HOST_KEY not in config or CONFIG_PORT_KEY not in config:
@@ -156,7 +162,7 @@ def handle_error_response(response):
                 error_context = err_key
             for err_msg in err_cases:
                 log.error('%s: %s', error_context, err_msg)
-    except json.decoder.JSONDecodeError:
+    except exception_class:
         pass
 
 
