@@ -201,7 +201,7 @@ class HostScanner(DiscoveryScanner):
         response = requests.post(self.fact_endpoint, json=payload)
         data = response.json()
         msg = 'Failed to obtain fact_collection_id when reporting facts.'
-        if response.status_code != 201:
+        if response.status_code != 201 or data['id'] is None:
             raise ScannerException('{} Error: {}'.format(msg, data))
         return data['id']
 
@@ -236,6 +236,8 @@ class HostScanner(DiscoveryScanner):
             self.scanjob.save()
 
             self._store_host_scan_success(fact_collection_id)
+            logger.info('Host scan successfully completed for job: %s.',
+                        self.scanjob)
         except AnsibleError as ansible_error:
             logger.error(ansible_error)
             self._store_error(ansible_error)
