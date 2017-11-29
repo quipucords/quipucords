@@ -53,7 +53,10 @@ The python packages required for running quipucords on a system can be found in
 
 Installation
 ------------
+quipucords is delivered via a RPM command line tool and a server container image. Below you will find instructions for installing each of these items.
 
+Command Line
+^^^^^^^^^^^^
 qpc is available for `download <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_ from fedora COPR.
 
 1. First, make sure that the EPEL repo is enabled for the server.
@@ -69,6 +72,30 @@ You can find the appropriate architecture and version on the `COPR qpc page <htt
 3. Then, install the qpc package:
 
 ``yum -y install qpc``
+
+Container Image
+^^^^^^^^^^^^^^^
+The quipucords container image can be created from source. This repository contains a Dockerfile detailing the image creation of the server.
+You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ in order to create the image and run the container.
+
+1. Begin by cloning the repository::
+
+    git clone git@github.com:quipucords/quipucords.git
+
+2. Build the docker image::
+
+    docker -D build . -t quipucords:latest
+
+*Note: You may or may not need to use ``sudo`` depending on your install setup.*
+
+3. Run the docker image::
+
+    docker run -d -p8000:8000 -i quipucords:latest
+
+Now the server should be running and you can launch the `Host Credential Browseable API <http://127.0.0.1:8000/api/v1/credentials/hosts/>`_.
+You can work with the APIs directly or you can use the CLI. You can configure the CLI with the following command::
+
+    qpc server config --host 127.0.0.1
 
 
 Command Syntax & Usage
