@@ -10,7 +10,7 @@
 #
 """Test the host scanner capabilities."""
 
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 import requests_mock
@@ -203,7 +203,7 @@ class HostScannerTest(TestCase):
         """Test scan flow with mocked manager and failure."""
         scanner = HostScanner(self.scanjob, self.fact_endpoint)
         facts = scanner.run()
-        mock_scan.assert_called()
+        mock_scan.assert_called_with()
         self.assertEqual(facts, [])
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
@@ -215,7 +215,7 @@ class HostScannerTest(TestCase):
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
             scanner = HostScanner(self.scanjob, self.fact_endpoint)
             facts = scanner.run()
-            mock_run.assert_called()
+            mock_run.assert_called_with(ANY)
             self.assertEqual(facts, [])
 
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
@@ -230,7 +230,7 @@ class HostScannerTest(TestCase):
                 self.fact_endpoint,
                 scan_results=self.scan_results)
             facts = scanner.run()
-            mock_run.assert_called()
+            mock_run.assert_called_with(ANY)
             self.assertEqual(facts, [])
 
     def test_populate_callback(self):
