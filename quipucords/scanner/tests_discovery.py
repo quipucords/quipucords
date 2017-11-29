@@ -10,7 +10,7 @@
 #
 """Test the discovery scanner capabilities."""
 
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -164,7 +164,7 @@ class DiscoveryScannerTest(TestCase):
         connected, failed = connect(hosts, cred, connection_port)
         self.assertEqual(connected, [])
         self.assertEqual(failed, [])
-        mock_run.assert_called()
+        mock_run.assert_called_with(ANY)
 
     @patch('scanner.discovery.connect')
     def test_discovery(self, mock_connect):
@@ -173,7 +173,7 @@ class DiscoveryScannerTest(TestCase):
         mock_connect.return_value = expected
         scanner = DiscoveryScanner(self.scanjob)
         conn_dict = scanner.run()
-        mock_connect.assert_called()
+        mock_connect.assert_called_with(ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict, {'1.2.3.4': {'name': 'cred1'}})
 
     def test_store_discovery_success(self):
