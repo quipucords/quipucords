@@ -320,7 +320,7 @@ The authentication profile credentials that are used to access servers are store
 Authors
 -------
 
-Quipucores was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, and Kevan Holdaway<kholdawa@redhat.com>.
+Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, and Kevan Holdaway<kholdawa@redhat.com>.
 
 Copyright
 ---------
