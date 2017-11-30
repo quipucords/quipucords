@@ -12,8 +12,8 @@ info:
 basePath: "/api/v1"
 
 tags:
-- name: "Host Credential"
-  description: "API related to the Host Credential model"
+- name: "Credential"
+  description: "API related to the Credential model"
 
 paths:
   /facts/:
@@ -41,10 +41,10 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Invalid input"
-  /credentials/hosts/:
+  /credentials/:
     post:
       tags:
-        - "Host Credential"
+        - "Credential"
       summary: "Add a new host credential"
       description: "Create a new host credential for use when connecting to a target system."
       operationId: "addCredential"
@@ -68,7 +68,7 @@ paths:
           description: "Invalid input"
     get:
       tags:
-        - "Host Credential"
+        - "Credential"
       summary: "List exsiting host credentials"
       description: "List all host credential for use when connecting to a target system."
       operationId: "listCredentials"
@@ -86,17 +86,17 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/CredentialOut"
-  /credentials/hosts/{host_cred_id}:
+  /credentials/{cred_id}:
     get:
       tags:
-        - "Host Credential"
+        - "Credential"
       summary: "Get an existing host credential"
       description: "Get a host credential for use when connecting to a target system."
       operationId: "getCredential"
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
         description: "ID of host credential to retrieve"
         required: true
@@ -111,7 +111,7 @@ paths:
           description: "Host credential not found"
     put:
       tags:
-        - "Host Credential"
+        - "Credential"
       summary: "Update an existing host credential"
       description: "Update a host credential for use when connecting to a target system."
       operationId: "updateCredential"
@@ -120,7 +120,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
         description: "ID of host credential to update"
         required: true
@@ -143,14 +143,14 @@ paths:
           description: "Host credential not found"
     delete:
       tags:
-        - "Host Credential"
+        - "Credential"
       summary: "Delete an existing host credential"
       description: "Delete a host credential for use when connecting to a target system."
       operationId: "deleteCredential"
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
         description: "ID of host credential to delete"
         required: true

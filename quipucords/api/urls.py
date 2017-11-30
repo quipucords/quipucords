@@ -19,7 +19,7 @@ from api.views import (CredentialViewSet, FactViewSet,
 
 ROUTER = SimpleRouter()
 
-ROUTER.register(r'credentials/hosts',
+ROUTER.register(r'credentials',
                 CredentialViewSet,
                 base_name='hostcred')
 ROUTER.register(r'facts',

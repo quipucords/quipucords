@@ -19,4 +19,4 @@ SHOW = 'show'
 CLEAR = 'clear'
 
 
-AUTH_URI = '/api/v1/credentials/hosts/'
+AUTH_URI = '/api/v1/credentials/'

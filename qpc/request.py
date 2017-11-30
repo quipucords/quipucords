@@ -30,7 +30,7 @@ PUT = 'PUT'
 def post(path, payload):
     """Post JSON payload to the given path with the configured server location.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/hosts)
+    :param path: path after server and port (i.e. /api/v1/credentials)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
@@ -41,7 +41,7 @@ def post(path, payload):
 def get(path, params=None):
     """Get JSON data from the given path with the configured server location.
 
-    :param path:  path after server and port (i.e. /api/v1/credentials/hosts)
+    :param path:  path after server and port (i.e. /api/v1/credentials)
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
     :returns: reponse object
     """
@@ -52,7 +52,7 @@ def get(path, params=None):
 def patch(path, payload):
     """Patch JSON payload to the given path with the configured server location.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
+    :param path: path after server and port (i.e. /api/v1/credentials/1)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
@@ -63,7 +63,7 @@ def patch(path, payload):
 def delete(path):
     """Delete the item with the given path with the configured server location.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/hosts/1)
+    :param path: path after server and port (i.e. /api/v1/credentials/1)
     :returns: reponse object
     """
     url = get_server_location() + path
@@ -73,7 +73,7 @@ def delete(path):
 def put(path, payload):
     """Put JSON payload to the given path with the configured server location.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/hosts)
+    :param path: path after server and port (i.e. /api/v1/credentials)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
@@ -85,7 +85,7 @@ def request(method, path, params=None, payload=None, parser=None):
     """Create a generic handler for passing to specific request methods.
 
     :param method: the request method to execute
-    :param path: path after server and port (i.e. /api/v1/credentials/hosts)
+    :param path: path after server and port (i.e. /api/v1/credentials)
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
     :param payload: dictionary of payload to be posted
     :param parser: parser for printing usage on failure
