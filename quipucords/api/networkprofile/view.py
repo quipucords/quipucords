@@ -22,7 +22,7 @@ from api.models import NetworkProfile
 CREDENTIALS_KEY = 'credentials'
 
 
-def expand_host_credential(profile, json_profile):
+def expand_credential(profile, json_profile):
     """Expand host credentials.
 
     Take network profile object with credential id and pull object from db.
@@ -77,7 +77,7 @@ class NetworkProfileViewSet(ModelViewSet):
             json_profile = serializer.data
 
             # Create expanded host cred JSON
-            expand_host_credential(profile, json_profile)
+            expand_credential(profile, json_profile)
 
             result.append(json_profile)
         return Response(result)
@@ -92,7 +92,7 @@ class NetworkProfileViewSet(ModelViewSet):
         profile = get_object_or_404(self.queryset, pk=json_profile['id'])
 
         # Create expanded host cred JSON
-        expand_host_credential(profile, json_profile)
+        expand_credential(profile, json_profile)
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
@@ -102,7 +102,7 @@ class NetworkProfileViewSet(ModelViewSet):
         json_profile = serializer.data
 
         # Create expanded host cred JSON
-        expand_host_credential(profile, json_profile)
+        expand_credential(profile, json_profile)
 
         return Response(json_profile)
 
@@ -117,6 +117,6 @@ class NetworkProfileViewSet(ModelViewSet):
         json_profile = serializer.data
 
         # Create expanded host cred JSON
-        expand_host_credential(profile, json_profile)
+        expand_credential(profile, json_profile)
 
         return Response(json_profile)

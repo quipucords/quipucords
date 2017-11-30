@@ -20,7 +20,7 @@ import api.messages as messages
 
 
 class Credential(models.Model):
-    """The host credential for connecting to host systems via ssh."""
+    """The credential for connecting to systems."""
 
     name = models.CharField(max_length=64, unique=True)
     username = models.CharField(max_length=64)

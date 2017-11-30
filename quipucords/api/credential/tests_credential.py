@@ -21,7 +21,7 @@ class CredentialTest(TestCase):
     """Tests against the Credential model and view set."""
 
     # pylint: disable= no-self-use
-    def create_hostcredential(self, name='test_cred',
+    def create_credential(self, name='test_cred',
                               username='testuser', password='testpass'):
         """Create a Credential model for use within test cases.
 
@@ -54,7 +54,7 @@ class CredentialTest(TestCase):
 
     def test_hostcred_creation(self):
         """Tests the creation of a Credential model."""
-        host_cred = self.create_hostcredential()
+        host_cred = self.create_credential()
         self.assertTrue(isinstance(host_cred, Credential))
 
     def test_hostcred_create(self):
