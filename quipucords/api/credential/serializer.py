@@ -12,7 +12,9 @@
 
 import os
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ModelSerializer, ValidationError,
+from rest_framework.serializers import (ModelSerializer,
+                                        ValidationError,
+                                        ChoiceField,
                                         CharField)
 from api.models import Credential
 import api.messages as messages
@@ -32,7 +34,11 @@ def expand_filepath(filepath):
 class CredentialSerializer(ModelSerializer):
     """Serializer for the Credential model."""
 
+    # pylint: disable= no-self-use
+
     name = CharField(required=True, max_length=64)
+    cred_type = ChoiceField(
+        required=False, choices=Credential.CRED_TYPE_CHOICES)
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
                          style={'input_type': 'password'})
@@ -82,6 +88,13 @@ class CredentialSerializer(ModelSerializer):
 
     def validate(self, attrs):
         """Validate the attributes."""
+        cred_type = 'cred_type' in attrs and attrs['cred_type']
+        if cred_type == Credential.VCENTER_CRED_TYPE:
+            return self.validate_vcenter_cred(attrs)
+        return self.validate_host_cred(attrs)
+
+    def validate_host_cred(self, attrs):
+        """Validate the attributes for host creds."""
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
@@ -101,4 +114,23 @@ class CredentialSerializer(ModelSerializer):
 
         if ssh_passphrase and not ssh_keyfile:
             raise ValidationError(_(messages.HC_NO_KEY_W_PASS))
+        return attrs
+
+    def validate_vcenter_cred(self, attrs):
+        """Validate the attributes for vcenter creds."""
+        # Required fields for vcenter
+        username = 'username' in attrs and attrs['username']
+        password = 'password' in attrs and attrs['password']
+
+        if not (password and username):
+            raise ValidationError(_(messages.VC_PWD_AND_USERNAME))
+
+        # Not allowed fields for vcenter
+        ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
+        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
+        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+
+        if ssh_keyfile or ssh_passphrase or sudo_password:
+            raise ValidationError(_(messages.VC_KEY_FILE_NOT_ALLOWED))
+
         return attrs

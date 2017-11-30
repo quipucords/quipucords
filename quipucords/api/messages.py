@@ -26,6 +26,10 @@ HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
     ' a ssh_passphrase is provided.'
 HC_NAME_ALREADY_EXISTS = 'Host credential with name=%s already exists'
 
+VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
+VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
+    ' keyfile, or ssh passphrase.'
+
 # network profile messages
 NP_HOST_AS_STRING = 'A host range must be a string.'
 NP_CRED_DISPLAY = 'Credential: %s'
