@@ -13,7 +13,7 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from api.fact.view import FactViewSet
-from api.hostcredential.view import HostCredentialViewSet
+from api.credential.view import CredentialViewSet
 from api.networkprofile.view import NetworkProfileViewSet
 from api.report_views import ReportListView
 from api.scanjob.view import ScanJobViewSet

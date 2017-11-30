@@ -14,8 +14,8 @@ from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import HostCredential, NetworkProfile, HostRange, ScanJob
-from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
+from api.models import Credential, NetworkProfile, HostRange, ScanJob
+from api.serializers import CredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (_construct_vars, _process_connect_callback,
                            _construct_error,
                            construct_connect_inventory, connect,
@@ -46,7 +46,7 @@ class DiscoveryScannerTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.cred = HostCredential(
+        self.cred = Credential(
             name='cred1',
             username='username',
             password='password',
@@ -73,7 +73,7 @@ class DiscoveryScannerTest(TestCase):
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         vars_dict = _construct_vars(22, cred)
         expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
@@ -96,7 +96,7 @@ class DiscoveryScannerTest(TestCase):
 
     def test_process_connect_callback(self):
         """Test callback processing logic."""
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         callback = ResultCallback()
         success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
@@ -116,7 +116,7 @@ class DiscoveryScannerTest(TestCase):
         profile = serializer.data
         hosts = profile['hosts']
         connection_port = profile['ssh_port']
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port)
@@ -145,7 +145,7 @@ class DiscoveryScannerTest(TestCase):
         profile = serializer.data
         hosts = profile['hosts']
         connection_port = profile['ssh_port']
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
             connect(hosts, cred, connection_port)
@@ -159,7 +159,7 @@ class DiscoveryScannerTest(TestCase):
         profile = serializer.data
         hosts = profile['hosts']
         connection_port = profile['ssh_port']
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected, failed = connect(hosts, cred, connection_port)
         self.assertEqual(connected, [])
@@ -179,7 +179,7 @@ class DiscoveryScannerTest(TestCase):
     def test_store_discovery_success(self):
         """Test running a discovery scan with mocked connection."""
         scanner = DiscoveryScanner(self.scanjob)
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected = [('1.2.3.4', cred)]
         failed = ['1.2.3.5']

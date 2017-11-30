@@ -47,7 +47,7 @@ paths:
         - "Host Credential"
       summary: "Add a new host credential"
       description: "Create a new host credential for use when connecting to a target system."
-      operationId: "addHostCredential"
+      operationId: "addCredential"
       consumes:
       - "application/json"
       produces:
@@ -58,12 +58,12 @@ paths:
         description: "Host credential object that needs to be stored"
         required: true
         schema:
-          $ref: "#/definitions/HostCredential"
+          $ref: "#/definitions/Credential"
       responses:
         201:
           description: "Host credential created"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         400:
           description: "Invalid input"
     get:
@@ -71,7 +71,7 @@ paths:
         - "Host Credential"
       summary: "List exsiting host credentials"
       description: "List all host credential for use when connecting to a target system."
-      operationId: "listHostCredentials"
+      operationId: "listCredentials"
       produces:
       - "application/json"
       parameters:
@@ -85,14 +85,14 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/HostCredentialOut"
+              $ref: "#/definitions/CredentialOut"
   /credentials/hosts/{host_cred_id}:
     get:
       tags:
         - "Host Credential"
       summary: "Get an existing host credential"
       description: "Get a host credential for use when connecting to a target system."
-      operationId: "getHostCredential"
+      operationId: "getCredential"
       produces:
       - "application/json"
       parameters:
@@ -106,7 +106,7 @@ paths:
         200:
           description: "Host credential retrieved"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         404:
           description: "Host credential not found"
     put:
@@ -114,7 +114,7 @@ paths:
         - "Host Credential"
       summary: "Update an existing host credential"
       description: "Update a host credential for use when connecting to a target system."
-      operationId: "updateHostCredential"
+      operationId: "updateCredential"
       consumes:
       - "application/json"
       produces:
@@ -131,12 +131,12 @@ paths:
         description: "Host credential object that needs to be modified"
         required: true
         schema:
-          $ref: "#/definitions/HostCredential"
+          $ref: "#/definitions/Credential"
       responses:
         200:
           description: "Host credential updated"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         400:
           description: "Invalid input"
         404:
@@ -146,7 +146,7 @@ paths:
         - "Host Credential"
       summary: "Delete an existing host credential"
       description: "Delete a host credential for use when connecting to a target system."
-      operationId: "deleteHostCredential"
+      operationId: "deleteCredential"
       produces:
       - "application/json"
       parameters:
@@ -512,7 +512,7 @@ definitions:
             $ref: "#/definitions/SystemFact"
           description: "The facts obtained during a scan"
 
-  HostCredential:
+  Credential:
     type: "object"
     required:
       - name
@@ -535,7 +535,7 @@ definitions:
         sudo_password:
           type: "string"
           description: "The password for sudo permission escalation after connection for the host credential"
-  HostCredentialMin:
+  CredentialMin:
     type: "object"
     required:
       - id
@@ -547,9 +547,9 @@ definitions:
       name:
         type: "string"
         description: "The name of the host credential"
-  HostCredentialOut:
+  CredentialOut:
     allOf:
-      - $ref: "#/definitions/HostCredential"
+      - $ref: "#/definitions/Credential"
       - type: "object"
         required:
           - id
@@ -638,7 +638,7 @@ definitions:
           credentials:
             type: "array"
             items:
-              $ref: "#/definitions/HostCredentialMin"
+              $ref: "#/definitions/CredentialMin"
             description: "The host credentials to try with these hosts."
   ScanJob:
     type: "object"

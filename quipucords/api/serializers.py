@@ -14,7 +14,7 @@
 # pylint: disable=unused-import
 from api.fact.serializer import FactCollectionSerializer, FactSerializer
 from api.fingerprint.serializer import FingerprintSerializer
-from api.hostcredential.serializer import HostCredentialSerializer
+from api.credential.serializer import CredentialSerializer
 from api.networkprofile.serializer import (CredentialsField, HostRangeField,
                                            NetworkProfileSerializer)
 from api.scanjob.serializer import NetworkProfileField, ScanJobSerializer

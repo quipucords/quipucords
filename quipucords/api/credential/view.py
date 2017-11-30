@@ -17,8 +17,8 @@ from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from filters import mixins
 from api.filters import ListFilter
-from api.serializers import HostCredentialSerializer
-from api.models import HostCredential
+from api.serializers import CredentialSerializer
+from api.models import Credential
 
 PASSWORD_KEY = 'password'
 SUDO_PASSWORD_KEY = 'sudo_password'
@@ -41,7 +41,7 @@ def mask_credential(cred):
     return cred
 
 
-class HostCredentialFilter(FilterSet):
+class CredentialFilter(FilterSet):
     """Filter for host credentials by name."""
 
     name = ListFilter(name='name')
@@ -49,23 +49,23 @@ class HostCredentialFilter(FilterSet):
     class Meta:
         """Metadata for filterset."""
 
-        model = HostCredential
+        model = Credential
         fields = ['name']
 
 
 # pylint: disable=too-many-ancestors
-class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
-    """A view set for the HostCredential model."""
+class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
+    """A view set for the Credential model."""
 
-    queryset = HostCredential.objects.all()
-    serializer_class = HostCredentialSerializer
+    queryset = Credential.objects.all()
+    serializer_class = CredentialSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_class = HostCredentialFilter
+    filter_class = CredentialFilter
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = HostCredentialSerializer(queryset, many=True)
+        serializer = CredentialSerializer(queryset, many=True)
         for cred in serializer.data:
             cred = mask_credential(cred)
         return Response(serializer.data)
@@ -83,7 +83,7 @@ class HostCredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         """Get a host credential."""
         host_cred = get_object_or_404(self.queryset, pk=pk)
-        serializer = HostCredentialSerializer(host_cred)
+        serializer = CredentialSerializer(host_cred)
         cred = mask_credential(serializer.data)
         return Response(cred)
 

@@ -18,7 +18,7 @@ from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
-from api.models import HostCredential, HostRange, NetworkProfile
+from api.models import Credential, HostRange, NetworkProfile
 import api.messages as messages
 
 
@@ -48,7 +48,7 @@ class CredentialsField(PrimaryKeyRelatedField):
 
     def to_internal_value(self, data):
         """Create internal value."""
-        actual_cred = HostCredential.objects.filter(id=data).first()
+        actual_cred = Credential.objects.filter(id=data).first()
         if actual_cred is None:
             raise ValidationError(_(messages.NP_HC_DO_NOT_EXIST % data))
         return actual_cred
@@ -60,7 +60,7 @@ class CredentialsField(PrimaryKeyRelatedField):
     def display_value(self, instance):
         """Create display value."""
         display = instance
-        if isinstance(instance, HostCredential):
+        if isinstance(instance, Credential):
             display = _(messages.NP_CRED_DISPLAY % instance.name)
         return display
 
@@ -77,7 +77,7 @@ class NetworkProfileSerializer(ModelSerializer):
 
     credentials = CredentialsField(
         many=True,
-        queryset=HostCredential.objects.all())
+        queryset=Credential.objects.all())
 
     class Meta:
         """Metadata for the serializer."""

@@ -14,7 +14,7 @@ These models are used in the REST definitions
 """
 
 from django.db import models
-from api.hostcredential.model import HostCredential
+from api.credential.model import Credential
 
 
 class NetworkProfile(models.Model):
@@ -22,7 +22,7 @@ class NetworkProfile(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     ssh_port = models.IntegerField(default=22)
-    credentials = models.ManyToManyField(HostCredential)
+    credentials = models.ManyToManyField(Credential)
     # NetworkProfile also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
 

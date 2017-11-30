@@ -13,14 +13,14 @@
 from django.conf.urls import url
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
-from api.views import (HostCredentialViewSet, FactViewSet,
+from api.views import (CredentialViewSet, FactViewSet,
                        NetworkProfileViewSet, ScanJobViewSet, ReportListView)
 
 
 ROUTER = SimpleRouter()
 
 ROUTER.register(r'credentials/hosts',
-                HostCredentialViewSet,
+                CredentialViewSet,
                 base_name='hostcred')
 ROUTER.register(r'facts',
                 FactViewSet,
