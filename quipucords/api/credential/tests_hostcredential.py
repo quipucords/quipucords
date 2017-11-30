@@ -31,8 +31,8 @@ class CredentialTest(TestCase):
         :returns: A Credential model
         """
         return Credential.objects.create(name=name,
-                                             username=username,
-                                             password=password)
+                                         username=username,
+                                         password=password)
 
     def create(self, data):
         """Call the create endpoint."""
@@ -279,7 +279,7 @@ class CredentialTest(TestCase):
     def test_hostcred_delete_view(self):
         """Tests the delete view set of the Credential API."""
         cred = Credential(name='cred2', username='user2',
-                              password='pass2')
+                          password='pass2')
         cred.save()
         url = reverse('hostcred-detail', args=(cred.pk,))
         resp = self.client.delete(url, format='json')
