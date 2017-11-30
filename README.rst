@@ -92,7 +92,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
     docker run -d -p8000:8000 -i quipucords:latest
 
-Now the server should be running and you can launch the `Host Credential Browseable API <http://127.0.0.1:8000/api/v1/credentials/hosts/>`_.
+Now the server should be running and you can launch the `Credential Browseable API <http://127.0.0.1:8000/api/v1/credentials/>`_.
 You can work with the APIs directly or you can use the CLI. You can configure the CLI with the following command::
 
     qpc server config --host 127.0.0.1

@@ -19,8 +19,8 @@ from api.vault import encrypt_data_as_unicode
 import api.messages as messages
 
 
-class HostCredential(models.Model):
-    """The host credential for connecting to host systems via ssh."""
+class Credential(models.Model):
+    """The credential for connecting to systems."""
 
     name = models.CharField(max_length=64, unique=True)
     username = models.CharField(max_length=64)

@@ -14,7 +14,7 @@ import os
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         CharField)
-from api.models import HostCredential
+from api.models import Credential
 import api.messages as messages
 
 
@@ -29,8 +29,8 @@ def expand_filepath(filepath):
     return filepath
 
 
-class HostCredentialSerializer(ModelSerializer):
-    """Serializer for the HostCredential model."""
+class CredentialSerializer(ModelSerializer):
+    """Serializer for the Credential model."""
 
     name = CharField(required=True, max_length=64)
     username = CharField(required=True, max_length=64)
@@ -46,18 +46,18 @@ class HostCredentialSerializer(ModelSerializer):
     class Meta:
         """Metadata for the serializer."""
 
-        model = HostCredential
+        model = Credential
         fields = '__all__'
 
     def create(self, validated_data):
         """Create host credential."""
-        HostCredentialSerializer.check_for_existing_name(
+        CredentialSerializer.check_for_existing_name(
             name=validated_data.get('name'))
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         """Update a host credential."""
-        HostCredentialSerializer.check_for_existing_name(
+        CredentialSerializer.check_for_existing_name(
             name=validated_data.get('name'),
             cred_id=instance.id)
 
@@ -72,10 +72,10 @@ class HostCredentialSerializer(ModelSerializer):
         """
         if cred_id is None:
             # Look for existing with same name (create)
-            existing = HostCredential.objects.filter(name=name).first()
+            existing = Credential.objects.filter(name=name).first()
         else:
             # Look for existing.  Same name, different id (update)
-            existing = HostCredential.objects.filter(
+            existing = Credential.objects.filter(
                 name=name).exclude(id=cred_id).first()
         if existing is not None:
             raise ValidationError(_(messages.HC_NAME_ALREADY_EXISTS % name))

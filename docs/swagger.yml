@@ -12,8 +12,8 @@ info:
 basePath: "/api/v1"
 
 tags:
-- name: "Host Credential"
-  description: "API related to the Host Credential model"
+- name: "Credential"
+  description: "API related to the Credential model"
 
 paths:
   /facts/:
@@ -41,13 +41,13 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Invalid input"
-  /credentials/hosts/:
+  /credentials/:
     post:
       tags:
-        - "Host Credential"
-      summary: "Add a new host credential"
-      description: "Create a new host credential for use when connecting to a target system."
-      operationId: "addHostCredential"
+        - "Credential"
+      summary: "Add a new credential"
+      description: "Create a new credential for use when connecting to a target system."
+      operationId: "addCredential"
       consumes:
       - "application/json"
       produces:
@@ -55,112 +55,112 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "Host credential object that needs to be stored"
+        description: "Credential object that needs to be stored"
         required: true
         schema:
-          $ref: "#/definitions/HostCredential"
+          $ref: "#/definitions/Credential"
       responses:
         201:
-          description: "Host credential created"
+          description: "Credential created"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         400:
           description: "Invalid input"
     get:
       tags:
-        - "Host Credential"
-      summary: "List exsiting host credentials"
-      description: "List all host credential for use when connecting to a target system."
-      operationId: "listHostCredentials"
+        - "Credential"
+      summary: "List exsiting credentials"
+      description: "List all credential for use when connecting to a target system."
+      operationId: "listCredentials"
       produces:
       - "application/json"
       parameters:
         - name: "name"
           in: "query"
-          description: "A list of names representing host credentials"
+          description: "A list of names representing credentials"
           type: "string"
       responses:
         200:
-          description: "Host credential retrieved"
+          description: "Credential retrieved"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/HostCredentialOut"
-  /credentials/hosts/{host_cred_id}:
+              $ref: "#/definitions/CredentialOut"
+  /credentials/{cred_id}:
     get:
       tags:
-        - "Host Credential"
-      summary: "Get an existing host credential"
-      description: "Get a host credential for use when connecting to a target system."
-      operationId: "getHostCredential"
+        - "Credential"
+      summary: "Get an existing credential"
+      description: "Get a credential for use when connecting to a target system."
+      operationId: "getCredential"
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
-        description: "ID of host credential to retrieve"
+        description: "ID of credential to retrieve"
         required: true
         type: "integer"
         format: "int64"
       responses:
         200:
-          description: "Host credential retrieved"
+          description: "Credential retrieved"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         404:
-          description: "Host credential not found"
+          description: "Credential not found"
     put:
       tags:
-        - "Host Credential"
-      summary: "Update an existing host credential"
-      description: "Update a host credential for use when connecting to a target system."
-      operationId: "updateHostCredential"
+        - "Credential"
+      summary: "Update an existing credential"
+      description: "Update a credential for use when connecting to a target system."
+      operationId: "updateCredential"
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
-        description: "ID of host credential to update"
+        description: "ID of credential to update"
         required: true
         type: "integer"
         format: "int64"
       - in: "body"
         name: "body"
-        description: "Host credential object that needs to be modified"
+        description: "Credential object that needs to be modified"
         required: true
         schema:
-          $ref: "#/definitions/HostCredential"
+          $ref: "#/definitions/Credential"
       responses:
         200:
-          description: "Host credential updated"
+          description: "Credential updated"
           schema:
-            $ref: "#/definitions/HostCredentialOut"
+            $ref: "#/definitions/CredentialOut"
         400:
           description: "Invalid input"
         404:
-          description: "Host credential not found"
+          description: "Credential not found"
     delete:
       tags:
-        - "Host Credential"
-      summary: "Delete an existing host credential"
-      description: "Delete a host credential for use when connecting to a target system."
-      operationId: "deleteHostCredential"
+        - "Credential"
+      summary: "Delete an existing credential"
+      description: "Delete a credential for use when connecting to a target system."
+      operationId: "deleteCredential"
       produces:
       - "application/json"
       parameters:
-      - name: "host_cred_id"
+      - name: "cred_id"
         in: "path"
-        description: "ID of host credential to delete"
+        description: "ID of credential to delete"
         required: true
         type: "integer"
         format: "int64"
       responses:
         204:
-          description: "Host credential deleted"
+          description: "Credential deleted"
         404:
-          description: "Host credential not found"
+          description: "Credential not found"
   /reports/:
     get:
       tags:
@@ -512,7 +512,7 @@ definitions:
             $ref: "#/definitions/SystemFact"
           description: "The facts obtained during a scan"
 
-  HostCredential:
+  Credential:
     type: "object"
     required:
       - name
@@ -522,20 +522,20 @@ definitions:
     properties:
         name:
           type: "string"
-          description: "The name of the host credential"
+          description: "The name of the credential"
         username:
           type: "string"
-          description: "The connection username for the host credential"
+          description: "The connection username for the credential"
         password:
           type: "string"
-          description: "The connection password for the host credential"
+          description: "The connection password for the credential"
         ssh_keyfile:
           type: "string"
-          description: "The connection private ssh keyfile for the host credential"
+          description: "The connection private ssh keyfile for the credential"
         sudo_password:
           type: "string"
-          description: "The password for sudo permission escalation after connection for the host credential"
-  HostCredentialMin:
+          description: "The password for sudo permission escalation after connection for the credential"
+  CredentialMin:
     type: "object"
     required:
       - id
@@ -546,10 +546,10 @@ definitions:
         format: "int64"
       name:
         type: "string"
-        description: "The name of the host credential"
-  HostCredentialOut:
+        description: "The name of the credential"
+  CredentialOut:
     allOf:
-      - $ref: "#/definitions/HostCredential"
+      - $ref: "#/definitions/Credential"
       - type: "object"
         required:
           - id
@@ -623,7 +623,7 @@ definitions:
             items:
               type: "integer"
               format: "int64"
-            description: "The host credentials to try with these hosts."
+            description: "The credentials to try with these hosts."
   NetworkProfileOut:
     allOf:
       - $ref: "#/definitions/NetworkProfile"
@@ -638,8 +638,8 @@ definitions:
           credentials:
             type: "array"
             items:
-              $ref: "#/definitions/HostCredentialMin"
-            description: "The host credentials to try with these hosts."
+              $ref: "#/definitions/CredentialMin"
+            description: "The credentials to try with these hosts."
   ScanJob:
     type: "object"
     properties:
@@ -670,6 +670,10 @@ definitions:
           type: "integer"
           format: "int64"
           description: "The total number of hosts that have been scanned."
+        failed_scans:
+          type: "integer"
+          format: "int64"
+          description: "The total number of hosts that failed to scan."
         fact_collection_id:
           type: "integer"
           format: "int64"

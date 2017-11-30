@@ -12,8 +12,8 @@
 import logging
 from multiprocessing import Process
 from ansible.errors import AnsibleError
-from api.serializers import NetworkProfileSerializer, HostCredentialSerializer
-from api.models import (HostCredential, ScanJob, ScanJobResults,
+from api.serializers import NetworkProfileSerializer, CredentialSerializer
+from api.models import (Credential, ScanJob, ScanJobResults,
                         Results, ResultKeyValue)
 from scanner.utils import connect
 
@@ -120,8 +120,8 @@ class DiscoveryScanner(Process):
 
         forks = self.scanjob.max_concurrency
         for cred_id in credentials:
-            cred_obj = HostCredential.objects.get(pk=cred_id)
-            hc_serializer = HostCredentialSerializer(cred_obj)
+            cred_obj = Credential.objects.get(pk=cred_id)
+            hc_serializer = CredentialSerializer(cred_obj)
             cred = hc_serializer.data
             connected, remaining = connect(remaining, cred, connection_port,
                                            forks=forks)

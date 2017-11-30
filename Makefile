@@ -48,10 +48,10 @@ test-coverage:
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 

@@ -14,7 +14,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import HostCredential
+from api.models import Credential
 
 
 class NetworkProfileTest(TestCase):
@@ -22,7 +22,7 @@ class NetworkProfileTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.cred = HostCredential.objects.create(
+        self.cred = Credential.objects.create(
             name='cred1',
             username='username',
             password='password',

@@ -14,25 +14,25 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import HostCredential
+from api.models import Credential
 
 
-class HostCredentialTest(TestCase):
-    """Tests against the HostCredential model and view set."""
+class CredentialTest(TestCase):
+    """Tests against the Credential model and view set."""
 
     # pylint: disable= no-self-use
-    def create_hostcredential(self, name='test_cred',
-                              username='testuser', password='testpass'):
-        """Create a HostCredential model for use within test cases.
+    def create_credential(self, name='test_cred',
+                          username='testuser', password='testpass'):
+        """Create a Credential model for use within test cases.
 
         :param name: name of the host credential
         :param username: the user used during the discovery and inspection
         :param password: the connection password
-        :returns: A HostCredential model
+        :returns: A Credential model
         """
-        return HostCredential.objects.create(name=name,
-                                             username=username,
-                                             password=password)
+        return Credential.objects.create(name=name,
+                                         username=username,
+                                         password=password)
 
     def create(self, data):
         """Call the create endpoint."""
@@ -53,9 +53,9 @@ class HostCredentialTest(TestCase):
         return response.json()
 
     def test_hostcred_creation(self):
-        """Tests the creation of a HostCredential model."""
-        host_cred = self.create_hostcredential()
-        self.assertTrue(isinstance(host_cred, HostCredential))
+        """Tests the creation of a Credential model."""
+        host_cred = self.create_credential()
+        self.assertTrue(isinstance(host_cred, Credential))
 
     def test_hostcred_create(self):
         """Ensure we can create a new host credential object via API."""
@@ -63,8 +63,8 @@ class HostCredentialTest(TestCase):
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
-        self.assertEqual(HostCredential.objects.count(), 1)
-        self.assertEqual(HostCredential.objects.get().name, 'cred1')
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
 
     def test_hostcred_create_double(self):
         """Create with duplicate name should fail."""
@@ -72,8 +72,8 @@ class HostCredentialTest(TestCase):
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
-        self.assertEqual(HostCredential.objects.count(), 1)
-        self.assertEqual(HostCredential.objects.get().name, 'cred1')
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
 
         self.create_expect_400(data)
 
@@ -227,13 +227,13 @@ class HostCredentialTest(TestCase):
         self.assertEqual(response.data, expected_error)
 
     def test_hostcred_list_view(self):
-        """Tests the list view set of the HostCredential API."""
+        """Tests the list view set of the Credential API."""
         url = reverse('hostcred-list')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_hostcred_update_view(self):
-        """Tests the update view set of the HostCredential API."""
+        """Tests the update view set of the Credential API."""
         url = reverse('hostcred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
@@ -277,9 +277,9 @@ class HostCredentialTest(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_hostcred_delete_view(self):
-        """Tests the delete view set of the HostCredential API."""
-        cred = HostCredential(name='cred2', username='user2',
-                              password='pass2')
+        """Tests the delete view set of the Credential API."""
+        cred = Credential(name='cred2', username='user2',
+                          password='pass2')
         cred.save()
         url = reverse('hostcred-detail', args=(cred.pk,))
         resp = self.client.delete(url, format='json')

@@ -14,7 +14,7 @@
 # pylint: disable=unused-import
 from api.fact.model import Fact, FactCollection
 from api.fingerprint.model import SystemFingerprint
-from api.hostcredential.model import HostCredential
+from api.credential.model import Credential
 from api.networkprofile.model import HostRange, NetworkProfile
 from api.scanjob.model import ScanJob
 from api.scanresults.model import ResultKeyValue, Results, ScanJobResults

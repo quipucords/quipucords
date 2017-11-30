@@ -15,9 +15,9 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
-from api.models import (HostCredential, NetworkProfile, HostRange,
+from api.models import (Credential, NetworkProfile, HostRange,
                         ScanJob, ScanJobResults, Results, ResultKeyValue)
-from api.serializers import HostCredentialSerializer, NetworkProfileSerializer
+from api.serializers import CredentialSerializer, NetworkProfileSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
 from scanner.callback import ResultCallback
@@ -44,7 +44,7 @@ class HostScannerTest(TestCase):
     # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
-        self.cred = HostCredential(
+        self.cred = Credential(
             name='cred1',
             username='username',
             password='password',
@@ -107,7 +107,7 @@ class HostScannerTest(TestCase):
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         connection_port = profile['ssh_port']
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
                                                   connection_port,
@@ -136,7 +136,7 @@ class HostScannerTest(TestCase):
         serializer = NetworkProfileSerializer(self.network_profile)
         profile = serializer.data
         connection_port = profile['ssh_port']
-        hc_serializer = HostCredentialSerializer(self.cred)
+        hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory(
             [

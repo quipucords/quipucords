@@ -13,7 +13,7 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import (HostCredential, NetworkProfile, ScanJob,
+from api.models import (Credential, NetworkProfile, ScanJob,
                         ScanJobResults, Results, ResultKeyValue)
 from api.serializers import (ResultKeyValueSerializer, ResultsSerializer)
 
@@ -23,7 +23,7 @@ class ScanJobResultsTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
-        self.cred = HostCredential.objects.create(
+        self.cred = Credential.objects.create(
             name='cred1',
             username='username',
             password='password',

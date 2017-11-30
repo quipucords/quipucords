@@ -14,7 +14,7 @@ import logging
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import ScanJob, HostCredential
+from api.models import ScanJob, Credential
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
 from scanner.utils import (construct_scan_inventory, write_inventory,
@@ -179,7 +179,7 @@ class HostScanner(DiscoveryScanner):
         for column in scan_result.columns.all():
             credential = None
             if lookup_creds and column.value is not None:
-                host_cred = HostCredential.objects.get(name=column.value)
+                host_cred = Credential.objects.get(name=column.value)
                 credential = {'name': host_cred.name,
                               'username': host_cred.username,
                               'password': host_cred.password,

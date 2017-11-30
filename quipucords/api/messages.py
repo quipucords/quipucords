@@ -16,7 +16,7 @@
 VALIDATE_FACTS_MSG = 'A least one fact is required.'
 
 # host credential messages
-PLURAL_HOST_CREDENTIALS_MSG = 'Host Credentials'
+PLURAL_HOST_CREDENTIALS_MSG = 'Credentials'
 HC_PWD_OR_KEYFILE = 'A host credential must have either' \
                     ' a password or an ssh_keyfile.'
 HC_NOT_BOTH = 'A host credential must have either' \
