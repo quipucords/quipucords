@@ -17,13 +17,13 @@ from django.db import models
 from api.credential.model import Credential
 
 
-class NetworkProfile(models.Model):
-    """A network profile connects a list of credentials and a list of hosts."""
+class Source(models.Model):
+    """A source connects a list of credentials and a list of hosts."""
 
     name = models.CharField(max_length=64, unique=True)
     ssh_port = models.IntegerField(default=22)
     credentials = models.ManyToManyField(Credential)
-    # NetworkProfile also has the field hosts, which is created by the
+    # Source also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
 
     def __str__(self):
@@ -32,7 +32,7 @@ class NetworkProfile(models.Model):
 
 
 class HostRange(models.Model):
-    """A HostRange is a subset of a network to scan.
+    """A HostRange is a subset of a source to scan.
 
     It can be either an IP range or a DNS name range. A HostRange is
     not the same as a set of hosts because there may be parts of the
@@ -41,16 +41,16 @@ class HostRange(models.Model):
     there.
     """
 
-    # HostRanges provide a convenient way for a NetworkProfile to
+    # HostRanges provide a convenient way for a Source to
     # store a list of name ranges.  As of now we don't make any effort
-    # to deduplicate when different NetworkProfiles have overlapping
+    # to deduplicate when different Sources have overlapping
     # (or identical) ranges. If we ever want to show the user exactly
-    # what parts of their network are being scanned, we will have to
+    # what parts of their source are being scanned, we will have to
     # dedup.
 
     # host_range is an IP address range or a DNS name range in Ansible
     # format.
     host_range = models.CharField(max_length=1024)
-    network_profile = models.ForeignKey(NetworkProfile,
-                                        models.CASCADE,
-                                        related_name='hosts')
+    source = models.ForeignKey(Source,
+                               models.CASCADE,
+                               related_name='hosts')

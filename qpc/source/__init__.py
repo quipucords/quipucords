@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright (c) 2017 Red Hat, Inc.
 #
@@ -8,12 +9,14 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
+"""Constants for the Sources commands."""
 
-"""Commands for import organization."""
-# flake8: noqa
-# pylint: disable=unused-import
-from qpc.network.add import NetworkAddCommand
-from qpc.network.list import NetworkListCommand
-from qpc.network.show import NetworkShowCommand
-from qpc.network.clear import NetworkClearCommand
-from qpc.network.edit import NetworkEditCommand
+SUBCOMMAND = 'source'
+ADD = 'add'
+LIST = 'list'
+EDIT = 'edit'
+SHOW = 'show'
+CLEAR = 'clear'
+
+
+SOURCE_URI = '/api/v1/sources/'

@@ -14,7 +14,7 @@ from django.conf.urls import url
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 from api.views import (CredentialViewSet, FactViewSet,
-                       NetworkProfileViewSet, ScanJobViewSet, ReportListView)
+                       SourceViewSet, ScanJobViewSet, ReportListView)
 
 
 ROUTER = SimpleRouter()
@@ -25,18 +25,18 @@ ROUTER.register(r'credentials',
 ROUTER.register(r'facts',
                 FactViewSet,
                 base_name='facts')
-ROUTER.register(r'profiles/networks',
-                NetworkProfileViewSet,
-                base_name='networkprofile')
+ROUTER.register(r'sources',
+                SourceViewSet,
+                base_name='source')
 ROUTER.register(r'scans',
                 ScanJobViewSet,
                 base_name='scanjob')
 
+# pylint: disable=invalid-name
 urlpatterns = [
     url(r'^reports/$', ReportListView.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
 
-# pylint: disable=invalid-name
 urlpatterns += ROUTER.urls

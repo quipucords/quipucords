@@ -12,7 +12,7 @@
 import logging
 from multiprocessing import Process
 from ansible.errors import AnsibleError
-from api.serializers import NetworkProfileSerializer, CredentialSerializer
+from api.serializers import SourceSerializer, CredentialSerializer
 from api.models import (Credential, ScanJob, ScanJobResults,
                         Results, ResultKeyValue)
 from scanner.utils import connect
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class DiscoveryScanner(Process):
     """Discovery system connection capabilities.
 
-    Attempts connections to a network profile using a list of credentials
+    Attempts connections to a source using a list of credentials
     and gathers the set of successes (host/ip, credential) and
     failures (host/ip).
     """
@@ -35,9 +35,9 @@ class DiscoveryScanner(Process):
         Process.__init__(self)
         self.scanjob = scanjob
         self.identifier = scanjob.id
-        network_profile = scanjob.profile
-        serializer = NetworkProfileSerializer(network_profile)
-        self.network_profile = serializer.data
+        source = scanjob.source
+        serializer = SourceSerializer(source)
+        self.source = serializer.data
         if scan_results is None:
             self.scan_results = ScanJobResults(scan_job=self.scanjob)
             self.scan_restart = False
@@ -106,15 +106,15 @@ class DiscoveryScanner(Process):
 
     # pylint: disable=too-many-locals
     def discovery(self):
-        """Execute the discovery scan with the initialized network profile.
+        """Execute the discovery scan with the initialized source.
 
         :returns: list of connected hosts credential tuples and
                   list of host that failed connection
         """
         connected = []
-        remaining = self.network_profile['hosts']
-        credentials = self.network_profile['credentials']
-        connection_port = self.network_profile['ssh_port']
+        remaining = self.source['hosts']
+        credentials = self.source['credentials']
+        connection_port = self.source['ssh_port']
 
         logger.info('Discovery scan started for %s.', self.scanjob)
 

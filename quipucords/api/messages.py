@@ -30,11 +30,11 @@ VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
     ' keyfile, or ssh passphrase.'
 
-# network profile messages
+# source messages
 NP_HOST_AS_STRING = 'A host range must be a string.'
 NP_CRED_DISPLAY = 'Credential: %s'
-NP_NAME_VALIDATION = 'Network profile must have printable name.'
-NP_MIN_HOST = 'Network profile must have at least one host.'
+NP_NAME_VALIDATION = 'Source must have printable name.'
+NP_MIN_HOST = 'Source must have at least one host.'
 NP_INVALID_RANGE_FORMAT = '%s is not a valid IP range format.'
 NP_INVALID_RANGE_CIDR = '%s is not a valid IP or CIDR pattern'
 NP_INVALID_HOST = '%s is invalid host'
@@ -46,15 +46,15 @@ NP_FOUR_OCTETS = '%s does not have exactly 4 octets.'
 NP_EMPTY_OCTET = '%s has an empty octet.'
 NP_CIDR_RANGE = '%(ip_range)s has invalid octet value of %(octet)s.' \
                 ' %(octet)s is not in the range [0,255]'
-NP_INVALID_PORT = 'Network profile must have ssh port in range [0, 65535]'
-NP_MIN_CREDS = 'Network profile must have at least one set of credentials.'
+NP_INVALID_PORT = 'Source must have ssh port in range [0, 65535]'
+NP_MIN_CREDS = 'Source must have at least one set of credentials.'
 NP_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
     ' found in database.'
-NP_NAME_ALREADY_EXISTS = 'Network profile with name=%s already exists'
+NP_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
-SJ_REQ_PROFILE = 'Scan must have a network profile.'
+SJ_REQ_SOURCE = 'Scan must have a source.'
 
 # scan results messages
 PLURAL_SCAN_RESULTS_MSG = 'Scan Results'

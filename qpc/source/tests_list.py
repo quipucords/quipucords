@@ -18,8 +18,8 @@ import requests
 import requests_mock
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.network import NETWORK_URI
-from qpc.network.list import NetworkListCommand
+from qpc.source import SOURCE_URI
+from qpc.source.list import SourceListCommand
 from qpc.utils import get_server_location, write_server_config
 
 PARSER = ArgumentParser()
@@ -29,8 +29,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class NetworkListCliTests(unittest.TestCase):
-    """Class for testing the network list commands for qpc."""
+class SourceListCliTests(unittest.TestCase):
+    """Class for testing the source list commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -44,73 +44,73 @@ class NetworkListCliTests(unittest.TestCase):
         # Restore stderr
         sys.stderr = self.orig_stderr
 
-    def test_list_network_ssl_err(self):
-        """Testing the list network command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI
+    def test_list_source_ssl_err(self):
+        """Testing the list source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            nlc = NetworkListCommand(SUBPARSER)
+            nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nlc.main(args)
-                    self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(source_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_list_network_conn_err(self):
-        """Testing the list network command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI
+    def test_list_source_conn_err(self):
+        """Testing the list source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            nlc = NetworkListCommand(SUBPARSER)
+            nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nlc.main(args)
-                    self.assertEqual(network_out.getvalue(),
+                    self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
-    def test_list_network_internal_err(self):
-        """Testing the list network command with an internal error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI
+    def test_list_source_internal_err(self):
+        """Testing the list source command with an internal error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            nlc = NetworkListCommand(SUBPARSER)
+            nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nlc.main(args)
-                    self.assertEqual(network_out.getvalue(), 'Server Error')
+                    self.assertEqual(source_out.getvalue(), 'Server Error')
 
-    def test_list_network_empty(self):
-        """Testing the list network command successfully with empty data."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI
+    def test_list_source_empty(self):
+        """Testing the list source command successfully with empty data."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            nlc = NetworkListCommand(SUBPARSER)
+            nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
-            with redirect_stdout(network_out):
+            with redirect_stdout(source_out):
                 nlc.main(args)
-                self.assertEqual(network_out.getvalue(),
-                                 'No profiles exist yet.\n')
+                self.assertEqual(source_out.getvalue(),
+                                 'No sources exist yet.\n')
 
-    def test_list_network_data(self):
-        """Testing the list network command successfully with stubbed data."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI
-        auth_entry = {'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
+    def test_list_source_data(self):
+        """Testing the list source command successfully with stubbed data."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
+        auth_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                       'credentials': [{'id': 1, 'name': 'auth1'}]}
         data = [auth_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
-            nlc = NetworkListCommand(SUBPARSER)
+            nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
-            with redirect_stdout(network_out):
+            with redirect_stdout(source_out):
                 nlc.main(args)
                 expected = '[{"credentials":[{"id":1,"name":"auth1"}],' \
-                    '"hosts":["1.2.3.4"],"id":1,"name":"profile1"}]'
-                self.assertEqual(network_out.getvalue().replace('\n', '')
+                    '"hosts":["1.2.3.4"],"id":1,"name":"source1"}]'
+                self.assertEqual(source_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

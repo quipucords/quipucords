@@ -16,7 +16,7 @@ import sys
 from requests import codes
 from qpc.request import POST, GET, request
 from qpc.clicommand import CliCommand
-import qpc.network as network
+import qpc.source as source
 import qpc.scan as scan
 from qpc.translation import _
 import qpc.messages as messages
@@ -26,7 +26,7 @@ import qpc.messages as messages
 class ScanStartCommand(CliCommand):
     """Defines the start command.
 
-    This command is for triggering host scans with a profile to gather system
+    This command is for triggering host scans with a source to gather system
     facts.
     """
 
@@ -39,34 +39,34 @@ class ScanStartCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
                             scan.SCAN_URI, [codes.created])
-        self.parser.add_argument('--profile', dest='profile',
-                                 metavar='PROFILE',
-                                 help=_(messages.PROFILE_NAME_HELP),
+        self.parser.add_argument('--source', dest='source',
+                                 metavar='source',
+                                 help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--max-concurrency', dest='max_concurrency',
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
-        self.profile_id = None
+        self.source_id = None
 
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        # check for existence of profile
+        # check for existence of source
         response = request(parser=self.parser, method=GET,
-                           path=network.NETWORK_URI,
-                           params={'name': self.args.profile},
+                           path=source.SOURCE_URI,
+                           params={'name': self.args.source},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
             if len(json_data) == 1:
-                profile_entry = json_data[0]
-                self.profile_id = profile_entry['id']
+                source_entry = json_data[0]
+                self.source_id = source_entry['id']
             else:
-                print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.profile))
+                print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.source))
                 sys.exit(1)
         else:
-            print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.profile))
+            print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.source))
             sys.exit(1)
 
     def _build_data(self):
@@ -75,7 +75,7 @@ class ScanStartCommand(CliCommand):
         :returns: a dictionary representing the auth being added
         """
         self.req_payload = {
-            'profile': self.profile_id,
+            'source': self.source_id,
             'scan_type': scan.SCAN_TYPE_HOST,
             'max_concurrency': self.args.max_concurrency
         }

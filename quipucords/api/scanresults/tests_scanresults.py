@@ -13,7 +13,7 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import (Credential, NetworkProfile, ScanJob,
+from api.models import (Credential, Source, ScanJob,
                         ScanJobResults, Results, ResultKeyValue)
 from api.serializers import (ResultKeyValueSerializer, ResultsSerializer)
 
@@ -31,12 +31,12 @@ class ScanJobResultsTest(TestCase):
             ssh_keyfile=None)
         self.cred_for_upload = self.cred.id
 
-        self.network_profile = NetworkProfile(
-            name='profile1',
+        self.source = Source(
+            name='source1',
             ssh_port=22)
-        self.network_profile.save()
-        self.network_profile.credentials.add(self.cred)
-        self.scanjob = ScanJob(profile_id=self.network_profile.id,
+        self.source.save()
+        self.source.credentials.add(self.cred)
+        self.scanjob = ScanJob(source_id=self.source.id,
                                scan_type=ScanJob.DISCOVERY)
         self.scanjob.save()
 

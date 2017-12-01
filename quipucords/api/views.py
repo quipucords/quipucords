@@ -14,6 +14,6 @@
 # pylint: disable=unused-import
 from api.fact.view import FactViewSet
 from api.credential.view import CredentialViewSet
-from api.networkprofile.view import NetworkProfileViewSet
+from api.source.view import SourceViewSet
 from api.report_views import ReportListView
 from api.scanjob.view import ScanJobViewSet

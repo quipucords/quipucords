@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 import sys
 import qpc.server as server
 import qpc.auth as auth
-import qpc.network as network
+import qpc.source as source
 import qpc.scan as scan
 from qpc.utils import (ensure_config_dir_exists,
                        get_server_location,
@@ -27,9 +27,9 @@ from qpc.server.commands import ConfigureHostCommand
 from qpc.auth.commands import (AuthAddCommand, AuthListCommand,
                                AuthEditCommand, AuthShowCommand,
                                AuthClearCommand)
-from qpc.network.commands import (NetworkAddCommand, NetworkListCommand,
-                                  NetworkShowCommand, NetworkClearCommand,
-                                  NetworkEditCommand)
+from qpc.source.commands import (SourceAddCommand, SourceListCommand,
+                                 SourceShowCommand, SourceClearCommand,
+                                 SourceEditCommand)
 from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
                                ScanShowCommand, ScanPauseCommand,
                                ScanCancelCommand, ScanRestartCommand)
@@ -67,10 +67,10 @@ class CLI(object):
                              [AuthAddCommand, AuthListCommand,
                               AuthEditCommand, AuthShowCommand,
                               AuthClearCommand])
-        self._add_subcommand(network.SUBCOMMAND,
-                             [NetworkAddCommand, NetworkListCommand,
-                              NetworkShowCommand, NetworkClearCommand,
-                              NetworkEditCommand])
+        self._add_subcommand(source.SUBCOMMAND,
+                             [SourceAddCommand, SourceListCommand,
+                              SourceShowCommand, SourceClearCommand,
+                              SourceEditCommand])
 
         self._add_subcommand(scan.SUBCOMMAND,
                              [ScanStartCommand, ScanListCommand,

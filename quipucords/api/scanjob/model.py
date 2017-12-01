@@ -14,7 +14,7 @@ These models are used in the REST definitions.
 """
 from django.utils.translation import ugettext as _
 from django.db import models
-from api.networkprofile.model import NetworkProfile
+from api.source.model import Source
 import api.messages as messages
 
 
@@ -35,7 +35,7 @@ class ScanJob(models.Model):
                       (COMPLETED, COMPLETED), (CANCELED, CANCELED),
                       (FAILED, FAILED))
 
-    profile = models.ForeignKey(NetworkProfile, on_delete=models.CASCADE)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
     scan_type = models.CharField(
         max_length=9,
         choices=SCAN_TYPE_CHOICES,
@@ -57,7 +57,7 @@ class ScanJob(models.Model):
         return '{' + 'id:{}, '\
             'scan_type:{}, '\
             'status:{}, '\
-            'profile:{}, '\
+            'source:{}, '\
             'max_concurrency: {}, '\
             'systems_count: {}, '\
             'systems_scanned: {}, '\
@@ -65,7 +65,7 @@ class ScanJob(models.Model):
             'fact_collection_id: {}'.format(self.id,
                                             self.scan_type,
                                             self.status,
-                                            self.profile,
+                                            self.source,
                                             self.max_concurrency,
                                             self.systems_count,
                                             self.systems_scanned,

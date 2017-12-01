@@ -102,10 +102,10 @@ class ScanListCliTests(unittest.TestCase):
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         scan_entry = {'id': 1,
-                      'profile': {
+                      'scan_type': 'host',
+                      'source': {
                           'id': 1,
                           'name': 'scan1'},
-                      'scan_type': 'host',
                       'status': 'completed'}
         data = [scan_entry]
         with requests_mock.Mocker() as mocker:
@@ -114,7 +114,8 @@ class ScanListCliTests(unittest.TestCase):
             args = Namespace()
             with redirect_stdout(scan_out):
                 slc.main(args)
-                expected = '[{"id":1,"profile":{"id":1,"name":"scan1"},' \
-                           '"scan_type":"host","status":"completed"}]'
+                expected = '[{"id":1,"scan_type":"host"' \
+                           ',"source":{"id":1,"name":"scan1"},'\
+                           '"status":"completed"}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

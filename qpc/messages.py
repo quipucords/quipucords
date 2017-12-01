@@ -36,38 +36,38 @@ AUTH_UPDATED = 'Auth "%s" was updated'
 
 AUTH_LIST_NO_CREDS = 'No credentials exist yet.'
 
-PROFILE_NAME_HELP = 'profile name'
-PROFILE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
-PROFILE_AUTHS_HELP = 'credentials to associate with profile'
-PROFILE_SSH_PORT_HELP = 'SSH port for connection; default=22'
-PROFILE_ADD_AUTHS_NOT_FOUND = 'An error occurred while processing the ' \
+SOURCE_NAME_HELP = 'source name'
+SOURCE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
+SOURCE_AUTHS_HELP = 'credentials to associate with source'
+SOURCE_SSH_PORT_HELP = 'SSH port for connection; default=22'
+SOURCE_ADD_AUTHS_NOT_FOUND = 'An error occurred while processing the ' \
     '"--auth" input values. References for the following auth could not' \
-    ' be found: %s. Failed to add profile "%s".'
-PROFILE_ADD_AUTH_PROCESS_ERR = 'An error occurred while processing the' \
-    ' "--auth" input values. Failed to add profile "%s"'
-PROFILE_ADDED = 'Profile "%s" was added'
+    ' be found: %s. Failed to add source "%s".'
+SOURCE_ADD_AUTH_PROCESS_ERR = 'An error occurred while processing the' \
+    ' "--auth" input values. Failed to add source "%s"'
+SOURCE_ADDED = 'Source "%s" was added'
 
 SERVER_CONFIG_HOST_HELP = 'host or ip address'
 SERVER_CONFIG_PORT_HELP = 'port number; default=8000'
 
-PROFILE_CLEAR_ALL_HELP = 'remove all network profiles'
-PROFILE_REMOVED = 'Profile "%s" was removed'
-PROFILE_FAILED_TO_REMOVE = 'Failed to remove profile "%s"'
-PROFILE_NOT_FOUND = 'Profile "%s" was not found'
-PROFILE_NO_PROFILES_TO_REMOVE = 'No profiles exist to be removed'
-PROFILE_PARTIAL_REMOVE = 'Some profiles were removed, however an error' \
-    ' occurred removing the following profiles: %s'
-PROFILE_CLEAR_ALL_SUCCESS = 'All profiles were removed'
-PROFILE_EDIT_NO_ARGS = 'No arguments provided to edit profile %s'
-PROFILE_DOES_NOT_EXIST = 'Profile "%s" does not exist'
+SOURCE_CLEAR_ALL_HELP = 'remove all sources'
+SOURCE_REMOVED = 'Source "%s" was removed'
+SOURCE_FAILED_TO_REMOVE = 'Failed to remove source "%s"'
+SOURCE_NOT_FOUND = 'Source "%s" was not found'
+SOURCE_NO_SOURCES_TO_REMOVE = 'No sources exist to be removed'
+SOURCE_PARTIAL_REMOVE = 'Some sources were removed, however an error' \
+    ' occurred removing the following sources: %s'
+SOURCE_CLEAR_ALL_SUCCESS = 'All sources were removed'
+SOURCE_EDIT_NO_ARGS = 'No arguments provided to edit source %s'
+SOURCE_DOES_NOT_EXIST = 'Source "%s" does not exist'
 
-PROFILE_EDIT_AUTHS_NOT_FOUND = 'An error occurred while processing the' \
+SOURCE_EDIT_AUTHS_NOT_FOUND = 'An error occurred while processing the' \
     ' "--auth" input  values. References for the following auth ' \
-    'could not be found: %s. Failed to edit profile "%s".'
-PROFILE_EDIT_AUTH_PROCESS_ERR = 'An error occurred while processing the ' \
-    '"--auth" input values. Failed to edit profile "%s"'
-PROFILE_UPDATED = 'Profile "%s" was updated'
-PROFILE_LIST_NO_PROFILES = 'No profiles exist yet.'
+    'could not be found: %s. Failed to edit source "%s".'
+SOURCE_EDIT_AUTH_PROCESS_ERR = 'An error occurred while processing the ' \
+    '"--auth" input values. Failed to edit source "%s"'
+SOURCE_UPDATED = 'Source "%s" was updated'
+SOURCE_LIST_NO_SOURCES = 'No sources exist yet.'
 
 SCAN_ID_HELP = 'scan identifier'
 SCAN_MAX_CONCURRENCY_HELP = 'number of concurrent scans; default=50'

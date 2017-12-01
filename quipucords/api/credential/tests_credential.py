@@ -50,7 +50,7 @@ class CredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def create_expect_201(self, data):
-        """Create a network profile, return the response as a dict."""
+        """Create a source, return the response as a dict."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()

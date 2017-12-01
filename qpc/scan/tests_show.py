@@ -89,7 +89,7 @@ class ScanShowCliTests(unittest.TestCase):
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/'
         scan_entry = {'id': 1,
-                      'profile': {
+                      'source': {
                           'id': 1,
                           'name': 'scan1'},
                       'scan_type': 'host',
@@ -100,7 +100,8 @@ class ScanShowCliTests(unittest.TestCase):
             args = Namespace(id='1')
             with redirect_stdout(scan_out):
                 nsc.main(args)
-                expected = '{"id":1,"profile":{"id":1,"name":"scan1"},' \
-                           '"scan_type":"host","status":"completed"}'
+                expected = '{"id":1,"scan_type":"host",' \
+                           '"source":{"id":1,"name":"scan1"},'\
+                           '"status":"completed"}'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

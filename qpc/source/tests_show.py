@@ -18,8 +18,8 @@ import requests
 import requests_mock
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.network import NETWORK_URI
-from qpc.network.show import NetworkShowCommand
+from qpc.source import SOURCE_URI
+from qpc.source.show import SourceShowCommand
 from qpc.utils import get_server_location, write_server_config
 
 PARSER = ArgumentParser()
@@ -29,8 +29,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class NetworkShowCliTests(unittest.TestCase):
-    """Class for testing the profile show commands for qpc."""
+class SourceShowCliTests(unittest.TestCase):
+    """Class for testing the source show commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -44,74 +44,74 @@ class NetworkShowCliTests(unittest.TestCase):
         # Restore stderr
         sys.stderr = self.orig_stderr
 
-    def test_show_network_ssl_err(self):
-        """Testing the show profile command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_show_source_ssl_err(self):
+        """Testing the show source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            nsc = NetworkShowCommand(SUBPARSER)
-            args = Namespace(name='profile1')
+            nsc = SourceShowCommand(SUBPARSER)
+            args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nsc.main(args)
-                    self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(source_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_show_network_conn_err(self):
-        """Testing the show profile command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_show_source_conn_err(self):
+        """Testing the show source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            nsc = NetworkShowCommand(SUBPARSER)
-            args = Namespace(name='profile1')
+            nsc = SourceShowCommand(SUBPARSER)
+            args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nsc.main(args)
-                    self.assertEqual(network_out.getvalue(),
+                    self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
-    def test_show_network_internal_err(self):
-        """Testing the show profile command with an internal error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_show_source_internal_err(self):
+        """Testing the show source command with an internal error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            nsc = NetworkShowCommand(SUBPARSER)
-            args = Namespace(name='profile1')
+            nsc = SourceShowCommand(SUBPARSER)
+            args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nsc.main(args)
-                    self.assertEqual(network_out.getvalue(), 'Server Error')
+                    self.assertEqual(source_out.getvalue(), 'Server Error')
 
-    def test_show_network_empty(self):
-        """Testing the show profile command successfully with empty data."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_show_source_empty(self):
+        """Testing the show source command successfully with empty data."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            nsc = NetworkShowCommand(SUBPARSER)
-            args = Namespace(name='profile1')
+            nsc = SourceShowCommand(SUBPARSER)
+            args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     nsc.main(args)
-                    self.assertEqual(network_out.getvalue(),
-                                     'Profile "profile1" does not exist\n')
+                    self.assertEqual(source_out.getvalue(),
+                                     'Source "source1" does not exist\n')
 
-    def test_show_network_data(self):
-        """Testing the show profile command successfully with stubbed data."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
-        auth_entry = {'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
+    def test_show_source_data(self):
+        """Testing the show source command successfully with stubbed data."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
+        auth_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                       'credentials': [{'id': 1, 'name': 'auth1'}]}
         data = [auth_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
-            nsc = NetworkShowCommand(SUBPARSER)
-            args = Namespace(name='profile1')
-            with redirect_stdout(network_out):
+            nsc = SourceShowCommand(SUBPARSER)
+            args = Namespace(name='source1')
+            with redirect_stdout(source_out):
                 nsc.main(args)
                 expected = '{"credentials":[{"id":1,"name":"auth1"}],' \
-                    '"hosts":["1.2.3.4"],"id":1,"name":"profile1"}'
-                self.assertEqual(network_out.getvalue().replace('\n', '')
+                    '"hosts":["1.2.3.4"],"id":1,"name":"source1"}'
+                self.assertEqual(source_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

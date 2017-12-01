@@ -64,5 +64,5 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Nov 13 2017 Chris Hambridge <chambrid@redhat.com> 0.0.1-1
 - Initial release of quipucords command line.
 - Allows credential management for hosts.
-- Enables network profile management.
+- Enables source management.
 - Controls basic host scan operations.

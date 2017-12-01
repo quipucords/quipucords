@@ -29,6 +29,15 @@ class ConfigureHostTests(unittest.TestCase):
 
     def tearDown(self):
         """Remove test case setup."""
+        # Reset server config to default ip/port
+        sys.argv = ['/bin/qpc', 'server', 'config',
+                    '--host', '127.0.0.1', '--port', '8000']
+
+        CLI().main()
+        config = read_server_config()
+        self.assertEqual(config['host'], '127.0.0.1')
+        self.assertEqual(config['port'], 8000)
+
         # Restore stderr
         sys.stderr = self.orig_stderr
 

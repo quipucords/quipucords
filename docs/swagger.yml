@@ -184,13 +184,13 @@ paths:
               $ref: "#/definitions/SystemReportOut"
         404:
           description: "Report for fact collection id not found"
-  /profiles/networks/:
+  /sources/:
     post:
       tags:
-        - "Network Profile"
-      summary: "Add a new network profile"
-      description: "Create a new network profile for scanning."
-      operationId: "addNetworkProfile"
+        - "Source"
+      summary: "Add a new source"
+      description: "Create a new source for scanning."
+      operationId: "addSource"
       consumes:
         - "application/json"
       produces:
@@ -198,112 +198,112 @@ paths:
       parameters:
         - in: "body"
           name: "body"
-          description: "JSON object representing new network profile"
+          description: "JSON object representing new source"
           required: true
           schema:
-            $ref: "#/definitions/NetworkProfileIn"
+            $ref: "#/definitions/SourceIn"
       responses:
         201:
-          description: "Network profile created"
+          description: "Source created"
           schema:
-            $ref: "#/definitions/NetworkProfileOut"
+            $ref: "#/definitions/SourceOut"
         400:
           description: "Invalid input"
     get:
       tags:
-        - "Network Profile"
-      summary: "List network profiles"
-      description: "List all network profiles available for scanning."
-      operationId: "listNetworkProfiles"
+        - "Source"
+      summary: "List sources"
+      description: "List all sources available for scanning."
+      operationId: "listSources"
       produces:
         - "application/json"
       parameters:
         - name: "name"
           in: "query"
-          description: "A list of names representing network profiles"
+          description: "A list of names representing sources"
           type: "string"
       responses:
         200:
-          description: "Network profiles retrieved"
+          description: "Sources retrieved"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/NetworkProfileOut"
-  /profiles/networks/{network_profile_id}:
+              $ref: "#/definitions/SourceOut"
+  /sources/{source_id}:
     get:
       tags:
-        - "Network Profile"
-      summary: "Get a network profile"
-      description: "Get a network profile."
-      operationId: "getNetworkProfile"
+        - "Source"
+      summary: "Get a source"
+      description: "Get a source."
+      operationId: "getSource"
       produces:
         - "application/json"
       parameters:
-        - name: "network_profile_id"
+        - name: "source_id"
           in: "path"
-          description: "ID of network profile to retrieve"
+          description: "ID of source to retrieve"
           required: true
           type: "integer"
           format: "int64"
       responses:
         200:
-          description: "Network profile returned"
+          description: "Source returned"
           schema:
-            $ref: "#/definitions/NetworkProfileOut"
+            $ref: "#/definitions/SourceOut"
         404:
-          description: "Network profile not found"
+          description: "Source not found"
     put:
       tags:
-        - "Network Profile"
-      summary: "Update an existing network profile"
-      description: "Update an existing network profile"
-      operationId: "updateNetworkProfile"
+        - "Source"
+      summary: "Update an existing source"
+      description: "Update an existing source"
+      operationId: "updateSource"
       consumes:
         - "application/json"
       produces:
         - "application/json"
       parameters:
-        - name: "network_profile_id"
+        - name: "source_id"
           in: "path"
-          description: "ID of network profile to update"
+          description: "ID of source to update"
           required: true
           type: "number"
           format: "int64"
         - name: "body"
           in: "body"
-          description: "Network profile object to be modified"
+          description: "Source object to be modified"
           required: true
           schema:
-            $ref: "#/definitions/NetworkProfileIn"
+            $ref: "#/definitions/SourceIn"
       responses:
         200:
-          description: "Network profile updated"
+          description: "Source updated"
           schema:
-            $ref: "#/definitions/NetworkProfileOut"
+            $ref: "#/definitions/SourceOut"
         400:
           description: "Invalid input"
         404:
-          description: "No network profile found"
+          description: "No source found"
     delete:
       tags:
-        - "Network Profile"
-      summary: "Delete an existing network profile"
-      description: "Delete an existing network profile"
-      operationId: "deleteNetworkProfile"
+        - "Source"
+      summary: "Delete an existing source"
+      description: "Delete an existing source"
+      operationId: "deleteSource"
       produces:
         - "application/json"
       parameters:
-        - name: "network_profile_id"
+        - name: "source_id"
           in: "path"
-          description: "ID of network profile to delete"
+          description: "ID of source to delete"
           required: true
           type: "integer"
           format: "int64"
       responses:
         204:
-          description: "Network profile deleted"
+          description: "Source deleted"
         404:
-          description: "Network profile not found"
+          description: "Source not found"
   /scans/:
     post:
       tags:
@@ -586,7 +586,7 @@ definitions:
           items:
             $ref: "#/definitions/SystemReport"
           description: "The report for the systems that were scanned"
-  NetworkProfile:
+  Source:
     type: "object"
     required:
       - name
@@ -595,17 +595,17 @@ definitions:
     properties:
       name:
         type: "string"
-        description: "The name of the network profile"
+        description: "The name of the source"
       hosts:
         type: "array"
         items:
           type: "string"
-        description: "The hosts on the network, as hostnames or IP ranges."
+        description: "The hosts to scan, as hostnames or IP ranges."
       ssh_port:
         type: "integer"
         format: "int32"
         description: "The SSH port to use on the hosts."
-  NetworkProfileMin:
+  SourceMin:
     type: "object"
     required:
       - id
@@ -616,10 +616,10 @@ definitions:
         format: "int64"
       name:
         type: "string"
-        description: "The name of the network profile"
-  NetworkProfileIn:
+        description: "The name of the source"
+  SourceIn:
     allOf:
-      - $ref: "#/definitions/NetworkProfile"
+      - $ref: "#/definitions/Source"
       - type: "object"
         required:
           - credentials
@@ -630,9 +630,9 @@ definitions:
               type: "integer"
               format: "int64"
             description: "The credentials to try with these hosts."
-  NetworkProfileOut:
+  SourceOut:
     allOf:
-      - $ref: "#/definitions/NetworkProfile"
+      - $ref: "#/definitions/Source"
       - type: "object"
         required:
           - id
@@ -689,26 +689,26 @@ definitions:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
-          - profile
+          - source
         properties:
-          profile:
+          source:
             type: "integer"
             format: "int64"
-            description: "The identifier of a network profile"
+            description: "The identifier of a source"
   ScanJobOut:
     allOf:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
           - id
-          - profile
+          - source
         properties:
           id:
             type: "integer"
             format: "int64"
-          profile:
-            $ref: "#/definitions/NetworkProfileMin"
-            description: "The identifier of a network profile"
+          source:
+            $ref: "#/definitions/SourceMin"
+            description: "The identifier of a source"
   ScanResultColumn:
     type: "object"
     required:

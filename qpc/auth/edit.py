@@ -27,7 +27,7 @@ class AuthEditCommand(CliCommand):
     """Defines the edit command.
 
     This command is for editing existing auths which can be later associated
-    with profiles to gather facts.
+    with sources to gather facts.
     """
 
     SUBCOMMAND = auth.SUBCOMMAND

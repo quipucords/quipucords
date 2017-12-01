@@ -14,8 +14,8 @@ from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import Credential, NetworkProfile, HostRange, ScanJob
-from api.serializers import CredentialSerializer, NetworkProfileSerializer
+from api.models import Credential, Source, HostRange, ScanJob
+from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.utils import (_construct_vars, _process_connect_callback,
                            _construct_error,
                            construct_connect_inventory, connect,
@@ -54,19 +54,19 @@ class DiscoveryScannerTest(TestCase):
             ssh_keyfile='keyfile')
         self.cred.save()
 
-        self.network_profile = NetworkProfile(
-            name='profile1',
+        self.source = Source(
+            name='source1',
             ssh_port=22)
-        self.network_profile.save()
-        self.network_profile.credentials.add(self.cred)
+        self.source.save()
+        self.source.credentials.add(self.cred)
 
         self.host = HostRange(host_range='1.2.3.4',
-                              network_profile_id=self.network_profile.id)
+                              source_id=self.source.id)
         self.host.save()
 
-        self.network_profile.hosts.add(self.host)
+        self.source.hosts.add(self.host)
 
-        self.scanjob = ScanJob(profile_id=self.network_profile.id,
+        self.scanjob = ScanJob(source_id=self.source.id,
                                scan_type=ScanJob.DISCOVERY)
         self.scanjob.failed_scans = 0
         self.scanjob.save()
@@ -112,10 +112,10 @@ class DiscoveryScannerTest(TestCase):
 
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""
-        serializer = NetworkProfileSerializer(self.network_profile)
-        profile = serializer.data
-        hosts = profile['hosts']
-        connection_port = profile['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['ssh_port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
@@ -141,10 +141,10 @@ class DiscoveryScannerTest(TestCase):
     @patch('scanner.utils._handle_ssh_passphrase', side_effect=mock_handle_ssh)
     def test_connect_failure(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure."""
-        serializer = NetworkProfileSerializer(self.network_profile)
-        profile = serializer.data
-        hosts = profile['hosts']
-        connection_port = profile['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['ssh_port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
@@ -155,10 +155,10 @@ class DiscoveryScannerTest(TestCase):
     @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
     def test_connect(self, mock_run):
         """Test connect flow with mocked manager."""
-        serializer = NetworkProfileSerializer(self.network_profile)
-        profile = serializer.data
-        hosts = profile['hosts']
-        connection_port = profile['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['ssh_port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected, failed = connect(hosts, cred, connection_port)
