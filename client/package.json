@@ -1,0 +1,23 @@
+{
+  "name": "quipucords-ui",
+  "version": "0.0.1",
+  "description": "Quipucords UI",
+  "author": "Red Hat",
+  "license": "GPL-3.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quipucords/quipucords.git"
+  },
+  "bugs": {
+    "url": "https://github.com/quipucords/quipucords/issues"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "scripts": {
+    "start:quipucords": "open http://127.0.0.1:8000/index.html; source ../venv/bin/activate; cd ../; make serve"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
