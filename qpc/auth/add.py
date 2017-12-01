@@ -26,7 +26,7 @@ class AuthAddCommand(CliCommand):
     """Defines the add command.
 
     This command is for creating new auths which can be later associated with
-    profiles to gather facts.
+    sources to gather facts.
     """
 
     SUBCOMMAND = auth.SUBCOMMAND

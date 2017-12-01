@@ -25,7 +25,7 @@ import qpc.messages as messages
 class ScanListCommand(CliCommand):
     """Defines the list command.
 
-    This command is for listing profiles scans used to gather system facts.
+    This command is for listing sources scans used to gather system facts.
     """
 
     SUBCOMMAND = scan.SUBCOMMAND

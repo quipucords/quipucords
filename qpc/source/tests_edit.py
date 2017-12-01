@@ -22,8 +22,8 @@ from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.utils import read_in_file
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.auth import AUTH_URI
-from qpc.network import NETWORK_URI
-from qpc.network.edit import NetworkEditCommand
+from qpc.source import SOURCE_URI
+from qpc.source.edit import SourceEditCommand
 from qpc.utils import get_server_location, write_server_config
 
 TMP_HOSTFILE = '/tmp/testhostsfile'
@@ -34,8 +34,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class NetworkEditCliTests(unittest.TestCase):
-    """Class for testing the network profile edit commands for qpc."""
+class SourceEditCliTests(unittest.TestCase):
+    """Class for testing the source edit commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -58,20 +58,20 @@ class NetworkEditCliTests(unittest.TestCase):
 
     def test_edit_req_args_err(self):
         """Testing the add edit command required flags."""
-        network_out = StringIO()
+        source_out = StringIO()
         with self.assertRaises(SystemExit):
-            with redirect_stdout(network_out):
-                sys.argv = ['/bin/qpc', 'profile', 'edit',
-                            '--name', 'profile1']
+            with redirect_stdout(source_out):
+                sys.argv = ['/bin/qpc', 'source', 'edit',
+                            '--name', 'source1']
                 CLI().main()
-                self.assertEqual(network_out.getvalue(),
+                self.assertEqual(source_out.getvalue(),
                                  'No arguments provided to edit '
-                                 'profile profile1')
+                                 'source source1')
 
     def test_edit_process_file(self):
-        """Testing the add network command process file."""
+        """Testing the add source command process file."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'network', 'add', '--name', 'net1',
+            sys.argv = ['/bin/qpc', 'source', 'add', '--name', 'source1',
                         '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
             CLI().main()
 
@@ -81,126 +81,126 @@ class NetworkEditCliTests(unittest.TestCase):
         expected = ['1.2.3.4', '1.2.3.[1:10]']
         self.assertEqual(expected, vals)
 
-    def test_edit_profile_none(self):
+    def test_edit_source_none(self):
         """Testing the edit auth command for none existing auth."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile_none'
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile_none', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source_none', hosts=['1.2.3.4'],
                              auth=['auth1'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
                     aec.main(args)
-                    self.assertTrue('Profile "profile_none" does not exist'
-                                    in network_out.getvalue())
+                    self.assertTrue('Source "source_none" does not exist'
+                                    in source_out.getvalue())
 
-    def test_edit_profile_ssl_err(self):
-        """Testing the edit profile command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_edit_source_ssl_err(self):
+        """Testing the edit source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
-                    self.assertEqual(network_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(source_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_edit_profile_conn_err(self):
-        """Testing the edit profile command with a connection error."""
-        network_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_edit_source_conn_err(self):
+        """Testing the edit source command with a connection error."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
-                    self.assertEqual(network_out.getvalue(),
+                    self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
-    def test_edit_profile(self):
-        """Testing the edit profile command successfully."""
-        network_out = StringIO()
+    def test_edit_source(self):
+        """Testing the edit source command successfully."""
+        source_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1'
-        url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
-        url_patch = BASE_URL + NETWORK_URI + '1/'
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_patch = BASE_URL + SOURCE_URI + '1/'
         auth_data = [{'id': 1, 'name': 'auth1', 'username': 'root',
                       'password': '********'}]
-        network_data = [{'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
-                         'credentials':[{'id': 2, 'name': 'auth2'}]}]
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_network, status_code=200, json=network_data)
+            mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_auth, status_code=200, json=auth_data)
             mocker.patch(url_patch, status_code=200)
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1'], ssh_port=22)
-            with redirect_stdout(network_out):
+            with redirect_stdout(source_out):
                 aec.main(args)
-                self.assertEqual(network_out.getvalue(),
-                                 'Profile "profile1" was updated\n')
+                self.assertEqual(source_out.getvalue(),
+                                 'Source "source1" was updated\n')
 
-    def test_edit_profile_no_val(self):
-        """Testing the edit profile command with profile doesn't exist."""
-        network_out = StringIO()
-        url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
+    def test_edit_source_no_val(self):
+        """Testing the edit source command with source doesn't exist."""
+        source_out = StringIO()
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_network, status_code=500, json=[])
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            mocker.get(url_get_source, status_code=500, json=[])
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
-                    self.assertEqual(network_out.getvalue(),
-                                     'Profile "profile1" does not exist\n')
+                    self.assertEqual(source_out.getvalue(),
+                                     'Source "source1" does not exist\n')
 
-    def test_edit_profile_auth_nf(self):
-        """Testing the edit profile command where auth is not found."""
-        network_out = StringIO()
+    def test_edit_source_auth_nf(self):
+        """Testing the edit source command where auth is not found."""
+        source_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
-        url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         auth_data = [{'id': 1, 'name': 'auth1', 'username': 'root',
                       'password': '********'}]
-        network_data = [{'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
-                         'credentials':[{'id': 2, 'name': 'auth2'}]}]
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_network, status_code=200, json=network_data)
+            mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_auth, status_code=200, json=auth_data)
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1', 'auth2'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
                                     'the "--auth" input'
-                                    in network_out.getvalue())
+                                    in source_out.getvalue())
 
-    def test_edit_profile_auth_err(self):
-        """Testing the edit profile command where auth request hits error."""
-        network_out = StringIO()
+    def test_edit_source_auth_err(self):
+        """Testing the edit source command where auth request hits error."""
+        source_out = StringIO()
         url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
-        url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
-        network_data = [{'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
-                         'credentials':[{'id': 2, 'name': 'auth2'}]}]
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_network, status_code=200, json=network_data)
+            mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_auth, status_code=500)
-            aec = NetworkEditCommand(SUBPARSER)
-            args = Namespace(name='profile1', hosts=['1.2.3.4'],
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4'],
                              auth=['auth1', 'auth2'], ssh_port=22)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(network_out):
+                with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
                                     'the "--auth" input'
-                                    in network_out.getvalue())
+                                    in source_out.getvalue())

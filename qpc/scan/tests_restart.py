@@ -89,7 +89,7 @@ class ScanRestartCliTests(unittest.TestCase):
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI + '1/restart/'
         scan_entry = {'id': 1,
-                      'profile': {
+                      'source': {
                           'id': 1,
                           'name': 'scan1'},
                       'scan_type': 'host',

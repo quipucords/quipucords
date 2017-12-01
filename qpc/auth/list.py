@@ -26,7 +26,7 @@ class AuthListCommand(CliCommand):
     """Defines the list command.
 
     This command is for listing auths which can be later associated with
-    profiles to gather facts.
+    sources to gather facts.
     """
 
     SUBCOMMAND = auth.SUBCOMMAND

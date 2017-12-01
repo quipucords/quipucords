@@ -17,8 +17,8 @@ from rest_framework import status
 from api.models import Credential
 
 
-class NetworkProfileTest(TestCase):
-    """Test the basic NetworkProfile infrastructure."""
+class SourceTest(TestCase):
+    """Test the basic Source infrastructure."""
 
     def setUp(self):
         """Create test case setup."""
@@ -33,7 +33,7 @@ class NetworkProfileTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('networkprofile-list')
+        url = reverse('source-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -44,14 +44,14 @@ class NetworkProfileTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def create_expect_201(self, data):
-        """Create a network profile, return the response as a dict."""
+        """Create a source, return the response as a dict."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
     def test_successful_create(self):
         """A valid create request should succeed."""
-        data = {'name': 'netprof1',
+        data = {'name': 'source1',
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
                 'credentials': [self.cred_for_upload]}
@@ -60,7 +60,7 @@ class NetworkProfileTest(TestCase):
 
     def test_double_create(self):
         """A duplicate create should fail."""
-        data = {'name': 'netprof1',
+        data = {'name': 'source1',
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
                 'credentials': [self.cred_for_upload]}
@@ -70,7 +70,7 @@ class NetworkProfileTest(TestCase):
 
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""
-        data = {'name': 'netprof1',
+        data = {'name': 'source1',
                 'hosts': ['1.2.3.4', '1.2.3.5'],
                 'ssh_port': '22',
                 'credentials': [self.cred_for_upload]}
@@ -84,7 +84,7 @@ class NetworkProfileTest(TestCase):
              'credentials': [self.cred_for_upload]})
 
     def test_create_unprintable_name(self):
-        """The NetworkProfile name must be printable."""
+        """The Source name must be printable."""
         self.create_expect_400(
             {'name': '\r\n',
              'hosts': '1.2.3.4',
@@ -92,22 +92,22 @@ class NetworkProfileTest(TestCase):
              'credentials': [self.cred_for_upload]})
 
     def test_create_no_host(self):
-        """A NetworkProfile needs a host."""
+        """A Source needs a host."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'ssh_port': '22',
              'credentials': [self.cred_for_upload]})
 
     def test_create_empty_host(self):
         """An empty string is not a host identifier."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': [],
              'ssh_port': '22',
              'credentials': [self.cred_for_upload]})
 
     def test_create_long_name(self):
-        """An long profile name."""
+        """An long source name."""
         self.create_expect_400(
             {'name': 'A' * 100,
              'hosts': ['1.2.3.4'],
@@ -115,9 +115,9 @@ class NetworkProfileTest(TestCase):
              'credentials': [self.cred_for_upload]})
 
     def test_create_negative_port(self):
-        """An long profile name."""
+        """An long source name."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': ['1.2.3.4'],
              'ssh_port': -1,
              'credentials': [self.cred_for_upload]})
@@ -125,7 +125,7 @@ class NetworkProfileTest(TestCase):
     def test_create_valid_hosts(self):
         """Test valid host patterns."""
         self.create_expect_201(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': ['10.10.181.9',
                        '10.10.181.9/16',
                        '10.10.128.[1:25]',
@@ -154,7 +154,7 @@ class NetworkProfileTest(TestCase):
                  'my-rhel[a:400].company.com']
 
         response = self.create(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': hosts,
              'ssh_port': '22',
              'credentials': [self.cred_for_upload]})
@@ -166,7 +166,7 @@ class NetworkProfileTest(TestCase):
         hosts = ['10.1.1.1-10.1.1.254']
 
         response = self.create(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': hosts,
              'ssh_port': '22',
              'credentials': [self.cred_for_upload]})
@@ -174,31 +174,31 @@ class NetworkProfileTest(TestCase):
         self.assertEqual(len(response.data['hosts']), len(hosts))
 
     def test_create_no_ssh_port(self):
-        """A NetworkProfile needs an ssh port."""
+        """A Source needs an ssh port."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': '1.2.3.4',
              'credentials': [self.cred_for_upload]})
 
     def test_create_bad_ssh_port(self):
         """-1 is not a valid ssh port."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': '1.2.3.4',
              'ssh_port': '-1',
              'credentials': [self.cred_for_upload]})
 
     def test_create_no_credentials(self):
-        """A NetworkProfile needs credentials."""
+        """A Source needs credentials."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': '1.2.3.4',
              'ssh_port': '22'})
 
     def test_create_empty_credentials(self):
         """The empty string is not a valid credential list."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': '1.2.3.4',
              'ssh_port': '22',
              'credentials': []})
@@ -206,47 +206,47 @@ class NetworkProfileTest(TestCase):
     def test_create_invalid_credentials(self):
         """A random int is not a valid credential."""
         self.create_expect_400(
-            {'name': 'netprof1',
+            {'name': 'source1',
              'hosts': '1.2.3.4',
              'ssh_port': '22',
              'credentials': [42]})
 
     def test_list(self):
-        """List all NetworkProfile objects."""
-        data = {'name': 'netprof',
+        """List all Source objects."""
+        data = {'name': 'source',
                 'ssh_port': '22',
                 'hosts': ['1.2.3.4'],
                 'credentials': [self.cred_for_upload]}
         for i in range(3):
             this_data = data.copy()
-            this_data['name'] = 'netprof' + str(i)
+            this_data['name'] = 'source' + str(i)
             self.create_expect_201(this_data)
 
-        url = reverse('networkprofile-list')
+        url = reverse('source-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
         expected = [{'id': 1, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'netprof0',
+                     [{'id': 1, 'name': 'cred1'}], 'name': 'source0',
                      'ssh_port': 22},
                     {'id': 2, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'netprof1',
+                     [{'id': 1, 'name': 'cred1'}], 'name': 'source1',
                      'ssh_port': 22},
                     {'id': 3, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'netprof2',
+                     [{'id': 1, 'name': 'cred1'}], 'name': 'source2',
                      'ssh_port': 22}]
         self.assertEqual(content, expected)
 
     def test_retrieve(self):
-        """Get details on a specific NetworkProfile by primary key."""
+        """Get details on a specific Source by primary key."""
         initial = self.create_expect_201({
-            'name': 'netprof1',
+            'name': 'source1',
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
-        url = reverse('networkprofile-detail', args=(initial['id'],))
+        url = reverse('source-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('credentials', response.json())
@@ -257,25 +257,25 @@ class NetworkProfileTest(TestCase):
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
     def test_update(self):
-        """Completely update a NetworkProfile."""
+        """Completely update a Source."""
         initial = self.create_expect_201({
-            'name': 'netprof2',
+            'name': 'source2',
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
-        data = {'name': 'netprof2',
+        data = {'name': 'source2',
                 'hosts': ['1.2.3.5'],
                 'ssh_port': 23,
                 'credentials': [self.cred.id]}
-        url = reverse('networkprofile-detail', args=(initial['id'],))
+        url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
                                    content_type='application/json',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected = {'name': 'netprof2',
+        expected = {'name': 'source2',
                     'hosts': ['1.2.3.5'],
                     'ssh_port': 23,
                     'credentials': [self.cred_for_response]}
@@ -287,22 +287,22 @@ class NetworkProfileTest(TestCase):
     def test_update_collide(self):
         """Fail update due to name conflict."""
         self.create_expect_201({
-            'name': 'netprof2-double',
+            'name': 'source2-double',
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
         initial = self.create_expect_201({
-            'name': 'netprof2',
+            'name': 'source2',
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
-        data = {'name': 'netprof2-double',
+        data = {'name': 'source2-double',
                 'hosts': ['1.2.3.5'],
                 'ssh_port': 23,
                 'credentials': [self.cred.id]}
-        url = reverse('networkprofile-detail', args=(initial['id'],))
+        url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
                                    content_type='application/json',
@@ -310,32 +310,32 @@ class NetworkProfileTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_partial_update(self):
-        """Partially update a NetworkProfile."""
+        """Partially update a Source."""
         initial = self.create_expect_201({
-            'name': 'netprof3',
+            'name': 'source3',
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
             'credentials': [self.cred_for_upload]})
 
-        data = {'name': 'netprof3-new',
+        data = {'name': 'source3-new',
                 'hosts': ['1.2.3.5']}
-        url = reverse('networkprofile-detail', args=(initial['id'],))
+        url = reverse('source-detail', args=(initial['id'],))
         response = self.client.patch(url,
                                      json.dumps(data),
                                      content_type='application/json',
                                      format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['name'], 'netprof3-new')
+        self.assertEqual(response.json()['name'], 'source3-new')
         self.assertEqual(response.json()['hosts'], ['1.2.3.5'])
 
     def test_delete(self):
-        """Delete a NetworkProfile."""
-        data = {'name': 'netprof3',
+        """Delete a Source."""
+        data = {'name': 'source3',
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
                 'credentials': [self.cred_for_upload]}
         response = self.create_expect_201(data)
 
-        url = reverse('networkprofile-detail', args=(response['id'],))
+        url = reverse('source-detail', args=(response['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

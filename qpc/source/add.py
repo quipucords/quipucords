@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""NetworkAddCommand is used to add network profiles for system scans."""
+"""SourceAddCommand is used to add sources for system scans."""
 
 from __future__ import print_function
 import sys
@@ -17,44 +17,44 @@ from requests import codes
 from qpc.request import POST, GET, request
 from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
-import qpc.network as network
-from qpc.network.utils import validate_port, build_profile_payload
+import qpc.source as source
+from qpc.source.utils import validate_port, build_source_payload
 import qpc.auth as auth
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class NetworkAddCommand(CliCommand):
+class SourceAddCommand(CliCommand):
     """Defines the add command.
 
-    This command is for creating new network profiles which can be later used
+    This command is for creating new sources which can be later used
     with scans to gather facts.
     """
 
-    SUBCOMMAND = network.SUBCOMMAND
-    ACTION = network.ADD
+    SUBCOMMAND = source.SUBCOMMAND
+    ACTION = source.ADD
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
-                            network.NETWORK_URI, [codes.created])
+                            source.SOURCE_URI, [codes.created])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help=_(messages.PROFILE_NAME_HELP),
+                                 help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
-                                 help=_(messages.PROFILE_HOSTS_HELP),
+                                 help=_(messages.SOURCE_HOSTS_HELP),
                                  required=True)
         self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
                                  nargs='+', default=[],
-                                 help=_(messages.PROFILE_AUTHS_HELP),
+                                 help=_(messages.SOURCE_AUTHS_HELP),
                                  required=True)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
-                                 help=_(messages.PROFILE_SSH_PORT_HELP),
+                                 help=_(messages.SOURCE_SSH_PORT_HELP),
                                  default=22)
 
     def _validate_args(self):
@@ -83,19 +83,19 @@ class NetworkAddCommand(CliCommand):
                     cred_name = cred_entry['name']
                     self.args.auth.remove(cred_name)
                 not_found_str = ','.join(self.args.auth)
-                print(_(messages.PROFILE_ADD_AUTHS_NOT_FOUND %
+                print(_(messages.SOURCE_ADD_AUTHS_NOT_FOUND %
                         (not_found_str, self.args.name)))
                 sys.exit(1)
         else:
-            print(_(messages.PROFILE_ADD_AUTH_PROCESS_ERR % self.args.name))
+            print(_(messages.SOURCE_ADD_AUTH_PROCESS_ERR % self.args.name))
             sys.exit(1)
 
     def _build_data(self):
         """Construct the dictionary auth given our arguments.
 
-        :returns: a dictionary representing the network profile being added
+        :returns: a dictionary representing the source being added
         """
-        self.req_payload = build_profile_payload(self.args)
+        self.req_payload = build_source_payload(self.args)
 
     def _handle_response_success(self):
-        print(_(messages.PROFILE_ADDED % self.args.name))
+        print(_(messages.SOURCE_ADDED % self.args.name))

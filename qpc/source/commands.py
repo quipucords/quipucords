@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (c) 2017 Red Hat, Inc.
 #
@@ -9,14 +8,12 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Constants for the Network Profile commands."""
 
-SUBCOMMAND = 'profile'
-ADD = 'add'
-LIST = 'list'
-EDIT = 'edit'
-SHOW = 'show'
-CLEAR = 'clear'
-
-
-NETWORK_URI = '/api/v1/profiles/networks/'
+"""Commands for import organization."""
+# flake8: noqa
+# pylint: disable=unused-import
+from qpc.source.add import SourceAddCommand
+from qpc.source.list import SourceListCommand
+from qpc.source.show import SourceShowCommand
+from qpc.source.clear import SourceClearCommand
+from qpc.source.edit import SourceEditCommand

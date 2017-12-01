@@ -16,25 +16,25 @@ from rest_framework.serializers import (ModelSerializer,
                                         ValidationError,
                                         ChoiceField,
                                         IntegerField)
-from api.models import NetworkProfile, ScanJob
+from api.models import Source, ScanJob
 import api.messages as messages
 
 
-class NetworkProfileField(PrimaryKeyRelatedField):
-    """Representation of the network profile associated with a scan job."""
+class SourceField(PrimaryKeyRelatedField):
+    """Representation of the source associated with a scan job."""
 
     def display_value(self, instance):
         """Create display value."""
         display = instance
-        if isinstance(instance, NetworkProfile):
-            display = 'NetworkProfile: %s' % instance.name
+        if isinstance(instance, Source):
+            display = 'Source: %s' % instance.name
         return display
 
 
 class ScanJobSerializer(ModelSerializer):
     """Serializer for the ScanJob model."""
 
-    profile = NetworkProfileField(queryset=NetworkProfile.objects.all())
+    source = SourceField(queryset=Source.objects.all())
     scan_type = ChoiceField(required=False, choices=ScanJob.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanJob.STATUS_CHOICES)
@@ -51,9 +51,9 @@ class ScanJobSerializer(ModelSerializer):
         fields = '__all__'
 
     @staticmethod
-    def validate_profile(profile):
-        """Make sure the profile is present."""
-        if not profile:
-            raise ValidationError(_(messages.SJ_REQ_PROFILE))
+    def validate_source(source):
+        """Make sure the source is present."""
+        if not source:
+            raise ValidationError(_(messages.SJ_REQ_SOURCE))
 
-        return profile
+        return source

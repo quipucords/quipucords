@@ -9,40 +9,49 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""NetworkListCommand is used to list network profiles for system scans."""
+"""SourceShowCommand is used to show sources for system scans."""
 
 from __future__ import print_function
+import sys
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
-import qpc.network as network
+import qpc.source as source
 from qpc.request import GET
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class NetworkListCommand(CliCommand):
-    """Defines the list command.
+class SourceShowCommand(CliCommand):
+    """Defines the show command.
 
-    This command is for listing profiles which can be later be used with a scan
+    This command is for showing a source which can later be used with a scan
     to gather facts.
     """
 
-    SUBCOMMAND = network.SUBCOMMAND
-    ACTION = network.LIST
+    SUBCOMMAND = source.SUBCOMMAND
+    ACTION = source.SHOW
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            network.NETWORK_URI, [codes.ok])
+                            source.SOURCE_URI, [codes.ok])
+        self.parser.add_argument('--name', dest='name', metavar='NAME',
+                                 help=_(messages.SOURCE_NAME_HELP),
+                                 required=True)
+
+    def _build_req_params(self):
+        self.req_params = {'name': self.args.name}
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        if json_data == []:
-            print(_(messages.PROFILE_LIST_NO_PROFILES))
-        else:
-            data = pretty_print(json_data)
+        if len(json_data) == 1:
+            cred_entry = json_data[0]
+            data = pretty_print(cred_entry)
             print(data)
+        else:
+            print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.name))
+            sys.exit(1)

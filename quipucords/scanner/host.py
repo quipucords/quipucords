@@ -43,7 +43,7 @@ class ScannerException(Exception):
 class HostScanner(DiscoveryScanner):
     """Scan target systems to collect facts.
 
-    Attempts connections to a network profile using a list of credentials
+    Attempts connections to a source using a list of credentials
     and gathers the set of successes (host/ip, credential) and
     failures (host/ip). Runs a host scan on the set of systems that are
     reachable. Collects the associated facts for the scanned systems
@@ -56,7 +56,7 @@ class HostScanner(DiscoveryScanner):
 
     # pylint: disable=too-many-locals
     def host_scan(self):
-        """Execute the host scan with the initialized network profile.
+        """Execute the host scan with the initialized source.
 
         :returns: An array of dictionaries of facts
         """
@@ -69,7 +69,7 @@ class HostScanner(DiscoveryScanner):
                     'gather_facts': False,
                     'strategy': 'free',
                     'roles': roles}
-        connection_port = self.network_profile['ssh_port']
+        connection_port = self.source['ssh_port']
 
         connected, failed, completed = self.obtain_discovery_data()
         forks = self.scanjob.max_concurrency

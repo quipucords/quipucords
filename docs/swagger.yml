@@ -689,9 +689,9 @@ definitions:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
-          - profile
+          - source
         properties:
-          profile:
+          source:
             type: "integer"
             format: "int64"
             description: "The identifier of a source"
@@ -701,12 +701,12 @@ definitions:
       - type: "object"
         required:
           - id
-          - profile
+          - source
         properties:
           id:
             type: "integer"
             format: "int64"
-          profile:
+          source:
             $ref: "#/definitions/SourceMin"
             description: "The identifier of a source"
   ScanResultColumn:

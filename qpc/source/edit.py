@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""NetworkEditCommand is used to edit existing profiles for system scans."""
+"""SourceEditCommand is used to edit existing sources for system scans."""
 
 from __future__ import print_function
 import sys
@@ -18,50 +18,50 @@ from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
 import qpc.auth as auth
-import qpc.network as network
-from qpc.network.utils import validate_port, build_profile_payload
+import qpc.source as source
+from qpc.source.utils import validate_port, build_source_payload
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class NetworkEditCommand(CliCommand):
+class SourceEditCommand(CliCommand):
     """Defines the edit command.
 
-    This command is for editing existing network profiles  which can be used
+    This command is for editing existing sources  which can be used
     for system scans to gather facts.
     """
 
-    SUBCOMMAND = network.SUBCOMMAND
-    ACTION = network.EDIT
+    SUBCOMMAND = source.SUBCOMMAND
+    ACTION = source.EDIT
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PATCH,
-                            network.NETWORK_URI, [codes.ok])
+                            source.SOURCE_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help=_(messages.PROFILE_NAME_HELP),
+                                 help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
-                                 help=_(messages.PROFILE_HOSTS_HELP),
+                                 help=_(messages.SOURCE_HOSTS_HELP),
                                  required=False)
         self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
                                  nargs='+', default=[],
-                                 help=_(messages.PROFILE_AUTHS_HELP),
+                                 help=_(messages.SOURCE_AUTHS_HELP),
                                  required=False)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
-                                 help=_(messages.PROFILE_SSH_PORT_HELP))
+                                 help=_(messages.SOURCE_SSH_PORT_HELP))
 
     # pylint: disable=too-many-branches
     def _validate_args(self):
         CliCommand._validate_args(self)
 
         if not(self.args.hosts or self.args.auth or self.args.ssh_port):
-            print(_(messages.PROFILE_EDIT_NO_ARGS % (self.args.name)))
+            print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
 
@@ -72,21 +72,21 @@ class NetworkEditCommand(CliCommand):
             except ValueError:
                 pass
 
-        # check for existence of profile
+        # check for existence of source
         response = request(parser=self.parser, method=GET,
-                           path=network.NETWORK_URI,
+                           path=source.SOURCE_URI,
                            params={'name': self.args.name},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
             if len(json_data) == 1:
-                profile_entry = json_data[0]
-                self.req_path = self.req_path + str(profile_entry['id']) + '/'
+                source_entry = json_data[0]
+                self.req_path = self.req_path + str(source_entry['id']) + '/'
             else:
-                print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.name))
+                print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.name))
                 sys.exit(1)
         else:
-            print(_(messages.PROFILE_DOES_NOT_EXIST % self.args.name))
+            print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
 
         # check for valid auth values
@@ -107,11 +107,11 @@ class NetworkEditCommand(CliCommand):
                         cred_name = cred_entry['name']
                         self.args.auth.remove(cred_name)
                     not_found_str = ','.join(self.args.auth)
-                    print(_(messages.PROFILE_EDIT_AUTHS_NOT_FOUND %
+                    print(_(messages.SOURCE_EDIT_AUTHS_NOT_FOUND %
                             (not_found_str, self.args.name)))
                     sys.exit(1)
             else:
-                print(_(messages.PROFILE_EDIT_AUTH_PROCESS_ERR %
+                print(_(messages.SOURCE_EDIT_AUTH_PROCESS_ERR %
                         self.args.name))
                 sys.exit(1)
 
@@ -120,7 +120,7 @@ class NetworkEditCommand(CliCommand):
 
         :returns: a dictionary representing the auth being added
         """
-        self.req_payload = build_profile_payload(self.args, add_none=False)
+        self.req_payload = build_source_payload(self.args, add_none=False)
 
     def _handle_response_success(self):
-        print(_(messages.PROFILE_UPDATED % self.args.name))
+        print(_(messages.SOURCE_UPDATED % self.args.name))

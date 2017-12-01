@@ -15,9 +15,9 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
-from api.models import (Credential, NetworkProfile, HostRange,
+from api.models import (Credential, Source, HostRange,
                         ScanJob, ScanJobResults, Results, ResultKeyValue)
-from api.serializers import CredentialSerializer, NetworkProfileSerializer
+from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
 from scanner.callback import ResultCallback
@@ -52,19 +52,19 @@ class HostScannerTest(TestCase):
             ssh_keyfile=None)
         self.cred.save()
 
-        self.network_profile = NetworkProfile(
-            name='profile1',
+        self.source = Source(
+            name='source1',
             ssh_port=22)
-        self.network_profile.save()
-        self.network_profile.credentials.add(self.cred)
+        self.source.save()
+        self.source.credentials.add(self.cred)
 
         self.host = HostRange(host_range='1.2.3.4',
-                              network_profile_id=self.network_profile.id)
+                              source_id=self.source.id)
         self.host.save()
 
-        self.network_profile.hosts.add(self.host)
+        self.source.hosts.add(self.host)
 
-        self.scanjob = ScanJob(profile_id=self.network_profile.id,
+        self.scanjob = ScanJob(source_id=self.source.id,
                                scan_type=ScanJob.HOST)
         self.scanjob.failed_scans = 0
         self.scanjob.save()
@@ -104,9 +104,9 @@ class HostScannerTest(TestCase):
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
-        serializer = NetworkProfileSerializer(self.network_profile)
-        profile = serializer.data
-        connection_port = profile['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        connection_port = source['ssh_port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
@@ -133,9 +133,9 @@ class HostScannerTest(TestCase):
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
-        serializer = NetworkProfileSerializer(self.network_profile)
-        profile = serializer.data
-        connection_port = profile['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        connection_port = source['ssh_port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_scan_inventory(

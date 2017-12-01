@@ -18,12 +18,12 @@ from rest_framework.serializers import (ModelSerializer, ValidationError,
                                         SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
-from api.models import Credential, HostRange, NetworkProfile
+from api.models import Credential, HostRange, Source
 import api.messages as messages
 
 
 class HostRangeField(SlugRelatedField):
-    """Representation of the host range with in a network profile."""
+    """Representation of the host range with in a source."""
 
     # SlugRelatedField is *almost* what we want for HostRanges, but it
     # doesn't allow creating new HostRanges because it requires them
@@ -44,7 +44,7 @@ class HostRangeField(SlugRelatedField):
 
 
 class CredentialsField(PrimaryKeyRelatedField):
-    """Representation of the credentials associated with a network profile."""
+    """Representation of the credentials associated with a source."""
 
     def to_internal_value(self, data):
         """Create internal value."""
@@ -65,8 +65,8 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
-class NetworkProfileSerializer(ModelSerializer):
-    """Serializer for the NetworkProfile model."""
+class SourceSerializer(ModelSerializer):
+    """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)
     ssh_port = IntegerField(required=False, min_value=0, default=22)
@@ -82,7 +82,7 @@ class NetworkProfileSerializer(ModelSerializer):
     class Meta:
         """Metadata for the serializer."""
 
-        model = NetworkProfile
+        model = Source
         fields = '__all__'
 
     # Have to implement explicit create() and update() methods to
@@ -90,33 +90,33 @@ class NetworkProfileSerializer(ModelSerializer):
     # http://www.django-rest-framework.org/api-guide/relations/
     @transaction.atomic
     def create(self, validated_data):
-        """Create a network profile."""
-        NetworkProfileSerializer.check_for_existing_name(
+        """Create a source."""
+        SourceSerializer.check_for_existing_name(
             name=validated_data.get('name'))
 
         hosts_data = validated_data.pop('hosts')
         credentials = validated_data.pop('credentials')
 
-        netprof = NetworkProfile.objects.create(**validated_data)
+        source = Source.objects.create(**validated_data)
 
         for host_data in hosts_data:
-            HostRange.objects.create(network_profile=netprof,
+            HostRange.objects.create(source=source,
                                      **host_data)
 
         for credential in credentials:
-            netprof.credentials.add(credential)
+            source.credentials.add(credential)
 
-        return netprof
+        return source
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        """Update a network profile."""
-        # If we ever add optional fields to NetworkProfile, we need to
+        """Update a source."""
+        # If we ever add optional fields to Source, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        NetworkProfileSerializer.check_for_existing_name(
+        SourceSerializer.check_for_existing_name(
             name=validated_data.get('name'),
-            profile_id=instance.id)
+            source_id=instance.id)
 
         hosts_data = validated_data.pop('hosts', None)
         credentials = validated_data.pop('credentials', None)
@@ -132,7 +132,7 @@ class NetworkProfileSerializer(ModelSerializer):
         if hosts_data:
             old_hosts = list(instance.hosts.all())
             new_hosts = [
-                HostRange.objects.create(network_profile=instance,
+                HostRange.objects.create(source=instance,
                                          **host_data)
                 for host_data in hosts_data]
             instance.hosts.set(new_hosts)
@@ -147,25 +147,25 @@ class NetworkProfileSerializer(ModelSerializer):
         return instance
 
     @staticmethod
-    def check_for_existing_name(name, profile_id=None):
+    def check_for_existing_name(name, source_id=None):
         """Look for existing (different object) with same name.
 
-        :param name: Name of profile to look for
-        :param profile_id: Network profile to exclude
+        :param name: Name of source to look for
+        :param source_id: Source to exclude
         """
-        if profile_id is None:
+        if source_id is None:
             # Look for existing with same name (create)
-            existing = NetworkProfile.objects.filter(name=name).first()
+            existing = Source.objects.filter(name=name).first()
         else:
             # Look for existing.  Same name, different id (update)
-            existing = NetworkProfile.objects.filter(
-                name=name).exclude(id=profile_id).first()
+            existing = Source.objects.filter(
+                name=name).exclude(id=source_id).first()
         if existing is not None:
             raise ValidationError(_(messages.NP_NAME_ALREADY_EXISTS % name))
 
     @staticmethod
     def validate_name(name):
-        """Validate the name of the NetworkProfile."""
+        """Validate the name of the Source."""
         if not isinstance(name, str) or not name.isprintable():
             raise ValidationError(_(messages.NP_NAME_VALIDATION))
 
@@ -242,7 +242,7 @@ class NetworkProfileSerializer(ModelSerializer):
                     # Attempt to convert CIDR to ansible range
                     if is_likely_cidr:
                         try:
-                            normalized_cidr = NetworkProfileSerializer \
+                            normalized_cidr = SourceSerializer \
                                 .cidr_to_ansible(host_range)
                             normalized_cidr_host = {
                                 'host_range': normalized_cidr}

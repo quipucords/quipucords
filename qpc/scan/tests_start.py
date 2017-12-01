@@ -20,7 +20,7 @@ from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
-from qpc.network import NETWORK_URI
+from qpc.source import SOURCE_URI
 from qpc.scan.start import ScanStartCommand
 from qpc.utils import get_server_location, write_server_config
 
@@ -52,29 +52,29 @@ class ScanStartCliTests(unittest.TestCase):
             sys.argv = ['/bin/qpc', 'scan', 'start']
             CLI().main()
 
-    def test_scan_profile_none(self):
-        """Testing the scan start command for none existing profile."""
+    def test_scan_source_none(self):
+        """Testing the scan start command for none existing source."""
         scan_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile_none'
+        url = BASE_URL + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(profile='profile_none')
+            args = Namespace(source='source_none')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
                     ssc.main(args)
-                    self.assertTrue('Profile "profile_none" does not exist'
+                    self.assertTrue('Source "source_none" does not exist'
                                     in scan_out.getvalue())
 
     def test_start_scan_ssl_err(self):
         """Testing the start scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(profile='profile1')
+            args = Namespace(source='source1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -83,11 +83,11 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan_conn_err(self):
         """Testing the start scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + NETWORK_URI + '?name=profile1'
+        url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(profile='profile1')
+            args = Namespace(source='source1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -97,15 +97,15 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan(self):
         """Testing the start scan command successfully."""
         scan_out = StringIO()
-        url_get_network = BASE_URL + NETWORK_URI + '?name=profile1'
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
-        network_data = [{'id': 1, 'name': 'profile1', 'hosts': ['1.2.3.4'],
-                         'credentials':[{'id': 2, 'name': 'auth2'}]}]
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_network, status_code=200, json=network_data)
+            mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(profile='profile1', max_concurrency=4)
+            args = Namespace(source='source1', max_concurrency=4)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

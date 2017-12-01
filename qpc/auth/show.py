@@ -27,7 +27,7 @@ class AuthShowCommand(CliCommand):
     """Defines the show command.
 
     This command is for showing an auth which can be later associated with
-    profiles to gather facts.
+    sources to gather facts.
     """
 
     SUBCOMMAND = auth.SUBCOMMAND

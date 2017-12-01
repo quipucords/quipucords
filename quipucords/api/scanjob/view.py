@@ -27,23 +27,23 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
                                         cancel_scan, restart_scan)
 
 
-PROFILE_KEY = 'profile'
+SOURCE_KEY = 'source'
 ROW_KEY = 'row'
 COLUMN_KEY = 'columns'
 RESULTS_KEY = 'results'
 
 
-def expand_network_profile(scan, json_scan):
-    """Expand the network profile.
+def expand_source(scan, json_scan):
+    """Expand the source.
 
-    Take scan object with profile id and pull object from db.
-    create slim dictionary version of profile with name an value
+    Take scan object with source id and pull object from db.
+    create slim dictionary version of source with name an value
     to return to user.
     """
-    if json_scan[PROFILE_KEY]:
-        profile = scan.profile
-        slim_profile = {'id': profile.id, 'name': profile.name}
-        json_scan[PROFILE_KEY] = slim_profile
+    if json_scan[SOURCE_KEY]:
+        source = scan.source
+        slim_source = {'id': source.id, 'name': source.name}
+        json_scan[SOURCE_KEY] = slim_source
 
 
 def expand_key_values(result, json_result):
@@ -113,7 +113,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         for scan in queryset:
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_network_profile(scan, json_scan)
+            expand_source(scan, json_scan)
             result.append(json_scan)
         return Response(result)
 
@@ -123,7 +123,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_network_profile(scan, json_scan)
+        expand_source(scan, json_scan)
         return Response(json_scan)
 
     # pylint: disable=unused-argument,invalid-name,no-self-use
@@ -149,7 +149,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_network_profile(scan, json_scan)
+            expand_source(scan, json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanJob.PAUSED:
             err_msg = _(messages.ALREADY_PAUSED)
@@ -173,7 +173,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         scan.save()
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_network_profile(scan, json_scan)
+        expand_source(scan, json_scan)
         return Response(json_scan, status=200)
 
     @detail_route(methods=['put'])
@@ -189,7 +189,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_network_profile(scan, json_scan)
+            expand_source(scan, json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanJob.RUNNING:
             err_msg = _(messages.ALREADY_RUNNING)

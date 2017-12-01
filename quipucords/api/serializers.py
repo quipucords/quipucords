@@ -15,9 +15,9 @@
 from api.fact.serializer import FactCollectionSerializer, FactSerializer
 from api.fingerprint.serializer import FingerprintSerializer
 from api.credential.serializer import CredentialSerializer
-from api.networkprofile.serializer import (CredentialsField, HostRangeField,
-                                           NetworkProfileSerializer)
-from api.scanjob.serializer import NetworkProfileField, ScanJobSerializer
+from api.source.serializer import (CredentialsField, HostRangeField,
+                                   SourceSerializer)
+from api.scanjob.serializer import SourceField, ScanJobSerializer
 from api.scanresults.serializer import (ResultKeyValueSerializer,
                                         ResultsSerializer,
                                         ScanJobResultsSerializer)

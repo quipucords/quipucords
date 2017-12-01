@@ -12,11 +12,11 @@
 
 from django.contrib import admin
 from api.models import (FactCollection, SystemFingerprint, Credential,
-                        NetworkProfile, ScanJob, ScanJobResults)
+                        Source, ScanJob, ScanJobResults)
 
 admin.site.register(FactCollection)
 admin.site.register(Credential)
-admin.site.register(NetworkProfile)
+admin.site.register(Source)
 admin.site.register(SystemFingerprint)
 admin.site.register(ScanJob)
 admin.site.register(ScanJobResults)
