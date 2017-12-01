@@ -1,5 +1,5 @@
-# Quipucords UI
-===============
+Quipucords UI
+=============
 
-User interface for Quipucords.
+User interface for Quipucords. This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
