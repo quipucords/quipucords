@@ -41,7 +41,7 @@ Requirements & Assumptions
 --------------------------
 Before installing quipucords, there are some guidelines about which system it should be installed on:
  * quipucords is written to run on RHEL or Fedora servers.
- * The system that quipucords is installed on must have source access the systems to be discovered and inspected.
+ * The system that quipucords is installed on must have access to the source systems to be discovered and inspected.
  * The target systems must be running SSH.
  * The user account that quipucords uses to SSH into the systems must have adequate permissions to run commands and read certain files.
  * The user account quipucords uses for a machine should have a sh like shell. For example, it *cannot* be a /sbin/nologin or /bin/false shell.
