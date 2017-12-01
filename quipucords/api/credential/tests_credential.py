@@ -15,14 +15,16 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import Credential
+import api.messages as messages
 
 
 class CredentialTest(TestCase):
     """Tests against the Credential model and view set."""
 
-    # pylint: disable= no-self-use
+    # pylint: disable= no-self-use,invalid-name
     def create_credential(self, name='test_cred',
-                          username='testuser', password='testpass'):
+                          username='testuser', password='testpass',
+                          cred_type=Credential.HOSTS_CRED_TYPE):
         """Create a Credential model for use within test cases.
 
         :param name: name of the host credential
@@ -31,6 +33,7 @@ class CredentialTest(TestCase):
         :returns: A Credential model
         """
         return Credential.objects.create(name=name,
+                                         cred_type=cred_type,
                                          username=username,
                                          password=password)
 
@@ -284,3 +287,83 @@ class CredentialTest(TestCase):
         url = reverse('hostcred-detail', args=(cred.pk,))
         resp = self.client.delete(url, format='json')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_vcentercred_create(self):
+        """Ensure we can create a new vcenter credential."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+
+    def test_vc_cred_create_double(self):
+        """Vcenter cred with duplicate name should fail."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+
+        self.create_expect_400(data)
+
+    def test_vc_create_missing_password(self):
+        """Test VCenter without password."""
+        expected_error = {'non_field_errors': [messages.VC_PWD_AND_USERNAME]}
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'ssh_keyfile': 'keyfile'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_vc_create_extra_keyfile(self):
+        """Test VCenter without password."""
+        expected_error = {'non_field_errors': [
+            messages.VC_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'ssh_keyfile': 'keyfile'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_vc_create_extra_sudopass(self):
+        """Test VCenter with extra sudo password."""
+        expected_error = {'non_field_errors': [
+            messages.VC_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'sudo_password': 'pass2'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_vc_create_extra_keyfile_pass(self):
+        """Test VCenter with extra keyfile passphase."""
+        expected_error = {'non_field_errors': [
+            messages.VC_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('hostcred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'ssh_passphrase': 'pass2'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
