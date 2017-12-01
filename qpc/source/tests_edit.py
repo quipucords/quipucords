@@ -21,7 +21,7 @@ from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.utils import read_in_file
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.auth import AUTH_URI
+from qpc.credential import CREDENTIAL_URI
 from qpc.source import SOURCE_URI
 from qpc.source.edit import SourceEditCommand
 from qpc.utils import get_server_location, write_server_config
@@ -72,7 +72,7 @@ class SourceEditCliTests(unittest.TestCase):
         """Testing the add source command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'source', 'add', '--name', 'source1',
-                        '--hosts', TMP_HOSTFILE, '--auth', 'auth1']
+                        '--hosts', TMP_HOSTFILE, '--credential', 'credential1']
             CLI().main()
 
     def test_read_input(self):
@@ -82,14 +82,14 @@ class SourceEditCliTests(unittest.TestCase):
         self.assertEqual(expected, vals)
 
     def test_edit_source_none(self):
-        """Testing the edit auth command for none existing auth."""
+        """Testing the edit credential command for none existing credential."""
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source_none', hosts=['1.2.3.4'],
-                             auth=['auth1'], ssh_port=22)
+                             credential=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -105,7 +105,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.SSLError)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1'], ssh_port=22)
+                             credential=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -119,7 +119,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1'], ssh_port=22)
+                             credential=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -129,20 +129,20 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source(self):
         """Testing the edit source command successfully."""
         source_out = StringIO()
-        url_get_auth = BASE_URL + AUTH_URI + '?name=auth1'
+        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_patch = BASE_URL + SOURCE_URI + '1/'
-        auth_data = [{'id': 1, 'name': 'auth1', 'username': 'root',
+        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
-            mocker.get(url_get_auth, status_code=200, json=auth_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
             mocker.patch(url_patch, status_code=200)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1'], ssh_port=22)
+                             credential=['credential1'], ssh_port=22)
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -156,51 +156,51 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_source, status_code=500, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1'], ssh_port=22)
+                             credential=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertEqual(source_out.getvalue(),
                                      'Source "source1" does not exist\n')
 
-    def test_edit_source_auth_nf(self):
-        """Testing the edit source command where auth is not found."""
+    def test_edit_source_cred_nf(self):
+        """Testing the edit source command where credential is not found."""
         source_out = StringIO()
-        url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
+        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        auth_data = [{'id': 1, 'name': 'auth1', 'username': 'root',
+        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
-            mocker.get(url_get_auth, status_code=200, json=auth_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1', 'auth2'], ssh_port=22)
+                             credential=['credential1', 'cred2'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--auth" input'
+                                    'the "--credential" input'
                                     in source_out.getvalue())
 
-    def test_edit_source_auth_err(self):
-        """Testing the edit source command where auth request hits error."""
+    def test_edit_source_cred_err(self):
+        """Testing the edit source command where credential request hits error."""
         source_out = StringIO()
-        url_get_auth = BASE_URL + AUTH_URI + '?name=auth1%2Cauth2'
+        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
-            mocker.get(url_get_auth, status_code=500)
+            mocker.get(url_get_cred, status_code=500)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             auth=['auth1', 'auth2'], ssh_port=22)
+                             credential=['credential1', 'cred2'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--auth" input'
+                                    'the "--credential" input'
                                     in source_out.getvalue())

@@ -58,7 +58,7 @@ def _credential_vars(credential):
 
 
 def _construct_vars(connection_port, credential=None):
-    """Get the Ansible host vars that implement an auth.
+    """Get the Ansible host vars that implement an credential.
 
     :param connection_port: The connection port
     :param credential: The credential used for connections

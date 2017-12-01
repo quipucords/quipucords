@@ -100,7 +100,7 @@ class ScanStartCliTests(unittest.TestCase):
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'auth2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})

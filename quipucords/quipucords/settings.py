@@ -110,7 +110,7 @@ COMMON_PASSWORD_VALIDATOR = \
     'django.contrib.auth.password_validation.CommonPasswordValidator'
 NUMERIC_PASSWORD_VALIDATOR = \
     'django.contrib.auth.password_validation.NumericPasswordValidator'
-AUTH_PASSWORD_VALIDATORS = [
+CRED_PASSWORD_VALIDATORS = [
     {
         NAME: USER_ATTRIBUTE_SIMILARITY_VALIDATOR,
     },

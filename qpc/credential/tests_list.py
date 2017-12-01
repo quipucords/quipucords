@@ -18,8 +18,8 @@ import requests
 import requests_mock
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.auth import AUTH_URI
-from qpc.auth.list import AuthListCommand
+from qpc.credential import CREDENTIAL_URI
+from qpc.credential.list import CredentialListCommand
 from qpc.utils import get_server_location, write_server_config
 
 PARSER = ArgumentParser()
@@ -29,8 +29,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class AuthListCliTests(unittest.TestCase):
-    """Class for testing the auth list commands for qpc."""
+class CredentialListCliTests(unittest.TestCase):
+    """Class for testing the credential list commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -44,72 +44,72 @@ class AuthListCliTests(unittest.TestCase):
         # Restore stderr
         sys.stderr = self.orig_stderr
 
-    def test_list_auth_ssl_err(self):
-        """Testing the list auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_list_cred_ssl_err(self):
+        """Testing the list credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            alc = AuthListCommand(SUBPARSER)
+            alc = CredentialListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_list_auth_conn_err(self):
-        """Testing the list auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_list_cred_conn_err(self):
+        """Testing the list credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            alc = AuthListCommand(SUBPARSER)
+            alc = CredentialListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
 
-    def test_list_auth_internal_err(self):
-        """Testing the list auth command with an internal error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_list_cred_internal_err(self):
+        """Testing the list credential command with an internal error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            alc = AuthListCommand(SUBPARSER)
+            alc = CredentialListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     alc.main(args)
-                    self.assertEqual(auth_out.getvalue(), 'Server Error')
+                    self.assertEqual(cred_out.getvalue(), 'Server Error')
 
-    def test_list_auth_empty(self):
-        """Testing the list auth command successfully with empty data."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_list_cred_empty(self):
+        """Testing the list credential command successfully with empty data."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            alc = AuthListCommand(SUBPARSER)
+            alc = CredentialListCommand(SUBPARSER)
             args = Namespace()
-            with redirect_stdout(auth_out):
+            with redirect_stdout(cred_out):
                 alc.main(args)
-                self.assertEqual(auth_out.getvalue(),
+                self.assertEqual(cred_out.getvalue(),
                                  'No credentials exist yet.\n')
 
-    def test_list_auth_data(self):
-        """Testing the list auth command successfully with stubbed data."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
-        auth_entry = {'id': 1, 'name': 'auth1', 'username': 'root',
+    def test_list_cred_data(self):
+        """Testing the list credential command successfully with stubbed data."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
+        credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}
-        data = [auth_entry]
+        data = [credential_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
-            alc = AuthListCommand(SUBPARSER)
+            alc = CredentialListCommand(SUBPARSER)
             args = Namespace()
-            with redirect_stdout(auth_out):
+            with redirect_stdout(cred_out):
                 alc.main(args)
-                expected = '[{"id":1,"name":"auth1","password":"********",' \
+                expected = '[{"id":1,"name":"credential1","password":"********",' \
                     '"username":"root"}]'
-                self.assertEqual(auth_out.getvalue().replace('\n', '')
+                self.assertEqual(cred_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

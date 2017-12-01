@@ -107,7 +107,7 @@ class SourceClearCliTests(unittest.TestCase):
         get_url = BASE_URL + SOURCE_URI + '?name=source1'
         delete_url = BASE_URL + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'auth': ['auth1', 'auth2'], 'ssh_port': 22}
+                        'credential': ['credential1', 'cred2'], 'ssh_port': 22}
         data = [source_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
@@ -128,7 +128,7 @@ class SourceClearCliTests(unittest.TestCase):
         get_url = BASE_URL + SOURCE_URI + '?name=source1'
         delete_url = BASE_URL + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'auth': ['auth1', 'auth2'], 'ssh_port': 22}
+                        'credential': ['credential1', 'cred2'], 'ssh_port': 22}
         data = [source_entry]
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
@@ -168,7 +168,7 @@ class SourceClearCliTests(unittest.TestCase):
         get_url = BASE_URL + SOURCE_URI
         delete_url = BASE_URL + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'auth': ['auth1', 'auth2'], 'ssh_port': 22}
+                        'credential': ['credential1', 'cred2'], 'ssh_port': 22}
         data = [source_entry]
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
@@ -190,7 +190,7 @@ class SourceClearCliTests(unittest.TestCase):
         get_url = BASE_URL + SOURCE_URI
         delete_url = BASE_URL + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'auth': ['auth1', 'auth2'], 'ssh_port': 22}
+                        'credential': ['credential1', 'cred2'], 'ssh_port': 22}
         data = [source_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)

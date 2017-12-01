@@ -17,7 +17,7 @@ from requests import codes
 from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
-import qpc.auth as auth
+import qpc.credential as credential
 import qpc.source as source
 from qpc.source.utils import validate_port, build_source_payload
 from qpc.translation import _
@@ -48,9 +48,9 @@ class SourceEditCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=False)
-        self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
+        self.parser.add_argument('--credential', dest='credential', metavar='CREDENTIAL',
                                  nargs='+', default=[],
-                                 help=_(messages.SOURCE_AUTHS_HELP),
+                                 help=_(messages.SOURCE_CREDS_HELP),
                                  required=False)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
@@ -60,7 +60,7 @@ class SourceEditCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if not(self.args.hosts or self.args.auth or self.args.ssh_port):
+        if not(self.args.hosts or self.args.credential or self.args.ssh_port):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
@@ -89,36 +89,36 @@ class SourceEditCommand(CliCommand):
             print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
 
-        # check for valid auth values
-        if len(self.args.auth) > 0:  # pylint: disable=len-as-condition
-            auth_list = ','.join(self.args.auth)
+        # check for valid credential values
+        if len(self.args.credential) > 0:  # pylint: disable=len-as-condition
+            cred_list = ','.join(self.args.credential)
             response = request(parser=self.parser, method=GET,
-                               path=auth.AUTH_URI,
-                               params={'name': auth_list},
+                               path=credential.CREDENTIAL_URI,
+                               params={'name': cred_list},
                                payload=None)
             if response.status_code == codes.ok:  # pylint: disable=no-member
                 json_data = response.json()
-                if len(json_data) == len(self.args.auth):
+                if len(json_data) == len(self.args.credential):
                     self.args.credentials = []
                     for cred_entry in json_data:
                         self.args.credentials.append(cred_entry['id'])
                 else:
                     for cred_entry in json_data:
                         cred_name = cred_entry['name']
-                        self.args.auth.remove(cred_name)
-                    not_found_str = ','.join(self.args.auth)
-                    print(_(messages.SOURCE_EDIT_AUTHS_NOT_FOUND %
+                        self.args.credential.remove(cred_name)
+                    not_found_str = ','.join(self.args.credential)
+                    print(_(messages.SOURCE_EDIT_CREDS_NOT_FOUND %
                             (not_found_str, self.args.name)))
                     sys.exit(1)
             else:
-                print(_(messages.SOURCE_EDIT_AUTH_PROCESS_ERR %
+                print(_(messages.SOURCE_EDIT_CRED_PROCESS_ERR %
                         self.args.name))
                 sys.exit(1)
 
     def _build_data(self):
-        """Construct the dictionary auth given our arguments.
+        """Construct the dictionary credential given our arguments.
 
-        :returns: a dictionary representing the auth being added
+        :returns: a dictionary representing the credential being added
         """
         self.req_payload = build_source_payload(self.args, add_none=False)
 

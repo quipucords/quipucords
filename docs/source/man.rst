@@ -32,11 +32,11 @@ Usage
 
 * Creating authentication profiles:
 
-  ``qpc auth add ...``
+  ``qpc credential add ...``
 
 * Creating sources:
 
-  ``qpc source add --name=X --hosts X Y Z --auth A B``
+  ``qpc source add --name=X --hosts X Y Z --credential A B``
 
 * Running a scan:
 
@@ -51,7 +51,7 @@ The following sections describe these commands, their subcommands, and their opt
 Authentication Profiles
 -----------------------
 
-Use the ``qpc auth`` command to create and manage authentication profiles.
+Use the ``qpc credential`` command to create and manage authentication profiles.
 
 An authentication profile defines a set of user credentials to be used during a scan. These user credentials include a username and a password or SSH key. Quipucords uses SSH to connect to servers on the network and uses authentication profiles to obtain the user credentials that are required to access those servers.
 
@@ -62,7 +62,7 @@ Creating and Editing Authentication Profiles
 
 To create an authentication profile, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate authentication profile entry.
 
-**qpc auth add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc credential add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 ``--name=name``
 
@@ -89,21 +89,21 @@ To create an authentication profile, supply SSH credentials as either a username
   Prompts for the password to be used when running a command that uses sudo on the systems to be scanned.
 
 
-The information in an authentication profile, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc auth edit`` command to change the SSH credential information in an authentication profile. The parameters for ``qpc auth edit`` are the same as those for ``qpc auth add``.
+The information in an authentication profile, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc credential edit`` command to change the SSH credential information in an authentication profile. The parameters for ``qpc credential edit`` are the same as those for ``qpc credential add``.
 
-**qpc auth edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc credential edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 Listing and Showing Authentication Profiles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``qpc auth list`` command returns the details for every authentication profile that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
+The ``qpc credential list`` command returns the details for every authentication profile that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
 
-**qpc auth list**
+**qpc credential list**
 
 
-The ``qpc auth show`` command is the same as the ``qpc auth list`` command, except that it returns details for a single specified authentication profile.
+The ``qpc credential show`` command is the same as the ``qpc credential list`` command, except that it returns details for a single specified authentication profile.
 
-**qpc auth show --name=** *name*
+**qpc credential show --name=** *name*
 
 ``--name=name``
 
@@ -117,7 +117,7 @@ As the network infrastructure changes, it might be necessary to delete some auth
 
 **IMPORTANT:** Remove or change the authentication profile from any source that uses it *before* clearing an authentication profile. Otherwise, any attempt to use the source to run a scan runs the command with a nonexistent authentication profile, an action that causes the ``qpc`` command to fail.
 
-**qpc auth clear (--name** *name* **| --all)**
+**qpc credential clear (--name** *name* **| --all)**
 
 ``--name=name``
 
@@ -138,9 +138,9 @@ A source defines a collection of network information, including IP addresses or 
 Creating and Editing Sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the authentication profiles needed to access those systems with the ``--auth`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
+To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the authentication profiles needed to access those systems with the ``--credential`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name* **--hosts** *ip_address* **--auth** *auth_profile* **[--sshport=** *ssh_port* **]**
+**qpc source add --name=** *name* **--hosts** *ip_address* **--credential** *auth_profile* **[--sshport=** *ssh_port* **]**
 
 ``--name=name``
 
@@ -168,11 +168,11 @@ To create a source, supply one or more host names or IP addresses to connect to 
 
     --hosts /home/user1/hosts_file
 
-``--auth auth_profile``
+``--credential auth_profile``
 
   Contains the name of the authentication profile to use to authenticate to the systems that are being scanned. If the individual systems that are being scanned each require different authentication credentials, you can use more than one authentication profile. To add multiple authentication profiles to the source, separate each value with a space, for example:
 
-  ``--auth first_auth second_auth``
+  ``--credential first_auth second_auth``
 
   **IMPORTANT:** An authentication profile must exist before you attempt to use it in a source.
 
@@ -184,11 +184,11 @@ The information in a source might change as the structure of the network changes
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--auth** *auth_profile* **] [--sshport=** *ssh_port* **]**
+**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--credential** *auth_profile* **] [--sshport=** *ssh_port* **]**
 
-For example, if a source contains a value of ``server1creds`` for the ``--auth`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` authentication profiles, you would edit the source as follows:
+For example, if a source contains a value of ``server1creds`` for the ``--credential`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` authentication profiles, you would edit the source as follows:
 
-``qpc source edit --name=mysource --auth server1creds server2creds``
+``qpc source edit --name=mysource --credential server1creds server2creds``
 
 **TIP:** After editing a source, use the ``qpc source show`` command to review those edits.
 
@@ -306,10 +306,10 @@ The following options are available for every Quipucords command.
 Examples
 --------
 
-:Creating a new authentication profile with a keyfile: ``qpc auth add --name=new-creds --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
-:Creating a new authentication profile with a password: ``qpc auth add --name=other-creds --username=qpc-user-pass --password``
-:Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --auth new-creds``
-:Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --auth new-creds other-creds``
+:Creating a new authentication profile with a keyfile: ``qpc credential add --name=new-creds --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
+:Creating a new authentication profile with a password: ``qpc credential add --name=other-creds --username=qpc-user-pass --password``
+:Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --credential new-creds``
+:Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --credential new-creds other-creds``
 :Running a scan with a source: ``qpc scan --source=new-source``
 
 Security Considerations

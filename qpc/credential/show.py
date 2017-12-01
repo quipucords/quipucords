@@ -9,40 +9,49 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""AuthListCommand is used to list authentication credentials."""
+"""CredentialShowCommand is used to show a specific credential."""
 
 from __future__ import print_function
+import sys
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
-import qpc.auth as auth
+import qpc.credential as credential
 from qpc.request import GET
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class AuthListCommand(CliCommand):
-    """Defines the list command.
+class CredentialShowCommand(CliCommand):
+    """Defines the show command.
 
-    This command is for listing auths which can be later associated with
+    This command is for showing an credential which can be later associated with
     sources to gather facts.
     """
 
-    SUBCOMMAND = auth.SUBCOMMAND
-    ACTION = auth.LIST
+    SUBCOMMAND = credential.SUBCOMMAND
+    ACTION = credential.SHOW
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            auth.AUTH_URI, [codes.ok])
+                            credential.CREDENTIAL_URI, [codes.ok])
+        self.parser.add_argument('--name', dest='name', metavar='NAME',
+                                 help=_(messages.CRED_NAME_HELP),
+                                 required=True)
+
+    def _build_req_params(self):
+        self.req_params = {'name': self.args.name}
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        if json_data == []:
-            print(_(messages.AUTH_LIST_NO_CREDS))
-        else:
-            data = pretty_print(json_data)
+        if len(json_data) == 1:
+            cred_entry = json_data[0]
+            data = pretty_print(cred_entry)
             print(data)
+        else:
+            print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
+            sys.exit(1)

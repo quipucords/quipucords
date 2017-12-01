@@ -20,8 +20,8 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.auth import AUTH_URI
-from qpc.auth.edit import AuthEditCommand
+from qpc.credential import CREDENTIAL_URI
+from qpc.credential.edit import CredentialEditCommand
 from qpc.utils import get_server_location, write_server_config
 
 TMP_KEY = '/tmp/testkey'
@@ -32,8 +32,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class AuthEditCliTests(unittest.TestCase):
-    """Class for testing the auth edit commands for qpc."""
+class CredentialEditCliTests(unittest.TestCase):
+    """Class for testing the credential edit commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -54,110 +54,110 @@ class AuthEditCliTests(unittest.TestCase):
             os.remove(TMP_KEY)
 
     def test_edit_req_args_err(self):
-        """Testing the auth edit command required flags."""
-        auth_out = StringIO()
+        """Testing the credential edit command required flags."""
+        cred_out = StringIO()
         with self.assertRaises(SystemExit):
-            with redirect_stdout(auth_out):
-                sys.argv = ['/bin/qpc', 'auth', 'edit', '--name', 'auth1']
+            with redirect_stdout(cred_out):
+                sys.argv = ['/bin/qpc', 'credential', 'edit', '--name', 'credential1']
                 CLI().main()
-                self.assertEqual(auth_out.getvalue(),
+                self.assertEqual(cred_out.getvalue(),
                                  'No arguments provided to edit '
-                                 'credential auth1')
+                                 'credential credential1')
 
     def test_edit_bad_key(self):
-        """Testing the auth edit command.
+        """Testing the credential edit command.
 
         When providing an invalid path for the sshkeyfile.
         """
-        auth_out = StringIO()
+        cred_out = StringIO()
         with self.assertRaises(SystemExit):
-            with redirect_stdout(auth_out):
-                sys.argv = ['/bin/qpc', 'auth', 'edit', '--name', 'auth1',
+            with redirect_stdout(cred_out):
+                sys.argv = ['/bin/qpc', 'credential', 'edit', '--name', 'credential1',
                             '--sshkeyfile', 'bad_path']
                 CLI().main()
                 self.assertTrue('Please provide a valid location for the '
                                 '"--sshkeyfile" argument.'
-                                in auth_out.getvalue())
+                                in cred_out.getvalue())
 
-    def test_edit_auth_none(self):
-        """Testing the edit auth command for none existing auth."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI + '?name=auth_none'
+    def test_edit_cred_none(self):
+        """Testing the edit credential command for none existing credential."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            aec = AuthEditCommand(SUBPARSER)
-            args = Namespace(name='auth_none', username='root',
+            aec = CredentialEditCommand(SUBPARSER)
+            args = Namespace(name='cred_none', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aec.main(args)
                     aec.main(args)
-                    self.assertTrue('Auth "auth_none" does not exist'
-                                    in auth_out.getvalue())
+                    self.assertTrue('credential "cred_none" does not exist'
+                                    in cred_out.getvalue())
 
-    def test_edit_auth_ssl_err(self):
-        """Testing the edit auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_edit_cred_ssl_err(self):
+        """Testing the edit credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            aec = AuthEditCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root',
+            aec = CredentialEditCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aec.main(args)
-                    self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_edit_auth_conn_err(self):
-        """Testing the edit auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_edit_cred_conn_err(self):
+        """Testing the edit credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            aec = AuthEditCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root',
+            aec = CredentialEditCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aec.main(args)
-                    self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
 
-    def test_edit_auth(self):
-        """Testing the edit auth command successfully."""
-        auth_out = StringIO()
-        url_get = BASE_URL + AUTH_URI
-        url_patch = BASE_URL + AUTH_URI + '1/'
-        data = [{'id': 1, 'name': 'auth1', 'username': 'root',
+    def test_edit_cred(self):
+        """Testing the edit credential command successfully."""
+        cred_out = StringIO()
+        url_get = BASE_URL + CREDENTIAL_URI
+        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = AuthEditCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root', filename=TMP_KEY,
+            aec = CredentialEditCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
-            with redirect_stdout(auth_out):
+            with redirect_stdout(cred_out):
                 aec.main(args)
-                self.assertEqual(auth_out.getvalue(),
-                                 'Auth "auth1" was updated\n')
+                self.assertEqual(cred_out.getvalue(),
+                                 'Credential "credential1" was updated\n')
 
-    def test_edit_auth_get_error(self):
-        """Testing the edit auth command server error occurs."""
-        auth_out = StringIO()
-        url_get = BASE_URL + AUTH_URI
-        data = [{'id': 1, 'name': 'auth1', 'username': 'root',
+    def test_edit_cred_get_error(self):
+        """Testing the edit credential command server error occurs."""
+        cred_out = StringIO()
+        url_get = BASE_URL + CREDENTIAL_URI
+        data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=500, json=data)
-            aec = AuthEditCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root', filename=TMP_KEY,
+            aec = CredentialEditCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aec.main(args)
-                    self.assertEqual(auth_out.getvalue(),
-                                     'Auth "auth1" does not exist\n')
+                    self.assertEqual(cred_out.getvalue(),
+                                     'Credential "credential1" does not exist\n')

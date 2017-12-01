@@ -20,8 +20,8 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.auth import AUTH_URI
-from qpc.auth.add import AuthAddCommand
+from qpc.credential import CREDENTIAL_URI
+from qpc.credential.add import CredentialAddCommand
 from qpc.utils import get_server_location, write_server_config
 
 TMP_KEY = '/tmp/testkey'
@@ -32,8 +32,8 @@ write_server_config({'host': '127.0.0.1', 'port': 8000})
 BASE_URL = get_server_location()
 
 
-class AuthAddCliTests(unittest.TestCase):
-    """Class for testing the auth add commands for qpc."""
+class CredentialAddCliTests(unittest.TestCase):
+    """Class for testing the credential add commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
@@ -54,85 +54,85 @@ class AuthAddCliTests(unittest.TestCase):
             os.remove(TMP_KEY)
 
     def test_add_req_args_err(self):
-        """Testing the add auth command required flags."""
+        """Testing the add credential command required flags."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'auth', 'add', '--name', 'auth1']
+            sys.argv = ['/bin/qpc', 'credential', 'add', '--name', 'credential1']
             CLI().main()
 
     def test_add_bad_key(self):
-        """Testing the add auth command.
+        """Testing the add credential command.
 
         When providing an invalid path for the sshkeyfile.
         """
-        auth_out = StringIO()
+        cred_out = StringIO()
         with self.assertRaises(SystemExit):
-            with redirect_stdout(auth_out):
-                sys.argv = ['/bin/qpc', 'auth', 'add', '--name', 'auth1',
+            with redirect_stdout(cred_out):
+                sys.argv = ['/bin/qpc', 'credential', 'add', '--name', 'credential1',
                             '--username', 'root', '--sshkeyfile', 'bad_path']
                 CLI().main()
 
-    def test_add_auth_name_dup(self):
-        """Testing the add auth command duplicate name."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_add_cred_name_dup(self):
+        """Testing the add credential command duplicate name."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=400, json=error)
-            aac = AuthAddCommand(SUBPARSER)
-            args = Namespace(name='auth_dup', username='root',
+            aac = CredentialAddCommand(SUBPARSER)
+            args = Namespace(name='cred_dup', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aac.main(args)
                     aac.main(args)
                     self.assertTrue('credential with this name already exists.'
-                                    in auth_out.getvalue())
+                                    in cred_out.getvalue())
 
-    def test_add_auth_ssl_err(self):
-        """Testing the add auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_add_cred_ssl_err(self):
+        """Testing the add credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
-            aac = AuthAddCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root',
+            aac = CredentialAddCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aac.main(args)
-                    self.assertEqual(auth_out.getvalue(), SSL_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
 
-    def test_add_auth_conn_err(self):
-        """Testing the add auth command with a connection error."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_add_cred_conn_err(self):
+        """Testing the add credential command with a connection error."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
-            aac = AuthAddCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root',
+            aac = CredentialAddCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
-                with redirect_stdout(auth_out):
+                with redirect_stdout(cred_out):
                     aac.main(args)
-                    self.assertEqual(auth_out.getvalue(), CONNECTION_ERROR_MSG)
+                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
 
-    def test_add_auth(self):
-        """Testing the add auth command successfully."""
-        auth_out = StringIO()
-        url = BASE_URL + AUTH_URI
+    def test_add_cred(self):
+        """Testing the add credential command successfully."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = AuthAddCommand(SUBPARSER)
-            args = Namespace(name='auth1', username='root', filename=TMP_KEY,
+            aac = CredentialAddCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
-            with redirect_stdout(auth_out):
+            with redirect_stdout(cred_out):
                 aac.main(args)
-                self.assertEqual(auth_out.getvalue(),
-                                 'Auth "auth1" was added\n')
+                self.assertEqual(cred_out.getvalue(),
+                                 'Credential "credential1" was added\n')

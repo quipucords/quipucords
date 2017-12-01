@@ -88,5 +88,5 @@ class ConfigureHostTests(unittest.TestCase):
         write_server_config({})
 
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'auth']
+            sys.argv = ['/bin/qpc', 'credential']
             CLI().main()
