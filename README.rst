@@ -41,7 +41,7 @@ Requirements & Assumptions
 --------------------------
 Before installing quipucords, there are some guidelines about which system it should be installed on:
  * quipucords is written to run on RHEL or Fedora servers.
- * The system that quipucords is installed on must have network access the systems to be discovered and inspected.
+ * The system that quipucords is installed on must have source access the systems to be discovered and inspected.
  * The target systems must be running SSH.
  * The user account that quipucords uses to SSH into the systems must have adequate permissions to run commands and read certain files.
  * The user account quipucords uses for a machine should have a sh like shell. For example, it *cannot* be a /sbin/nologin or /bin/false shell.
@@ -103,7 +103,7 @@ Command Syntax & Usage
 The complete list of options for each command and subcommand are listed in the
 qpc manpage with other usage examples.
 
-For expanded information on auth entries, profiles, scanning, and output read
+For expanded information on auth entries, sources, scanning, and output read
 the `syntax and usage document <docs/source/man.rst>`_.
 
 Development
