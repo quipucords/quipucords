@@ -72,7 +72,7 @@ class SourceEditCliTests(unittest.TestCase):
         """Testing the add source command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'source', 'add', '--name', 'source1',
-                        '--hosts', TMP_HOSTFILE, '--credential', 'credential1']
+                        '--hosts', TMP_HOSTFILE, '--cred', 'credential1']
             CLI().main()
 
     def test_read_input(self):
@@ -82,14 +82,14 @@ class SourceEditCliTests(unittest.TestCase):
         self.assertEqual(expected, vals)
 
     def test_edit_source_none(self):
-        """Testing the edit credential command for none existing credential."""
+        """Testing the edit cred command for none existing cred."""
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source_none', hosts=['1.2.3.4'],
-                             credential=['credential1'], ssh_port=22)
+                             cred=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -105,7 +105,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.SSLError)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1'], ssh_port=22)
+                             cred=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -119,7 +119,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1'], ssh_port=22)
+                             cred=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -142,7 +142,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.patch(url_patch, status_code=200)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1'], ssh_port=22)
+                             cred=['credential1'], ssh_port=22)
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -156,7 +156,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_source, status_code=500, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1'], ssh_port=22)
+                             cred=['credential1'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -164,7 +164,7 @@ class SourceEditCliTests(unittest.TestCase):
                                      'Source "source1" does not exist\n')
 
     def test_edit_source_cred_nf(self):
-        """Testing the edit source command where credential is not found."""
+        """Testing the edit source command where cred is not found."""
         source_out = StringIO()
         url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
@@ -177,12 +177,12 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_cred, status_code=200, json=cred_data)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1', 'cred2'], ssh_port=22)
+                             cred=['credential1', 'cred2'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--credential" input'
+                                    'the "--cred" input'
                                     in source_out.getvalue())
 
     def test_edit_source_cred_err(self):
@@ -197,10 +197,10 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_cred, status_code=500)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             credential=['credential1', 'cred2'], ssh_port=22)
+                             cred=['credential1', 'cred2'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--credential" input'
+                                    'the "--cred" input'
                                     in source_out.getvalue())

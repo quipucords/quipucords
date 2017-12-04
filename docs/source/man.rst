@@ -32,11 +32,11 @@ Usage
 
 * Creating credentials:
 
-  ``qpc credential add ...``
+  ``qpc cred add ...``
 
 * Creating sources:
 
-  ``qpc source add --name=X --hosts X Y Z --credential A B``
+  ``qpc source add --name=X --hosts X Y Z --cred A B``
 
 * Running a scan:
 
@@ -51,7 +51,7 @@ The following sections describe these commands, their subcommands, and their opt
 Credentials
 -----------------------
 
-Use the ``qpc credential`` command to create and manage credentials.
+Use the ``qpc cred`` command to create and manage credentials.
 
 A credential defines a set of user authentication configuration to be used during a scan. These user credentials include a username and a password or SSH key. Quipucords uses SSH to connect to servers on the network and uses credentials to access those servers.
 
@@ -62,7 +62,7 @@ Creating and Editing Credentials
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
-**qpc credential add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred add --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 ``--name=name``
 
@@ -89,21 +89,21 @@ To create a credential, supply SSH credentials as either a username-password pai
   Prompts for the password to be used when running a command that uses sudo on the systems to be scanned.
 
 
-The information in a credential, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc credential edit`` command to change the SSH credential information in a credential. The parameters for ``qpc credential edit`` are the same as those for ``qpc credential add``.
+The information in a credential, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
 
-**qpc credential edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 Listing and Showing Credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``qpc credential list`` command returns the details for every credential that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
+The ``qpc cred list`` command returns the details for every credential that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
 
-**qpc credential list**
+**qpc cred list**
 
 
-The ``qpc credential show`` command is the same as the ``qpc credential list`` command, except that it returns details for a single specified credential.
+The ``qpc cred show`` command is the same as the ``qpc cred list`` command, except that it returns details for a single specified credential.
 
-**qpc credential show --name=** *name*
+**qpc cred show --name=** *name*
 
 ``--name=name``
 
@@ -117,7 +117,7 @@ As the network infrastructure changes, it might be necessary to delete some cred
 
 **IMPORTANT:** Remove or change the credential from any source that uses it *before* clearing a credential. Otherwise, any attempt to use the source to run a scan runs the command with a nonexistent credential, an action that causes the ``qpc`` command to fail.
 
-**qpc credential clear (--name** *name* **| --all)**
+**qpc cred clear (--name** *name* **| --all)**
 
 ``--name=name``
 
@@ -138,9 +138,9 @@ A source defines a collection of network information, including IP addresses or 
 Creating and Editing Sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the credentials needed to access those systems with the ``--credential`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
+To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name* **--hosts** *ip_address* **--credential** *credential* **[--sshport=** *ssh_port* **]**
+**qpc source add --name=** *name* **--hosts** *ip_address* **--cred** *credential* **[--sshport=** *ssh_port* **]**
 
 ``--name=name``
 
@@ -168,11 +168,11 @@ To create a source, supply one or more host names or IP addresses to connect to 
 
     --hosts /home/user1/hosts_file
 
-``--credential credential``
+``--cred credential``
 
   Contains the name of the credential to use to authenticate to the systems that are being scanned. If the individual systems that are being scanned each require different authentication credentials, you can use more than one credential. To add multiple credentials to the source, separate each value with a space, for example:
 
-  ``--credential first_auth second_auth``
+  ``--cred first_auth second_auth``
 
   **IMPORTANT:** A credential must exist before you attempt to use it in a source.
 
@@ -184,11 +184,11 @@ The information in a source might change as the structure of the network changes
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--credential** *credential* **] [--sshport=** *ssh_port* **]**
+**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--sshport=** *ssh_port* **]**
 
-For example, if a source contains a value of ``server1creds`` for the ``--credential`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
+For example, if a source contains a value of ``server1creds`` for the ``--cred`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
 
-``qpc source edit --name=mysource --credential server1creds server2creds``
+``qpc source edit --name=mysource --cred server1creds server2creds``
 
 **TIP:** After editing a source, use the ``qpc source show`` command to review those edits.
 
@@ -306,10 +306,10 @@ The following options are available for every Quipucords command.
 Examples
 --------
 
-:Creating a new credential with a keyfile: ``qpc credential add --name=new-creds --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
-:Creating a new credential with a password: ``qpc credential add --name=other-creds --username=qpc-user-pass --password``
-:Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --credential new-creds``
-:Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --credential new-creds other-creds``
+:Creating a new credential with a keyfile: ``qpc cred add --name=new-creds --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
+:Creating a new credential with a password: ``qpc cred add --name=other-creds --username=qpc-user-pass --password``
+:Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --cred new-creds``
+:Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --cred new-creds other-creds``
 :Running a scan with a source: ``qpc scan --source=new-source``
 
 Security Considerations

@@ -19,7 +19,7 @@ from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
 import qpc.source as source
 from qpc.source.utils import validate_port, build_source_payload
-import qpc.cred as credential
+import qpc.cred as cred
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -48,8 +48,8 @@ class SourceAddCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=True)
-        self.parser.add_argument('--credential', dest='credential',
-                                 metavar='CREDENTIAL',
+        self.parser.add_argument('--cred', dest='cred',
+                                 metavar='CRED',
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=True)
@@ -68,23 +68,23 @@ class SourceAddCommand(CliCommand):
             except ValueError:
                 pass
 
-        # check for valid credential values
-        cred_list = ','.join(self.args.credential)
+        # check for valid cred values
+        cred_list = ','.join(self.args.cred)
         response = request(parser=self.parser, method=GET,
-                           path=credential.CREDENTIAL_URI,
+                           path=cred.CREDENTIAL_URI,
                            params={'name': cred_list},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
-            if len(json_data) == len(self.args.credential):
-                self.args.credentials = []
+            if len(json_data) == len(self.args.cred):
+                self.args.creds = []
                 for cred_entry in json_data:
-                    self.args.credentials.append(cred_entry['id'])
+                    self.args.creds.append(cred_entry['id'])
             else:
                 for cred_entry in json_data:
                     cred_name = cred_entry['name']
-                    self.args.credential.remove(cred_name)
-                not_found_str = ','.join(self.args.credential)
+                    self.args.cred.remove(cred_name)
+                not_found_str = ','.join(self.args.cred)
                 print(_(messages.SOURCE_ADD_CREDS_NOT_FOUND %
                         (not_found_str, self.args.name)))
                 sys.exit(1)
@@ -93,7 +93,7 @@ class SourceAddCommand(CliCommand):
             sys.exit(1)
 
     def _build_data(self):
-        """Construct the dictionary credential given our arguments.
+        """Construct the dictionary cred given our arguments.
 
         :returns: a dictionary representing the source being added
         """

@@ -66,7 +66,7 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add source command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'source', 'add', '--name', 'source1',
-                        '--hosts', TMP_HOSTFILE, '--credential', 'cred1']
+                        '--hosts', TMP_HOSTFILE, '--cred', 'cred1']
             CLI().main()
 
     def test_validate_port_string(self):
@@ -112,7 +112,7 @@ class SourceAddCliTests(unittest.TestCase):
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             mocker.post(post_source_url, status_code=400, json=error)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source_dup', credential=['cred1'],
+            args = Namespace(name='source_dup', cred=['cred1'],
                              hosts=['1.2.3.4'], ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
@@ -122,38 +122,38 @@ class SourceAddCliTests(unittest.TestCase):
                                     in source_out.getvalue())
 
     def test_add_source_cred_less(self):
-        """Testing the add source command with a some invalid credential."""
+        """Testing the add source command with a some invalid cred."""
         source_out = StringIO()
         get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1%2Ccred2'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source1', credential=['cred1', 'cred2'],
+            args = Namespace(name='source1', cred=['cred1', 'cred2'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--credential" input'
+                                    'the "--cred" input'
                                     in source_out.getvalue())
 
     def test_add_source_cred_err(self):
-        """Testing the add source command with an credential err."""
+        """Testing the add source command with an cred err."""
         source_out = StringIO()
         get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1%2Ccred2'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=500)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source1', credential=['cred1', 'cred2'],
+            args = Namespace(name='source1', cred=['cred1', 'cred2'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
                     self.assertTrue('An error occurred while processing '
-                                    'the "--credential" input'
+                                    'the "--cred" input'
                                     in source_out.getvalue())
 
     def test_add_source_ssl_err(self):
@@ -163,7 +163,7 @@ class SourceAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, exc=requests.exceptions.SSLError)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source1', credential=['cred1'],
+            args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
@@ -178,7 +178,7 @@ class SourceAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, exc=requests.exceptions.ConnectTimeout)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source1', credential=['cred1'],
+            args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with self.assertRaises(SystemExit):
@@ -197,7 +197,7 @@ class SourceAddCliTests(unittest.TestCase):
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             mocker.post(post_source_url, status_code=201)
             nac = SourceAddCommand(SUBPARSER)
-            args = Namespace(name='source1', credential=['cred1'],
+            args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'],
                              ssh_port=22)
             with redirect_stdout(source_out):
