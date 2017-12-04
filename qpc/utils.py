@@ -156,12 +156,18 @@ def handle_error_response(response):
     """
     try:
         response_data = response.json()
-        for err_key, err_cases in response_data.items():
-            error_context = 'Error'
-            if err_key != 'non_field_errors':
-                error_context = err_key
-            for err_msg in err_cases:
-                log.error('%s: %s', error_context, err_msg)
+        if isinstance(response_data, dict):
+            for err_key, err_cases in response_data.items():
+                error_context = 'Error'
+                if err_key != 'non_field_errors':
+                    error_context = err_key
+                for err_msg in err_cases:
+                    log.error('%s: %s', error_context, err_msg)
+        elif isinstance(response_data, list):
+            for err in response_data:
+                log.error('Error: %s', err)
+        else:
+            log.error('Error: %s', str(response_data))
     except exception_class:
         pass
 
