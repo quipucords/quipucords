@@ -41,11 +41,11 @@ SOURCE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_SSH_PORT_HELP = 'SSH port for connection; default=22'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
-    '"--credential" input values. References for the'\
+    '"--cred" input values. References for the'\
     ' following credential could not' \
     ' be found: %s. Failed to add source "%s".'
 SOURCE_ADD_CRED_PROCESS_ERR = 'An error occurred while processing the' \
-    ' "--credential" input values. Failed to add source "%s"'
+    ' "--cred" input values. Failed to add source "%s"'
 SOURCE_ADDED = 'Source "%s" was added'
 
 SERVER_CONFIG_HOST_HELP = 'host or ip address'
@@ -63,10 +63,10 @@ SOURCE_EDIT_NO_ARGS = 'No arguments provided to edit source %s'
 SOURCE_DOES_NOT_EXIST = 'Source "%s" does not exist'
 
 SOURCE_EDIT_CREDS_NOT_FOUND = 'An error occurred while processing the' \
-    ' "--credential" input  values. References for the following credential ' \
+    ' "--cred" input  values. References for the following credential ' \
     'could not be found: %s. Failed to edit source "%s".'
 SOURCE_EDIT_CRED_PROCESS_ERR = 'An error occurred while processing the ' \
-    '"--credential" input values. Failed to edit source "%s"'
+    '"--cred" input values. Failed to edit source "%s"'
 SOURCE_UPDATED = 'Source "%s" was updated'
 SOURCE_LIST_NO_SOURCES = 'No sources exist yet.'
 
