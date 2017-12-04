@@ -20,8 +20,8 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.credential import CREDENTIAL_URI
-from qpc.credential.edit import CredentialEditCommand
+from qpc.cred import CREDENTIAL_URI
+from qpc.cred.edit import CredEditCommand
 from qpc.utils import get_server_location, write_server_config
 
 TMP_KEY = '/tmp/testkey'
@@ -87,7 +87,7 @@ class CredentialEditCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            aec = CredentialEditCommand(SUBPARSER)
+            aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred_none', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
@@ -104,7 +104,7 @@ class CredentialEditCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            aec = CredentialEditCommand(SUBPARSER)
+            aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
@@ -119,7 +119,7 @@ class CredentialEditCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            aec = CredentialEditCommand(SUBPARSER)
+            aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None)
@@ -138,7 +138,7 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredentialEditCommand(SUBPARSER)
+            aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -155,7 +155,7 @@ class CredentialEditCliTests(unittest.TestCase):
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=500, json=data)
-            aec = CredentialEditCommand(SUBPARSER)
+            aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):

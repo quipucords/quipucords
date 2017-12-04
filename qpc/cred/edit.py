@@ -9,43 +9,44 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""CredentialAddCommand is used to add authentication credentials."""
+"""CredEditCommand is used to edit credentials."""
 
 from __future__ import print_function
+import sys
 from requests import codes
-from qpc.request import POST
+from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
-import qpc.credential as credential
-from qpc.credential.utils import validate_sshkeyfile, build_credential_payload
+import qpc.cred as credential
+from qpc.cred.utils import validate_sshkeyfile, build_credential_payload
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class CredentialAddCommand(CliCommand):
-    """Defines the add command.
+class CredEditCommand(CliCommand):
+    """Defines the edit command.
 
-    This command is for creating new credentials which
-    can be later associated with sources to gather facts.
+    This command is for editing existing credentials
+    which can be later associated with sources to gather facts.
     """
 
     SUBCOMMAND = credential.SUBCOMMAND
-    ACTION = credential.ADD
+    ACTION = credential.EDIT
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
-                            subparsers.add_parser(self.ACTION), POST,
-                            credential.CREDENTIAL_URI, [codes.created])
+                            subparsers.add_parser(self.ACTION), PATCH,
+                            credential.CREDENTIAL_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.CRED_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--username', dest='username',
                                  metavar='USERNAME',
                                  help=_(messages.CRED_USER_HELP),
-                                 required=True)
-        group = self.parser.add_mutually_exclusive_group(required=True)
+                                 required=False)
+        group = self.parser.add_mutually_exclusive_group(required=False)
         group.add_argument('--password', dest='password',
                            action='store_true',
                            help=_(messages.CRED_PWD_HELP))
@@ -62,17 +63,41 @@ class CredentialAddCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
+        if not(self.args.username or self.args.password or
+               self.args.sudo_password or self.args.filename or
+               self.args.ssh_passphrase):
+            print(_(messages.CRED_EDIT_NO_ARGS % (self.args.name)))
+            self.parser.print_help()
+            sys.exit(1)
+
         if self.args.filename:
             # check for file existence on system
             self.args.filename = validate_sshkeyfile(self.args.filename,
                                                      self.parser)
+
+        # check for existence of credential
+        response = request(parser=self.parser, method=GET,
+                           path=credential.CREDENTIAL_URI,
+                           params={'name': self.args.name},
+                           payload=None)
+        if response.status_code == codes.ok:  # pylint: disable=no-member
+            json_data = response.json()
+            if len(json_data) == 1:
+                cred_entry = json_data[0]
+                self.req_path = self.req_path + str(cred_entry['id']) + '/'
+            else:
+                print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
+                sys.exit(1)
+        else:
+            print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
+            sys.exit(1)
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.
 
         :returns: a dictionary representing the credential being added
         """
-        self.req_payload = build_credential_payload(self.args)
+        self.req_payload = build_credential_payload(self.args, add_none=False)
 
     def _handle_response_success(self):
-        print(_(messages.CRED_ADDED % self.args.name))
+        print(_(messages.CRED_UPDATED % self.args.name))

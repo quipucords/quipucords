@@ -21,7 +21,7 @@ from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.utils import read_in_file
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.credential import CREDENTIAL_URI
+from qpc.cred import CREDENTIAL_URI
 from qpc.source import SOURCE_URI
 from qpc.source.edit import SourceEditCommand
 from qpc.utils import get_server_location, write_server_config

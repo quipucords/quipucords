@@ -15,7 +15,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 import sys
 import qpc.server as server
-import qpc.credential as credential
+import qpc.cred as cred
 import qpc.source as source
 import qpc.scan as scan
 from qpc.utils import (ensure_config_dir_exists,
@@ -24,11 +24,11 @@ from qpc.utils import (ensure_config_dir_exists,
                        setup_logging,
                        log)
 from qpc.server.commands import ConfigureHostCommand
-from qpc.credential.commands import (CredentialAddCommand,
-                                     CredentialListCommand,
-                                     CredentialEditCommand,
-                                     CredentialShowCommand,
-                                     CredentialClearCommand)
+from qpc.cred.commands import (CredAddCommand,
+                               CredListCommand,
+                               CredEditCommand,
+                               CredShowCommand,
+                               CredClearCommand)
 from qpc.source.commands import (SourceAddCommand, SourceListCommand,
                                  SourceShowCommand, SourceClearCommand,
                                  SourceEditCommand)
@@ -65,10 +65,10 @@ class CLI(object):
         self.subcommands = {}
         self._add_subcommand(server.SUBCOMMAND,
                              [ConfigureHostCommand])
-        self._add_subcommand(credential.SUBCOMMAND,
-                             [CredentialAddCommand, CredentialListCommand,
-                              CredentialEditCommand, CredentialShowCommand,
-                              CredentialClearCommand])
+        self._add_subcommand(cred.SUBCOMMAND,
+                             [CredAddCommand, CredListCommand,
+                              CredEditCommand, CredShowCommand,
+                              CredClearCommand])
         self._add_subcommand(source.SUBCOMMAND,
                              [SourceAddCommand, SourceListCommand,
                               SourceShowCommand, SourceClearCommand,

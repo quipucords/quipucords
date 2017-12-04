@@ -18,8 +18,8 @@ import requests
 import requests_mock
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.credential import CREDENTIAL_URI
-from qpc.credential.clear import CredentialClearCommand
+from qpc.cred import CREDENTIAL_URI
+from qpc.cred.clear import CredClearCommand
 from qpc.utils import get_server_location, write_server_config
 
 PARSER = ArgumentParser()
@@ -50,7 +50,7 @@ class CredentialClearCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -63,7 +63,7 @@ class CredentialClearCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -76,7 +76,7 @@ class CredentialClearCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -89,7 +89,7 @@ class CredentialClearCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='cred1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -108,7 +108,7 @@ class CredentialClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with redirect_stdout(cred_out):
                 acc.main(args)
@@ -130,7 +130,7 @@ class CredentialClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=500, json=err_data)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -147,7 +147,7 @@ class CredentialClearCliTests(unittest.TestCase):
         get_url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=[])
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -170,7 +170,7 @@ class CredentialClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=500, json=err_data)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -194,7 +194,7 @@ class CredentialClearCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
-            acc = CredentialClearCommand(SUBPARSER)
+            acc = CredClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with redirect_stdout(cred_out):
                 acc.main(args)

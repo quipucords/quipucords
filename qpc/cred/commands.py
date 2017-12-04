@@ -12,8 +12,8 @@
 """Commands for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
-from qpc.credential.add import CredentialAddCommand
-from qpc.credential.list import CredentialListCommand
-from qpc.credential.edit import CredentialEditCommand
-from qpc.credential.show import CredentialShowCommand
-from qpc.credential.clear import CredentialClearCommand
+from qpc.cred.add import CredAddCommand
+from qpc.cred.list import CredListCommand
+from qpc.cred.edit import CredEditCommand
+from qpc.cred.show import CredShowCommand
+from qpc.cred.clear import CredClearCommand

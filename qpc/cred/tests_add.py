@@ -20,8 +20,8 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.credential import CREDENTIAL_URI
-from qpc.credential.add import CredentialAddCommand
+from qpc.cred import CREDENTIAL_URI
+from qpc.cred.add import CredAddCommand
 from qpc.utils import get_server_location, write_server_config
 
 TMP_KEY = '/tmp/testkey'
@@ -80,7 +80,7 @@ class CredentialAddCliTests(unittest.TestCase):
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=400, json=error)
-            aac = CredentialAddCommand(SUBPARSER)
+            aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='cred_dup', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
@@ -98,7 +98,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
-            aac = CredentialAddCommand(SUBPARSER)
+            aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
@@ -114,7 +114,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
-            aac = CredentialAddCommand(SUBPARSER)
+            aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
@@ -130,7 +130,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = CredentialAddCommand(SUBPARSER)
+            aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, sudo_password=None,

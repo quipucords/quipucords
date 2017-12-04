@@ -17,7 +17,7 @@ from requests import codes
 from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
-import qpc.credential as credential
+import qpc.cred as credential
 import qpc.source as source
 from qpc.source.utils import validate_port, build_source_payload
 from qpc.translation import _

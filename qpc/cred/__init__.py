@@ -11,7 +11,7 @@
 #
 """Constants for the Credential commands."""
 
-SUBCOMMAND = 'credential'
+SUBCOMMAND = 'cred'
 ADD = 'add'
 LIST = 'list'
 EDIT = 'edit'

@@ -9,21 +9,21 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""CredentialClearCommand is used to clear a or all credentials."""
+"""CredClearCommand is used to clear a or all credentials."""
 
 from __future__ import print_function
 import sys
 from requests import codes
 from qpc.utils import handle_error_response
 from qpc.clicommand import CliCommand
-import qpc.credential as credential
+import qpc.cred as credential
 from qpc.request import GET, DELETE, request
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class CredentialClearCommand(CliCommand):
+class CredClearCommand(CliCommand):
     """Defines the clear command.
 
     This command is for clearing a specific credential or all credentials.

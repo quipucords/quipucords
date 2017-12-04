@@ -19,7 +19,7 @@ from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
 import qpc.source as source
 from qpc.source.utils import validate_port, build_source_payload
-import qpc.credential as credential
+import qpc.cred as credential
 from qpc.translation import _
 import qpc.messages as messages
 
