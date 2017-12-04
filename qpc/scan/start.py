@@ -70,9 +70,9 @@ class ScanStartCommand(CliCommand):
             sys.exit(1)
 
     def _build_data(self):
-        """Construct the dictionary auth given our arguments.
+        """Construct the dictionary credential given our arguments.
 
-        :returns: a dictionary representing the auth being added
+        :returns: a dictionary representing the credential being added
         """
         self.req_payload = {
             'source': self.source_id,

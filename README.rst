@@ -103,7 +103,7 @@ Command Syntax & Usage
 The complete list of options for each command and subcommand are listed in the
 qpc manpage with other usage examples.
 
-For expanded information on auth entries, sources, scanning, and output read
+For expanded information on credential entries, sources, scanning, and output read
 the `syntax and usage document <docs/source/man.rst>`_.
 
 Development

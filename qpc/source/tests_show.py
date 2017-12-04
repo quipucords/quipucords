@@ -102,16 +102,17 @@ class SourceShowCliTests(unittest.TestCase):
         """Testing the show source command successfully with stubbed data."""
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI + '?name=source1'
-        auth_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                      'credentials': [{'id': 1, 'name': 'auth1'}]}
-        data = [auth_entry]
+        credential_entry = {'id': 1, 'name': 'source1',
+                            'hosts': ['1.2.3.4'],
+                            'credentials': [{'id': 1, 'name': 'cred1'}]}
+        data = [credential_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             nsc = SourceShowCommand(SUBPARSER)
             args = Namespace(name='source1')
             with redirect_stdout(source_out):
                 nsc.main(args)
-                expected = '{"credentials":[{"id":1,"name":"auth1"}],' \
+                expected = '{"credentials":[{"id":1,"name":"cred1"}],' \
                     '"hosts":["1.2.3.4"],"id":1,"name":"source1"}'
                 self.assertEqual(source_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

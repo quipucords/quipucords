@@ -19,7 +19,7 @@ from qpc.clicommand import CliCommand
 from qpc.utils import read_in_file
 import qpc.source as source
 from qpc.source.utils import validate_port, build_source_payload
-import qpc.auth as auth
+import qpc.cred as cred
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -48,9 +48,10 @@ class SourceAddCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=True)
-        self.parser.add_argument('--auth', dest='auth', metavar='AUTH',
+        self.parser.add_argument('--cred', dest='cred',
+                                 metavar='CRED',
                                  nargs='+', default=[],
-                                 help=_(messages.SOURCE_AUTHS_HELP),
+                                 help=_(messages.SOURCE_CREDS_HELP),
                                  required=True)
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
@@ -67,31 +68,32 @@ class SourceAddCommand(CliCommand):
             except ValueError:
                 pass
 
-        # check for valid auth values
-        auth_list = ','.join(self.args.auth)
-        response = request(parser=self.parser, method=GET, path=auth.AUTH_URI,
-                           params={'name': auth_list},
+        # check for valid cred values
+        cred_list = ','.join(self.args.cred)
+        response = request(parser=self.parser, method=GET,
+                           path=cred.CREDENTIAL_URI,
+                           params={'name': cred_list},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
-            if len(json_data) == len(self.args.auth):
+            if len(json_data) == len(self.args.cred):
                 self.args.credentials = []
                 for cred_entry in json_data:
                     self.args.credentials.append(cred_entry['id'])
             else:
                 for cred_entry in json_data:
                     cred_name = cred_entry['name']
-                    self.args.auth.remove(cred_name)
-                not_found_str = ','.join(self.args.auth)
-                print(_(messages.SOURCE_ADD_AUTHS_NOT_FOUND %
+                    self.args.cred.remove(cred_name)
+                not_found_str = ','.join(self.args.cred)
+                print(_(messages.SOURCE_ADD_CREDS_NOT_FOUND %
                         (not_found_str, self.args.name)))
                 sys.exit(1)
         else:
-            print(_(messages.SOURCE_ADD_AUTH_PROCESS_ERR % self.args.name))
+            print(_(messages.SOURCE_ADD_CRED_PROCESS_ERR % self.args.name))
             sys.exit(1)
 
     def _build_data(self):
-        """Construct the dictionary auth given our arguments.
+        """Construct the dictionary cred given our arguments.
 
         :returns: a dictionary representing the source being added
         """

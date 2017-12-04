@@ -101,16 +101,17 @@ class SourceListCliTests(unittest.TestCase):
         """Testing the list source command successfully with stubbed data."""
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI
-        auth_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                      'credentials': [{'id': 1, 'name': 'auth1'}]}
-        data = [auth_entry]
+        credential_entry = {'id': 1, 'name': 'source1',
+                            'hosts': ['1.2.3.4'],
+                            'credentials': [{'id': 1, 'name': 'cred1'}]}
+        data = [credential_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(source_out):
                 nlc.main(args)
-                expected = '[{"credentials":[{"id":1,"name":"auth1"}],' \
+                expected = '[{"credentials":[{"id":1,"name":"cred1"}],' \
                     '"hosts":["1.2.3.4"],"id":1,"name":"source1"}]'
                 self.assertEqual(source_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

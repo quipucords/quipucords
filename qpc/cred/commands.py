@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (c) 2017 Red Hat, Inc.
 #
@@ -9,14 +8,12 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Constants for the Auth commands."""
 
-SUBCOMMAND = 'auth'
-ADD = 'add'
-LIST = 'list'
-EDIT = 'edit'
-SHOW = 'show'
-CLEAR = 'clear'
-
-
-AUTH_URI = '/api/v1/credentials/'
+"""Commands for import organization."""
+# flake8: noqa
+# pylint: disable=unused-import
+from qpc.cred.add import CredAddCommand
+from qpc.cred.list import CredListCommand
+from qpc.cred.edit import CredEditCommand
+from qpc.cred.show import CredShowCommand
+from qpc.cred.clear import CredClearCommand

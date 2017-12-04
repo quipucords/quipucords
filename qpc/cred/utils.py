@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Utilities for the auth credentials module."""
+"""Utilities for the credential credentials module."""
 
 from __future__ import print_function
 import os
@@ -37,7 +37,7 @@ def validate_sshkeyfile(keyfile, parser):
 
 
 def get_password(args, req_payload, add_none=True):
-    """Collect the password value and place in auth dictionary.
+    """Collect the password value and place in credential dictionary.
 
     :param args: the command line arguments
     :param req_payload: the dictionary for the request

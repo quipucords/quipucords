@@ -12,39 +12,40 @@
 
 """CLI messages for translation."""
 
-AUTH_NAME_HELP = 'auth credential name'
-AUTH_USER_HELP = 'user name for authenticating against target system'
-AUTH_PWD_HELP = 'password for authenticating against target system'
-AUTH_SSH_HELP = 'file containing SSH key'
-AUTH_SSH_PSPH_HELP = 'ssh passphrase for authenticating against target system'
-AUTH_SUDO_HELP = 'password for running sudo'
-AUTH_CLEAR_ALL_HELP = 'remove all credentials'
+CRED_NAME_HELP = 'credential credential name'
+CRED_USER_HELP = 'user name for authenticating against target system'
+CRED_PWD_HELP = 'password for authenticating against target system'
+CRED_SSH_HELP = 'file containing SSH key'
+CRED_SSH_PSPH_HELP = 'ssh passphrase for authenticating against target system'
+CRED_SUDO_HELP = 'password for running sudo'
+CRED_CLEAR_ALL_HELP = 'remove all credentials'
 
-AUTH_ADDED = 'Auth "%s" was added'
+CRED_ADDED = 'Credential "%s" was added'
 
-AUTH_REMOVED = 'Auth "%s" was removed'
-AUTH_FAILED_TO_REMOVE = 'Failed to remove auth "%s"'
-AUTH_NOT_FOUND = 'Auth "%s" was not found'
-AUTH_NO_CREDS_TO_REMOVE = 'No credentials exist to be removed'
-AUTH_PARTIAL_REMOVE = 'Some credentials were removed, however an error' \
+CRED_REMOVED = 'Credential "%s" was removed'
+CRED_FAILED_TO_REMOVE = 'Failed to remove credential "%s"'
+CRED_NOT_FOUND = 'Credential "%s" was not found'
+CRED_NO_CREDS_TO_REMOVE = 'No credentials exist to be removed'
+CRED_PARTIAL_REMOVE = 'Some credentials were removed, however an error' \
     ' occurred removing the following credentials: %s'
-AUTH_CLEAR_ALL_SUCCESS = 'All credentials were removed'
+CRED_CLEAR_ALL_SUCCESS = 'All credentials were removed'
 
-AUTH_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
-AUTH_DOES_NOT_EXIST = 'Auth "%s" does not exist'
-AUTH_UPDATED = 'Auth "%s" was updated'
+CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
+CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
+CRED_UPDATED = 'Credential "%s" was updated'
 
-AUTH_LIST_NO_CREDS = 'No credentials exist yet.'
+CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
 SOURCE_NAME_HELP = 'source name'
 SOURCE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
-SOURCE_AUTHS_HELP = 'credentials to associate with source'
+SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_SSH_PORT_HELP = 'SSH port for connection; default=22'
-SOURCE_ADD_AUTHS_NOT_FOUND = 'An error occurred while processing the ' \
-    '"--auth" input values. References for the following auth could not' \
+SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
+    '"--cred" input values. References for the'\
+    ' following credential could not' \
     ' be found: %s. Failed to add source "%s".'
-SOURCE_ADD_AUTH_PROCESS_ERR = 'An error occurred while processing the' \
-    ' "--auth" input values. Failed to add source "%s"'
+SOURCE_ADD_CRED_PROCESS_ERR = 'An error occurred while processing the' \
+    ' "--cred" input values. Failed to add source "%s"'
 SOURCE_ADDED = 'Source "%s" was added'
 
 SERVER_CONFIG_HOST_HELP = 'host or ip address'
@@ -61,11 +62,11 @@ SOURCE_CLEAR_ALL_SUCCESS = 'All sources were removed'
 SOURCE_EDIT_NO_ARGS = 'No arguments provided to edit source %s'
 SOURCE_DOES_NOT_EXIST = 'Source "%s" does not exist'
 
-SOURCE_EDIT_AUTHS_NOT_FOUND = 'An error occurred while processing the' \
-    ' "--auth" input  values. References for the following auth ' \
+SOURCE_EDIT_CREDS_NOT_FOUND = 'An error occurred while processing the' \
+    ' "--cred" input  values. References for the following credential ' \
     'could not be found: %s. Failed to edit source "%s".'
-SOURCE_EDIT_AUTH_PROCESS_ERR = 'An error occurred while processing the ' \
-    '"--auth" input values. Failed to edit source "%s"'
+SOURCE_EDIT_CRED_PROCESS_ERR = 'An error occurred while processing the ' \
+    '"--cred" input values. Failed to edit source "%s"'
 SOURCE_UPDATED = 'Source "%s" was updated'
 SOURCE_LIST_NO_SOURCES = 'No sources exist yet.'
 

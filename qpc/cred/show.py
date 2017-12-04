@@ -9,38 +9,38 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""AuthShowCommand is used to show a specific credential."""
+"""CredShowCommand is used to show a specific credential."""
 
 from __future__ import print_function
 import sys
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
-import qpc.auth as auth
+import qpc.cred as credential
 from qpc.request import GET
 from qpc.translation import _
 import qpc.messages as messages
 
 
 # pylint: disable=too-few-public-methods
-class AuthShowCommand(CliCommand):
+class CredShowCommand(CliCommand):
     """Defines the show command.
 
-    This command is for showing an auth which can be later associated with
-    sources to gather facts.
+    This command is for showing a credential which can
+    be associated with sources to gather facts.
     """
 
-    SUBCOMMAND = auth.SUBCOMMAND
-    ACTION = auth.SHOW
+    SUBCOMMAND = credential.SUBCOMMAND
+    ACTION = credential.SHOW
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            auth.AUTH_URI, [codes.ok])
+                            credential.CREDENTIAL_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help=_(messages.AUTH_NAME_HELP),
+                                 help=_(messages.CRED_NAME_HELP),
                                  required=True)
 
     def _build_req_params(self):
@@ -53,5 +53,5 @@ class AuthShowCommand(CliCommand):
             data = pretty_print(cred_entry)
             print(data)
         else:
-            print(_(messages.AUTH_DOES_NOT_EXIST % self.args.name))
+            print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
