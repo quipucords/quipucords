@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Sonar",
+  "name": "Sonar Enterprise Application",
   "icons": [
     {
       "src": "favicon.ico",
