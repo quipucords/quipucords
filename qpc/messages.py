@@ -41,7 +41,8 @@ SOURCE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_SSH_PORT_HELP = 'SSH port for connection; default=22'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
-    '"--credential" input values. References for the following credential could not' \
+    '"--credential" input values. References for the'\
+    ' following credential could not' \
     ' be found: %s. Failed to add source "%s".'
 SOURCE_ADD_CRED_PROCESS_ERR = 'An error occurred while processing the' \
     ' "--credential" input values. Failed to add source "%s"'

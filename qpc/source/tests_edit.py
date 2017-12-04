@@ -186,7 +186,7 @@ class SourceEditCliTests(unittest.TestCase):
                                     in source_out.getvalue())
 
     def test_edit_source_cred_err(self):
-        """Testing the edit source command where credential request hits error."""
+        """Testing the edit source command where cred request hits error."""
         source_out = StringIO()
         url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'

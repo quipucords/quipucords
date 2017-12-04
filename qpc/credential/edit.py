@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""CredentialEditCommand is used to edit existing authentication credentials."""
+"""CredentialEditCommand is used to edit credentials."""
 
 from __future__ import print_function
 import sys
@@ -26,8 +26,8 @@ import qpc.messages as messages
 class CredentialEditCommand(CliCommand):
     """Defines the edit command.
 
-    This command is for editing existing credentials which can be later associated
-    with sources to gather facts.
+    This command is for editing existing credentials
+    which can be later associated with sources to gather facts.
     """
 
     SUBCOMMAND = credential.SUBCOMMAND
@@ -76,7 +76,8 @@ class CredentialEditCommand(CliCommand):
                                                      self.parser)
 
         # check for existence of credential
-        response = request(parser=self.parser, method=GET, path=credential.CREDENTIAL_URI,
+        response = request(parser=self.parser, method=GET,
+                           path=credential.CREDENTIAL_URI,
                            params={'name': self.args.name},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member

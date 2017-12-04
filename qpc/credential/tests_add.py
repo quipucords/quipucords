@@ -56,7 +56,8 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_req_args_err(self):
         """Testing the add credential command required flags."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'credential', 'add', '--name', 'credential1']
+            sys.argv = ['/bin/qpc', 'credential',
+                        'add', '--name', 'credential1']
             CLI().main()
 
     def test_add_bad_key(self):
@@ -67,7 +68,8 @@ class CredentialAddCliTests(unittest.TestCase):
         cred_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(cred_out):
-                sys.argv = ['/bin/qpc', 'credential', 'add', '--name', 'credential1',
+                sys.argv = ['/bin/qpc', 'credential', 'add',
+                            '--name', 'credential1',
                             '--username', 'root', '--sshkeyfile', 'bad_path']
                 CLI().main()
 
@@ -129,7 +131,8 @@ class CredentialAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredentialAddCommand(SUBPARSER)
-            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
+            args = Namespace(name='credential1', username='root',
+                             filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):

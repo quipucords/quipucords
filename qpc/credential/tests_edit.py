@@ -58,7 +58,8 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(cred_out):
-                sys.argv = ['/bin/qpc', 'credential', 'edit', '--name', 'credential1']
+                sys.argv = ['/bin/qpc', 'credential',
+                            'edit', '--name', 'credential1']
                 CLI().main()
                 self.assertEqual(cred_out.getvalue(),
                                  'No arguments provided to edit '
@@ -72,7 +73,8 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(cred_out):
-                sys.argv = ['/bin/qpc', 'credential', 'edit', '--name', 'credential1',
+                sys.argv = ['/bin/qpc', 'credential', 'edit',
+                            '--name', 'cred1',
                             '--sshkeyfile', 'bad_path']
                 CLI().main()
                 self.assertTrue('Please provide a valid location for the '
@@ -131,33 +133,33 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = BASE_URL + CREDENTIAL_URI
         url_patch = BASE_URL + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'credential1', 'username': 'root',
+        data = [{'id': 1, 'name': 'cred1', 'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
             aec = CredentialEditCommand(SUBPARSER)
-            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
+            args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "credential1" was updated\n')
+                                 'Credential "cred1" was updated\n')
 
     def test_edit_cred_get_error(self):
         """Testing the edit credential command server error occurs."""
         cred_out = StringIO()
         url_get = BASE_URL + CREDENTIAL_URI
-        data = [{'id': 1, 'name': 'credential1', 'username': 'root',
+        data = [{'id': 1, 'name': 'cred1', 'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=500, json=data)
             aec = CredentialEditCommand(SUBPARSER)
-            args = Namespace(name='credential1', username='root', filename=TMP_KEY,
+            args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, sudo_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)
                     self.assertEqual(cred_out.getvalue(),
-                                     'Credential "credential1" does not exist\n')
+                                     'Credential "cred1" does not exist\n')

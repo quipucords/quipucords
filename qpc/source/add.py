@@ -48,7 +48,8 @@ class SourceAddCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=True)
-        self.parser.add_argument('--credential', dest='credential', metavar='CREDENTIAL',
+        self.parser.add_argument('--credential', dest='credential',
+                                 metavar='CREDENTIAL',
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=True)
@@ -69,7 +70,8 @@ class SourceAddCommand(CliCommand):
 
         # check for valid credential values
         cred_list = ','.join(self.args.credential)
-        response = request(parser=self.parser, method=GET, path=credential.CREDENTIAL_URI,
+        response = request(parser=self.parser, method=GET,
+                           path=credential.CREDENTIAL_URI,
                            params={'name': cred_list},
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member

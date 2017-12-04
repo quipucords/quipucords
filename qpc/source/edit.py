@@ -48,7 +48,8 @@ class SourceEditCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=False)
-        self.parser.add_argument('--credential', dest='credential', metavar='CREDENTIAL',
+        self.parser.add_argument('--credential', dest='credential',
+                                 metavar='CREDENTIAL',
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=False)

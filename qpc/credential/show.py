@@ -26,8 +26,8 @@ import qpc.messages as messages
 class CredentialShowCommand(CliCommand):
     """Defines the show command.
 
-    This command is for showing an credential which can be later associated with
-    sources to gather facts.
+    This command is for showing a credential which can
+    be associated with sources to gather facts.
     """
 
     SUBCOMMAND = credential.SUBCOMMAND

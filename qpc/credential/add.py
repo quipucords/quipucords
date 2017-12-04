@@ -25,8 +25,8 @@ import qpc.messages as messages
 class CredentialAddCommand(CliCommand):
     """Defines the add command.
 
-    This command is for creating new credentials which can be later associated with
-    sources to gather facts.
+    This command is for creating new credentials which
+    can be later associated with sources to gather facts.
     """
 
     SUBCOMMAND = credential.SUBCOMMAND

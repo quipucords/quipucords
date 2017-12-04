@@ -50,7 +50,8 @@ class CredentialClearCommand(CliCommand):
 
     def _delete_entry(self, credential_entry, print_out=True):
         deleted = False
-        delete_uri = credential.CREDENTIAL_URI + str(credential_entry['id']) + '/'
+        delete_uri = credential.CREDENTIAL_URI + \
+            str(credential_entry['id']) + '/'
         response = request(DELETE, delete_uri, parser=self.parser)
         name = credential_entry['name']
         # pylint: disable=no-member

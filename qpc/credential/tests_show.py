@@ -86,31 +86,31 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_empty(self):
         """Testing the show credential command successfully with empty data."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             asc = CredentialShowCommand(SUBPARSER)
-            args = Namespace(name='credential1')
+            args = Namespace(name='cred1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     asc.main(args)
                     self.assertEqual(cred_out.getvalue(),
-                                     'credential "credential1" does not exist\n')
+                                     'credential "cred1" does not exist\n')
 
     def test_show_cred_data(self):
-        """Testing the show credential command successfully with stubbed data."""
+        """Testing the show credential command with stubbed data."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
-        credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
-                      'password': '********'}
+        url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        credential_entry = {'id': 1, 'name': 'cred1', 'username': 'root',
+                            'password': '********'}
         data = [credential_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             asc = CredentialShowCommand(SUBPARSER)
-            args = Namespace(name='credential1')
+            args = Namespace(name='cred1')
             with redirect_stdout(cred_out):
                 asc.main(args)
-                expected = '{"id":1,"name":"credential1","password":"********",' \
+                expected = '{"id":1,"name":"cred1","password":"********",' \
                     '"username":"root"}'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

@@ -97,11 +97,11 @@ class CredentialListCliTests(unittest.TestCase):
                                  'No credentials exist yet.\n')
 
     def test_list_cred_data(self):
-        """Testing the list credential command successfully with stubbed data."""
+        """Testing the list credential command with stubbed data."""
         cred_out = StringIO()
         url = BASE_URL + CREDENTIAL_URI
-        credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
-                      'password': '********'}
+        credential_entry = {'id': 1, 'name': 'cred1', 'username': 'root',
+                            'password': '********'}
         data = [credential_entry]
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
@@ -109,7 +109,7 @@ class CredentialListCliTests(unittest.TestCase):
             args = Namespace()
             with redirect_stdout(cred_out):
                 alc.main(args)
-                expected = '[{"id":1,"name":"credential1","password":"********",' \
+                expected = '[{"id":1,"name":"cred1","password":"********",' \
                     '"username":"root"}]'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

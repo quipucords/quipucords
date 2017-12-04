@@ -24,9 +24,11 @@ from qpc.utils import (ensure_config_dir_exists,
                        setup_logging,
                        log)
 from qpc.server.commands import ConfigureHostCommand
-from qpc.credential.commands import (CredentialAddCommand, CredentialListCommand,
-                               CredentialEditCommand, CredentialShowCommand,
-                               CredentialClearCommand)
+from qpc.credential.commands import (CredentialAddCommand,
+                                     CredentialListCommand,
+                                     CredentialEditCommand,
+                                     CredentialShowCommand,
+                                     CredentialClearCommand)
 from qpc.source.commands import (SourceAddCommand, SourceListCommand,
                                  SourceShowCommand, SourceClearCommand,
                                  SourceEditCommand)
