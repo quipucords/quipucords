@@ -39,7 +39,7 @@ class CredentialTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -86,7 +86,7 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object without a name.
         """
         expected_error = {'name': ['This field is required.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'username': 'user1',
                 'password': 'pass1'}
         response = self.client.post(url, json.dumps(data),
@@ -101,7 +101,7 @@ class CredentialTest(TestCase):
         username.
         """
         expected_error = {'username': ['This field is required.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'password': 'pass1'}
         response = self.client.post(url, json.dumps(data),
@@ -118,7 +118,7 @@ class CredentialTest(TestCase):
         expected_error = {'non_field_errors': ['A host credential must have '
                                                'either a password or an '
                                                'ssh_keyfile.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1'}
         response = self.client.post(url, json.dumps(data),
@@ -134,7 +134,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'non_field_errors': ['ssh_keyfile, blah, is not a '
                                                'valid file on the system.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'ssh_keyfile': 'blah'}
@@ -151,7 +151,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'name': ['Ensure this field has no more than '
                                    '64 characters.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'A' * 100,
                 'username': 'user1',
                 'password': 'pass1'}
@@ -168,7 +168,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'username': ['Ensure this field has no more than '
                                        '64 characters.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'A' * 100,
                 'password': 'pass1'}
@@ -185,7 +185,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'password': ['Ensure this field has no more than '
                                        '1024 characters.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'A' * 2000}
@@ -202,7 +202,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'sudo_password': ['Ensure this field has no more '
                                             'than 1024 characters.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1',
@@ -220,7 +220,7 @@ class CredentialTest(TestCase):
         """
         expected_error = {'ssh_keyfile': ['Ensure this field has no more than '
                                           '1024 characters.']}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'ssh_keyfile': 'A' * 2000}
@@ -231,13 +231,13 @@ class CredentialTest(TestCase):
 
     def test_hostcred_list_view(self):
         """Tests the list view set of the Credential API."""
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_hostcred_update_view(self):
         """Tests the update view set of the Credential API."""
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1'}
@@ -251,7 +251,7 @@ class CredentialTest(TestCase):
         data = {'name': 'cred2',
                 'username': 'user23',
                 'password': 'pass2'}
-        url = reverse('hostcred-detail', args=(2,))
+        url = reverse('cred-detail', args=(2,))
         resp = self.client.put(url, json.dumps(data),
                                content_type='application/json',
                                format='json')
@@ -259,7 +259,7 @@ class CredentialTest(TestCase):
 
     def test_hostcred_update_double(self):
         """Update to new name that conflicts with other should fail."""
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1'}
@@ -273,7 +273,7 @@ class CredentialTest(TestCase):
         data = {'name': 'cred1',
                 'username': 'user2',
                 'password': 'pass2'}
-        url = reverse('hostcred-detail', args=(2,))
+        url = reverse('cred-detail', args=(2,))
         resp = self.client.put(url, json.dumps(data),
                                content_type='application/json',
                                format='json')
@@ -284,7 +284,7 @@ class CredentialTest(TestCase):
         cred = Credential(name='cred2', username='user2',
                           password='pass2')
         cred.save()
-        url = reverse('hostcred-detail', args=(cred.pk,))
+        url = reverse('cred-detail', args=(cred.pk,))
         resp = self.client.delete(url, format='json')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -313,7 +313,7 @@ class CredentialTest(TestCase):
     def test_vc_create_missing_password(self):
         """Test VCenter without password."""
         expected_error = {'non_field_errors': [messages.VC_PWD_AND_USERNAME]}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
                 'username': 'user1',
@@ -327,7 +327,7 @@ class CredentialTest(TestCase):
         """Test VCenter without password."""
         expected_error = {'non_field_errors': [
             messages.VC_KEY_FILE_NOT_ALLOWED]}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
                 'username': 'user1',
@@ -342,7 +342,7 @@ class CredentialTest(TestCase):
         """Test VCenter with extra sudo password."""
         expected_error = {'non_field_errors': [
             messages.VC_KEY_FILE_NOT_ALLOWED]}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
                 'username': 'user1',
@@ -357,7 +357,7 @@ class CredentialTest(TestCase):
         """Test VCenter with extra keyfile passphase."""
         expected_error = {'non_field_errors': [
             messages.VC_KEY_FILE_NOT_ALLOWED]}
-        url = reverse('hostcred-list')
+        url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
                 'username': 'user1',

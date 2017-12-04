@@ -21,7 +21,7 @@ ROUTER = SimpleRouter()
 
 ROUTER.register(r'credentials',
                 CredentialViewSet,
-                base_name='hostcred')
+                base_name='cred')
 ROUTER.register(r'facts',
                 FactViewSet,
                 base_name='facts')

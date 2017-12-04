@@ -110,7 +110,7 @@ COMMON_PASSWORD_VALIDATOR = \
     'django.contrib.auth.password_validation.CommonPasswordValidator'
 NUMERIC_PASSWORD_VALIDATOR = \
     'django.contrib.auth.password_validation.NumericPasswordValidator'
-CRED_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS = [
     {
         NAME: USER_ATTRIBUTE_SIMILARITY_VALIDATOR,
     },
@@ -143,11 +143,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/'
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'client'),
-]
+STATIC_URL = '/static/'
 
 LOGGING = {
     'version': 1,
