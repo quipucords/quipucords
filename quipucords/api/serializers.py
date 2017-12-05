@@ -12,7 +12,7 @@
 """API serializers for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
-from api.fact.serializer import FactCollectionSerializer, FactSerializer
+from api.fact.serializer import FactCollectionSerializer, SystemFactsSerializer
 from api.fingerprint.serializer import FingerprintSerializer
 from api.credential.serializer import CredentialSerializer
 from api.source.serializer import (CredentialsField, HostRangeField,
