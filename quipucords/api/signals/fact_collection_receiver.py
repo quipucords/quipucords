@@ -49,6 +49,6 @@ def process_fact_collection(sender, instance, **kwargs):
         if serializer.is_valid():
             serializer.save()
         else:
-            logger.error('%s could not persist fingerprint. Fact: %s',
+            logger.error('%s could not persist fingerprint. SystemFacts: %s',
                          __name__, fingerprint_dict)
             logger.error('Errors: %s', serializer.errors)

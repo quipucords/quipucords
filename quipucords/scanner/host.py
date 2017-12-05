@@ -225,7 +225,7 @@ class HostScanner(DiscoveryScanner):
             # Send facts to fact endpoint
             fact_size = len(facts)
             if facts is None or fact_size == 0:
-                msg = 'Fact set is empty.  '\
+                msg = 'SystemFacts set is empty.  '\
                     'No results will be reported to fact endpoint.'
                 raise ScannerException(msg)
 

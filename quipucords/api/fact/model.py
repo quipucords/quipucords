@@ -14,7 +14,7 @@
 from django.db import models
 
 
-class Fact(models.Model):
+class SystemFacts(models.Model):
     """Represents a system fact."""
 
     connection_host = models.CharField(
@@ -86,7 +86,7 @@ class Fact(models.Model):
 class FactCollection(models.Model):
     """A reported set of facts."""
 
-    facts = models.ManyToManyField(Fact)
+    facts = models.ManyToManyField(SystemFacts)
 
     def __str__(self):
         """Convert to string."""

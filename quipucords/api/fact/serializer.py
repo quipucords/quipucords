@@ -18,13 +18,13 @@ from rest_framework.serializers import (ModelSerializer,
                                         UUIDField,
                                         DateField,
                                         NullBooleanField)
-from api.models import Fact, FactCollection
+from api.models import SystemFacts, FactCollection
 import api.messages as messages
 from django.utils.translation import ugettext as _
 
 
-class FactSerializer(ModelSerializer):
-    """Serializer for the Fact model."""
+class SystemFactsSerializer(ModelSerializer):
+    """Serializer for the SystemFacts model."""
 
     connection_host = CharField(required=False, max_length=256)
     connection_port = IntegerField(required=False, min_value=0)
@@ -47,16 +47,16 @@ class FactSerializer(ModelSerializer):
     virt_what_type = CharField(required=False, max_length=64)
 
     class Meta:
-        """Meta class for FactSerializer."""
+        """Meta class for SystemFactsSerializer."""
 
-        model = Fact
+        model = SystemFacts
         exclude = ('id',)
 
 
 class FactCollectionSerializer(ModelSerializer):
     """Serializer for the FactCollection model."""
 
-    facts = FactSerializer(many=True)
+    facts = SystemFactsSerializer(many=True)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""
@@ -69,7 +69,7 @@ class FactCollectionSerializer(ModelSerializer):
         facts_data = validated_data.pop('facts')
         fact_collection = FactCollection.objects.create(**validated_data)
         for fact_data in facts_data:
-            new_fact = Fact.objects.create(**fact_data)
+            new_fact = SystemFacts.objects.create(**fact_data)
             fact_collection.facts.add(new_fact)
         fact_collection.save()
         return fact_collection

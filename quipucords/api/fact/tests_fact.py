@@ -124,7 +124,7 @@ class FactCollectionTest(TestCase):
         self.assertEqual(FactCollection.objects.count(), 1)
 
     ################################################################
-    # Test Fact Collection No Facts
+    # Test SystemFacts Collection No Facts
     ################################################################
     def test_no_facts(self):
         """Ensure error if missing facts array."""
