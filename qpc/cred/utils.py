@@ -44,19 +44,19 @@ def get_password(args, req_payload, add_none=True):
     :param add_none: add None for a key if True vs. not in dictionary
     :returns: the updated dictionary
     """
-    if args.password:
+    if 'password' in args and args.password:
         print(_(messages.CONN_PASSWORD))
         pass_prompt = getpass()
         req_payload['password'] = pass_prompt or None
     elif add_none:
         req_payload['password'] = None
-    if args.ssh_passphrase:
+    if 'ssh_passphrase' in args and args.ssh_passphrase:
         print(_(messages.SSH_PASSPHRASE))
         pass_prompt = getpass()
         req_payload['ssh_passphrase'] = pass_prompt or None
     elif add_none:
         req_payload['ssh_passphrase'] = None
-    if args.sudo_password:
+    if 'sudo_password' in args and args.sudo_password:
         print(_(messages.SUDO_PASSWORD))
         pass_prompt = getpass()
         req_payload['sudo_password'] = pass_prompt or None
@@ -66,17 +66,17 @@ def get_password(args, req_payload, add_none=True):
     return req_payload
 
 
-def build_credential_payload(args, add_none=True):
+def build_credential_payload(args, cred_type, add_none=True):
     """Construct payload from command line arguments.
 
     :param args: the command line arguments
     :param add_none: add None for a key if True vs. not in dictionary
     :returns: the dictionary for the request payload
     """
-    req_payload = {'name': args.name}
-    if args.username:
+    req_payload = {'name': args.name, 'cred_type': cred_type}
+    if 'username' in args and args.username:
         req_payload['username'] = args.username
-    if args.filename:
+    if 'filename' in args and args.filename:
         req_payload['ssh_keyfile'] = args.filename
     elif add_none:
         req_payload['ssh_keyfile'] = None

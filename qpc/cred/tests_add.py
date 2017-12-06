@@ -11,6 +11,7 @@
 """Test the CLI module."""
 
 import unittest
+from unittest.mock import patch
 import sys
 import os
 from io import StringIO
@@ -20,9 +21,12 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.cred import CREDENTIAL_URI
+from qpc.cred import (CREDENTIAL_URI,
+                      VCENTER_CRED_TYPE,
+                      NETWORK_CRED_TYPE)
 from qpc.cred.add import CredAddCommand
 from qpc.utils import get_server_location, write_server_config
+
 
 TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()
@@ -60,6 +64,14 @@ class CredentialAddCliTests(unittest.TestCase):
                         'add', '--name', 'credential1']
             CLI().main()
 
+    def test_add_no_type(self):
+        """Testing the add credential without type flag."""
+        with self.assertRaises(SystemExit):
+            sys.argv = ['/bin/qpc', 'credential',
+                        'add', '--name', 'credential1',
+                        '--username', 'foo', '--password']
+            CLI().main()
+
     def test_add_bad_key(self):
         """Testing the add credential command.
 
@@ -82,6 +94,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, status_code=400, json=error)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='cred_dup', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -100,6 +113,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, exc=requests.exceptions.SSLError)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -116,6 +130,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -124,18 +139,38 @@ class CredentialAddCliTests(unittest.TestCase):
                     aac.main(args)
                     self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
 
-    def test_add_cred(self):
-        """Testing the add credential command successfully."""
+    def test_add_host_cred(self):
+        """Testing the add host cred command successfully."""
         cred_out = StringIO()
         url = BASE_URL + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
+                                 'Credential "credential1" was added\n')
+
+    @patch('getpass._raw_input')
+    def test_add_vcenter_cred(self, do_mock_raw_input):
+        """Testing the add vcenter cred command successfully."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.post(url, status_code=201)
+            aac = CredAddCommand(SUBPARSER)
+            args = Namespace(name='credential1',
+                             type=VCENTER_CRED_TYPE,
+                             username='root',
+                             password='sdf')
+            do_mock_raw_input.return_value = 'abc'
+            with redirect_stdout(cred_out):
+                aac.main(args)
+                self.assertEqual(cred_out.getvalue(),
+                                 'Provide connection password.\n'
                                  'Credential "credential1" was added\n')

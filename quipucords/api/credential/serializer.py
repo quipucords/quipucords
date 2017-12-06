@@ -59,6 +59,10 @@ class CredentialSerializer(ModelSerializer):
         """Create host credential."""
         CredentialSerializer.check_for_existing_name(
             name=validated_data.get('name'))
+
+        if 'cred_type' not in validated_data:
+            raise ValidationError(_(messages.CRED_TYPE_REQUIRED_CREATED))
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -66,6 +70,9 @@ class CredentialSerializer(ModelSerializer):
         CredentialSerializer.check_for_existing_name(
             name=validated_data.get('name'),
             cred_id=instance.id)
+
+        if 'cred_type' in validated_data:
+            raise ValidationError(_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE))
 
         return super().update(instance, validated_data)
 

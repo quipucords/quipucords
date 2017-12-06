@@ -24,7 +24,7 @@ class CredentialTest(TestCase):
     # pylint: disable= no-self-use,invalid-name
     def create_credential(self, name='test_cred',
                           username='testuser', password='testpass',
-                          cred_type=Credential.HOSTS_CRED_TYPE):
+                          cred_type=Credential.NETWORK_CRED_TYPE):
         """Create a Credential model for use within test cases.
 
         :param name: name of the host credential
@@ -63,6 +63,7 @@ class CredentialTest(TestCase):
     def test_hostcred_create(self):
         """Ensure we can create a new host credential object via API."""
         data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
@@ -72,6 +73,7 @@ class CredentialTest(TestCase):
     def test_hostcred_create_double(self):
         """Create with duplicate name should fail."""
         data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
@@ -239,11 +241,13 @@ class CredentialTest(TestCase):
         """Tests the update view set of the Credential API."""
         url = reverse('cred-list')
         data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
 
         data = {'name': 'cred2',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user2',
                 'password': 'pass2'}
         self.create_expect_201(data)
@@ -261,11 +265,13 @@ class CredentialTest(TestCase):
         """Update to new name that conflicts with other should fail."""
         url = reverse('cred-list')
         data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1'}
         self.create_expect_201(data)
 
         data = {'name': 'cred2',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user2',
                 'password': 'pass2'}
         self.create_expect_201(data)

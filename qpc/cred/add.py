@@ -38,8 +38,15 @@ class CredAddCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
                             credential.CREDENTIAL_URI, [codes.created])
+
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.CRED_NAME_HELP),
+                                 required=True)
+        self.parser.add_argument('--type', dest='type',
+                                 choices=[credential.NETWORK_CRED_TYPE,
+                                          credential.VCENTER_CRED_TYPE],
+                                 metavar='TYPE',
+                                 help=_(messages.CRED_TYPE_HELP),
                                  required=True)
         self.parser.add_argument('--username', dest='username',
                                  metavar='USERNAME',
@@ -62,7 +69,7 @@ class CredAddCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if self.args.filename:
+        if 'filename' in self.args and self.args.filename:
             # check for file existence on system
             self.args.filename = validate_sshkeyfile(self.args.filename,
                                                      self.parser)
@@ -72,7 +79,7 @@ class CredAddCommand(CliCommand):
 
         :returns: a dictionary representing the credential being added
         """
-        self.req_payload = build_credential_payload(self.args)
+        self.req_payload = build_credential_payload(self.args, self.args.type)
 
     def _handle_response_success(self):
         print(_(messages.CRED_ADDED % self.args.name))

@@ -59,6 +59,7 @@ class CredEditCommand(CliCommand):
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.CRED_SUDO_HELP))
+        self.cred_type = None
 
     def _validate_args(self):
         CliCommand._validate_args(self)
@@ -70,7 +71,7 @@ class CredEditCommand(CliCommand):
             self.parser.print_help()
             sys.exit(1)
 
-        if self.args.filename:
+        if 'filename' in self.args and self.args.filename:
             # check for file existence on system
             self.args.filename = validate_sshkeyfile(self.args.filename,
                                                      self.parser)
@@ -84,6 +85,7 @@ class CredEditCommand(CliCommand):
             json_data = response.json()
             if len(json_data) == 1:
                 cred_entry = json_data[0]
+                self.cred_type = cred_entry['cred_type']
                 self.req_path = self.req_path + str(cred_entry['id']) + '/'
             else:
                 print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
@@ -97,7 +99,8 @@ class CredEditCommand(CliCommand):
 
         :returns: a dictionary representing the credential being added
         """
-        self.req_payload = build_credential_payload(self.args, add_none=False)
+        self.req_payload = build_credential_payload(
+            self.args, self.cred_type, add_none=False)
 
     def _handle_response_success(self):
         print(_(messages.CRED_UPDATED % self.args.name))
