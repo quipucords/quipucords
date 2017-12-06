@@ -13,6 +13,7 @@
 """CLI messages for translation."""
 
 CRED_NAME_HELP = 'credential credential name'
+CRED_TYPE_HELP = 'type of scan job.  Valid values: vcenter, network'
 CRED_USER_HELP = 'user name for authenticating against target system'
 CRED_PWD_HELP = 'password for authenticating against target system'
 CRED_SSH_HELP = 'file containing SSH key'
@@ -30,6 +31,12 @@ CRED_PARTIAL_REMOVE = 'Some credentials were removed, however an error' \
     ' occurred removing the following credentials: %s'
 CRED_CLEAR_ALL_SUCCESS = 'All credentials were removed'
 
+CRED_TYPE_REQUIRED = '--type is required; Must be set to vcenter or network'
+CRED_VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
+CRED_VC_EDIT_PWD_OR_USERNAME = 'Must update either username or password '
+'for VCenter credentials'
+CRED_VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
+    ' keyfile, or ssh passphrase.'
 CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
 CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
 CRED_UPDATED = 'Credential "%s" was updated'

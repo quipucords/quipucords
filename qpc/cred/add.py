@@ -12,6 +12,7 @@
 """CredAddCommand is used to add authentication credentials."""
 
 from __future__ import print_function
+import sys
 from requests import codes
 from qpc.request import POST
 from qpc.clicommand import CliCommand
@@ -38,8 +39,14 @@ class CredAddCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
                             credential.CREDENTIAL_URI, [codes.created])
+
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.CRED_NAME_HELP),
+                                 required=True)
+        self.parser.add_argument('--type', dest='type',
+                                 choices=['vcenter', 'network'],
+                                 metavar='TYPE',
+                                 help=_(messages.CRED_TYPE_HELP),
                                  required=True)
         self.parser.add_argument('--username', dest='username',
                                  metavar='USERNAME',
@@ -62,17 +69,41 @@ class CredAddCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if self.args.filename:
-            # check for file existence on system
-            self.args.filename = validate_sshkeyfile(self.args.filename,
-                                                     self.parser)
+        has_type = 'type' in self.args
+        if has_type and self.args.type == credential.HOSTS_CRED_TYPE:
+            if 'filename' in self.args and self.args.filename:
+                # check for file existence on system
+                self.args.filename = validate_sshkeyfile(self.args.filename,
+                                                         self.parser)
+        elif has_type and self.args.type == credential.VCENTER_CRED_TYPE:
+            if not ('username' in self.args and
+                    'password' in self.args and
+                    self.args.password is not None):
+                print(_(messages.CRED_VC_PWD_AND_USERNAME))
+                self.parser.print_help()
+                sys.exit(1)
+            else:
+                # Not allowed fields for vcenter
+                filename = 'filename' in self.args and self.args.filename
+                ssh_passphrase = 'ssh_passphrase' in self.args and\
+                    self.args.ssh_passphrase
+                sudo_password = 'sudo_password' in self.args and\
+                    self.args.sudo_password
+                if filename or ssh_passphrase or sudo_password:
+                    print(_(messages.CRED_VC_KEY_FILE_NOT_ALLOWED))
+                    self.parser.print_help()
+                    sys.exit(1)
+        else:
+            print(_(messages.CRED_TYPE_REQUIRED))
+            self.parser.print_help()
+            sys.exit(1)
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.
 
         :returns: a dictionary representing the credential being added
         """
-        self.req_payload = build_credential_payload(self.args)
+        self.req_payload = build_credential_payload(self.args, self.args.type)
 
     def _handle_response_success(self):
         print(_(messages.CRED_ADDED % self.args.name))

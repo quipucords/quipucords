@@ -59,21 +59,10 @@ class CredEditCommand(CliCommand):
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.CRED_SUDO_HELP))
+        self.cred_type = None
 
     def _validate_args(self):
         CliCommand._validate_args(self)
-
-        if not(self.args.username or self.args.password or
-               self.args.sudo_password or self.args.filename or
-               self.args.ssh_passphrase):
-            print(_(messages.CRED_EDIT_NO_ARGS % (self.args.name)))
-            self.parser.print_help()
-            sys.exit(1)
-
-        if self.args.filename:
-            # check for file existence on system
-            self.args.filename = validate_sshkeyfile(self.args.filename,
-                                                     self.parser)
 
         # check for existence of credential
         response = request(parser=self.parser, method=GET,
@@ -84,6 +73,7 @@ class CredEditCommand(CliCommand):
             json_data = response.json()
             if len(json_data) == 1:
                 cred_entry = json_data[0]
+                self.cred_type = cred_entry['cred_type']
                 self.req_path = self.req_path + str(cred_entry['id']) + '/'
             else:
                 print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
@@ -92,12 +82,42 @@ class CredEditCommand(CliCommand):
             print(_(messages.CRED_DOES_NOT_EXIST % self.args.name))
             sys.exit(1)
 
+        if not(self.args.username or self.args.password or
+               self.args.sudo_password or self.args.filename or
+               self.args.ssh_passphrase):
+            print(_(messages.CRED_EDIT_NO_ARGS % (self.args.name)))
+            self.parser.print_help()
+            sys.exit(1)
+
+        if self.cred_type == credential.HOSTS_CRED_TYPE:
+            if 'filename' in self.args and self.args.filename:
+                # check for file existence on system
+                self.args.filename = validate_sshkeyfile(self.args.filename,
+                                                         self.parser)
+        else:
+            if not ('username' in self.args or 'password' in self.args):
+                print(_(messages.CRED_VC_EDIT_PWD_OR_USERNAME))
+                self.parser.print_help()
+                sys.exit(1)
+            else:
+                # Not allowed fields for vcenter
+                filename = 'filename' in self.args and self.args.filename
+                ssh_passphrase = 'ssh_passphrase' in self.args and\
+                    self.args.ssh_passphrase
+                sudo_password = 'sudo_password' in self.args and\
+                    self.args.sudo_password
+                if filename or ssh_passphrase or sudo_password:
+                    print(_(messages.CRED_VC_KEY_FILE_NOT_ALLOWED))
+                    self.parser.print_help()
+                    sys.exit(1)
+
     def _build_data(self):
         """Construct the dictionary credential given our arguments.
 
         :returns: a dictionary representing the credential being added
         """
-        self.req_payload = build_credential_payload(self.args, add_none=False)
+        self.req_payload = build_credential_payload(
+            self.args, self.cred_type, add_none=False)
 
     def _handle_response_success(self):
         print(_(messages.CRED_UPDATED % self.args.name))
