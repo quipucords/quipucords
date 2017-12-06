@@ -19,7 +19,7 @@ SHOW = 'show'
 CLEAR = 'clear'
 
 
-HOSTS_CRED_TYPE = 'hosts'
+NETWORK_CRED_TYPE = 'network'
 VCENTER_CRED_TYPE = 'vcenter'
 
 CREDENTIAL_URI = '/api/v1/credentials/'

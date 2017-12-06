@@ -525,9 +525,9 @@ definitions:
           description: "The name of the credential"
         cred_type:
           type: "string"
-          description: "The name of the credential"
+          description: "The type of the credential"
           enum:
-            - hosts
+            - network
             - vcenter
         username:
           type: "string"
@@ -553,6 +553,12 @@ definitions:
       name:
         type: "string"
         description: "The name of the credential"
+        cred_type:
+          type: "string"
+          description: "The type of the credential"
+          enum:
+            - network
+            - vcenter
   CredentialOut:
     allOf:
       - $ref: "#/definitions/Credential"

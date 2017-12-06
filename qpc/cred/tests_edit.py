@@ -21,7 +21,7 @@ from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
-                      HOSTS_CRED_TYPE,
+                      NETWORK_CRED_TYPE,
                       VCENTER_CRED_TYPE)
 from qpc.cred.edit import CredEditCommand
 from qpc.utils import get_server_location, write_server_config
@@ -135,7 +135,7 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = BASE_URL + CREDENTIAL_URI
         url_patch = BASE_URL + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1', 'cred_type': HOSTS_CRED_TYPE,
+        data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
                  'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:

@@ -44,7 +44,8 @@ class CredAddCommand(CliCommand):
                                  help=_(messages.CRED_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--type', dest='type',
-                                 choices=['vcenter', 'network'],
+                                 choices=[credential.NETWORK_CRED_TYPE,
+                                          credential.VCENTER_CRED_TYPE],
                                  metavar='TYPE',
                                  help=_(messages.CRED_TYPE_HELP),
                                  required=True)
@@ -70,7 +71,7 @@ class CredAddCommand(CliCommand):
         CliCommand._validate_args(self)
 
         has_type = 'type' in self.args
-        if has_type and self.args.type == credential.HOSTS_CRED_TYPE:
+        if has_type and self.args.type == credential.NETWORK_CRED_TYPE:
             if 'filename' in self.args and self.args.filename:
                 # check for file existence on system
                 self.args.filename = validate_sshkeyfile(self.args.filename,

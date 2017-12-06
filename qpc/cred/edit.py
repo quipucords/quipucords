@@ -89,7 +89,7 @@ class CredEditCommand(CliCommand):
             self.parser.print_help()
             sys.exit(1)
 
-        if self.cred_type == credential.HOSTS_CRED_TYPE:
+        if self.cred_type == credential.NETWORK_CRED_TYPE:
             if 'filename' in self.args and self.args.filename:
                 # check for file existence on system
                 self.args.filename = validate_sshkeyfile(self.args.filename,

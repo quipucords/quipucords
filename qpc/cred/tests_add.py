@@ -23,7 +23,7 @@ from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
                       VCENTER_CRED_TYPE,
-                      HOSTS_CRED_TYPE)
+                      NETWORK_CRED_TYPE)
 from qpc.cred.add import CredAddCommand
 from qpc.utils import get_server_location, write_server_config
 
@@ -144,7 +144,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
-                             type=HOSTS_CRED_TYPE,
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)

@@ -24,7 +24,7 @@ class CredentialTest(TestCase):
     # pylint: disable= no-self-use,invalid-name
     def create_credential(self, name='test_cred',
                           username='testuser', password='testpass',
-                          cred_type=Credential.HOSTS_CRED_TYPE):
+                          cred_type=Credential.NETWORK_CRED_TYPE):
         """Create a Credential model for use within test cases.
 
         :param name: name of the host credential

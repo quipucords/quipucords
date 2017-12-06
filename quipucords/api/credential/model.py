@@ -22,16 +22,16 @@ import api.messages as messages
 class Credential(models.Model):
     """The credential for connecting to systems."""
 
-    HOSTS_CRED_TYPE = 'hosts'
+    NETWORK_CRED_TYPE = 'network'
     VCENTER_CRED_TYPE = 'vcenter'
-    CRED_TYPE_CHOICES = ((HOSTS_CRED_TYPE, HOSTS_CRED_TYPE),
+    CRED_TYPE_CHOICES = ((NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
                          (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE))
 
     name = models.CharField(max_length=64, unique=True)
     cred_type = models.CharField(
         max_length=9,
         choices=CRED_TYPE_CHOICES,
-        default=HOSTS_CRED_TYPE,
+        default=NETWORK_CRED_TYPE,
     )
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=1024, null=True)
