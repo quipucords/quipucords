@@ -12,7 +12,6 @@
 """CredAddCommand is used to add authentication credentials."""
 
 from __future__ import print_function
-import sys
 from requests import codes
 from qpc.request import POST
 from qpc.clicommand import CliCommand
@@ -70,34 +69,10 @@ class CredAddCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        has_type = 'type' in self.args
-        if has_type and self.args.type == credential.NETWORK_CRED_TYPE:
-            if 'filename' in self.args and self.args.filename:
-                # check for file existence on system
-                self.args.filename = validate_sshkeyfile(self.args.filename,
-                                                         self.parser)
-        elif has_type and self.args.type == credential.VCENTER_CRED_TYPE:
-            if not ('username' in self.args and
-                    'password' in self.args and
-                    self.args.password is not None):
-                print(_(messages.CRED_VC_PWD_AND_USERNAME))
-                self.parser.print_help()
-                sys.exit(1)
-            else:
-                # Not allowed fields for vcenter
-                filename = 'filename' in self.args and self.args.filename
-                ssh_passphrase = 'ssh_passphrase' in self.args and\
-                    self.args.ssh_passphrase
-                sudo_password = 'sudo_password' in self.args and\
-                    self.args.sudo_password
-                if filename or ssh_passphrase or sudo_password:
-                    print(_(messages.CRED_VC_KEY_FILE_NOT_ALLOWED))
-                    self.parser.print_help()
-                    sys.exit(1)
-        else:
-            print(_(messages.CRED_TYPE_REQUIRED))
-            self.parser.print_help()
-            sys.exit(1)
+        if 'filename' in self.args and self.args.filename:
+            # check for file existence on system
+            self.args.filename = validate_sshkeyfile(self.args.filename,
+                                                     self.parser)
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.

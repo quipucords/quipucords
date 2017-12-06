@@ -94,6 +94,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, status_code=400, json=error)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='cred_dup', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -112,6 +113,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, exc=requests.exceptions.SSLError)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -128,6 +130,7 @@ class CredentialAddCliTests(unittest.TestCase):
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
                              ssh_passphrase=None)
@@ -171,32 +174,3 @@ class CredentialAddCliTests(unittest.TestCase):
                 self.assertEqual(cred_out.getvalue(),
                                  'Provide connection password.\n'
                                  'Credential "credential1" was added\n')
-
-    def test_add_vcenter_no_pass_cred(self):
-        """Testing the add vcenter cred w/o password."""
-        cred_out = StringIO()
-        aac = CredAddCommand(SUBPARSER)
-        args = Namespace(name='credential1',
-                         type=VCENTER_CRED_TYPE,
-                         username='root',
-                         filename=TMP_KEY,
-                         sudo_password=None,
-                         ssh_passphrase=None)
-        with redirect_stdout(cred_out):
-            with self.assertRaises(SystemExit):
-                aac.main(args)
-
-    def test_add_vcenter_extra_creds(self):
-        """Testing the add vcenter cred with extra params."""
-        cred_out = StringIO()
-        aac = CredAddCommand(SUBPARSER)
-        args = Namespace(name='credential1',
-                         type=VCENTER_CRED_TYPE,
-                         username='root',
-                         password='abc',
-                         filename=TMP_KEY,
-                         sudo_password=None,
-                         ssh_passphrase=None)
-        with redirect_stdout(cred_out):
-            with self.assertRaises(SystemExit):
-                aac.main(args)

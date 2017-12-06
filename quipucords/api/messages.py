@@ -25,6 +25,8 @@ HC_KEY_INVALID = 'ssh_keyfile, %s, is not a valid file on the system.'
 HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
     ' a ssh_passphrase is provided.'
 HC_NAME_ALREADY_EXISTS = 'Host credential with name=%s already exists'
+CRED_TYPE_REQUIRED_CREATED = 'cred_type is required for credential creation'
+CRED_TYPE_NOT_ALLOWED_UPDATE = 'cred_type is invalid for credential update'
 
 VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\

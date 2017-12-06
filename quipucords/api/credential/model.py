@@ -31,7 +31,7 @@ class Credential(models.Model):
     cred_type = models.CharField(
         max_length=9,
         choices=CRED_TYPE_CHOICES,
-        default=NETWORK_CRED_TYPE,
+        null=False
     )
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=1024, null=True)

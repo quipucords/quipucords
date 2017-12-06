@@ -72,6 +72,10 @@ To create a credential, supply SSH credentials as either a username-password pai
 
   Required. Sets the username of the SSH identity that is used to bind to the server.
 
+``--type=type``
+
+  Required. Sets the type of credential.  Must be ``network`` or ``vcenter``.
+
 ``--password``
 
   Prompts for the password for the ``--username`` identity. Mutually exclusive with the ``--sshkeyfile`` option.
@@ -306,8 +310,8 @@ The following options are available for every Quipucords command.
 Examples
 --------
 
-:Creating a new credential with a keyfile: ``qpc cred add --name=new-creds **--type=** *network* --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
-:Creating a new credential with a password: ``qpc cred add --name=other-creds **--type=** *network* --username=qpc-user-pass --password``
+:Creating a new network type credential with a keyfile: ``qpc cred add --name=new-creds **--type=** *network* --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
+:Creating a new network type credential with a password: ``qpc cred add --name=other-creds **--type=** *network* --username=qpc-user-pass --password``
 :Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --cred new-creds``
 :Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --cred new-creds other-creds``
 :Running a scan with a source: ``qpc scan --source=new-source``
