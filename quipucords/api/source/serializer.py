@@ -15,7 +15,7 @@ import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ModelSerializer, ValidationError,
-                                        SlugRelatedField,
+                                        SlugRelatedField, ChoiceField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
 from api.models import Credential, HostRange, Source
@@ -34,7 +34,7 @@ class HostRangeField(SlugRelatedField):
     def to_internal_value(self, data):
         """Create internal value."""
         if not isinstance(data, str):
-            raise ValidationError(_(messages.NP_HOST_AS_STRING))
+            raise ValidationError(_(messages.NET_HOST_AS_STRING))
 
         return {'host_range': data}
 
@@ -50,7 +50,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         """Create internal value."""
         actual_cred = Credential.objects.filter(id=data).first()
         if actual_cred is None:
-            raise ValidationError(_(messages.NP_HC_DO_NOT_EXIST % data))
+            raise ValidationError(_(messages.NET_HC_DO_NOT_EXIST % data))
         return actual_cred
 
     def to_representation(self, value):
@@ -61,7 +61,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         """Create display value."""
         display = instance
         if isinstance(instance, Credential):
-            display = _(messages.NP_CRED_DISPLAY % instance.name)
+            display = _(messages.SOURCE_CRED_DISPLAY % instance.name)
         return display
 
 
@@ -69,8 +69,12 @@ class SourceSerializer(ModelSerializer):
     """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)
-    ssh_port = IntegerField(required=False, min_value=0, default=22)
+    source_type = ChoiceField(
+        required=False, choices=Source.SOURCE_TYPE_CHOICES)
+    address = CharField(required=False, max_length=512)
+    ssh_port = IntegerField(required=False, min_value=0)
     hosts = HostRangeField(
+        required=False,
         many=True,
         slug_field='host_range',
         queryset=HostRange.objects.all())
@@ -88,20 +92,52 @@ class SourceSerializer(ModelSerializer):
     # Have to implement explicit create() and update() methods to
     # allow creates/updates of nested HostRange field. See
     # http://www.django-rest-framework.org/api-guide/relations/
+    # pylint: disable=too-many-branches
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
         SourceSerializer.check_for_existing_name(
             name=validated_data.get('name'))
 
-        hosts_data = validated_data.pop('hosts')
+        if 'source_type' not in validated_data:
+            raise ValidationError(_(messages.SOURCE_TYPE_REQ))
+        source_type = validated_data['source_type']
         credentials = validated_data.pop('credentials')
+        hosts_data = validated_data.pop('hosts', None)
+        address = None
+        ssh_port = None
+        if 'address' in validated_data:
+            address = validated_data['address']
+        if 'ssh_port' in validated_data:
+            ssh_port = validated_data['ssh_port']
+
+        if source_type == Source.NETWORK_SOURCE_TYPE:
+            if not hosts_data:
+                raise ValidationError(_(messages.NET_MIN_HOST))
+            elif address is not None:
+                raise ValidationError(_(messages.NET_NO_ADDR))
+            if credentials:
+                for cred in credentials:
+                    SourceSerializer.check_credential_type(source_type, cred)
+            if ssh_port is None:
+                validated_data['ssh_port'] = 22
+        elif source_type == Source.VCENTER_SOURCE_TYPE:
+            if hosts_data:
+                raise ValidationError(_(messages.VC_NO_HOSTS))
+            elif address is None:
+                raise ValidationError(_(messages.VC_REQ_ADDR))
+            elif credentials and len(credentials) > 1:
+                raise ValidationError(_(messages.VC_ONE_CRED))
+            elif credentials and len(credentials) == 1:
+                SourceSerializer.check_credential_type(source_type,
+                                                       credentials[0])
 
         source = Source.objects.create(**validated_data)
 
-        for host_data in hosts_data:
-            HostRange.objects.create(source=source,
-                                     **host_data)
+        if source_type == Source.NETWORK_SOURCE_TYPE:
+            for host_data in hosts_data:
+                HostRange.objects.create(source=source,
+                                         **host_data)
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -118,8 +154,29 @@ class SourceSerializer(ModelSerializer):
             name=validated_data.get('name'),
             source_id=instance.id)
 
-        hosts_data = validated_data.pop('hosts', None)
+        if 'source_type' in validated_data:
+            raise ValidationError(_(messages.SOURCE_TYPE_INV))
+        source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
+        hosts_data = validated_data.pop('hosts', None)
+        address = None
+        if 'address' in validated_data:
+            address = validated_data['address']
+
+        if source_type == Source.NETWORK_SOURCE_TYPE:
+            if address is not None:
+                raise ValidationError(_(messages.NET_NO_ADDR))
+            if credentials:
+                for cred in credentials:
+                    SourceSerializer.check_credential_type(source_type, cred)
+        elif source_type == Source.VCENTER_SOURCE_TYPE:
+            if hosts_data:
+                raise ValidationError(_(messages.VC_NO_HOSTS))
+            elif credentials and len(credentials) > 1:
+                raise ValidationError(_(messages.VC_ONE_CRED))
+            elif credentials and len(credentials) == 1:
+                SourceSerializer.check_credential_type(source_type,
+                                                       credentials[0])
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -129,7 +186,7 @@ class SourceSerializer(ModelSerializer):
         # then we should already have raised a ValidationError before
         # this point, so it's safe to use hosts_data as an indicator
         # of whether to replace the hosts.
-        if hosts_data:
+        if source_type == Source.NETWORK_SOURCE_TYPE and hosts_data:
             old_hosts = list(instance.hosts.all())
             new_hosts = [
                 HostRange.objects.create(source=instance,
@@ -161,13 +218,24 @@ class SourceSerializer(ModelSerializer):
             existing = Source.objects.filter(
                 name=name).exclude(id=source_id).first()
         if existing is not None:
-            raise ValidationError(_(messages.NP_NAME_ALREADY_EXISTS % name))
+            raise ValidationError(_(messages.SOURCE_NAME_ALREADY_EXISTS %
+                                    name))
+
+    @staticmethod
+    def check_credential_type(source_type, credential):
+        """Look for existing credential with same type as the source.
+
+        :param source_type: The source type
+        :param credential: The credential to obtain
+        """
+        if credential.cred_type != source_type:
+            raise ValidationError(_(messages.SOURCE_CRED_WRONG_TYPE))
 
     @staticmethod
     def validate_name(name):
         """Validate the name of the Source."""
         if not isinstance(name, str) or not name.isprintable():
-            raise ValidationError(_(messages.NP_NAME_VALIDATION))
+            raise ValidationError(_(messages.SOURCE_NAME_VALIDATION))
 
         return name
 
@@ -176,7 +244,7 @@ class SourceSerializer(ModelSerializer):
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
         if not hosts:
-            raise ValidationError(_(messages.NP_MIN_HOST))
+            return hosts
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
@@ -225,7 +293,7 @@ class SourceSerializer(ModelSerializer):
                                           len(host_range))
 
             if is_likely_invalid_ip_range:
-                err_message = _(messages.NP_INVALID_RANGE_FORMAT %
+                err_message = _(messages.NET_INVALID_RANGE_FORMAT %
                                 (host_range,))
                 result = ValidationError(err_message)
 
@@ -250,7 +318,7 @@ class SourceSerializer(ModelSerializer):
                         except ValidationError as validate_error:
                             result = validate_error
                     else:
-                        err_message = _(messages.NP_INVALID_RANGE_CIDR %
+                        err_message = _(messages.NET_INVALID_RANGE_CIDR %
                                         (host_range,))
                         result = ValidationError(err_message)
             else:
@@ -261,7 +329,7 @@ class SourceSerializer(ModelSerializer):
                         result = host
                         break
                 if result is None:
-                    err_message = _(messages.NP_INVALID_HOST % (host_range,))
+                    err_message = _(messages.NET_INVALID_HOST % (host_range,))
                     result = ValidationError(err_message)
 
             if isinstance(result, ValidationError):
@@ -297,37 +365,38 @@ class SourceSerializer(ModelSerializer):
         # different way.
         cidr_like = r'[0-9\.]*/[0-9]+'
         if not re.match(cidr_like, ip_range):
-            err_msg = _(messages.NP_NO_CIDR_MATCH % (ip_range, str(cidr_like)))
+            err_msg = _(messages.NET_NO_CIDR_MATCH %
+                        (ip_range, str(cidr_like)))
             raise ValidationError(err_msg)
 
         try:
             base_address, prefix_bits = ip_range.split('/')
         except ValueError:
-            err_msg = _(messages.NP_CIDR_INVALID % (ip_range,))
+            err_msg = _(messages.NET_CIDR_INVALID % (ip_range,))
             raise ValidationError(err_msg)
 
         prefix_bits = int(prefix_bits)
 
         if prefix_bits < 0 or prefix_bits > 32:
-            err_msg = _(messages.NP_CIDR_BIT_MASK %
+            err_msg = _(messages.NET_CIDR_BIT_MASK %
                         {'ip_range': ip_range, 'prefix_bits': prefix_bits})
             raise ValidationError(err_msg)
 
         octet_strings = base_address.split('.')
         if len(octet_strings) != 4:
-            err_msg = _(messages.NP_FOUR_OCTETS % (ip_range,))
+            err_msg = _(messages.NET_FOUR_OCTETS % (ip_range,))
             raise ValidationError(err_msg)
 
         octets = [None] * 4
         for i in range(4):
             if not octet_strings[i]:
-                err_msg = _(messages.NP_EMPTY_OCTET % (ip_range,))
+                err_msg = _(messages.NET_EMPTY_OCTET % (ip_range,))
                 raise ValidationError(err_msg)
 
             val = int(octet_strings[i])
             if val < 0 or val > 255:
                 # pylint: disable=too-many-locals
-                err_msg = _(messages.NP_CIDR_RANGE %
+                err_msg = _(messages.NET_CIDR_RANGE %
                             {'ip_range': ip_range, 'octet': val})
                 raise ValidationError(err_msg)
             octets[i] = val
@@ -362,8 +431,10 @@ class SourceSerializer(ModelSerializer):
     @staticmethod
     def validate_ssh_port(ssh_port):
         """Validate the ssh port."""
-        if not ssh_port or ssh_port < 0 or ssh_port > 65536:
-            raise ValidationError(_(messages.NP_INVALID_PORT))
+        if not ssh_port:
+            pass
+        elif ssh_port < 0 or ssh_port > 65536:
+            raise ValidationError(_(messages.NET_INVALID_PORT))
 
         return ssh_port
 
@@ -371,6 +442,6 @@ class SourceSerializer(ModelSerializer):
     def validate_credentials(credentials):
         """Make sure the credentials list is present."""
         if not credentials:
-            raise ValidationError(_(messages.NP_MIN_CREDS))
+            raise ValidationError(_(messages.NET_MIN_CREDS))
 
         return credentials
