@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import ClassNames from 'classnames';
 
 import Sources from '../sources/sources';
@@ -31,6 +32,6 @@ function mapStateToProps(state, ownProps) {
   return state;
 }
 
-export default connect(mapStateToProps)(
+export default withRouter(connect(mapStateToProps)(
   Content
-);
+));
