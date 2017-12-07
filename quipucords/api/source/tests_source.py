@@ -311,17 +311,17 @@ class SourceTest(TestCase):
         content = response.json()
         expected = [{'id': 1, 'name': 'source0',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': '', 'ssh_port': 22,
+                     'address': None, 'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]},
                     {'id': 2, 'name': 'source1',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': '', 'ssh_port': 22,
+                     'address': None, 'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]},
                     {'id': 3, 'name': 'source2',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': '', 'ssh_port': 22,
+                     'address': None, 'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]}]
         self.assertEqual(content, expected)
