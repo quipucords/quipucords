@@ -14,7 +14,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import Credential
+from api.models import Credential, Source
 
 
 class SourceTest(TestCase):
@@ -22,14 +22,27 @@ class SourceTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.cred = Credential.objects.create(
-            name='cred1',
+        self.net_cred = Credential.objects.create(
+            name='net_cred1',
+            cred_type=Credential.NETWORK_CRED_TYPE,
             username='username',
             password='password',
             sudo_password=None,
             ssh_keyfile=None)
-        self.cred_for_upload = self.cred.id
-        self.cred_for_response = {'id': self.cred.id, 'name': self.cred.name}
+        self.net_cred_for_upload = self.net_cred.id
+        self.net_cred_for_response = {'id': self.net_cred.id,
+                                      'name': self.net_cred.name}
+
+        self.vc_cred = Credential.objects.create(
+            name='vc_cred1',
+            cred_type=Credential.VCENTER_CRED_TYPE,
+            username='username',
+            password='password',
+            sudo_password=None,
+            ssh_keyfile=None)
+        self.vc_cred_for_upload = self.vc_cred.id
+        self.vc_cred_for_response = {'id': self.vc_cred.id,
+                                     'name': self.vc_cred.name}
 
     def create(self, data):
         """Call the create endpoint."""
@@ -49,21 +62,32 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def test_successful_create(self):
+    def test_successful_net_create(self):
         """A valid create request should succeed."""
         data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
-                'credentials': [self.cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_successful_vc_create(self):
+        """A valid create request should succeed."""
+        data = {'name': 'source1',
+                'source_type': Source.VCENTER_SOURCE_TYPE,
+                'address': '1.2.3.4',
+                'credentials': [self.vc_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
     def test_double_create(self):
         """A duplicate create should fail."""
         data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
-                'credentials': [self.cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
         response = self.create_expect_400(data)
@@ -71,61 +95,69 @@ class SourceTest(TestCase):
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""
         data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4', '1.2.3.5'],
                 'ssh_port': '22',
-                'credentials': [self.cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
         self.create_expect_201(data)
 
     def test_create_no_name(self):
         """A create request must have a name."""
         self.create_expect_400(
             {'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_unprintable_name(self):
         """The Source name must be printable."""
         self.create_expect_400(
             {'name': '\r\n',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': '1.2.3.4',
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_no_host(self):
         """A Source needs a host."""
         self.create_expect_400(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_empty_host(self):
         """An empty string is not a host identifier."""
         self.create_expect_400(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': [],
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_long_name(self):
         """An long source name."""
         self.create_expect_400(
             {'name': 'A' * 100,
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': ['1.2.3.4'],
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_negative_port(self):
         """An long source name."""
         self.create_expect_400(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': ['1.2.3.4'],
              'ssh_port': -1,
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_valid_hosts(self):
         """Test valid host patterns."""
         self.create_expect_201(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': ['10.10.181.9',
                        '10.10.181.9/16',
                        '10.10.128.[1:25]',
@@ -136,7 +168,7 @@ class SourceTest(TestCase):
                        'my-rhel[a:d].company.com',
                        'my-rhel[120:400].company.com'],
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_invalid_hosts(self):
         """Test invalid host patterns."""
@@ -155,9 +187,10 @@ class SourceTest(TestCase):
 
         response = self.create(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': hosts,
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(response.data['hosts']), len(hosts))
 
@@ -167,39 +200,36 @@ class SourceTest(TestCase):
 
         response = self.create(
             {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': hosts,
              'ssh_port': '22',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(response.data['hosts']), len(hosts))
-
-    def test_create_no_ssh_port(self):
-        """A Source needs an ssh port."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'hosts': '1.2.3.4',
-             'credentials': [self.cred_for_upload]})
 
     def test_create_bad_ssh_port(self):
         """-1 is not a valid ssh port."""
         self.create_expect_400(
             {'name': 'source1',
-             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
              'ssh_port': '-1',
-             'credentials': [self.cred_for_upload]})
+             'credentials': [self.net_cred_for_upload]})
 
     def test_create_no_credentials(self):
         """A Source needs credentials."""
         self.create_expect_400(
             {'name': 'source1',
-             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
              'ssh_port': '22'})
 
     def test_create_empty_credentials(self):
         """The empty string is not a valid credential list."""
         self.create_expect_400(
             {'name': 'source1',
-             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
              'ssh_port': '22',
              'credentials': []})
 
@@ -207,16 +237,68 @@ class SourceTest(TestCase):
         """A random int is not a valid credential."""
         self.create_expect_400(
             {'name': 'source1',
-             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
              'ssh_port': '22',
              'credentials': [42]})
+
+    def test_create_invalid_cred_type(self):
+        """A source type and credential type must be the same."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'ssh_port': '22',
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_too_many_creds(self):
+        """A vcenter source and have one credential."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'address': '1.2.3.4',
+             'credentials': [self.vc_cred_for_upload,
+                             self.net_cred_for_upload]})
+
+    def test_create_req_address(self):
+        """A vcenter source must have an address."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_vc_with_host(self):
+        """A vcenter source cannot have a host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'address': '1.2.3.4',
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_net_with_address(self):
+        """A vcenter source cannot have a host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'address': '1.2.3.4',
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_req_type(self):
+        """A vcenter source must have an address."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'address': '1.2.3.4',
+             'credentials': [self.vc_cred_for_upload]})
 
     def test_list(self):
         """List all Source objects."""
         data = {'name': 'source',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'ssh_port': '22',
                 'hosts': ['1.2.3.4'],
-                'credentials': [self.cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
         for i in range(3):
             this_data = data.copy()
             this_data['name'] = 'source' + str(i)
@@ -227,24 +309,31 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'source0',
-                     'ssh_port': 22},
-                    {'id': 2, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'source1',
-                     'ssh_port': 22},
-                    {'id': 3, 'hosts': ['1.2.3.4'], 'credentials':
-                     [{'id': 1, 'name': 'cred1'}], 'name': 'source2',
-                     'ssh_port': 22}]
+        expected = [{'id': 1, 'name': 'source0',
+                     'source_type': Source.NETWORK_SOURCE_TYPE,
+                     'address': '', 'ssh_port': 22,
+                     'hosts': ['1.2.3.4'], 'credentials':
+                     [self.net_cred_for_response]},
+                    {'id': 2, 'name': 'source1',
+                     'source_type': Source.NETWORK_SOURCE_TYPE,
+                     'address': '', 'ssh_port': 22,
+                     'hosts': ['1.2.3.4'], 'credentials':
+                     [self.net_cred_for_response]},
+                    {'id': 3, 'name': 'source2',
+                     'source_type': Source.NETWORK_SOURCE_TYPE,
+                     'address': '', 'ssh_port': 22,
+                     'hosts': ['1.2.3.4'], 'credentials':
+                     [self.net_cred_for_response]}]
         self.assertEqual(content, expected)
 
     def test_retrieve(self):
         """Get details on a specific Source by primary key."""
         initial = self.create_expect_201({
             'name': 'source1',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
-            'credentials': [self.cred_for_upload]})
+            'credentials': [self.net_cred_for_upload]})
 
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.get(url)
@@ -252,7 +341,7 @@ class SourceTest(TestCase):
         self.assertIn('credentials', response.json())
         creds = response.json()['credentials']
 
-        self.assertEqual(creds, [self.cred_for_response])
+        self.assertEqual(creds, [self.net_cred_for_response])
 
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
@@ -260,14 +349,15 @@ class SourceTest(TestCase):
         """Completely update a Source."""
         initial = self.create_expect_201({
             'name': 'source2',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
-            'credentials': [self.cred_for_upload]})
+            'credentials': [self.net_cred_for_upload]})
 
         data = {'name': 'source2',
                 'hosts': ['1.2.3.5'],
                 'ssh_port': 23,
-                'credentials': [self.cred.id]}
+                'credentials': [self.net_cred.id]}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -276,9 +366,10 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected = {'name': 'source2',
+                    'source_type': Source.NETWORK_SOURCE_TYPE,
                     'hosts': ['1.2.3.5'],
                     'ssh_port': 23,
-                    'credentials': [self.cred_for_response]}
+                    'credentials': [self.net_cred_for_response]}
         # data should be a strict subset of the response, because the
         # response adds an id field.
         for key, value in expected.items():  # pylint: disable=unused-variable
@@ -288,20 +379,106 @@ class SourceTest(TestCase):
         """Fail update due to name conflict."""
         self.create_expect_201({
             'name': 'source2-double',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
-            'credentials': [self.cred_for_upload]})
+            'credentials': [self.net_cred_for_upload]})
 
         initial = self.create_expect_201({
             'name': 'source2',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
-            'credentials': [self.cred_for_upload]})
+            'credentials': [self.net_cred_for_upload]})
 
         data = {'name': 'source2-double',
                 'hosts': ['1.2.3.5'],
                 'ssh_port': 23,
-                'credentials': [self.cred.id]}
+                'credentials': [self.net_cred.id]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_type_passed(self):
+        """Fail update due to type passed."""
+        initial = self.create_expect_201({
+            'name': 'source2',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source3',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.5'],
+                'ssh_port': 23,
+                'credentials': [self.net_cred.id]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_bad_cred_type(self):
+        """Fail update due to bad cred type."""
+        initial = self.create_expect_201({
+            'name': 'source2',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source3',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.5'],
+                'ssh_port': 23,
+                'credentials': [self.vc_cred.id]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_net_with_addr(self):
+        """Fail update due to bad cred type."""
+        initial = self.create_expect_201({
+            'name': 'source2',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source3',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.5'],
+                'address': '1.2.3.4',
+                'ssh_port': 23,
+                'credentials': [self.vc_cred.id]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_vc_with_hosts(self):
+        """Fail update due to bad cred type."""
+        initial = self.create_expect_201({
+            'name': 'source2',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'address': '1.2.3.4',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source3',
+                'source_type': Source.VCENTER_SOURCE_TYPE,
+                'hosts': ['1.2.3.5'],
+                'address': '1.2.3.4',
+                'credentials': [self.vc_cred_for_upload]}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -313,9 +490,10 @@ class SourceTest(TestCase):
         """Partially update a Source."""
         initial = self.create_expect_201({
             'name': 'source3',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
             'ssh_port': '22',
-            'credentials': [self.cred_for_upload]})
+            'credentials': [self.net_cred_for_upload]})
 
         data = {'name': 'source3-new',
                 'hosts': ['1.2.3.5']}
@@ -331,9 +509,10 @@ class SourceTest(TestCase):
     def test_delete(self):
         """Delete a Source."""
         data = {'name': 'source3',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
                 'ssh_port': '22',
-                'credentials': [self.cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
 
         url = reverse('source-detail', args=(response['id'],))

@@ -14,6 +14,14 @@ basePath: "/api/v1"
 tags:
 - name: "Credential"
   description: "API related to the Credential model"
+- name: "Source"
+  description: "API related to the Source model"
+- name: "Scan"
+  description: "API related to the Scan model"
+- name: "Fact"
+  description: "API related to the Fact model"
+- name: "Report"
+  description: "API related to the Report model"
 
 paths:
   /facts/:
@@ -560,12 +568,12 @@ definitions:
       name:
         type: "string"
         description: "The name of the credential"
-        cred_type:
-          type: "string"
-          description: "The type of the credential"
-          enum:
-            - network
-            - vcenter
+      cred_type:
+        type: "string"
+        description: "The type of the credential"
+        enum:
+          - network
+          - vcenter
   CredentialOut:
     allOf:
       - $ref: "#/definitions/Credential"
@@ -603,12 +611,23 @@ definitions:
     type: "object"
     required:
       - name
+      - source_type
+      - address
       - hosts
       - ssh_port
     properties:
       name:
         type: "string"
         description: "The name of the source"
+      source_type:
+        type: "string"
+        description: "The type of the source"
+        enum:
+          - network
+          - vcenter
+      address:
+        type: "string"
+        description: "The address of the source"
       hosts:
         type: "array"
         items:
@@ -623,6 +642,7 @@ definitions:
     required:
       - id
       - name
+      - source_type
     properties:
       id:
         type: "integer"
@@ -630,6 +650,12 @@ definitions:
       name:
         type: "string"
         description: "The name of the source"
+      source_type:
+        type: "string"
+        description: "The type of the source"
+        enum:
+          - network
+          - vcenter
   SourceIn:
     allOf:
       - $ref: "#/definitions/Source"

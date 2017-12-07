@@ -33,26 +33,39 @@ VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
     ' keyfile, or ssh passphrase.'
 
 # source messages
-NP_HOST_AS_STRING = 'A host range must be a string.'
-NP_CRED_DISPLAY = 'Credential: %s'
-NP_NAME_VALIDATION = 'Source must have printable name.'
-NP_MIN_HOST = 'Source must have at least one host.'
-NP_INVALID_RANGE_FORMAT = '%s is not a valid IP range format.'
-NP_INVALID_RANGE_CIDR = '%s is not a valid IP or CIDR pattern'
-NP_INVALID_HOST = '%s is invalid host'
-NP_NO_CIDR_MATCH = '%s does not match CIDR %s'
-NP_CIDR_INVALID = '%s has invalid format.'
-NP_CIDR_BIT_MASK = '%(ip_range)s has bit mask length %(prefix_bits)s. ' \
-                   '%(prefix_bits)s is not in the valid range [0,32].'
-NP_FOUR_OCTETS = '%s does not have exactly 4 octets.'
-NP_EMPTY_OCTET = '%s has an empty octet.'
-NP_CIDR_RANGE = '%(ip_range)s has invalid octet value of %(octet)s.' \
-                ' %(octet)s is not in the range [0,255]'
-NP_INVALID_PORT = 'Source must have ssh port in range [0, 65535]'
-NP_MIN_CREDS = 'Source must have at least one set of credentials.'
-NP_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
+SOURCE_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
+SOURCE_NAME_VALIDATION = 'Source must have printable name.'
+SOURCE_CRED_DISPLAY = 'Credential: %s'
+SOURCE_CRED_WRONG_TYPE = 'Credentials must have the same type as source.'
+SOURCE_TYPE_REQ = 'A value for source_type must be provided to ' \
+                  'create a source.'
+SOURCE_TYPE_INV = 'A source_type must not be provided when updating a source.'
+
+NET_HOST_AS_STRING = 'A host range must be a string.'
+NET_MIN_HOST = 'Source of type network must have at least one host.'
+NET_NO_ADDR = 'Source of type network should not have an address.'
+NET_INVALID_RANGE_FORMAT = '%s is not a valid IP range format.'
+NET_INVALID_RANGE_CIDR = '%s is not a valid IP or CIDR pattern'
+NET_INVALID_HOST = '%s is invalid host'
+NET_NO_CIDR_MATCH = '%s does not match CIDR %s'
+NET_CIDR_INVALID = '%s has invalid format.'
+NET_CIDR_BIT_MASK = '%(ip_range)s has bit mask length %(prefix_bits)s. ' \
+                    '%(prefix_bits)s is not in the valid range [0,32].'
+NET_FOUR_OCTETS = '%s does not have exactly 4 octets.'
+NET_EMPTY_OCTET = '%s has an empty octet.'
+NET_CIDR_RANGE = '%(ip_range)s has invalid octet value of %(octet)s.' \
+                 ' %(octet)s is not in the range [0,255]'
+NET_INVALID_PORT = 'Source of type network must have ssh port in' \
+                   ' range [0, 65535]'
+NET_MIN_CREDS = 'Source of type network must have at least one ' \
+                'set of credentials.'
+NET_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
     ' found in database.'
-NP_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
+
+
+VC_REQ_ADDR = 'Source of type vcenter must have an address.'
+VC_NO_HOSTS = 'Source of type vcenter should not have any hosts.'
+VC_ONE_CRED = 'Source of type vcenter must a single credential.'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'

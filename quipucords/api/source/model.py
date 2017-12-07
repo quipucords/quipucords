@@ -20,8 +20,19 @@ from api.credential.model import Credential
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
 
+    NETWORK_SOURCE_TYPE = 'network'
+    VCENTER_SOURCE_TYPE = 'vcenter'
+    SOURCE_TYPE_CHOICES = ((NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
+                           (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE))
+
     name = models.CharField(max_length=64, unique=True)
-    ssh_port = models.IntegerField(default=22)
+    source_type = models.CharField(
+        max_length=7,
+        choices=SOURCE_TYPE_CHOICES,
+        null=False
+    )
+    address = models.CharField(max_length=512)
+    ssh_port = models.IntegerField(null=True)
     credentials = models.ManyToManyField(Credential)
     # Source also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
