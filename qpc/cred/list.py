@@ -38,6 +38,17 @@ class CredListCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             credential.CREDENTIAL_URI, [codes.ok])
+        self.parser.add_argument('--type', dest='type',
+                                 choices=[credential.NETWORK_CRED_TYPE,
+                                          credential.VCENTER_CRED_TYPE],
+                                 metavar='TYPE',
+                                 help=_(messages.CRED_TYPE_FILTER_HELP),
+                                 required=False)
+
+    def _build_req_params(self):
+        """Sub-commands can override to construct request parameters."""
+        if 'type' in self.args and self.args.type:
+            self.req_params = {'cred_type': self.args.type}
 
     def _handle_response_success(self):
         json_data = self.response.json()

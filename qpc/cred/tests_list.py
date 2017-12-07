@@ -113,3 +113,23 @@ class CredentialListCliTests(unittest.TestCase):
                     '"username":"root"}]'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
+
+    def test_list_filtered_cred_data(self):
+        """Testing the list credential with filter by cred type."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
+        credential_entry = {'id': 1, 'name': 'cred1', 'cred_type': 'network',
+                            'username': 'root',
+                            'password': '********'}
+        data = [credential_entry]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=data)
+            alc = CredListCommand(SUBPARSER)
+            args = Namespace(type='network')
+            with redirect_stdout(cred_out):
+                alc.main(args)
+                expected = '[{"cred_type":"network","id":1,'\
+                    '"name":"cred1","password":"********",' \
+                    '"username":"root"}]'
+                self.assertEqual(cred_out.getvalue().replace('\n', '')
+                                 .replace(' ', '').strip(), expected)

@@ -13,7 +13,9 @@
 """CLI messages for translation."""
 
 CRED_NAME_HELP = 'credential credential name'
-CRED_TYPE_HELP = 'type of scan job.  Valid values: vcenter, network'
+CRED_TYPE_HELP = 'type of credential job.  Valid values: vcenter, network'
+CRED_TYPE_FILTER_HELP = 'type filter for listing credentials.  Valid '\
+    'values: vcenter, network'
 CRED_USER_HELP = 'user name for authenticating against target system'
 CRED_PWD_HELP = 'password for authenticating against target system'
 CRED_SSH_HELP = 'file containing SSH key'
