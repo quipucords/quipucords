@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
+import Store from '../../store';
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap'
-import './Masthead.css'
+import './masthead.css'
 
 class NavBar extends Component {
+  toggleCollapse(e) {
+    Store.dispatch({type: 'NAV_TOGGLE_COLLAPSE'});
+  }
+
   render() {
     return (
       <nav className="navbar navbar-pf-vertical">
         <div className="navbar-header">
-          <button type="button" className="navbar-toggle">
+          <button type="button" className="navbar-toggle" onClick={this.toggleCollapse.bind(this)}>
             <span className="sr-only">Toggle navigation</span>
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
