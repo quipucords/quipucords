@@ -18,5 +18,7 @@ EDIT = 'edit'
 SHOW = 'show'
 CLEAR = 'clear'
 
+NETWORK_SOURCE_TYPE = 'network'
+VCENTER_SOURCE_TYPE = 'vcenter'
 
 SOURCE_URI = '/api/v1/sources/'
