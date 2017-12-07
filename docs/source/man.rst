@@ -106,7 +106,7 @@ The ``qpc cred list`` command returns the details for every credential that is c
 
 ``--type=type``
 
-  Optional.  Filter list results by credential type.
+  Optional.  Filter list results by credential type.  Must be ``network`` or ``vcenter``.
 
 The ``qpc cred show`` command is the same as the ``qpc cred list`` command, except that it returns details for a single specified credential.
 
@@ -216,7 +216,7 @@ The ``qpc source list`` command returns the details for all configured sources. 
 
 ``--type=type``
 
-  Optional.  Filter list results by source type.
+  Optional.  Filter list results by source type.  Must be ``network`` or ``vcenter``.
 
 
 The ``qpc source show`` command is the same as the ``qpc source list`` command, except that it returns details for a single specified source.
