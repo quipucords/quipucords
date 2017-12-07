@@ -72,7 +72,8 @@ class SourceEditCliTests(unittest.TestCase):
         """Testing the add source command process file."""
         with self.assertRaises(SystemExit):
             sys.argv = ['/bin/qpc', 'source', 'add', '--name', 'source1',
-                        '--hosts', TMP_HOSTFILE, '--cred', 'credential1']
+                        '--type', 'network', '--hosts', TMP_HOSTFILE,
+                        '--cred', 'credential1']
             CLI().main()
 
     def test_read_input(self):
@@ -126,8 +127,8 @@ class SourceEditCliTests(unittest.TestCase):
                     self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
-    def test_edit_source(self):
-        """Testing the edit source command successfully."""
+    def test_edit_net_source(self):
+        """Testing the edit network source command successfully."""
         source_out = StringIO()
         url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1'
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
@@ -143,6 +144,28 @@ class SourceEditCliTests(unittest.TestCase):
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
                              cred=['credential1'], ssh_port=22)
+            with redirect_stdout(source_out):
+                aec.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 'Source "source1" was updated\n')
+
+    def test_edit_vc_source(self):
+        """Testing the edit vcenter source command successfully."""
+        source_out = StringIO()
+        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_patch = BASE_URL + SOURCE_URI + '1/'
+        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                      'password': '********'}]
+        source_data = [{'id': 1, 'name': 'source1', 'address': '1.2.3.4',
+                        'credentials': [{'id': 2, 'name': 'cred2'}]}]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
+            mocker.patch(url_patch, status_code=200)
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', address='1.2.3.5',
+                             cred=['credential1'], hosts=None)
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),

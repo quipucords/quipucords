@@ -51,10 +51,16 @@ def build_source_payload(args, add_none=True):
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
+
+    if hasattr(args, 'type') and args.type:
+        req_payload['source_type'] = args.type
+
+    if hasattr(args, 'address') and args.address:
+        req_payload['address'] = args.address
+    elif add_none:
+        req_payload['address'] = None
     if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
-    elif add_none:
-        req_payload['hosts'] = None
     if hasattr(args, 'ssh_port') and args.ssh_port:
         req_payload['ssh_port'] = args.ssh_port
     elif add_none:

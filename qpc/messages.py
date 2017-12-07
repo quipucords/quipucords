@@ -13,7 +13,7 @@
 """CLI messages for translation."""
 
 CRED_NAME_HELP = 'credential credential name'
-CRED_TYPE_HELP = 'type of credential job.  Valid values: vcenter, network'
+CRED_TYPE_HELP = 'type of credential.  Valid values: vcenter, network'
 CRED_TYPE_FILTER_HELP = 'type filter for listing credentials.  Valid '\
     'values: vcenter, network'
 CRED_USER_HELP = 'user name for authenticating against target system'
@@ -46,7 +46,9 @@ CRED_UPDATED = 'Credential "%s" was updated'
 CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
 SOURCE_NAME_HELP = 'source name'
-SOURCE_HOSTS_HELP = 'IP range to scan. See "man qpc" for supported formats.'
+SOURCE_TYPE_HELP = 'type of source.  Valid values: vcenter, network'
+SOURCE_ADDRESS_HELP = 'Full address include port to connect to the source.'
+SOURCE_HOSTS_HELP = 'IP ranges to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_SSH_PORT_HELP = 'SSH port for connection; default=22'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \

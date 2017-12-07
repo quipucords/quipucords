@@ -44,6 +44,10 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
+        self.parser.add_argument('--address', dest='address',
+                                 metavar='ADDRESS',
+                                 help=_(messages.SOURCE_ADDRESS_HELP),
+                                 required=False)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
@@ -61,12 +65,14 @@ class SourceEditCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if not(self.args.hosts or self.args.cred or self.args.ssh_port):
+        if not(self.args.hosts or self.args.cred or self.args.ssh_port or
+               self.args.address):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
 
-        if self.args.hosts and len(self.args.hosts) == 1:
+        if ('hosts' in self.args and self.args.hosts and
+                len(self.args.hosts) == 1):
             # check if a file and read in values
             try:
                 self.args.hosts = read_in_file(self.args.hosts[0])
