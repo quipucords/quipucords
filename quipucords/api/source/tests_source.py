@@ -326,6 +326,58 @@ class SourceTest(TestCase):
                      [self.net_cred_for_response]}]
         self.assertEqual(content, expected)
 
+    def test_filter_by_type_list(self):
+        """List all Source objects filtered by type."""
+        data = {'name': 'nsource',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'ssh_port': '22',
+                'hosts': ['1.2.3.4'],
+                'credentials': [self.net_cred_for_upload]}
+        for i in range(1, 3):
+            this_data = data.copy()
+            this_data['name'] = 'nsource' + str(i)
+            self.create_expect_201(this_data)
+
+        data = {'name': 'vsource',
+                'source_type': Source.VCENTER_SOURCE_TYPE,
+                'address': '1.2.3.4',
+                'credentials': [self.vc_cred_for_upload]}
+
+        for i in range(3, 5):
+            this_data = data.copy()
+            this_data['name'] = 'vsource' + str(i)
+            self.create_expect_201(this_data)
+
+        url = reverse('source-list')
+        response = self.client.get(
+            url, {'source_type': Source.VCENTER_SOURCE_TYPE})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_json = response.json()
+        print(response_json)
+
+        content = response.json()
+        expected = [
+            {
+                'id': 3, 'name':
+                'vsource3', 'source_type':
+                'vcenter', 'address': '1.2.3.4',
+                'ssh_port': None,
+                'hosts': [],
+                'credentials': [{'id': 2, 'name': 'vc_cred1'}]
+            },
+            {
+                'id': 4,
+                'name': 'vsource4',
+                'source_type': 'vcenter',
+                'address': '1.2.3.4',
+                'ssh_port': None,
+                'hosts': [],
+                'credentials': [{'id': 2, 'name': 'vc_cred1'}]
+            }
+        ]
+
+        self.assertEqual(content, expected)
+
     def test_retrieve(self):
         """Get details on a specific Source by primary key."""
         initial = self.create_expect_201({
