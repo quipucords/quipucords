@@ -16,8 +16,12 @@
       esac
   done
 
-  if [ -z "$(which docker)" ]; then
-    echo "Setting up API Docker container"
+  if [ -z "$(docker info | grep Containers)" ]; then
+    exit 1
+  fi
+
+  if [ -z "$(docker images | grep $CONTAINER)" ]; then
+    echo "Setting up Docker API container"
     docker pull $CONTAINER
   fi
 
@@ -26,7 +30,16 @@
     exit 0
   fi
 
-  docker run -i --rm -p $PORT:8000 -v $FILE:/data/swagger.yaml -t $CONTAINER >/dev/null
-  exit 0
+  if [ -z "$(docker ps | grep $CONTAINER)" ]; then
+    echo "Starting API..."
+    docker run -d --rm -p $PORT:8000 -v $FILE:/data/swagger.yaml $CONTAINER >/dev/null
+  fi
+
+  if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
+    echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
+    echo "  Mock API running: http://localhost:$PORT/"
+  fi
+
+  echo ""
 }
 
