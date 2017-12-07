@@ -71,11 +71,12 @@ class SourceSerializer(ModelSerializer):
     name = CharField(required=True, max_length=64)
     source_type = ChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
-    address = CharField(required=False, max_length=512)
-    ssh_port = IntegerField(required=False, min_value=0)
+    address = CharField(required=False, max_length=512, allow_null=True)
+    ssh_port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = HostRangeField(
         required=False,
         many=True,
+        allow_null=True,
         slug_field='host_range',
         queryset=HostRange.objects.all())
 

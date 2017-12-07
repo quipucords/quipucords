@@ -31,7 +31,7 @@ class Source(models.Model):
         choices=SOURCE_TYPE_CHOICES,
         null=False
     )
-    address = models.CharField(max_length=512)
+    address = models.CharField(max_length=512, null=True)
     ssh_port = models.IntegerField(null=True)
     credentials = models.ManyToManyField(Credential)
     # Source also has the field hosts, which is created by the

@@ -61,8 +61,6 @@ def build_source_payload(args, add_none=True):
         req_payload['address'] = None
     if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
-    elif add_none:
-        req_payload['hosts'] = None
     if hasattr(args, 'ssh_port') and args.ssh_port:
         req_payload['ssh_port'] = args.ssh_port
     elif add_none:
