@@ -78,6 +78,9 @@ SOURCE_EDIT_CRED_PROCESS_ERR = 'An error occurred while processing the ' \
     '"--cred" input values. Failed to edit source "%s"'
 SOURCE_UPDATED = 'Source "%s" was updated'
 SOURCE_LIST_NO_SOURCES = 'No sources exist yet.'
+SOURCE_TYPE_FILTER_HELP = 'type filter for listing sources.  Valid '\
+    'values: vcenter, network'
+
 
 SCAN_ID_HELP = 'scan identifier'
 SCAN_MAX_CONCURRENCY_HELP = 'number of concurrent scans; default=50'

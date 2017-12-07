@@ -115,3 +115,24 @@ class SourceListCliTests(unittest.TestCase):
                     '"hosts":["1.2.3.4"],"id":1,"name":"source1"}]'
                 self.assertEqual(source_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
+
+    def test_list_filtered_source_data(self):
+        """Testing the list source with filter by source_type."""
+        source_out = StringIO()
+        url = BASE_URL + SOURCE_URI
+        credential_entry = {'id': 1, 'name': 'source1',
+                            'source_type': 'network',
+                            'hosts': ['1.2.3.4'],
+                            'credentials': [{'id': 1, 'name': 'cred1'}]}
+        data = [credential_entry]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=data)
+            nlc = SourceListCommand(SUBPARSER)
+            args = Namespace(type='network')
+            with redirect_stdout(source_out):
+                nlc.main(args)
+                expected = '[{"credentials":[{"id":1,"name":"cred1"}],' \
+                    '"hosts":["1.2.3.4"],"id":1,"name":"source1",'\
+                    '"source_type":"network"}]'
+                self.assertEqual(source_out.getvalue().replace('\n', '')
+                                 .replace(' ', '').strip(), expected)

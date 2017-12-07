@@ -46,7 +46,7 @@ class CredListCommand(CliCommand):
                                  required=False)
 
     def _build_req_params(self):
-        """Sub-commands can override to construct request parameters."""
+        """Add filter by cred_type query param."""
         if 'type' in self.args and self.args.type:
             self.req_params = {'cred_type': self.args.type}
 

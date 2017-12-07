@@ -38,6 +38,17 @@ class SourceListCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             source.SOURCE_URI, [codes.ok])
+        self.parser.add_argument('--type', dest='type',
+                                 choices=[source.NETWORK_SOURCE_TYPE,
+                                          source.VCENTER_SOURCE_TYPE],
+                                 metavar='TYPE',
+                                 help=_(messages.SOURCE_TYPE_FILTER_HELP),
+                                 required=False)
+
+    def _build_req_params(self):
+        """Add filter by source_type query param."""
+        if 'type' in self.args and self.args.type:
+            self.req_params = {'source_type': self.args.type}
 
     def _handle_response_success(self):
         json_data = self.response.json()

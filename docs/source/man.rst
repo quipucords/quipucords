@@ -204,7 +204,11 @@ Listing and Showing Sources
 
 The ``qpc source list`` command returns the details for all configured sources. The output of this command includes the host names, IP addresses, or IP ranges, the credentials, and the ports that are configured for each source.
 
-**qpc source list**
+**qpc source list **--type=** *(network | vcenter)* **
+
+``--type=type``
+
+  Optional.  Filter list results by source type.
 
 
 The ``qpc source show`` command is the same as the ``qpc source list`` command, except that it returns details for a single specified source.
