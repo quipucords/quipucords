@@ -237,6 +237,13 @@ paths:
           in: "query"
           description: "A list of names representing sources"
           type: "string"
+        - name: "source_type"
+          in: "query"
+          description: "Filter list based on source type"
+          type: "string"
+          enum:
+            - network
+            - vcenter
       responses:
         200:
           description: "Sources retrieved"

@@ -53,7 +53,7 @@ class SourceFilter(FilterSet):
         """Metadata for filterset."""
 
         model = Source
-        fields = ['name']
+        fields = ['name', 'source_type']
 
 
 # pylint: disable=too-many-ancestors
