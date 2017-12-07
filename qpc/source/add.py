@@ -44,10 +44,20 @@ class SourceAddCommand(CliCommand):
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
+        self.parser.add_argument('--type', dest='type',
+                                 choices=[source.NETWORK_SOURCE_TYPE,
+                                          source.VCENTER_SOURCE_TYPE],
+                                 metavar='TYPE',
+                                 help=_(messages.SOURCE_TYPE_HELP),
+                                 required=True)
+        self.parser.add_argument('--address', dest='address',
+                                 metavar='ADDRESS',
+                                 help=_(messages.SOURCE_ADDRESS_HELP),
+                                 required=False)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
-                                 required=True)
+                                 required=False)
         self.parser.add_argument('--cred', dest='cred',
                                  metavar='CRED',
                                  nargs='+', default=[],
@@ -56,12 +66,13 @@ class SourceAddCommand(CliCommand):
         self.parser.add_argument('--sshport', dest='ssh_port',
                                  metavar='SSHPORT', type=validate_port,
                                  help=_(messages.SOURCE_SSH_PORT_HELP),
-                                 default=22)
+                                 required=False)
 
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if self.args.hosts and len(self.args.hosts) == 1:
+        if ('hosts' in self.args and self.args.hosts and
+                len(self.args.hosts) == 1):
             # check if a file and read in values
             try:
                 self.args.hosts = read_in_file(self.args.hosts[0])

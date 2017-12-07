@@ -147,15 +147,23 @@ Creating and Editing Sources
 
 To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name* **--hosts** *ip_address* **--cred** *credential* **[--sshport=** *ssh_port* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter)* **--address** *address_and_port* **--hosts** *ip_addresses* **--cred** *credential* **[--sshport=** *ssh_port* **]**
 
 ``--name=name``
 
   Required. Sets the name of the new source. For the value, use a descriptive name that is meaningful to your organization, such as ``APSubnet`` or ``Lab3``.
 
-``--hosts ip_address``
+``--type=type``
 
-  Sets the host name, IP address, or IP address range to use when running a scan. You can also provide a path for a file that contains a list of host names or IP addresses or ranges, where each item is on a separate line. The following examples show several different formats that are allowed as values for the ``--hosts`` option:
+  Required. Sets the type of source.  Must be ``network`` or ``vcenter``.
+
+``--address=address_and_port`
+
+  Optional. The connection information needed for a vcenter source.
+
+``--hosts ip_addresses``
+
+  Optional. Sets the host name, IP address, or IP address range to use when running a scan. You can also provide a path for a file that contains a list of host names or IP addresses or ranges, where each item is on a separate line. The following examples show several different formats that are allowed as values for the ``--hosts`` option:
 
   * A specific host name:
 
@@ -181,17 +189,17 @@ To create a source, supply one or more host names or IP addresses to connect to 
 
   ``--cred first_auth second_auth``
 
-  **IMPORTANT:** A credential must exist before you attempt to use it in a source.
+  **IMPORTANT:** A credential must exist before you attempt to use it in a source and must be of the same type.
 
 ``--sshport=ssh_port``
 
-  Sets a port to be used for the scan. This value supports discovery and inspection on a non-standard port. By default, the scan runs on port 22.
+  Optional. Sets a port to be used for the scan. This value supports discovery and inspection on a non-standard port. By default, the scan runs on port 22.
 
 The information in a source might change as the structure of the network changes. Use the ``qpc source edit`` command to edit a source to accommodate those changes.
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--sshport=** *ssh_port* **]**
+**qpc source edit --name** *name*  **--type=** *(network | vcenter)* **[--address** *address_and_port* **] **[--hosts** *ip_addresses* **] [--cred** *credential* **] [--sshport=** *ssh_port* **]**
 
 For example, if a source contains a value of ``server1creds`` for the ``--cred`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
 
@@ -319,7 +327,9 @@ Examples
 
 :Creating a new network type credential with a keyfile: ``qpc cred add --name=new-creds **--type=** *network* --username=qpc-user --sshkeyfile=/etc/ssh/ssh_host_rsa_key``
 :Creating a new network type credential with a password: ``qpc cred add --name=other-creds **--type=** *network* --username=qpc-user-pass --password``
-:Creating a new source: ``qpc source add --name=new-source --hosts 1.192.0.19 --cred new-creds``
+:Creating a new vcenter type credential: ``qpc cred add --name=vcenter-cred **--type=** *vcenter* --username=vc-user-pass --password``
+:Creating a new network source: ``qpc source add --name=new-source --type network --hosts 1.192.0.19 1.192.0.20 --cred new-creds``
+:Creating a new vcenter source: ``qpc source add --name=new-source --type vcenter --address 1.192.0.19 --cred vcenter-cred``
 :Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --cred new-creds other-creds``
 :Running a scan with a source: ``qpc scan --source=new-source``
 
