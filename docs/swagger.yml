@@ -79,6 +79,13 @@ paths:
           in: "query"
           description: "A list of names representing credentials"
           type: "string"
+        - name: "cred_type"
+          in: "query"
+          description: "Filter list based on credential type"
+          type: "string"
+          enum:
+            - network
+            - vcenter
       responses:
         200:
           description: "Credential retrieved"

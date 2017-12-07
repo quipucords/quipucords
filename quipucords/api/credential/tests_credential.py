@@ -237,6 +237,32 @@ class CredentialTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_hostcred_list_filter_view(self):
+        """Tests the list view with filter set of the Credential API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+
+        data = {'name': 'cred2',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user2',
+                'password': 'pass2'}
+        self.create_expect_201(data)
+
+        url = reverse('cred-list')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        json_resp = resp.json()
+        self.assertEqual(len(json_resp), 2)
+
+        resp = self.client.get(
+            url, {'cred_type': Credential.VCENTER_CRED_TYPE})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        json_resp = resp.json()
+        self.assertEqual(len(json_resp), 1)
+
     def test_hostcred_update_view(self):
         """Tests the update view set of the Credential API."""
         url = reverse('cred-list')

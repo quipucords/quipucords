@@ -50,7 +50,7 @@ class CredentialFilter(FilterSet):
         """Metadata for filterset."""
 
         model = Credential
-        fields = ['name']
+        fields = ['name', 'cred_type']
 
 
 # pylint: disable=too-many-ancestors
