@@ -102,8 +102,11 @@ Listing and Showing Credentials
 
 The ``qpc cred list`` command returns the details for every credential that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
 
-**qpc cred list**
+**qpc cred list **--type=** *(network | vcenter)* **
 
+``--type=type``
+
+  Optional.  Filter list results by credential type.
 
 The ``qpc cred show`` command is the same as the ``qpc cred list`` command, except that it returns details for a single specified credential.
 
