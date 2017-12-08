@@ -10,11 +10,12 @@
 #
 """Module for serializing all model object for database storage."""
 
-from rest_framework.serializers import ModelSerializer, CharField
+from rest_framework.serializers import CharField
 from api.models import ScanJobResults, Results, ResultKeyValue
+from api.common.serializer import NotEmptySerializer
 
 
-class ResultKeyValueSerializer(ModelSerializer):
+class ResultKeyValueSerializer(NotEmptySerializer):
     """Serializer for the ResultKeyValue model."""
 
     key = CharField(required=True, max_length=64)
@@ -25,9 +26,10 @@ class ResultKeyValueSerializer(ModelSerializer):
 
         model = ResultKeyValue
         fields = '__all__'
+        qpc_allow_empty_fields = ['value']
 
 
-class ResultsSerializer(ModelSerializer):
+class ResultsSerializer(NotEmptySerializer):
     """Serializer for the Results model."""
 
     row = CharField(required=False, max_length=64)
@@ -37,9 +39,10 @@ class ResultsSerializer(ModelSerializer):
 
         model = Results
         fields = '__all__'
+        qpc_allow_empty_fields = ['row', 'column']
 
 
-class ScanJobResultsSerializer(ModelSerializer):
+class ScanJobResultsSerializer(NotEmptySerializer):
     """Serializer for the ScanJobResults model."""
 
     class Meta:
@@ -47,3 +50,4 @@ class ScanJobResultsSerializer(ModelSerializer):
 
         model = ScanJobResults
         fields = '__all__'
+        qpc_allow_empty_fields = ['results']

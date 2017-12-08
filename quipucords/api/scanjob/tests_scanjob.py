@@ -119,20 +119,12 @@ class ScanJobTest(TestCase):
                      'source': {'id': 1, 'name': 'source1'},
                      'scan_type': 'host',
                      'status': 'pending',
-                     'max_concurrency': 50,
-                     'systems_count': None,
-                     'systems_scanned': None,
-                     'failed_scans': None,
-                     'fact_collection_id': None},
+                     'max_concurrency': 50},
                     {'id': 2,
                      'source': {'id': 1, 'name': 'source1'},
                      'scan_type': 'discovery',
                      'status': 'pending',
-                     'max_concurrency': 50,
-                     'systems_count': None,
-                     'systems_scanned': None,
-                     'failed_scans': None,
-                     'fact_collection_id': None}]
+                     'max_concurrency': 50}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)

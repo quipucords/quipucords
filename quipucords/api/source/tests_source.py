@@ -311,17 +311,17 @@ class SourceTest(TestCase):
         content = response.json()
         expected = [{'id': 1, 'name': 'source0',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': None, 'ssh_port': 22,
+                     'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]},
                     {'id': 2, 'name': 'source1',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': None, 'ssh_port': 22,
+                     'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]},
                     {'id': 3, 'name': 'source2',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
-                     'address': None, 'ssh_port': 22,
+                     'ssh_port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]}]
         self.assertEqual(content, expected)
@@ -361,8 +361,6 @@ class SourceTest(TestCase):
                 'id': 3, 'name':
                 'vsource3', 'source_type':
                 'vcenter', 'address': '1.2.3.4',
-                'ssh_port': None,
-                'hosts': [],
                 'credentials': [{'id': 2, 'name': 'vc_cred1'}]
             },
             {
@@ -370,8 +368,6 @@ class SourceTest(TestCase):
                 'name': 'vsource4',
                 'source_type': 'vcenter',
                 'address': '1.2.3.4',
-                'ssh_port': None,
-                'hosts': [],
                 'credentials': [{'id': 2, 'name': 'vc_cred1'}]
             }
         ]

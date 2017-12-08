@@ -11,13 +11,13 @@
 """Module for serializing all model object for database storage."""
 
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ModelSerializer,
-                                        PrimaryKeyRelatedField,
+from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         ChoiceField,
                                         IntegerField)
 from api.models import Source, ScanJob
 import api.messages as messages
+from api.common.serializer import NotEmptySerializer
 
 
 class SourceField(PrimaryKeyRelatedField):
@@ -31,7 +31,7 @@ class SourceField(PrimaryKeyRelatedField):
         return display
 
 
-class ScanJobSerializer(ModelSerializer):
+class ScanJobSerializer(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
     source = SourceField(queryset=Source.objects.all())

@@ -12,12 +12,12 @@
 
 import os
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ModelSerializer,
-                                        ValidationError,
+from rest_framework.serializers import (ValidationError,
                                         ChoiceField,
                                         CharField)
 from api.models import Credential
 import api.messages as messages
+from api.common.serializer import NotEmptySerializer
 
 
 def expand_filepath(filepath):
@@ -31,7 +31,7 @@ def expand_filepath(filepath):
     return filepath
 
 
-class CredentialSerializer(ModelSerializer):
+class CredentialSerializer(NotEmptySerializer):
     """Serializer for the Credential model."""
 
     # pylint: disable= no-self-use
