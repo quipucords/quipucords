@@ -31,5 +31,6 @@ class NotEmptySerializer(ModelSerializer):
                               for key in result
                               if key in self.qpc_allow_empty_fields or
                               isinstance(result[key], bool) or
+                              isinstance(result[key], int) or
                               bool(result[key])])
         return result

@@ -42,7 +42,8 @@ def expand_source(scan, json_scan):
     """
     if json_scan[SOURCE_KEY]:
         source = scan.source
-        slim_source = {'id': source.id, 'name': source.name}
+        slim_source = {'id': source.id, 'name': source.name,
+                       'source_type': source.source_type}
         json_scan[SOURCE_KEY] = slim_source
 
 
@@ -53,7 +54,7 @@ def expand_key_values(result, json_result):
     create slim dictionary version of key/value to return to user.
     """
     columns = []
-    if json_result is not None and json_result[COLUMN_KEY]:
+    if json_result is not None and json_result.get(COLUMN_KEY):
         for column in result.columns.all():
             serializer = ResultKeyValueSerializer(column)
             json_column = serializer.data
@@ -69,7 +70,8 @@ def expand_scan_results(job_scan_result, json_job_scan_result):
     Take collection of json_job_scan_result ids and pull objects from db.
     create slim dictionary version of rows of key/value to return to user.
     """
-    if json_job_scan_result is not None and json_job_scan_result[RESULTS_KEY]:
+    if json_job_scan_result is not None and\
+            json_job_scan_result.get(RESULTS_KEY):
         json_job_scan_result_list = []
         for result in job_scan_result.results.all():
             serializer = ResultsSerializer(result)
