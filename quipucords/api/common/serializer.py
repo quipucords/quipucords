@@ -42,7 +42,6 @@ class NotEmptySerializer(ModelSerializer):
         result = OrderedDict([(key, result[key])
                               for key in result
                               if key in self.qpc_allow_empty_fields or
-                              isinstance(result[key], bool) or
-                              isinstance(result[key], int) or
+                              isinstance(result[key], (bool, int)) or
                               bool(result[key])])
         return result
