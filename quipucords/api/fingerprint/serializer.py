@@ -11,17 +11,17 @@
 
 """Serializer for system fingerprint models."""
 
-from rest_framework.serializers import (ModelSerializer,
-                                        IntegerField,
+from rest_framework.serializers import (IntegerField,
                                         CharField,
                                         ChoiceField,
                                         UUIDField,
                                         DateField,
                                         NullBooleanField)
 from api.models import SystemFingerprint
+from api.common.serializer import NotEmptySerializer
 
 
-class FingerprintSerializer(ModelSerializer):
+class FingerprintSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
 
     os_name = CharField(required=True, max_length=64)

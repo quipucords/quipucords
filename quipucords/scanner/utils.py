@@ -40,10 +40,10 @@ ANSIBLE_PLAYBOOK_ERR_MSG = 'An error occurred while executing the ' \
 
 def _credential_vars(credential):
     ansible_dict = {}
-    username = credential['username']
-    password = credential['password']
-    ssh_keyfile = credential['ssh_keyfile']
-    sudo_password = credential['sudo_password']
+    username = credential.get('username')
+    password = credential.get('password')
+    ssh_keyfile = credential.get('ssh_keyfile')
+    sudo_password = credential.get('sudo_password')
 
     ansible_dict['ansible_user'] = username
     if password:
@@ -241,9 +241,9 @@ def _handle_ssh_passphrase(credential):
 
     :param credential: The credential used for connections
     """
-    if (credential['ssh_keyfile'] is not None and
-            credential['ssh_passphrase'] is not None):
-        keyfile = credential['ssh_keyfile']
+    if (credential.get('ssh_keyfile') is not None and
+            credential.get('ssh_passphrase') is not None):
+        keyfile = credential.get('ssh_keyfile')
         passphrase = \
             decrypt_data_as_unicode(credential['ssh_passphrase'])
         cmd_string = 'ssh-add {}'.format(keyfile)

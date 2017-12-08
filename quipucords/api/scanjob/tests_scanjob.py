@@ -39,6 +39,7 @@ class ScanJobTest(TestCase):
 
         self.source = Source(
             name='source1',
+            source_type='network',
             ssh_port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
@@ -116,23 +117,17 @@ class ScanJobTest(TestCase):
         content = response.json()
         print(content)
         expected = [{'id': 1,
-                     'source': {'id': 1, 'name': 'source1'},
+                     'source': {'id': 1, 'name': 'source1',
+                                'source_type': 'network'},
                      'scan_type': 'host',
                      'status': 'pending',
-                     'max_concurrency': 50,
-                     'systems_count': None,
-                     'systems_scanned': None,
-                     'failed_scans': None,
-                     'fact_collection_id': None},
+                     'max_concurrency': 50},
                     {'id': 2,
-                     'source': {'id': 1, 'name': 'source1'},
+                     'source': {'id': 1, 'name': 'source1',
+                                'source_type': 'network'},
                      'scan_type': 'discovery',
                      'status': 'pending',
-                     'max_concurrency': 50,
-                     'systems_count': None,
-                     'systems_scanned': None,
-                     'failed_scans': None,
-                     'fact_collection_id': None}]
+                     'max_concurrency': 50}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -148,7 +143,8 @@ class ScanJobTest(TestCase):
         self.assertIn('source', response.json())
         source = response.json()['source']
 
-        self.assertEqual(source, {'id': 1, 'name': 'source1'})
+        self.assertEqual(
+            source, {'id': 1, 'name': 'source1', 'source_type': 'network'})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):

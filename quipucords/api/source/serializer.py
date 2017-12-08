@@ -14,12 +14,13 @@ import re
 import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ModelSerializer, ValidationError,
+from rest_framework.serializers import (ValidationError,
                                         SlugRelatedField, ChoiceField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
 from api.models import Credential, HostRange, Source
 import api.messages as messages
+from api.common.serializer import NotEmptySerializer
 
 
 class HostRangeField(SlugRelatedField):
@@ -65,7 +66,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
-class SourceSerializer(ModelSerializer):
+class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)

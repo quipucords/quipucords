@@ -11,8 +11,7 @@
 
 """Serializer for system facts models."""
 
-from rest_framework.serializers import (ModelSerializer,
-                                        ValidationError,
+from rest_framework.serializers import (ValidationError,
                                         IntegerField,
                                         CharField,
                                         UUIDField,
@@ -20,10 +19,12 @@ from rest_framework.serializers import (ModelSerializer,
                                         NullBooleanField)
 from api.models import SystemFacts, FactCollection
 import api.messages as messages
+from api.common.serializer import NotEmptySerializer
+
 from django.utils.translation import ugettext as _
 
 
-class SystemFactsSerializer(ModelSerializer):
+class SystemFactsSerializer(NotEmptySerializer):
     """Serializer for the SystemFacts model."""
 
     connection_host = CharField(required=False, max_length=256)
@@ -53,7 +54,7 @@ class SystemFactsSerializer(ModelSerializer):
         exclude = ('id',)
 
 
-class FactCollectionSerializer(ModelSerializer):
+class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
     facts = SystemFactsSerializer(many=True)
@@ -63,6 +64,7 @@ class FactCollectionSerializer(ModelSerializer):
 
         model = FactCollection
         fields = '__all__'
+        qpc_allow_empty_fields = ['facts']
 
     def create(self, validated_data):
         """Create the fact collection."""

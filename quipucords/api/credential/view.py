@@ -32,11 +32,11 @@ def mask_credential(cred):
     :param cred: a dictionary of values that may be masked
     :returns: the masked dictionary if it contains sensitive data
     """
-    if cred[PASSWORD_KEY]:
+    if cred.get(PASSWORD_KEY):
         cred[PASSWORD_KEY] = PASSWORD_MASK
-    if cred[SUDO_PASSWORD_KEY]:
+    if cred.get(SUDO_PASSWORD_KEY):
         cred[SUDO_PASSWORD_KEY] = PASSWORD_MASK
-    if cred[SSH_PASSPHRASE_KEY]:
+    if cred.get(SSH_PASSPHRASE_KEY):
         cred[SSH_PASSPHRASE_KEY] = PASSWORD_MASK
     return cred
 
