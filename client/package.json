@@ -18,8 +18,9 @@
   "scripts": {
     "create-react-app": "create-react-app",
     "start": "npm-run-all -lp api:mock start:client",
-    "start:client": "react-scripts start >/dev/null",
-    "api:mock": "sh ./scripts/api.sh -p 4000 -f \"$(pwd)/../docs/swagger.yml\"",
+    "start:client": "react-scripts start",
+    "start:quipucords": "open http://127.0.0.1:8000/index.html; source ../venv/bin/activate; cd ../; make serve",
+    "api:mock": "sh ./scripts/api.sh -p 4000 -f \"$(pwd)/../docs/swagger.yml\" &",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom"
   },
