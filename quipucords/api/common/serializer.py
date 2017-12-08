@@ -15,7 +15,19 @@ from rest_framework.serializers import ModelSerializer
 
 
 class NotEmptySerializer(ModelSerializer):
-    """Serializer for the Source model."""
+    """Serializer for the NotEmptySerializer model.
+
+    Serializer will remove keys with a value of null or None.
+    Additionally, it will remove empty lists or empty objects.
+
+    To allow keys to be empty, include
+    the 'qpc_allow_empty_fields' attribute in the Meta class.
+    For example, to exclude key1 and key2 from
+    pruning, add the following to the serializer subclass:
+
+    class Meta:
+        qpc_allow_empty_fields = ['key1','key2']
+    """
 
     def __init__(self, *args, **kwargs):
         """Initialize required meta-data."""
