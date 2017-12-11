@@ -246,7 +246,7 @@ class SourceSerializer(NotEmptySerializer):
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
         if not hosts:
-            return hosts
+             raise ValidationError(_(messages.SOURCE_HOSTS_CANNOT_BE_EMPTY))
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
