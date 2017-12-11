@@ -16,20 +16,30 @@ These models are used in the REST definitions
 from django.utils.translation import ugettext as _
 from django.db import models
 from api.scanjob.model import ScanJob
+from api.source.model import Source
+from api.credential.model import Credential
 import api.messages as messages
 
 
-class ResultKeyValue(models.Model):
+class SystemConnectionResult(models.Model):
     """A key value pair of captured data."""
 
-    key = models.CharField(max_length=64)
-    value = models.CharField(max_length=1024, null=True)
+    SUCCESS = 'succcess'
+    FAILED = 'failed'
+    UNREACHABLE = 'unreachable'
+    CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),
+                           (UNREACHABLE, UNREACHABLE))
+
+    name = models.CharField(max_length=1024)
+    credential = models.ForeignKey(Credential,
+                                   on_delete=models.CASCADE,
+                                   null=True)
+    status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, key:%s, value:%s }' % (self.id,
-                                                self.key,
-                                                self.value)
+        return '{ id:%s, name:%s, credential:%s, status:%s }' % \
+            (self.id, self.name, self.credential, self.status)
 
     class Meta:
         """Metadata for model."""
@@ -37,17 +47,17 @@ class ResultKeyValue(models.Model):
         verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
-class Results(models.Model):
-    """The captured results from a scan."""
+class ConnectionResult(models.Model):
+    """The captured connection results from a scan."""
 
-    row = models.CharField(max_length=64)
-    columns = models.ManyToManyField(ResultKeyValue)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    systems = models.ManyToManyField(SystemConnectionResult)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, row:%s, columns:%s }' % (self.id,
-                                                  self.row,
-                                                  self.columns)
+        return '{ id:%s, source:%s, sytems:%s }' % (self.id,
+                                                    self.source,
+                                                    self.sytems)
 
     class Meta:
         """Metadata for model."""
@@ -55,20 +65,16 @@ class Results(models.Model):
         verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
-class ScanJobResults(models.Model):
-    """The results of a scan job."""
+class ConnectionResults(models.Model):
+    """The results of a connection scan."""
 
     scan_job = models.ForeignKey(ScanJob, on_delete=models.CASCADE)
-    results = models.ManyToManyField(Results)
-    fact_collection_id = models.IntegerField(null=True)
+    results = models.ManyToManyField(ConnectionResult)
 
     def __str__(self):
         """Convert to string."""
         return '{ id:%s, scan_job:%s, ' \
-            'fact_collection_id:%s, results:%s }' % (self.id,
-                                                     self.scan_job,
-                                                     self.fact_collection_id,
-                                                     self.results)
+            'results:%s }' % (self.id, self.scan_job, self.results)
 
     class Meta:
         """Metadata for model."""

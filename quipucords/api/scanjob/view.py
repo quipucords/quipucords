@@ -18,18 +18,19 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
-from api.models import ScanJob, ScanJobResults
+from api.models import ScanJob, ConnectionResults, InspectionResults
 from api.serializers import (ScanJobSerializer,
-                             ScanJobResultsSerializer,
-                             ResultsSerializer,
-                             ResultKeyValueSerializer)
+                             SourceSerializer,
+                             ConnectionResultsSerializer,
+                             SystemConnectionResultSerializer,
+                             InspectionResultsSerializer,
+                             SystemInspectionResultSerializer,
+                             RawFactSerializer)
 from api.signals.scanjob_signal import (start_scan, pause_scan,
                                         cancel_scan, restart_scan)
 
 
 SOURCE_KEY = 'source'
-ROW_KEY = 'row'
-COLUMN_KEY = 'columns'
 RESULTS_KEY = 'results'
 
 
@@ -47,40 +48,90 @@ def expand_source(scan, json_scan):
         json_scan[SOURCE_KEY] = slim_source
 
 
-def expand_key_values(result, json_result):
-    """Expand the key values.
+def expand_sys_conn_result(conn_result):
+    """Expand the system connection results.
 
-    Take collection of result key value ids and pull objects from db.
-    create slim dictionary version of key/value to return to user.
+    Take collection of system connection result ids and pull objects from db.
+    Return the user a json representation of these values.
     """
-    columns = []
-    if json_result is not None and json_result.get(COLUMN_KEY):
-        for column in result.columns.all():
-            serializer = ResultKeyValueSerializer(column)
-            json_column = serializer.data
-            field_out = {'key': json_column['key'],
-                         'value': json_column['value']}
-            columns.append(field_out)
-    return columns
+    result = []
+    for system_result in conn_result.systems.all():
+        serializer = SystemConnectionResultSerializer(system_result)
+        json_sys_result = serializer.data
+        if system_result.credential is not None:
+            cred = system_result.credential
+            json_cred = {'id': cred.id, 'name': cred.name}
+            json_sys_result['credential'] = json_cred
+        result.append(json_sys_result)
+    return result
 
 
-def expand_scan_results(job_scan_result, json_job_scan_result):
-    """Expand the scan results.
+def expand_sys_inspect_results(inspect_result):
+    """Expand the system inspection results.
 
-    Take collection of json_job_scan_result ids and pull objects from db.
+    Take collection of system inspection result ids and pull objects from db.
+    Return the user a json representation of these values.
+    """
+    result = []
+    for system_result in inspect_result.systems.all():
+        serializer = SystemInspectionResultSerializer(system_result)
+        json_sys_result = serializer.data
+        if system_result.facts is not None:
+            facts = system_result.facts.all()
+            json_facts = []
+            for fact in facts:
+                fact_serializer = RawFactSerializer(fact)
+                json_fact = fact_serializer.data
+                json_facts.append(json_fact)
+            json_sys_result['facts'] = json_facts
+        result.append(json_sys_result)
+    return result
+
+
+def expand_conn_results(job_conn_result, json_job_conn_result):
+    """Expand the connection results.
+
+    Take collection of json_job_conn_result ids and pull objects from db.
     create slim dictionary version of rows of key/value to return to user.
     """
-    if json_job_scan_result is not None and\
-            json_job_scan_result.get(RESULTS_KEY):
-        json_job_scan_result_list = []
-        for result in job_scan_result.results.all():
-            serializer = ResultsSerializer(result)
-            json_result = serializer.data
-            columns = expand_key_values(result, json_result)
-            json_job_scan_result_out = {ROW_KEY: json_result[ROW_KEY],
-                                        COLUMN_KEY: columns}
-            json_job_scan_result_list.append(json_job_scan_result_out)
-        json_job_scan_result[RESULTS_KEY] = json_job_scan_result_list
+    if json_job_conn_result is not None and\
+            json_job_conn_result.get(RESULTS_KEY):
+        json_job_conn_result_list = []
+        for result in job_conn_result.results.all():
+            source_serializer = SourceSerializer(result.source)
+            json_source = source_serializer.data
+            json_source.pop('credentials', None)
+            json_source.pop('hosts', None)
+            json_source.pop('ssh_port', None)
+            json_source.pop('address', None)
+            systems = expand_sys_conn_result(result)
+            json_job_conn_result_out = {'source': json_source,
+                                        'systems': systems}
+            json_job_conn_result_list.append(json_job_conn_result_out)
+        json_job_conn_result[RESULTS_KEY] = json_job_conn_result_list
+
+
+def expand_inspect_results(job_inspect_result, json_job_inspect_result):
+    """Expand the inspection results.
+
+    Take collection of json_job_inspect_result ids and pull objects from db.
+    create slim dictionary version of rows of key/value to return to user.
+    """
+    if json_job_inspect_result is not None and\
+            json_job_inspect_result.get(RESULTS_KEY):
+        json_job_inspect_result_list = []
+        for result in job_inspect_result.results.all():
+            source_serializer = SourceSerializer(result.source)
+            json_source = source_serializer.data
+            json_source.pop('credentials', None)
+            json_source.pop('hosts', None)
+            json_source.pop('ssh_port', None)
+            json_source.pop('address', None)
+            systems = expand_sys_inspect_results(result)
+            json_job_inspect_result_out = {'source': json_source,
+                                           'systems': systems}
+            json_job_inspect_result_list.append(json_job_inspect_result_out)
+        json_job_inspect_result[RESULTS_KEY] = json_job_inspect_result_list
 
 
 # pylint: disable=too-many-ancestors
@@ -132,13 +183,27 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['get'])
     def results(self, request, pk=None):
         """Get the results of a scan job."""
-        job_scan_result = ScanJobResults.objects.all() \
+        result = None
+        job_conn_result = ConnectionResults.objects.all() \
             .filter(scan_job__id=pk).first()
+        job_scan_result = InspectionResults.objects.all() \
+            .filter(scan_job__id=pk).first()
+        if job_conn_result:
+            serializer = ConnectionResultsSerializer(job_conn_result)
+            json_job_conn_result = serializer.data
+            expand_conn_results(job_conn_result, json_job_conn_result)
+            if result is None:
+                result = {}
+            result['connection_results'] = json_job_conn_result
         if job_scan_result:
-            serializer = ScanJobResultsSerializer(job_scan_result)
+            serializer = InspectionResultsSerializer(job_scan_result)
             json_job_scan_result = serializer.data
-            expand_scan_results(job_scan_result, json_job_scan_result)
-            return Response(json_job_scan_result)
+            expand_inspect_results(job_scan_result, json_job_scan_result)
+            if result is None:
+                result = {}
+            result['inspection_results'] = json_job_scan_result
+        if result is not None:
+            return Response(result)
         return Response(status=404)
 
     @detail_route(methods=['put'])

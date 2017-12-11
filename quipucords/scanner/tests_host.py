@@ -16,7 +16,8 @@ from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
 from api.models import (Credential, Source, HostRange,
-                        ScanJob, ScanJobResults, Results, ResultKeyValue)
+                        ScanJob, ConnectionResults, ConnectionResult,
+                        SystemConnectionResult, InspectionResults)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.utils import (construct_scan_inventory)
 from scanner.host import HostScanner
@@ -70,37 +71,31 @@ class HostScannerTest(TestCase):
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
-        self.scan_results = ScanJobResults(scan_job=self.scanjob,
-                                           fact_collection_id=1)
-        self.scan_results.save()
+        self.conn_results = ConnectionResults(scan_job=self.scanjob)
+        self.conn_results.save()
 
-        self.success_row = Results(row='success')
-        self.success_row.save()
+        self.conn_result = ConnectionResult(source=self.source)
+        self.conn_result.save()
 
-        success_cols = ResultKeyValue(key='1.2.3.4', value='cred1')
-        success_cols.save()
-        self.success_row.columns.add(success_cols)
-        self.success_row.save()
-        self.scan_results.results.add(self.success_row)
-
-        self.failed_row = Results(row='failed')
-        self.failed_row.save()
-
-        failed_cols = ResultKeyValue(key='1.1.1.2', value='None')
-        failed_cols.save()
-        self.failed_row.columns.add(failed_cols)
-        self.failed_row.save()
-        self.scan_results.results.add(self.failed_row)
-
-        self.scan_results.save()
+        success_sys = SystemConnectionResult(
+            name='1.2.3.4', credential=self.cred,
+            status=SystemConnectionResult.SUCCESS)
+        success_sys.save()
+        failed_sys = SystemConnectionResult(
+            name='1.1.1.2', status=SystemConnectionResult.FAILED)
+        failed_sys.save()
+        self.conn_result.systems.add(success_sys)
+        self.conn_result.systems.add(failed_sys)
+        self.conn_result.save()
+        self.conn_results.results.add(self.conn_result)
+        self.conn_results.save()
 
     def test_store_host_scan_success(self):
         """Test success storage."""
         scanner = HostScanner(self.scanjob, self.fact_endpoint)
         # pylint: disable=protected-access
         result = scanner._store_host_scan_success(1)
-        self.assertTrue(isinstance(result, ScanJobResults))
-        self.assertEqual(result.fact_collection_id, 1)
+        self.assertTrue(isinstance(result, InspectionResults))
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -228,40 +223,19 @@ class HostScannerTest(TestCase):
             scanner = HostScanner(
                 self.scanjob,
                 self.fact_endpoint,
-                scan_results=self.scan_results)
+                conn_results=self.conn_results)
             facts = scanner.run()
             mock_run.assert_called_with(ANY)
             self.assertEqual(facts, [])
 
     def test_populate_callback(self):
         """Test the population of the callback object for host scan."""
+        inspect = InspectionResults(scan_job=self.scanjob)
+        inspect.save()
         callback = ResultCallback(
-            scanjob=self.scanjob, scan_results=self.scan_results)
+            scanjob=self.scanjob, inspect_results=inspect)
         host = Mock()
         host.name = '1.2.3.4'
         result = Mock(_host=host, _results={'rc': 3})
 
-        success_result = self.scan_results.results.all()[0]
-        failed_result = self.scan_results.results.all()[1]
-
-        self.assertEqual(_is_host_in_result(
-            host.name, success_result), True)
-        self.assertEqual(_is_host_in_result(
-            host.name, failed_result), False)
-
         callback.v2_runner_on_unreachable(result)
-
-        self.assertEqual(_is_host_in_result(
-            host.name, success_result), False)
-        self.assertEqual(_is_host_in_result(
-            host.name, failed_result), True)
-
-
-def _is_host_in_result(host, result):
-    found = False
-    for column in result.columns.all():
-        if column.key == host:
-            found = True
-            break
-
-    return found

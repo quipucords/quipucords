@@ -18,6 +18,10 @@ from api.credential.serializer import CredentialSerializer
 from api.source.serializer import (CredentialsField, HostRangeField,
                                    SourceSerializer)
 from api.scanjob.serializer import SourceField, ScanJobSerializer
-from api.scanresults.serializer import (ResultKeyValueSerializer,
-                                        ResultsSerializer,
-                                        ScanJobResultsSerializer)
+from api.connresults.serializer import (ConnectionResultsSerializer,
+                                        ConnectionResultSerializer,
+                                        SystemConnectionResultSerializer)
+from api.inspectresults.serializer import(InspectionResultsSerializer,
+                                          InspectionResultSerializer,
+                                          SystemInspectionResultSerializer,
+                                          RawFactSerializer)
