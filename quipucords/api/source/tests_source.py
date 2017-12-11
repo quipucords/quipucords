@@ -15,6 +15,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import Credential, Source
+import api.messages as messages
 
 
 class SourceTest(TestCase):
@@ -449,6 +450,30 @@ class SourceTest(TestCase):
                                    content_type='application/json',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_empty_hosts(self):
+        """Fail update due to empty host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'ssh_port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': [],
+                'ssh_port': 22,
+                'credentials': [self.net_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_rsp = response.json()
+        print(json_rsp)
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
 
     def test_update_type_passed(self):
         """Fail update due to type passed."""
