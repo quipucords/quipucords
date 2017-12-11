@@ -17,6 +17,7 @@ from rest_framework import status
 from api.models import Credential, Source
 import api.messages as messages
 
+
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -471,7 +472,8 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_rsp = response.json()
         print(json_rsp)
-        self.assertEqual(json_rsp['hosts'][0], messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
 
     def test_update_type_passed(self):
         """Fail update due to type passed."""
