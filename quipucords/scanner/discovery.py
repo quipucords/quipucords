@@ -50,11 +50,7 @@ class DiscoveryScanner(Process):
         conn_result.save()
 
         for success in connected:
-            print(success)
             result[success[0]] = success[1]
-            ('*'*80)
-            print(success[1])
-            ('*'*80)
             cred = Credential.objects.get(pk=success[1]['id'])
             sys_result = SystemConnectionResult(
                 name=success[0], status=SystemConnectionResult.SUCCESS,
