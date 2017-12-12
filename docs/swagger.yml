@@ -780,20 +780,101 @@ definitions:
         items:
           $ref: "#/definitions/ScanResultColumn"
         description: "An array of key value pairs of result data."
+  SysConnResultOut:
+    type: "object"
+    required:
+      - name
+      - credential
+      - status
+    properties:
+      name:
+        type: "string"
+        description: "The name of the system (ip, hostname, etc.)"
+      credential:
+        $ref: "#/definitions/CredentialMin"
+        description: "The credential used to connect to the system."
+      status:
+        type: "string"
+        description: "The status of the system connection."
+        enum:
+          - success
+          - unreachable
+          - failed
+  ConnResultsOut:
+    type: "object"
+    required:
+      - source
+      - systems
+    properties:
+      source:
+        $ref: "#/definitions/SourceMin"
+        description: "The source associated with the connection scan."
+      systems:
+        type: "array"
+        items:
+          $ref: "#/definitions/SysConnResultOut"
+        description: "The connection result for each system."
+  RawFactsOut:
+    type: "object"
+    required:
+      - name
+      - value
+    properties:
+      name:
+        type: "string"
+        description: "The raw fact name."
+      value:
+        type: "string"
+        description: "The raw fact value"
+  SysInpectResultOut:
+    type: "object"
+    required:
+      - name
+      - facts
+      - status
+    properties:
+      name:
+        type: "string"
+        description: "The name of the system (ip, hostname, etc.)"
+      facts:
+        type: "array"
+        items:
+          $ref: "#/definitions/RawFactsOut"
+        description: "The raw facts collected from the system."
+      status:
+        type: "string"
+        description: "The status of the system connection."
+        enum:
+          - success
+          - unreachable
+          - failed
+  InspectResultsOut:
+    type: "object"
+    required:
+      - source
+      - systems
+    properties:
+      source:
+        $ref: "#/definitions/SourceMin"
+        description: "The source associated with the connection scan."
+      systems:
+        type: "array"
+        items:
+          $ref: "#/definitions/SysInpectResultOut"
+        description: "The connection result for each system."
   ScanJobResultsOut:
     type: "object"
     required:
-      - scan_job
-      - results
+      - connection_results
+      - inspection_results
     properties:
-        scan_job:
-          type: "integer"
-          format: "int64"
-        fact_collection_id:
-          type: "integer"
-          format: "int64"
-        results:
+        connection_results:
           type: "array"
           items:
-            $ref: "#/definitions/ScanResultRow"
-          description: "The results of scan job."
+            $ref: "#/definitions/ConnResultsOut"
+          description: "The connection results"
+        inspection_results:
+          type: "array"
+          items:
+            $ref: "#/definitions/InspectResultsOut"
+          description: "The connection results"
