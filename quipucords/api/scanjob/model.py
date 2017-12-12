@@ -28,7 +28,7 @@ class ScanOptions(models.Model):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'max_concurrency: {}'.format(self.id,
-                                           self.max_concurrency) + '}'
+                                         self.max_concurrency) + '}'
 
 
 class ScanJob(models.Model):

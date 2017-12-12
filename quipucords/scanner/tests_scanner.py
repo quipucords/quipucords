@@ -10,32 +10,11 @@
 #
 """Test the scanner capabilities."""
 
-from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-import requests_mock
-from ansible.errors import AnsibleError
 from api.models import (Credential, Source, HostRange,
-                        ScanTask, ScanJob, ConnectionResults, ConnectionResult,
-                        SystemConnectionResult, InspectionResults)
-from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.utils import (construct_scan_inventory)
-from scanner.host import HostScanner
-from scanner.callback import ResultCallback
-from scanner.task import Task
-from scanner import Scanner
-
-class FakeTask(Task):
-    """Fake task that prints id"""
-
-    def __init__(self, scanjob, scantask, prerequisite_tasks, sequence):
-        super().__init__(scanjob, scantask, prerequisite_tasks)
-        self.sequence = sequence
-
-    def run(self):
-        print('Running fake task %d' % self.sequence)
-        return ScanTask.COMPLETED
-
+                        ScanTask, ScanJob)
+from scanner.job import ScanJobRunner
 
 
 class ScannerTest(TestCase):
@@ -44,7 +23,6 @@ class ScannerTest(TestCase):
     # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
-
         self.scanjob = ScanJob(scan_type=ScanTask.HOST)
         self.scanjob.save()
 
@@ -82,7 +60,7 @@ class ScannerTest(TestCase):
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
-        self.scanner = Scanner(self.scanjob, self.fact_endpoint)
+        self.scanner = ScanJobRunner(self.scanjob, self.fact_endpoint)
 
     def test_fake_tasks_success(self):
         """Test success storage."""

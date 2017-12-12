@@ -10,7 +10,8 @@
 #
 """Util for re-loading partial scan jobs and their results."""
 
-from scanner import Scanner
+from scanner.job import ScanJobRunner
+
 
 def create_scanner_for_job(scanjob, fact_endpoint):
     """Given a job, read partial results and create new scanner.
@@ -18,5 +19,5 @@ def create_scanner_for_job(scanjob, fact_endpoint):
     :param scanjob: Results for this scanjob will be retreived
     :returns: the scanner object to be run
     """
-    scanner = Scanner(scanjob, fact_endpoint)
+    scanner = ScanJobRunner(scanjob, fact_endpoint)
     return scanner

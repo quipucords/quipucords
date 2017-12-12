@@ -8,15 +8,17 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Task is a logical breakdown of work."""
+"""ScanTaskRunner is a logical breakdown of work."""
 
 from api.models import ScanTask
 
-class Task(object):
-    """Task is a logical breakdown of work."""
+
+class ScanTaskRunner(object):
+    """ScanTaskRunner is a logical breakdown of work."""
 
     def __init__(self, scanjob, scantask, prerequisite_tasks=None):
         """Set context for task execution.
+
         :param scanjob: the scan job that contains this task
         :param scantask: the scan task model for this task
         :param prerequisite_tasks: An array of scan task model objects
@@ -36,6 +38,12 @@ class Task(object):
         :returns: Returns the status.  Must be one of the
         ScanTask.STATUS_CHOICES values
         """
-
         print('Running task: %s' % self.scantask)
         return ScanTask.COMPLETED
+
+    def facts(self):
+        """Provide the resulting facts for the scan task.
+
+        :returns: Returns a dictionary of gathered facts.
+        """
+        return {}

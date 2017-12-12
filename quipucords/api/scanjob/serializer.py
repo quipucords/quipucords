@@ -54,8 +54,6 @@ class ScanJobSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan job."""
-
-
         options = validated_data.pop('options', None)
         scanjob = super().create(validated_data)
 
@@ -66,7 +64,6 @@ class ScanJobSerializer(NotEmptySerializer):
             scanjob.save()
 
         return scanjob
-
 
     @staticmethod
     def validate_sources(sources):
