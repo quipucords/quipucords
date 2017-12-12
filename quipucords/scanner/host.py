@@ -14,7 +14,7 @@ import logging
 import requests
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import (ScanJob, InspectionResults,
+from api.models import (ScanTask, InspectionResults,
                         SystemConnectionResult)
 from scanner.discovery import DiscoveryScanner
 from scanner.callback import ResultCallback
@@ -196,14 +196,14 @@ class HostScanner(DiscoveryScanner):
     def _store_host_scan_success(self, fact_collection_id):
         self.inspect_results.fact_collection_id = fact_collection_id
         self.inspect_results.save()
-        self.scanjob.status = ScanJob.COMPLETED
+        self.scanjob.status = ScanTask.COMPLETED
         self.scanjob.save()
         return self.inspect_results
 
     def run(self):
         """Trigger thread execution."""
         facts = []
-        self.scanjob.status = ScanJob.RUNNING
+        self.scanjob.status = ScanTask.RUNNING
         self.scanjob.save()
 
         try:
@@ -228,14 +228,14 @@ class HostScanner(DiscoveryScanner):
                         self.scanjob)
         except AnsibleError as ansible_error:
             logger.error(ansible_error)
-            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.status = ScanTask.FAILED
             self.scanjob.save()
         except AssertionError as assertion_error:
             logger.error(assertion_error)
-            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.status = ScanTask.FAILED
             self.scanjob.save()
         except ScannerException as scan_error:
             logger.error(scan_error)
-            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.status = ScanTask.FAILED
             self.scanjob.save()
         return facts

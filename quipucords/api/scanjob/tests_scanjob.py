@@ -51,21 +51,28 @@ class ScanJobTest(TestCase):
                                 json.dumps(data),
                                 'application/json')
 
-    def create_expect_400(self, data):
+    def create_expect_400(self, data, expected_response):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response_json = response.json()
+        self.assertEqual(response_json, expected_response)
 
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create(data)
+        response_json = response.json()
+        if response.status_code != status.HTTP_201_CREATED:
+            print('Cause of failure: ')
+            print(response_json)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        return response.json()
+        return response_json
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
-        data = {'source': self.source.id,
+        data = {'sources': [self.source.id],
                 'scan_type': 'discovery'}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
@@ -73,18 +80,19 @@ class ScanJobTest(TestCase):
     def test_create_no_source(self):
         """A create request must have a source."""
         self.create_expect_400(
-            {})
+            {}, {'sources': ['This field is required.']})
 
     def test_create_invalid_scan_type(self):
         """A create request must have a valid scan_type."""
-        data = {'source': self.source.id,
+        data = {'sources': [self.source.id],
                 'scan_type': 'foo'}
-        self.create_expect_400(data)
+        self.create_expect_400(
+            data, {'scan_type': ['"foo" is not a valid choice.']})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_create_default_host_type(self, start_scan):
         """A valid create request should succeed with defaulted type."""
-        data = {'source': self.source.id}
+        data = {'sources': [self.source.id]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
         self.assertIn('scan_type', response)
@@ -93,19 +101,24 @@ class ScanJobTest(TestCase):
     def test_create_invalid_source(self):
         """The Source name must valid."""
         self.create_expect_400(
-            {'source': -1})
+            {'sources': -1},
+            {'sources':
+             ['Expected a list of items but got type "int".']})
 
     def test_create_invalid_forks(self):
         """Test valid number of forks."""
-        data = {'source': self.source.id,
-                'max_concurrency': -5}
-        self.create_expect_400(data)
+        data = {'sources': [self.source.id],
+                'options': {'max_concurrency': -5}}
+        self.create_expect_400(data, {
+            'options': {'max_concurrency':
+                        ['Ensure this value is greater than or equal '
+                         'to 1.']}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
         """List all ScanJob objects."""
-        data_default = {'source': self.source.id}
-        data_discovery = {'source': self.source.id,
+        data_default = {'sources': [self.source.id]}
+        data_discovery = {'sources': [self.source.id],
                           'scan_type': 'discovery'}
         self.create_expect_201(data_default)
         self.create_expect_201(data_discovery)
@@ -117,43 +130,41 @@ class ScanJobTest(TestCase):
         content = response.json()
         print(content)
         expected = [{'id': 1,
-                     'source': {'id': 1, 'name': 'source1',
-                                'source_type': 'network'},
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
                      'scan_type': 'host',
-                     'status': 'pending',
-                     'max_concurrency': 50},
+                     'status': 'pending'},
                     {'id': 2,
-                     'source': {'id': 1, 'name': 'source1',
-                                'source_type': 'network'},
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
                      'scan_type': 'discovery',
-                     'status': 'pending',
-                     'max_concurrency': 50}]
+                     'status': 'pending'}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
         """Get details on a specific ScanJob by primary key."""
-        data_discovery = {'source': self.source.id,
+        data_discovery = {'sources': [self.source.id],
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
 
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('source', response.json())
-        source = response.json()['source']
+        self.assertIn('sources', response.json())
+        sources = response.json()['sources']
 
         self.assertEqual(
-            source, {'id': 1, 'name': 'source1', 'source_type': 'network'})
+            sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
         """Completely update a Source."""
-        data_discovery = {'source': self.source.id,
+        data_discovery = {'sources': [self.source.id],
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
 
-        data = {'source': self.source.id,
+        data = {'sources': [self.source.id],
                 'scan_type': 'host'}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
@@ -166,7 +177,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_partial_update(self, start_scan):
         """Partially update a ScanJob is not supported."""
-        data_discovery = {'source': self.source.id,
+        data_discovery = {'sources': [self.source.id],
                           'scan_type': 'discovery'}
         initial = self.create_expect_201(data_discovery)
 
@@ -182,7 +193,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_delete(self, start_scan):
         """Delete a ScanJob is not supported."""
-        data_discovery = {'source': self.source.id,
+        data_discovery = {'sources': [self.source.id],
                           'scan_type': 'discovery'}
         response = self.create_expect_201(data_discovery)
 
@@ -194,7 +205,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_pause_bad_state(self, start_scan):
         """Pause a scanjob."""
-        data_host = {'source': self.source.id, 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
@@ -206,7 +217,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
-        data_host = {'source': self.source.id, 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
@@ -218,7 +229,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
-        data_host = {'source': self.source.id, 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))

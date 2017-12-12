@@ -13,7 +13,7 @@ import logging
 from multiprocessing import Process
 from ansible.errors import AnsibleError
 from api.serializers import SourceSerializer, CredentialSerializer
-from api.models import (Credential, ScanJob, ConnectionResults,
+from api.models import (Credential, ScanTask, ScanJob, ConnectionResults,
                         ConnectionResult, SystemConnectionResult)
 from scanner.utils import connect
 
@@ -71,7 +71,7 @@ class DiscoveryScanner(Process):
         self.conn_results.save()
 
         if mark_complete:
-            self.scanjob.status = ScanJob.COMPLETED
+            self.scanjob.status = ScanTask.COMPLETED
             self.scanjob.save()
 
         return result
@@ -79,7 +79,7 @@ class DiscoveryScanner(Process):
     def run(self):
         """Trigger thread execution."""
         result = {}
-        self.scanjob.status = ScanJob.RUNNING
+        self.scanjob.status = ScanTask.RUNNING
         self.scanjob.save()
         try:
             connected, failed_hosts = self.discovery()
@@ -117,7 +117,7 @@ class DiscoveryScanner(Process):
                                            forks=forks)
 
             # Update the scan counts
-            if self.scanjob.scan_type == ScanJob.DISCOVERY:
+            if self.scanjob.scan_type == ScanTask.DISCOVERY:
                 if self.scanjob.systems_count is None:
                     self.scanjob.systems_count = len(
                         connected) + len(remaining)

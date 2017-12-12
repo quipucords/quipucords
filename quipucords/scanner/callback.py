@@ -12,7 +12,7 @@
 
 import logging
 from ansible.plugins.callback import CallbackBase
-from api.models import (ScanJob, InspectionResult,
+from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
 
 # Get an instance of a logger
@@ -103,12 +103,12 @@ class ResultCallback(CallbackBase):
         if self.scanjob is not None:
             self._update_reachable_hosts(result_obj)
             self.scanjob.failed_scans += 1
-            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.status = ScanTask.FAILED
             self.scanjob.save()
         logger.warning('%s', result_obj)
 
     def _update_reachable_hosts(self, result_obj):
-        if self.scanjob.scan_type != ScanJob.HOST:
+        if self.scanjob.scan_type != ScanTask.HOST:
             # Don't update for discovery scan.
             return
 
