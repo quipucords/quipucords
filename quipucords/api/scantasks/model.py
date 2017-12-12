@@ -49,7 +49,7 @@ class ScanTask(models.Model):
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
-    sequency_number = models.PositiveIntegerField(null=True)
+    sequence_number = models.PositiveIntegerField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -57,12 +57,14 @@ class ScanTask(models.Model):
             'scan_type:{}, '\
             'status:{}, '\
             'source:{}, '\
+            'sequence_number:{}, '\
             'systems_count: {}, '\
             'systems_scanned: {}, '\
             'systems_failed: {}, '.format(self.id,
                                           self.scan_type,
                                           self.status,
                                           self.source,
+                                          self.sequence_number,
                                           self.systems_count,
                                           self.systems_scanned,
                                           self.systems_failed) + '}'

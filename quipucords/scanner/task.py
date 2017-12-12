@@ -46,4 +46,5 @@ class ScanTaskRunner(object):
 
         :returns: Returns a dictionary of gathered facts.
         """
+        # pylint: disable=no-self-use
         return {}

@@ -11,6 +11,7 @@
 """ScanJobRunner runs a group of scan tasks."""
 import logging
 from multiprocessing import Process
+from django.db.models import Q
 from api.models import ScanTask
 from scanner.task import ScanTaskRunner
 
@@ -34,11 +35,12 @@ class ScanJobRunner(Process):
         self.scanjob.status = ScanTask.RUNNING
         self.scanjob.save()
 
-        # FIXME load partial results and sort.
-        # Doing dumb method now.
-
+        # Load tasks that have no been run or are in progress
         tasks_to_run = []
-        for scantaskmodel in self.scanjob.tasks.all():
+        incomplete_scantasks = self.scanjob.tasks.filter(
+            Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
+        ).order_by('sequence_number')
+        for scantaskmodel in incomplete_scantasks:
             tasks_to_run.append(ScanTaskRunner(self.scanjob, scantaskmodel))
 
         print('Running: %s' % self.scanjob)

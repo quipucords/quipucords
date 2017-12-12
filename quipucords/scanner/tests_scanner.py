@@ -46,11 +46,13 @@ class ScannerTest(TestCase):
 
         self.source.hosts.add(self.host)
 
-        scantask = ScanTask(scan_type=ScanTask.HOST, source=self.source)
+        scantask = ScanTask(scan_type=ScanTask.HOST,
+                            source=self.source, sequence_number=2)
         scantask.save()
         self.scanjob.tasks.add(scantask)
 
-        scantask = ScanTask(scan_type=ScanTask.HOST, source=self.source)
+        scantask = ScanTask(scan_type=ScanTask.HOST,
+                            source=self.source, sequence_number=1)
         scantask.save()
         self.scanjob.tasks.add(scantask)
 
