@@ -27,7 +27,6 @@ class ScanJobRunner(Process):
         """Create discovery scanner."""
         Process.__init__(self)
         self.scanjob = scanjob
-        self.identifier = scanjob.id
         self.fact_endpoint = fact_endpoint
 
     def run(self):
@@ -36,26 +35,26 @@ class ScanJobRunner(Process):
         self.scanjob.save()
 
         # Load tasks that have no been run or are in progress
-        tasks_to_run = []
+        task_runners = []
         incomplete_scantasks = self.scanjob.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
-        for scantaskmodel in incomplete_scantasks:
-            tasks_to_run.append(ScanTaskRunner(self.scanjob, scantaskmodel))
+        for scantask in incomplete_scantasks:
+            task_runners.append(ScanTaskRunner(self.scanjob, scantask))
 
         print('Running: %s' % self.scanjob)
 
-        for task in tasks_to_run:
-            # Mark task as running
-            task.scantask.status = ScanTask.RUNNING
-            task.scantask.save()
+        for runner in task_runners:
+            # Mark runner as running
+            runner.scantask.status = ScanTask.RUNNING
+            runner.scantask.save()
 
-            # run task
-            task_status = task.run()
+            # run runner
+            task_status = runner.run()
 
             # Save Task status
-            task.scantask.status = task_status
-            task.scantask.save()
+            runner.scantask.status = task_status
+            runner.scantask.save()
 
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully so save job status as fail

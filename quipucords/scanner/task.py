@@ -16,7 +16,7 @@ from api.models import ScanTask
 class ScanTaskRunner(object):
     """ScanTaskRunner is a logical breakdown of work."""
 
-    def __init__(self, scanjob, scantask, prerequisite_tasks=None):
+    def __init__(self, scanjob, scantask):
         """Set context for task execution.
 
         :param scanjob: the scan job that contains this task
@@ -26,7 +26,6 @@ class ScanTaskRunner(object):
         """
         self.scanjob = scanjob
         self.scantask = scantask
-        self.prerequisite_tasks = prerequisite_tasks
 
     def run(self):
         """Block that will be executed.

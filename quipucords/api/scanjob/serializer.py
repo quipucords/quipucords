@@ -31,7 +31,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanOptions
-        fields = '__all__'
+        fields = ['max_concurrency']
 
 
 class ScanJobSerializer(NotEmptySerializer):
