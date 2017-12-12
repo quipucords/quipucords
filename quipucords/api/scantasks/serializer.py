@@ -41,6 +41,7 @@ class ScanTaskSerializer(NotEmptySerializer):
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
+    sequence_number = IntegerField(required=False, min_value=0, read_only=True)
 
     class Meta:
         """Metadata for serializer."""

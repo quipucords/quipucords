@@ -10,10 +10,7 @@
 #
 """Util for re-loading partial scan jobs and their results."""
 
-from api.models import ScanTask, ConnectionResults, InspectionResults
-from scanner.discovery import DiscoveryScanner
-from scanner.host import HostScanner
-
+from scanner import Scanner
 
 def create_scanner_for_job(scanjob, fact_endpoint):
     """Given a job, read partial results and create new scanner.
@@ -21,15 +18,5 @@ def create_scanner_for_job(scanjob, fact_endpoint):
     :param scanjob: Results for this scanjob will be retreived
     :returns: the scanner object to be run
     """
-    scanner = None
-    conn_results = ConnectionResults.objects.filter(
-        scan_job=scanjob.id).first()
-    if scanjob.scan_type == ScanTask.DISCOVERY:
-        scanner = DiscoveryScanner(scanjob, conn_results=conn_results)
-    else:
-        inspect_results = InspectionResults.objects.filter(
-            scan_job=scanjob.id).first()
-        scanner = HostScanner(
-            scanjob, fact_endpoint, conn_results=conn_results,
-            inspect_results=inspect_results)
+    scanner = Scanner(scanjob, fact_endpoint)
     return scanner

@@ -27,7 +27,7 @@ class ScanOptions(models.Model):
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
-            'max_concurrency: {}, '.format(self.id,
+            'max_concurrency: {}'.format(self.id,
                                            self.max_concurrency) + '}'
 
 

@@ -10,6 +10,7 @@
 #
 """Module for serializing all model object for database storage."""
 
+from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
@@ -49,6 +50,23 @@ class ScanJobSerializer(NotEmptySerializer):
 
         model = ScanJob
         fields = '__all__'
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a scan job."""
+
+
+        options = validated_data.pop('options', None)
+        scanjob = super().create(validated_data)
+
+        if options:
+            options = ScanOptions.objects.create(**options)
+            options.save()
+            scanjob.options = options
+            scanjob.save()
+
+        return scanjob
+
 
     @staticmethod
     def validate_sources(sources):
