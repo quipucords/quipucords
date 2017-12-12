@@ -12,7 +12,8 @@
 
 import logging
 from ansible.plugins.callback import CallbackBase
-from api.models import Results, ResultKeyValue, ScanJob
+from api.models import (ScanJob, InspectionResult,
+                        SystemInspectionResult, RawFact)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -33,13 +34,14 @@ class ResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, scanjob=None, scan_results=None, display=None):
+    def __init__(self, scanjob=None, inspect_results=None, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.scanjob = scanjob
-        self.scan_results = scan_results
-        self.success_results = None
-        self.failed_results = None
+        self.source = None
+        if scanjob is not None:
+            self.source = scanjob.source
+        self.inspect_results = inspect_results
         self.results = []
         self._ansible_facts = {}
 
@@ -66,16 +68,25 @@ class ResultCallback(CallbackBase):
                         self.scanjob.save()
 
                     # Save facts for host
-                    row = Results(row=host)
-                    row.save()
+                    sys_result = SystemInspectionResult(
+                        name=host, status=SystemInspectionResult.SUCCESS)
+                    sys_result.save()
                     for result_key, result_value in facts.items():
-                        stored_fact = ResultKeyValue(key=result_key,
-                                                     value=result_value)
+                        stored_fact = RawFact(name=result_key,
+                                              value=result_value)
                         stored_fact.save()
-                        row.columns.add(stored_fact)
-                    row.save()
-                    self.scan_results.results.add(row)
-                    self.scan_results.save()
+                        sys_result.facts.add(stored_fact)
+                    sys_result.save()
+
+                    inspect_result = self.inspect_results.results.filter(
+                        source__id=self.source.id).first()
+                    if inspect_result is None:
+                        inspect_result = InspectionResult(source=self.source)
+                        inspect_result.save()
+                    inspect_result.systems.add(sys_result)
+                    inspect_result.save()
+                    self.inspect_results.results.add(inspect_result)
+                    self.inspect_results.save()
 
                 elif not key.startswith('internal'):
                     facts[key] = value
@@ -106,34 +117,17 @@ class ResultCallback(CallbackBase):
             'Host %s is no longer reachable.  Moving host to failed results',
             unreachable_host)
 
-        # cache success and failed results for future use in scan
-        if self.failed_results is None or self.success_results is None:
-            for scan_result in self.scan_results.results.all():
-                if scan_result.row == 'success':
-                    self.success_results = scan_result
-                elif scan_result.row == 'failed':
-                    self.failed_results = scan_result
-
-        # remove host from success if there
-        for column in self.success_results.columns.all():
-            if column.key == unreachable_host:
-                self.success_results.columns.remove(column)
-                column.delete()
-                self.success_results.save()
-                break
-
-        # Add host to failed if not there
-        failed_column = None
-        for column in self.failed_results.columns.all():
-            if column.key == unreachable_host:
-                failed_column = column
-                break
-
-        if failed_column is None:
-            failed_column = ResultKeyValue(key=unreachable_host, value=None)
-            failed_column.save()
-            self.failed_results.columns.add(failed_column)
-            self.failed_results.save()
+        inspect_result = self.inspect_results.results.filter(
+            source__id=self.source.id).first()
+        if inspect_result is None:
+            inspect_result = InspectionResult(source=self.source)
+            inspect_result.save()
+        sys_result = SystemInspectionResult(
+            name=unreachable_host,
+            status=SystemInspectionResult.UNREACHABLE)
+        sys_result.save()
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""

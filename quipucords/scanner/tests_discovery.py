@@ -169,15 +169,15 @@ class DiscoveryScannerTest(TestCase):
     @patch('scanner.discovery.connect')
     def test_discovery(self, mock_connect):
         """Test running a discovery scan with mocked connection."""
-        expected = ([('1.2.3.4', {'name': 'cred1'})], [])
+        expected = ([('1.2.3.4', {'id': '1'})], [])
         mock_connect.return_value = expected
         scanner = DiscoveryScanner(self.scanjob)
         conn_dict = scanner.run()
         mock_connect.assert_called_with(ANY, ANY, 22, forks=50)
-        self.assertEqual(conn_dict, {'1.2.3.4': {'name': 'cred1'}})
+        self.assertEqual(conn_dict, {'1.2.3.4': {'id': '1'}})
 
     def test_store_discovery_success(self):
-        """Test running a discovery scan with mocked connection."""
+        """Test running a discovery scan _store_discovery_success."""
         scanner = DiscoveryScanner(self.scanjob)
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data

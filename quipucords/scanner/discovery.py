@@ -13,8 +13,8 @@ import logging
 from multiprocessing import Process
 from ansible.errors import AnsibleError
 from api.serializers import SourceSerializer, CredentialSerializer
-from api.models import (Credential, ScanJob, ScanJobResults,
-                        Results, ResultKeyValue)
+from api.models import (Credential, ScanJob, ConnectionResults,
+                        ConnectionResult, SystemConnectionResult)
 from scanner.utils import connect
 
 
@@ -30,64 +30,51 @@ class DiscoveryScanner(Process):
     failures (host/ip).
     """
 
-    def __init__(self, scanjob, scan_results=None):
+    def __init__(self, scanjob, conn_results=None):
         """Create discovery scanner."""
         Process.__init__(self)
         self.scanjob = scanjob
         self.identifier = scanjob.id
-        source = scanjob.source
-        serializer = SourceSerializer(source)
-        self.source = serializer.data
-        if scan_results is None:
-            self.scan_results = ScanJobResults(scan_job=self.scanjob)
+        self.source = scanjob.source
+        if conn_results is None:
+            self.conn_results = ConnectionResults(scan_job=self.scanjob)
             self.scan_restart = False
         else:
-            self.scan_results = scan_results
+            self.conn_results = conn_results
             self.scan_restart = True
 
     def _store_discovery_success(self, connected, failed_hosts,
                                  mark_complete=True):
         result = {}
-        success_row = Results(row='success')
-        success_row.save()
+        conn_result = ConnectionResult(source=self.source)
+        conn_result.save()
+
         for success in connected:
             result[success[0]] = success[1]
-            rkv1 = ResultKeyValue(key=success[0], value=success[1]['name'])
-            rkv1.save()
-            success_row.columns.add(rkv1)
-        success_row.save()
+            cred = Credential.objects.get(pk=success[1]['id'])
+            sys_result = SystemConnectionResult(
+                name=success[0], status=SystemConnectionResult.SUCCESS,
+                credential=cred)
+            sys_result.save()
+            conn_result.systems.add(sys_result)
 
-        failed_row = Results(row='failed')
-        failed_row.save()
         for failed in failed_hosts:
             result[failed] = None
-            rkv1 = ResultKeyValue(key=failed, value=None)
-            rkv1.save()
-            failed_row.columns.add(rkv1)
-        failed_row.save()
+            sys_result = SystemConnectionResult(
+                name=failed, status=SystemConnectionResult.FAILED)
+            sys_result.save()
+            conn_result.systems.add(sys_result)
 
-        self.scan_results.save()
-        self.scan_results.results.add(success_row)
-        self.scan_results.results.add(failed_row)
-        self.scan_results.save()
+        conn_result.save()
+        self.conn_results.save()
+        self.conn_results.results.add(conn_result)
+        self.conn_results.save()
 
         if mark_complete:
             self.scanjob.status = ScanJob.COMPLETED
             self.scanjob.save()
 
         return result
-
-    def _store_error(self, ansible_error):
-        self.scanjob.status = ScanJob.FAILED
-        self.scanjob.save()
-        self.scan_results.save()
-        error_row = Results(row='error')
-        error_row.save()
-        rkv1 = ResultKeyValue(key='message', value=ansible_error.message)
-        rkv1.save()
-        error_row.columns.add(rkv1)
-        self.scan_results.results.add(error_row)
-        self.scan_results.save()
 
     def run(self):
         """Trigger thread execution."""
@@ -100,7 +87,8 @@ class DiscoveryScanner(Process):
         except AnsibleError as ansible_error:
             logger.error('Discovery scan failed for %s. %s', self.scanjob,
                          ansible_error)
-            self._store_error(ansible_error)
+            self.scanjob.status = ScanJob.FAILED
+            self.scanjob.save()
 
         return result
 
@@ -112,9 +100,11 @@ class DiscoveryScanner(Process):
                   list of host that failed connection
         """
         connected = []
-        remaining = self.source['hosts']
-        credentials = self.source['credentials']
-        connection_port = self.source['ssh_port']
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        remaining = source['hosts']
+        credentials = source['credentials']
+        connection_port = source['ssh_port']
 
         logger.info('Discovery scan started for %s.', self.scanjob)
 
