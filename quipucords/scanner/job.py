@@ -42,13 +42,14 @@ class ScanJobRunner(Process):
         for scantask in incomplete_scantasks:
             task_runners.append(ScanTaskRunner(self.scanjob, scantask))
 
-        print('Running: %s' % self.scanjob)
+        logger.info('ScanJob %s started', self.scanjob.id)
 
         for runner in task_runners:
             # Mark runner as running
             runner.scantask.status = ScanTask.RUNNING
             runner.scantask.save()
 
+            logger.info('Running task: %s', runner)
             # run runner
             task_status = runner.run()
 
@@ -66,4 +67,11 @@ class ScanJobRunner(Process):
             self.scanjob.status = ScanTask.COMPLETED
             self.scanjob.save()
 
+        logger.info('ScanJob %s ended', self.scanjob.id)
         return self.scanjob.status
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'scanjob:{}, '\
+            'fact_endpoint: {}'.format(self.scanjob.id,
+                                       self.fact_endpoint) + '}'

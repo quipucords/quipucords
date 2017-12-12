@@ -37,7 +37,6 @@ class ScanTaskRunner(object):
         :returns: Returns the status.  Must be one of the
         ScanTask.STATUS_CHOICES values
         """
-        print('Running task: %s' % self.scantask)
         return ScanTask.COMPLETED
 
     def facts(self):
@@ -47,3 +46,11 @@ class ScanTaskRunner(object):
         """
         # pylint: disable=no-self-use
         return {}
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'scanjob:{}, '\
+            'scantask: {}, '\
+            'sequence_number: {}'.format(self.scanjob.id,
+                                         self.scantask.id,
+                                         self.scantask.sequence_number) + '}'
