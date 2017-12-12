@@ -14,7 +14,7 @@ from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import Credential, Source, HostRange, ScanJob
+from api.models import Credential, Source, HostRange, ScanTask, ScanJob
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.utils import (_construct_vars, _process_connect_callback,
                            _construct_error,
@@ -67,7 +67,7 @@ class DiscoveryScannerTest(TestCase):
         self.source.hosts.add(self.host)
 
         self.scanjob = ScanJob(source_id=self.source.id,
-                               scan_type=ScanJob.DISCOVERY)
+                               scan_type=ScanTask.DISCOVERY)
         self.scanjob.failed_scans = 0
         self.scanjob.save()
 

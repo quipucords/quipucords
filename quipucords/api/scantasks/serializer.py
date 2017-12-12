@@ -15,45 +15,43 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         ChoiceField,
                                         IntegerField)
-from api.models import Source, ScanTask, ScanJob, ScanOptions
+from api.models import Source, ScanTask
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
-from api.scantasks.serializer import SourceField
 
 
-class ScanOptionsSerializer(NotEmptySerializer):
-    """Serializer for the ScanOptions model."""
+class SourceField(PrimaryKeyRelatedField):
+    """Representation of the source associated with a scan job."""
 
-    max_concurrency = IntegerField(required=False, min_value=1, default=50)
+    def display_value(self, instance):
+        """Create display value."""
+        display = instance
+        if isinstance(instance, Source):
+            display = 'Source: %s' % instance.name
+        return display
 
-    class Meta:
-        """Metadata for serializer."""
 
-        model = ScanOptions
-        fields = '__all__'
+class ScanTaskSerializer(NotEmptySerializer):
+    """Serializer for the ScanTask model."""
 
-
-class ScanJobSerializer(NotEmptySerializer):
-    """Serializer for the ScanJob model."""
-
-    sources = SourceField(many=True, queryset=Source.objects.all())
+    source = SourceField(queryset=Source.objects.all())
     scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
-    tasks = PrimaryKeyRelatedField(many=True, read_only=True)
-    options = ScanOptionsSerializer(required=False, many=False)
-    fact_collection_id = IntegerField(read_only=True)
+    systems_count = IntegerField(required=False, min_value=0, read_only=True)
+    systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
+    systems_failed = IntegerField(required=False, min_value=0, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
 
-        model = ScanJob
+        model = ScanTask
         fields = '__all__'
 
     @staticmethod
-    def validate_sources(sources):
+    def validate_source(source):
         """Make sure the source is present."""
-        if not sources:
-            raise ValidationError(_(messages.SJ_REQ_SOURCES))
+        if not source:
+            raise ValidationError(_(messages.ST_REQ_SOURCE))
 
-        return sources
+        return source

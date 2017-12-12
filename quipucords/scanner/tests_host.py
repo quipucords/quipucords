@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 import requests_mock
 from ansible.errors import AnsibleError
 from api.models import (Credential, Source, HostRange,
-                        ScanJob, ConnectionResults, ConnectionResult,
+                        ScanTask, ScanJob, ConnectionResults, ConnectionResult,
                         SystemConnectionResult, InspectionResults)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.utils import (construct_scan_inventory)
@@ -65,8 +65,12 @@ class HostScannerTest(TestCase):
 
         self.source.hosts.add(self.host)
 
-        self.scanjob = ScanJob(source_id=self.source.id,
-                               scan_type=ScanJob.HOST)
+        self.scanjob = ScanJob(scan_type=ScanTask.HOST)
+        self.scanjob.save()
+
+        self.scanjob.sources = [self.source.id]
+        self.scanjob.save()
+
         self.scanjob.failed_scans = 0
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')

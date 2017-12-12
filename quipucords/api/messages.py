@@ -70,7 +70,11 @@ VC_ONE_CRED = 'Source of type vcenter must a single credential.'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
-SJ_REQ_SOURCE = 'Scan must have a source.'
+SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
+
+# scan task messages
+PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'
+ST_REQ_SOURCE = 'Scan task must have a source.'
 
 # scan results messages
 PLURAL_SCAN_RESULTS_MSG = 'Scan Results'
