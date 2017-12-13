@@ -16,7 +16,8 @@ from ansible.parsing.splitter import parse_kv
 from api.serializers import SourceSerializer, CredentialSerializer
 from api.models import (Credential, ScanTask, ConnectionResults,
                         ConnectionResult, SystemConnectionResult)
-from scanner import (ScanTaskRunner, ResultCallback)
+from scanner.task import ScanTaskRunner
+from scanner.callback import ResultCallback
 from scanner.network.utils import (_handle_ssh_passphrase,
                                    run_playbook,
                                    _construct_error,
@@ -35,7 +36,7 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task):
+    def __init__(self, scan_job, scan_task, conn_results):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
@@ -44,7 +45,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         that were execute prior to running this task.
         """
         super().__init__(scan_job, scan_task)
-        self.conn_results = None
+        self.conn_results = conn_results
 
     def _store_discovery_success(self, connected, failed_hosts):
         result = {}
@@ -88,11 +89,13 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self):
         """Scan network range ang attempt connections."""
+        logger.info('Connect scan task started for %s.', self.scan_task)
+
         try:
             connected, failed_hosts = self.discovery()
             self.facts = self._store_discovery_success(connected, failed_hosts)
         except AnsibleError as ansible_error:
-            logger.error('Discovery scan failed for %s. %s', self.scan_task,
+            logger.error('Connect scan task failed for %s. %s', self.scan_task,
                          ansible_error)
             return ScanTask.FAILED
 
@@ -111,8 +114,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         remaining = source['hosts']
         credentials = source['credentials']
         connection_port = source['ssh_port']
-
-        logger.info('Discovery scan started for %s.', self.scan_task)
 
         forks = self.scan_job.options.max_concurrency
         for cred_id in credentials:
