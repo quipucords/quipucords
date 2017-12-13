@@ -24,7 +24,7 @@ import api.messages as messages
 class SystemConnectionResult(models.Model):
     """A key value pair of captured data."""
 
-    SUCCESS = 'succcess'
+    SUCCESS = 'success'
     FAILED = 'failed'
     UNREACHABLE = 'unreachable'
     CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),

@@ -113,7 +113,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         source = serializer.data
         remaining = source['hosts']
         credentials = source['credentials']
-        connection_port = source['ssh_port']
+        connection_port = source['port']
 
         forks = self.scan_job.options.max_concurrency
         for cred_id in credentials:

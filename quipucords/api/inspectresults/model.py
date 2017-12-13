@@ -40,7 +40,7 @@ class RawFact(models.Model):
 class SystemInspectionResult(models.Model):
     """A model the of captured system data."""
 
-    SUCCESS = 'succcess'
+    SUCCESS = 'success'
     FAILED = 'failed'
     UNREACHABLE = 'unreachable'
     CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),

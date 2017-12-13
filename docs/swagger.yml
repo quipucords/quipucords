@@ -619,9 +619,8 @@ definitions:
     required:
       - name
       - source_type
-      - address
       - hosts
-      - ssh_port
+      - port
     properties:
       name:
         type: "string"
@@ -632,18 +631,15 @@ definitions:
         enum:
           - network
           - vcenter
-      address:
-        type: "string"
-        description: "The address of the source"
       hosts:
         type: "array"
         items:
           type: "string"
-        description: "The hosts to scan, as hostnames or IP ranges."
-      ssh_port:
+        description: "The host(s) to scan.Can be an IP or hostname for vcenter; or ips, hostnames or IP ranges for network."
+      port:
         type: "integer"
         format: "int32"
-        description: "The SSH port to use on the hosts."
+        description: "The port to use on the host(s)."
   SourceMin:
     type: "object"
     required:

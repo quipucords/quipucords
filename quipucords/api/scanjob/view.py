@@ -105,8 +105,7 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
-            json_source.pop('ssh_port', None)
-            json_source.pop('address', None)
+            json_source.pop('port', None)
             systems = expand_sys_conn_result(result)
             json_job_conn_result_out = {'source': json_source,
                                         'systems': systems}
@@ -128,8 +127,7 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
-            json_source.pop('ssh_port', None)
-            json_source.pop('address', None)
+            json_source.pop('port', None)
             systems = expand_sys_inspect_results(result)
             json_job_inspect_result_out = {'source': json_source,
                                            'systems': systems}
