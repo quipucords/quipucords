@@ -54,7 +54,7 @@ class SourceEditCommand(CliCommand):
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=False)
         self.parser.add_argument('--port', dest='port',
-                                 metavar='SSHPORT', type=validate_port,
+                                 metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_SSH_PORT_HELP))
 
     # pylint: disable=too-many-branches

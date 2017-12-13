@@ -38,7 +38,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         that were execute prior to running this task.
         """
         super().__init__(scan_job, scan_task)
-        print('conn_results=%s' % conn_results)
         self.conn_results = conn_results
 
     def _store_connect_success(self, connected, credential):
