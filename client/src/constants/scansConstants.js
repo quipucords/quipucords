@@ -1,0 +1,6 @@
+
+const LOAD_SCANS_SUCCESS = 'LOAD_SCANS_SUCCESS';
+
+export {
+  LOAD_SCANS_SUCCESS
+}

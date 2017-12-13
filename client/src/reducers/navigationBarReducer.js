@@ -1,16 +1,19 @@
+
+import * as types from '../constants/navigationBarConstants';
+
 const initialState = {
   collapsed: false
 };
 
-export default function navigationBarReducer(state = initialState, action) {
+export default function navigationBarReducer(state=initialState, action) {
   switch (action.type) {
-    case 'NAV_TOGGLE_COLLAPSE':
+    case types.NAV_TOGGLE_COLLAPSE:
       return Object.assign({}, state, {collapsed: !state.collapsed});
 
-    case 'NAV_COLLAPSE':
+    case types.NAV_COLLAPSE:
       return Object.assign({}, state, {collapsed: true});
 
-    case 'NAV_OPEN':
+    case types.NAV_OPEN:
       return Object.assign({}, state, {collapsed: false});
 
     default:
