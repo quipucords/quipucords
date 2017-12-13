@@ -108,7 +108,7 @@ class ResultCallback(CallbackBase):
         logger.warning('%s', result_obj)
 
     def _update_reachable_hosts(self, result_obj):
-        if self.scanjob.scan_type != ScanTask.HOST:
+        if self.scanjob.scan_type != ScanTask.SCAN_TYPE_INSPECT:
             # Don't update for discovery scan.
             return
 

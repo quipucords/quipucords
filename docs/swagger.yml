@@ -699,8 +699,8 @@ definitions:
           type: "string"
           description: "The type of scan. 'host' is the default."
           enum:
-            - host
-            - discovery
+            - inspect
+            - connect
         status:
           type: "string"
           description: "The status of the scan."

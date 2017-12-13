@@ -16,41 +16,60 @@ from api.models import ScanTask
 class ScanTaskRunner(object):
     """ScanTaskRunner is a logical breakdown of work."""
 
-    def __init__(self, scanjob, scantask):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
-        :param scanjob: the scan job that contains this task
-        :param scantask: the scan task model for this task
+        :param scan_job: the scan job that contains this task
+        :param scan_task: the scan task model for this task
         :param prerequisite_tasks: An array of scan task model objects
         that were execute prior to running this task.
         """
-        self.scanjob = scanjob
-        self.scantask = scantask
+        self.scan_job = scan_job
+        self.scan_task = scan_task
+        self.facts = None
+        self.results = None
 
     def run(self):
         """Block that will be executed.
 
         Results are expected to be persisted.  The state of
-        self.scantask should be updated with status COMPLETE/FAILED
+        self.scan_task should be updated with status COMPLETE/FAILED
         before returning.
 
         :returns: Returns the status.  Must be one of the
         ScanTask.STATUS_CHOICES values
         """
+        # pylint: disable=no-self-use
         return ScanTask.COMPLETED
 
-    def facts(self):
-        """Provide the resulting facts for the scan task.
+    def get_facts(self):
+        """Access gathered facts from ScanTask.
 
-        :returns: Returns a dictionary of gathered facts.
+        Facts may need to be rebuilt from persisted results.
+
+        :returns: Dictionary of facts
         """
-        # pylint: disable=no-self-use
-        return {}
+        if not self.facts:
+            self.facts = {}
+        return self.facts
+
+    def get_results(self):
+        """Access results from ScanTask.
+
+        Results are expected to be persisted. This method should
+        understand how to read persisted results into a dictionary
+        using a ScanTask object so others can retrieve them if needed.
+
+        :returns: Dictionary of facts
+        """
+        if not self.results:
+            self.results = {}
+        return self.results
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'scanjob:{}, '\
-            'scantask: {}, '\
-            'sequence_number: {}'.format(self.scanjob.id,
-                                         self.scantask.id,
-                                         self.scantask.sequence_number) + '}'
+        return '{' + 'scan_job:{}, '\
+            'scan_task: {}, '\
+            'sequence_number: {}'.format(self.scan_job.id,
+                                         self.scan_task.id,
+                                         self.scan_task.sequence_number) + '}'

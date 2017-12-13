@@ -15,7 +15,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import Credential, Source
+from api.models import Credential, Source, ScanTask
 
 
 def dummy_start():
@@ -73,7 +73,7 @@ class ScanJobTest(TestCase):
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
         data = {'sources': [self.source.id],
-                'scan_type': 'discovery'}
+                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
@@ -96,7 +96,7 @@ class ScanJobTest(TestCase):
         response = self.create_expect_201(data)
         self.assertIn('id', response)
         self.assertIn('scan_type', response)
-        self.assertEqual(response['scan_type'], 'host')
+        self.assertEqual(response['scan_type'], ScanTask.SCAN_TYPE_INSPECT)
 
     def test_create_invalid_source(self):
         """The Source name must valid."""
@@ -119,7 +119,7 @@ class ScanJobTest(TestCase):
         """List all ScanJob objects."""
         data_default = {'sources': [self.source.id]}
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': 'discovery'}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         self.create_expect_201(data_default)
         self.create_expect_201(data_discovery)
 
@@ -132,20 +132,20 @@ class ScanJobTest(TestCase):
         expected = [{'id': 1,
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'host',
-                     'status': 'pending'},
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                     'status': 'created'},
                     {'id': 2,
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'discovery',
-                     'status': 'pending'}]
+                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                     'status': 'created'}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
         """Get details on a specific ScanJob by primary key."""
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': 'discovery'}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         initial = self.create_expect_201(data_discovery)
 
         url = reverse('scanjob-detail', args=(initial['id'],))
@@ -161,11 +161,11 @@ class ScanJobTest(TestCase):
     def test_update_not_allowed(self, start_scan):
         """Completely update a Source."""
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': 'discovery'}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         initial = self.create_expect_201(data_discovery)
 
         data = {'sources': [self.source.id],
-                'scan_type': 'host'}
+                'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -178,10 +178,10 @@ class ScanJobTest(TestCase):
     def test_partial_update(self, start_scan):
         """Partially update a ScanJob is not supported."""
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': 'discovery'}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         initial = self.create_expect_201(data_discovery)
 
-        data = {'scan_type': 'host'}
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.patch(url,
                                      json.dumps(data),
@@ -194,7 +194,7 @@ class ScanJobTest(TestCase):
     def test_delete(self, start_scan):
         """Delete a ScanJob is not supported."""
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': 'discovery'}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         response = self.create_expect_201(data_discovery)
 
         url = reverse('scanjob-detail', args=(response['id'],))
@@ -205,7 +205,8 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_pause_bad_state(self, start_scan):
         """Pause a scanjob."""
-        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id],
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
@@ -217,7 +218,8 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
-        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id],
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
@@ -229,7 +231,8 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
-        data_host = {'sources': [self.source.id], 'scan_type': 'host'}
+        data_host = {'sources': [self.source.id],
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
