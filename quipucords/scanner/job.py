@@ -12,8 +12,8 @@
 import logging
 from multiprocessing import Process
 from django.db.models import Q
-from api.models import (ScanTask)
-from scanner.task import ScanTaskRunner
+from api.models import (ScanTask, ConnectionResults, InspectionResults)
+from scanner.network import ConnectTaskRunner
 
 
 # Get an instance of a logger
@@ -28,18 +28,54 @@ class ScanJobRunner(Process):
         Process.__init__(self)
         self.scan_job = scan_job
         self.fact_endpoint = fact_endpoint
+        self.conn_results = None
+        self.inspect_results = None
 
     def initialize_job(self):
         """Initialize the job by creating ScanTasks."""
-        pass
+        if self.scan_job.tasks:
+            # It appears the initialization didn't complete
+            # so remove partial results
+            self.scan_job.tasks.all().delete()
+            ConnectionResults.objects.filter(
+                scan_job=self.scan_job.id).delete()
+            InspectionResults.objects.filter(
+                scan_job=self.scan_job.id).delete()
+
+        count = 0
+        for source in self.scan_job.sources.all():
+            task = ScanTask(source=source,
+                            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                            status=ScanTask.PENDING,
+                            sequence_number=count)
+            count += 1
+            task.save()
+            self.scan_job.tasks.add(task)
+
+        temp_conn_results = ConnectionResults(scan_job=self.scan_job)
+        temp_conn_results.save()
+
+        if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            temp_inspect_results = InspectionResults(scan_job=self.scan_job)
+            temp_inspect_results.save()
+
+        self.scan_job.status = ScanTask.PENDING
+        self.scan_job.save()
 
     def run(self):
         """Trigger thread execution."""
         if self.scan_job.status == ScanTask.CREATED:
+            # Job is not ready to run
             self.initialize_job()
 
-        self.scan_job.status = ScanTask.RUNNING
-        self.scan_job.save()
+            self.conn_results = ConnectionResults.objects.filter(
+                scan_job=self.scan_job.id).first()
+            self.inspect_results = InspectionResults.objects.filter(
+                scan_job=self.scan_job.id).first()
+
+            # Job is not running so start
+            self.scan_job.status = ScanTask.RUNNING
+            self.scan_job.save()
 
         # Load tasks that have no been run or are in progress
         task_runners = []
@@ -47,7 +83,16 @@ class ScanJobRunner(Process):
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
         for scan_task in incomplete_scan_tasks:
-            task_runners.append(ScanTaskRunner(self.scan_job, scan_task))
+            if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+                runner = ConnectTaskRunner(
+                    self.scan_job, scan_task, self.conn_results)
+            else:
+                logger.error(
+                    'Scan task does not have recognized type: %s', scan_task)
+                scan_task.status = ScanTask.FAILED
+                continue
+
+            task_runners.append(runner)
 
         logger.info('ScanJob %s started', self.scan_job.id)
 

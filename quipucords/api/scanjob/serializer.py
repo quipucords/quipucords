@@ -19,6 +19,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
+from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 
 
@@ -34,6 +35,15 @@ class ScanOptionsSerializer(NotEmptySerializer):
         fields = ['max_concurrency']
 
 
+class TaskField(PrimaryKeyRelatedField):
+    """Representation of the source associated with a scan job."""
+
+    def to_representation(self, value):
+        """Create output representation."""
+        serializer = ScanTaskSerializer(value)
+        return serializer.data
+
+
 class ScanJobSerializer(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
@@ -41,7 +51,7 @@ class ScanJobSerializer(NotEmptySerializer):
     scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
-    tasks = PrimaryKeyRelatedField(many=True, read_only=True)
+    tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)
 
