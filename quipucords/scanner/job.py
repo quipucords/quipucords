@@ -93,10 +93,6 @@ class ScanJobRunner(Process):
                   source_type == Source.VCENTER_SOURCE_TYPE):
                 runner = vcenter.ConnectTaskRunner(
                     self.scan_job, scan_task, self.conn_results)
-            elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
-                  source_type == Source.VCENTER_SOURCE_TYPE):
-                runner = vcenter.InspectTaskRunner(
-                    self.scan_job, scan_task, self.inspect_results)
             else:
                 logger.error(
                     'Scan task does not have recognized type: %s', scan_task)
