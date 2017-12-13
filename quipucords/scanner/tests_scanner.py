@@ -23,7 +23,7 @@ class ScannerTest(TestCase):
     # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
-        self.scanjob = ScanJob(scan_type=ScanTask.HOST)
+        self.scanjob = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         self.scanjob.save()
 
         self.cred = Credential(
@@ -46,12 +46,12 @@ class ScannerTest(TestCase):
 
         self.source.hosts.add(self.host)
 
-        scantask = ScanTask(scan_type=ScanTask.HOST,
+        scantask = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
                             source=self.source, sequence_number=2)
         scantask.save()
         self.scanjob.tasks.add(scantask)
 
-        scantask = ScanTask(scan_type=ScanTask.HOST,
+        scantask = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
                             source=self.source, sequence_number=1)
         scantask.save()
         self.scanjob.tasks.add(scantask)

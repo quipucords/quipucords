@@ -45,13 +45,13 @@ class ScanTaskTest(TestCase):
         """Create a scan task and serialize it."""
         task = ScanTask.objects.create(
             source=self.source,
-            scan_type=ScanTask.DISCOVERY,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
         serializer = ScanTaskSerializer(task)
         json_task = serializer.data
         self.assertEqual(
             {'id': 1,
              'source': 1,
-             'scan_type': 'discovery',
+             'scan_type': ScanTask.SCAN_TYPE_CONNECT,
              'status': 'pending'},
             json_task)

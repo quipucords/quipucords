@@ -22,5 +22,5 @@ RESTART = 'restart'
 
 SCAN_URI = '/api/v1/scans/'
 
-SCAN_TYPE_DISCOVERY = 'discovery'
-SCAN_TYPE_HOST = 'host'
+SCAN_TYPE_CONNECT = 'connect'
+SCAN_TYPE_INSPECT = 'inspect'

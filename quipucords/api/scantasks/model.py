@@ -21,18 +21,24 @@ import api.messages as messages
 class ScanTask(models.Model):
     """The scan task captures a single source for a scan."""
 
-    DISCOVERY = 'discovery'
-    HOST = 'host'
-    SCAN_TYPE_CHOICES = ((HOST, HOST), (DISCOVERY, DISCOVERY))
+    SCAN_TYPE_CONNECT = 'connect'
+    SCAN_TYPE_INSPECT = 'inspect'
+    SCAN_TYPE_CHOICES = ((SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),
+                         (SCAN_TYPE_INSPECT, SCAN_TYPE_INSPECT))
 
+    CREATED = 'created'
     PENDING = 'pending'
     RUNNING = 'running'
     PAUSED = 'paused'
     CANCELED = 'canceled'
     COMPLETED = 'completed'
     FAILED = 'failed'
-    STATUS_CHOICES = ((PENDING, PENDING), (RUNNING, RUNNING), (PAUSED, PAUSED),
-                      (COMPLETED, COMPLETED), (CANCELED, CANCELED),
+    STATUS_CHOICES = ((CREATED, CREATED),
+                      (PENDING, PENDING),
+                      (RUNNING, RUNNING),
+                      (PAUSED, PAUSED),
+                      (COMPLETED, COMPLETED),
+                      (CANCELED, CANCELED),
                       (FAILED, FAILED))
 
     # Model fields
@@ -46,6 +52,7 @@ class ScanTask(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING
     )
+    prerequisites = models.ManyToManyField('ScanTask')
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)

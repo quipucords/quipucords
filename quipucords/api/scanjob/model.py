@@ -38,12 +38,12 @@ class ScanJob(models.Model):
     scan_type = models.CharField(
         max_length=9,
         choices=ScanTask.SCAN_TYPE_CHOICES,
-        default=ScanTask.HOST,
+        default=ScanTask.SCAN_TYPE_INSPECT,
     )
     status = models.CharField(
         max_length=20,
         choices=ScanTask.STATUS_CHOICES,
-        default=ScanTask.PENDING,
+        default=ScanTask.CREATED,
     )
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(

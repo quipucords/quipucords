@@ -8,16 +8,8 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Util for re-loading partial scan jobs and their results."""
 
-from scanner.job import ScanJobRunner
-
-
-def create_scanner_for_job(scanjob, fact_endpoint):
-    """Given a job, read partial results and create new scanner.
-
-    :param scanjob: Results for this scanjob will be retreived
-    :returns: the scanner object to be run
-    """
-    scanner = ScanJobRunner(scanjob, fact_endpoint)
-    return scanner
+"""API models for import organization."""
+# flake8: noqa
+# pylint: disable=unused-import
+from scanner.network.connect import ConnectTaskRunner

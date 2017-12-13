@@ -38,6 +38,7 @@ class ScanTaskSerializer(NotEmptySerializer):
     scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
+    prerequisites = PrimaryKeyRelatedField(many=True, read_only=True)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
