@@ -90,7 +90,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, status_code=200, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source_none', hosts=['1.2.3.4'],
-                             cred=['credential1'], ssh_port=22)
+                             cred=['credential1'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -106,7 +106,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.SSLError)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1'], ssh_port=22)
+                             cred=['credential1'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -120,7 +120,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1'], ssh_port=22)
+                             cred=['credential1'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -143,7 +143,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.patch(url_patch, status_code=200)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1'], ssh_port=22)
+                             cred=['credential1'], port=22)
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -157,15 +157,15 @@ class SourceEditCliTests(unittest.TestCase):
         url_patch = BASE_URL + SOURCE_URI + '1/'
         cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
-        source_data = [{'id': 1, 'name': 'source1', 'address': '1.2.3.4',
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials': [{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_cred, status_code=200, json=cred_data)
             mocker.patch(url_patch, status_code=200)
             aec = SourceEditCommand(SUBPARSER)
-            args = Namespace(name='source1', address='1.2.3.5',
-                             cred=['credential1'], hosts=None)
+            args = Namespace(name='source1', hosts=['1.2.3.5'],
+                             cred=['credential1'])
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -179,7 +179,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_source, status_code=500, json=[])
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1'], ssh_port=22)
+                             cred=['credential1'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -200,7 +200,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_cred, status_code=200, json=cred_data)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1', 'cred2'], ssh_port=22)
+                             cred=['credential1', 'cred2'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)
@@ -220,7 +220,7 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_cred, status_code=500)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1', 'cred2'], ssh_port=22)
+                             cred=['credential1', 'cred2'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     aec.main(args)

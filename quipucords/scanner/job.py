@@ -12,8 +12,8 @@
 import logging
 from multiprocessing import Process
 from django.db.models import Q
-from api.models import (ScanTask, ConnectionResults, InspectionResults)
-from scanner.network import ConnectTaskRunner
+from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
+from scanner import network, vcenter
 
 
 # Get an instance of a logger
@@ -68,14 +68,14 @@ class ScanJobRunner(Process):
             # Job is not ready to run
             self.initialize_job()
 
-            self.conn_results = ConnectionResults.objects.filter(
-                scan_job=self.scan_job.id).first()
-            self.inspect_results = InspectionResults.objects.filter(
-                scan_job=self.scan_job.id).first()
+        self.conn_results = ConnectionResults.objects.filter(
+            scan_job=self.scan_job.id).first()
+        self.inspect_results = InspectionResults.objects.filter(
+            scan_job=self.scan_job.id).first()
 
-            # Job is not running so start
-            self.scan_job.status = ScanTask.RUNNING
-            self.scan_job.save()
+        # Job is not running so start
+        self.scan_job.status = ScanTask.RUNNING
+        self.scan_job.save()
 
         # Load tasks that have no been run or are in progress
         task_runners = []
@@ -83,8 +83,15 @@ class ScanJobRunner(Process):
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
         for scan_task in incomplete_scan_tasks:
-            if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-                runner = ConnectTaskRunner(
+            scan_type = scan_task.scan_type
+            source_type = scan_task.source.source_type
+            if (scan_type == ScanTask.SCAN_TYPE_CONNECT and
+                    source_type == Source.NETWORK_SOURCE_TYPE):
+                runner = network.ConnectTaskRunner(
+                    self.scan_job, scan_task, self.conn_results)
+            elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
+                  source_type == Source.VCENTER_SOURCE_TYPE):
+                runner = vcenter.ConnectTaskRunner(
                     self.scan_job, scan_task, self.conn_results)
             else:
                 logger.error(

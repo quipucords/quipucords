@@ -40,7 +40,7 @@ class ScanJobTest(TestCase):
         self.source = Source(
             name='source1',
             source_type='network',
-            ssh_port=22)
+            port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
 

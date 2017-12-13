@@ -44,7 +44,6 @@ SOURCE_TYPE_INV = 'A source_type must not be provided when updating a source.'
 
 NET_HOST_AS_STRING = 'A host range must be a string.'
 NET_MIN_HOST = 'Source of type network must have at least one host.'
-NET_NO_ADDR = 'Source of type network should not have an address.'
 NET_INVALID_RANGE_FORMAT = '%s is not a valid IP range format.'
 NET_INVALID_RANGE_CIDR = '%s is not a valid IP or CIDR pattern'
 NET_INVALID_HOST = '%s is invalid host'
@@ -64,9 +63,8 @@ NET_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
     ' found in database.'
 
 
-VC_REQ_ADDR = 'Source of type vcenter must have an address.'
-VC_NO_HOSTS = 'Source of type vcenter should not have any hosts.'
-VC_ONE_CRED = 'Source of type vcenter must a single credential.'
+VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
+VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'

@@ -36,7 +36,7 @@ class ScannerTest(TestCase):
 
         self.source = Source(
             name='source1',
-            ssh_port=22)
+            port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
 

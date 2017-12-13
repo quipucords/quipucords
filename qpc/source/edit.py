@@ -44,10 +44,6 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SOURCE_NAME_HELP),
                                  required=True)
-        self.parser.add_argument('--address', dest='address',
-                                 metavar='ADDRESS',
-                                 help=_(messages.SOURCE_ADDRESS_HELP),
-                                 required=False)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
@@ -57,16 +53,15 @@ class SourceEditCommand(CliCommand):
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=False)
-        self.parser.add_argument('--sshport', dest='ssh_port',
-                                 metavar='SSHPORT', type=validate_port,
+        self.parser.add_argument('--port', dest='port',
+                                 metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_SSH_PORT_HELP))
 
     # pylint: disable=too-many-branches
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if not(self.args.hosts or self.args.cred or self.args.ssh_port or
-               self.args.address):
+        if not(self.args.hosts or self.args.cred or self.args.port):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
