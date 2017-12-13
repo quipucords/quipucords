@@ -11,7 +11,6 @@
 """Scanner used for host connection discovery."""
 
 from collections import namedtuple
-import pexpect
 from django.conf import settings
 from ansible import constants as C
 from ansible.errors import AnsibleError
@@ -70,39 +69,6 @@ def _construct_vars(connection_port, credential=None):
         ansible_vars.update(ansible_dict)
 
     return ansible_vars
-
-
-def construct_scan_inventory(hosts, connection_port, concurrency_count):
-    """Create a dictionary inventory for Ansible to execute with.
-
-    :param hosts: The collection of hosts/credential tuples
-    :param connection_port: The connection port
-    :param concurrency_count: The number of concurrent scans
-    :returns: A dictionary of the ansible invetory
-    """
-    concurreny_groups = list(
-        [hosts[i:i + concurrency_count] for i in range(0,
-                                                       len(hosts),
-                                                       concurrency_count)])
-
-    vars_dict = _construct_vars(connection_port)
-    children = {}
-    inventory = {'all': {'children': children, 'vars': vars_dict}}
-    i = 0
-    group_names = []
-    for concurreny_group in concurreny_groups:
-        hosts_dict = {}
-        for host in concurreny_group:
-            host_vars = _credential_vars(host[1])
-            host_vars['ansible_host'] = host[0]
-            hosts_dict[host[0]] = host_vars
-
-        group_name = 'group_{}'.format(i)
-        i += 1
-        group_names.append(group_name)
-        children[group_name] = {'hosts': hosts_dict}
-
-    return group_names, inventory
 
 
 def write_inventory(inventory):
@@ -184,26 +150,3 @@ def _construct_error_msg(return_code):
 
 def _construct_error(return_code):
     return AnsibleError(message=_construct_error_msg(return_code))
-
-
-def _handle_ssh_passphrase(credential):
-    """Attempt to setup loggin via passphrase if necessary.
-
-    :param credential: The credential used for connections
-    """
-    if (credential.get('ssh_keyfile') is not None and
-            credential.get('ssh_passphrase') is not None):
-        keyfile = credential.get('ssh_keyfile')
-        passphrase = \
-            decrypt_data_as_unicode(credential['ssh_passphrase'])
-        cmd_string = 'ssh-add {}'.format(keyfile)
-
-        try:
-            child = pexpect.spawn(cmd_string, timeout=12)
-            phrase = [pexpect.EOF, 'Enter passphrase for .*:']
-            i = child.expect(phrase)
-            child.sendline(passphrase)
-            while i:
-                i = child.expect(phrase)
-        except pexpect.exceptions.TIMEOUT:
-            pass

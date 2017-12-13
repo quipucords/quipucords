@@ -10,18 +10,20 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
+import pexpect
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 from api.serializers import SourceSerializer, CredentialSerializer
-from api.models import (Credential, ScanTask, ConnectionResults,
-                        ConnectionResult, SystemConnectionResult)
+from api.models import (Credential, ScanTask,
+                        ConnectionResult,
+                        SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.callback import ResultCallback
-from scanner.network.utils import (_handle_ssh_passphrase,
-                                   run_playbook,
+from scanner.network.utils import (run_playbook,
                                    _construct_error,
                                    _construct_vars,
+                                   decrypt_data_as_unicode,
                                    write_inventory)
 
 # Get an instance of a logger
@@ -41,63 +43,40 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param prerequisite_tasks: An array of scan task model objects
-        that were execute prior to running this task.
+        :param conn_results: ConnectionResults object used
+        to store results
         """
         super().__init__(scan_job, scan_task)
         self.conn_results = conn_results
-
-    def _store_discovery_success(self, connected, failed_hosts):
-        result = {}
-        conn_result = ConnectionResult(
-            scan_task=self.scan_task, source=self.scan_task.source)
-        conn_result.save()
-
-        for success in connected:
-            result[success[0]] = success[1]
-            # pylint: disable=no-member
-            cred = Credential.objects.get(pk=success[1]['id'])
-            sys_result = SystemConnectionResult(
-                name=success[0], status=SystemConnectionResult.SUCCESS,
-                credential=cred)
-            sys_result.save()
-            conn_result.systems.add(sys_result)
-
-        for failed in failed_hosts:
-            result[failed] = None
-            sys_result = SystemConnectionResult(
-                name=failed, status=SystemConnectionResult.FAILED)
-            sys_result.save()
-            conn_result.systems.add(sys_result)
-
-        conn_result.save()
-        self.conn_results.save()
-        self.conn_results.results.add(conn_result)
-        self.conn_results.save()
-
-        return result
 
     def get_results(self):
         """Access connection results."""
         if not self.results or not self.conn_results:
             # pylint: disable=no-member
-            self.conn_results = ConnectionResults.objects.filter(
-                scan_job=self.scan_job.id).first()
-            self.results = self.conn_results.results.filter(
-                scan_task=self.scan_task.id)
+            self.results = ConnectionResult.objects.filter(
+                scan_task=self.scan_task.id).first()
         return self.results
 
     def run(self):
         """Scan network range ang attempt connections."""
         logger.info('Connect scan task started for %s.', self.scan_task)
 
+        # Remove results for this task if they exist
+        old_results = self.get_results()
+        if old_results:
+            self.results = None
+            old_results.delete()
+
         try:
             connected, failed_hosts = self.discovery()
-            self.facts = self._store_discovery_success(connected, failed_hosts)
+            self._store_discovery_success(connected, failed_hosts)
         except AnsibleError as ansible_error:
             logger.error('Connect scan task failed for %s. %s', self.scan_task,
                          ansible_error)
             return ScanTask.FAILED
+
+        # Clear cache as results changed
+        self.results = None
 
         return ScanTask.COMPLETED
 
@@ -142,6 +121,36 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         return connected, remaining
 
+    def _store_discovery_success(self, connected, failed_hosts):
+        result = {}
+        conn_result = ConnectionResult(
+            scan_task=self.scan_task, source=self.scan_task.source)
+        conn_result.save()
+
+        for success in connected:
+            result[success[0]] = success[1]
+            # pylint: disable=no-member
+            cred = Credential.objects.get(pk=success[1]['id'])
+            sys_result = SystemConnectionResult(
+                name=success[0], status=SystemConnectionResult.SUCCESS,
+                credential=cred)
+            sys_result.save()
+            conn_result.systems.add(sys_result)
+
+        for failed in failed_hosts:
+            result[failed] = None
+            sys_result = SystemConnectionResult(
+                name=failed, status=SystemConnectionResult.FAILED)
+            sys_result.save()
+            conn_result.systems.add(sys_result)
+
+        conn_result.save()
+        self.conn_results.save()
+        self.conn_results.results.add(conn_result)
+        self.conn_results.save()
+
+        return result
+
 
 def connect(hosts, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
@@ -174,6 +183,29 @@ def connect(hosts, credential, connection_port, forks=50):
     success, failed = _process_connect_callback(callback, credential)
 
     return success, failed
+
+
+def _handle_ssh_passphrase(credential):
+    """Attempt to setup loggin via passphrase if necessary.
+
+    :param credential: The credential used for connections
+    """
+    if (credential.get('ssh_keyfile') is not None and
+            credential.get('ssh_passphrase') is not None):
+        keyfile = credential.get('ssh_keyfile')
+        passphrase = \
+            decrypt_data_as_unicode(credential['ssh_passphrase'])
+        cmd_string = 'ssh-add {}'.format(keyfile)
+
+        try:
+            child = pexpect.spawn(cmd_string, timeout=12)
+            phrase = [pexpect.EOF, 'Enter passphrase for .*:']
+            i = child.expect(phrase)
+            child.sendline(passphrase)
+            while i:
+                i = child.expect(phrase)
+        except pexpect.exceptions.TIMEOUT:
+            pass
 
 
 def _process_connect_callback(callback, credential):

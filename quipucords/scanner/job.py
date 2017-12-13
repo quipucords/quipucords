@@ -42,20 +42,36 @@ class ScanJobRunner(Process):
             InspectionResults.objects.filter(
                 scan_job=self.scan_job.id).delete()
 
+        job_scan_type = self.scan_job.scan_type
         count = 0
         for source in self.scan_job.sources.all():
-            task = ScanTask(source=source,
-                            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                            status=ScanTask.PENDING,
-                            sequence_number=count)
-            count += 1
-            task.save()
-            self.scan_job.tasks.add(task)
+            conn_task = ScanTask(source=source,
+                                 scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                 status=ScanTask.PENDING,
+                                 sequence_number=count)
+            conn_task.save()
+            self.scan_job.tasks.add(conn_task)
 
+            count += 1
+
+            if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
+                inspect_task = ScanTask(source=source,
+                                        scan_type=ScanTask.SCAN_TYPE_INSPECT,
+                                        status=ScanTask.PENDING,
+                                        sequence_number=count)
+                inspect_task.save()
+                inspect_task.prerequisites.add(conn_task)
+                inspect_task.save()
+
+                self.scan_job.tasks.add(inspect_task)
+
+                count += 1
+
+        # Setup results objects
         temp_conn_results = ConnectionResults(scan_job=self.scan_job)
         temp_conn_results.save()
 
-        if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
             temp_inspect_results = InspectionResults(scan_job=self.scan_job)
             temp_inspect_results.save()
 
@@ -93,11 +109,19 @@ class ScanJobRunner(Process):
                   source_type == Source.VCENTER_SOURCE_TYPE):
                 runner = vcenter.ConnectTaskRunner(
                     self.scan_job, scan_task, self.conn_results)
+            elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
+                  source_type == Source.NETWORK_SOURCE_TYPE):
+                runner = network.InspectTaskRunner(
+                    self.scan_job, scan_task, self.inspect_results)
             else:
                 logger.error(
-                    'Scan task does not have recognized type: %s', scan_task)
+                    'Scan Job failed.  Scan task does not'
+                    ' have recognized type: %s',
+                    scan_task)
                 scan_task.status = ScanTask.FAILED
-                continue
+                self.scan_job.status = ScanTask.FAILED
+                self.scan_job.save()
+                return
 
             task_runners.append(runner)
 
@@ -121,6 +145,15 @@ class ScanJobRunner(Process):
                 self.scan_job.status = ScanTask.FAILED
                 self.scan_job.save()
 
+        fact_collection_id = self.send_facts()
+        if not fact_collection_id:
+            logger.error('Facts could not be sent to %s', self.fact_endpoint)
+            self.scan_job.status = ScanTask.FAILED
+            self.scan_job.save()
+
+        self.inspect_results.fact_collection_id = fact_collection_id
+        self.inspect_results.save()
+
         # All tasks completed successfully
         if self.scan_job.status != ScanTask.FAILED:
             self.scan_job.status = ScanTask.COMPLETED
@@ -128,6 +161,22 @@ class ScanJobRunner(Process):
 
         logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
+
+    def send_facts(self):
+        """Send collected host scan facts to fact endpoint.
+
+        :param facts: The array of fact dictionaries
+        :returns: Identifer for the sent facts
+        """
+        # pylint: disable=no-self-use
+        return 42
+        # payload = {'facts': facts}
+        # response = requests.post(self.fact_endpoint, json=payload)
+        # data = response.json()
+        # msg = 'Failed to obtain fact_collection_id when reporting facts.'
+        # if response.status_code != 201 or data.get('id') is None:
+        #     logger.error('{} Error: {}'.format(msg, data))
+        # return data.get('id')
 
     def __str__(self):
         """Convert to string."""

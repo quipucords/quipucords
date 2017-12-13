@@ -58,7 +58,7 @@ class ScannerTest(TestCase):
 
         self.scanjob.save()
 
-        self.scanjob.failed_scans = 0
+        self.scanjob.systems_failed = 0
         self.scanjob.save()
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
