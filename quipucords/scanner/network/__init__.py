@@ -12,6 +12,5 @@
 """API models for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
-from scanner.job import ScanJobRunner
-from scanner.task import ScanTaskRunner
-from scanner.callback import ResultCallback
+from scanner.network.connect import ConnectTaskRunner
+from scanner.network.inspect import InspectTaskRunner

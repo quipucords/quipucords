@@ -14,7 +14,7 @@
 import logging
 import django.dispatch
 from scanner.manager import SCAN_MANAGER
-from api.scanjob.utils import create_scanner_for_job
+from scanner import ScanJobRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -35,7 +35,7 @@ def handle_scan(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scanner = create_scanner_for_job(instance, fact_endpoint)
+    scanner = ScanJobRunner(instance, fact_endpoint)
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
@@ -88,7 +88,7 @@ def scan_restart(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scanner = create_scanner_for_job(instance, fact_endpoint)
+    scanner = ScanJobRunner(instance, fact_endpoint)
 
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()

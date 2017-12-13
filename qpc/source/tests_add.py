@@ -114,7 +114,7 @@ class SourceAddCliTests(unittest.TestCase):
             mocker.post(post_source_url, status_code=400, json=error)
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source_dup', cred=['cred1'], type='network',
-                             hosts=['1.2.3.4'], ssh_port=22)
+                             hosts=['1.2.3.4'], port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
@@ -132,7 +132,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1', 'cred2'],
                              hosts=['1.2.3.4'], type='network',
-                             ssh_port=22)
+                             port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
@@ -149,7 +149,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1', 'cred2'],
                              hosts=['1.2.3.4'], type='network',
-                             ssh_port=22)
+                             port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
@@ -166,7 +166,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'], type='network',
-                             ssh_port=22)
+                             port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
@@ -181,7 +181,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'], type='network',
-                             ssh_port=22)
+                             port=22)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(source_out):
                     nac.main(args)
@@ -200,7 +200,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'], type='network',
-                             ssh_port=22)
+                             port=22)
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -217,7 +217,7 @@ class SourceAddCliTests(unittest.TestCase):
             mocker.post(post_source_url, status_code=201)
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
-                             address='1.2.3.4', type='vcenter')
+                             hosts=['1.2.3.4'], type='vcenter')
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),

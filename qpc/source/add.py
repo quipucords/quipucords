@@ -50,10 +50,6 @@ class SourceAddCommand(CliCommand):
                                  metavar='TYPE',
                                  help=_(messages.SOURCE_TYPE_HELP),
                                  required=True)
-        self.parser.add_argument('--address', dest='address',
-                                 metavar='ADDRESS',
-                                 help=_(messages.SOURCE_ADDRESS_HELP),
-                                 required=False)
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
@@ -63,8 +59,8 @@ class SourceAddCommand(CliCommand):
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=True)
-        self.parser.add_argument('--sshport', dest='ssh_port',
-                                 metavar='SSHPORT', type=validate_port,
+        self.parser.add_argument('--port', dest='port',
+                                 metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_SSH_PORT_HELP),
                                  required=False)
 
