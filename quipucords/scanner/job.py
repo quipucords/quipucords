@@ -45,6 +45,7 @@ class ScanJobRunner(Process):
 
         job_scan_type = self.scan_job.scan_type
         count = 0
+        conn_tasks = []
         for source in self.scan_job.sources.all():
             conn_task = ScanTask(source=source,
                                  scan_type=ScanTask.SCAN_TYPE_CONNECT,
@@ -52,11 +53,13 @@ class ScanJobRunner(Process):
                                  sequence_number=count)
             conn_task.save()
             self.scan_job.tasks.add(conn_task)
+            conn_tasks.append(conn_task)
 
             count += 1
 
-            if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                inspect_task = ScanTask(source=source,
+        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            for conn_task in conn_tasks:
+                inspect_task = ScanTask(source=conn_task.source,
                                         scan_type=ScanTask.SCAN_TYPE_INSPECT,
                                         status=ScanTask.PENDING,
                                         sequence_number=count)
