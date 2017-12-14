@@ -8,18 +8,17 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the vcenter connect capabilities."""
+"""Test the vcenter utils."""
 
+from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, ConnectionResults)
-from scanner.vcenter.connect import ConnectTaskRunner
+from scanner.vcenter.utils import vcenter_connect
 
 
-class ConnectTaskRunnerTest(TestCase):
-    """Tests against the ConnectTaskRunner class and functions."""
-
-    runner = None
+class VCenterUtilsTest(TestCase):
+    """Tests VCenter utils functions."""
 
     def setUp(self):
         """Create test case setup."""
@@ -52,20 +51,17 @@ class ConnectTaskRunnerTest(TestCase):
         self.scan_job.tasks.add(self.scan_task)
         self.conn_results = ConnectionResults(scan_job=self.scan_job)
         self.conn_results.save()
-        self.runner = ConnectTaskRunner(scan_job=self.scan_job,
-                                        scan_task=self.scan_task,
-                                        conn_results=self.conn_results)
 
     def tearDown(self):
         """Cleanup test case setup."""
         pass
 
-    def test_store_connect_data(self):
-        """Test the connection data method."""
-        vm_names = ['vm1', 'vm2']
-        # pylint: disable=protected-access
-        self.runner._store_connect_data(vm_names, self.cred)
-        self.assertEqual(len(self.conn_results.results.all()), 1)
-        result = self.conn_results.results.all().first()
-        self.assertEqual(result.scan_task, self.scan_task)
-        self.assertEqual(result.source, self.source)
+    def test_vcenter_connect(self):
+        """Test the connection method."""
+        mock_vcenter = Mock()
+        with patch('scanner.vcenter.utils.SmartConnectNoSSL',
+                   return_value=mock_vcenter) as mock_smart_connect:
+            vcenter = vcenter_connect(self.scan_task)
+            self.assertEqual(mock_vcenter, vcenter)
+            mock_smart_connect.assert_called_once_with(
+                host=ANY, user=ANY, pwd=ANY, port=ANY)
