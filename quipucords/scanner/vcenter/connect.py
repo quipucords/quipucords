@@ -11,14 +11,41 @@
 """ScanTask used for vcenter connection task."""
 import logging
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-
-from api.models import (ScanTask, ConnectionResults,
-                        ConnectionResult, SystemConnectionResult)
+from api.models import (ScanTask, ConnectionResult, SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def get_vm_container(vcenter):
+    """Get the container for virtual machines.
+
+    :param vcenter: The vcenter object.
+    :returns: The vm container object.
+    """
+    content = vcenter.RetrieveContent()
+    container = content.rootFolder  # starting point to look into
+    view_type = [vim.VirtualMachine]  # object types to look for
+    recursive = True  # whether we should look into it recursively
+    container_view = content.viewManager.CreateContainerView(
+        container, view_type, recursive)
+    return container_view
+
+
+def get_vm_names(vm_container_view):
+    """Get the vm names from the container view.
+
+    :param vm_container_view: The VM container view.
+    :returns: list of vm names.
+    """
+    vm_names = []
+    children = vm_container_view.view
+    for child in children:
+        summary = child.summary
+        vm_names.append(summary.config.name)
+    return vm_names
 
 
 class ConnectTaskRunner(ScanTaskRunner):
@@ -60,18 +87,16 @@ class ConnectTaskRunner(ScanTaskRunner):
         """Access connection results."""
         if not self.results or not self.conn_results:
             # pylint: disable=no-member
-            self.conn_results = ConnectionResults.objects.filter(
-                scan_job=self.scan_job.id).first()
-            self.results = self.conn_results.results.filter(
-                scan_task=self.scan_task.id)
+            self.results = ConnectionResult.objects.filter(
+                scan_task=self.scan_task.id).first()
         return self.results
 
     def run(self):
         """Scan network range ang attempt connections."""
+        source = self.scan_task.source
+        credential = self.scan_task.source.credentials.all().first()
         try:
             connected = self.connect()
-            source = self.scan_task.source
-            credential = self.scan_task.source.credentials.all().first()
             self._store_connect_data(connected, credential)
         except vim.fault.InvalidLogin as vm_error:
             logger.error('Unable to connect to VCenter source, %s, '
@@ -93,18 +118,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         logger.info('Connect scan started for %s.', self.scan_task)
 
         vcenter = vcenter_connect(self.scan_task)
-
-        content = vcenter.RetrieveContent()
-        container = content.rootFolder  # starting point to look into
-        view_type = [vim.VirtualMachine]  # object types to look for
-        recursive = True  # whether we should look into it recursively
-        container_view = content.viewManager.CreateContainerView(
-            container, view_type, recursive)
-
-        children = container_view.view
-        for child in children:
-            summary = child.summary
-            vm_names.append(summary.config.name)
+        container_view = get_vm_container(vcenter)
+        vm_names = get_vm_names(container_view)
 
         logger.info('Connect scan completed for %s.', self.scan_task)
         return set(vm_names)
