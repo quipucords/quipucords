@@ -139,7 +139,8 @@ class ScanJobRunner(Process):
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             fact_collection_id = self.send_facts()
             if not fact_collection_id:
-                logger.error('Facts could not be sent to %s', self.fact_endpoint)
+                logger.error('Facts could not be sent to %s',
+                             self.fact_endpoint)
                 self.scan_job.status = ScanTask.FAILED
             else:
                 self.scan_job.fact_collection_id = fact_collection_id
