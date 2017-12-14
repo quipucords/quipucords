@@ -11,6 +11,7 @@
 """ScanJobRunner runs a group of scan tasks."""
 import logging
 from multiprocessing import Process
+import requests
 from django.db.models import Q
 from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
 from scanner import network, vcenter
@@ -99,28 +100,11 @@ class ScanJobRunner(Process):
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
         for scan_task in incomplete_scan_tasks:
-            scan_type = scan_task.scan_type
-            source_type = scan_task.source.source_type
-            if (scan_type == ScanTask.SCAN_TYPE_CONNECT and
-                    source_type == Source.NETWORK_SOURCE_TYPE):
-                runner = network.ConnectTaskRunner(
-                    self.scan_job, scan_task, self.conn_results)
-            elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
-                  source_type == Source.VCENTER_SOURCE_TYPE):
-                runner = vcenter.ConnectTaskRunner(
-                    self.scan_job, scan_task, self.conn_results)
-            elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
-                  source_type == Source.NETWORK_SOURCE_TYPE):
-                runner = network.InspectTaskRunner(
-                    self.scan_job, scan_task, self.inspect_results)
-            elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
-                  source_type == Source.VCENTER_SOURCE_TYPE):
-                runner = vcenter.InspectTaskRunner(
-                    self.scan_job, scan_task, self.inspect_results)
-            else:
+            runner = self.create_task_runner(scan_task)
+            if not runner:
                 logger.error(
                     'Scan Job failed.  Scan task does not'
-                    ' have recognized type: %s',
+                    ' have recognized type/souce combination: %s',
                     scan_task)
                 scan_task.status = ScanTask.FAILED
                 self.scan_job.status = ScanTask.FAILED
@@ -155,13 +139,37 @@ class ScanJobRunner(Process):
             self.scan_job.status = ScanTask.FAILED
             self.scan_job.save()
 
-        # All tasks completed successfully
+        # All tasks completed successfully and sent to endpoint
         if self.scan_job.status != ScanTask.FAILED:
+            self.scan_job.fact_collection_id = fact_collection_id
             self.scan_job.status = ScanTask.COMPLETED
             self.scan_job.save()
 
         logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
+
+    def create_task_runner(self, scan_task):
+        """Create ScanTaskRunner using scan_type and source_type."""
+        scan_type = scan_task.scan_type
+        source_type = scan_task.source.source_type
+        runner = None
+        if (scan_type == ScanTask.SCAN_TYPE_CONNECT and
+                source_type == Source.NETWORK_SOURCE_TYPE):
+            runner = network.ConnectTaskRunner(
+                self.scan_job, scan_task, self.conn_results)
+        elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
+              source_type == Source.VCENTER_SOURCE_TYPE):
+            runner = vcenter.ConnectTaskRunner(
+                self.scan_job, scan_task, self.conn_results)
+        elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
+              source_type == Source.NETWORK_SOURCE_TYPE):
+            runner = network.InspectTaskRunner(
+                self.scan_job, scan_task, self.inspect_results)
+        elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
+              source_type == Source.VCENTER_SOURCE_TYPE):
+            runner = vcenter.InspectTaskRunner(
+                self.scan_job, scan_task, self.inspect_results)
+        return runner
 
     def send_facts(self):
         """Send collected host scan facts to fact endpoint.
@@ -169,15 +177,26 @@ class ScanJobRunner(Process):
         :param facts: The array of fact dictionaries
         :returns: Identifer for the sent facts
         """
-        # pylint: disable=no-self-use
-        return 42
-        # payload = {'facts': facts}
-        # response = requests.post(self.fact_endpoint, json=payload)
-        # data = response.json()
-        # msg = 'Failed to obtain fact_collection_id when reporting facts.'
-        # if response.status_code != 201 or data.get('id') is None:
-        #     logger.error('{} Error: {}'.format(msg, data))
-        # return data.get('id')
+        inspect_tasks = self.scan_job.tasks.filter(
+            scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
+        facts = []
+        for inspect_task in inspect_tasks.all():
+            runner = self.create_task_runner(inspect_task)
+            if runner:
+                task_facts = runner.get_facts()
+                if task_facts:
+                    facts = facts + task_facts
+
+        payload = {'facts': facts}
+        logger.info('Sending facts to %s', self.fact_endpoint)
+        logger.debug('Facts:  %s', facts)
+        response = requests.post(self.fact_endpoint, json=payload)
+        data = response.json()
+        msg = 'Failed to obtain fact_collection_id when reporting facts.'
+        if response.status_code != 201 or data.get('id') is None:
+            msg = '{} Error: {}'.format(msg, data)
+            logger.error(msg)
+        return data.get('id')
 
     def __str__(self):
         """Convert to string."""
