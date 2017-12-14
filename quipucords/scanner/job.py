@@ -136,17 +136,20 @@ class ScanJobRunner(Process):
                 self.scan_job.status = ScanTask.FAILED
                 self.scan_job.save()
 
-        fact_collection_id = self.send_facts()
-        if not fact_collection_id:
-            logger.error('Facts could not be sent to %s', self.fact_endpoint)
-            self.scan_job.status = ScanTask.FAILED
-            self.scan_job.save()
+        if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            fact_collection_id = self.send_facts()
+            if not fact_collection_id:
+                logger.error('Facts could not be sent to %s',
+                             self.fact_endpoint)
+                self.scan_job.status = ScanTask.FAILED
+            else:
+                self.scan_job.fact_collection_id = fact_collection_id
 
         # All tasks completed successfully and sent to endpoint
         if self.scan_job.status != ScanTask.FAILED:
-            self.scan_job.fact_collection_id = fact_collection_id
             self.scan_job.status = ScanTask.COMPLETED
-            self.scan_job.save()
+
+        self.scan_job.save()
 
         logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
@@ -190,16 +193,20 @@ class ScanJobRunner(Process):
                 if task_facts:
                     facts = facts + task_facts
 
-        payload = {'facts': facts}
-        logger.info('Sending facts to %s', self.fact_endpoint)
-        logger.debug('Facts:  %s', facts)
-        response = requests.post(self.fact_endpoint, json=payload)
-        data = response.json()
-        msg = 'Failed to obtain fact_collection_id when reporting facts.'
-        if response.status_code != 201 or data.get('id') is None:
-            msg = '{} Error: {}'.format(msg, data)
-            logger.error(msg)
-        return data.get('id')
+        if bool(facts):
+            payload = {'facts': facts}
+            logger.info('Sending facts to %s', self.fact_endpoint)
+            logger.debug('Facts:  %s', facts)
+            response = requests.post(self.fact_endpoint, json=payload)
+            data = response.json()
+            msg = 'Failed to obtain fact_collection_id when reporting facts.'
+            if response.status_code != 201 or data.get('id') is None:
+                msg = '{} Error: {}'.format(msg, data)
+                logger.error(msg)
+            return data.get('id')
+        else:
+            logger.error('No facts gathered from scan.')
+            return None
 
     def __str__(self):
         """Convert to string."""
