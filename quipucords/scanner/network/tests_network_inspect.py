@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Test the host scanner capabilities."""
+"""Test the inspect scanner capabilities."""
 
 from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
@@ -234,7 +234,7 @@ class HostScannerTest(TestCase):
     @patch('scanner.network.utils.TaskQueueManager.run',
            side_effect=mock_run_success)
     def test_inspect_scan_fail_no_facts(self, mock_run):
-        """Test running a host scan with mocked connection."""
+        """Test running a inspect scan with mocked connection."""
         expected = ([('1.2.3.4', {'name': 'cred1'})], [])
         mock_run.return_value = expected
         with requests_mock.Mocker() as mocker:
@@ -246,7 +246,7 @@ class HostScannerTest(TestCase):
             self.assertEqual(scan_task_status, ScanTask.FAILED)
 
     def test_populate_callback(self):
-        """Test the population of the callback object for host scan."""
+        """Test the population of the callback object for inspect scan."""
         callback = ResultCallback(
             scan_task=self.inspect_scan_task,
             inspect_results=self.inspect_results)
