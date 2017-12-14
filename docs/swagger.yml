@@ -718,7 +718,7 @@ definitions:
           type: "integer"
           format: "int64"
           description: "The total number of hosts that have been scanned."
-        failed_scans:
+        systems_failed:
           type: "integer"
           format: "int64"
           description: "The total number of hosts that failed to scan."

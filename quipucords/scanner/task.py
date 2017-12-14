@@ -50,7 +50,7 @@ class ScanTaskRunner(object):
         :returns: Dictionary of facts
         """
         if not self.facts:
-            self.facts = {}
+            self.facts = []
         return self.facts
 
     def get_results(self):
@@ -69,7 +69,7 @@ class ScanTaskRunner(object):
     def __str__(self):
         """Convert to string."""
         return '{' + 'scan_job:{}, '\
-            'scan_task: {}, '\
-            'sequence_number: {}'.format(self.scan_job.id,
-                                         self.scan_task.id,
-                                         self.scan_task.sequence_number) + '}'
+            'sequence_number: {}, '\
+            'scan_task: {}'.format(self.scan_job.id,
+                                   self.scan_task.sequence_number,
+                                   self.scan_task) + '}'

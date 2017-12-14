@@ -34,13 +34,13 @@ class ResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, scanjob=None, inspect_results=None, display=None):
+    def __init__(self, scan_task=None, inspect_results=None, display=None):
         """Create result callback."""
         super().__init__(display=display)
-        self.scanjob = scanjob
+        self.scan_task = scan_task
         self.source = None
-        if scanjob is not None:
-            self.source = scanjob.source
+        if scan_task is not None:
+            self.source = scan_task.source
         self.inspect_results = inspect_results
         self.results = []
         self._ansible_facts = {}
@@ -63,9 +63,9 @@ class ResultCallback(CallbackBase):
                                  host, facts)
 
                     # Update scan counts and save
-                    if self.scanjob is not None:
-                        self.scanjob.systems_scanned += 1
-                        self.scanjob.save()
+                    if self.scan_task is not None:
+                        self.scan_task.systems_scanned += 1
+                        self.scan_task.save()
 
                     # Save facts for host
                     sys_result = SystemInspectionResult(
@@ -100,15 +100,15 @@ class ResultCallback(CallbackBase):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        if self.scanjob is not None:
+        if self.scan_task is not None:
             self._update_reachable_hosts(result_obj)
-            self.scanjob.failed_scans += 1
-            self.scanjob.status = ScanTask.FAILED
-            self.scanjob.save()
+            self.scan_task.systems_failed += 1
+            self.scan_task.status = ScanTask.FAILED
+            self.scan_task.save()
         logger.warning('%s', result_obj)
 
     def _update_reachable_hosts(self, result_obj):
-        if self.scanjob.scan_type != ScanTask.SCAN_TYPE_INSPECT:
+        if self.scan_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:
             # Don't update for discovery scan.
             return
 
