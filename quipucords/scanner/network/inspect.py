@@ -9,7 +9,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for network connection discovery."""
-import os
 import logging
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -26,8 +25,6 @@ from scanner.network.utils import (_construct_error_msg,
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-PLAYBOOK_PATH = os.path.abspath(os.path.normpath(
-    os.path.join(os.path.curdir, 'playbooks', 'host_scan_playbook.yaml')))
 
 
 class ScannerException(Exception):
@@ -74,14 +71,16 @@ class InspectTaskRunner(ScanTaskRunner):
         """Access inspection facts."""
         if not self.facts:
             temp_facts = []
-            # Process all results that were save to db
-            for system_result in self.get_results().systems.all():
-                fact = {}
-                for raw_fact in system_result.facts.all():
-                    if raw_fact.value is None or raw_fact.value == '':
-                        continue
-                    fact[raw_fact.name] = raw_fact.value
-                temp_facts.append(fact)
+            system_results = self.get_results()
+            if system_results:
+                # Process all results that were save to db
+                for system_result in system_results.systems.all():
+                    fact = {}
+                    for raw_fact in system_result.facts.all():
+                        if raw_fact.value is None or raw_fact.value == '':
+                            continue
+                        fact[raw_fact.name] = raw_fact.value
+                    temp_facts.append(fact)
 
             self.facts = temp_facts
         return self.facts
@@ -99,11 +98,14 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
+            logger.error(
+                'Prerequisites scan task with id %d failed.',
+                self.connect_scan_task.id)
             return ScanTask.FAILED
 
         try:
             # Execute scan
-            self.host_scan()
+            self.inspect_scan()
 
             # Send temp_facts to fact endpoint
             temp_facts = self.get_facts()
@@ -132,7 +134,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return ScanTask.COMPLETED
 
     # pylint: disable=too-many-locals
-    def host_scan(self):
+    def inspect_scan(self):
         """Execute the host scan with the initialized source.
 
         :returns: An array of dictionaries of facts
