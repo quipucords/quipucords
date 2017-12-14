@@ -57,10 +57,3 @@ class ScanManagerTest(TestCase):
         """Test kill on missing id."""
         killed = self.scan_manager.kill(1)
         self.assertFalse(killed)
-
-    def test_kill(self):
-        """Test kill on added task."""
-        task = MockTask()
-        self.scan_manager.put(task)
-        killed = self.scan_manager.kill(1)
-        self.assertTrue(killed)
