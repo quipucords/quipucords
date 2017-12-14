@@ -75,14 +75,13 @@ class InspectTaskRunner(ScanTaskRunner):
         if not self.facts:
             temp_facts = []
             # Process all results that were save to db
-            for inspect in self.inspect_results.results.all():
-                for result in inspect.systems.all():
-                    fact = {}
-                    for raw_fact in result.facts.all():
-                        if raw_fact.value is None or raw_fact.value == '':
-                            continue
-                        fact[raw_fact.name] = raw_fact.value
-                    temp_facts.append(fact)
+            for system_result in self.get_results().systems.all():
+                fact = {}
+                for raw_fact in system_result.facts.all():
+                    if raw_fact.value is None or raw_fact.value == '':
+                        continue
+                    fact[raw_fact.name] = raw_fact.value
+                temp_facts.append(fact)
 
             self.facts = temp_facts
         return self.facts

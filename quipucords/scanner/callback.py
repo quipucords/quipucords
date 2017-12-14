@@ -81,7 +81,8 @@ class ResultCallback(CallbackBase):
                     inspect_result = self.inspect_results.results.filter(
                         source__id=self.source.id).first()
                     if inspect_result is None:
-                        inspect_result = InspectionResult(source=self.source)
+                        inspect_result = InspectionResult(
+                            scan_task=self.scan_task, source=self.source)
                         inspect_result.save()
                     inspect_result.systems.add(sys_result)
                     inspect_result.save()
