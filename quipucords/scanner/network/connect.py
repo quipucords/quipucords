@@ -69,7 +69,7 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         try:
             connected, failed_hosts = self.discovery()
-            self._store_discovery_success(connected, failed_hosts)
+            self._store_connect_result(connected, failed_hosts)
         except AnsibleError as ansible_error:
             logger.error('Connect scan task failed for %s. %s', self.scan_task,
                          ansible_error)
@@ -121,7 +121,7 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         return connected, remaining
 
-    def _store_discovery_success(self, connected, failed_hosts):
+    def _store_connect_result(self, connected, failed_hosts):
         result = {}
         conn_result = ConnectionResult(
             scan_task=self.scan_task, source=self.scan_task.source)
