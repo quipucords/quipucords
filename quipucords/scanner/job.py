@@ -151,9 +151,6 @@ class ScanJobRunner(Process):
             self.scan_job.status = ScanTask.FAILED
             self.scan_job.save()
 
-        self.inspect_results.fact_collection_id = fact_collection_id
-        self.inspect_results.save()
-
         # All tasks completed successfully
         if self.scan_job.status != ScanTask.FAILED:
             self.scan_job.status = ScanTask.COMPLETED
