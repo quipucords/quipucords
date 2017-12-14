@@ -104,7 +104,7 @@ class ScanJobRunner(Process):
             if not runner:
                 logger.error(
                     'Scan Job failed.  Scan task does not'
-                    ' have recognized type/souce combination: %s',
+                    ' have recognized type/source combination: %s',
                     scan_task)
                 scan_task.status = ScanTask.FAILED
                 self.scan_job.status = ScanTask.FAILED
