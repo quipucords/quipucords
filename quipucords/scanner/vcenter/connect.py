@@ -10,13 +10,12 @@
 #
 """ScanTask used for vcenter connection task."""
 import logging
-import atexit
-from pyVim.connect import SmartConnectNoSSL, Disconnect
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.vault import decrypt_data_as_unicode
+
 from api.models import (ScanTask, ConnectionResults,
                         ConnectionResult, SystemConnectionResult)
 from scanner.task import ScanTaskRunner
+from scanner.vcenter.utils import vcenter_connect
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -40,7 +39,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.conn_results = conn_results
 
-    def _store_connect_success(self, connected, credential):
+    def _store_connect_data(self, connected, credential):
         conn_result = ConnectionResult(source=self.scan_task.source,
                                        scan_task=self.scan_task)
         conn_result.save()
@@ -73,12 +72,12 @@ class ConnectTaskRunner(ScanTaskRunner):
             connected = self.connect()
             source = self.scan_task.source
             credential = self.scan_task.source.credentials.all().first()
-            self.facts = self._store_connect_success(connected, credential)
+            self._store_connect_data(connected, credential)
         except vim.fault.InvalidLogin as vm_error:
             logger.error('Unable to connect to VCenter source, %s, '
                          'with supplied credential, %s.',
                          source.name, credential.name)
-            logger.error('Discovery scan failed for %s. %s', self.scan_task,
+            logger.error('Connect scan failed for %s. %s', self.scan_task,
                          vm_error)
             return ScanTask.FAILED
 
@@ -93,19 +92,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         vm_names = []
         logger.info('Connect scan started for %s.', self.scan_task)
 
-        vcenter = None
-        credential = self.scan_task.source.credentials.all().first()
-        user = credential.username
-        host = self.scan_task.source.hosts.all().first().host_range
-        password = decrypt_data_as_unicode(credential.password)
-        port = self.scan_task.source.port
+        vcenter = vcenter_connect(self.scan_task)
 
-        # TO DO: Fix port handling and SSL options
-        vcenter = SmartConnectNoSSL(host=host, user=user,
-                                    pwd=password, port=port)
-        atexit.register(Disconnect, vcenter)
         content = vcenter.RetrieveContent()
-
         container = content.rootFolder  # starting point to look into
         view_type = [vim.VirtualMachine]  # object types to look for
         recursive = True  # whether we should look into it recursively
@@ -117,4 +106,5 @@ class ConnectTaskRunner(ScanTaskRunner):
             summary = child.summary
             vm_names.append(summary.config.name)
 
+        logger.info('Connect scan completed for %s.', self.scan_task)
         return set(vm_names)

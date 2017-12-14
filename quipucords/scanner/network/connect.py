@@ -113,7 +113,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             if remaining == []:
                 break
 
-        logger.info('Discovery scan completed for %s.', self.scan_task)
+        logger.info('Connect scan completed for %s.', self.scan_task)
         logger.info('Successfully connected to %d systems.', len(connected))
         if bool(remaining):
             logger.warning('Failed to connect to %d systems.', len(remaining))

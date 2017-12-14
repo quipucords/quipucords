@@ -113,6 +113,10 @@ class ScanJobRunner(Process):
                   source_type == Source.NETWORK_SOURCE_TYPE):
                 runner = network.InspectTaskRunner(
                     self.scan_job, scan_task, self.inspect_results)
+            elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
+                  source_type == Source.VCENTER_SOURCE_TYPE):
+                runner = vcenter.InspectTaskRunner(
+                    self.scan_job, scan_task, self.inspect_results)
             else:
                 logger.error(
                     'Scan Job failed.  Scan task does not'
