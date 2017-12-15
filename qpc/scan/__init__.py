@@ -19,6 +19,15 @@ PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
 
+# Status values
+SCAN_STATUS_CREATED = 'created'
+SCAN_STATUS_PENDING = 'pending'
+SCAN_STATUS_RUNNING = 'running'
+SCAN_STATUS_PAUSED = 'paused'
+SCAN_STATUS_CANCELED = 'canceled'
+SCAN_STATUS_COMPLETED = 'completed'
+SCAN_STATUS_FAILED = 'failed'
+
 
 SCAN_URI = '/api/v1/scans/'
 

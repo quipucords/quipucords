@@ -21,6 +21,7 @@ from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
 from qpc.scan.list import ScanListCommand
 from qpc.utils import get_server_location, write_server_config
+from qpc import messages
 
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
@@ -95,14 +96,14 @@ class ScanListCliTests(unittest.TestCase):
             with redirect_stdout(scan_out):
                 slc.main(args)
                 self.assertEqual(scan_out.getvalue(),
-                                 'No scans exist yet.\n')
+                                 messages.SCAN_LIST_NO_SCANS + '\n')
 
     def test_list_scan_data(self):
         """Testing the list scan command successfully with stubbed data."""
         scan_out = StringIO()
         url = BASE_URL + SCAN_URI
         scan_entry = {'id': 1,
-                      'scan_type': 'host',
+                      'scan_type': 'inspect',
                       'source': {
                           'id': 1,
                           'name': 'scan1'},
@@ -114,7 +115,53 @@ class ScanListCliTests(unittest.TestCase):
             args = Namespace()
             with redirect_stdout(scan_out):
                 slc.main(args)
-                expected = '[{"id":1,"scan_type":"host"' \
+                expected = '[{"id":1,"scan_type":"inspect"' \
+                           ',"source":{"id":1,"name":"scan1"},'\
+                           '"status":"completed"}]'
+                self.assertEqual(scan_out.getvalue().replace('\n', '')
+                                 .replace(' ', '').strip(), expected)
+
+    def test_list_filter_type(self):
+        """Testing the list scan with filter by type."""
+        scan_out = StringIO()
+        url = BASE_URL + SCAN_URI
+        scan_entry = {'id': 1,
+                      'scan_type': 'inspect',
+                      'source': {
+                          'id': 1,
+                          'name': 'scan1'},
+                      'status': 'completed'}
+        data = [scan_entry]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=data)
+            slc = ScanListCommand(SUBPARSER)
+            args = Namespace(type='inspect')
+            with redirect_stdout(scan_out):
+                slc.main(args)
+                expected = '[{"id":1,"scan_type":"inspect"' \
+                           ',"source":{"id":1,"name":"scan1"},'\
+                           '"status":"completed"}]'
+                self.assertEqual(scan_out.getvalue().replace('\n', '')
+                                 .replace(' ', '').strip(), expected)
+
+    def test_list_filter_status(self):
+        """Testing the list scan with filter by state."""
+        scan_out = StringIO()
+        url = BASE_URL + SCAN_URI
+        scan_entry = {'id': 1,
+                      'scan_type': 'inspect',
+                      'source': {
+                          'id': 1,
+                          'name': 'scan1'},
+                      'status': 'completed'}
+        data = [scan_entry]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=data)
+            slc = ScanListCommand(SUBPARSER)
+            args = Namespace(status='completed')
+            with redirect_stdout(scan_out):
+                slc.main(args)
+                expected = '[{"id":1,"scan_type":"inspect"' \
                            ',"source":{"id":1,"name":"scan1"},'\
                            '"status":"completed"}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
