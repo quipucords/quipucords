@@ -358,7 +358,27 @@ paths:
       description: "List all scans."
       operationId: "listScanJobs"
       produces:
-      - "application/json"
+        - "application/json"
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "Filter list based on job status"
+          type: "string"
+          enum:
+            - created
+            - pending
+            - running
+            - paused
+            - canceled
+            - completed
+            - failed
+        - name: "scan_type"
+          in: "query"
+          description: "Filter list based on scan type"
+          type: "string"
+          enum:
+            - connect
+            - inspect
       responses:
         200:
           description: "Scan jobs retrieved"

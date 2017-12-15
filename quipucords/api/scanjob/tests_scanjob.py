@@ -128,7 +128,53 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        print(content)
+        expected = [{'id': 1,
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                     'status': 'created'},
+                    {'id': 2,
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                     'status': 'created'}]
+        self.assertEqual(content, expected)
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_filtered_list(self, start_scan):
+        """List all ScanJob objects."""
+        data_default = {'sources': [self.source.id]}
+        data_discovery = {'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
+        self.create_expect_201(data_default)
+        self.create_expect_201(data_discovery)
+
+        url = reverse('scanjob-list')
+        response = self.client.get(
+            url, {'scan_type': ScanTask.SCAN_TYPE_CONNECT})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        expected = [{'id': 2,
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                     'status': 'created'}]
+        self.assertEqual(content, expected)
+
+        response = self.client.get(
+            url, {'status': ScanTask.PENDING})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        expected = []
+        self.assertEqual(content, expected)
+
+        response = self.client.get(
+            url, {'status': ScanTask.CREATED})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
         expected = [{'id': 1,
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
