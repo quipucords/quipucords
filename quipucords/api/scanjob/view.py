@@ -18,7 +18,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
-from api.models import ScanJob, ConnectionResults, InspectionResults
+from api.models import ScanTask, ScanJob, ConnectionResults, InspectionResults
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              ConnectionResultsSerializer,
@@ -30,7 +30,7 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
                                         cancel_scan, restart_scan)
 
 
-SOURCE_KEY = 'source'
+SOURCE_KEY = 'sources'
 RESULTS_KEY = 'results'
 
 
@@ -42,10 +42,13 @@ def expand_source(scan, json_scan):
     to return to user.
     """
     if json_scan[SOURCE_KEY]:
-        source = scan.source
-        slim_source = {'id': source.id, 'name': source.name,
-                       'source_type': source.source_type}
-        json_scan[SOURCE_KEY] = slim_source
+        sources = scan.sources
+        slim_sources = []
+        for source in sources.all():
+            slim_source = {'id': source.id, 'name': source.name,
+                           'source_type': source.source_type}
+            slim_sources.append(slim_source)
+        json_scan[SOURCE_KEY] = slim_sources
 
 
 def expand_sys_conn_result(conn_result):
@@ -102,8 +105,7 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
-            json_source.pop('ssh_port', None)
-            json_source.pop('address', None)
+            json_source.pop('port', None)
             systems = expand_sys_conn_result(result)
             json_job_conn_result_out = {'source': json_source,
                                         'systems': systems}
@@ -125,8 +127,7 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
-            json_source.pop('ssh_port', None)
-            json_source.pop('address', None)
+            json_source.pop('port', None)
             systems = expand_sys_inspect_results(result)
             json_job_inspect_result_out = {'source': json_source,
                                            'systems': systems}
@@ -210,15 +211,15 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def pause(self, request, pk=None):
         """Pause the running scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if scan.status == ScanJob.RUNNING:
+        if scan.status == ScanTask.RUNNING:
             pause_scan.send(sender=self.__class__, instance=scan)
-            scan.status = ScanJob.PAUSED
+            scan.status = ScanTask.PAUSED
             scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_source(scan, json_scan)
             return Response(json_scan, status=200)
-        elif scan.status == ScanJob.PAUSED:
+        elif scan.status == ScanTask.PAUSED:
             err_msg = _(messages.ALREADY_PAUSED)
             return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
@@ -229,14 +230,14 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if (scan.status == ScanJob.COMPLETED or
-                scan.status == ScanJob.FAILED or
-                scan.status == ScanJob.CANCELED):
+        if (scan.status == ScanTask.COMPLETED or
+                scan.status == ScanTask.FAILED or
+                scan.status == ScanTask.CANCELED):
             err_msg = _(messages.NO_CANCEL)
             return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
         cancel_scan.send(sender=self.__class__, instance=scan)
-        scan.status = ScanJob.CANCELED
+        scan.status = ScanTask.CANCELED
         scan.save()
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
@@ -247,18 +248,18 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def restart(self, request, pk=None):
         """Restart a paused scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
-        if scan.status == ScanJob.PAUSED:
+        if scan.status == ScanTask.PAUSED:
             fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
             restart_scan.send(sender=self.__class__,
                               instance=scan,
                               fact_endpoint=fact_endpoint)
-            scan.status = ScanJob.RUNNING
+            scan.status = ScanTask.RUNNING
             scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_source(scan, json_scan)
             return Response(json_scan, status=200)
-        elif scan.status == ScanJob.RUNNING:
+        elif scan.status == ScanTask.RUNNING:
             err_msg = _(messages.ALREADY_RUNNING)
             return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 

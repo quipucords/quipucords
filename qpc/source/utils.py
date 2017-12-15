@@ -55,16 +55,12 @@ def build_source_payload(args, add_none=True):
     if hasattr(args, 'type') and args.type:
         req_payload['source_type'] = args.type
 
-    if hasattr(args, 'address') and args.address:
-        req_payload['address'] = args.address
-    elif add_none:
-        req_payload['address'] = None
     if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
-    if hasattr(args, 'ssh_port') and args.ssh_port:
-        req_payload['ssh_port'] = args.ssh_port
+    if hasattr(args, 'port') and args.port:
+        req_payload['port'] = args.port
     elif add_none:
-        req_payload['ssh_port'] = None
+        req_payload['port'] = None
     if hasattr(args, 'credentials') and args.credentials:
         req_payload['credentials'] = args.credentials
     elif add_none:

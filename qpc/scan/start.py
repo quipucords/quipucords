@@ -76,7 +76,7 @@ class ScanStartCommand(CliCommand):
         """
         self.req_payload = {
             'source': self.source_id,
-            'scan_type': scan.SCAN_TYPE_HOST,
+            'scan_type': scan.SCAN_TYPE_INSPECT,
             'max_concurrency': self.args.max_concurrency
         }
 

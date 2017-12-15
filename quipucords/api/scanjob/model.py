@@ -15,61 +15,55 @@ These models are used in the REST definitions.
 from django.utils.translation import ugettext as _
 from django.db import models
 from api.source.model import Source
+from api.scantasks.model import ScanTask
 import api.messages as messages
 
 
+class ScanOptions(models.Model):
+    """The scan options allows configuration of a scan job."""
+
+    max_concurrency = models.PositiveIntegerField(default=50)
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'id:{}, '\
+            'max_concurrency: {}'.format(self.id,
+                                         self.max_concurrency) + '}'
+
+
 class ScanJob(models.Model):
-    """The host credential for connecting to host systems via ssh."""
+    """The scan job captures all sources and scan tasks for a scan."""
 
-    DISCOVERY = 'discovery'
-    HOST = 'host'
-    SCAN_TYPE_CHOICES = ((HOST, HOST), (DISCOVERY, DISCOVERY))
-
-    PENDING = 'pending'
-    RUNNING = 'running'
-    PAUSED = 'paused'
-    CANCELED = 'canceled'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    STATUS_CHOICES = ((PENDING, PENDING), (RUNNING, RUNNING), (PAUSED, PAUSED),
-                      (COMPLETED, COMPLETED), (CANCELED, CANCELED),
-                      (FAILED, FAILED))
-
-    source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
-        choices=SCAN_TYPE_CHOICES,
-        default=HOST,
+        choices=ScanTask.SCAN_TYPE_CHOICES,
+        default=ScanTask.SCAN_TYPE_INSPECT,
     )
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default=PENDING,
+        choices=ScanTask.STATUS_CHOICES,
+        default=ScanTask.CREATED,
     )
-    max_concurrency = models.PositiveIntegerField(default=50)
-    systems_count = models.PositiveIntegerField(null=True)
-    systems_scanned = models.PositiveIntegerField(null=True)
-    failed_scans = models.PositiveIntegerField(null=True)
+    tasks = models.ManyToManyField(ScanTask)
+    options = models.ForeignKey(
+        ScanOptions, null=True, on_delete=models.CASCADE)
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
+            'sources:{}, '\
             'scan_type:{}, '\
             'status:{}, '\
-            'source:{}, '\
-            'max_concurrency: {}, '\
-            'systems_count: {}, '\
-            'systems_scanned: {}, '\
-            'failed_scans: {}, '\
+            'tasks: {}, '\
+            'options: {}, '\
             'fact_collection_id: {}'.format(self.id,
+                                            self.sources,
                                             self.scan_type,
                                             self.status,
-                                            self.source,
-                                            self.max_concurrency,
-                                            self.systems_count,
-                                            self.systems_scanned,
-                                            self.failed_scans,
+                                            self.tasks,
+                                            self.options,
                                             self.fact_collection_id) + '}'
 
     class Meta:

@@ -14,15 +14,22 @@ from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import Credential, Source, HostRange, ScanJob
+from api.models import (Credential,
+                        Source,
+                        ConnectionResults,
+                        HostRange,
+                        ScanJob,
+                        ScanOptions,
+                        ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.utils import (_construct_vars, _process_connect_callback,
-                           _construct_error,
-                           construct_connect_inventory, connect,
-                           ANSIBLE_FAILED_HOST_ERR_MSG,
-                           ANSIBLE_UNREACHABLE_HOST_ERR_MSG,
-                           ANSIBLE_PLAYBOOK_ERR_MSG)
-from scanner.discovery import DiscoveryScanner
+from scanner.network.connect import (_construct_vars,
+                                     _process_connect_callback,
+                                     _construct_error,
+                                     construct_connect_inventory, connect)
+from scanner.network.utils import (ANSIBLE_FAILED_HOST_ERR_MSG,
+                                   ANSIBLE_UNREACHABLE_HOST_ERR_MSG,
+                                   ANSIBLE_PLAYBOOK_ERR_MSG)
+from scanner.network import ConnectTaskRunner
 from scanner.callback import ResultCallback
 
 
@@ -41,8 +48,8 @@ def mock_handle_ssh(cred):  # pylint: disable=unused-argument
     pass
 
 
-class DiscoveryScannerTest(TestCase):
-    """Tests against the DiscoveryScanner class and functions."""
+class NetworkConnectTaskRunnerTest(TestCase):
+    """Tests against the ConnectTaskRunner class and functions."""
 
     def setUp(self):
         """Create test case setup."""
@@ -56,7 +63,7 @@ class DiscoveryScannerTest(TestCase):
 
         self.source = Source(
             name='source1',
-            ssh_port=22)
+            port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
 
@@ -66,10 +73,22 @@ class DiscoveryScannerTest(TestCase):
 
         self.source.hosts.add(self.host)
 
-        self.scanjob = ScanJob(source_id=self.source.id,
-                               scan_type=ScanJob.DISCOVERY)
-        self.scanjob.failed_scans = 0
-        self.scanjob.save()
+        self.scan_task = ScanTask(
+            source=self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        self.scan_task.systems_failed = 0
+        self.scan_task.save()
+
+        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        self.scan_job.save()
+        self.scan_job.sources.add(self.source)
+        self.scan_job.tasks.add(self.scan_task)
+        scan_options = ScanOptions()
+        scan_options.save()
+        self.scan_job.options = scan_options
+        self.scan_job.save()
+
+        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results.save()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -84,7 +103,7 @@ class DiscoveryScannerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object."""
-        callback = ResultCallback(scanjob=self.scanjob)
+        callback = ResultCallback(scan_task=self.scan_task)
         host = Mock(name='1.2.3.4')
         result = Mock(_host=host, _results={'rc': 0})
         callback.v2_runner_on_ok(result)
@@ -115,7 +134,7 @@ class DiscoveryScannerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
-        connection_port = source['ssh_port']
+        connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
@@ -137,14 +156,16 @@ class DiscoveryScannerTest(TestCase):
         error = _construct_error(TaskQueueManager.RUN_FAILED_BREAK_PLAY)
         self.assertEqual(error.message, ANSIBLE_PLAYBOOK_ERR_MSG)
 
-    @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_failed)
-    @patch('scanner.utils._handle_ssh_passphrase', side_effect=mock_handle_ssh)
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_failed)
+    @patch('scanner.network.connect._handle_ssh_passphrase',
+           side_effect=mock_handle_ssh)
     def test_connect_failure(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure."""
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
-        connection_port = source['ssh_port']
+        connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
@@ -152,13 +173,14 @@ class DiscoveryScannerTest(TestCase):
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
-    @patch('scanner.utils.TaskQueueManager.run', side_effect=mock_run_success)
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
     def test_connect(self, mock_run):
         """Test connect flow with mocked manager."""
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
-        connection_port = source['ssh_port']
+        connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected, failed = connect(hosts, cred, connection_port)
@@ -166,19 +188,21 @@ class DiscoveryScannerTest(TestCase):
         self.assertEqual(failed, [])
         mock_run.assert_called_with(ANY)
 
-    @patch('scanner.discovery.connect')
+    @patch('scanner.network.connect.connect')
     def test_discovery(self, mock_connect):
         """Test running a discovery scan with mocked connection."""
         expected = ([('1.2.3.4', {'id': '1'})], [])
         mock_connect.return_value = expected
-        scanner = DiscoveryScanner(self.scanjob)
+        scanner = ConnectTaskRunner(
+            self.scan_job, self.scan_task, self.conn_results)
         conn_dict = scanner.run()
         mock_connect.assert_called_with(ANY, ANY, 22, forks=50)
-        self.assertEqual(conn_dict, {'1.2.3.4': {'id': '1'}})
+        self.assertEqual(conn_dict, ScanTask.COMPLETED)
 
     def test_store_discovery_success(self):
-        """Test running a discovery scan _store_discovery_success."""
-        scanner = DiscoveryScanner(self.scanjob)
+        """Test running a discovery scan _store_connect_result."""
+        scanner = ConnectTaskRunner(
+            self.scan_job, self.scan_task, self.conn_results)
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         connected = [('1.2.3.4', cred)]
@@ -186,7 +210,7 @@ class DiscoveryScannerTest(TestCase):
         expected = {'1.2.3.4': {'name': 'cred1'},
                     '1.2.3.5': None}
         # pylint: disable=protected-access
-        result = scanner._store_discovery_success(connected, failed)
+        result = scanner._store_connect_result(connected, failed)
         self.assertEqual(len(result), len(expected))
         self.assertIn('1.2.3.5', result)
         self.assertIsNone(result['1.2.3.5'])

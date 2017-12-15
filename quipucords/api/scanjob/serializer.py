@@ -10,38 +10,49 @@
 #
 """Module for serializing all model object for database storage."""
 
+from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         ChoiceField,
                                         IntegerField)
-from api.models import Source, ScanJob
+from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
+from api.scantasks.serializer import ScanTaskSerializer
+from api.scantasks.serializer import SourceField
 
 
-class SourceField(PrimaryKeyRelatedField):
+class ScanOptionsSerializer(NotEmptySerializer):
+    """Serializer for the ScanOptions model."""
+
+    max_concurrency = IntegerField(required=False, min_value=1, default=50)
+
+    class Meta:
+        """Metadata for serializer."""
+
+        model = ScanOptions
+        fields = ['max_concurrency']
+
+
+class TaskField(PrimaryKeyRelatedField):
     """Representation of the source associated with a scan job."""
 
-    def display_value(self, instance):
-        """Create display value."""
-        display = instance
-        if isinstance(instance, Source):
-            display = 'Source: %s' % instance.name
-        return display
+    def to_representation(self, value):
+        """Create output representation."""
+        serializer = ScanTaskSerializer(value)
+        return serializer.data
 
 
 class ScanJobSerializer(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
-    source = SourceField(queryset=Source.objects.all())
-    scan_type = ChoiceField(required=False, choices=ScanJob.SCAN_TYPE_CHOICES)
+    sources = SourceField(many=True, queryset=Source.objects.all())
+    scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
-                         choices=ScanJob.STATUS_CHOICES)
-    max_concurrency = IntegerField(required=False, min_value=1, default=50)
-    systems_count = IntegerField(required=False, min_value=0, read_only=True)
-    systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
-    failed_scans = IntegerField(required=False, min_value=0, read_only=True)
+                         choices=ScanTask.STATUS_CHOICES)
+    tasks = TaskField(many=True, read_only=True)
+    options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)
 
     class Meta:
@@ -50,10 +61,24 @@ class ScanJobSerializer(NotEmptySerializer):
         model = ScanJob
         fields = '__all__'
 
-    @staticmethod
-    def validate_source(source):
-        """Make sure the source is present."""
-        if not source:
-            raise ValidationError(_(messages.SJ_REQ_SOURCE))
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a scan job."""
+        options = validated_data.pop('options', None)
+        scanjob = super().create(validated_data)
 
-        return source
+        if options:
+            options = ScanOptions.objects.create(**options)
+            options.save()
+            scanjob.options = options
+            scanjob.save()
+
+        return scanjob
+
+    @staticmethod
+    def validate_sources(sources):
+        """Make sure the source is present."""
+        if not sources:
+            raise ValidationError(_(messages.SJ_REQ_SOURCES))
+
+        return sources

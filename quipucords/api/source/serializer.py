@@ -72,8 +72,7 @@ class SourceSerializer(NotEmptySerializer):
     name = CharField(required=True, max_length=64)
     source_type = ChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
-    address = CharField(required=False, max_length=512, allow_null=True)
-    ssh_port = IntegerField(required=False, min_value=0, allow_null=True)
+    port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = HostRangeField(
         required=False,
         many=True,
@@ -106,29 +105,26 @@ class SourceSerializer(NotEmptySerializer):
         source_type = validated_data['source_type']
         credentials = validated_data.pop('credentials')
         hosts_data = validated_data.pop('hosts', None)
-        address = None
-        ssh_port = None
-        if 'address' in validated_data:
-            address = validated_data['address']
-        if 'ssh_port' in validated_data:
-            ssh_port = validated_data['ssh_port']
+        port = None
+        if 'port' in validated_data:
+            port = validated_data['port']
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if not hosts_data:
                 raise ValidationError(_(messages.NET_MIN_HOST))
-            elif address is not None:
-                raise ValidationError(_(messages.NET_NO_ADDR))
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
-            if ssh_port is None:
-                validated_data['ssh_port'] = 22
+            if port is None:
+                validated_data['port'] = 22
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if hosts_data:
-                raise ValidationError(_(messages.VC_NO_HOSTS))
-            elif address is None:
-                raise ValidationError(_(messages.VC_REQ_ADDR))
-            elif credentials and len(credentials) > 1:
+            if port is None:
+                validated_data['port'] = 443
+            if not hosts_data:
+                raise ValidationError(_(messages.VC_ONE_HOST))
+            elif hosts_data and len(hosts_data) != 1:
+                raise ValidationError(_(messages.VC_ONE_HOST))
+            if credentials and len(credentials) > 1:
                 raise ValidationError(_(messages.VC_ONE_CRED))
             elif credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
@@ -136,10 +132,9 @@ class SourceSerializer(NotEmptySerializer):
 
         source = Source.objects.create(**validated_data)
 
-        if source_type == Source.NETWORK_SOURCE_TYPE:
-            for host_data in hosts_data:
-                HostRange.objects.create(source=source,
-                                         **host_data)
+        for host_data in hosts_data:
+            HostRange.objects.create(source=source,
+                                     **host_data)
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -161,20 +156,17 @@ class SourceSerializer(NotEmptySerializer):
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
         hosts_data = validated_data.pop('hosts', None)
-        address = None
-        if 'address' in validated_data:
-            address = validated_data['address']
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
-            if address is not None:
-                raise ValidationError(_(messages.NET_NO_ADDR))
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if hosts_data:
-                raise ValidationError(_(messages.VC_NO_HOSTS))
-            elif credentials and len(credentials) > 1:
+            if not hosts_data:
+                raise ValidationError(_(messages.VC_ONE_HOST))
+            elif hosts_data and len(hosts_data) != 1:
+                raise ValidationError(_(messages.VC_ONE_HOST))
+            if credentials and len(credentials) > 1:
                 raise ValidationError(_(messages.VC_ONE_CRED))
             elif credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
@@ -188,7 +180,7 @@ class SourceSerializer(NotEmptySerializer):
         # then we should already have raised a ValidationError before
         # this point, so it's safe to use hosts_data as an indicator
         # of whether to replace the hosts.
-        if source_type == Source.NETWORK_SOURCE_TYPE and hosts_data:
+        if hosts_data:
             old_hosts = list(instance.hosts.all())
             new_hosts = [
                 HostRange.objects.create(source=instance,
@@ -431,14 +423,14 @@ class SourceSerializer(NotEmptySerializer):
         return '.'.join(ansible_out)
 
     @staticmethod
-    def validate_ssh_port(ssh_port):
-        """Validate the ssh port."""
-        if not ssh_port:
+    def validate_port(port):
+        """Validate the port."""
+        if not port:
             pass
-        elif ssh_port < 0 or ssh_port > 65536:
+        elif port < 0 or port > 65536:
             raise ValidationError(_(messages.NET_INVALID_PORT))
 
-        return ssh_port
+        return port
 
     @staticmethod
     def validate_credentials(credentials):
