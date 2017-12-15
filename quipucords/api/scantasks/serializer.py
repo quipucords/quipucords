@@ -38,17 +38,17 @@ class ScanTaskSerializer(NotEmptySerializer):
     scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
-    prerequisites = PrimaryKeyRelatedField(many=True, read_only=True)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
-    sequence_number = IntegerField(required=False, min_value=0, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
 
         model = ScanTask
-        fields = '__all__'
+        fields = ['source', 'scan_type', 'status',
+                  'systems_count', 'systems_scanned',
+                  'systems_failed']
 
     @staticmethod
     def validate_source(source):

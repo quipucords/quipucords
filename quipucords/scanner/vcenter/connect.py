@@ -83,6 +83,13 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.conn_results.results.add(conn_result)
         self.conn_results.save()
 
+        # Update the scan counts
+        if self.scan_task.systems_count is None:
+            self.scan_task.systems_count = len(connected)
+            self.scan_task.systems_scanned = 0
+        self.scan_task.systems_scanned = len(connected)
+        self.scan_task.save()
+
     def get_results(self):
         """Access connection results."""
         if not self.results or not self.conn_results:
