@@ -53,7 +53,7 @@ class SourceAddCommand(CliCommand):
         self.parser.add_argument('--hosts', dest='hosts', nargs='+',
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
-                                 required=False)
+                                 required=True)
         self.parser.add_argument('--cred', dest='cred',
                                  metavar='CRED',
                                  nargs='+', default=[],

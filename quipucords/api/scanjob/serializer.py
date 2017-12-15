@@ -69,9 +69,11 @@ class ScanJobSerializer(NotEmptySerializer):
 
         if options:
             options = ScanOptions.objects.create(**options)
-            options.save()
-            scanjob.options = options
-            scanjob.save()
+        else:
+            options = ScanOptions()
+        options.save()
+        scanjob.options = options
+        scanjob.save()
 
         return scanjob
 

@@ -176,16 +176,17 @@ class InspectTaskRunner(ScanTaskRunner):
         for child in children:  # Iterate though DataCenters
             data_center = child
             data_center_name = data_center.name
-            clusters = data_center.hostFolder.childEntity
-            for cluster in clusters:  # Iterate through the clusters in the DC
-                cluster_name = cluster.name
-                hosts = cluster.host  # Variable to make pep8 compliance
-                for host in hosts:  # Iterate through Hosts in the Cluster
-                    hostname = host.summary.config.name
-                    vms = host.vm
-                    for virtual_machine in vms:
-                        self.get_vm_info(data_center_name, cluster_name,
-                                         hostname, virtual_machine)
+            if hasattr(data_center, 'hostFolder'):
+                clusters = data_center.hostFolder.childEntity
+                for cluster in clusters:  # Iterate through the clusters
+                    cluster_name = cluster.name
+                    hosts = cluster.host  # Variable to make pep8 compliance
+                    for host in hosts:  # Iterate through Hosts in the Cluster
+                        hostname = host.summary.config.name
+                        vms = host.vm
+                        for virtual_machine in vms:
+                            self.get_vm_info(data_center_name, cluster_name,
+                                             hostname, virtual_machine)
 
     # pylint: disable=too-many-locals
     def inspect(self):
