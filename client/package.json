@@ -22,6 +22,7 @@
     "start:quipucords": "open http://127.0.0.1:8000/index.html; source ../venv/bin/activate; cd ../; make serve",
     "api:mock": "sh ./scripts/api.sh -p 4000 -f \"$(pwd)/../docs/swagger.yml\" &",
     "build": "react-scripts build",
+    "build:prod": "npm run build && mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client",
     "test": "react-scripts test --env=jsdom"
   },
   "dependencies": {

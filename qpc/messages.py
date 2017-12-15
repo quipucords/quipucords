@@ -46,6 +46,7 @@ CRED_UPDATED = 'Credential "%s" was updated'
 CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
 SOURCE_NAME_HELP = 'source name'
+SOURCES_NAME_HELP = 'list of source names'
 SOURCE_TYPE_HELP = 'type of source.  Valid values: vcenter, network'
 SOURCE_HOSTS_HELP = 'IP ranges to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
