@@ -39,35 +39,47 @@ class ScanStartCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), POST,
                             scan.SCAN_URI, [codes.created])
-        self.parser.add_argument('--source', dest='source',
-                                 metavar='source',
-                                 help=_(messages.SOURCE_NAME_HELP),
+        self.parser.add_argument('--sources', dest='sources', nargs='+',
+                                 metavar='SOURCES', default=[],
+                                 help=_(messages.SOURCES_NAME_HELP),
                                  required=True)
         self.parser.add_argument('--max-concurrency', dest='max_concurrency',
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
-        self.source_id = None
+        self.source_ids = []
+
+    def _get_source_ids(self, source_names):
+        not_found = False
+        source_ids = []
+        for source_name in set(source_names):
+            # check for existence of source
+            response = request(parser=self.parser, method=GET,
+                               path=source.SOURCE_URI,
+                               params={'name': source_name},
+                               payload=None)
+            if response.status_code == codes.ok:  # pylint: disable=no-member
+                json_data = response.json()
+                if len(json_data) == 1:
+                    source_entry = json_data[0]
+                    source_ids.append(source_entry['id'])
+                else:
+                    print(_(messages.SOURCE_DOES_NOT_EXIST % source_name))
+                    not_found = True
+            else:
+                print(_(messages.SOURCE_DOES_NOT_EXIST % source_name))
+                not_found = True
+        return not_found, source_ids
 
     def _validate_args(self):
         CliCommand._validate_args(self)
-
-        # check for existence of source
-        response = request(parser=self.parser, method=GET,
-                           path=source.SOURCE_URI,
-                           params={'name': self.args.source},
-                           payload=None)
-        if response.status_code == codes.ok:  # pylint: disable=no-member
-            json_data = response.json()
-            if len(json_data) == 1:
-                source_entry = json_data[0]
-                self.source_id = source_entry['id']
-            else:
-                print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.source))
+        source_ids = []
+        if self.args.sources:
+            # check for existence of sources
+            not_found, source_ids = self._get_source_ids(self.args.sources)
+            if not_found is True:
                 sys.exit(1)
-        else:
-            print(_(messages.SOURCE_DOES_NOT_EXIST % self.args.source))
-            sys.exit(1)
+        self.source_ids = source_ids
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.
@@ -75,9 +87,11 @@ class ScanStartCommand(CliCommand):
         :returns: a dictionary representing the credential being added
         """
         self.req_payload = {
-            'source': self.source_id,
+            'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
-            'max_concurrency': self.args.max_concurrency
+            'options': {
+                'max_concurrency': self.args.max_concurrency
+            }
         }
 
     def _handle_response_success(self):

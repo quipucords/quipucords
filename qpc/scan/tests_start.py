@@ -59,7 +59,7 @@ class ScanStartCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(source='source_none')
+            args = Namespace(sources=['source_none'])
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -74,7 +74,7 @@ class ScanStartCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(source='source1')
+            args = Namespace(sources=['source1'])
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -87,12 +87,30 @@ class ScanStartCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(source='source1')
+            args = Namespace(sources=['source1'])
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
                     self.assertEqual(scan_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
+
+    def test_start_scan_bad_resp(self):
+        """Testing the start scan command successfully."""
+        scan_out = StringIO()
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_post = BASE_URL + SCAN_URI
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=500, json=source_data)
+            mocker.post(url_post, status_code=201, json={'id': 1})
+            ssc = ScanStartCommand(SUBPARSER)
+            args = Namespace(sources=['source1'], max_concurrency=4)
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(scan_out):
+                    ssc.main(args)
+                    self.assertTrue('Source "source_none" does not exist'
+                                    in scan_out.getvalue())
 
     def test_start_scan(self):
         """Testing the start scan command successfully."""
@@ -105,7 +123,7 @@ class ScanStartCliTests(unittest.TestCase):
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(source='source1', max_concurrency=4)
+            args = Namespace(sources=['source1'], max_concurrency=4)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

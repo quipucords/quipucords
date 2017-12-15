@@ -36,11 +36,11 @@ Usage
 
 * Creating sources:
 
-  ``qpc source add --name=X --hosts X Y Z --cred A B``
+  ``qpc source add --type TYPE --name=X --hosts X Y Z --cred A B``
 
 * Running a scan:
 
-  ``qpc scan start --source=X``
+  ``qpc scan start --sources X``
 
 * Working with scans:
 
@@ -243,14 +243,14 @@ As the network infrastructure changes, it might be necessary to delete some sour
 Scanning
 --------
 
-Use the ``qpc scan`` command to run discovery and inspection scans on the network. This command scans all of the host names or IP addresses that are defined in the supplied source, and then writes the report information to a comma separated values (CSV) file. Note: Any ssh-agent connection setup for a target host '
+Use the ``qpc scan start`` command to run connect and inspection scans on the sources. This command scans all of the host names or IP addresses that are defined in the supplied source, and then writes the report information to a comma separated values (CSV) file. Note: Any ssh-agent connection setup for a target host '
               'will be used as a fallback if it exists.
 
-**qpc scan --source=** *source_name* **[--max-concurrency=** *concurrency* **]**
+**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]**
 
-``--source=source_name``
+``--sources=source_list``
 
-  Required. Contains the name of the source to use to run the scan.
+  Required. Contains the list of names of the sources to use to run the scan.
 
 ``--max-concurrency=concurrency``
 
@@ -327,7 +327,7 @@ Examples
 :Creating a new network source: ``qpc source add --name=new-source --type network --hosts 1.192.0.19 1.192.0.20 --cred new-creds``
 :Creating a new vcenter source: ``qpc source add --name=new-source --type vcenter --hosts 1.192.0.19 --cred vcenter-cred``
 :Editing a source: ``qpc source edit --name=new-source --hosts 1.192.0.[0:255] --cred new-creds other-creds``
-:Running a scan with a source: ``qpc scan --source=new-source``
+:Running a scan with a source: ``qpc scan start --sources new-source``
 
 Security Considerations
 -----------------------
