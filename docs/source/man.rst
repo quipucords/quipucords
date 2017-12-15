@@ -261,8 +261,15 @@ Listing and Showing Scans
 
 The ``qpc scan list`` command returns the details for all executed scans. The output of this command includes the identifier, the source, and the status of the scan.
 
-**qpc scan list**
+**qpc scan list** **--type=** *(connect | inspect)* **--type=** *(created | pending | running | paused | canceled | completed | failed)*
 
+``--state=state``
+
+  Optional. Filter list by scan state.  Must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed`` or ``failed``.
+
+``--type=type``
+
+  Optional. Filter list by scan type.  Must be ``connect`` or ``inspect``.
 
 The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns details for a single specified scan.
 

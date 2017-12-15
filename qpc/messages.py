@@ -85,9 +85,13 @@ SOURCE_TYPE_FILTER_HELP = 'type filter for listing sources.  Valid '\
 
 
 SCAN_ID_HELP = 'scan identifier'
+SCAN_TYPE_FILTER_HELP = 'type filter for listing scan jobs.  Valid '\
+    'values: connect, inspect'
+SCAN_STATUS_FILTER_HELP = 'status filter for listing scan jobs.  Valid '\
+    'values: created, pending, running, paused, canceled, completed, failed'
 SCAN_MAX_CONCURRENCY_HELP = 'number of concurrent scans; default=50'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist'
-SCAN_LIST_NO_SCANS = 'No scans exist yet.'
+SCAN_LIST_NO_SCANS = 'No scans found.'
 SCAN_STARTED = 'Scan "%s" started'
 SCAN_PAUSED = 'Scan "%s" paused'
 SCAN_RESTARTED = 'Scan "%s" restarted'
