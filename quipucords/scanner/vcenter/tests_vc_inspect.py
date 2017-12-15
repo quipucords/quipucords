@@ -204,7 +204,7 @@ class InspectTaskRunnerTest(TestCase):
         with patch.object(InspectTaskRunner,
                           'get_vm_info') as mock_get_vm_info:
             self.runner.recurse_datacenter(vcenter)
-            mock_get_vm_info.assert_called()
+            mock_get_vm_info.assert_called_with(ANY, ANY, ANY, ANY)
 
     def test_inspect(self):
         """Test the inspect method."""
