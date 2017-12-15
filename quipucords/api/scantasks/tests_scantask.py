@@ -50,8 +50,7 @@ class ScanTaskTest(TestCase):
         serializer = ScanTaskSerializer(task)
         json_task = serializer.data
         self.assertEqual(
-            {'id': 1,
-             'source': 1,
+            {'source': 1,
              'scan_type': ScanTask.SCAN_TYPE_CONNECT,
              'status': 'pending'},
             json_task)

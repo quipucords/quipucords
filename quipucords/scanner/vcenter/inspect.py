@@ -11,7 +11,7 @@
 """ScanTask used for vcenter inspection task."""
 import logging
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask, InspectionResults, InspectionResult,
+from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
@@ -80,23 +80,29 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         super().__init__(scan_job, scan_task)
         self.inspect_results = inspect_results
+        self.connect_scan_task = None
 
     def get_results(self):
         """Access connection results."""
         if not self.results or not self.inspect_results:
-            # pylint: disable=no-member
-            self.inspect_results = InspectionResults.objects.filter(
-                scan_job=self.scan_job.id).first()
-            self.results = self.inspect_results.results.filter(
-                scan_task=self.scan_task.id)
+            self.results = InspectionResult.objects.filter(
+                scan_task=self.scan_task.id).first()
         return self.results
 
     def run(self):
         """Scan network range ang attempt connections."""
+        source = self.scan_task.source
+        credential = self.scan_task.source.credentials.all().first()
+
+        self.connect_scan_task = self.scan_task.prerequisites.first()
+        if self.connect_scan_task.status != ScanTask.COMPLETED:
+            logger.error(
+                'Prerequisites scan task with id %d failed.',
+                self.connect_scan_task.id)
+            return ScanTask.FAILED
+
         try:
             self.inspect()
-            source = self.scan_task.source
-            credential = self.scan_task.source.credentials.all().first()
         except vim.fault.InvalidLogin as vm_error:
             logger.error('Unable to connect to VCenter source, %s, '
                          'with supplied credential, %s.',
@@ -149,19 +155,22 @@ class InspectTaskRunner(ScanTaskRunner):
         inspect_result = self.inspect_results.results.filter(
             source__id=self.scan_task.source.id).first()
         if inspect_result is None:
-            inspect_result = InspectionResult(source=self.scan_task.source)
+            inspect_result = InspectionResult(source=self.scan_task.source,
+                                              scan_task=self.scan_task)
             inspect_result.save()
         inspect_result.systems.add(sys_result)
         inspect_result.save()
         self.inspect_results.results.add(inspect_result)
         self.inspect_results.save()
 
-    # pylint: disable=too-many-locals
-    def inspect(self):
-        """Execute the inspection scan with the initialized source."""
-        logger.info('Inspect scan started for %s.', self.scan_task)
-        vcenter = vcenter_connect(self.scan_task)
+        self.scan_task.systems_scanned += 1
+        self.scan_task.save()
 
+    def recurse_datacenter(self, vcenter):
+        """Walk datacenter to collect vm facts.
+
+        :param vcenter: The vcenter object.
+        """
         content = vcenter.RetrieveContent()
         children = content.rootFolder.childEntity
         for child in children:  # Iterate though DataCenters
@@ -178,4 +187,17 @@ class InspectTaskRunner(ScanTaskRunner):
                         self.get_vm_info(data_center_name, cluster_name,
                                          hostname, virtual_machine)
 
+    # pylint: disable=too-many-locals
+    def inspect(self):
+        """Execute the inspection scan with the initialized source."""
+        logger.info('Inspect scan started for %s.', self.scan_task)
+
+        # Save counts
+        self.scan_task.systems_count = self.connect_scan_task.systems_count
+        self.scan_task.systems_scanned = 0
+        self.scan_task.systems_failed = 0
+        self.scan_task.save()
+
+        vcenter = vcenter_connect(self.scan_task)
+        self.recurse_datacenter(vcenter)
         logger.info('Inspect scan completed for %s.', self.scan_task)

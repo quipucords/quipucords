@@ -107,6 +107,7 @@ class ConnectTaskRunner(ScanTaskRunner):
                 self.scan_task.systems_count = len(
                     connected) + len(remaining)
                 self.scan_task.systems_scanned = 0
+                self.scan_task.systems_failed = 0
             self.scan_task.systems_scanned += len(connected)
             self.scan_task.save()
 
