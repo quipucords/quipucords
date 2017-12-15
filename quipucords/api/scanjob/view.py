@@ -225,9 +225,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         """Pause the running scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanTask.RUNNING:
+            scan.pause()
             pause_scan.send(sender=self.__class__, instance=scan)
-            scan.status = ScanTask.PAUSED
-            scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_source(scan, json_scan)
@@ -249,9 +248,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             err_msg = _(messages.NO_CANCEL)
             return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
+        scan.cancel()
         cancel_scan.send(sender=self.__class__, instance=scan)
-        scan.status = ScanTask.CANCELED
-        scan.save()
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
         expand_source(scan, json_scan)
@@ -263,11 +261,10 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanTask.PAUSED:
             fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
+            scan.restart()
             restart_scan.send(sender=self.__class__,
                               instance=scan,
                               fact_endpoint=fact_endpoint)
-            scan.status = ScanTask.RUNNING
-            scan.save()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_source(scan, json_scan)

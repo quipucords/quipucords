@@ -15,7 +15,7 @@ These models are used in the REST definitions
 
 from django.utils.translation import ugettext as _
 from django.db import models
-from api.scanjob.model import ScanTask, ScanJob
+from api.scantasks.model import ScanTask
 from api.source.model import Source
 from api.credential.model import Credential
 import api.messages as messages
@@ -74,7 +74,7 @@ class ConnectionResult(models.Model):
 class ConnectionResults(models.Model):
     """The results of a connection scan."""
 
-    scan_job = models.ForeignKey(ScanJob, on_delete=models.CASCADE)
+    scan_job = models.ForeignKey('ScanJob', on_delete=models.CASCADE)
     results = models.ManyToManyField(ConnectionResult)
 
     def __str__(self):
