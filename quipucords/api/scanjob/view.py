@@ -13,6 +13,7 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
@@ -135,6 +136,16 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
         json_job_inspect_result[RESULTS_KEY] = json_job_inspect_result_list
 
 
+class ScanJobFilter(FilterSet):
+    """Filter for sources by name."""
+
+    class Meta:
+        """Metadata for filterset."""
+
+        model = ScanJob
+        fields = ['status', 'scan_type']
+
+
 # pylint: disable=too-many-ancestors
 class ScanJobViewSet(mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
@@ -144,6 +155,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = ScanJobFilter
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
