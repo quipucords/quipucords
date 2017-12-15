@@ -50,7 +50,7 @@ SOURCES_NAME_HELP = 'list of source names'
 SOURCE_TYPE_HELP = 'type of source.  Valid values: vcenter, network'
 SOURCE_HOSTS_HELP = 'IP ranges to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
-SOURCE_SSH_PORT_HELP = 'port for connection; network default=22, '\
+SOURCE_PORT_HELP = 'port for connection; network default=22, '\
     'vcenter default=443'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
     '"--cred" input values. References for the'\
