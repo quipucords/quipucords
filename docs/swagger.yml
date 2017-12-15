@@ -708,94 +708,122 @@ definitions:
             items:
               $ref: "#/definitions/CredentialMin"
             description: "The credentials to try with these hosts."
+  ScanTask:
+    type: "object"
+    properties:
+      source:
+        type: "integer"
+        format: "int64"
+        description: "The identifier of the source."
+      scan_type:
+        type: "string"
+        description: "The type of scan task."
+        enum:
+          - inspect
+          - connect
+      status:
+        type: "string"
+        description: "The status of the scan task."
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the taks."
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that have been scanned in the task."
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that failed during the scan task."
+  ScanOptions:
+    type: "object"
+    properties:
+      max_concurrency:
+        type: "integer"
+        format: "int64"
+        description: "The maximum concurrent host scans. default is 50."
   ScanJob:
     type: "object"
     properties:
         scan_type:
           type: "string"
-          description: "The type of scan. 'host' is the default."
+          description: "The type of scan. 'connect' is the default."
           enum:
             - inspect
             - connect
-        status:
-          type: "string"
-          description: "The status of the scan."
-          enum:
-            - pending
-            - running
-            - paused
-            - canceled
-            - failed
-        max_concurrency:
-          type: "integer"
-          format: "int64"
-          description: "The maximum concurrent host scans. default is 50."
-        systems_count:
-          type: "integer"
-          format: "int64"
-          description: "The total number of hosts to be scanned."
-        systems_scanned:
-          type: "integer"
-          format: "int64"
-          description: "The total number of hosts that have been scanned."
-        systems_failed:
-          type: "integer"
-          format: "int64"
-          description: "The total number of hosts that failed to scan."
-        fact_collection_id:
-          type: "integer"
-          format: "int64"
-          description: "The identifier of the sent fact collection."
+        options:
+          $ref: "#/definitions/ScanOptions"
+          description: "The options used during a scan."
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
-          - source
+          - sources
         properties:
-          source:
-            type: "integer"
-            format: "int64"
-            description: "The identifier of a source"
+          sources:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+            description: "The list of source identifiers"
   ScanJobOut:
     allOf:
       - $ref: "#/definitions/ScanJob"
       - type: "object"
         required:
           - id
-          - source
+          - sources
         properties:
           id:
             type: "integer"
             format: "int64"
-          source:
-            $ref: "#/definitions/SourceMin"
-            description: "The identifier of a source"
-  ScanResultColumn:
-    type: "object"
-    required:
-      - key
-      - value
-    properties:
-        key:
-          type: "string"
-          description: "The name result data."
-        value:
-          type: "string"
-          description: "The value of the result data."
-  ScanResultRow:
-    type: "object"
-    required:
-      - columns
-    properties:
-      row:
-        type: "string"
-        description: "The name for the row of results."
-      columns:
-        type: "array"
-        items:
-          $ref: "#/definitions/ScanResultColumn"
-        description: "An array of key value pairs of result data."
+          status:
+            type: "string"
+            description: "The status of the scan."
+            enum:
+              - created
+              - pending
+              - running
+              - paused
+              - canceled
+              - failed
+              - completed
+          sources:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceMin"
+            description: "The list of sources"
+          tasks:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanTask"
+            description: "The scan tasks being processed."
+          systems_count:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems to be scanned."
+          systems_scanned:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems that have been scanned."
+          systems_failed:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems that failed to scan."
+          fact_collection_id:
+            type: "integer"
+            format: "int64"
+            description: "The identifier of the sent fact collection."
   SysConnResultOut:
     type: "object"
     required:
