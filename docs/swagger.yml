@@ -365,8 +365,13 @@ paths:
           description: "Filter list based on job status"
           type: "string"
           enum:
-            - connect
-            - inspect
+            - created
+            - pending
+            - running
+            - paused
+            - canceled
+            - completed
+            - failed
         - name: "scan_type"
           in: "query"
           description: "Filter list based on scan type"
