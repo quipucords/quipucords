@@ -129,11 +129,13 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 1,
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created'},
                     {'id': 2,
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
@@ -142,7 +144,7 @@ class ScanJobTest(TestCase):
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_filtered_list(self, start_scan):
-        """List all ScanJob objects."""
+        """List filtered ScanJob objects."""
         data_default = {'sources': [self.source.id]}
         data_discovery = {'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT}
@@ -156,6 +158,7 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 2,
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
