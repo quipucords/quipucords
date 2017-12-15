@@ -28,65 +28,16 @@ class ScanJobRunner(Process):
         """Create discovery scanner."""
         Process.__init__(self)
         self.scan_job = scan_job
+        self.identifier = scan_job.id
         self.fact_endpoint = fact_endpoint
         self.conn_results = None
         self.inspect_results = None
-
-    def initialize_job(self):
-        """Initialize the job by creating ScanTasks."""
-        if self.scan_job.tasks:
-            # It appears the initialization didn't complete
-            # so remove partial results
-            self.scan_job.tasks.all().delete()
-            ConnectionResults.objects.filter(
-                scan_job=self.scan_job.id).delete()
-            InspectionResults.objects.filter(
-                scan_job=self.scan_job.id).delete()
-
-        job_scan_type = self.scan_job.scan_type
-        count = 0
-        conn_tasks = []
-        for source in self.scan_job.sources.all():
-            conn_task = ScanTask(source=source,
-                                 scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                 status=ScanTask.PENDING,
-                                 sequence_number=count)
-            conn_task.save()
-            self.scan_job.tasks.add(conn_task)
-            conn_tasks.append(conn_task)
-
-            count += 1
-
-        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            for conn_task in conn_tasks:
-                inspect_task = ScanTask(source=conn_task.source,
-                                        scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                        status=ScanTask.PENDING,
-                                        sequence_number=count)
-                inspect_task.save()
-                inspect_task.prerequisites.add(conn_task)
-                inspect_task.save()
-
-                self.scan_job.tasks.add(inspect_task)
-
-                count += 1
-
-        # Setup results objects
-        temp_conn_results = ConnectionResults(scan_job=self.scan_job)
-        temp_conn_results.save()
-
-        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            temp_inspect_results = InspectionResults(scan_job=self.scan_job)
-            temp_inspect_results.save()
-
-        self.scan_job.status = ScanTask.PENDING
-        self.scan_job.save()
 
     def run(self):
         """Trigger thread execution."""
         if self.scan_job.status == ScanTask.CREATED:
             # Job is not ready to run
-            self.initialize_job()
+            self.scan_job.queue()
 
         self.conn_results = ConnectionResults.objects.filter(
             scan_job=self.scan_job.id).first()
@@ -94,8 +45,7 @@ class ScanJobRunner(Process):
             scan_job=self.scan_job.id).first()
 
         # Job is not running so start
-        self.scan_job.status = ScanTask.RUNNING
-        self.scan_job.save()
+        self.scan_job.start()
 
         # Load tasks that have no been run or are in progress
         task_runners = []
@@ -110,8 +60,7 @@ class ScanJobRunner(Process):
                     ' have recognized type/source combination: %s',
                     scan_task)
                 scan_task.status = ScanTask.FAILED
-                self.scan_job.status = ScanTask.FAILED
-                self.scan_job.save()
+                self.scan_job.fail()
                 return
 
             task_runners.append(runner)
@@ -133,23 +82,20 @@ class ScanJobRunner(Process):
 
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully so save job status as fail
-                self.scan_job.status = ScanTask.FAILED
-                self.scan_job.save()
+                self.scan_job.fail()
 
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             fact_collection_id = self.send_facts()
             if not fact_collection_id:
                 logger.error('Facts could not be sent to %s',
                              self.fact_endpoint)
-                self.scan_job.status = ScanTask.FAILED
+                self.scan_job.fail()
             else:
                 self.scan_job.fact_collection_id = fact_collection_id
 
         # All tasks completed successfully and sent to endpoint
         if self.scan_job.status != ScanTask.FAILED:
-            self.scan_job.status = ScanTask.COMPLETED
-
-        self.scan_job.save()
+            self.scan_job.complete()
 
         logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
