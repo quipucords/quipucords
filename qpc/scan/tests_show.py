@@ -51,7 +51,7 @@ class ScanShowCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             nsc = ScanShowCommand(SUBPARSER)
-            args = Namespace(id='1')
+            args = Namespace(id='1', results=False)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     nsc.main(args)
@@ -64,7 +64,7 @@ class ScanShowCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             nsc = ScanShowCommand(SUBPARSER)
-            args = Namespace(id='1')
+            args = Namespace(id='1', results=False)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     nsc.main(args)
@@ -78,7 +78,7 @@ class ScanShowCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             nsc = ScanShowCommand(SUBPARSER)
-            args = Namespace(id='1')
+            args = Namespace(id='1', results=False)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     nsc.main(args)
@@ -97,11 +97,53 @@ class ScanShowCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=scan_entry)
             nsc = ScanShowCommand(SUBPARSER)
-            args = Namespace(id='1')
+            args = Namespace(id='1', results=False)
             with redirect_stdout(scan_out):
                 nsc.main(args)
                 expected = '{"id":1,"scan_type":"host",' \
                            '"source":{"id":1,"name":"scan1"},'\
                            '"status":"completed"}'
+                self.assertEqual(scan_out.getvalue().replace('\n', '')
+                                 .replace(' ', '').strip(), expected)
+
+    def test_show_scan_results(self):
+        """Testing the show scan results command with stubbed data."""
+        scan_out = StringIO()
+        url = BASE_URL + SCAN_URI + '1/results/'
+
+        scan_entry = {
+            'connection_results': {
+                'results': [
+                    {
+                        'source': {
+                            'id': 1,
+                            'name': 'vc1',
+                            'source_type': 'vcenter'
+                        },
+                        'systems': [
+                            {
+                                'credential': {
+                                    'id': 1,
+                                    'name': 'vc1'
+                                },
+                                'name': 'sonar-jbossfuse-rhel-7-vc',
+                                'status': 'success'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=scan_entry)
+            nsc = ScanShowCommand(SUBPARSER)
+            args = Namespace(id='1', results=True)
+            with redirect_stdout(scan_out):
+                nsc.main(args)
+                expected = '{"connection_results":{"results":' \
+                    '[{"source":{"id":1,"name":"vc1","source_type":' \
+                    '"vcenter"},"systems":[{"credential":{"id":1,' \
+                    '"name":"vc1"},"name":"sonar-jbossfuse-rhel-7-vc"' \
+                    ',"status":"success"}]}]}}'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)

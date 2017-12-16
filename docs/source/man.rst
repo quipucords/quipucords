@@ -273,12 +273,15 @@ The ``qpc scan list`` command returns the details for all executed scans. The ou
 
 The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns details for a single specified scan.
 
-**qpc scan show --id=** *scan_identifier*
+**qpc scan show --id=** *scan_identifier* **[--results]**
 
 ``--id=scan_identifier``
 
   Required. Contains the scan identifier to display.
 
+``--results``
+
+    Optional. Displays the results of the scan instead of the status.
 
 Controlling Scans
 ~~~~~~~~~~~~~~~~~
