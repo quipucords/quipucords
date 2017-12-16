@@ -41,11 +41,17 @@ class ScanShowCommand(CliCommand):
                             scan.SCAN_URI, [codes.ok])
         self.parser.add_argument('--id', dest='id', metavar='ID',
                                  help=_(messages.SCAN_ID_HELP), required=True)
+        self.parser.add_argument('--results', dest='results',
+                                 action='store_true',
+                                 help=_(messages.SCAN_RESULTS_HELP),
+                                 required=False)
 
     def _validate_args(self):
         CliCommand._validate_args(self)
         if self.args.id:
             self.req_path = self.req_path + str(self.args.id) + '/'
+        if self.args.results:
+            self.req_path += 'results/'
 
     def _handle_response_success(self):
         json_data = self.response.json()

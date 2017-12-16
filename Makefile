@@ -7,7 +7,7 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*,*/docs/*
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -48,10 +48,10 @@ test-coverage:
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 
