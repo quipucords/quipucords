@@ -31,25 +31,56 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
                                         cancel_scan, restart_scan)
 
 
-SOURCE_KEY = 'sources'
+SOURCES_KEY = 'sources'
 RESULTS_KEY = 'results'
+TASKS_KEY = 'tasks'
+SYSTEMS_COUNT_KEY = 'systems_count'
+SYSTEMS_SCANNED_KEY = 'systems_scanned'
+SYSTEMS_FAILED_KEY = 'systems_failed'
 
 
-def expand_source(scan, json_scan):
-    """Expand the source.
+# pylint: disable=too-many-branches
+def expand_scanjob(scan, json_scan):
+    """Expand the source and calculate values.
 
-    Take scan object with source id and pull object from db.
-    create slim dictionary version of source with name an value
-    to return to user.
+    Take scan object with source ids and pull objects from db.
+    create slim dictionary version of sources with name an value
+    to return to user. Calculate systems_count, systems_scanned,
+    systems_failed values from tasks.
     """
-    if json_scan[SOURCE_KEY]:
+    if json_scan.get(SOURCES_KEY):
         sources = scan.sources
         slim_sources = []
         for source in sources.all():
             slim_source = {'id': source.id, 'name': source.name,
                            'source_type': source.source_type}
             slim_sources.append(slim_source)
-        json_scan[SOURCE_KEY] = slim_sources
+        json_scan[SOURCES_KEY] = slim_sources
+    if json_scan.get(TASKS_KEY):
+        systems_count = None
+        systems_scanned = None
+        systems_failed = None
+        tasks = scan.tasks.filter(
+            scan_type=scan.scan_type).order_by('sequence_number')
+        for task in tasks:
+            if task.systems_count is not None:
+                if systems_count is None:
+                    systems_count = 0
+                systems_count += task.systems_count
+            if task.systems_scanned is not None:
+                if systems_scanned is None:
+                    systems_scanned = 0
+                systems_scanned += task.systems_scanned
+            if task.systems_failed is not None:
+                if systems_failed is None:
+                    systems_failed = 0
+                systems_failed += task.systems_failed
+        if systems_count is not None:
+            json_scan[SYSTEMS_COUNT_KEY] = systems_count
+        if systems_scanned is not None:
+            json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
+        if systems_failed is not None:
+            json_scan[SYSTEMS_FAILED_KEY] = systems_failed
 
 
 def expand_sys_conn_result(conn_result):
@@ -180,7 +211,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         for scan in queryset:
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_source(scan, json_scan)
+            expand_scanjob(scan, json_scan)
             result.append(json_scan)
         return Response(result)
 
@@ -190,7 +221,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_source(scan, json_scan)
+        expand_scanjob(scan, json_scan)
         return Response(json_scan)
 
     # pylint: disable=unused-argument,invalid-name,no-self-use
@@ -229,7 +260,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             pause_scan.send(sender=self.__class__, instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_source(scan, json_scan)
+            expand_scanjob(scan, json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.PAUSED:
             err_msg = _(messages.ALREADY_PAUSED)
@@ -252,7 +283,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         cancel_scan.send(sender=self.__class__, instance=scan)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_source(scan, json_scan)
+        expand_scanjob(scan, json_scan)
         return Response(json_scan, status=200)
 
     @detail_route(methods=['put'])
@@ -267,7 +298,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                               fact_endpoint=fact_endpoint)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_source(scan, json_scan)
+            expand_scanjob(scan, json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.RUNNING:
             err_msg = _(messages.ALREADY_RUNNING)
