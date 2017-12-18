@@ -29,7 +29,6 @@ from api.models import (Credential,
 from api.scanjob.view import (expand_scanjob,
                               expand_sys_conn_result,
                               expand_conn_results,
-                              expand_sys_inspect_results,
                               expand_inspect_results)
 
 
@@ -38,7 +37,7 @@ def dummy_start():
     pass
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,invalid-name
 class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
@@ -85,7 +84,7 @@ class ScanJobTest(TestCase):
         return response_json
 
     def test_queue_task(self):
-        """"Test create queue state change."""
+        """Test create queue state change."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -116,7 +115,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(inspect_task.status, ScanTask.PENDING)
 
     def test_queue_invalid_state_changes(self):
-        """"Test create queue failed."""
+        """Test create queue failed."""
         scan_job = ScanJob(status=ScanTask.FAILED,
                            scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
@@ -154,7 +153,7 @@ class ScanJobTest(TestCase):
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_start_task(self, start_scan):
-        """"Test start pending task."""
+        """Test start pending task."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -175,7 +174,7 @@ class ScanJobTest(TestCase):
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_pause_restart_task(self, start_scan):
-        """"Test pause and restart task."""
+        """Test pause and restart task."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -380,7 +379,8 @@ class ScanJobTest(TestCase):
 
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
-                                            status=SystemConnectionResult.SUCCESS)
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
         sys_result.save()
         conn_result.systems.add(sys_result)
         conn_result.save()
@@ -398,7 +398,8 @@ class ScanJobTest(TestCase):
         inspect_results.save()
 
         sys_result = SystemInspectionResult(name='Foo',
-                                            status=SystemConnectionResult.SUCCESS)
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
         sys_result.save()
 
         fact = RawFact(name='foo', value='value')
@@ -409,7 +410,6 @@ class ScanJobTest(TestCase):
         inspect_result.systems.add(sys_result)
         inspect_result.save()
 
-
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'results/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -418,7 +418,10 @@ class ScanJobTest(TestCase):
         self.assertIn('inspection_results', json_response)
 
         self.assertEqual(
-            json_response, {'connection_results': {'scan_job': 1, 'results': []}, 'inspection_results': {'scan_job': 1, 'results': []}})
+            json_response, {'connection_results':
+                            {'scan_job': 1, 'results': []},
+                            'inspection_results': {'scan_job': 1,
+                                                   'results': []}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
@@ -505,7 +508,7 @@ class ScanJobTest(TestCase):
                          status.HTTP_400_BAD_REQUEST)
 
     def test_expand_scanjob(self):
-        """"Test view expand_scanjob."""
+        """Test view expand_scanjob."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -533,7 +536,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(json_scan.get('systems_scanned'), 1)
 
     def test_expand_sys_conn_result(self):
-        """"Test view expand_sys_conn_result."""
+        """Test view expand_sys_conn_result."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -554,7 +557,8 @@ class ScanJobTest(TestCase):
 
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
-                                            status=SystemConnectionResult.SUCCESS)
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
         sys_result.save()
         conn_result.systems.add(sys_result)
         conn_result.save()
@@ -563,7 +567,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(result[0]['credential']['name'], 'cred1')
 
     def test_expand_conn_results(self):
-        """"Test view expand_conn_results."""
+        """Test view expand_conn_results."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -590,7 +594,8 @@ class ScanJobTest(TestCase):
 
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
-                                            status=SystemConnectionResult.SUCCESS)
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
         sys_result.save()
         conn_result.systems.add(sys_result)
         conn_result.save()
@@ -601,7 +606,7 @@ class ScanJobTest(TestCase):
             conn_results_json['results'][0]['systems'][0]['name'], 'Foo')
 
     def test_expand_inspect_results(self):
-        """"Test view expand_inspect_results."""
+        """Test view expand_inspect_results."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
         scan_job.sources.add(self.source)
@@ -627,7 +632,8 @@ class ScanJobTest(TestCase):
         inspect_results.save()
 
         sys_result = SystemInspectionResult(name='Foo',
-                                            status=SystemConnectionResult.SUCCESS)
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
         sys_result.save()
 
         fact = RawFact(name='foo', value='value')
@@ -641,4 +647,6 @@ class ScanJobTest(TestCase):
         inspect_results_json = {'results': [{}]}
         expand_inspect_results(inspect_results, inspect_results_json)
         self.assertEqual(
-            inspect_results_json['results'][0]['systems'][0]['facts'][0]['name'], 'foo')
+            inspect_results_json['results'][0]['systems'][0]
+            ['facts'][0]['name'],
+            'foo')
