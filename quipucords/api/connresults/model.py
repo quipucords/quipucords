@@ -58,7 +58,7 @@ class ConnectionResult(models.Model):
         """Convert to string."""
         return '{ ' + 'id:{}, '\
             'source:{}, '\
-            'scan_job:{}, '\
+            'scan_task:{}, '\
             'sytems:{}'\
             .format(self.id,
                     self.source,
