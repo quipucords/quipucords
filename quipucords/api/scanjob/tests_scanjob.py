@@ -15,7 +15,21 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import Credential, Source, ScanTask
+from api.models import (Credential,
+                        Source,
+                        ScanTask,
+                        ScanJob,
+                        ConnectionResults,
+                        ConnectionResult,
+                        SystemConnectionResult,
+                        InspectionResults,
+                        InspectionResult,
+                        SystemInspectionResult,
+                        RawFact)
+from api.scanjob.view import (expand_scanjob,
+                              expand_sys_conn_result,
+                              expand_conn_results,
+                              expand_inspect_results)
 
 
 def dummy_start():
@@ -23,7 +37,7 @@ def dummy_start():
     pass
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,invalid-name
 class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
@@ -68,6 +82,134 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response_json
+
+    def test_queue_task(self):
+        """Test create queue state change."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+
+        # Job should be in pending state
+        self.assertEqual(scan_job.status, ScanTask.PENDING)
+
+        # Queue should have created scan tasks
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 2)
+
+        # Validate connect task created and correct
+        connect_task = tasks[0]
+        self.assertEqual(connect_task.scan_type, ScanTask.SCAN_TYPE_CONNECT)
+        self.assertEqual(connect_task.status, ScanTask.PENDING)
+
+        # Validate inspect task created and correct
+        inspect_task = tasks[1]
+        self.assertEqual(inspect_task.scan_type, ScanTask.SCAN_TYPE_INSPECT)
+        self.assertEqual(inspect_task.status, ScanTask.PENDING)
+
+    def test_queue_invalid_state_changes(self):
+        """Test create queue failed."""
+        scan_job = ScanJob(status=ScanTask.FAILED,
+                           scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Queue job to run
+        scan_job.queue()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.complete()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.pause()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.start()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.cancel()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.restart()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.fail()
+        self.assertEqual(scan_job.status, ScanTask.FAILED)
+
+        scan_job.status = ScanTask.CREATED
+        scan_job.fail()
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+
+        scan_job.status = ScanTask.RUNNING
+        scan_job.complete()
+        self.assertEqual(scan_job.status, ScanTask.COMPLETED)
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_start_task(self, start_scan):
+        """Test start pending task."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        tasks = scan_job.tasks.all()
+
+        # Queue job to run
+        scan_job.queue()
+        self.assertEqual(scan_job.status, ScanTask.PENDING)
+
+        # Queue should have created scan tasks
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 1)
+
+        # Start job
+        scan_job.start()
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_pause_restart_task(self, start_scan):
+        """Test pause and restart task."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        tasks = scan_job.tasks.all()
+
+        # Queue job to run
+        scan_job.queue()
+        self.assertEqual(scan_job.status, ScanTask.PENDING)
+
+        # Queue should have created scan tasks
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 1)
+        connect_task = scan_job.tasks.first()
+        self.assertEqual(connect_task.status, ScanTask.PENDING)
+
+        # Start job
+        scan_job.start()
+        self.assertEqual(scan_job.status, ScanTask.RUNNING)
+
+        scan_job.pause()
+        connect_task = scan_job.tasks.first()
+        self.assertEqual(scan_job.status, ScanTask.PAUSED)
+        self.assertEqual(connect_task.status, ScanTask.PAUSED)
+
+        scan_job.restart()
+        connect_task = scan_job.tasks.first()
+        self.assertEqual(scan_job.status, ScanTask.RUNNING)
+        self.assertEqual(connect_task.status, ScanTask.PENDING)
+
+        scan_job.cancel()
+        connect_task = scan_job.tasks.first()
+        self.assertEqual(scan_job.status, ScanTask.CANCELED)
+        self.assertEqual(connect_task.status, ScanTask.CANCELED)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_successful_create(self, start_scan):
@@ -194,7 +336,7 @@ class ScanJobTest(TestCase):
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
-        """Get details on a specific ScanJob by primary key."""
+        """Get ScanJob details by primary key."""
         data_discovery = {'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         initial = self.create_expect_201(data_discovery)
@@ -207,6 +349,79 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(
             sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_details(self, start_scan):
+        """Get ScanJob result details by primary key."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+
+        conn_task = scan_job.tasks.first()
+
+        conn_results = ConnectionResults(scan_job=scan_job)
+        conn_results.save()
+
+        conn_result = ConnectionResult(
+            source=conn_task.source, scan_task=conn_task)
+        conn_result.save()
+
+        conn_results.results.add(conn_result)
+        conn_results.save()
+
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        inspect_task = scan_job.tasks.all()[1]
+
+        inspect_results = InspectionResults(scan_job=scan_job)
+        inspect_results.save()
+
+        inspect_result = InspectionResult(
+            source=inspect_task.source, scan_task=inspect_task)
+        inspect_result.save()
+
+        inspect_results.results.add(inspect_result)
+        inspect_results.save()
+
+        sys_result = SystemInspectionResult(name='Foo',
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+
+        fact = RawFact(name='foo', value='value')
+        fact.save()
+        sys_result.facts.add(fact)
+        sys_result.save()
+
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'results/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        self.assertIn('connection_results', json_response)
+        self.assertIn('inspection_results', json_response)
+
+        self.assertEqual(
+            json_response, {'connection_results':
+                            {'scan_job': 1, 'results': []},
+                            'inspection_results': {'scan_job': 1,
+                                                   'results': []}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
@@ -291,3 +506,147 @@ class ScanJobTest(TestCase):
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
+
+    def test_expand_scanjob(self):
+        """Test view expand_scanjob."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+        task = scan_job.tasks.all()[1]
+        task.systems_count = 2
+        task.systems_failed = 1
+        task.systems_scanned = 1
+        task.save()
+
+        scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
+
+        json_scan = {'tasks': [{}]}
+        expand_scanjob(scan_job, json_scan)
+
+        self.assertEqual(json_scan.get('systems_count'), 2)
+        self.assertEqual(json_scan.get('systems_failed'), 1)
+        self.assertEqual(json_scan.get('systems_scanned'), 1)
+
+    def test_expand_sys_conn_result(self):
+        """Test view expand_sys_conn_result."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+
+        conn_task = scan_job.tasks.first()
+
+        conn_result = ConnectionResult(
+            source=conn_task.source, scan_task=conn_task)
+        conn_result.save()
+
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        result = expand_sys_conn_result(conn_result)
+        self.assertEqual(result[0]['credential']['name'], 'cred1')
+
+    def test_expand_conn_results(self):
+        """Test view expand_conn_results."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+
+        conn_task = scan_job.tasks.first()
+
+        conn_results = ConnectionResults(scan_job=scan_job)
+        conn_results.save()
+
+        conn_result = ConnectionResult(
+            source=conn_task.source, scan_task=conn_task)
+        conn_result.save()
+
+        conn_results.results.add(conn_result)
+        conn_results.save()
+
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        conn_results_json = {'results': [{}]}
+        expand_conn_results(conn_results, conn_results_json)
+        self.assertEqual(
+            conn_results_json['results'][0]['systems'][0]['name'], 'Foo')
+
+    def test_expand_inspect_results(self):
+        """Test view expand_inspect_results."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_job.sources.add(self.source)
+
+        # Job in created state
+        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        tasks = scan_job.tasks.all()
+        self.assertEqual(len(tasks), 0)
+
+        # Queue job to run
+        scan_job.queue()
+
+        inspect_task = scan_job.tasks.all()[1]
+
+        inspect_results = InspectionResults(scan_job=scan_job)
+        inspect_results.save()
+
+        inspect_result = InspectionResult(
+            source=inspect_task.source, scan_task=inspect_task)
+        inspect_result.save()
+
+        inspect_results.results.add(inspect_result)
+        inspect_results.save()
+
+        sys_result = SystemInspectionResult(name='Foo',
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+
+        fact = RawFact(name='foo', value='value')
+        fact.save()
+        sys_result.facts.add(fact)
+        sys_result.save()
+
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
+
+        inspect_results_json = {'results': [{}]}
+        expand_inspect_results(inspect_results, inspect_results_json)
+        self.assertEqual(
+            inspect_results_json['results'][0]['systems'][0]
+            ['facts'][0]['name'],
+            'foo')
