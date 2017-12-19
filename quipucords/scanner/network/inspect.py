@@ -180,7 +180,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
         error_msg = ''
         for group_name in group_names:
-            callback = InspectResultCallback(scan_task=self.scan_task,
+            callback =\
+                InspectResultCallback(scan_task=self.scan_task,
                                       inspect_results=self.inspect_results)
             playbook = {'name': 'scan systems for product fingerprint facts',
                         'hosts': group_name,

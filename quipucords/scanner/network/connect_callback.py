@@ -12,8 +12,6 @@
 
 import logging
 from ansible.plugins.callback import CallbackBase
-from api.models import (ScanTask, InspectionResult,
-                        SystemInspectionResult, RawFact)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
