@@ -19,7 +19,7 @@ from api.models import (Credential, ScanTask,
                         ConnectionResult,
                         SystemConnectionResult)
 from scanner.task import ScanTaskRunner
-from scanner.callback import ResultCallback
+from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (run_playbook,
                                    _construct_error,
                                    _construct_vars,
@@ -167,7 +167,7 @@ def connect(hosts, credential, connection_port, forks=50):
     failed = []
     inventory = construct_connect_inventory(hosts, credential, connection_port)
     inventory_file = write_inventory(inventory)
-    callback = ResultCallback()
+    callback = ConnectResultCallback()
 
     playbook = {'name': 'discovery play',
                 'hosts': 'all',
@@ -221,7 +221,7 @@ def _process_connect_callback(callback, credential):
     """
     success = []
     failed = []
-    if isinstance(callback, ResultCallback):
+    if isinstance(callback, ConnectResultCallback):
         for connection_result in callback.results:
             if 'host' in connection_result:
                 host = connection_result['host']

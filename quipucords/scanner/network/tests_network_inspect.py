@@ -28,7 +28,7 @@ from api.models import (Credential,
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.inspect import (construct_scan_inventory)
 from scanner.network import InspectTaskRunner
-from scanner.callback import ResultCallback
+from scanner.network.inspect_callback import InspectResultCallback
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -247,7 +247,7 @@ class HostScannerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
-        callback = ResultCallback(
+        callback = InspectResultCallback(
             scan_task=self.inspect_scan_task,
             inspect_results=self.inspect_results)
         host = Mock()

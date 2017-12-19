@@ -26,7 +26,7 @@ def _construct_result(result):
     return {'host': host.name, 'result': result._result}
 
 
-class ResultCallback(CallbackBase):
+class ConnectResultCallback(CallbackBase):
     """A sample callback plugin used for performing an action.
 
     If you want to collect all results into a single object for processing at
