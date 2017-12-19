@@ -221,18 +221,17 @@ def _process_connect_callback(callback, credential):
     """
     success = []
     failed = []
-    if isinstance(callback, ConnectResultCallback):
-        for connection_result in callback.results:
-            if 'host' in connection_result:
-                host = connection_result['host']
-                if 'result' in connection_result:
-                    task_result = connection_result['result']
-                    if 'rc' in task_result and task_result['rc'] is 0:
-                        success.append((host, credential))
-                    else:
-                        failed.append(host)
+    for connection_result in callback.results:
+        if 'host' in connection_result:
+            host = connection_result['host']
+            if 'result' in connection_result:
+                task_result = connection_result['result']
+                if 'rc' in task_result and task_result['rc'] is 0:
+                    success.append((host, credential))
                 else:
                     failed.append(host)
+            else:
+                failed.append(host)
 
     return success, failed
 

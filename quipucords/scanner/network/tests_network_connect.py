@@ -103,7 +103,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object."""
-        callback = ConnectResultCallback(scan_task=self.scan_task)
+        callback = ConnectResultCallback()
         host = Mock(name='1.2.3.4')
         result = Mock(_host=host, _results={'rc': 0})
         callback.v2_runner_on_ok(result)
