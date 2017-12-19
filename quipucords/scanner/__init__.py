@@ -14,4 +14,3 @@
 # pylint: disable=unused-import
 from scanner.job import ScanJobRunner
 from scanner.task import ScanTaskRunner
-from scanner.callback import ResultCallback

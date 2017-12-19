@@ -16,7 +16,7 @@ from api.models import (ScanTask, ConnectionResult,
                         InspectionResult,
                         SystemConnectionResult)
 from scanner.task import ScanTaskRunner
-from scanner.callback import ResultCallback
+from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
                                    _credential_vars,
                                    _construct_vars,
@@ -180,7 +180,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
         error_msg = ''
         for group_name in group_names:
-            callback = ResultCallback(scan_task=self.scan_task,
+            callback =\
+                InspectResultCallback(scan_task=self.scan_task,
                                       inspect_results=self.inspect_results)
             playbook = {'name': 'scan systems for product fingerprint facts',
                         'hosts': group_name,

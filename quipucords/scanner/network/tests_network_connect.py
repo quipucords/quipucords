@@ -30,7 +30,7 @@ from scanner.network.utils import (ANSIBLE_FAILED_HOST_ERR_MSG,
                                    ANSIBLE_UNREACHABLE_HOST_ERR_MSG,
                                    ANSIBLE_PLAYBOOK_ERR_MSG)
 from scanner.network import ConnectTaskRunner
-from scanner.callback import ResultCallback
+from scanner.network.connect_callback import ConnectResultCallback
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -103,7 +103,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object."""
-        callback = ResultCallback(scan_task=self.scan_task)
+        callback = ConnectResultCallback()
         host = Mock(name='1.2.3.4')
         result = Mock(_host=host, _results={'rc': 0})
         callback.v2_runner_on_ok(result)
@@ -117,7 +117,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         """Test callback processing logic."""
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        callback = ResultCallback()
+        callback = ConnectResultCallback()
         success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
         failed_result = {'host': '1.2.3.5', 'result': {'rc': 1}}
         failed_result_format = {'host': '1.2.3.6'}

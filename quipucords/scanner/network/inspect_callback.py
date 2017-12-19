@@ -26,7 +26,7 @@ def _construct_result(result):
     return {'host': host.name, 'result': result._result}
 
 
-class ResultCallback(CallbackBase):
+class InspectResultCallback(CallbackBase):
     """A sample callback plugin used for performing an action.
 
     If you want to collect all results into a single object for processing at
@@ -34,13 +34,11 @@ class ResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, scan_task=None, inspect_results=None, display=None):
+    def __init__(self, scan_task, inspect_results, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.scan_task = scan_task
-        self.source = None
-        if scan_task is not None:
-            self.source = scan_task.source
+        self.source = scan_task.source
         self.inspect_results = inspect_results
         self.results = []
         self._ansible_facts = {}
@@ -101,18 +99,13 @@ class ResultCallback(CallbackBase):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
-        if self.scan_task is not None:
-            self._update_reachable_hosts(result_obj)
-            self.scan_task.systems_failed += 1
-            self.scan_task.status = ScanTask.FAILED
-            self.scan_task.save()
+        self._update_reachable_hosts(result_obj)
+        self.scan_task.systems_failed += 1
+        self.scan_task.status = ScanTask.FAILED
+        self.scan_task.save()
         logger.warning('%s', result_obj)
 
     def _update_reachable_hosts(self, result_obj):
-        if self.scan_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:
-            # Don't update for discovery scan.
-            return
-
         unreachable_host = result_obj['host']
         logger.error(
             'Host %s is no longer reachable.  Moving host to failed results',
