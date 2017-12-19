@@ -222,3 +222,6 @@ ES_CONFIGURATION = {
     'fingerprint_index_name': 'fingerprints_index',
     'doc_type': 'fingerprint'
 }
+
+
+FACTS_DIR = BASE_DIR + '/raw_facts'

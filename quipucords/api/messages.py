@@ -13,7 +13,7 @@
 """API messages for translation."""
 
 # fact messages
-VALIDATE_FACTS_MSG = 'A least one fact is required.'
+FC_REQUIRED_ATTRIBUTE = "Missing required '%s' attribute"
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = 'Credentials'

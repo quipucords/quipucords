@@ -28,7 +28,7 @@ build: clean-cli
 	$(PYTHON) setup.py build -f
 
 clean-cli:
-	-rm -rf dist/ build/ quipucords.egg-info/
+	-rm -rf dist/ build/ quipucords.egg-info/ quipucords/raw_facts/
 
 clean: clean-cli
 	rm -rf quipucords/api/migrations/*;rm quipucords/db.sqlite3
