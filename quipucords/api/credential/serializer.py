@@ -13,11 +13,10 @@
 import os
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        ChoiceField,
                                         CharField)
 from api.models import Credential
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
 
 def expand_filepath(filepath):
@@ -37,7 +36,7 @@ class CredentialSerializer(NotEmptySerializer):
     # pylint: disable= no-self-use
 
     name = CharField(required=True, max_length=64)
-    cred_type = ChoiceField(
+    cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES)
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
