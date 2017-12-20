@@ -52,10 +52,13 @@ class SourceTest(TestCase):
                                 json.dumps(data),
                                 'application/json')
 
-    def create_expect_400(self, data):
+    def create_expect_400(self, data, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        if expected_response:
+            response_json = response.json()
+            self.assertEqual(response_json, expected_response)
 
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""

@@ -23,6 +23,15 @@ from api.common.serializer import NotEmptySerializer
 class SourceField(PrimaryKeyRelatedField):
     """Representation of the source associated with a scan job."""
 
+    def to_internal_value(self, data):
+        """Create internal value."""
+        if not isinstance(data, int):
+            raise ValidationError(_(messages.SJ_SOURCE_IDS_INV))
+        actual_source = Source.objects.filter(id=data).first()
+        if actual_source is None:
+            raise ValidationError(_(messages.SJ_SOURCE_DO_NOT_EXIST % data))
+        return actual_source
+
     def display_value(self, instance):
         """Create display value."""
         display = instance

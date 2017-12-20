@@ -15,12 +15,12 @@ import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        SlugRelatedField, ChoiceField,
+                                        SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
 from api.models import Credential, HostRange, Source
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
 
 class HostRangeField(SlugRelatedField):
@@ -49,6 +49,8 @@ class CredentialsField(PrimaryKeyRelatedField):
 
     def to_internal_value(self, data):
         """Create internal value."""
+        if not isinstance(data, int):
+            raise ValidationError(_(messages.SOURCE_CRED_IDS_INV))
         actual_cred = Credential.objects.filter(id=data).first()
         if actual_cred is None:
             raise ValidationError(_(messages.NET_HC_DO_NOT_EXIST % data))
@@ -70,7 +72,7 @@ class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)
-    source_type = ChoiceField(
+    source_type = ValidStringChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = HostRangeField(
@@ -105,7 +107,7 @@ class SourceSerializer(NotEmptySerializer):
                 'source_type': [_(messages.SOURCE_TYPE_REQ)]
             }
             raise ValidationError(error)
-        source_type = validated_data['source_type']
+        source_type = validated_data.get('source_type')
         credentials = validated_data.pop('credentials')
         hosts_data = validated_data.pop('hosts', None)
         port = None
@@ -468,6 +470,6 @@ class SourceSerializer(NotEmptySerializer):
     def validate_credentials(credentials):
         """Make sure the credentials list is present."""
         if not credentials:
-            raise ValidationError(_(messages.NET_MIN_CREDS))
+            raise ValidationError(_(messages.SOURCE_MIN_CREDS))
 
         return credentials
