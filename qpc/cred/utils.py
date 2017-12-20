@@ -73,7 +73,9 @@ def build_credential_payload(args, cred_type, add_none=True):
     :param add_none: add None for a key if True vs. not in dictionary
     :returns: the dictionary for the request payload
     """
-    req_payload = {'name': args.name, 'cred_type': cred_type}
+    req_payload = {'name': args.name}
+    if 'type' in args and cred_type is not None:
+        req_payload['cred_type'] = cred_type
     if 'username' in args and args.username:
         req_payload['username'] = args.username
     if 'filename' in args and args.filename:

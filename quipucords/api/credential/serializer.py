@@ -13,11 +13,10 @@
 import os
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        ChoiceField,
                                         CharField)
 from api.models import Credential
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
 
 def expand_filepath(filepath):
@@ -37,7 +36,7 @@ class CredentialSerializer(NotEmptySerializer):
     # pylint: disable= no-self-use
 
     name = CharField(required=True, max_length=64)
-    cred_type = ChoiceField(
+    cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES)
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
@@ -114,7 +113,7 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        if not (password or ssh_keyfile):
+        if not (password or ssh_keyfile) and not self.partial:
             error = {
                 'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
             }
@@ -137,7 +136,7 @@ class CredentialSerializer(NotEmptySerializer):
             else:
                 attrs['ssh_keyfile'] = keyfile
 
-        if ssh_passphrase and not ssh_keyfile:
+        if ssh_passphrase and not ssh_keyfile and not self.partial:
             error = {
                 'ssh_passphrase': [_(messages.HC_NO_KEY_W_PASS)]
             }

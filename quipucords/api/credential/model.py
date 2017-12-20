@@ -39,9 +39,16 @@ class Credential(models.Model):
     ssh_keyfile = models.CharField(max_length=1024, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
 
+    def is_encrypted(self):
+        """Check to see if the password is already encrypted."""
+        for i in self.password:
+            if i.isalpha():
+                return False
+            return True
+
     def encrypt_fields(self):
         """Encrypt the sensitive fields of the object."""
-        if self.password:
+        if self.password and not self.is_encrypted():
             self.password = encrypt_data_as_unicode(self.password)
         if self.sudo_password:
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
@@ -58,6 +65,11 @@ class Credential(models.Model):
         """Update the model object."""
         self.encrypt_fields()
         super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Update the model object."""
+        self.encrypt_fields()
+        super().partial_update(request, *args, **kwargs)
 
     class Meta:
         """Metadata for the model."""
