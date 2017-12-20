@@ -134,8 +134,8 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object an ssh_keyfile
         that cannot be found on the server.
         """
-        expected_error = {'non_field_errors': ['ssh_keyfile, blah, is not a '
-                                               'valid file on the system.']}
+        expected_error = {'ssh_keyfile': ['ssh_keyfile, blah, is not a '
+                                          'valid file on the system.']}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
