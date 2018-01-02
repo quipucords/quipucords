@@ -11,7 +11,28 @@
 """Common serializer to remove empty or null values."""
 
 from collections import OrderedDict
-from rest_framework.serializers import ModelSerializer
+import api.messages as messages
+from rest_framework.serializers import (ModelSerializer,
+                                        ChoiceField,
+                                        ValidationError)
+
+
+class ValidStringChoiceField(ChoiceField):
+    """Updated handling for choice field."""
+
+    def to_internal_value(self, data):
+        """Create internal value."""
+        valid_values = self.choices.keys()
+        values_str = ','.join(valid_values)
+        if not isinstance(data, str):
+            raise ValidationError(messages.COMMON_CHOICE_STR %
+                                  (values_str))
+        if data == '':
+            raise ValidationError(messages.COMMON_CHOICE_BLANK % (values_str))
+        if data not in valid_values:
+            raise ValidationError(messages.COMMON_CHOICE_INV %
+                                  (data, values_str))
+        return data
 
 
 class NotEmptySerializer(ModelSerializer):

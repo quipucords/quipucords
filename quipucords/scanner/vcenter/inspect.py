@@ -39,30 +39,6 @@ def get_nics(guest):
     return mac_addresses, ip_addresses
 
 
-def vmsummary(summary, guest):
-    """Extract VM summary data.
-
-    :param summary: The VM summary object.
-    :param guest: The VM guest object.
-    :returns: Dictionary of vm summary info.
-    """
-    vmsum = {}
-    config = summary.config
-    mac_addresses, ip_addresses = get_nics(guest)
-    vmsum['uuid'] = config.uuid
-    vmsum['mem'] = None
-    if config.memorySizeMB is not None:
-        vmsum['mem'] = str(config.memorySizeMB / 1024)
-    vmsum['cpu'] = str(config.numCpu)
-    vmsum['ostype'] = config.guestFullName
-    vmsum['state'] = summary.runtime.powerState
-    vmsum['mac'] = ';'.join(mac_addresses)
-    vmsum['ip_address'] = ';'.join(ip_addresses)
-    vmsum['hostname'] = summary.guest.hostName
-
-    return vmsum
-
-
 class InspectTaskRunner(ScanTaskRunner):
     """InspectTaskRunner vcenter connection capabilities.
 
@@ -113,6 +89,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return ScanTask.COMPLETED
 
+    # pylint: disable=too-many-locals
     def get_vm_info(self, data_center, cluster, host, virtual_machine):
         """Get VM information.
 
@@ -121,21 +98,35 @@ class InspectTaskRunner(ScanTaskRunner):
         :param host: The host server.
         :param virtual_machine: The virtual machine.
         """
-        vm_name = virtual_machine.summary.config.name
-        summary = vmsummary(virtual_machine.summary,
-                            virtual_machine.guest)
+        host_name = host.summary.config.name
+        host_cpu_cores = host.summary.hardware.numCpuCores
+        host_cpu_threads = host.summary.hardware.numCpuThreads
+        host_cpu_count = host_cpu_threads // host_cpu_cores
+        mac_addresses, ip_addresses = get_nics(virtual_machine.guest)
+        summary = virtual_machine.summary
+        config = summary.config
+        vm_name = config.name
+        vm_uuid = config.uuid
+        vm_cpu_count = config.numCpu
+        vm_os = config.guestFullName
+        vm_mem = None
+        if config.memorySizeMB is not None:
+            vm_mem = int(config.memorySizeMB / 1024)
 
         # Need to obtain "DNS Name"
         facts = {'vm.name': vm_name,  # "Name"
-                 'vm.state': summary['state'],  # "State"
-                 'vm.uuid': summary['uuid'],  # "UUID"
-                 'vm.cpu_count': summary['cpu'],  # "CPU"
-                 'vm.memory_size': summary['mem'],  # "Memory"
-                 'vm.os': summary['ostype'],  # "Guest OS"
-                 'vm.dns_name': summary['hostname'],  # "DNS NAME"
-                 'vm.mac_address': summary['mac'],  # "Mac Address"
-                 'vm.ip_address': summary['ip_address'],  # "IP Address"
-                 'vm.host': host,  # "Host"
+                 'vm.state': summary.runtime.powerState,  # "State"
+                 'vm.uuid': vm_uuid,  # "UUID"
+                 'vm.cpu_count': vm_cpu_count,  # "CPU"
+                 'vm.memory_size': vm_mem,  # "Memory"
+                 'vm.os': vm_os,  # "Guest OS"
+                 'vm.dns_name': summary.guest.hostName,  # "DNS NAME"
+                 'vm.mac_address': ';'.join(mac_addresses),  # "Mac Address"
+                 'vm.ip_address': ';'.join(ip_addresses),  # "IP Address"
+                 'vm.host.name': host_name,  # "Host Name"
+                 'vm.host.cpu_cores': host_cpu_cores,  # "Host CPU Cores"
+                 'vm.host.cpu_threads': host_cpu_threads,  # "Host CPU Threads"
+                 'vm.host.cpu_count': host_cpu_count,  # "Host CPU Count"
                  'vm.datacenter': data_center,  # "Data Center"
                  'vm.cluster': cluster}  # "Cluster"
 
@@ -152,8 +143,8 @@ class InspectTaskRunner(ScanTaskRunner):
         sys_result.save()
 
         self.inspect_results.save()
-        inspect_result = self.inspect_results.results.filter(
-            source__id=self.scan_task.source.id).first()
+        inspect_result = InspectionResult.objects.filter(
+            scan_task=self.scan_task.id).first()
         if inspect_result is None:
             inspect_result = InspectionResult(source=self.scan_task.source,
                                               scan_task=self.scan_task)
@@ -182,11 +173,10 @@ class InspectTaskRunner(ScanTaskRunner):
                     cluster_name = cluster.name
                     hosts = cluster.host  # Variable to make pep8 compliance
                     for host in hosts:  # Iterate through Hosts in the Cluster
-                        hostname = host.summary.config.name
                         vms = host.vm
                         for virtual_machine in vms:
                             self.get_vm_info(data_center_name, cluster_name,
-                                             hostname, virtual_machine)
+                                             host, virtual_machine)
 
     # pylint: disable=too-many-locals
     def inspect(self):

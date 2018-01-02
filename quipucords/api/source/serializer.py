@@ -15,12 +15,12 @@ import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        SlugRelatedField, ChoiceField,
+                                        SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
 from api.models import Credential, HostRange, Source
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
 
 class HostRangeField(SlugRelatedField):
@@ -49,6 +49,8 @@ class CredentialsField(PrimaryKeyRelatedField):
 
     def to_internal_value(self, data):
         """Create internal value."""
+        if not isinstance(data, int):
+            raise ValidationError(_(messages.SOURCE_CRED_IDS_INV))
         actual_cred = Credential.objects.filter(id=data).first()
         if actual_cred is None:
             raise ValidationError(_(messages.NET_HC_DO_NOT_EXIST % data))
@@ -70,7 +72,7 @@ class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)
-    source_type = ChoiceField(
+    source_type = ValidStringChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = HostRangeField(
@@ -101,8 +103,11 @@ class SourceSerializer(NotEmptySerializer):
             name=validated_data.get('name'))
 
         if 'source_type' not in validated_data:
-            raise ValidationError(_(messages.SOURCE_TYPE_REQ))
-        source_type = validated_data['source_type']
+            error = {
+                'source_type': [_(messages.SOURCE_TYPE_REQ)]
+            }
+            raise ValidationError(error)
+        source_type = validated_data.get('source_type')
         credentials = validated_data.pop('credentials')
         hosts_data = validated_data.pop('hosts', None)
         port = None
@@ -111,7 +116,10 @@ class SourceSerializer(NotEmptySerializer):
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if not hosts_data:
-                raise ValidationError(_(messages.NET_MIN_HOST))
+                error = {
+                    'hosts': [_(messages.NET_MIN_HOST)]
+                }
+                raise ValidationError(error)
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
@@ -121,11 +129,20 @@ class SourceSerializer(NotEmptySerializer):
             if port is None:
                 validated_data['port'] = 443
             if not hosts_data:
-                raise ValidationError(_(messages.VC_ONE_HOST))
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             elif hosts_data and len(hosts_data) != 1:
-                raise ValidationError(_(messages.VC_ONE_HOST))
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                raise ValidationError(_(messages.VC_ONE_CRED))
+                error = {
+                    'credentials': [_(messages.VC_ONE_CRED)]
+                }
+                raise ValidationError(error)
             elif credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
@@ -152,7 +169,10 @@ class SourceSerializer(NotEmptySerializer):
             source_id=instance.id)
 
         if 'source_type' in validated_data:
-            raise ValidationError(_(messages.SOURCE_TYPE_INV))
+            error = {
+                'source_type': [_(messages.SOURCE_TYPE_INV)]
+            }
+            raise ValidationError(error)
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
         hosts_data = validated_data.pop('hosts', None)
@@ -163,11 +183,20 @@ class SourceSerializer(NotEmptySerializer):
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if not hosts_data:
-                raise ValidationError(_(messages.VC_ONE_HOST))
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             elif hosts_data and len(hosts_data) != 1:
-                raise ValidationError(_(messages.VC_ONE_HOST))
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                raise ValidationError(_(messages.VC_ONE_CRED))
+                error = {
+                    'credentials': [_(messages.VC_ONE_CRED)]
+                }
+                raise ValidationError(error)
             elif credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
@@ -212,8 +241,10 @@ class SourceSerializer(NotEmptySerializer):
             existing = Source.objects.filter(
                 name=name).exclude(id=source_id).first()
         if existing is not None:
-            raise ValidationError(_(messages.SOURCE_NAME_ALREADY_EXISTS %
-                                    name))
+            error = {
+                'name': [_(messages.SOURCE_NAME_ALREADY_EXISTS % name)]
+            }
+            raise ValidationError(error)
 
     @staticmethod
     def check_credential_type(source_type, credential):
@@ -223,7 +254,10 @@ class SourceSerializer(NotEmptySerializer):
         :param credential: The credential to obtain
         """
         if credential.cred_type != source_type:
-            raise ValidationError(_(messages.SOURCE_CRED_WRONG_TYPE))
+            error = {
+                'source_type': [_(messages.SOURCE_CRED_WRONG_TYPE)]
+            }
+            raise ValidationError(error)
 
     @staticmethod
     def validate_name(name):
@@ -436,6 +470,6 @@ class SourceSerializer(NotEmptySerializer):
     def validate_credentials(credentials):
         """Make sure the credentials list is present."""
         if not credentials:
-            raise ValidationError(_(messages.NET_MIN_CREDS))
+            raise ValidationError(_(messages.SOURCE_MIN_CREDS))
 
         return credentials

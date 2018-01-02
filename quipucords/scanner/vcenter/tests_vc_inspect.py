@@ -15,7 +15,7 @@ from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, InspectionResults, InspectionResult)
-from scanner.vcenter.inspect import (InspectTaskRunner, get_nics, vmsummary)
+from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
 
 
 def invalid_login():
@@ -97,36 +97,6 @@ class InspectTaskRunnerTest(TestCase):
         self.assertEqual(mac_addresses, ['mac0', 'mac1'])
         self.assertEqual(ip_addresses, ['ip0', 'ip1'])
 
-    def test_vmsummary(self):
-        """Test the vmsummary method."""
-        summary = Mock()
-        guest = Mock()
-        config = Mock()
-        runtime = Mock()
-        sum_guest = Mock()
-        config.uuid = '1111'
-        config.memorySizeMB = 1024
-        config.numCpu = 2
-        config.guestFullName = 'Red Hat 7'
-        runtime.powerState = 'powerOn'
-        sum_guest.hostName = 'hostname'
-        summary.config = config
-        summary.runtime = runtime
-        summary.guest = sum_guest
-        with patch('scanner.vcenter.inspect.get_nics',
-                   return_value=(['mac1'], ['ip1'])) as mock_get_nics:
-            expected = {'cpu': '2',
-                        'hostname': 'hostname',
-                        'ip_address': 'ip1',
-                        'mac': 'mac1',
-                        'mem': '1.0',
-                        'ostype': 'Red Hat 7',
-                        'state': 'powerOn',
-                        'uuid': '1111'}
-            vm_summary = vmsummary(summary, guest)
-            mock_get_nics.assert_called_once_with(ANY)
-            self.assertEqual(vm_summary, expected)
-
     def test_get_results_none(self):
         """Test get results method when no results exist."""
         results = self.runner.get_results()
@@ -142,33 +112,73 @@ class InspectTaskRunnerTest(TestCase):
         results = self.runner.get_results()
         self.assertEqual(results, inspect_result)
 
+    # pylint: disable=too-many-locals
     def test_get_vm_info(self):
         """Test the get vm info method."""
         data_center = 'dc1'
         cluster = 'cluster1'
-        host = 'host1'
+        host = Mock()
+        host_sum = Mock()
+        host_config = Mock()
+        host_config.name = 'host1'
+        host_sum.config = host_config
+        host_hard = Mock()
+        host_hard.numCpuCores = 12
+        host_hard.numCpuThreads = 24
+        host_sum.hardware = host_hard
+        host.summary = host_sum
         virtual_machine = Mock()
         summary = Mock()
         config = Mock()
+        runtime = Mock()
+        sum_guest = Mock()
         config.name = 'vm1'
+        config.uuid = '1111'
+        config.memorySizeMB = 1024
+        config.numCpu = 2
+        config.guestFullName = 'Red Hat 7'
+        runtime.powerState = 'powerOn'
+        sum_guest.hostName = 'hostname'
         summary.config = config
+        summary.runtime = runtime
+        summary.guest = sum_guest
+
         virtual_machine.summary = summary
-        vm_summary = {'cpu': '2',
-                      'hostname': 'hostname',
-                      'ip_address': 'ip1',
-                      'mac': 'mac1',
-                      'mem': '1.0',
-                      'ostype': 'Red Hat 7',
-                      'state': 'powerOn',
-                      'uuid': '1111'}
-        with patch('scanner.vcenter.inspect.vmsummary',
-                   return_value=vm_summary):
-            self.scan_task.systems_count = 5
-            self.scan_task.systems_failed = 0
-            self.scan_task.systems_scanned = 0
-            self.scan_task.save()
+        self.scan_task.systems_count = 5
+        self.scan_task.systems_failed = 0
+        self.scan_task.systems_scanned = 0
+        self.scan_task.save()
+        getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
+        with patch('scanner.vcenter.inspect.get_nics',
+                   return_value=getnics):
             self.runner.get_vm_info(data_center, cluster,
                                     host, virtual_machine)
+
+            inspect_result = InspectionResult.objects.filter(
+                scan_task=self.scan_task.id).first()
+            sys_results = inspect_result.systems.all()
+            expected_facts = {'vm.cluster': 'cluster1',
+                              'vm.cpu_count': '2',
+                              'vm.datacenter': 'dc1',
+                              'vm.dns_name': 'hostname',
+                              'vm.host.cpu_cores': '12',
+                              'vm.host.cpu_count': '2',
+                              'vm.host.cpu_threads': '24',
+                              'vm.host.name': 'host1',
+                              'vm.ip_address': '1.2.3.4',
+                              'vm.mac_address': '00:50:56:9e:09:8c',
+                              'vm.memory_size': '1',
+                              'vm.name': 'vm1',
+                              'vm.os': 'Red Hat 7',
+                              'vm.state': 'powerOn',
+                              'vm.uuid': '1111'}
+            sys_fact = {}
+            for raw_fact in sys_results.first().facts.all():
+                sys_fact[raw_fact.name] = raw_fact.value
+
+            self.assertEqual(1, len(sys_results))
+            self.assertEqual('vm1', sys_results.first().name)
+            self.assertEqual(expected_facts, sys_fact)
 
     # pylint: disable=too-many-locals
     def test_recurse_datacenter(self):

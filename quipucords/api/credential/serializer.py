@@ -13,11 +13,10 @@
 import os
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        ChoiceField,
                                         CharField)
 from api.models import Credential
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
 
 def expand_filepath(filepath):
@@ -37,7 +36,7 @@ class CredentialSerializer(NotEmptySerializer):
     # pylint: disable= no-self-use
 
     name = CharField(required=True, max_length=64)
-    cred_type = ChoiceField(
+    cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES)
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
@@ -61,7 +60,10 @@ class CredentialSerializer(NotEmptySerializer):
             name=validated_data.get('name'))
 
         if 'cred_type' not in validated_data:
-            raise ValidationError(_(messages.CRED_TYPE_REQUIRED_CREATED))
+            error = {
+                'cred_type': [_(messages.CRED_TYPE_REQUIRED_CREATED)]
+            }
+            raise ValidationError(error)
 
         return super().create(validated_data)
 
@@ -72,7 +74,10 @@ class CredentialSerializer(NotEmptySerializer):
             cred_id=instance.id)
 
         if 'cred_type' in validated_data:
-            raise ValidationError(_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE))
+            error = {
+                'cred_type': [_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE)]
+            }
+            raise ValidationError(error)
 
         return super().update(instance, validated_data)
 
@@ -91,7 +96,10 @@ class CredentialSerializer(NotEmptySerializer):
             existing = Credential.objects.filter(
                 name=name).exclude(id=cred_id).first()
         if existing is not None:
-            raise ValidationError(_(messages.HC_NAME_ALREADY_EXISTS % name))
+            error = {
+                'name': [_(messages.HC_NAME_ALREADY_EXISTS % name)]
+            }
+            raise ValidationError(error)
 
     def validate(self, attrs):
         """Validate the attributes."""
@@ -106,21 +114,33 @@ class CredentialSerializer(NotEmptySerializer):
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
         if not (password or ssh_keyfile):
-            raise ValidationError(_(messages.HC_PWD_OR_KEYFILE))
+            error = {
+                'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
+            }
+            raise ValidationError(error)
 
         if password and ssh_keyfile:
-            raise ValidationError(_(messages.HC_NOT_BOTH))
+            error = {
+                'non_field_errors': [_(messages.HC_NOT_BOTH)]
+            }
+            raise ValidationError(error)
 
         if ssh_keyfile:
             keyfile = expand_filepath(ssh_keyfile)
             if not os.path.isfile(keyfile):
-                raise ValidationError(_(messages.HC_KEY_INVALID
-                                        % (ssh_keyfile)))
+                error = {
+                    'ssh_keyfile': [_(messages.HC_KEY_INVALID
+                                      % (ssh_keyfile))]
+                }
+                raise ValidationError(error)
             else:
                 attrs['ssh_keyfile'] = keyfile
 
         if ssh_passphrase and not ssh_keyfile:
-            raise ValidationError(_(messages.HC_NO_KEY_W_PASS))
+            error = {
+                'ssh_passphrase': [_(messages.HC_NO_KEY_W_PASS)]
+            }
+            raise ValidationError(error)
         return attrs
 
     def validate_vcenter_cred(self, attrs):
@@ -130,7 +150,10 @@ class CredentialSerializer(NotEmptySerializer):
         password = 'password' in attrs and attrs['password']
 
         if not (password and username):
-            raise ValidationError(_(messages.VC_PWD_AND_USERNAME))
+            error = {
+                'non_field_errors': [_(messages.VC_PWD_AND_USERNAME)]
+            }
+            raise ValidationError(error)
 
         # Not allowed fields for vcenter
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
@@ -138,6 +161,9 @@ class CredentialSerializer(NotEmptySerializer):
         sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
 
         if ssh_keyfile or ssh_passphrase or sudo_password:
-            raise ValidationError(_(messages.VC_KEY_FILE_NOT_ALLOWED))
+            error = {
+                'non_field_errors': [_(messages.VC_KEY_FILE_NOT_ALLOWED)]
+            }
+            raise ValidationError(error)
 
         return attrs

@@ -229,7 +229,31 @@ class ScanJobTest(TestCase):
         data = {'sources': [self.source.id],
                 'scan_type': 'foo'}
         self.create_expect_400(
-            data, {'scan_type': ['"foo" is not a valid choice.']})
+            data, {'scan_type': ['foo, is an invalid choice. '
+                                 'Valid values are connect,inspect.']})
+
+    def test_create_blank_scan_type(self):
+        """A create request must not have a blank scan_type."""
+        data = {'sources': [self.source.id],
+                'scan_type': ''}
+        self.create_expect_400(
+            data, {'scan_type': ['This field may not be blank. '
+                                 'Valid values are connect,inspect.']})
+
+    def test_create_invalid_srcs_type(self):
+        """A create request must have integer ids."""
+        data = {'sources': ['foo'],
+                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
+        self.create_expect_400(
+            data, {'sources': ['Source identitiers must be integer values.']})
+
+    def test_create_invalid_srcs_id(self):
+        """A create request must have vaild ids."""
+        data = {'sources': [100000],
+                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
+        self.create_expect_400(
+            data, {'sources': ['Source with id=100000 could '
+                               'not be found in database.']})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_create_default_host_type(self, start_scan):
