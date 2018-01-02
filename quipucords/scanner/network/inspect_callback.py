@@ -141,7 +141,7 @@ class InspectResultCallback(CallbackBase):
             'Host %s is no longer reachable.  Moving host to failed results',
             unreachable_host)
 
-        sys_result, inspect_result = self._result_objects(
+        _, _ = self._result_objects(
             unreachable_host, SystemInspectionResult.UNREACHABLE)
 
         self.scan_task.systems_failed += 1
