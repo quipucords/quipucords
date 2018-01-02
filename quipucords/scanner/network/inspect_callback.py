@@ -11,6 +11,7 @@
 """Callback object for capturing ansible task execution."""
 
 import logging
+from django.db import transaction
 from ansible.plugins.callback import CallbackBase
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
@@ -43,6 +44,9 @@ class InspectResultCallback(CallbackBase):
         self.results = []
         self._ansible_facts = {}
 
+    # Needs to be atomic so that the host won't be marked as complete
+    # unless we actually save its results.
+    @transaction.atomic
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
@@ -95,6 +99,10 @@ class InspectResultCallback(CallbackBase):
             else:
                 self._ansible_facts[host] = facts
 
+    # Same as above. The multiple save() statements are hidden inside
+    # _update_reachable_hosts, but they do need to be in the same
+    # transaction as the scan_task.save() below.
+    @transaction.atomic
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
@@ -105,6 +113,7 @@ class InspectResultCallback(CallbackBase):
         self.scan_task.save()
         logger.warning('%s', result_obj)
 
+    @transaction.atomic
     def _update_reachable_hosts(self, result_obj):
         unreachable_host = result_obj['host']
         logger.error(
