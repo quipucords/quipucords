@@ -58,7 +58,7 @@ class InspectResultCallback(CallbackBase):
             facts = {}
             for key, value in host_facts.items():
                 if key == 'host_done':
-                    self.finalize_host(host)
+                    self._finalize_host(host)
                 elif not key.startswith('internal'):
                     facts[key] = value
                 # Facts starting with 'internal' are used only by the
@@ -102,7 +102,7 @@ class InspectResultCallback(CallbackBase):
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
     @transaction.atomic
-    def finalize_host(self, host):
+    def _finalize_host(self, host):
         facts = self._ansible_facts[host]
         logger.debug('host scan complete for %s with facts %s',
                      host, facts)
