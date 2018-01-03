@@ -17,37 +17,48 @@ from datetime import datetime
 class Engine():
     """Engine that produces fingerprints from facts."""
 
+    def process_sources(self, raw_facts):
+        """Process facts and convert to fingerprints.
 
-    def process_sources(self, fact_collection_id, sources):
-        pass
+        :param raw_facts: Collected raw facts for all sources
+        :returns: list of fingerprints for all systems (all scans)
+        """
+        all_fingerprints = []
+        for source in raw_facts['sources']:
+            source_fingerprints = self._process_facts(
+                raw_facts['fact_collection_id'],
+                source['source_id'],
+                source['facts'])
+            all_fingerprints = all_fingerprints + source_fingerprints
+        print('number of fingerprints: %d' %len(all_fingerprints))
+        return all_fingerprints
 
-    def process_source(self, fact_collection_id, source):
-        pass
-
-    # pylint: disable= no-self-use
-    def process_facts(self, fact_collection_id, facts):
+    def _process_facts(self, fact_collection_id, source_id, facts):
         """Process facts and convert to fingerprints.
 
         :param fact_collection_id: id of fact collection
         associated with facts
+        :param source_id: id of source associated with facts
         :param facts: facts to process
         :returns: fingerprints produced from facts
         """
         fingerprints = []
         for fact in facts:
-            fingerprints.append(self.process_fact(fact_collection_id, fact))
+            fingerprint = self._process_fact(fact)
+            fingerprint['fact_collection_id'] = fact_collection_id
+            fingerprint['source_id'] = source_id
+            fingerprints.append(fingerprint)
         return fingerprints
 
-    def process_fact(self, fact_collection_id, fact):
+    def _process_fact(self, fact):
         """Process a fact and convert to a fingerprint.
 
-        :param fact_collection_id: id of fact collection
         associated with facts
         :param facts: fact to process
         :returns: fingerprint produced from fact
         """
         # Set fact collection id
-        fingerprint = {'fact_collection_id': fact_collection_id}
+        fingerprint = {}
 
         # Set OS information
         if fact.get('etc_release_name'):

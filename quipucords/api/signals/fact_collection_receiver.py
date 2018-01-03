@@ -15,42 +15,11 @@ import logging
 import django.dispatch
 from fingerprinter import Engine
 from api.fact.raw_fact_util import read_raw_facts
-from api.serializers import FingerprintSerializer, FactCollectionSerializer
-from api.models import FactCollection
+from api.serializers import FingerprintSerializer
 
 ENGINE = Engine()
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-
-def process_fact_collection_old(sender, instance, **kwargs):
-    """Process facts using engine and convert to fingerprints.
-
-    :param sender: Class that was saved
-    :param instance: FactCollection that was saved
-    :param kwargs: Other args
-    :returns: None
-    """
-    # pylint: disable=unused-argument
-
-    # Convert to python dictionary
-    fact_collection = FactCollectionSerializer(instance).data
-
-    # Extract facts and collection id
-    fact_collection_id = fact_collection['id']
-    facts = fact_collection['facts']
-
-    # Invoke ENGINE to create fingerprints from facts
-    fingerprints_list = ENGINE.process_facts(
-        fact_collection_id, facts)
-
-    for fingerprint_dict in fingerprints_list:
-        serializer = FingerprintSerializer(data=fingerprint_dict)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            logger.error('%s could not persist fingerprint. SystemFacts: %s',
-                        __name__, fingerprint_dict)
-            logger.error('Errors: %s', serializer.errors)
 
 def process_fact_collection(sender, instance, **kwargs):
     """Restart a scan.
@@ -62,11 +31,19 @@ def process_fact_collection(sender, instance, **kwargs):
     :returns: None
     """
     # pylint: disable=unused-argument
-    print('process_fact_collection')
-    print(instance)
-    print('Facts from disk:')
     raw_facts = read_raw_facts(instance.id)
-    print(raw_facts)
+
+    # Invoke ENGINE to create fingerprints from facts
+    fingerprints_list = ENGINE.process_sources(raw_facts)
+
+    for fingerprint_dict in fingerprints_list:
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            logger.error('%s could not persist fingerprint. SystemFacts: %s',
+                         __name__, fingerprint_dict)
+            logger.error('Errors: %s', serializer.errors)
 
 
 # pylint: disable=C0103
