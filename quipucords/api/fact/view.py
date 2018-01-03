@@ -12,9 +12,7 @@
 """Viewset for system facts models."""
 
 import logging
-import os
-import json
-from django.conf import settings
+import api.messages as messages
 from django.utils.translation import ugettext as _
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
@@ -22,7 +20,7 @@ from rest_framework.serializers import ValidationError
 from api.models import FactCollection, Source
 from api.serializers import FactCollectionSerializer
 from api.signals.fact_collection_receiver import pfc_signal
-import api.messages as messages
+from api.fact.raw_fact_util import write_raw_facts
 
 
 # pylint: disable=too-many-ancestors
@@ -48,8 +46,8 @@ class FactViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
         if not request.data.get(self.SOURCES_ATTR):
-            raise ValidationError(
-                _(messages.FC_REQUIRED_ATTRIBUTE))
+            return Response({self.SOURCES_ATTR : _(messages.FC_REQUIRED_ATTRIBUTE)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Remove to make serializer happy since its not part of the model
         sources = request.data.get(self.SOURCES_ATTR)
@@ -66,7 +64,7 @@ class FactViewSet(mixins.CreateModelMixin,
         fact_collection.save()
 
         # Save raw facts and update fact collection
-        fact_collection.path = save_raw_facts(
+        fact_collection.path = write_raw_facts(
             fact_collection.id, request.data)
         fact_collection.save()
 
@@ -143,14 +141,3 @@ class FactViewSet(mixins.CreateModelMixin,
             return error_json
         return None
 
-
-def save_raw_facts(fc_id, data):
-    """Write raw facts to json file."""
-    if not os.path.exists(settings.FACTS_DIR):
-        os.makedirs(settings.FACTS_DIR)
-
-    file_path = '%s/%d.json' % (settings.FACTS_DIR, fc_id)
-    with open(file_path, 'w') as raw_fact_file:
-        json.dump(data, raw_fact_file)
-
-    return file_path

@@ -17,7 +17,14 @@ from datetime import datetime
 class Engine():
     """Engine that produces fingerprints from facts."""
 
-    # pylint: disable= no-self-use,too-many-branches,too-many-statements
+
+    def process_sources(self, fact_collection_id, sources):
+        pass
+
+    def process_source(self, fact_collection_id, source):
+        pass
+
+    # pylint: disable= no-self-use
     def process_facts(self, fact_collection_id, facts):
         """Process facts and convert to fingerprints.
 
