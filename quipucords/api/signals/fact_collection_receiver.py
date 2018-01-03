@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 #                      __name__, fingerprint_dict)
 #         logger.error('Errors: %s', serializer.errors)
 
-def process_fact_collection(sender, instance, facts, **kwargs):
+def process_fact_collection(sender, instance, **kwargs):
     """Restart a scan.
 
     :param sender: Class that was saved
@@ -63,14 +63,13 @@ def process_fact_collection(sender, instance, facts, **kwargs):
     """
     # FIXME connect back to the engine.
     # FC should be updated to complete when fingerprints are generated
+    # this should read the raw facts for disk?
     print('process_fact_collection')
     print(instance)
-    print(facts)
 
 
 # pylint: disable=C0103
 pfc_signal = django.dispatch.Signal(providing_args=[
-    'instance',
-    'facts'])
+    'instance'])
 
 pfc_signal.connect(process_fact_collection)

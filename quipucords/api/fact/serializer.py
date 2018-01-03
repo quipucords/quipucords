@@ -11,7 +11,9 @@
 
 """Serializer for system facts models."""
 
-from rest_framework.serializers import ChoiceField, JSONField
+from rest_framework.serializers import (
+    ChoiceField,
+    JSONField)
 from api.models import FactCollection
 from api.common.serializer import NotEmptySerializer
 
@@ -29,11 +31,3 @@ class FactCollectionSerializer(NotEmptySerializer):
 
         model = FactCollection
         fields = ['id', 'status', 'sources']
-
-    @staticmethod
-    def validate_sources(sources):
-        """Validate sources field."""
-        # FIXME add code to validate sources
-        print('hereS')
-        print(sources)
-        return sources
