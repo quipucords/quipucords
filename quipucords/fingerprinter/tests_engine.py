@@ -21,6 +21,7 @@ class EngineTest(TestCase):
 
     # pylint: disable=no-self-use,too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
+    # pylint: disable=protected-access
 
     ################################################################
     # Helper function
@@ -99,8 +100,7 @@ class EngineTest(TestCase):
                                              1,
                                              fact_collection['facts'])
         fingerprint = fingerprints[0]
-        self.validate_result(
-            fact_collection['id'], fingerprint, fact)
+        self.validate_result(fingerprint, fact)
 
     def test_basic_engine_process_fact(self):
         """Test basic engine process_fact."""
@@ -108,8 +108,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc()
         fact = fact_collection['facts'][0]
         fingerprint = engine._process_fact(fact)
-        self.validate_result(
-            fact_collection['id'], fingerprint, fact)
+        self.validate_result(fingerprint, fact)
 
     def test_create_yum(self):
         """Test date_yum_history used for sys create time."""
@@ -286,7 +285,7 @@ class EngineTest(TestCase):
         fingerprint = engine._process_fact(fact)
         self.assertNotIn('virtualization_num_running_guests', fingerprint)
 
-    def validate_result(self, fc_id, fingerprint, fact):
+    def validate_result(self, fingerprint, fact):
         """Help to validate fields."""
         self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
         self.assertEqual(fact['etc_release_release'],

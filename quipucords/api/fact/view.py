@@ -12,11 +12,10 @@
 """Viewset for system facts models."""
 
 import logging
-import api.messages as messages
 from django.utils.translation import ugettext as _
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.serializers import ValidationError
+import api.messages as messages
 from api.models import FactCollection, Source
 from api.serializers import FactCollectionSerializer
 from api.signals.fact_collection_receiver import pfc_signal
@@ -46,7 +45,8 @@ class FactViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
         if not request.data.get(self.SOURCES_ATTR):
-            return Response({self.SOURCES_ATTR : _(messages.FC_REQUIRED_ATTRIBUTE)},
+            return Response({self.SOURCES_ATTR:
+                             _(messages.FC_REQUIRED_ATTRIBUTE)},
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Remove to make serializer happy since its not part of the model
@@ -140,4 +140,3 @@ class FactViewSet(mixins.CreateModelMixin,
             error_json['errors'] = invalid_field_obj
             return error_json
         return None
-

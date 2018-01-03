@@ -31,7 +31,8 @@ class SourceField(PrimaryKeyRelatedField):
         int_data = convert_to_int(data)
         actual_source = Source.objects.filter(id=int_data).first()
         if actual_source is None:
-            raise ValidationError(_(messages.SJ_SOURCE_DO_NOT_EXIST % int_data))
+            raise ValidationError(
+                _(messages.SJ_SOURCE_DO_NOT_EXIST % int_data))
         return actual_source
 
     def display_value(self, instance):

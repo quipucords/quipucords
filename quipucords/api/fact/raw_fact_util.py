@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Util to read/write raw facts to file"""
+"""Util to read/write raw facts to file."""
 
 import os
 import json
@@ -51,5 +51,5 @@ def write_raw_facts(fc_id, data):
 
 
 def _build_path(fc_id):
-    """Helper to consistently build path."""
+    """Build path to json file."""
     return '%s/%d.json' % (settings.FACTS_DIR, fc_id)

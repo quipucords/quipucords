@@ -17,6 +17,9 @@ from datetime import datetime
 class Engine():
     """Engine that produces fingerprints from facts."""
 
+    # pylint: disable=no-self-use,too-many-branches,too-many-statements
+    # pylint: disable=too-few-public-methods
+
     def process_sources(self, raw_facts):
         """Process facts and convert to fingerprints.
 
@@ -30,7 +33,7 @@ class Engine():
                 source['source_id'],
                 source['facts'])
             all_fingerprints = all_fingerprints + source_fingerprints
-        print('number of fingerprints: %d' %len(all_fingerprints))
+        print('number of fingerprints: %d' % len(all_fingerprints))
         return all_fingerprints
 
     def _process_facts(self, fact_collection_id, source_id, facts):
