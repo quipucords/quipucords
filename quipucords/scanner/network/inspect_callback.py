@@ -88,12 +88,13 @@ class InspectResultCallback(CallbackBase):
     # as complete unless we actually save its results.
     @transaction.atomic
     def _finalize_host(self, host):
-        facts = self._ansible_facts[host]
+        facts = self._ansible_facts.get(host, {})
         logger.debug('host scan complete for %s with facts %s',
                      host, facts)
 
         # Update scan counts
         if self.scan_task is not None:
+
             self.scan_task.systems_scanned += 1
             self.scan_task.save()
 
