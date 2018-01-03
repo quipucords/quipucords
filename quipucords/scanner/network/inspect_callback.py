@@ -70,33 +70,19 @@ class InspectResultCallback(CallbackBase):
             else:
                 self._ansible_facts[host] = facts
 
-    def _result_objects(self, host, status):
-        """Create and save result objects.
-
-        Return objects will have been saved in the database. You don't
-        have to save them again unless you update them.
-
-        :returns: a pair of SystemInspectionResult, InspectionResult.
-        """
-        # Have to save inspect_result (if creating it) and sys_result
-        # because inspect_result.systems.add wants them to have
-        # primary keys first. This means that _result_objects has to
-        # be part of any larger transaction that is updating the
-        # database.
+    def _get_inspect_result(self):
+        # Have to save inspect_result (if creating it) because
+        # inspect_result.systems.add wants it to have a primary key
+        # first. This means that _inspect_result has to be part of any
+        # larger transaction that is updating the database.
         inspect_result = self.inspect_results.results.filter(
             source__id=self.source.id).first()
         if inspect_result is None:
             inspect_result = InspectionResult(
                 scan_task=self.scan_task, source=self.source)
             inspect_result.save()
-        sys_result = SystemInspectionResult(
-            name=host, status=status)
-        sys_result.save()
 
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-
-        return sys_result, inspect_result
+        return inspect_result
 
     # Called after all fact collection is complete for host. Writing
     # results needs to be atomic so that the host won't be marked
@@ -112,8 +98,13 @@ class InspectResultCallback(CallbackBase):
             self.scan_task.systems_scanned += 1
             self.scan_task.save()
 
-        sys_result, inspect_result = self._result_objects(
-            host, SystemInspectionResult.SUCCESS)
+        inspect_result = self._get_inspect_result()
+        sys_result = SystemInspectionResult(
+            name=host, status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
 
         # Generate facts for host
         for result_key, result_value in facts.items():
@@ -126,9 +117,7 @@ class InspectResultCallback(CallbackBase):
         self.inspect_results.results.add(inspect_result)
         self.inspect_results.save()
 
-    # Same as above. The multiple save() statements are hidden inside
-    # _update_reachable_hosts, but they do need to be in the same
-    # transaction as the scan_task.save() below.
+    # Make this atomic for the same reason as _finalize_host.
     @transaction.atomic
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
@@ -141,8 +130,11 @@ class InspectResultCallback(CallbackBase):
             'Host %s is no longer reachable.  Moving host to failed results',
             unreachable_host)
 
-        _, _ = self._result_objects(
-            unreachable_host, SystemInspectionResult.UNREACHABLE)
+        self._get_inspect_result()
+        sys_result = SystemInspectionResult(
+            name=unreachable_host,
+            status=SystemInspectionResult.UNREACHABLE)
+        sys_result.save()
 
         self.scan_task.systems_failed += 1
         self.scan_task.status = ScanTask.FAILED
