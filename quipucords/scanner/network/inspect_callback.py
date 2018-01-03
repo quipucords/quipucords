@@ -44,7 +44,6 @@ class InspectResultCallback(CallbackBase):
         self.results = []
         self._ansible_facts = {}
 
-    @transaction.atomic
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
         result_obj = _construct_result(result)
