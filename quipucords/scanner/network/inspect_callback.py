@@ -94,7 +94,6 @@ class InspectResultCallback(CallbackBase):
 
         # Update scan counts
         if self.scan_task is not None:
-
             self.scan_task.systems_scanned += 1
             self.scan_task.save()
 
