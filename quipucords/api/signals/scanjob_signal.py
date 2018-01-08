@@ -26,16 +26,15 @@ RESTART = 'restart'
 # pylint: disable=W0613
 
 
-def handle_scan(sender, instance, fact_endpoint, **kwargs):
+def handle_scan(sender, instance, **kwargs):
     """Handle incoming scan.
 
     :param sender: Class that was saved
     :param instance: ScanJob that was triggered
-    :param fact_endpoint: The API endpoint to send collect fact to
     :param kwargs: Other args
     :returns: None
     """
-    scanner = ScanJobRunner(instance, fact_endpoint)
+    scanner = ScanJobRunner(instance)
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
@@ -80,7 +79,7 @@ def scan_cancel(sender, instance, **kwargs):
     scan_action(sender, instance, CANCEL, **kwargs)
 
 
-def scan_restart(sender, instance, fact_endpoint, **kwargs):
+def scan_restart(sender, instance, **kwargs):
     """Restart a scan.
 
     :param sender: Class that was saved
@@ -88,7 +87,7 @@ def scan_restart(sender, instance, fact_endpoint, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    scanner = ScanJobRunner(instance, fact_endpoint)
+    scanner = ScanJobRunner(instance)
 
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
@@ -99,12 +98,10 @@ def scan_restart(sender, instance, fact_endpoint, **kwargs):
 
 
 # pylint: disable=C0103
-start_scan = django.dispatch.Signal(providing_args=['instance',
-                                                    'fact_endpoint'])
+start_scan = django.dispatch.Signal(providing_args=['instance'])
 pause_scan = django.dispatch.Signal(providing_args=['instance'])
 cancel_scan = django.dispatch.Signal(providing_args=['instance'])
-restart_scan = django.dispatch.Signal(providing_args=['instance',
-                                                      'fact_endpoint'])
+restart_scan = django.dispatch.Signal(providing_args=['instance'])
 
 start_scan.connect(handle_scan)
 pause_scan.connect(scan_pause)

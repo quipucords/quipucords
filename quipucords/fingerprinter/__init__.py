@@ -11,7 +11,44 @@
 
 """Fingerprint engine ingests raw facts and produces system finger prints."""
 
+import logging
 from datetime import datetime
+import django.dispatch
+from api.fact.util import read_raw_facts
+from api.models import FactCollection
+from api.serializers import FingerprintSerializer
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+# pylint: disable=unused-argument
+
+
+def process_fact_collection(sender, instance, **kwargs):
+    """Process the fact collection.
+
+    :param sender: Class that was saved
+    :param instance: FactCollection that was saved
+    :param facts: dict of raw facts
+    :param kwargs: Other args
+    :returns: None
+    """
+    raw_facts = read_raw_facts(instance.id)
+
+    # Invoke ENGINE to create fingerprints from facts
+    fingerprints_list = FINGERPRINT_ENGINE.process_sources(raw_facts)
+
+    for fingerprint_dict in fingerprints_list:
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            logger.error('%s could not persist fingerprint. SystemFacts: %s',
+                         __name__, fingerprint_dict)
+            logger.error('Errors: %s', serializer.errors)
+
+    # Mark completed because engine has process raw facts
+    instance.status = FactCollection.FC_STATUS_COMPLETE
+    instance.save()
 
 
 class Engine():
@@ -145,3 +182,12 @@ class Engine():
                 fact['virt_num_running_guests']
 
         return fingerprint
+
+
+FINGERPRINT_ENGINE = Engine()
+
+# pylint: disable=C0103
+pfc_signal = django.dispatch.Signal(providing_args=[
+    'instance'])
+
+pfc_signal.connect(process_fact_collection)
