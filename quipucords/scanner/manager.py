@@ -17,8 +17,6 @@ from threading import Thread
 from api.models import ScanTask, ScanJob
 from scanner import ScanJobRunner
 from django.db.models import Q
-from django.core.urlresolvers import reverse
-from quipucords.settings import SERVER_URL
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -91,10 +89,9 @@ class Manager(Thread):
             Q(status=ScanTask.RUNNING) | Q(
                 status=ScanTask.PENDING) | Q(status=ScanTask.CREATED)
         ).order_by('-status')
-        fact_endpoint = SERVER_URL + reverse('facts-list')
         restarted_scan_count = 0
         for scanjob in incomplete_scans:
-            scanner = ScanJobRunner(scanjob, fact_endpoint)
+            scanner = ScanJobRunner(scanjob)
             logger.debug('Adding ScanJob(id=%d, status=%s, scan_type=%s)',
                          scanjob.id, scanjob.status, scanjob.scan_type)
             self.put(scanner)

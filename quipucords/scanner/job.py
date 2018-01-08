@@ -11,8 +11,10 @@
 """ScanJobRunner runs a group of scan tasks."""
 import logging
 from multiprocessing import Process
-import requests
 from django.db.models import Q
+from fingerprinter import pfc_signal
+from api.fact.util import (validate_fact_collection_json,
+                           create_fact_collection)
 from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
 from scanner import network, vcenter
 
@@ -24,12 +26,11 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ScanJobRunner(Process):
     """ScanProcess perform a group of scan tasks."""
 
-    def __init__(self, scan_job, fact_endpoint):
+    def __init__(self, scan_job):
         """Create discovery scanner."""
         Process.__init__(self)
         self.scan_job = scan_job
         self.identifier = scan_job.id
-        self.fact_endpoint = fact_endpoint
         self.conn_results = None
         self.inspect_results = None
 
@@ -53,7 +54,7 @@ class ScanJobRunner(Process):
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
         for scan_task in incomplete_scan_tasks:
-            runner = self.create_task_runner(scan_task)
+            runner = self._create_task_runner(scan_task)
             if not runner:
                 logger.error(
                     'Scan Job failed.  Scan task does not'
@@ -85,10 +86,10 @@ class ScanJobRunner(Process):
                 self.scan_job.fail()
 
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            fact_collection_id = self.send_facts()
+            fact_collection_id = self._send_facts_to_engine()
             if not fact_collection_id:
-                logger.error('Facts could not be sent to %s',
-                             self.fact_endpoint)
+                logger.error(
+                    'Error: Facts not sent to fingerprint engine.  See logs.')
                 self.scan_job.fail()
             else:
                 self.scan_job.fact_collection_id = fact_collection_id
@@ -100,7 +101,7 @@ class ScanJobRunner(Process):
         logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
 
-    def create_task_runner(self, scan_task):
+    def _create_task_runner(self, scan_task):
         """Create ScanTaskRunner using scan_type and source_type."""
         scan_type = scan_task.scan_type
         source_type = scan_task.source.source_type
@@ -123,7 +124,7 @@ class ScanJobRunner(Process):
                 self.scan_job, scan_task, self.inspect_results)
         return runner
 
-    def send_facts(self):
+    def _send_facts_to_engine(self):
         """Send collected host scan facts to fact endpoint.
 
         :param facts: The array of fact dictionaries
@@ -135,7 +136,7 @@ class ScanJobRunner(Process):
                     'sequence_number')
         sources = []
         for inspect_task in inspect_tasks.all():
-            runner = self.create_task_runner(inspect_task)
+            runner = self._create_task_runner(inspect_task)
             if runner:
                 task_facts = runner.get_facts()
                 if task_facts:
@@ -146,22 +147,27 @@ class ScanJobRunner(Process):
                     sources.append(source_dict)
 
         if bool(sources):
-            payload = {'sources': sources}
-            logger.info('Sending facts to %s', self.fact_endpoint)
-            logger.debug('Facts:  %s', payload)
-            response = requests.post(self.fact_endpoint, json=payload)
-            data = response.json()
-            msg = 'Failed to obtain fact_collection_id when reporting facts.'
-            if response.status_code != 201 or data.get('id') is None:
-                msg = '{} Error: {}'.format(msg, data)
-                logger.error(msg)
-            return data.get('id')
+            fact_collection_json = {'sources': sources}
+            has_errors, validation_result = validate_fact_collection_json(
+                fact_collection_json)
+
+            if has_errors:
+                logger.error('Scan producted invalid fact collection JSON: ')
+                logger.error(validation_result)
+                return None
+
+            # Create FC model and save data to JSON file
+            fact_collection = create_fact_collection(fact_collection_json)
+
+            # Send signal so fingerprint engine processes raw facts
+            pfc_signal.send(sender=self.__class__,
+                            instance=fact_collection)
+
+            return fact_collection.id
         else:
             logger.error('No facts gathered from scan.')
             return None
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'scan_job:{}, '\
-            'fact_endpoint: {}'.format(self.scan_job.id,
-                                       self.fact_endpoint) + '}'
+        return '{' + 'scan_job:{}, '.format(self.scan_job.id) + '}'

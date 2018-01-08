@@ -15,7 +15,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
@@ -197,9 +196,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
-        fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
-        start_scan.send(sender=self.__class__, instance=scanjob_obj,
-                        fact_endpoint=fact_endpoint)
+        start_scan.send(sender=self.__class__, instance=scanjob_obj)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)
@@ -291,11 +288,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         """Restart a paused scan."""
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanTask.PAUSED:
-            fact_endpoint = request.build_absolute_uri(reverse('facts-list'))
             scan.restart()
             restart_scan.send(sender=self.__class__,
-                              instance=scan,
-                              fact_endpoint=fact_endpoint)
+                              instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             expand_scanjob(scan, json_scan)

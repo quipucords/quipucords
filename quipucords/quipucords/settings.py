@@ -166,7 +166,7 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
-        'api.fact_collection_receiver': {
+        'fingerprinter': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
@@ -208,11 +208,6 @@ LOGGING = {
 # Elasticsearch env configuration
 USE_ELASTICSEARCH = os.environ.get('USE_ELASTICSEARCH', False)
 ES_HOSTS = os.environ.get('ES_HOSTS', 'http://localhost:9200')
-
-# Server deployment information
-SERVER_HOSTNAME = os.environ.get('SERVER_HOSTNAME', 'localhost')
-SERVER_PORT = os.environ.get('SERVER_PORT', 8000)
-SERVER_URL = 'http://{}:{}'.format(SERVER_HOSTNAME, SERVER_PORT)
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
