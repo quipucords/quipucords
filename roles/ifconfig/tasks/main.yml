@@ -1,0 +1,31 @@
+---
+
+- name: initialize ifconfig.mac-address
+  set_fact:
+    ifconfig_mac_address: "{{ None }}"
+
+- name: gather ifconfig.mac-address fact
+  raw: ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+  register: internal_ifconfig_mac_address_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for ifconfig.mac-address
+  set_fact:
+    ifconfig_mac_address: "{{  internal_ifconfig_mac_address_cmd['stdout_lines'] | default(None) }}"
+  when: '"stdout_lines" in internal_ifconfig_mac_address_cmd'
+
+- name: initialize ifconfig.ip-address
+  set_fact:
+    ifconfig_ip_address: "{{ None }}"
+
+- name: gather ifconfig.ip-address fact
+  raw: ifconfig -a | grep -Po 'inet \K[\d.]+' | grep -v '127.0.0.1'
+  register: internal_ifconfig_ip_address_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for ifconfig.ip-address
+  set_fact:
+    ifconfig_ip_address: "{{  internal_ifconfig_ip_address_cmd['stdout_lines'] | default(None) }}"
+  when: '"stdout_lines" in internal_ifconfig_ip_address_cmd'

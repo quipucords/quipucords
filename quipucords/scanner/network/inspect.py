@@ -139,9 +139,9 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :returns: An array of dictionaries of facts
         """
-        roles = ['check_dependencies', 'connection', 'cpu',
-                 'date', 'dmi', 'etc_release', 'file_contents',
-                 'jboss_eap', 'virt', 'virt_what', 'host_done']
+        roles = ['check_dependencies', 'connection', 'cpu', 'date',
+                 'dmi', 'etc_release', 'file_contents', 'jboss_eap',
+                 'ifconfig', 'uname', 'virt', 'virt_what', 'host_done']
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,

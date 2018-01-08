@@ -63,3 +63,19 @@
   set_fact:
     dmi_processor_family: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
   when: '"stdout" not in internal_dmi_processor_family_cmd'
+
+- name: gather dmi.system-uuid fact
+  raw: /usr/sbin/dmidecode -s system-uuid
+  register: internal_dmi_system_uuid_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for dmi.system-uuid
+  set_fact:
+    dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_system_uuid_cmd'
+
+- name: handle failure value for dmi.system-uuid
+  set_fact:
+    dmi_system_uuid: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_system_uuid_cmd'
