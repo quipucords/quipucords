@@ -141,7 +141,7 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         roles = ['check_dependencies', 'connection', 'cpu',
                  'date', 'dmi', 'etc_release', 'file_contents',
-                 'jboss_eap', 'virt', 'virt_what', 'host_done']
+                 'jboss_eap', 'virt', 'virt_what', 'ifconfig', 'host_done']
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,
