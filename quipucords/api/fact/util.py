@@ -36,7 +36,7 @@ def validate_fact_collection_json(fact_collection_json):
     """Validate fact_collection field.
 
     :param fact_collection_json: dict representing a fact collection
-    :returns: dict with bool indicating error and result.
+    :returns: bool indicating if there are errors and dict with result.
     """
     if not fact_collection_json.get(SOURCES_KEY):
         return True, {SOURCES_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
@@ -48,7 +48,8 @@ def _validate_sources_json(sources_json):
     """Validate sources field.
 
     :param sources_json: list of sources.  Each source is a dict.
-    :returns: dict with 2 lists.  Valid and invalid sources.
+    :returns: bool indicating if there are errors and
+    dict with 2 lists.  Valid and invalid sources.
     """
     valid_sources = []
     invalid_sources = []
@@ -70,7 +71,8 @@ def _validate_source_json(source_json):
     """Validate source fields.
 
     :param source_json: The dict representing facts for a source
-    :returns: None if no errors or a JSON dict with the errors
+    :returns: bool indicating if there are errors and
+    dict with error result or None.
     """
     invalid_field_obj = {}
     source_id = source_json.get(SOURCE_ID_KEY)
