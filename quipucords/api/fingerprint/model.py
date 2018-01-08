@@ -13,6 +13,7 @@
 
 from django.db import models
 from api.fact.model import FactCollection
+from api.source.model import Source
 
 
 class SystemFingerprint(models.Model):
@@ -25,6 +26,7 @@ class SystemFingerprint(models.Model):
 
     fact_collection_id = models.ForeignKey(FactCollection,
                                            models.CASCADE)
+    source_id = models.ForeignKey(Source, models.CASCADE)
 
     os_name = models.CharField(max_length=64, unique=False)
     os_release = models.CharField(max_length=128, unique=False)

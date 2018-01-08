@@ -13,7 +13,10 @@
 """API messages for translation."""
 
 # fact messages
-VALIDATE_FACTS_MSG = 'A least one fact is required.'
+FC_REQUIRED_ATTRIBUTE = 'Required. May not be null or empty.'
+FC_SOURCE_ID_NOT_INT = 'Must be an integer referencing source id.'
+FC_SOURCE_NOT_FOUND = 'Source with id=%d could not be found.'
+FC_MUST_BE_ONE_OF = 'Must be one of the following: %s'
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = 'Credentials'

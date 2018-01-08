@@ -130,19 +130,25 @@ class ScanJobRunner(Process):
         :returns: Identifer for the sent facts
         """
         inspect_tasks = self.scan_job.tasks.filter(
-            scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
-        facts = []
+            scan_type=ScanTask.SCAN_TYPE_INSPECT).filter(
+                source__source_type=Source.NETWORK_SOURCE_TYPE).order_by(
+                    'sequence_number')
+        sources = []
         for inspect_task in inspect_tasks.all():
             runner = self.create_task_runner(inspect_task)
             if runner:
                 task_facts = runner.get_facts()
                 if task_facts:
-                    facts = facts + task_facts
+                    source = inspect_task.source
+                    source_dict = {'source_id': source.id,
+                                   'source_type': source.source_type,
+                                   'facts': task_facts}
+                    sources.append(source_dict)
 
-        if bool(facts):
-            payload = {'facts': facts}
+        if bool(sources):
+            payload = {'sources': sources}
             logger.info('Sending facts to %s', self.fact_endpoint)
-            logger.debug('Facts:  %s', facts)
+            logger.debug('Facts:  %s', payload)
             response = requests.post(self.fact_endpoint, json=payload)
             data = response.json()
             msg = 'Failed to obtain fact_collection_id when reporting facts.'
