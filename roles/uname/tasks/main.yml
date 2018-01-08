@@ -7,9 +7,7 @@
 
 - name: add uname.os to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_os['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.os'
+    uname_os: "{{ uname_os['stdout_lines'][0] | default('error') }}"
 
 - name: gather uname.hostname fact
   raw: uname -n
@@ -18,9 +16,7 @@
 
 - name: add uname.hostname to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_hostname['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.hostname'
+    uname_hostname: "{{ uname_hostname['stdout_lines'][0] | default('error') }}"
 
 - name: gather uname.processor fact
   raw: uname -p
@@ -29,9 +25,7 @@
 
 - name: add uname.processor to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_processor['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.processor'
+    uname_processor: "{{ uname_processor['stdout_lines'][0] | default('error') }}"
 
 - name: gather uname.kernel fact
   raw: uname -r
@@ -40,9 +34,7 @@
 
 - name: add uname.kernel to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_kernel['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.kernel'
+    uname_kernel: "{{ uname_kernel['stdout_lines'][0] | default('error') }}"
 
 - name: gather uname.all fact
   raw: uname -a
@@ -51,9 +43,7 @@
 
 - name: add uname.all to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_all['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.all'
+    uname_all: "{{ uname_all['stdout_lines'][0] | default('error') }}"
 
 - name: gather uname.hardware_platform fact
   raw: uname -i
@@ -62,10 +52,4 @@
 
 - name: add uname.hardware_platform to dictionary
   set_fact:
-    uname: "{{ uname|default({}) | combine({ item: uname_hardware_platform['stdout_lines'][0] | default('error') }) }}"
-  with_items:
-  - 'uname.hardware_platform'
-
-- name: add uname dict to the facts dict
-  set_fact:
-    uname: "{{ uname|default({}) }}"
+    uname_hardware_platform: "{{ uname_hardware_platform['stdout_lines'][0] | default('error') }}"
