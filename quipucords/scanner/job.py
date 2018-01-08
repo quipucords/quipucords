@@ -14,9 +14,7 @@ from multiprocessing import Process
 from django.db.models import Q
 from fingerprinter import pfc_signal
 from api.fact.util import (validate_fact_collection_json,
-                           create_fact_collection,
-                           ERRORS_KEY,
-                           RESULT_KEY)
+                           create_fact_collection)
 from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
 from scanner import network, vcenter
 
@@ -150,12 +148,12 @@ class ScanJobRunner(Process):
 
         if bool(sources):
             fact_collection_json = {'sources': sources}
-            validation_result = validate_fact_collection_json(
+            has_errors, validation_result = validate_fact_collection_json(
                 fact_collection_json)
 
-            if validation_result[ERRORS_KEY]:
+            if has_errors:
                 logger.error('Scan producted invalid fact collection JSON: ')
-                logger.error(validation_result[RESULT_KEY])
+                logger.error(validation_result)
                 return None
 
             # Create FC model and save data to JSON file

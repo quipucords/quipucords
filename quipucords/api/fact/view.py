@@ -18,8 +18,6 @@ from api.models import FactCollection
 from api.serializers import FactCollectionSerializer
 from api.fact.util import (validate_fact_collection_json,
                            create_fact_collection,
-                           ERRORS_KEY,
-                           RESULT_KEY,
                            SOURCES_KEY,
                            VALID_SOURCES_KEY)
 from fingerprinter import pfc_signal
@@ -39,9 +37,10 @@ class FactViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
         # Validate incoming request body
-        validation_result = validate_fact_collection_json(request.data)
-        if validation_result[ERRORS_KEY]:
-            return Response(validation_result[RESULT_KEY],
+        has_errors, validation_result = validate_fact_collection_json(
+            request.data)
+        if has_errors:
+            return Response(validation_result,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Create FC model and save data to JSON file
@@ -50,7 +49,7 @@ class FactViewSet(mixins.CreateModelMixin,
         # Prepare REST response body
         serializer = self.get_serializer(fact_collection)
         result = serializer.data
-        result[SOURCES_KEY] = validation_result[RESULT_KEY][VALID_SOURCES_KEY]
+        result[SOURCES_KEY] = validation_result[VALID_SOURCES_KEY]
 
         # Send signal so fingerprint engine processes raw facts
         pfc_signal.send(sender=self.__class__,

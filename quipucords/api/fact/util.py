@@ -21,7 +21,6 @@ from api.models import Source, FactCollection
 
 
 ERRORS_KEY = 'errors'
-RESULT_KEY = 'result'
 INVALID_SOURCES_KEY = 'invalid_sources'
 VALID_SOURCES_KEY = 'valid_sources'
 
@@ -40,9 +39,7 @@ def validate_fact_collection_json(fact_collection_json):
     :returns: dict with bool indicating error and result.
     """
     if not fact_collection_json.get(SOURCES_KEY):
-        return {ERRORS_KEY: True,
-                RESULT_KEY: {
-                    SOURCES_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}}
+        return True, {SOURCES_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
 
     return _validate_sources_json(fact_collection_json.get(SOURCES_KEY))
 
@@ -55,18 +52,18 @@ def _validate_sources_json(sources_json):
     """
     valid_sources = []
     invalid_sources = []
+    has_errors = False
     for source_json in sources_json:
-        result = _validate_source_json(source_json)
-        if result[ERRORS_KEY]:
-            invalid_sources.append(result[RESULT_KEY])
+        source_error, result = _validate_source_json(source_json)
+        if source_error:
+            has_errors = True
+            invalid_sources.append(result)
         else:
             valid_sources.append(source_json)
 
-    has_errors = len(invalid_sources) > 0
-    return {ERRORS_KEY: has_errors,
-            RESULT_KEY: {
-                VALID_SOURCES_KEY: valid_sources,
-                INVALID_SOURCES_KEY: invalid_sources}}
+    return has_errors, {
+        VALID_SOURCES_KEY: valid_sources,
+        INVALID_SOURCES_KEY: invalid_sources}
 
 
 def _validate_source_json(source_json):
@@ -116,13 +113,12 @@ def _validate_source_json(source_json):
         invalid_field_obj[FACTS_KEY] = _(
             messages.FC_REQUIRED_ATTRIBUTE)
 
-    result = {ERRORS_KEY: has_error}
     if has_error:
         error_json = {}
         error_json[SOURCE_KEY] = source_json
         error_json[ERRORS_KEY] = invalid_field_obj
-        result[RESULT_KEY] = error_json
-    return result
+        return True, error_json
+    return False, None
 
 
 def create_fact_collection(fact_collection_json):

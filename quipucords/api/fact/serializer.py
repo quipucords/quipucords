@@ -11,9 +11,7 @@
 
 """Serializer for system facts models."""
 
-from rest_framework.serializers import (
-    ChoiceField,
-    JSONField)
+from rest_framework.serializers import JSONField
 from api.models import FactCollection
 from api.common.serializer import NotEmptySerializer
 
@@ -21,13 +19,10 @@ from api.common.serializer import NotEmptySerializer
 class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
-    status = ChoiceField(
-        choices=FactCollection.FC_STATUS_CHOICES,
-        read_only=True)
     sources = JSONField(required=False)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""
 
         model = FactCollection
-        fields = ['id', 'status', 'sources']
+        fields = ['id', 'sources']
