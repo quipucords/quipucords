@@ -1,0 +1,71 @@
+---
+
+- name: gather uname.os fact
+  raw: uname -s
+  register: uname_os
+  ignore_errors: yes
+
+- name: add uname.os to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_os['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.os'
+
+- name: gather uname.hostname fact
+  raw: uname -n
+  register: uname_hostname
+  ignore_errors: yes
+
+- name: add uname.hostname to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_hostname['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.hostname'
+
+- name: gather uname.processor fact
+  raw: uname -p
+  register: uname_processor
+  ignore_errors: yes
+
+- name: add uname.processor to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_processor['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.processor'
+
+- name: gather uname.kernel fact
+  raw: uname -r
+  register: uname_kernel
+  ignore_errors: yes
+
+- name: add uname.kernel to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_kernel['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.kernel'
+
+- name: gather uname.all fact
+  raw: uname -a
+  register: uname_all
+  ignore_errors: yes
+
+- name: add uname.all to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_all['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.all'
+
+- name: gather uname.hardware_platform fact
+  raw: uname -i
+  register: uname_hardware_platform
+  ignore_errors: yes
+
+- name: add uname.hardware_platform to dictionary
+  set_fact:
+    uname: "{{ uname|default({}) | combine({ item: uname_hardware_platform['stdout_lines'][0] | default('error') }) }}"
+  with_items:
+  - 'uname.hardware_platform'
+
+- name: add uname dict to the facts dict
+  set_fact:
+    uname: "{{ uname|default({}) }}"
