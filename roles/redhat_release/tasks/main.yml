@@ -1,0 +1,23 @@
+---
+
+- name: initialize redhat_release facts
+  set_fact:
+    redhat_release_name: 'N/A (rpm not found)'
+    redhat_release_version: 'N/A (rpm not found)'
+    redhat_release_release: 'N/A (rpm not found)'
+
+- name: gather internal_redhat_release fact
+  raw: rpm -q --queryformat "%{NAME}\n%{VERSION}\n%{RELEASE}\n" --whatprovides redhat-release
+  register: internal_redhat_release
+  ignore_errors: yes
+  when: 'internal_have_rpm'
+
+- name: set redhat_release facts based on internal_redhat_release
+  set_fact:
+    redhat_release_name: "{{ internal_redhat_release['stdout_lines'][0] }}"
+    redhat_release_version: "{{ internal_redhat_release['stdout_lines'][1] }}"
+    redhat_release_release: "{{ internal_redhat_release['stdout_lines'][2] }}"
+  ignore_errors: yes
+  when:
+    - "'stdout_lines' in internal_redhat_release"
+    - "internal_redhat_release['stdout_lines']|length == 3"
