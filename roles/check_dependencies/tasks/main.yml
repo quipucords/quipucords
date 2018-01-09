@@ -81,6 +81,15 @@
   set_fact:
     internal_have_locate: "{{ internal_have_locate_cmd.rc == 0 }}"
 
+- name: gather internal_have_systemctl
+  raw: command -v systemctl
+  register: internal_have_systemctl
+  ignore_errors: yes
+
+- name: set internal_have_systemctl
+  set_fact:
+    internal_have_systemctl: "{{ internal_have_systemctl.rc == 0 }}"
+
 - name: gather internal_have_ifconfig_cmd
   raw: command -v ifconfig
   register: internal_have_ifconfig_cmd
