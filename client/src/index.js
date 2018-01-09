@@ -7,7 +7,7 @@ import 'patternfly/dist/css/patternfly.css';
 import 'patternfly/dist/css/patternfly-additions.css';
 import './index.css';
 
-import App from './app';
+import App from './components/app';
 import store from './store';
 
 import registerServiceWorker from './registerServiceWorker';

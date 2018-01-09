@@ -1,3 +1,4 @@
+
 /**
  * Return array of objects that describe vertical menu
  * @return {array}
