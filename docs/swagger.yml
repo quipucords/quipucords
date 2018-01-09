@@ -28,7 +28,7 @@ paths:
     post:
       tags:
         - "Fact"
-      summary: "Publish facts from an environment scan"
+      summary: "Publish facts from environment scans"
       description: "Publish facts from environment scans"
       operationId: "publishFacts"
       consumes:
@@ -519,41 +519,71 @@ definitions:
         etc_release_name:
           type: "string"
           description: "The name of the operation system"
+          example: "Red Hat Enterprise Linux Server"
         etc_release_release:
           type: "string"
           description: "The release of the operating system"
+          example: "Red Hat Enterprise Linux Server release 6.7 (Santiago)"
         etc_release_version:
           type: "string"
           description: "The version of the operating system"
+          example: "6.7"
         connection_uuid:
           type: "string"
           description: "The UUID of the connection"
+          example: "abc7f26f-1234-57bd-85d8-de7617123456"
   FactCollectionIn:
     type: "object"
     required:
-      - facts
+      - sources
     properties:
-        facts:
+        sources:
           type: "array"
           items:
-            $ref: "#/definitions/SystemFact"
+            $ref: "#/definitions/FactCollectionSource"
           description: "The facts obtained during a scan"
+          minItems: 1
+
   FactCollectionOut:
     type: "object"
     required:
       - id
-      - facts
+      - sources
     properties:
         id:
           type: "integer"
           format: "int64"
           description: "The fact collection identifier"
+          example: 15
         facts:
           type: "array"
           items:
-            $ref: "#/definitions/SystemFact"
+            $ref: "#/definitions/FactCollectionSource"
           description: "The facts obtained during a scan"
-
+          minItems: 1
+  FactCollectionSource:
+    type: "object"
+    required:
+      - source_id
+      - source_type
+      - facts
+    properties:
+      source_id:
+        type: "integer"
+        description: "The source associated with these facts"
+        example: 12
+      source_type:
+        type: "string"
+        description: "The type of source used for scanning"
+        enum:
+          - network
+          - vcenter
+      facts:
+        type: "array"
+        items:
+          $ref: "#/definitions/SystemFact"
+        description: "The facts obtained during a scan for this source"
+        minItems: 1
   Credential:
     type: "object"
     required:
@@ -762,7 +792,6 @@ definitions:
             - connect
         options:
           $ref: "#/definitions/ScanOptions"
-          description: "The options used during a scan."
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"
@@ -836,7 +865,6 @@ definitions:
         description: "The name of the system (ip, hostname, etc.)"
       credential:
         $ref: "#/definitions/CredentialMin"
-        description: "The credential used to connect to the system."
       status:
         type: "string"
         description: "The status of the system connection."
@@ -852,7 +880,6 @@ definitions:
     properties:
       source:
         $ref: "#/definitions/SourceMin"
-        description: "The source associated with the connection scan."
       systems:
         type: "array"
         items:
@@ -900,7 +927,6 @@ definitions:
     properties:
       source:
         $ref: "#/definitions/SourceMin"
-        description: "The source associated with the connection scan."
       systems:
         type: "array"
         items:
