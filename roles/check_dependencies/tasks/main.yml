@@ -90,6 +90,15 @@
   set_fact:
     internal_have_systemctl: "{{ internal_have_systemctl.rc == 0 }}"
 
+- name: gather internal_have_chkconfig
+  raw: command -v chkconfig
+  register: internal_have_chkconfig
+  ignore_errors: yes
+
+- name: set internal_have_chkconfig
+  set_fact:
+    internal_have_chkconfig: "{{ internal_have_chkconfig.rc == 0 }}"
+
 - name: gather internal_have_ifconfig_cmd
   raw: command -v ifconfig
   register: internal_have_ifconfig_cmd
