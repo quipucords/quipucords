@@ -49,22 +49,14 @@ class ConnectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.conn_results = conn_results
 
-    def get_results(self):
-        """Access connection results."""
-        if not self.results or not self.conn_results:
-            # pylint: disable=no-member
-            self.results = ConnectionResult.objects.filter(
-                scan_task=self.scan_task.id).first()
-        return self.results
-
     def run(self):
         """Scan network range ang attempt connections."""
         logger.info('Connect scan task started for %s.', self.scan_task)
 
         # Remove results for this task if they exist
-        old_results = self.get_results()
+        old_results = self.get_result()
         if old_results:
-            self.results = None
+            self.result = None
             old_results.delete()
 
         try:
@@ -76,7 +68,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             return ScanTask.FAILED
 
         # Clear cache as results changed
-        self.results = None
+        self.result = None
 
         return ScanTask.COMPLETED
 

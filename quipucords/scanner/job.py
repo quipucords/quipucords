@@ -131,9 +131,7 @@ class ScanJobRunner(Process):
         :returns: Identifer for the sent facts
         """
         inspect_tasks = self.scan_job.tasks.filter(
-            scan_type=ScanTask.SCAN_TYPE_INSPECT).filter(
-                source__source_type=Source.NETWORK_SOURCE_TYPE).order_by(
-                    'sequence_number')
+            scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
         sources = []
         for inspect_task in inspect_tasks.all():
             runner = self._create_task_runner(inspect_task)
