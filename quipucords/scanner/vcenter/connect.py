@@ -90,14 +90,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.scan_task.systems_scanned = len(connected)
         self.scan_task.save()
 
-    def get_results(self):
-        """Access connection results."""
-        if not self.results or not self.conn_results:
-            # pylint: disable=no-member
-            self.results = ConnectionResult.objects.filter(
-                scan_task=self.scan_task.id).first()
-        return self.results
-
     def run(self):
         """Scan network range ang attempt connections."""
         source = self.scan_task.source

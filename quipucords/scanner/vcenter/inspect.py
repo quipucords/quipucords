@@ -58,13 +58,6 @@ class InspectTaskRunner(ScanTaskRunner):
         self.inspect_results = inspect_results
         self.connect_scan_task = None
 
-    def get_results(self):
-        """Access connection results."""
-        if not self.results or not self.inspect_results:
-            self.results = InspectionResult.objects.filter(
-                scan_task=self.scan_task.id).first()
-        return self.results
-
     def run(self):
         """Scan network range ang attempt connections."""
         source = self.scan_task.source
