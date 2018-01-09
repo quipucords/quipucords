@@ -1,0 +1,21 @@
+---
+
+- name: gather redhat-packages fact data
+  raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}|%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}|\n"
+  register: redhat_packages_results
+  ignore_errors: yes
+  when: internal_have_rpm
+
+- name: add redhat-packages.results to dictionary
+  set_fact:
+    redhat_packages: "{{ redhat_packages_results['stdout_lines'] | default([]) if internal_have_rpm else 'N/A (rpm not found)' }}"
+
+- name: gather redhat-packages.certs fact
+  raw: ls /etc/pki/product/ 2> /dev/null| grep '.pem'
+  register: redhat_packages_certs_cmd
+  ignore_errors: yes
+
+- name: extract result value for redhat-packages.certs
+  set_fact:
+    redhat_packages_certs: "{{  redhat_packages_certs_cmd['stdout'] | trim | default('error') }}"
+  when: '"stdout" in redhat_packages_certs_cmd'
