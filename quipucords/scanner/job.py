@@ -157,6 +157,10 @@ class ScanJobRunner(Process):
             # Create FC model and save data to JSON file
             fact_collection = create_fact_collection(fact_collection_json)
 
+            # Log facts that were gathered
+            logger.debug('Fact collection complete for scan job %s:' % self.scan_job.id)
+            logger.debug(fact_collection_json)
+
             # Send signal so fingerprint engine processes raw facts
             pfc_signal.send(sender=self.__class__,
                             instance=fact_collection)

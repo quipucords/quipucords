@@ -10,13 +10,8 @@
 
 - name: extract result value for subman.cpu.cpu(s)
   set_fact:
-    subman_cpu_cpu: "{{  internal_subman_cpu_cpu_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_cpu_cpu: "{{ internal_subman_cpu_cpu_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_cpu_cpu_cmd'
-
-- name: handle failure value for subman.cpu.cpu(s)
-  set_fact:
-    subman_cpu_cpu: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_cpu_cpu_cmd'
 
 # subman_cpu_core_per_socket fact
 - name: gather subman.cpu.core(s)_per_socket fact
@@ -28,13 +23,8 @@
 
 - name: extract result value for subman.cpu.core(s)_per_socket
   set_fact:
-    subman_cpu_core_per_socket: "{{  internal_subman_cpu_core_per_socket_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_cpu_core_per_socket: "{{  internal_subman_cpu_core_per_socket_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_cpu_core_per_socket_cmd'
-
-- name: handle failure value for subman.cpu.core(s)_per_socket
-  set_fact:
-    subman_cpu_core_per_socket: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_cpu_core_per_socket_cmd'
 
 # subman_cpu_cpu_socket fact
 - name: gather subman.cpu.cpu_socket(s) fact
@@ -46,13 +36,8 @@
 
 - name: extract result value for subman.cpu.cpu_socket(s)
   set_fact:
-    subman_cpu_cpu_socket: "{{  internal_subman_cpu_cpu_socket_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_cpu_cpu_socket: "{{  internal_subman_cpu_cpu_socket_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_cpu_cpu_socket_cmd'
-
-- name: handle failure value for subman.cpu.cpu_socket(s)
-  set_fact:
-    subman_cpu_cpu_socket: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_cpu_cpu_socket_cmd'
 
 # subman_virt_host_type fact
 - name: gather subman.virt.host_type fact
@@ -64,13 +49,8 @@
 
 - name: extract result value for subman.virt.host_type
   set_fact:
-    subman_virt_host_type: "{{  internal_subman_virt_host_type_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_virt_host_type: "{{  internal_subman_virt_host_type_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_virt_host_type_cmd'
-
-- name: handle failure value for subman.virt.host_type
-  set_fact:
-    subman_virt_host_type: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_virt_host_type_cmd'
 
 # subman_virt_is_guest fact
 - name: gather subman.virt.is_guest fact
@@ -82,13 +62,8 @@
 
 - name: extract result value for subman.virt.is_guest
   set_fact:
-    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout'] | string() | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout'] | string() | trim | default(None) }}"
   when: '"stdout" in internal_subman_virt_is_guest_cmd'
-
-- name: handle failure value for subman.virt.is_guest
-  set_fact:
-    subman_virt_is_guest: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: 'internal_subman_virt_is_guest_cmd is mapping and "stdout" not in internal_subman_virt_is_guest_cmd'
 
 # subman_virt_uuid fact
 - name: gather subman.virt.uuid fact
@@ -100,13 +75,8 @@
 
 - name: extract result value for subman.virt.uuid
   set_fact:
-    subman_virt_uuid: "{{  internal_subman_virt_uuid_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_virt_uuid: "{{  internal_subman_virt_uuid_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_virt_uuid_cmd'
-
-- name: handle failure value for subman.virt.is_guest
-  set_fact:
-    subman_virt_uuid: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_virt_uuid_cmd'
 
 # subman fact
 - name: gather subman.has_facts_file fact
@@ -117,7 +87,7 @@
 
 - name: add subman.has_facts_file to dictionary
   set_fact:
-    subman: "{{ subman|default({}) | combine({ item: internal_subman_has_facts_file['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }) }}"
+    subman: "{{ subman|default({}) | combine({ item: internal_subman_has_facts_file['stdout'] | trim | default(None) }) }}"
   with_items:
   - 'subman.has_facts_file'
 
@@ -131,10 +101,5 @@
 
 - name: extract result value for subman.consumed
   set_fact:
-    subman_consumed: "{{  internal_subman_consumed_cmd['stdout'] | trim | default('error') if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
+    subman_consumed: "{{  internal_subman_consumed_cmd['stdout'] | trim | default(None) }}"
   when: '"stdout" in internal_subman_consumed_cmd'
-
-- name: handle failure value for subman.consumed
-  set_fact:
-    subman_consumed: "{{ 'error' if internal_have_subscription_manager else 'N/A (subscription-manager not found)' }}"
-  when: '"stdout" not in internal_subman_consumed_cmd'
