@@ -1,6 +1,6 @@
 
 import * as types from '../constants/sourcesConstants';
-import sourcesApi from '../services/sourcesApi';
+import sourcesApi from '../../services/sourcesApi';
 
 const loadSourcesSuccess = data => ({
   type: types.LOAD_SOURCES_SUCCESS,
