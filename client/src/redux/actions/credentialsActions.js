@@ -1,6 +1,6 @@
 
 import * as types from '../constants/credentialsConstants';
-import credentialsApi from '../services/credentialsApi';
+import credentialsApi from '../../services/credentialsApi';
 
 const loadCredentialsSuccess = data => ({
   type: types.LOAD_CREDENTIALS_SUCCESS,

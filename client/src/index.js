@@ -8,7 +8,7 @@ import 'patternfly/dist/css/patternfly-additions.css';
 import './index.css';
 
 import App from './components/app';
-import store from './store';
+import store from './redux/store';
 
 import registerServiceWorker from './registerServiceWorker';
 
