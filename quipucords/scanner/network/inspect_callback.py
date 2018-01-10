@@ -90,10 +90,10 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def _finalize_host(self, host):
         facts = self._ansible_facts.get(host, {})
-        logger.debug('host scan complete for %s with facts %s',
-                     host, facts)
-
         results = initial_processing.process(facts)
+
+        logger.debug('host scan complete for %s with facts %s',
+                     host, results)
 
         # Update scan counts
         if self.scan_task is not None:

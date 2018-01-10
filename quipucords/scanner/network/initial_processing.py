@@ -31,7 +31,7 @@ def process(facts):
       Ansible result dictionaries.
 
     :returns: a dictionary of key, value pairs, where the values are
-      strings.
+      strings or None.
     """
     result = facts.copy()
 
@@ -75,8 +75,9 @@ def process(facts):
             result[key] = 'Error: {0}'.format(' '.join(processor_out.args))
             continue
 
-        result[key] = json.dumps(processor_out,
-                                 indent=' ', separators=(',', ':'))
+        # https://docs.python.org/3/library/json.html suggests that
+        # these separators will give the most compact representation.
+        result[key] = json.dumps(processor_out, separators=(',', ':'))
 
     return result
 
@@ -142,7 +143,7 @@ FIND_WARNING = 'find: WARNING: Hard link count is wrong for /proc: this may' \
 class ProcessJbossEapRunningPaths(Processor):
     """Process a list of JBoss EAP processes."""
 
-    KEY = 'internal_jboss_eap_running_paths'
+    KEY = 'jboss_eap_running_paths'
 
     DEPS = ['internal_have_java']
 
@@ -157,7 +158,7 @@ class ProcessJbossEapRunningPaths(Processor):
 class ProcessFindJboss(Processor):
     """Process the results of a find command."""
 
-    KEY = 'internal_jboss_eap_find_jboss_modules_jar'
+    KEY = 'jboss_eap_find_jboss_modules_jar'
 
     @staticmethod
     def process(output):
@@ -168,7 +169,7 @@ class ProcessFindJboss(Processor):
 class ProcessIdUJboss(Processor):
     """Process the results of 'id -u jboss'."""
 
-    KEY = 'internal_jboss_eap_id_jboss'
+    KEY = 'jboss_eap_id_jboss'
 
     RETURN_CODE_ANY = True
 

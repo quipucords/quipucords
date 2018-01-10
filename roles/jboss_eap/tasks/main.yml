@@ -72,7 +72,7 @@
 
     - name: set eap_home_bin
       set_fact:
-        eap_home_bin: "{{ internal_eap_home_bin['results'] }}"
+        eap_home_bin: "{{ internal_eap_home_bin }}"
 
     - name: check JBoss layers.conf
       raw: cat "{{ item }}"/modules/layers.conf
@@ -82,7 +82,7 @@
 
     - name: set eap_home_layers_conf
       set_fact:
-        eap_home_layers_conf: "{{ internal_eap_home_layers_conf['results'] }}"
+        eap_home_layers_conf: "{{ internal_eap_home_layers_conf }}"
 
     - name: check JBoss modules/system/layers
       raw: ls -1 "{{ item }}"/modules/system/layers
@@ -92,7 +92,7 @@
 
     - name: set eap_home_layers
       set_fact:
-        eap_home_layers: "{{ internal_eap_home_layers['results'] }}"
+        eap_home_layers: "{{ internal_eap_home_layers }}"
 
 # Tests that can indicate the presence of EAP, but don't let us
 # automatically locate EAP_HOME

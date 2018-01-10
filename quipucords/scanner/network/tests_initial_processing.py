@@ -148,18 +148,25 @@ class TestProcess(unittest.TestCase):
 
 
 class TestProcessorMeta(unittest.TestCase):
+    """Test the ProcessorMeta class."""
+
     def test_must_have_key(self):
+        """Require Processors to have a KEY."""
         with self.assertRaises(Exception):
-            ProcessorMeta('NewProcessor', (), {})
+            ip.ProcessorMeta('NewProcessor', (), {})
 
 
 class TestProcessJbossEapRunningPaths(unittest.TestCase):
+    """Test ProcessJbossEapRunningPaths."""
+
     def test_success_case(self):
+        """Strip spaces from good input."""
         self.assertEqual(
             ip.ProcessJbossEapRunningPaths.process(ansible_result(' good ')),
             'good')
 
     def test_find_warning(self):
+        """Fail if we get the special find warning string."""
         self.assertIsInstance(
             ip.ProcessJbossEapRunningPaths.process(
                 ansible_result(ip.FIND_WARNING)),
@@ -167,7 +174,10 @@ class TestProcessJbossEapRunningPaths(unittest.TestCase):
 
 
 class TestProcessFindJboss(unittest.TestCase):
+    """Test ProcessFindJBoss."""
+
     def test_success_case(self):
+        """Return stdout_lines in case of success."""
         self.assertEqual(
             ip.ProcessFindJboss.process(ansible_result('a\nb\nc')),
             ['a', 'b', 'c'])
