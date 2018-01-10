@@ -158,7 +158,7 @@ class ScanJobRunner(Process):
             fact_collection = create_fact_collection(fact_collection_json)
 
             # Log facts that were gathered
-            logger.debug('Fact collection complete for scan job %s:' %
+            logger.debug('Fact collection complete for scan job %s:',
                          self.scan_job.id)
             logger.debug(fact_collection_json)
 
