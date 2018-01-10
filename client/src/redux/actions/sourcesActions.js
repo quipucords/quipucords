@@ -2,22 +2,33 @@
 import * as types from '../constants/sourcesConstants';
 import sourcesApi from '../../services/sourcesApi';
 
-const loadSourcesSuccess = data => ({
+const sourcesError = bool => ({
+  type: types.LOAD_SOURCES_ERROR,
+  error: bool
+});
+
+const sourcesLoading = bool => ({
+  type: types.LOAD_SOURCES_LOADING,
+  loading: bool
+});
+
+const sourcesSuccess = data => ({
   type: types.LOAD_SOURCES_SUCCESS,
   data
 });
 
 const getSources = () => {
   return function(dispatch) {
-    return sourcesApi.getSources().then(success => {
-      dispatch(loadSourcesSuccess(success));
-    }).catch(error => {
-      throw(error);
-    });
+    return sourcesApi.getSources()
+      .then(success => {dispatch(sourcesSuccess(success))})
+      .catch(error => dispatch(sourcesError(true)))
+      .finally(() => dispatch(sourcesLoading(false)));
   };
 };
 
 export {
-  loadSourcesSuccess,
+  sourcesError,
+  sourcesLoading,
+  sourcesSuccess,
   getSources
 };
