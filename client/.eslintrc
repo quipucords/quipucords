@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      { "singleQuote": true, "trailingComma": "none" }
+    ]
+  },
+  "extends": [
+    "standard",
+    "standard-react",
+    "standard-jsx",
+    "prettier",
+    "prettier/react"
+  ],
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "plugins": ["prettier", "react"]
+}
