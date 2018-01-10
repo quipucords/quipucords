@@ -124,6 +124,7 @@ class InspectTaskRunner(ScanTaskRunner):
             'jboss_eap',
             'ifconfig',
             'redhat_release',
+            'subman',
             'uname',
             'virt',
             'virt_what',
