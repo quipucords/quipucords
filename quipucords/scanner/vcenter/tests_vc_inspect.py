@@ -97,19 +97,19 @@ class InspectTaskRunnerTest(TestCase):
         self.assertEqual(mac_addresses, ['mac0', 'mac1'])
         self.assertEqual(ip_addresses, ['ip0', 'ip1'])
 
-    def test_get_results_none(self):
-        """Test get results method when no results exist."""
-        results = self.runner.get_results()
+    def test__none(self):
+        """Test get result method when no results exist."""
+        results = self.runner.get_result()
         self.assertEqual(results, None)
 
-    def test_get_results(self):
+    def test_get_result(self):
         """Test get results method when results exist."""
         inspect_result = InspectionResult(source=self.source,
                                           scan_task=self.scan_task)
         inspect_result.save()
         self.inspect_results.results.add(inspect_result)
         self.inspect_results.save()
-        results = self.runner.get_results()
+        results = self.runner.get_result()
         self.assertEqual(results, inspect_result)
 
     # pylint: disable=too-many-locals

@@ -11,36 +11,94 @@
 
 """Fingerprint engine ingests raw facts and produces system finger prints."""
 
+import logging
 from datetime import datetime
+import django.dispatch
+from api.fact.util import read_raw_facts
+from api.models import FactCollection
+from api.serializers import FingerprintSerializer
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+# pylint: disable=unused-argument
+
+
+def process_fact_collection(sender, instance, **kwargs):
+    """Process the fact collection.
+
+    :param sender: Class that was saved
+    :param instance: FactCollection that was saved
+    :param facts: dict of raw facts
+    :param kwargs: Other args
+    :returns: None
+    """
+    raw_facts = read_raw_facts(instance.id)
+
+    # Invoke ENGINE to create fingerprints from facts
+    fingerprints_list = FINGERPRINT_ENGINE.process_sources(raw_facts)
+
+    for fingerprint_dict in fingerprints_list:
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            logger.error('%s could not persist fingerprint. SystemFacts: %s',
+                         __name__, fingerprint_dict)
+            logger.error('Errors: %s', serializer.errors)
+
+    # Mark completed because engine has process raw facts
+    instance.status = FactCollection.FC_STATUS_COMPLETE
+    instance.save()
 
 
 class Engine():
     """Engine that produces fingerprints from facts."""
 
-    # pylint: disable= no-self-use,too-many-branches,too-many-statements
-    def process_facts(self, fact_collection_id, facts):
+    # pylint: disable=no-self-use,too-many-branches,too-many-statements
+    # pylint: disable=too-few-public-methods
+
+    def process_sources(self, raw_facts):
+        """Process facts and convert to fingerprints.
+
+        :param raw_facts: Collected raw facts for all sources
+        :returns: list of fingerprints for all systems (all scans)
+        """
+        all_fingerprints = []
+        for source in raw_facts['sources']:
+            source_fingerprints = self._process_facts(
+                raw_facts['fact_collection_id'],
+                source['source_id'],
+                source['facts'])
+            all_fingerprints = all_fingerprints + source_fingerprints
+        print('number of fingerprints: %d' % len(all_fingerprints))
+        return all_fingerprints
+
+    def _process_facts(self, fact_collection_id, source_id, facts):
         """Process facts and convert to fingerprints.
 
         :param fact_collection_id: id of fact collection
         associated with facts
+        :param source_id: id of source associated with facts
         :param facts: facts to process
         :returns: fingerprints produced from facts
         """
         fingerprints = []
         for fact in facts:
-            fingerprints.append(self.process_fact(fact_collection_id, fact))
+            fingerprint = self._process_fact(fact)
+            fingerprint['fact_collection_id'] = fact_collection_id
+            fingerprint['source_id'] = source_id
+            fingerprints.append(fingerprint)
         return fingerprints
 
-    def process_fact(self, fact_collection_id, fact):
+    def _process_fact(self, fact):
         """Process a fact and convert to a fingerprint.
 
-        :param fact_collection_id: id of fact collection
         associated with facts
         :param facts: fact to process
         :returns: fingerprint produced from fact
         """
         # Set fact collection id
-        fingerprint = {'fact_collection_id': fact_collection_id}
+        fingerprint = {}
 
         # Set OS information
         if fact.get('etc_release_name'):
@@ -124,3 +182,12 @@ class Engine():
                 fact['virt_num_running_guests']
 
         return fingerprint
+
+
+FINGERPRINT_ENGINE = Engine()
+
+# pylint: disable=C0103
+pfc_signal = django.dispatch.Signal(providing_args=[
+    'instance'])
+
+pfc_signal.connect(process_fact_collection)

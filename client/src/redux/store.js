@@ -1,4 +1,6 @@
-import { createStore } from 'redux';
+
+import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
 
 import appReducer from './reducers/appReducer';
 
@@ -10,7 +12,8 @@ const hydrateStore = () => {
 
 const store = createStore(
   appReducer,
-  hydrateStore()
+  hydrateStore(),
+  applyMiddleware(thunkMiddleware)
 );
 
 export default store;

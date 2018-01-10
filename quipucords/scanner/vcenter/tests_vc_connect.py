@@ -51,11 +51,11 @@ class ConnectTaskRunnerTest(TestCase):
 
         self.source.hosts.add(self.host)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
+        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                   source=self.source, sequence_number=2)
         self.scan_task.save()
 
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
         self.conn_results = ConnectionResults(scan_job=self.scan_job)
@@ -122,19 +122,19 @@ class ConnectTaskRunnerTest(TestCase):
                     mock_get_vm_container.assert_called_once_with(ANY)
                     mock_names.assert_called_once_with(ANY)
 
-    def test_get_results_none(self):
-        """Test get results method when no results exist."""
-        results = self.runner.get_results()
+    def test_get_result_none(self):
+        """Test get result method when no results exist."""
+        results = self.runner.get_result()
         self.assertEqual(results, None)
 
-    def test_get_results(self):
-        """Test get results method when results exist."""
+    def test_get_result(self):
+        """Test get result method when results exist."""
         conn_result = ConnectionResult(source=self.source,
                                        scan_task=self.scan_task)
         conn_result.save()
         self.conn_results.results.add(conn_result)
         self.conn_results.save()
-        results = self.runner.get_results()
+        results = self.runner.get_result()
         self.assertEqual(results, conn_result)
 
     def test_failed_run(self):

@@ -1,3 +1,4 @@
+
 import cx from 'classnames'
 import React from 'react'
 
@@ -20,7 +21,7 @@ export const renderActions = () => (
   <div>
   <Button>Details</Button>
   </div>
-)
+);
 
 export const renderAdditionalInfoItems = itemProperties => {
   return (
@@ -31,7 +32,7 @@ export const renderAdditionalInfoItems = itemProperties => {
         'pficon-cluster': prop === 'clusters',
         'pficon-container-node': prop === 'nodes',
         'pficon-image': prop === 'images'
-      })
+      });
       return (
         <ListViewInfoItem key={prop}>
         <span className={classNames} />
@@ -40,4 +41,4 @@ export const renderAdditionalInfoItems = itemProperties => {
     )
     })
   )
-}
+};

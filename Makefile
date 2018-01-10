@@ -31,7 +31,7 @@ clean-cli:
 	-rm -rf dist/ build/ quipucords.egg-info/
 
 clean: clean-cli
-	rm -rf quipucords/api/migrations/*;rm quipucords/db.sqlite3
+	rm -rf quipucords/api/migrations/ quipucords/db.sqlite3 quipucords/raw_facts/*
 
 install: build
 	$(PYTHON) setup.py install -f
@@ -48,10 +48,10 @@ test-coverage:
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 

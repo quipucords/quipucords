@@ -11,6 +11,7 @@
 """Callback object for capturing ansible task execution."""
 
 import logging
+from django.db import transaction
 from ansible.plugins.callback import CallbackBase
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
@@ -56,73 +57,87 @@ class InspectResultCallback(CallbackBase):
             facts = {}
             for key, value in host_facts.items():
                 if key == 'host_done':
-                    facts = self._ansible_facts[host]
-                    logger.debug('host scan complete for %s with facts %s',
-                                 host, facts)
-
-                    # Update scan counts and save
-                    if self.scan_task is not None:
-                        self.scan_task.systems_scanned += 1
-                        self.scan_task.save()
-
-                    # Save facts for host
-                    sys_result = SystemInspectionResult(
-                        name=host, status=SystemInspectionResult.SUCCESS)
-                    sys_result.save()
-                    for result_key, result_value in facts.items():
-                        stored_fact = RawFact(name=result_key,
-                                              value=result_value)
-                        stored_fact.save()
-                        sys_result.facts.add(stored_fact)
-                    sys_result.save()
-
-                    inspect_result = self.inspect_results.results.filter(
-                        source__id=self.source.id).first()
-                    if inspect_result is None:
-                        inspect_result = InspectionResult(
-                            scan_task=self.scan_task, source=self.source)
-                        inspect_result.save()
-                    inspect_result.systems.add(sys_result)
-                    inspect_result.save()
-                    self.inspect_results.results.add(inspect_result)
-                    self.inspect_results.save()
-
+                    self._finalize_host(host)
                 elif not key.startswith('internal'):
                     facts[key] = value
+                # Facts starting with 'internal' are used only by the
+                # Ansible playbooks to compute other
+                # facts. Deliberately drop them here.
 
             if host in self._ansible_facts:
                 self._ansible_facts[host].update(facts)
             else:
                 self._ansible_facts[host] = facts
 
-    def v2_runner_on_unreachable(self, result):
-        """Print a json representation of the result."""
-        result_obj = _construct_result(result)
-        self.results.append(result_obj)
-        self._update_reachable_hosts(result_obj)
-        self.scan_task.systems_failed += 1
-        self.scan_task.status = ScanTask.FAILED
-        self.scan_task.save()
-        logger.warning('%s', result_obj)
-
-    def _update_reachable_hosts(self, result_obj):
-        unreachable_host = result_obj['host']
-        logger.error(
-            'Host %s is no longer reachable.  Moving host to failed results',
-            unreachable_host)
-
+    def _get_inspect_result(self):
+        # Have to save inspect_result (if creating it) because
+        # inspect_result.systems.add wants it to have a primary key
+        # first. This means that _inspect_result has to be part of any
+        # larger transaction that is updating the database.
         inspect_result = self.inspect_results.results.filter(
             source__id=self.source.id).first()
         if inspect_result is None:
             inspect_result = InspectionResult(
                 scan_task=self.scan_task, source=self.source)
             inspect_result.save()
+
+        return inspect_result
+
+    # Called after all fact collection is complete for host. Writing
+    # results needs to be atomic so that the host won't be marked
+    # as complete unless we actually save its results.
+    @transaction.atomic
+    def _finalize_host(self, host):
+        facts = self._ansible_facts.get(host, {})
+        logger.debug('host scan complete for %s with facts %s',
+                     host, facts)
+
+        # Update scan counts
+        if self.scan_task is not None:
+            self.scan_task.systems_scanned += 1
+            self.scan_task.save()
+
+        inspect_result = self._get_inspect_result()
+        sys_result = SystemInspectionResult(
+            name=host, status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
+
+        # Generate facts for host
+        for result_key, result_value in facts.items():
+            stored_fact = RawFact(name=result_key,
+                                  value=result_value)
+            stored_fact.save()
+            sys_result.facts.add(stored_fact)
+        sys_result.save()
+
+        self.inspect_results.results.add(inspect_result)
+        self.inspect_results.save()
+
+    # Make this atomic for the same reason as _finalize_host.
+    @transaction.atomic
+    def v2_runner_on_unreachable(self, result):
+        """Print a json representation of the result."""
+        result_obj = _construct_result(result)
+        self.results.append(result_obj)
+        logger.warning('%s', result_obj)
+
+        unreachable_host = result_obj['host']
+        logger.error(
+            'Host %s is no longer reachable.  Moving host to failed results',
+            unreachable_host)
+
+        self._get_inspect_result()
         sys_result = SystemInspectionResult(
             name=unreachable_host,
             status=SystemInspectionResult.UNREACHABLE)
         sys_result.save()
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
+
+        self.scan_task.systems_failed += 1
+        self.scan_task.status = ScanTask.FAILED
+        self.scan_task.save()
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""

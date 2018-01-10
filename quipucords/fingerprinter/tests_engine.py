@@ -21,6 +21,7 @@ class EngineTest(TestCase):
 
     # pylint: disable=no-self-use,too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
+    # pylint: disable=protected-access
 
     ################################################################
     # Helper function
@@ -95,27 +96,26 @@ class EngineTest(TestCase):
         engine = Engine()
         fact_collection = self._create_json_fc()
         fact = fact_collection['facts'][0]
-        fingerprints = engine.process_facts(fact_collection['id'],
-                                            fact_collection['facts'])
+        fingerprints = engine._process_facts(fact_collection['id'],
+                                             1,
+                                             fact_collection['facts'])
         fingerprint = fingerprints[0]
-        self.validate_result(
-            fact_collection['id'], fingerprint, fact)
+        self.validate_result(fingerprint, fact)
 
     def test_basic_engine_process_fact(self):
         """Test basic engine process_fact."""
         engine = Engine()
         fact_collection = self._create_json_fc()
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
-        self.validate_result(
-            fact_collection['id'], fingerprint, fact)
+        fingerprint = engine._process_fact(fact)
+        self.validate_result(fingerprint, fact)
 
     def test_create_yum(self):
         """Test date_yum_history used for sys create time."""
         engine = Engine()
         fact_collection = self._create_json_fc(date_yum_history='2015-07-18')
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         fact_date = datetime.strptime(fact['date_yum_history'], '%Y-%m-%d')
         fact_date = fact_date.date()
         self.assertEqual(fact_date, fingerprint['system_creation_date'])
@@ -125,7 +125,7 @@ class EngineTest(TestCase):
         engine = Engine()
         fact_collection = self._create_json_fc(virt_what_type='bare metal')
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertEqual('bare_metal', fingerprint['infrastructure_type'])
 
     def test_infrastructure_unknown(self):
@@ -137,7 +137,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             virt_what_type='foobar', virt_type=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertEqual('unknown', fingerprint['infrastructure_type'])
 
     def test_infrastructure_missing(self):
@@ -146,7 +146,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             virt_what_type=None, virt_type=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertEqual('unknown', fingerprint['infrastructure_type'])
 
     # Test missing fields
@@ -156,7 +156,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             etc_release_name=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('os_name', fingerprint)
 
     def test_os_version_missing(self):
@@ -165,7 +165,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             etc_release_version=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('os_version', fingerprint)
 
     def test_os_release_missing(self):
@@ -174,7 +174,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             etc_release_release=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('os_release', fingerprint)
 
     def test_connection_uuid_missing(self):
@@ -183,7 +183,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             connection_uuid=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('connection_uuid', fingerprint)
 
     def test_connection_host_missing(self):
@@ -192,7 +192,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             connection_host=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('connection_host', fingerprint)
 
     def test_connection_port_missing(self):
@@ -201,7 +201,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             connection_port=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('connection_port', fingerprint)
 
     def test_cpu_count_missing(self):
@@ -210,7 +210,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_count=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_count', fingerprint)
 
     def test_cpu_core_per_socket_missing(self):
@@ -219,7 +219,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_core_per_socket=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_core_per_socket', fingerprint)
 
     def test_cpu_siblings_missing(self):
@@ -228,7 +228,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_siblings=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_siblings', fingerprint)
 
     def test_cpu_hyperthreading_missing(self):
@@ -237,7 +237,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_hyperthreading=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_hyperthreading', fingerprint)
 
     def test_cpu_socket_count_missing(self):
@@ -246,7 +246,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_socket_count=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_socket_count', fingerprint)
 
     def test_cpu_core_count_missing(self):
@@ -255,7 +255,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             cpu_core_count=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('cpu_core_count', fingerprint)
 
     def test_virt_type_missing(self):
@@ -264,7 +264,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             virt_type=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('virtualization_type', fingerprint)
 
     def test_virt_num_guests_missing(self):
@@ -273,7 +273,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             virt_num_guests=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('virtualization_num_guests', fingerprint)
 
     def test_virt_num_running_guests_missing(self):
@@ -282,14 +282,11 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc(
             virt_num_running_guests=None)
         fact = fact_collection['facts'][0]
-        fingerprint = engine.process_fact(fact_collection['id'], fact)
+        fingerprint = engine._process_fact(fact)
         self.assertNotIn('virtualization_num_running_guests', fingerprint)
 
-    def validate_result(self, fc_id, fingerprint, fact):
+    def validate_result(self, fingerprint, fact):
         """Help to validate fields."""
-        self.assertEqual(fc_id,
-                         fingerprint['fact_collection_id'])
-
         self.assertEqual(fact['etc_release_name'], fingerprint['os_name'])
         self.assertEqual(fact['etc_release_release'],
                          fingerprint['os_release'])

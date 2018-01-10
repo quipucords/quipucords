@@ -111,3 +111,7 @@ migrations/
 
 # From ide
 .idea/
+
+# Facts
+raw_facts/
+

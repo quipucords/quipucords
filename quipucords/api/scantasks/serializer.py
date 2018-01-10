@@ -18,6 +18,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
 from api.models import Source, ScanTask
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
+from api.common.util import is_int, convert_to_int
 
 
 class SourceField(PrimaryKeyRelatedField):
@@ -25,11 +26,13 @@ class SourceField(PrimaryKeyRelatedField):
 
     def to_internal_value(self, data):
         """Create internal value."""
-        if not isinstance(data, int):
+        if not is_int(data):
             raise ValidationError(_(messages.SJ_SOURCE_IDS_INV))
-        actual_source = Source.objects.filter(id=data).first()
+        int_data = convert_to_int(data)
+        actual_source = Source.objects.filter(id=int_data).first()
         if actual_source is None:
-            raise ValidationError(_(messages.SJ_SOURCE_DO_NOT_EXIST % data))
+            raise ValidationError(
+                _(messages.SJ_SOURCE_DO_NOT_EXIST % int_data))
         return actual_source
 
     def display_value(self, instance):

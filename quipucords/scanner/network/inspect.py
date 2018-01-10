@@ -13,7 +13,6 @@ import logging
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.models import (ScanTask, ConnectionResult,
-                        InspectionResult,
                         SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback
@@ -60,31 +59,6 @@ class InspectTaskRunner(ScanTaskRunner):
         self.inspect_results = inspect_results
         self.connect_scan_task = None
 
-    def get_results(self):
-        """Access inspection results."""
-        if not self.results or not self.inspect_results:
-            self.results = InspectionResult.objects.filter(
-                scan_task=self.scan_task.id).first()
-        return self.results
-
-    def get_facts(self):
-        """Access inspection facts."""
-        if not self.facts:
-            temp_facts = []
-            system_results = self.get_results()
-            if system_results:
-                # Process all results that were save to db
-                for system_result in system_results.systems.all():
-                    fact = {}
-                    for raw_fact in system_result.facts.all():
-                        if raw_fact.value is None or raw_fact.value == '':
-                            continue
-                        fact[raw_fact.name] = raw_fact.value
-                    temp_facts.append(fact)
-
-            self.facts = temp_facts
-        return self.facts
-
     def run(self):
         """Scan target systems to collect facts.
 
@@ -117,9 +91,9 @@ class InspectTaskRunner(ScanTaskRunner):
                 return ScanTask.FAILED
 
             # Clear cache as results changed
-            self.results = None
+            self.result = None
 
-            logger.info('Inspect scan task completed: %s.',
+            logger.info('Inspect scan task %s completed.',
                         self.scan_task.id)
         except AnsibleError as ansible_error:
             logger.error(ansible_error)
@@ -139,9 +113,23 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :returns: An array of dictionaries of facts
         """
-        roles = ['check_dependencies', 'connection',
-                 'cpu', 'date', 'dmi', 'etc_release',
-                 'virt', 'virt_what', 'host_done']
+        roles = [
+            'check_dependencies',
+            'connection',
+            'cpu',
+            'date',
+            'dmi',
+            'etc_release',
+            'file_contents',
+            'jboss_eap',
+            'ifconfig',
+            'redhat_release',
+            'subman',
+            'uname',
+            'virt',
+            'virt_what',
+            'host_done',
+        ]
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,

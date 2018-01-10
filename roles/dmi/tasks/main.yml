@@ -2,64 +2,80 @@
 
 - name: gather dmi.bios-vendor fact
   raw: /usr/sbin/dmidecode -s bios-vendor
-  register: dmi_bios_vendor_cmd
+  register: internal_dmi_bios_vendor_cmd
   ignore_errors: yes
   become: yes
 
-# - name: extract result value for dmi.bios-vendor
-#   set_fact:
-#     dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" in internal_dmi_bios_vendor_cmd'
-#
-# - name: handle failure value for dmi.bios-vendor
-#   set_fact:
-#     dmi_bios_vendor: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" not in internal_dmi_bios_vendor_cmd'
-#
-# - name: gather dmi.bios-version fact
-#   raw: /usr/sbin/dmidecode -s bios-version
-#   register: internal_dmi_bios_version_cmd
-#   ignore_errors: yes
-#   become: yes
-#
-# - name: extract result value for dmi.bios-version
-#   set_fact:
-#     dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" in internal_dmi_bios_version_cmd'
-#
-# - name: handle failure value for dmi.bios-version
-#   set_fact:
-#     dmi_bios_version: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" not in internal_dmi_bios_version_cmd'
-#
-# - name: gather dmi.system-manufacturer fact
-#   raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
-#   register: internal_dmi_system_manufacturer_cmd
-#   ignore_errors: yes
-#   become: yes
-#
-# - name: extract result value for dmi.system-manufacturer
-#   set_fact:
-#     dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" in internal_dmi_system_manufacturer_cmd'
-#
-# - name: handle failure value for dmi.system-manufacturer
-#   set_fact:
-#     dmi_system_manufacturer: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" not in internal_dmi_system_manufacturer_cmd'
-#
-# - name: gather dmi.processor-family fact
-#   raw: /usr/sbin/dmidecode -s processor-family
-#   register: internal_dmi_processor_family_cmd
-#   ignore_errors: yes
-#   become: yes
-#
-# - name: extract result value for dmi.processor-family
-#   set_fact:
-#     dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" in internal_dmi_processor_family_cmd'
-#
-# - name: handle failure value for dmi.processor-family
-#   set_fact:
-#     dmi_processor_family: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
-#   when: '"stdout" not in internal_dmi_processor_family_cmd'
+- name: extract result value for dmi.bios-vendor
+  set_fact:
+    dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_bios_vendor_cmd'
+
+- name: handle failure value for dmi.bios-vendor
+  set_fact:
+    dmi_bios_vendor: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_bios_vendor_cmd'
+
+- name: gather dmi.bios-version fact
+  raw: /usr/sbin/dmidecode -s bios-version
+  register: internal_dmi_bios_version_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for dmi.bios-version
+  set_fact:
+    dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_bios_version_cmd'
+
+- name: handle failure value for dmi.bios-version
+  set_fact:
+    dmi_bios_version: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_bios_version_cmd'
+
+- name: gather dmi.system-manufacturer fact
+  raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  register: internal_dmi_system_manufacturer_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for dmi.system-manufacturer
+  set_fact:
+    dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_system_manufacturer_cmd'
+
+- name: handle failure value for dmi.system-manufacturer
+  set_fact:
+    dmi_system_manufacturer: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_system_manufacturer_cmd'
+
+- name: gather dmi.processor-family fact
+  raw: /usr/sbin/dmidecode -s processor-family
+  register: internal_dmi_processor_family_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for dmi.processor-family
+  set_fact:
+    dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_processor_family_cmd'
+
+- name: handle failure value for dmi.processor-family
+  set_fact:
+    dmi_processor_family: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_processor_family_cmd'
+
+- name: gather dmi.system-uuid fact
+  raw: /usr/sbin/dmidecode -s system-uuid
+  register: internal_dmi_system_uuid_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: extract result value for dmi.system-uuid
+  set_fact:
+    dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" in internal_dmi_system_uuid_cmd'
+
+- name: handle failure value for dmi.system-uuid
+  set_fact:
+    dmi_system_uuid: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+  when: '"stdout" not in internal_dmi_system_uuid_cmd'
