@@ -147,6 +147,32 @@ class TestProcess(unittest.TestCase):
             {INPUT_ERROR_KEY: 'Error: bad input!'})
 
 
+class TestProcessorMeta(unittest.TestCase):
+    def test_must_have_key(self):
+        with self.assertRaises(Exception):
+            ProcessorMeta('NewProcessor', (), {})
+
+
+class TestProcessJbossEapRunningPaths(unittest.TestCase):
+    def test_success_case(self):
+        self.assertEqual(
+            ip.ProcessJbossEapRunningPaths.process(ansible_result(' good ')),
+            'good')
+
+    def test_find_warning(self):
+        self.assertIsInstance(
+            ip.ProcessJbossEapRunningPaths.process(
+                ansible_result(ip.FIND_WARNING)),
+            Exception)
+
+
+class TestProcessFindJboss(unittest.TestCase):
+    def test_success_case(self):
+        self.assertEqual(
+            ip.ProcessFindJboss.process(ansible_result('a\nb\nc')),
+            ['a', 'b', 'c'])
+
+
 class TestProcessIdUJboss(unittest.TestCase):
     """Tests for 'id -u jboss'."""
 
@@ -203,6 +229,12 @@ class TestProcessJbossEapProcesses(unittest.TestCase):
             ip.ProcessJbossEapProcesses.process(ansible_result('1\n2\n3')),
             1)
 
+    def test_bad_data(self):
+        """Found too few processes."""
+        self.assertIsInstance(
+            ip.ProcessJbossEapProcesses.process(ansible_result('1')),
+            Exception)
+
 
 class TestProcessJbossEapPackages(unittest.TestCase):
     """Test looking for JBoss EAP rpm packages."""
@@ -239,8 +271,8 @@ class TestProcessJbossLocateJbossModulesJar(unittest.TestCase):
 class TestProcessEapHomeLs(unittest.TestCase):
     """Test listing EAP_HOME directories."""
 
-    def test_one_dir(self):
-        """A system with one EAP_HOME candidate."""
+    def test_three_states(self):
+        """A directory can go three ways."""
         extra_files = [
             'docs', 'installation', 'LICENSE.txt', 'welcome-content', 'bin',
             'domain', 'Uninstaller', 'bundles', 'icons', 'SHA256SUM']
@@ -248,11 +280,21 @@ class TestProcessEapHomeLs(unittest.TestCase):
         self.assertEqual(
             ip.ProcessEapHomeLs.process(
                 ansible_results([
+                    # dir1: ls was successful, directory has JBoss files.
                     {'item': 'dir1',
                      'stdout':
                      '\n'.join(extra_files +
-                               ip.ProcessEapHomeLs.INDICATOR_FILES)}])),
-            {'dir1': ip.ProcessEapHomeLs.INDICATOR_FILES})
+                               ip.ProcessEapHomeLs.INDICATOR_FILES)},
+                    # dir2: ls was unsuccessful. Output should be ignored.
+                    {'item': 'dir2',
+                     'rc': 1,
+                     'stdout': '\n'.join(ip.ProcessEapHomeLs.INDICATOR_FILES)},
+                    # dir3: ls was successful, directory has no JBoss files.
+                    {'item': 'dir3',
+                     'stdout': '\n'.join(extra_files)}])),
+            {'dir1': ip.ProcessEapHomeLs.INDICATOR_FILES,
+             'dir2': [],
+             'dir3': []})
 
 
 class TestProcessEapHomeCat(unittest.TestCase):
@@ -261,13 +303,20 @@ class TestProcessEapHomeCat(unittest.TestCase):
     cat_result = (
         'Red Hat JBoss Enterprise Application Platform - Version 6.4.0.GA')
 
-    def test_one_dir(self):
-        """A system with one EAP_HOME candidate."""
+    def test_three_dirs(self):
+        """A directory can have three outcomes."""
         self.assertEqual(
             ip.ProcessEapHomeCat.process(
-                ansible_results(
-                    [{'item': 'dir1', 'stdout': self.cat_result}])),
-            {'dir1': True})
+                ansible_results([
+                    # dir1: cat was successful, stdout has 'Red Hat' in it.
+                    {'item': 'dir1', 'stdout': self.cat_result},
+                    # dir2: cat was unsuccessful. Output should be ignored.
+                    {'item': 'dir2', 'rc': 1, 'stdout': self.cat_result},
+                    # dir3: cat was successful, output does not have 'Red Hat'.
+                    {'item': 'dir3', 'stdout': 'foo'}])),
+            {'dir1': True,
+             'dir2': False,
+             'dir3': False})
 
 
 class TestProcessJbossEapInitFiles(unittest.TestCase):
@@ -280,7 +329,8 @@ class TestProcessJbossEapInitFiles(unittest.TestCase):
         """No 'jboss' or 'eap' found."""
         for processor in self.processors:
             self.assertEqual(
-                processor.process(ansible_result('foo\nbar\nbaz')),
+                # Blank line in input to check that processor will skip it.
+                processor.process(ansible_result('foo\nbar\n\nbaz')),
                 [])
 
     def test_jboss(self):

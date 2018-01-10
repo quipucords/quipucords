@@ -227,7 +227,7 @@ class ProcessJbossEapProcesses(Processor):
         num_procs = len(output['stdout_lines'])
 
         if num_procs < 2:
-            return 'Error: bad result ({0} processes)'.format(num_procs)
+            return ValueError('bad result ({0} processes)'.format(num_procs))
 
         return num_procs - 2
 
@@ -240,9 +240,6 @@ class ProcessJbossEapPackages(Processor):
     @staticmethod
     def process(output):
         """Count the number of lines of output."""
-        if output['rc']:
-            return 'Error: pipeline returned non-zero status'
-
         return len(output['stdout_lines'])
 
 
@@ -254,10 +251,7 @@ class ProcessJbossEapLocate(Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        if not output['rc']:
-            return output['stdout_lines']
-
-        return ValueError('locate returned non-zero status')
+        return output['stdout_lines']
 
 
 class InitLineFinder(Processor):
@@ -319,7 +313,7 @@ class IndicatorFileFinder(Processor):
         for item in output['results']:
             directory = item['item']
             if item['rc']:
-                results[directory] = ''
+                results[directory] = []
                 continue
 
             files = item['stdout_lines']
