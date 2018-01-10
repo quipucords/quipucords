@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Store from '../../store';
+import Store from '../../redux/store';
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap'
 import './masthead.css'
 
