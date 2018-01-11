@@ -39,19 +39,23 @@ class Credential(models.Model):
     ssh_keyfile = models.CharField(max_length=1024, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
 
-    def is_encrypted(self):
+    def is_encrypted(self, field):
         """Check to see if the password is already encrypted."""
-        if '$ANSIBLE_VAULT' in self.password:
+        if '$ANSIBLE_VAULT' in field:
             return True
         return False
 
     def encrypt_fields(self):
         """Encrypt the sensitive fields of the object."""
-        if self.password and not self.is_encrypted():
+        # Uses is_encrypted() to make sure the password/sudo_password/
+        # passphrase is not already encrypted, which would be the case
+        # in partial_updates that do not update the password
+        # (as it grabs the old, encrypted one)
+        if self.password and not self.is_encrypted(self.password):
             self.password = encrypt_data_as_unicode(self.password)
-        if self.sudo_password:
+        if self.sudo_password and not self.is_encrypted(self.sudo_password):
             self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
-        if self.ssh_passphrase:
+        if self.ssh_passphrase and not self.is_encrypted(self.ssh_passphrase):
             self.ssh_passphrase = encrypt_data_as_unicode(self.ssh_passphrase)
 
     # pylint: disable=arguments-differ

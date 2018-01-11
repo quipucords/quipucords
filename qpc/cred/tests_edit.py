@@ -150,6 +150,25 @@ class CredentialEditCliTests(unittest.TestCase):
                 self.assertEqual(cred_out.getvalue(),
                                  'Credential "cred1" was updated\n')
 
+    def test_partial_edit_host_cred(self):
+        """Testing the edit credential command successfully."""
+        cred_out = StringIO()
+        url_get = BASE_URL + CREDENTIAL_URI
+        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
+                 'username': 'root'}]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get, status_code=200, json=data)
+            mocker.patch(url_patch, status_code=200)
+            aec = CredEditCommand(SUBPARSER)
+            args = Namespace(name='cred1', username='root', filename=TMP_KEY,
+                             password=None, sudo_password=None,
+                             ssh_passphrase=None)
+            with redirect_stdout(cred_out):
+                aec.main(args)
+                self.assertEqual(cred_out.getvalue(),
+                                 'Credential "cred1" was updated\n')
+
     def test_edit_vcenter_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
@@ -157,6 +176,25 @@ class CredentialEditCliTests(unittest.TestCase):
         url_patch = BASE_URL + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1',
                  'cred_type': VCENTER_CRED_TYPE, 'username': 'root',
+                 'password': '********'}]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get, status_code=200, json=data)
+            mocker.patch(url_patch, status_code=200)
+            aec = CredEditCommand(SUBPARSER)
+            args = Namespace(name='cred1', username='root',
+                             password=None)
+            with redirect_stdout(cred_out):
+                aec.main(args)
+                self.assertEqual(cred_out.getvalue(),
+                                 'Credential "cred1" was updated\n')
+
+    def test_partial_edit_vcenter_cred(self):
+        """Testing the edit credential command successfully."""
+        cred_out = StringIO()
+        url_get = BASE_URL + CREDENTIAL_URI
+        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        data = [{'id': 1, 'name': 'cred1',
+                 'cred_type': VCENTER_CRED_TYPE,
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
