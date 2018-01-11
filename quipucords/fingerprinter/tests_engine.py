@@ -13,7 +13,8 @@
 
 from datetime import datetime
 from django.test import TestCase
-from fingerprinter import Engine
+from fingerprinter import (Engine,
+                           remove_duplicate_systems)
 
 
 class EngineTest(TestCase):
@@ -97,7 +98,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc()
         fact = fact_collection['facts'][0]
         fingerprints = engine._process_facts(fact_collection['id'],
-                                             1,
+                                             1, 'network',
                                              fact_collection['facts'])
         fingerprint = fingerprints[0]
         self.validate_result(fingerprint, fact)
@@ -322,3 +323,62 @@ class EngineTest(TestCase):
                          fingerprint['virtualized_num_guests'])
         self.assertEqual(fact['virt_num_running_guests'],
                          fingerprint['virtualized_num_running_guests'])
+
+    def test_remove_duplicate_systems_one_key(self):
+        """Test removing duplicates with one id key."""
+        system1 = {'id': 1,
+                   'key1': 'value1',
+                   'key2': 'value2',
+                   'always_unique': 1}
+        system2 = {'id': 2,
+                   'key1': 'value1',
+                   'key2': 'value2',
+                   'always_unique': 2}
+        systems = [system1, system2]
+        unique_systems = remove_duplicate_systems(systems, ['always_unique'])
+        self.assertEqual(len(unique_systems), 2)
+
+        unique_systems = remove_duplicate_systems(systems, ['key1'])
+        self.assertEqual(len(unique_systems), 1)
+
+    def test_remove_duplicate_systems_two_key(self):
+        """Test removing duplicates with two id keys."""
+        system1 = {'id': 1,
+                   'key1': '1and2',
+                   'key2': 'value1'}
+        system2 = {'id': 2,
+                   'key1': '1and2',
+                   'key2': '2and3'}
+        system3 = {'id': 3,
+                   'key1': 'value3',
+                   'key2': '2and3'}
+        systems = [system1, system2, system3]
+
+        unique_systems = remove_duplicate_systems(systems, ['key1'])
+        self.assertEqual(len(unique_systems), 2)
+
+        unique_systems = remove_duplicate_systems(systems, ['key2'])
+        self.assertEqual(len(unique_systems), 2)
+
+        unique_systems = remove_duplicate_systems(systems, ['key1', 'key2'])
+        self.assertEqual(len(unique_systems), 1)
+
+    def test_remove_duplicate_systems_none_key_values(self):
+        """Test removing duplicates when system missing id key."""
+        system1 = {'id': 1,
+                   'key1': '1and2',
+                   'key2': 'value1'}
+        system2 = {'id': 2,
+                   'key1': '1and2'}
+        system3 = {'id': 3}
+        systems = [system1, system2, system3]
+
+        unique_systems = remove_duplicate_systems(systems, ['key1'])
+        self.assertEqual(len(unique_systems), 2)
+
+        unique_systems = remove_duplicate_systems(systems, ['key2'])
+        self.assertEqual(len(unique_systems), 3)
+
+        unique_systems = remove_duplicate_systems(
+            systems, ['id', 'key1', 'key2'])
+        self.assertEqual(len(unique_systems), 2)
