@@ -98,3 +98,14 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         self.perform_update(serializer)
         cred = mask_credential(serializer.data)
         return Response(cred)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Update (partially) a host credential."""
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        cred = mask_credential(serializer.data)
+        return Response(cred)

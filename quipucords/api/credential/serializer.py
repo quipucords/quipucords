@@ -113,7 +113,7 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        if not (password or ssh_keyfile):
+        if not (password or ssh_keyfile) and not self.partial:
             error = {
                 'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
             }
@@ -136,7 +136,7 @@ class CredentialSerializer(NotEmptySerializer):
             else:
                 attrs['ssh_keyfile'] = keyfile
 
-        if ssh_passphrase and not ssh_keyfile:
+        if ssh_passphrase and not ssh_keyfile and not self.partial:
             error = {
                 'ssh_passphrase': [_(messages.HC_NO_KEY_W_PASS)]
             }
