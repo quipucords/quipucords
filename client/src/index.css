@@ -3,3 +3,22 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.quipicords-list-view {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.quipicords-list-view .list-view-pf-description {
+  flex: 1 0 75%;
+}
+@media (min-width: 992px) {
+  .quipicords-list-view .list-view-pf-additional-info {
+    width: 25%;
+  }
+}
+
+button.unavailable:hover, li.unavailable > a:hover {
+  cursor: default;
+  opacity: 0;
+}
