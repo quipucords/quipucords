@@ -11,17 +11,21 @@
 
 import abc
 import json
+import logging
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # ### Conventions ####
 #
-# The processing functions return strings because that's what can fit
-# in a RawFact in our database. To keep things understandable,
-#   - All error strings start with 'Error:'
-#   - Everything else is JSON-encoded
+# The processing functions return strings or None because that's what
+# can fit in a RawFact in our database. Normal results are
+# JSON-encoded strings. In case of error, the result is '' and the
+# error is logged.
 
 # #### Infrastructure ####
 
 PROCESSORS = {}
+NO_DATA = ''  # Result value when we have errors.
 
 
 def process(facts):
@@ -31,7 +35,8 @@ def process(facts):
       Ansible result dictionaries.
 
     :returns: a dictionary of key, value pairs, where the values are
-      strings or None.
+      strings. They will either be JSON-encoded data, or the empty
+      string on errors.
     """
     result = facts.copy()
 
@@ -49,30 +54,29 @@ def process(facts):
                 if dep not in facts or \
                    not facts[dep] or \
                    isinstance(facts[dep], Exception):
-                    result[key] = 'Error: {0} missing dependency {1}'.format(
-                        key, dep)
+                    logger.error('Fact %s missing dependency %s',
+                                 key, dep)
+                    result[key] = NO_DATA
                     raise StopIteration()
         except StopIteration:
             continue
 
         if value.get('skipped', False):
-            result[key] = 'Error: {0} skipped, no results'.format(key)
+            logger.error('Fact %s skipped, no results', key)
+            result[key] = NO_DATA
             continue
 
         if value.get('rc', 0) and \
            not getattr(processor, 'RETURN_CODE_ANY', False):
-            result[key] = 'Error: remote command returned {0}'.format(
-                value['stdout'])
+            logger.error('Remote command returned %s', value['stdout'])
+            result[key] = NO_DATA
             continue
 
         try:
             processor_out = processor.process(value)
         except Exception as ex:  # pylint: disable=broad-except
-            result[key] = 'Error: processor returned {0}'.format(str(ex))
-            continue
-
-        if isinstance(processor_out, Exception):
-            result[key] = 'Error: {0}'.format(' '.join(processor_out.args))
+            logger.error('Processor returned %s', str(ex))
+            result[key] = NO_DATA
             continue
 
         # https://docs.python.org/3/library/json.html suggests that
@@ -127,9 +131,8 @@ class Processor(object, metaclass=ProcessorMeta):
           that each have 'rc', 'stdout', 'stdout_lines', and
           'item'.
 
-        :returns: a Python object that represents output. Will return
-          an instance of Exception if it can't find the expected
-          information.
+        :returns: a Python object that represents output. Returns
+          NO_DATA in case of error.
         """
         raise NotImplementedError()
 
@@ -145,13 +148,15 @@ class ProcessJbossEapRunningPaths(Processor):
 
     KEY = 'jboss_eap_running_paths'
 
-    DEPS = ['internal_have_java']
+    DEPS = ['have_java']
 
     @staticmethod
     def process(output):
         """Just preserve the output, except for a known issue."""
         if FIND_WARNING in output['stdout']:
-            return ValueError('find command failed')
+            logging.error('Find command failed')
+            return NO_DATA
+
         return output['stdout'].strip()
 
 
@@ -183,7 +188,8 @@ class ProcessIdUJboss(Processor):
         if plain_output.lower() == 'id: jboss: no such user':
             return False
 
-        return ValueError('unexpected output {0}'.format(plain_output))
+        logging.error('id: unexpected output %s', plain_output)
+        return NO_DATA
 
 
 class ProcessJbossEapCommonFiles(Processor):
@@ -228,7 +234,8 @@ class ProcessJbossEapProcesses(Processor):
         num_procs = len(output['stdout_lines'])
 
         if num_procs < 2:
-            return ValueError('bad result ({0} processes)'.format(num_procs))
+            logging.error('Bad result from ps (%s processes)', num_procs)
+            return NO_DATA
 
         return num_procs - 2
 
@@ -248,6 +255,8 @@ class ProcessJbossEapLocate(Processor):
     """Process the output of 'locate jboss-modules.jar'."""
 
     KEY = 'jboss_eap_locate_jboss_modules_jar'
+
+    DEPS = ['have_locate']
 
     @staticmethod
     def process(output):

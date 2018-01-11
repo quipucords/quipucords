@@ -38,7 +38,6 @@ NO_PROCESSOR_KEY = 'no_processor_key'
 TEST_KEY = 'test_key'
 DEPENDENT_KEY = 'dependent_key'
 PROCESSOR_ERROR_KEY = 'processor_error_key'
-INPUT_ERROR_KEY = 'input_error_key'
 
 
 # pylint: disable=too-few-public-methods
@@ -78,18 +77,6 @@ class MyErroringProcessor(ip.Processor):
         raise Exception('Something went wrong!')
 
 
-# pylint: disable=too-few-public-methods
-class MyInputErrorProcessor(ip.Processor):
-    """Processor that reports an input error."""
-
-    KEY = INPUT_ERROR_KEY
-
-    @staticmethod
-    def process(output):
-        """Report bad input."""
-        return Exception('bad input!')
-
-
 class TestProcess(unittest.TestCase):
     """Test the process() infrastructure."""
 
@@ -109,8 +96,7 @@ class TestProcess(unittest.TestCase):
         """Test a key whose processor is missing a dependency."""
         self.assertEqual(
             ip.process({DEPENDENT_KEY: ansible_result('')}),
-            {DEPENDENT_KEY:
-             'Error: dependent_key missing dependency no_processor_key'})
+            {DEPENDENT_KEY: ip.NO_DATA})
 
     def test_satisfied_dependency(self):
         """Test a key whose processor has a dependency, which is present."""
@@ -124,27 +110,19 @@ class TestProcess(unittest.TestCase):
         """Test a task that Ansible skipped."""
         self.assertEqual(
             ip.process({TEST_KEY: {'skipped': True}}),
-            {TEST_KEY: 'Error: test_key skipped, no results'})
+            {TEST_KEY: ip.NO_DATA})
 
     def test_task_errored(self):
         """Test a task that errored on the remote machine."""
         self.assertEqual(
             ip.process({TEST_KEY: ansible_result('error!', rc=1)}),
-            {TEST_KEY: 'Error: remote command returned error!'})
+            {TEST_KEY: ip.NO_DATA})
 
     def test_processor_errored(self):
         """Test a task where the processor itself errors."""
-        value = ip.process({PROCESSOR_ERROR_KEY: ansible_result('')})
-        self.assertIn(PROCESSOR_ERROR_KEY, value)
-        print('test_processor_errored:', value)
-        self.assertTrue(
-            value[PROCESSOR_ERROR_KEY].startswith('Error: processor returned'))
-
-    def test_input_error(self):
-        """Test a task where the processor rejects the remote results."""
         self.assertEqual(
-            ip.process({INPUT_ERROR_KEY: ansible_result('')}),
-            {INPUT_ERROR_KEY: 'Error: bad input!'})
+            ip.process({PROCESSOR_ERROR_KEY: ansible_result('')}),
+            {PROCESSOR_ERROR_KEY: ip.NO_DATA})
 
 
 class TestProcessorMeta(unittest.TestCase):
@@ -167,10 +145,10 @@ class TestProcessJbossEapRunningPaths(unittest.TestCase):
 
     def test_find_warning(self):
         """Fail if we get the special find warning string."""
-        self.assertIsInstance(
+        self.assertEqual(
             ip.ProcessJbossEapRunningPaths.process(
                 ansible_result(ip.FIND_WARNING)),
-            Exception)
+            ip.NO_DATA)
 
 
 class TestProcessFindJboss(unittest.TestCase):
@@ -201,10 +179,10 @@ class TestProcessIdUJboss(unittest.TestCase):
 
     def test_unknown_error(self):
         """'id' returned an error."""
-        self.assertIsInstance(
+        self.assertEqual(
             ip.ProcessIdUJboss.process(
                 ansible_result('something went wrong!', rc=1)),
-            Exception)
+            ip.NO_DATA)
 
 
 class TestProcessJbossCommonFiles(unittest.TestCase):
@@ -241,9 +219,9 @@ class TestProcessJbossEapProcesses(unittest.TestCase):
 
     def test_bad_data(self):
         """Found too few processes."""
-        self.assertIsInstance(
+        self.assertEqual(
             ip.ProcessJbossEapProcesses.process(ansible_result('1')),
-            Exception)
+            ip.NO_DATA)
 
 
 class TestProcessJbossEapPackages(unittest.TestCase):

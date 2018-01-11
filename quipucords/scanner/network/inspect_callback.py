@@ -110,6 +110,9 @@ class InspectResultCallback(CallbackBase):
 
         # Generate facts for host
         for result_key, result_value in results.items():
+            if result_value == initial_processing.NO_DATA:
+                continue
+
             stored_fact = RawFact(name=result_key,
                                   value=result_value)
             stored_fact.save()

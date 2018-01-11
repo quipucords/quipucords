@@ -32,9 +32,11 @@
   register: internal_have_java_cmd
   ignore_errors: yes
 
-- name: set internal_have_java
+# have_java is not internal because the inspect callback needs to
+# collect it and pass it to the postprocessor.
+- name: set have_java
   set_fact:
-    internal_have_java: "{{ internal_have_java_cmd.rc == 0 }}"
+    have_java: "{{ internal_have_java_cmd.rc == 0 }}"
 
 - name: gather internal_have_rpm_cmd
   raw: command -v rpm
@@ -77,9 +79,10 @@
   register: internal_have_locate_cmd
   ignore_errors: yes
 
-- name: set internal_have_locate
+# Not internal for the same reason as have_java.
+- name: set have_locate
   set_fact:
-    internal_have_locate: "{{ internal_have_locate_cmd.rc == 0 }}"
+    have_locate: "{{ internal_have_locate_cmd.rc == 0 }}"
 
 - name: gather internal_have_systemctl
   raw: command -v systemctl
