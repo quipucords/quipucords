@@ -1,4 +1,3 @@
-
 import * as types from '../constants/scansConstants';
 import scansApi from '../../services/scansApi';
 
@@ -9,15 +8,15 @@ const loadScansSuccess = data => ({
 
 const getScans = () => {
   return function(dispatch) {
-    return scansApi.getScans().then(success => {
-      dispatch(loadScansSuccess(success));
-    }).catch(error => {
-      throw(error);
-    });
+    return scansApi
+      .getScans()
+      .then(success => {
+        dispatch(loadScansSuccess(success));
+      })
+      .catch(error => {
+        throw error;
+      });
   };
 };
 
-export {
-  loadScansSuccess,
-  getScans
-};
+export { loadScansSuccess, getScans };
