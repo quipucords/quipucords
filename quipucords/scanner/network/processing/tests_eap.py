@@ -13,125 +13,9 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from scanner.network import initial_processing as ip
-
-
-def ansible_result(stdout, rc=0):  # pylint: disable=invalid-name
-    """Make an Ansible result dictionary for a successful result."""
-    return {'rc': rc,
-            'stdout': stdout,
-            'stdout_lines': stdout.splitlines()}
-
-
-def ansible_results(results):
-    """Make an Ansible result dictionary for a with_items task."""
-    return {'results':
-            [{'item': result['item'],
-              'stdout': result['stdout'],
-              'stdout_lines': result['stdout'].splitlines(),
-              'rc': result.get('rc', 0)}
-             for result in results]}
-
-
-NOT_A_KEY = 'not_a_key'
-NO_PROCESSOR_KEY = 'no_processor_key'
-TEST_KEY = 'test_key'
-DEPENDENT_KEY = 'dependent_key'
-PROCESSOR_ERROR_KEY = 'processor_error_key'
-
-
-# pylint: disable=too-few-public-methods
-class MyProcessor(ip.Processor):
-    """Basic test processor."""
-
-    KEY = TEST_KEY
-
-    @staticmethod
-    def process(output):
-        """Return 1 to distinguish from MyDependentProcessor."""
-        return 1
-
-
-# pylint: disable=too-few-public-methods
-class MyDependentProcessor(ip.Processor):
-    """Processor that depends on another key."""
-
-    KEY = DEPENDENT_KEY
-    DEPS = [NO_PROCESSOR_KEY]
-
-    @staticmethod
-    def process(output):
-        """Return 2 to distinguish from MyProcessor."""
-        return 2
-
-
-# pylint: disable=too-few-public-methods
-class MyErroringProcessor(ip.Processor):
-    """Processor that has an internal error."""
-
-    KEY = PROCESSOR_ERROR_KEY
-
-    @staticmethod
-    def process(output):
-        """Uh oh, this processor doesn't work."""
-        raise Exception('Something went wrong!')
-
-
-class TestProcess(unittest.TestCase):
-    """Test the process() infrastructure."""
-
-    def test_no_processing(self):
-        """Test a key that doesn't need to be processed."""
-        self.assertEqual(
-            ip.process({NOT_A_KEY: ansible_result('')}),
-            {NOT_A_KEY: ansible_result('')})
-
-    def test_simple_processor(self):
-        """Test a key whose processor succeeds."""
-        self.assertEqual(
-            ip.process({TEST_KEY: ansible_result('')}),
-            {TEST_KEY: '1'})
-
-    def test_missing_dependency(self):
-        """Test a key whose processor is missing a dependency."""
-        self.assertEqual(
-            ip.process({DEPENDENT_KEY: ansible_result('')}),
-            {DEPENDENT_KEY: ip.NO_DATA})
-
-    def test_satisfied_dependency(self):
-        """Test a key whose processor has a dependency, which is present."""
-        self.assertEqual(
-            ip.process({NO_PROCESSOR_KEY: 'result',
-                        DEPENDENT_KEY: ansible_result('')}),
-            {NO_PROCESSOR_KEY: 'result',
-             DEPENDENT_KEY: '2'})
-
-    def test_skipped_task(self):
-        """Test a task that Ansible skipped."""
-        self.assertEqual(
-            ip.process({TEST_KEY: {'skipped': True}}),
-            {TEST_KEY: ip.NO_DATA})
-
-    def test_task_errored(self):
-        """Test a task that errored on the remote machine."""
-        self.assertEqual(
-            ip.process({TEST_KEY: ansible_result('error!', rc=1)}),
-            {TEST_KEY: ip.NO_DATA})
-
-    def test_processor_errored(self):
-        """Test a task where the processor itself errors."""
-        self.assertEqual(
-            ip.process({PROCESSOR_ERROR_KEY: ansible_result('')}),
-            {PROCESSOR_ERROR_KEY: ip.NO_DATA})
-
-
-class TestProcessorMeta(unittest.TestCase):
-    """Test the ProcessorMeta class."""
-
-    def test_must_have_key(self):
-        """Require Processors to have a KEY."""
-        with self.assertRaises(Exception):
-            ip.ProcessorMeta('NewProcessor', (), {})
+from scanner.network.processing import process, eap
+from scanner.network.processing.test_util import ansible_result, \
+    ansible_results
 
 
 class TestProcessJbossEapRunningPaths(unittest.TestCase):
@@ -140,15 +24,16 @@ class TestProcessJbossEapRunningPaths(unittest.TestCase):
     def test_success_case(self):
         """Strip spaces from good input."""
         self.assertEqual(
-            ip.ProcessJbossEapRunningPaths.process(ansible_result(' good ')),
+            eap.ProcessJbossEapRunningPaths.process(
+                ansible_result(' good ')),
             'good')
 
     def test_find_warning(self):
         """Fail if we get the special find warning string."""
         self.assertEqual(
-            ip.ProcessJbossEapRunningPaths.process(
-                ansible_result(ip.FIND_WARNING)),
-            ip.NO_DATA)
+            eap.ProcessJbossEapRunningPaths.process(
+                ansible_result(eap.FIND_WARNING)),
+            process.NO_DATA)
 
 
 class TestProcessFindJboss(unittest.TestCase):
@@ -157,7 +42,7 @@ class TestProcessFindJboss(unittest.TestCase):
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         self.assertEqual(
-            ip.ProcessFindJboss.process(ansible_result('a\nb\nc')),
+            eap.ProcessFindJboss.process(ansible_result('a\nb\nc')),
             ['a', 'b', 'c'])
 
 
@@ -167,22 +52,22 @@ class TestProcessIdUJboss(unittest.TestCase):
     def test_user_found(self):
         """'id' found the user."""
         self.assertEqual(
-            ip.ProcessIdUJboss.process(ansible_result('11111')),
+            eap.ProcessIdUJboss.process(ansible_result('11111')),
             True)
 
     def test_no_such_user(self):
         """'id' did not find the user."""
         self.assertEqual(
-            ip.ProcessIdUJboss.process(
+            eap.ProcessIdUJboss.process(
                 ansible_result('id: jboss: no such user', rc=1)),
             False)
 
     def test_unknown_error(self):
         """'id' returned an error."""
         self.assertEqual(
-            ip.ProcessIdUJboss.process(
+            eap.ProcessIdUJboss.process(
                 ansible_result('something went wrong!', rc=1)),
-            ip.NO_DATA)
+            process.NO_DATA)
 
 
 class TestProcessJbossCommonFiles(unittest.TestCase):
@@ -191,7 +76,7 @@ class TestProcessJbossCommonFiles(unittest.TestCase):
     def test_three_states(self):
         """Test one file found, one not found, and one skipped."""
         self.assertEqual(
-            ip.ProcessJbossEapCommonFiles.process(
+            eap.ProcessJbossEapCommonFiles.process(
                 {'results': [
                     {'item': 'dir1',
                      'skipped': True},
@@ -208,20 +93,21 @@ class TestProcessJbossEapProcesses(unittest.TestCase):
     def test_no_processes(self):
         """No processes found."""
         self.assertEqual(
-            ip.ProcessJbossEapProcesses.process(ansible_result('', rc=1)),
+            eap.ProcessJbossEapProcesses.process(ansible_result('', rc=1)),
             0)
 
     def test_found_processes(self):
         """Found one process."""
         self.assertEqual(
-            ip.ProcessJbossEapProcesses.process(ansible_result('1\n2\n3')),
+            eap.ProcessJbossEapProcesses.process(
+                ansible_result('1\n2\n3')),
             1)
 
     def test_bad_data(self):
         """Found too few processes."""
         self.assertEqual(
-            ip.ProcessJbossEapProcesses.process(ansible_result('1')),
-            ip.NO_DATA)
+            eap.ProcessJbossEapProcesses.process(ansible_result('1')),
+            process.NO_DATA)
 
 
 class TestProcessJbossEapPackages(unittest.TestCase):
@@ -230,13 +116,13 @@ class TestProcessJbossEapPackages(unittest.TestCase):
     def test_found_packages(self):
         """Found some packages."""
         self.assertEqual(
-            ip.ProcessJbossEapPackages.process(ansible_result('a\nb\nc')),
+            eap.ProcessJbossEapPackages.process(ansible_result('a\nb\nc')),
             3)
 
     def test_no_packages(self):
         """No RPMs found."""
         self.assertEqual(
-            ip.ProcessJbossEapPackages.process(ansible_result('')),
+            eap.ProcessJbossEapPackages.process(ansible_result('')),
             0)
 
 
@@ -246,13 +132,13 @@ class TestProcessJbossLocateJbossModulesJar(unittest.TestCase):
     def test_success(self):
         """Found jboss-modules.jar."""
         self.assertEqual(
-            ip.ProcessJbossEapLocate.process(ansible_result('a\nb\nc')),
+            eap.ProcessJbossEapLocate.process(ansible_result('a\nb\nc')),
             ['a', 'b', 'c'])
 
     def test_not_found(self):
         """Did not find jboss-modules.jar."""
         self.assertEqual(
-            ip.ProcessJbossEapLocate.process(ansible_result('')),
+            eap.ProcessJbossEapLocate.process(ansible_result('')),
             [])
 
 
@@ -266,21 +152,22 @@ class TestProcessEapHomeLs(unittest.TestCase):
             'domain', 'Uninstaller', 'bundles', 'icons', 'SHA256SUM']
 
         self.assertEqual(
-            ip.ProcessEapHomeLs.process(
+            eap.ProcessEapHomeLs.process(
                 ansible_results([
                     # dir1: ls was successful, directory has JBoss files.
                     {'item': 'dir1',
                      'stdout':
                      '\n'.join(extra_files +
-                               ip.ProcessEapHomeLs.INDICATOR_FILES)},
+                               eap.ProcessEapHomeLs.INDICATOR_FILES)},
                     # dir2: ls was unsuccessful. Output should be ignored.
                     {'item': 'dir2',
                      'rc': 1,
-                     'stdout': '\n'.join(ip.ProcessEapHomeLs.INDICATOR_FILES)},
+                     'stdout': '\n'.join(
+                         eap.ProcessEapHomeLs.INDICATOR_FILES)},
                     # dir3: ls was successful, directory has no JBoss files.
                     {'item': 'dir3',
                      'stdout': '\n'.join(extra_files)}])),
-            {'dir1': ip.ProcessEapHomeLs.INDICATOR_FILES,
+            {'dir1': eap.ProcessEapHomeLs.INDICATOR_FILES,
              'dir2': [],
              'dir3': []})
 
@@ -294,7 +181,7 @@ class TestProcessEapHomeCat(unittest.TestCase):
     def test_three_dirs(self):
         """A directory can have three outcomes."""
         self.assertEqual(
-            ip.ProcessEapHomeCat.process(
+            eap.ProcessEapHomeCat.process(
                 ansible_results([
                     # dir1: cat was successful, stdout has 'Red Hat' in it.
                     {'item': 'dir1', 'stdout': self.cat_result},
@@ -310,8 +197,8 @@ class TestProcessEapHomeCat(unittest.TestCase):
 class TestProcessJbossEapInitFiles(unittest.TestCase):
     """Test looking for 'jboss' or 'eap' init files."""
 
-    processors = [ip.ProcessJbossEapChkconfig,
-                  ip.ProcessJbossEapSystemctl]
+    processors = [eap.ProcessJbossEapChkconfig,
+                  eap.ProcessJbossEapSystemctl]
 
     def test_no_jboss(self):
         """No 'jboss' or 'eap' found."""
