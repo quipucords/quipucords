@@ -5,21 +5,21 @@
       raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*"); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
       register: internal_jboss_eap_running_paths
       ignore_errors: yes
-      when: 'internal_have_java'
+      when: 'have_java'
 
     - name: set jboss_eap_running_paths
       set_fact:
-        jboss_eap_running_paths: "{{ internal_jboss_eap_running_paths.get('stdout_lines') }}"
+        jboss_eap_running_paths: "{{ internal_jboss_eap_running_paths }}"
 
     - name: use locate to look for jboss-modules.jar
       raw: locate jboss-modules.jar | xargs -n 1 dirname 2> /dev/null
       register: internal_jboss_eap_locate_jboss_modules_jar
       ignore_errors: yes
-      when: 'internal_have_locate'
+      when: 'have_locate'
 
     - name: set jboss_eap_locate_jboss_modules_jar
       set_fact:
-        jboss_eap_locate_jboss_modules_jar: "{{ internal_jboss_eap_locate_jboss_modules_jar.get('stdout_lines') }}"
+        jboss_eap_locate_jboss_modules_jar: "{{ internal_jboss_eap_locate_jboss_modules_jar }}"
 
     - name: use find to look for jboss-modules.jar
       raw: find {{scan_dirs}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 dirname 2> /dev/null | sort -u
@@ -50,7 +50,7 @@
 
     - name: set ls_eap_home
       set_fact:
-        ls_eap_home: "{{ internal_ls_eap_home['results'] }}"
+        ls_eap_home: "{{ internal_ls_eap_home }}"
 
     - name: get version.txt from EAP_HOME candidates
       raw: cat "{{ item }}"/version.txt
@@ -60,7 +60,7 @@
 
     - name: set eap_home_version_txt
       set_fact:
-        eap_home_version_txt: "{{ internal_eap_home_version_txt['results'] }}"
+        eap_home_version_txt: "{{ internal_eap_home_version_txt }}"
 
 # Look for fuse inside EAP_HOME directories
 
@@ -72,7 +72,7 @@
 
     - name: set eap_home_bin
       set_fact:
-        eap_home_bin: "{{ internal_eap_home_bin['results'] }}"
+        eap_home_bin: "{{ internal_eap_home_bin }}"
 
     - name: check JBoss layers.conf
       raw: cat "{{ item }}"/modules/layers.conf
@@ -82,7 +82,7 @@
 
     - name: set eap_home_layers_conf
       set_fact:
-        eap_home_layers_conf: "{{ internal_eap_home_layers_conf['results'] }}"
+        eap_home_layers_conf: "{{ internal_eap_home_layers_conf }}"
 
     - name: check JBoss modules/system/layers
       raw: ls -1 "{{ item }}"/modules/system/layers
@@ -92,7 +92,7 @@
 
     - name: set eap_home_layers
       set_fact:
-        eap_home_layers: "{{ internal_eap_home_layers['results'] }}"
+        eap_home_layers: "{{ internal_eap_home_layers }}"
 
 # Tests that can indicate the presence of EAP, but don't let us
 # automatically locate EAP_HOME
@@ -123,7 +123,7 @@
 
     - name: set jboss_eap_common_files
       set_fact:
-        jboss_eap_common_files: "{{ internal_jboss_eap_common_files['results'] }}"
+        jboss_eap_common_files: "{{ internal_jboss_eap_common_files }}"
 
     - name: gather jboss.eap.processes
       raw: ps -A -f e | grep eap
@@ -132,7 +132,7 @@
 
     - name: set jboss_eap_processes
       set_fact:
-        jboss_eap_processes: "{{ internal_jboss_eap_processes['stdout_lines'] }}"
+        jboss_eap_processes: "{{ internal_jboss_eap_processes }}"
 
     - name: check for jboss packages
       raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}\n" | grep -E '(eap7)|(jbossas)' | sort
@@ -141,7 +141,7 @@
 
     - name: set jboss_eap_packages
       set_fact:
-        jboss_eap_packages: "{{ internal_jboss_eap_packages['stdout_lines'] }}"
+        jboss_eap_packages: "{{ internal_jboss_eap_packages }}"
 
     - name: check for user 'jboss'
       raw: id -u jboss
@@ -150,7 +150,7 @@
 
     - name: set jboss_eap_id_jboss
       set_fact:
-        jboss_eap_id_jboss: "{{ internal_jboss_eap_id_jboss['stdout'] }}"
+        jboss_eap_id_jboss: "{{ internal_jboss_eap_id_jboss }}"
 
     - name: look for jboss systemd service
       raw: systemctl list-unit-files --no-pager
@@ -160,7 +160,7 @@
 
     - name: set jboss_eap_systemctl_unit_files
       set_fact:
-        jboss_eap_systemctl_unit_files: "{{ internal_jboss_eap_systemctl_unit_files['stdout'] }}"
+        jboss_eap_systemctl_unit_files: "{{ internal_jboss_eap_systemctl_unit_files }}"
 
     - name: look for jboss in chkconfig
       raw: chkconfig
@@ -170,4 +170,4 @@
 
     - name: set jboss_eap_chkconfig
       set_fact:
-        jboss_eap_chkconfig: "{{ internal_jboss_eap_chkconfig['stdout'] }}"
+        jboss_eap_chkconfig: "{{ internal_jboss_eap_chkconfig }}"
