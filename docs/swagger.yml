@@ -190,6 +190,50 @@ paths:
           in: "query"
           description: "The Fact Collection ID to be queried"
           type: "string"
+        - name: "group_count"
+          in: "query"
+          description: "The field to group and count on. Cannot be used with other filters."
+          type: "string"
+        - name: "source_type"
+          in: "query"
+          description: "Present the value for source_type."
+          type: "boolean"
+        - name: "os_name"
+          in: "query"
+          description: "Present the value for os_name."
+          type: "boolean"
+        - name: "os_release"
+          in: "query"
+          description: "Present the value for os_release."
+          type: "boolean"
+        - name: "cpu_socket_count"
+          in: "query"
+          description: "Present the value for cpu_socket_count."
+          type: "boolean"
+        - name: "system_creation_date"
+          in: "query"
+          description: "Present the value for system_creation_date."
+          type: "boolean"
+        - name: "infrastructure_type"
+          in: "query"
+          description: "Present the value for infrastructure_type."
+          type: "boolean"
+        - name: "vm_host"
+          in: "query"
+          description: "Present the value for vm_host."
+          type: "boolean"
+        - name: "vm_host_socket_count"
+          in: "query"
+          description: "Present the value for vm_host_socket_count."
+          type: "boolean"
+        - name: "vm_cluster"
+          in: "query"
+          description: "Present the value for vm_cluster."
+          type: "boolean"
+        - name: "vm_datacenter"
+          in: "query"
+          description: "Present the value for vm_datacenter."
+          type: "boolean"
       responses:
         200:
           description: "List of reports for scanned systems"
@@ -643,17 +687,100 @@ definitions:
             format: "int64"
   SystemReport:
     type: "object"
-    required:
-      - os_release
-      - count
     properties:
+        id:
+          type: "integer"
+          format: "int64"
+          description: "Fingerprint database identifier"
+        fact_collection_id:
+            type: "integer"
+            format: "int64"
+            description: "Fact collection identifier"
+        source_id:
+            type: "integer"
+            format: "int64"
+            description: "Source identifier"
+        source_type:
+          type: "string"
+          enum:
+            - network
+            - vcenter
+          description: "The source type"
+        bios_uuid:
+          type: "string"
+          description: "The system bios uuid"
+        subscription_manager_id:
+          type: "string"
+          description: "The subscription manager identitifer"
+        os_name:
+          type: "string"
+          description: "The operating system name"
+        os_version:
+          type: "string"
+          description: "The operating system version"
         os_release:
           type: "string"
           description: "The operating system release"
+        cpu_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpus"
+        cpu_socket_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpu sockets"
+        cpu_core_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpu cores"
+        cpu_hyperthreading:
+          type: "boolean"
+          description: "cpu hyperthreading"
+        cpu_core_per_socket:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpu cores per socket"
+        system_creation_date:
+          type: "string"
+          description: "The system creation date"
+        infrastructure_type:
+          type: "string"
+          enum:
+            - virtualized
+            - bare_metal
+            - unknown
+          description: "The infrastructure type"
+        virtualized_is_guest:
+          type: "boolean"
+          description: "Is system a virtualized guest"
+        virtualized_type:
+          type: "string"
+          description: "The type of virtualization system"
+        virtualized_num_guests:
+          type: "integer"
+          format: "int64"
+          description: "The number of virtualized guests"
+        virtualized_num_running_guests:
+          type: "integer"
+          format: "int64"
+          description: "The number of running virtualized guests"
+        virtualized_host:
+          type: "string"
+          description: "The virtualized host name"
+        virtualized_host_socket_count:
+          type: "integer"
+          format: "int64"
+          description: "The number of cpu sockets on the virtualized host"
+        virtualized_cluster:
+          type: "string"
+          description: "The virtualized cluster name"
+        virtualized_datacenter:
+          type: "string"
+          description: "The virtualized datacenter name"
         count:
           type: "integer"
           format: "int64"
-          description: "The number of times this operating system appears in the scanned environment"
+          description: "The number of times a grouped field appears in the scanned environment"
   SystemReportOut:
     properties:
         fact_collection_id:

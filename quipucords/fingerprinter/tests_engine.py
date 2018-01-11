@@ -98,7 +98,7 @@ class EngineTest(TestCase):
         fact_collection = self._create_json_fc()
         fact = fact_collection['facts'][0]
         fingerprints = engine._process_facts(fact_collection['id'],
-                                             1,
+                                             1, 'network',
                                              fact_collection['facts'])
         fingerprint = fingerprints[0]
         self.validate_result(fingerprint, fact)

@@ -99,9 +99,9 @@ class SystemReportTest(TestCase):
         fact_collection = self.create_fact_collection_expect_201(fc_json)
         return fact_collection
 
-    def test_get_report_list(self):
-        """Create fact collection object via API."""
-        url = '/api/v1/reports/'
+    def test_get_group_count_report_list(self):
+        """Get a group count report for all collections."""
+        url = '/api/v1/reports/?group_count=os_release'
 
         # Create a system fingerprint via fact collection receiver
         self.generate_fingerprints(
@@ -116,8 +116,8 @@ class SystemReportTest(TestCase):
         self.assertEqual(report_list[0]['report'][0]['count'], 2)
         self.assertEqual(report_list[0]['report'][1]['count'], 1)
 
-    def test_get_fact_collection_report(self):
-        """Create fact collection object via API."""
+    def test_get_fact_collection_group_report_count(self):
+        """Get a specific group count report."""
         url = '/api/v1/reports/'
 
         # Create a system fingerprint via collection receiver
@@ -125,15 +125,51 @@ class SystemReportTest(TestCase):
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        response = self.client.get(url, {'fact_collection_id': 1})
+        filters = {'fact_collection_id': 1, 'group_count': 'os_release'}
+        response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
         self.assertEqual(report['report'][0]['count'], 2)
         self.assertEqual(report['report'][1]['count'], 1)
 
+    def test_get_fact_collection_group_report(self):
+        """Get a specific group count report."""
+        url = '/api/v1/reports/'
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+
+        # Query API
+        filters = {'fact_collection_id': 1}
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+        self.assertIsInstance(report, dict)
+        self.assertEqual(len(report['report'][0].keys()), 24)
+
+    def test_get_fact_collection_filter_report(self):
+        """Get a specific group count report with filter."""
+        url = '/api/v1/reports/'
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+
+        # Query API
+        filters = {'fact_collection_id': 1,
+                   'os_name': True,
+                   'os_release': 'true'}
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+        self.assertIsInstance(report, dict)
+        self.assertEqual(report['report'][0],
+                         {'os_name': 'RHEL', 'os_release': 'RHEL 7.4'})
+
     def test_get_fact_collection_404(self):
-        """Create fact collection object via API."""
+        """Fail to get a report for missing collection."""
         url = '/api/v1/reports/'
 
         # Create a system fingerprint via collection receiver
@@ -143,3 +179,43 @@ class SystemReportTest(TestCase):
         # Query API
         response = self.client.get(url, {'fact_collection_id': 2})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_group_count_400_invalid_field(self):
+        """Fail to get report with invalid field for group_count."""
+        url = '/api/v1/reports/'
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+
+        # Query API
+        response = self.client.get(url, {'group_count': 'no_field'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_group_count_invalid_combo_400(self):
+        """Fail to get report due to invalid filter combo."""
+        url = '/api/v1/reports/'
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+
+        # Query API
+        filters = {'group_count': 'os_release', 'os_name': 'true'}
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_group_count_invalid_combo2_400(self):
+        """Fail to get report due to invalid filter combo."""
+        url = '/api/v1/reports/'
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+
+        # Query API
+        filters = {'fact_collection_id': 1,
+                   'group_count': 'os_release',
+                   'os_name': 'true'}
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

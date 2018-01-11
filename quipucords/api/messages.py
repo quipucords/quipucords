@@ -106,3 +106,9 @@ ALREADY_RUNNING = 'Scan cannot be restarted. ' \
 COMMON_CHOICE_STR = 'Must be a string. Valid values are %s.'
 COMMON_CHOICE_BLANK = 'This field may not be blank. Valid values are %s.'
 COMMON_CHOICE_INV = '%s, is an invalid choice. Valid values are %s.'
+
+# report messages
+REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \
+    'other filters other than fact_collection_id.'
+REPORT_GROUP_COUNT_FIELD = 'The group_count filter cannot be used with ' \
+    'the invalid filter key %s.'

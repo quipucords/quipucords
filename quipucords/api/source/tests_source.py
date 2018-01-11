@@ -346,8 +346,6 @@ class SourceTest(TestCase):
         response = self.client.get(
             url, {'source_type': Source.VCENTER_SOURCE_TYPE})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_json = response.json()
-        print(response_json)
 
         content = response.json()
         expected = [
@@ -465,7 +463,6 @@ class SourceTest(TestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_rsp = response.json()
-        print(json_rsp)
         self.assertEqual(json_rsp['hosts'][0],
                          messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
 

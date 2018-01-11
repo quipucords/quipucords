@@ -99,18 +99,21 @@ class Engine():
             source_fingerprints = self._process_facts(
                 raw_facts['fact_collection_id'],
                 source['source_id'],
+                source['source_type'],
                 source['facts'])
             all_fingerprints = all_fingerprints + source_fingerprints
         logger.debug('FactCollection %d produced %d fingerprints',
                      fact_collection.id, len(all_fingerprints))
         return all_fingerprints
 
-    def _process_facts(self, fact_collection_id, source_id, facts):
+    def _process_facts(self, fact_collection_id, source_id,
+                       source_type, facts):
         """Process facts and convert to fingerprints.
 
         :param fact_collection_id: id of fact collection
         associated with facts
         :param source_id: id of source associated with facts
+        :param source_type: the type of source (network, vcenter, etc)
         :param facts: facts to process
         :returns: fingerprints produced from facts
         """
@@ -119,6 +122,7 @@ class Engine():
             fingerprint = self._process_fact(fact)
             fingerprint['fact_collection_id'] = fact_collection_id
             fingerprint['source_id'] = source_id
+            fingerprint['source_type'] = source_type
             fingerprints.append(fingerprint)
         return fingerprints
 
