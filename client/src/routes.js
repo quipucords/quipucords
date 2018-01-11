@@ -1,19 +1,18 @@
-
 /**
  * Return array of objects that describe vertical menu
  * @return {array}
  */
-const getMenu = () => ([
+const getMenu = () => [
   {
     icon: 'pficon pficon-network',
     title: 'Sources',
-    to: '/sources',
+    to: '/sources'
   },
   {
     icon: 'fa fa-list-alt',
     title: 'Scans',
-    to: '/scans',
+    to: '/scans'
   }
-]);
+];
 
 export { getMenu };

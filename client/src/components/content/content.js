@@ -1,11 +1,12 @@
+import ClassNames from 'classnames';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import ClassNames from 'classnames';
 
-import Sources from '../sources/sources';
 import Scans from '../scans/scans';
+import Sources from '../sources/sources';
 
 class Content extends Component {
   render() {
@@ -21,17 +22,18 @@ class Content extends Component {
         <Switch>
           <Route path="/sources" component={Sources} />
           <Route path="/scans" component={Scans} />
-          <Redirect from="/" to="/sources"/>
+          <Redirect from="/" to="/sources" />
         </Switch>
       </div>
     );
   }
 }
+Content.propTypes = {
+  navigationBar: PropTypes.object
+};
 
 function mapStateToProps(state, ownProps) {
   return state;
 }
 
-export default withRouter(connect(mapStateToProps)(
-  Content
-));
+export default withRouter(connect(mapStateToProps)(Content));

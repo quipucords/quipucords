@@ -1,15 +1,14 @@
+import cx from 'classnames';
+import React from 'react';
 
-import cx from 'classnames'
-import React from 'react'
-
-import { Button, ListViewInfoItem } from 'patternfly-react'
+import { Button, ListViewInfoItem } from 'patternfly-react';
 
 // TODO make this make more sense for VerticalNavigation
 
 export const navItems = [
   {
     title: 'Sources',
-    description: 'Sources',
+    description: 'Sources'
   },
   {
     title: 'Scans',
@@ -19,7 +18,7 @@ export const navItems = [
 
 export const renderActions = () => (
   <div>
-  <Button>Details</Button>
+    <Button>Details</Button>
   </div>
 );
 
@@ -35,10 +34,10 @@ export const renderAdditionalInfoItems = itemProperties => {
       });
       return (
         <ListViewInfoItem key={prop}>
-        <span className={classNames} />
-      <strong>{itemProperties[prop]}</strong> {prop}
-      </ListViewInfoItem>
-    )
+          <span className={classNames} />
+          <strong>{itemProperties[prop]}</strong> {prop}
+        </ListViewInfoItem>
+      );
     })
-  )
+  );
 };

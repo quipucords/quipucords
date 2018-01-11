@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "create-react-app": "^1.4.3",
+    "eslint": "^4.15.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-config-standard-jsx": "^4.0.2",
