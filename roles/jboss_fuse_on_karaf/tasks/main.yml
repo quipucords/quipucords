@@ -30,6 +30,10 @@
       ignore_errors: yes
       when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
+    - name: set jboss_fuse_on_karaf_running_paths
+      set_fact:
+        jboss_fuse_on_karaf_running_paths: "{{ internal_jboss_fuse_on_karaf_running_paths.get('stdout_lines') }}"
+
     - name: Use locate to look for karaf.jar
 
       # We look for karaf.jar. We expect that it will be located at
