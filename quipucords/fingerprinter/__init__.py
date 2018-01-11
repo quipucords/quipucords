@@ -35,7 +35,9 @@ def process_fact_collection(sender, instance, **kwargs):
     raw_facts = read_raw_facts(instance.id)
 
     # Invoke ENGINE to create fingerprints from facts
-    fingerprints_list = FINGERPRINT_ENGINE.process_sources(raw_facts)
+    fingerprints_list = FINGERPRINT_ENGINE.process_sources(instance, raw_facts)
+    fingerprints_list = remove_duplicate_systems(
+        fingerprints_list, ['subscription_manager_id', 'bios_uuid'])
 
     for fingerprint_dict in fingerprints_list:
         serializer = FingerprintSerializer(data=fingerprint_dict)
@@ -51,15 +53,44 @@ def process_fact_collection(sender, instance, **kwargs):
     instance.save()
 
 
+def remove_duplicate_systems(initial_systems, identification_keys):
+    """Remove duplicate systems from list.
+
+    Systems who have the same value for any one of the identification
+    keys are considered duplicates.
+    :param initial_systems: The systems to deduplicate. Passed as
+    list of dict containing system facts
+    :param identification_keys: list of keys used to identify a system
+    :returns: A list of unique systems determined the identification_keys
+    """
+    systems = initial_systems[:]
+    for identification_key in identification_keys:
+        systems_by_id_key = {}
+        systems_without_key = []
+        for system in systems:
+            system_id_key = system.get(identification_key)
+            if system_id_key:
+                # System has key so add/overwrite system with key
+                systems_by_id_key[system_id_key] = system
+            else:
+                # Key is not a system fact, so add to list
+                systems_without_key.append(system)
+        # merge systems_without_key with unique set of systems
+        systems = systems_without_key + list(systems_by_id_key.values())
+    return systems
+
+
 class Engine():
     """Engine that produces fingerprints from facts."""
 
     # pylint: disable=no-self-use,too-many-branches,too-many-statements
     # pylint: disable=too-few-public-methods
 
-    def process_sources(self, raw_facts):
+    def process_sources(self, fact_collection, raw_facts):
         """Process facts and convert to fingerprints.
 
+        :param fact_collection: FactCollection associated with
+        raw facts
         :param raw_facts: Collected raw facts for all sources
         :returns: list of fingerprints for all systems (all scans)
         """
@@ -70,7 +101,8 @@ class Engine():
                 source['source_id'],
                 source['facts'])
             all_fingerprints = all_fingerprints + source_fingerprints
-        print('number of fingerprints: %d' % len(all_fingerprints))
+        logger.debug('FactCollection %d produced %d fingerprints',
+                     fact_collection.id, len(all_fingerprints))
         return all_fingerprints
 
     def _process_facts(self, fact_collection_id, source_id, facts):
@@ -109,6 +141,14 @@ class Engine():
 
         if fact.get('etc_release_release'):
             fingerprint['os_release'] = fact['etc_release_release']
+
+        # Set bios UUID
+        if fact.get('dmi_system_uuid'):
+            fingerprint['bios_uuid'] = fact['dmi_system_uuid']
+
+        # Set subscription manager id
+        if fact.get('subman_virt_uuid'):
+            fingerprint['subscription_manager_id'] = fact['subman_virt_uuid']
 
         # Set connection information
         if fact.get('connection_uuid'):
