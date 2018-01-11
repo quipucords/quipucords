@@ -12,8 +12,8 @@
 
 import yaml
 from django.test import TestCase
-from . import vault
 from api.models import Credential
+from . import vault
 
 
 class VaultTest(TestCase):
