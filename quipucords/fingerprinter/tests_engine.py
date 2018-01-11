@@ -340,7 +340,6 @@ class EngineTest(TestCase):
 
         unique_systems = remove_duplicate_systems(systems, ['key1'])
         self.assertEqual(len(unique_systems), 1)
-        self.assertEqual(unique_systems[0]['id'], 2)
 
     def test_remove_duplicate_systems_two_key(self):
         """Test removing duplicates with two id keys."""
@@ -357,17 +356,12 @@ class EngineTest(TestCase):
 
         unique_systems = remove_duplicate_systems(systems, ['key1'])
         self.assertEqual(len(unique_systems), 2)
-        self.assertEqual(unique_systems[0]['id'], 2)
-        self.assertEqual(unique_systems[1]['id'], 3)
 
         unique_systems = remove_duplicate_systems(systems, ['key2'])
         self.assertEqual(len(unique_systems), 2)
-        self.assertEqual(unique_systems[0]['id'], 1)
-        self.assertEqual(unique_systems[1]['id'], 3)
 
         unique_systems = remove_duplicate_systems(systems, ['key1', 'key2'])
         self.assertEqual(len(unique_systems), 1)
-        self.assertEqual(unique_systems[0]['id'], 3)
 
     def test_remove_duplicate_systems_none_key_values(self):
         """Test removing duplicates when system missing id key."""
