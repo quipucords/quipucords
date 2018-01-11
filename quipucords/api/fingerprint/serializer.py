@@ -28,6 +28,9 @@ class FingerprintSerializer(NotEmptySerializer):
     os_release = CharField(required=True, max_length=128)
     os_version = CharField(required=True, max_length=64)
 
+    bios_uuid = CharField(required=False, max_length=36)
+    subscription_manager_id = CharField(required=False, max_length=36)
+
     connection_host = CharField(required=False, max_length=256)
     connection_port = IntegerField(required=False, min_value=0)
     connection_uuid = UUIDField(required=True)

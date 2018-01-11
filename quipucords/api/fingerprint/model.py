@@ -32,6 +32,9 @@ class SystemFingerprint(models.Model):
     os_release = models.CharField(max_length=128, unique=False)
     os_version = models.CharField(max_length=64, unique=False)
 
+    bios_uuid = models.CharField(max_length=36, unique=False)
+    subscription_manager_id = models.CharField(max_length=36, unique=False)
+
     connection_host = models.CharField(
         max_length=256, unique=False, blank=True, null=True)
     connection_port = models.PositiveIntegerField(unique=False, null=True)
