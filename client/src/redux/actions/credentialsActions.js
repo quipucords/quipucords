@@ -1,4 +1,3 @@
-
 import * as types from '../constants/credentialsConstants';
 import credentialsApi from '../../services/credentialsApi';
 
@@ -9,15 +8,15 @@ const loadCredentialsSuccess = data => ({
 
 const getCredentials = () => {
   return function(dispatch) {
-    return credentialsApi.getCredentials().then(success => {
-      dispatch(loadCredentialsSuccess(success));
-    }).catch(error => {
-      throw(error);
-    });
+    return credentialsApi
+      .getCredentials()
+      .then(success => {
+        dispatch(loadCredentialsSuccess(success));
+      })
+      .catch(error => {
+        throw error;
+      });
   };
 };
 
-export {
-  loadCredentialsSuccess,
-  getCredentials
-};
+export { loadCredentialsSuccess, getCredentials };

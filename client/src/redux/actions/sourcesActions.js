@@ -1,4 +1,3 @@
-
 import * as types from '../constants/sourcesConstants';
 import sourcesApi from '../../services/sourcesApi';
 
@@ -19,16 +18,14 @@ const sourcesSuccess = data => ({
 
 const getSources = () => {
   return function(dispatch) {
-    return sourcesApi.getSources()
-      .then(success => {dispatch(sourcesSuccess(success))})
-      .catch(error => dispatch(sourcesError(true)))
+    return sourcesApi
+      .getSources()
+      .then(success => {
+        dispatch(sourcesSuccess(success));
+      })
+      .catch(() => dispatch(sourcesError(true)))
       .finally(() => dispatch(sourcesLoading(false)));
   };
 };
 
-export {
-  sourcesError,
-  sourcesLoading,
-  sourcesSuccess,
-  getSources
-};
+export { sourcesError, sourcesLoading, sourcesSuccess, getSources };

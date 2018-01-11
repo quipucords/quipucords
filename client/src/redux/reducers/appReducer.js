@@ -1,4 +1,3 @@
-
 import { combineReducers } from 'redux';
 
 import navigationBarReducer from './navigationBarReducer';
