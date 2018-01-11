@@ -706,6 +706,12 @@ definitions:
             - network
             - vcenter
           description: "The source type"
+        bios_uuid:
+          type: "string"
+          description: "The system bios uuid"
+        subscription_manager_id:
+          type: "string"
+          description: "The subscription manager identitifer"
         os_name:
           type: "string"
           description: "The operating system name"

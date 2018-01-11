@@ -25,7 +25,7 @@ class FingerprintSerializer(ModelSerializer):
 
     os_name = CharField(required=True, max_length=64)
     os_release = CharField(required=True, max_length=128)
-    os_version = CharField(required=True, max_length=64)
+    os_version = CharField(required=False, max_length=64)
 
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
