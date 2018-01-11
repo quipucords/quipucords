@@ -39,7 +39,8 @@ class Credential(models.Model):
     ssh_keyfile = models.CharField(max_length=1024, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
 
-    def is_encrypted(self, field):
+    @staticmethod
+    def is_encrypted(field):
         """Check to see if the password is already encrypted."""
         if '$ANSIBLE_VAULT' in field:
             return True

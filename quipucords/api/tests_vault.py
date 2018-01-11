@@ -12,7 +12,6 @@
 
 import yaml
 from django.test import TestCase
-from api.models import Credential
 from . import vault
 
 
@@ -45,14 +44,3 @@ class VaultTest(TestCase):
             decrypted = vault.decrypt_data_as_unicode(encrypted)
             obj = yaml.load(decrypted)
             self.assertEqual(obj, data)
-
-    def test_is_encrypted_false(self):
-        """Test that is_encrypted() returns False if pass isn't encrypted."""
-        raw = 'encrypted data'
-        self.assertFalse(Credential.is_encrypted(self, raw))
-
-    def test_is_encrypted_true(self):
-        """Test that is_encrypted() returns True if pass is encrypted."""
-        raw = 'encrypted data'
-        encrypted = vault.encrypt_data_as_unicode(raw)
-        self.assertTrue(Credential.is_encrypted(self, encrypted))
