@@ -35,7 +35,7 @@ def process_fact_collection(sender, instance, **kwargs):
     raw_facts = read_raw_facts(instance.id)
 
     # Invoke ENGINE to create fingerprints from facts
-    fingerprints_list = FINGERPRINT_ENGINE.process_sources(raw_facts)
+    fingerprints_list = FINGERPRINT_ENGINE.process_sources(instance, raw_facts)
     fingerprints_list = remove_duplicate_systems(
         fingerprints_list, ['subscription_manager_id', 'bios_uuid'])
 
@@ -86,9 +86,11 @@ class Engine():
     # pylint: disable=no-self-use,too-many-branches,too-many-statements
     # pylint: disable=too-few-public-methods
 
-    def process_sources(self, raw_facts):
+    def process_sources(self, fact_collection, raw_facts):
         """Process facts and convert to fingerprints.
 
+        :param fact_collection: FactCollection associated with
+        raw facts
         :param raw_facts: Collected raw facts for all sources
         :returns: list of fingerprints for all systems (all scans)
         """
@@ -99,7 +101,8 @@ class Engine():
                 source['source_id'],
                 source['facts'])
             all_fingerprints = all_fingerprints + source_fingerprints
-        print('number of fingerprints: %d' % len(all_fingerprints))
+        logger.debug('FactCollection %d produced %d fingerprints',
+                     fact_collection.id, len(all_fingerprints))
         return all_fingerprints
 
     def _process_facts(self, fact_collection_id, source_id, facts):
