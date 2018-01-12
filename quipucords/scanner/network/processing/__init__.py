@@ -9,4 +9,5 @@
 
 """Initial processing for facts coming from Ansible."""
 
+# flake8: noqa
 from . import eap
