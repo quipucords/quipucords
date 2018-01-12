@@ -26,13 +26,13 @@
       # slash and the other doesn't, even without actual symlinks.
 
       raw: ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 realpath 2> /dev/null
-      register: karaf_running_processes
+      register: internal_karaf_running_processes
       ignore_errors: yes
-      when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
-    - name: set jboss_fuse_on_karaf_running_paths
+    - name: set karaf_running_paths
       set_fact:
-        jboss_fuse_on_karaf_running_paths: "{{ internal_jboss_fuse_on_karaf_running_paths.get('stdout_lines') }}"
+        karaf_running_paths: "{{ internal_karaf_running_paths.get('stdout_lines') }}"
 
     - name: Use locate to look for karaf.jar
 
@@ -42,48 +42,77 @@
       # realpath to normalize paths.
 
       raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null
-      register: karaf_locate_karaf_jar
+      register: internal_karaf_locate_karaf_jar
       ignore_errors: yes
-      when: 'have_locate and "jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+      when: 'False'
+      #when: 'have_locate and "jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+
+    - name: set karaf_locate_karaf_jar
+      set_fact:
+        karaf_locate_karaf_jar: "{{ internal_karaf_locate_karaf_jar.get('stdout_lines') }}"
+
+    - name: Use find to look for karaf.jar
+      raw: find {{scan_dirs}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null | sort -u
+      register: internal_karaf_find_karaf_jar
+      ignore_errors: yes
+      when: 'False'
+      #when: '"jboss.fuse-on-karaf.find-karaf-jar" in facts_to_collect'
 
 # Combine the outputs of the above into a single fact
 
     - name: combine KARAF_HOME candidates into single list
       set_fact:
           karaf_homes: "{{ (karaf_running_processes.get('stdout_lines', []) +
-                            karaf_locate_karaf_jar.get('stdout_lines', [])) | unique }}"
+                            karaf_locate_karaf_jar.get('stdout_lines', []) +
+                            karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
       ignore_errors: yes
-      when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
 # Look for fuse inside KARAF_HOME directories
 
     - name: check bin/fuse
       raw: ls -1 "{{ item }}/bin/fuse"
-      register: karaf_home_bin_fuse
+      register: internal_karaf_home_bin_fuse
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-      when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+
+    - name: set karaf_home_bin_fuse
+      set_fact:
+        karaf_home_bin_fuse: "{{ internal_karaf_home_bin_fuse['results'] }}"
 
     - name: check system/org/jboss/fuse
       raw: ls -1 "{{ item }}/system/org/jboss"
-      register: karaf_home_system_org_jboss
+      register: internal_karaf_home_system_org_jboss
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-      when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
+
+    - name: set karaf_home_system_org_jboss
+      set_fact:
+        karaf_home_system_org_jboss: "{{ internal_karaf_home_system_org_jboss['results'] }}"
 
 # Tests that can indicate the presence of Fuse, but can't tell us the
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
     - name: look for fuse systemd service
       raw: systemctl list-unit-files | grep fuse
-      register: jboss_fuse_systemctl_unit_files
+      register: internal_jboss_fuse_systemctl_unit_files
       ignore_errors: yes
       become: true
-      when: 'have_systemctl and "jboss.fuse.init-files" in facts_to_collect'
+      #when: 'have_systemctl and "jboss.fuse.init-files" in facts_to_collect'
+
+    - name: set jboss_fuse_systemctl_unit_files
+      set_fact:
+        jboss_fuse_systemctl_unit_files: "{{ internal_jboss_fuse_systemctl_unit_files['results'] }}"
 
     - name: look for fuse in chkconfig
       raw: chkconfig 2> /dev/null | grep fuse
-      register: jboss_fuse_chkconfig
+      register: internal_jboss_fuse_chkconfig
       ignore_errors: yes
       become: true
-      when: 'have_chkconfig and "jboss.fuse.init-files" in facts_to_collect'
+      #when: 'have_chkconfig and "jboss.fuse.init-files" in facts_to_collect'
+
+    - name: set jboss_fuse_chkconfig
+      set_fact:
+        jboss_fuse_chkconfig: "{{ internal_jboss_fuse_chkconfig['results']}}"
