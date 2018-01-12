@@ -8,3 +8,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
 """Initial processing for facts coming from Ansible."""
+
+# flake8: noqa
+from . import eap
+from . import karaf
