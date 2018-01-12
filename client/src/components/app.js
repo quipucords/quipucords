@@ -12,13 +12,11 @@ class App extends Component {
   }
 
   render() {
-    return (
-      <div>
-        <Masthead />
-        <VerticalNavigation menuItems={this.menu} />
-        <Content />
-      </div>
-    );
+    return [
+      <Masthead key="masthead" />,
+      <VerticalNavigation menuItems={this.menu} key="navigation" />,
+      <Content key="content" />
+    ];
   }
 }
 

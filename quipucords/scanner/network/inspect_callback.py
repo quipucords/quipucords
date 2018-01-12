@@ -15,6 +15,7 @@ from django.db import transaction
 from ansible.plugins.callback import CallbackBase
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
+from scanner.network.processing import process
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -89,8 +90,10 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def _finalize_host(self, host):
         facts = self._ansible_facts.get(host, {})
+        results = process.process(facts)
+
         logger.debug('host scan complete for %s with facts %s',
-                     host, facts)
+                     host, results)
 
         # Update scan counts
         if self.scan_task is not None:
@@ -106,7 +109,10 @@ class InspectResultCallback(CallbackBase):
         inspect_result.save()
 
         # Generate facts for host
-        for result_key, result_value in facts.items():
+        for result_key, result_value in results.items():
+            if result_value == process.NO_DATA:
+                continue
+
             stored_fact = RawFact(name=result_key,
                                   value=result_value)
             stored_fact.save()
