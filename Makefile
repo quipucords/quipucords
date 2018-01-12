@@ -37,14 +37,14 @@ install: build
 	$(PYTHON) setup.py install -f
 
 test:
-	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/
+	QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/
 
 test-case:
 	echo $(pattern)
 	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/ -p $(pattern)
 
 test-coverage:
-	coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/
+	QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 lint-flake8:
@@ -56,7 +56,7 @@ lint-pylint:
 lint: lint-flake8 lint-pylint
 
 server-init:
-	$(PYTHON) quipucords/manage.py makemigrations api; $(PYTHON) quipucords/manage.py migrate
+	$(PYTHON) quipucords/manage.py makemigrations api; $(PYTHON) quipucords/manage.py migrate; echo "from django.contrib.auth.models import User; User.objects.filter(email='admin@example.com').delete(); User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | $(PYTHON) quipucords/manage.py shell
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver

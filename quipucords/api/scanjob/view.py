@@ -10,9 +10,13 @@
 #
 """Describes the views associated with the API models."""
 
+import os
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework.authentication import (TokenAuthentication,
+                                           SessionAuthentication)
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -182,6 +186,10 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     """A view set for ScanJob."""
+
+    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer

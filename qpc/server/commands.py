@@ -13,3 +13,5 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from qpc.server.configure_host import ConfigureHostCommand
+from qpc.server.login_host import LoginHostCommand
+from qpc.server.logout_host import LogoutHostCommand
