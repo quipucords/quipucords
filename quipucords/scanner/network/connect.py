@@ -18,6 +18,7 @@ from api.serializers import SourceSerializer, CredentialSerializer
 from api.models import (Credential, ScanTask,
                         ConnectionResult,
                         SystemConnectionResult)
+from django.db import transaction
 from scanner.task import ScanTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (run_playbook,
@@ -28,6 +29,77 @@ from scanner.network.utils import (run_playbook,
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+# The ConnectTaskRunner creates a new ConnectResultCallback for each
+# credential it tries to connect with, and the ConnectResultCallbacks
+# all forward their information to a single ConnectResultStore.
+class ConnectResultStore(object):
+    """This object knows how to record and retrieve connection results."""
+
+    def __init__(self, scan_task, conn_results):
+        """Get the unique ConnectionResult object for this scan."""
+        self.scan_task = scan_task
+        self.conn_results = conn_results
+
+        source = scan_task.source
+
+        with transaction.atomic():
+            conn_result = conn_results.results.filter(
+                source__id=source.id).first()
+            if conn_result is None:
+                conn_result = ConnectionResult(
+                    scan_task=scan_task, source=source)
+                conn_result.save()
+                conn_results.results.add(conn_result)
+                conn_results.save()
+        self.conn_result = conn_result
+
+        hosts = set((host_range.host_range
+                     for host_range in source.hosts.all()))
+        for sys_result in conn_result.systems.all():
+            hosts.discard(sys_result.name)
+        self._remaining_hosts = hosts
+
+        if scan_task.systems_count is None:
+            scan_task.systems_count = len(hosts)
+            scan_task.systems_scanned = 0
+            scan_task.systems_failed = 0
+            scan_task.save()
+
+    @transaction.atomic
+    def record_result(self, name, credential, status):
+        """Record a new result, either a connection success or a failure."""
+        sys_result = SystemConnectionResult(
+            name=name,
+            credential=credential,
+            status=status)
+        sys_result.save()
+
+        self.conn_result.systems.add(sys_result)
+        self.conn_result.save()
+
+        if status == SystemConnectionResult.SUCCESS:
+            self.scan_task.systems_scanned += 1
+        else:
+            self.scan_task.systems_failed += 1
+        self.scan_task.save()
+
+        self._remaining_hosts.remove(name)
+
+    def remaining_hosts(self):
+        """Get the set of hosts that are left to scan."""
+        # Need to return a list becuase the caller can iterate over
+        # our return value and call record_result repeatedly. If we
+        # returned the actual list, then they would get a 'set changed
+        # size during iteration' error.
+        return list(self._remaining_hosts)
+
+    def get_stats(self):
+        """Get statistics about this connection scan."""
+        return (self.scan_task.systems_count,
+                self.scan_task.systems_scanned,
+                self.scan_task.systems_failed)
 
 
 class ConnectTaskRunner(ScanTaskRunner):
@@ -48,118 +120,75 @@ class ConnectTaskRunner(ScanTaskRunner):
         """
         super().__init__(scan_job, scan_task)
         self.conn_results = conn_results
+        self.scan_task = scan_task
 
     def run(self):
         """Scan network range ang attempt connections."""
         logger.info('Connect scan task started for %s.', self.scan_task)
 
-        # Remove results for this task if they exist
-        old_results = self.get_result()
-        if old_results:
-            self.result = None
-            old_results.delete()
+        result_store = ConnectResultStore(self.scan_task, self.conn_results)
+        return self.run_with_result_store(result_store)
 
-        try:
-            connected, failed_hosts = self.discovery()
-            self._store_connect_result(connected, failed_hosts)
-        except AnsibleError as ansible_error:
-            logger.error('Connect scan task failed for %s. %s', self.scan_task,
-                         ansible_error)
-            return ScanTask.FAILED
+    # pylint: disable=too-many-locals
+    def run_with_result_store(self, result_store):
+        """Run with a given ConnectResultStore."""
+        serializer = SourceSerializer(self.scan_task.source)
+        source = serializer.data
+
+        forks = self.scan_job.options.max_concurrency
+        connection_port = source['port']
+        credentials = source['credentials']
+
+        remaining_hosts = result_store.remaining_hosts()
+
+        for cred_id in credentials:
+            if not remaining_hosts:
+                break
+
+            credential = Credential.objects.get(pk=cred_id)
+            cred_data = CredentialSerializer(credential).data
+            callback = ConnectResultCallback(result_store, credential)
+            try:
+                connect(remaining_hosts, callback, cred_data,
+                        connection_port, forks=forks)
+            except AnsibleError as ansible_error:
+                logger.error('Connect scan task failed for %s. %s',
+                             self.scan_task, ansible_error)
+                return ScanTask.FAILED
+
+            remaining_hosts = result_store.remaining_hosts()
+
+            logger.info('Connect scan completed for %s.', self.scan_task)
+            total, succeeded, failed = result_store.get_stats()
+            logger.info('%s connected, %s failed out of %s total',
+                        succeeded, failed, total)
+            logger.debug('Failed systems: %s', remaining_hosts)
+
+        for host in remaining_hosts:
+            # We haven't connected to these hosts with any
+            # credentials, so they have failed.
+            result_store.record_result(host, None,
+                                       SystemConnectionResult.FAILED)
 
         # Clear cache as results changed
         self.result = None
 
         return ScanTask.COMPLETED
 
-    # pylint: disable=too-many-locals
-    def discovery(self):
-        """Execute the discovery scan with the initialized source.
 
-        :returns: list of connected hosts credential tuples and
-                  list of host that failed connection
-        """
-        connected = []
-        serializer = SourceSerializer(self.scan_task.source)
-        source = serializer.data
-        remaining = source['hosts']
-        credentials = source['credentials']
-        connection_port = source['port']
-
-        forks = self.scan_job.options.max_concurrency
-        for cred_id in credentials:
-            cred_obj = Credential.objects.get(pk=cred_id)
-            hc_serializer = CredentialSerializer(cred_obj)
-            cred = hc_serializer.data
-            connected, remaining = connect(remaining, cred, connection_port,
-                                           forks=forks)
-
-            # Update the scan counts
-            if self.scan_task.systems_count is None:
-                self.scan_task.systems_count = len(
-                    connected) + len(remaining)
-                self.scan_task.systems_scanned = 0
-                self.scan_task.systems_failed = 0
-            self.scan_task.systems_scanned += len(connected)
-            self.scan_task.save()
-
-            if remaining == []:
-                break
-
-        logger.info('Connect scan completed for %s.', self.scan_task)
-        logger.info('Successfully connected to %d systems.', len(connected))
-        if bool(remaining):
-            logger.warning('Failed to connect to %d systems.', len(remaining))
-            logger.debug('Failed systems: %s', remaining)
-
-        return connected, remaining
-
-    def _store_connect_result(self, connected, failed_hosts):
-        result = {}
-        conn_result = ConnectionResult(
-            scan_task=self.scan_task, source=self.scan_task.source)
-        conn_result.save()
-
-        for success in connected:
-            result[success[0]] = success[1]
-            # pylint: disable=no-member
-            cred = Credential.objects.get(pk=success[1]['id'])
-            sys_result = SystemConnectionResult(
-                name=success[0], status=SystemConnectionResult.SUCCESS,
-                credential=cred)
-            sys_result.save()
-            conn_result.systems.add(sys_result)
-
-        for failed in failed_hosts:
-            result[failed] = None
-            sys_result = SystemConnectionResult(
-                name=failed, status=SystemConnectionResult.FAILED)
-            sys_result.save()
-            conn_result.systems.add(sys_result)
-
-        conn_result.save()
-        self.conn_results.save()
-        self.conn_results.results.add(conn_result)
-        self.conn_results.save()
-
-        return result
-
-
-def connect(hosts, credential, connection_port, forks=50):
+def connect(hosts, callback, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
+    :param callback: The Ansible callback to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param forks: number of forks to run with, default of 50
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
-    success = []
-    failed = []
     inventory = construct_connect_inventory(hosts, credential, connection_port)
     inventory_file = write_inventory(inventory)
-    callback = ConnectResultCallback()
 
     playbook = {'name': 'discovery play',
                 'hosts': 'all',
@@ -172,10 +201,6 @@ def connect(hosts, credential, connection_port, forks=50):
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)
-
-    success, failed = _process_connect_callback(callback, credential)
-
-    return success, failed
 
 
 def _handle_ssh_passphrase(credential):
@@ -199,33 +224,6 @@ def _handle_ssh_passphrase(credential):
                 i = child.expect(phrase)
         except pexpect.exceptions.TIMEOUT:
             pass
-
-
-def _process_connect_callback(callback, credential):
-    """Process the callback information from a scan.
-
-     Create the success and failed lists from callback data.
-
-    :param callback: The callback handler
-    :param credential: The credential used for connections
-    :returns: list of connected hosts credential tuples and
-              list of host that failed connection
-    """
-    success = []
-    failed = []
-    for connection_result in callback.results:
-        if 'host' in connection_result:
-            host = connection_result['host']
-            if 'result' in connection_result:
-                task_result = connection_result['result']
-                if 'rc' in task_result and task_result['rc'] is 0:
-                    success.append((host, credential))
-                else:
-                    failed.append(host)
-            else:
-                failed.append(host)
-
-    return success, failed
 
 
 def construct_connect_inventory(hosts, credential, connection_port):

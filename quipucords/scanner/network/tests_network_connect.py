@@ -10,10 +10,11 @@
 #
 """Test the discovery scanner capabilities."""
 
+import unittest
 from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from ansible.errors import AnsibleError
-from ansible.executor.task_queue_manager import TaskQueueManager
+from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
                         Source,
                         ConnectionResults,
@@ -22,13 +23,7 @@ from api.models import (Credential,
                         ScanOptions,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.network.connect import (_construct_vars,
-                                     _process_connect_callback,
-                                     _construct_error,
-                                     construct_connect_inventory, connect)
-from scanner.network.utils import (ANSIBLE_FAILED_HOST_ERR_MSG,
-                                   ANSIBLE_UNREACHABLE_HOST_ERR_MSG,
-                                   ANSIBLE_PLAYBOOK_ERR_MSG)
+from scanner.network.connect import construct_connect_inventory, connect
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
 
@@ -46,6 +41,74 @@ def mock_run_failed(play):  # pylint: disable=unused-argument
 def mock_handle_ssh(cred):  # pylint: disable=unused-argument
     """Mock for handling ssh passphrase setting."""
     pass
+
+
+class MockResultStore(object):
+    """A mock ConnectResultStore."""
+
+    def __init__(self, hosts):
+        """Minimal internal variables, just to fake the state."""
+        self._remaining_hosts = set(hosts)
+        self.succeeded = []
+        self.failed = []
+
+    def record_result(self, name, credential, status):
+        """Keep a list of succeeses and failures."""
+        if status == SystemConnectionResult.SUCCESS:
+            self.succeeded.append((name, credential, status))
+        elif status == SystemConnectionResult.FAILED:
+            self.failed.append((name, credential, status))
+        else:
+            raise ValueError()
+
+        self._remaining_hosts.remove(name)
+
+    def remaining_hosts(self):
+        """Need this method because the task runner uses it."""
+        return list(self._remaining_hosts)
+
+    def get_stats(self):
+        """Similarly, the task runner uses this too."""
+        return (len(self._remaining_hosts) +
+                len(self.succeeded) +
+                len(self.failed),
+                len(self.succeeded),
+                len(self.failed))
+
+
+def make_result(hostname, rc):  # pylint: disable=invalid-name
+    """Mock the result structure that Ansible pass the callback."""
+    if rc is not None:
+        result = {'rc': rc}
+    else:
+        result = {}
+
+    host = Mock()
+    host.name = hostname
+
+    return Mock(
+        _host=host,
+        _result=result)
+
+
+class TestConnectResultCallback(unittest.TestCase):
+    """Test ConnectResultCallback."""
+
+    def test_callback(self):
+        """Test the callback."""
+        result_store = MockResultStore(['host1', 'host2', 'host3'])
+        credential = Mock(name='credential')
+        callback = ConnectResultCallback(result_store, credential)
+
+        callback.v2_runner_on_ok(make_result('host1', 0))
+        callback.v2_runner_on_ok(make_result('host2', 1))
+        callback.v2_runner_on_ok(make_result('host3', None))
+
+        self.assertEqual(result_store.succeeded,
+                         [('host1', credential, 'success')])
+        self.assertEqual(result_store.failed,
+                         [('host2', credential, 'failed'),
+                          ('host3', credential, 'failed')])
 
 
 class NetworkConnectTaskRunnerTest(TestCase):
@@ -90,45 +153,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.conn_results = ConnectionResults(scan_job=self.scan_job)
         self.conn_results.save()
 
-    def test_construct_vars(self):
-        """Test constructing ansible vars dictionary."""
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        vars_dict = _construct_vars(22, cred)
-        expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
-                    'ansible_ssh_pass': 'password',
-                    'ansible_ssh_private_key_file': 'keyfile',
-                    'ansible_user': 'username'}
-        self.assertEqual(vars_dict, expected)
-
-    def test_populate_callback(self):
-        """Test the population of the callback object."""
-        callback = ConnectResultCallback()
-        host = Mock(name='1.2.3.4')
-        result = Mock(_host=host, _results={'rc': 0})
-        callback.v2_runner_on_ok(result)
-        self.assertTrue(len(callback.results) == 1)
-        callback.v2_runner_on_failed(result)
-        self.assertTrue(len(callback.results) == 2)
-        callback.v2_runner_on_unreachable(result)
-        self.assertTrue(len(callback.results) == 3)
-
-    def test_process_connect_callback(self):
-        """Test callback processing logic."""
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        callback = ConnectResultCallback()
-        success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
-        failed_result = {'host': '1.2.3.5', 'result': {'rc': 1}}
-        failed_result_format = {'host': '1.2.3.6'}
-        callback.results.append(success_result)
-        callback.results.append(failed_result)
-        callback.results.append(failed_result_format)
-        success, failed = _process_connect_callback(callback, cred)
-        del cred['password']
-        self.assertEqual(success, [('1.2.3.4', cred)])
-        self.assertEqual(failed, ['1.2.3.5', '1.2.3.6'])
-
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""
         serializer = SourceSerializer(self.source)
@@ -147,15 +171,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
                                      'ansible_user': 'username'}}}
         self.assertEqual(inventory_dict, expected)
 
-    def test_construct_error(self):
-        """Test the creation of different errors."""
-        error = _construct_error(TaskQueueManager.RUN_FAILED_HOSTS)
-        self.assertEqual(error.message, ANSIBLE_FAILED_HOST_ERR_MSG)
-        error = _construct_error(TaskQueueManager.RUN_UNREACHABLE_HOSTS)
-        self.assertEqual(error.message, ANSIBLE_UNREACHABLE_HOST_ERR_MSG)
-        error = _construct_error(TaskQueueManager.RUN_FAILED_BREAK_PLAY)
-        self.assertEqual(error.message, ANSIBLE_PLAYBOOK_ERR_MSG)
-
     @patch('scanner.network.utils.TaskQueueManager.run',
            side_effect=mock_run_failed)
     @patch('scanner.network.connect._handle_ssh_passphrase',
@@ -169,7 +184,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, cred, connection_port)
+            connect(hosts, Mock(), cred, connection_port)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -183,34 +198,15 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        connected, failed = connect(hosts, cred, connection_port)
-        self.assertEqual(connected, [])
-        self.assertEqual(failed, [])
+        connect(hosts, Mock(), cred, connection_port)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')
-    def test_discovery(self, mock_connect):
-        """Test running a discovery scan with mocked connection."""
-        expected = ([('1.2.3.4', {'id': '1'})], [])
-        mock_connect.return_value = expected
+    def test_connect_runner(self, mock_connect):
+        """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(
             self.scan_job, self.scan_task, self.conn_results)
-        conn_dict = scanner.run()
-        mock_connect.assert_called_with(ANY, ANY, 22, forks=50)
+        result_store = MockResultStore(['1.2.3.4'])
+        conn_dict = scanner.run_with_result_store(result_store)
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict, ScanTask.COMPLETED)
-
-    def test_store_discovery_success(self):
-        """Test running a discovery scan _store_connect_result."""
-        scanner = ConnectTaskRunner(
-            self.scan_job, self.scan_task, self.conn_results)
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        connected = [('1.2.3.4', cred)]
-        failed = ['1.2.3.5']
-        expected = {'1.2.3.4': {'name': 'cred1'},
-                    '1.2.3.5': None}
-        # pylint: disable=protected-access
-        result = scanner._store_connect_result(connected, failed)
-        self.assertEqual(len(result), len(expected))
-        self.assertIn('1.2.3.5', result)
-        self.assertIsNone(result['1.2.3.5'])
