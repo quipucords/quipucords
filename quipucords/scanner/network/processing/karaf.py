@@ -68,14 +68,16 @@ class InitLineFinder(process.Processor):
 
     For both chkconfig and systemctl list-unit-files, we look for
     lines where the first (whitespace-delineated) element contains
-    'jboss' or 'eap'.
+    'jboss' or 'fuse'.
     """
 
+    # This same code is in eap but I wasn't sure how to make the keyword an
+    # argument since it is in a class (without doing an __init__)
     KEY = None
 
     @staticmethod
     def process(output):
-        """Find lines where the first element contains 'jboss' or 'eap'."""
+        """Find lines where the first element contains 'jboss' or 'fuse'."""
         matches = []
 
         for line in output['stdout_lines']:

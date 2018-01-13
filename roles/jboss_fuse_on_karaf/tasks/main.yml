@@ -28,7 +28,6 @@
       raw: ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 realpath 2> /dev/null
       register: internal_karaf_running_processes
       ignore_errors: yes
-      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
     - name: set karaf_running_processes
       set_fact:
@@ -45,7 +44,6 @@
       register: internal_karaf_locate_karaf_jar
       ignore_errors: yes
       when: 'have_locate'
-      #when: 'have_locate and "jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
     - name: set karaf_locate_karaf_jar
       set_fact:
@@ -56,7 +54,6 @@
       register: internal_karaf_find_karaf_jar
       ignore_errors: yes
       when: 'have_locate'
-      #when: '"jboss.fuse-on-karaf.find-karaf-jar" in facts_to_collect'
 
 # Combine the outputs of the above into a single fact
 
@@ -67,7 +64,6 @@
                internal_karaf_locate_karaf_jar.get('stdout_lines', []) +
                internal_karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
       ignore_errors: yes
-      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
 # Look for fuse inside KARAF_HOME directories
 
@@ -76,7 +72,6 @@
       register: internal_karaf_home_bin_fuse
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
     - name: set karaf_home_bin_fuse
       set_fact:
@@ -87,7 +82,6 @@
       register: internal_karaf_home_system_org_jboss
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-      #when: '"jboss.fuse-on-karaf.karaf-home" in facts_to_collect or "jboss.fuse.summary" in facts_to_collect'
 
     - name: set karaf_home_system_org_jboss
       set_fact:
@@ -101,7 +95,6 @@
       register: internal_jboss_fuse_systemctl_unit_files
       ignore_errors: yes
       become: true
-      #when: 'have_systemctl and "jboss.fuse.init-files" in facts_to_collect'
 
     - name: set jboss_fuse_systemctl_unit_files
       set_fact:
@@ -112,7 +105,6 @@
       register: internal_jboss_fuse_chkconfig
       ignore_errors: yes
       become: true
-      #when: 'have_chkconfig and "jboss.fuse.init-files" in facts_to_collect'
 
     - name: set jboss_fuse_chkconfig
       set_fact:
