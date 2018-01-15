@@ -1,6 +1,6 @@
 class SourcesApi {
   static getSources() {
-    return fetch('http://localhost:4000/api/v1/sources/').then(response => {
+    return fetch(process.env.REACT_APP_SOURCES_API).then(response => {
       if (response.ok) {
         return response.json();
       } else {
