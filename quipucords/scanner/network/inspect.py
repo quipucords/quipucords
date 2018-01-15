@@ -122,6 +122,7 @@ class InspectTaskRunner(ScanTaskRunner):
             'etc_release',
             'file_contents',
             'jboss_eap',
+            'jboss_brms',
             'ifconfig',
             'redhat_release',
             'subman',
