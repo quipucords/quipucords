@@ -13,3 +13,7 @@
 
 SUBCOMMAND = 'server'
 CONFIG = 'config'
+LOGIN = 'login'
+LOGOUT = 'logout'
+
+LOGIN_URI = '/api/v1/token/'

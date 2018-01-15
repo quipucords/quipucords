@@ -11,6 +11,7 @@
 
 """Viewset for system reports."""
 import logging
+import os
 from django.utils.translation import ugettext as _
 from django.db.models import Count
 from django.core.exceptions import FieldError
@@ -18,6 +19,9 @@ from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authentication import (TokenAuthentication,
+                                           SessionAuthentication)
+from rest_framework.permissions import IsAuthenticated
 from api.models import SystemFingerprint
 from api.serializers import FingerprintSerializer
 import api.messages as messages
@@ -29,6 +33,10 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 class ReportListView(APIView):
     """List all system reports."""
+
+    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         """Lookup and return all system reports."""

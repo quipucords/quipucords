@@ -10,9 +10,13 @@
 #
 """Describes the views associated with the API models."""
 
+import os
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.authentication import (TokenAuthentication,
+                                           SessionAuthentication)
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
@@ -59,6 +63,10 @@ class SourceFilter(FilterSet):
 # pylint: disable=too-many-ancestors
 class SourceViewSet(ModelViewSet):
     """A view set for Sources."""
+
+    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
