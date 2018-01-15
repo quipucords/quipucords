@@ -23,7 +23,9 @@ from qpc.utils import (ensure_config_dir_exists,
                        ensure_data_dir_exists,
                        setup_logging,
                        log)
-from qpc.server.commands import ConfigureHostCommand
+from qpc.server.commands import (ConfigureHostCommand,
+                                 LoginHostCommand,
+                                 LogoutHostCommand)
 from qpc.cred.commands import (CredAddCommand,
                                CredListCommand,
                                CredEditCommand,
@@ -64,7 +66,8 @@ class CLI(object):
         self.args = None
         self.subcommands = {}
         self._add_subcommand(server.SUBCOMMAND,
-                             [ConfigureHostCommand])
+                             [ConfigureHostCommand, LoginHostCommand,
+                              LogoutHostCommand])
         self._add_subcommand(cred.SUBCOMMAND,
                              [CredAddCommand, CredListCommand,
                               CredEditCommand, CredShowCommand,

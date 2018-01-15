@@ -155,12 +155,17 @@ In order to setup the server execute the following command::
 
     make server-init
 
+This command will create a super user with name *admin* and password of *pass*.
 
 Running Server
 ^^^^^^^^^^^^^^
 In order to run the server execute the following command::
 
     make serve
+
+In order to login to the server you must launch to http://127.0.0.1:8000/admin/ and provide the super user credentials.
+From here you can change the password and also go to some fo the browsable APIs like http://127.0.0.1:8000/api/v1/credentials/.
+Using the CLI you can configure access to the server using `qpc server config` and login using `qpc server login`.
 
 If you intend to run on Mac OS there are several more steps required.
 

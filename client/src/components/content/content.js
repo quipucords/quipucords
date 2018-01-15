@@ -11,8 +11,6 @@ import Sources from '../sources/sources';
 class Content extends Component {
   render() {
     let classes = ClassNames({
-      'container-fluid': true,
-      'container-cards-pf': true,
       'container-pf-nav-pf-vertical': true,
       'collapsed-nav': this.props.navigationBar.collapsed
     });

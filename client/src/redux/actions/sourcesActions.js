@@ -1,9 +1,10 @@
 import * as types from '../constants/sourcesConstants';
 import sourcesApi from '../../services/sourcesApi';
 
-const sourcesError = bool => ({
+const sourcesError = (bool, message) => ({
   type: types.LOAD_SOURCES_ERROR,
-  error: bool
+  error: bool,
+  message: message
 });
 
 const sourcesLoading = bool => ({
@@ -18,12 +19,15 @@ const sourcesSuccess = data => ({
 
 const getSources = () => {
   return function(dispatch) {
+    dispatch(sourcesLoading(true));
     return sourcesApi
       .getSources()
       .then(success => {
         dispatch(sourcesSuccess(success));
       })
-      .catch(() => dispatch(sourcesError(true)))
+      .catch(error => {
+        dispatch(sourcesError(true, error.message));
+      })
       .finally(() => dispatch(sourcesLoading(false)));
   };
 };
