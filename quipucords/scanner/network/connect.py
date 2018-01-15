@@ -25,6 +25,7 @@ from scanner.network.utils import (run_playbook,
                                    _construct_error,
                                    _construct_vars,
                                    decrypt_data_as_unicode,
+                                   expand_hostpattern,
                                    write_inventory)
 
 # Get an instance of a logger
@@ -54,12 +55,18 @@ class ConnectResultStore(object):
                 conn_results.results.add(conn_result)
                 conn_results.save()
         self.conn_result = conn_result
+        # If we're restarting the scan after a pause, systems that
+        # were previously up might be down. So we throw out any
+        # partial results and start over.
+        conn_result.systems.all().delete()
 
-        hosts = set((host_range.host_range
-                     for host_range in source.hosts.all()))
-        for sys_result in conn_result.systems.all():
-            hosts.discard(sys_result.name)
-        self._remaining_hosts = hosts
+        # Sources can contain patterns that describe multiple hosts,
+        # like '1.2.3.[4:6]'. Expand the patterns so hosts is a list
+        # of single hosts we can try to connect to.
+        hosts = []
+        for host_range in source.hosts.all():
+            hosts.extend(expand_hostpattern(host_range.host_range))
+        self._remaining_hosts = set(hosts)
 
         if scan_task.systems_count is None:
             scan_task.systems_count = len(hosts)

@@ -49,3 +49,37 @@ class TestConstructError(unittest.TestCase):
         self.assertEqual(error.message, utils.ANSIBLE_UNREACHABLE_HOST_ERR_MSG)
         error = utils._construct_error(TaskQueueManager.RUN_FAILED_BREAK_PLAY)
         self.assertEqual(error.message, utils.ANSIBLE_PLAYBOOK_ERR_MSG)
+
+
+class TestExpandHostpattern(unittest.TestCase):
+    """Test utils.expand_hostpattern."""
+
+    def test_single_hostname(self):
+        """A single hostname."""
+        self.assertEqual(
+            utils.expand_hostpattern('domain.com'),
+            ['domain.com'])
+
+    def test_single_hostname_with_port(self):
+        """Users can specify a port, too."""
+        self.assertEqual(
+            utils.expand_hostpattern('domain.com:1234'),
+            ['domain.com'])
+
+    def test_hostname_range(self):
+        """A range of hostnames."""
+        self.assertEqual(
+            utils.expand_hostpattern('[a:c].domain.com'),
+            ['a.domain.com', 'b.domain.com', 'c.domain.com'])
+
+    def test_single_ip_address(self):
+        """A single IP address."""
+        self.assertEqual(
+            utils.expand_hostpattern('1.2.3.4'),
+            ['1.2.3.4'])
+
+    def test_ip_range(self):
+        """A range of IP addresses."""
+        self.assertEqual(
+            utils.expand_hostpattern('1.2.3.[4:6]'),
+            ['1.2.3.4', '1.2.3.5', '1.2.3.6'])
