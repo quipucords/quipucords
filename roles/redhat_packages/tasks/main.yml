@@ -6,7 +6,7 @@
   ignore_errors: yes
   when: internal_have_rpm
 
-- name: set fact of all installed red hat rpms
+- name: set fact whether red hat rpms are installed or not
   set_fact:
     redhat_packages_gpg_is_redhat: "{{ redhat_packages_gpg_is_redhat['stdout_lines'][0] }}"
 
