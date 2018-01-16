@@ -399,3 +399,83 @@ class CredentialTest(TestCase):
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
+
+    def test_sat_cred_create(self):
+        """Ensure we can create a new satellite credential."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+
+    def test_sat_cred_create_double(self):
+        """Satellite cred with duplicate name should fail."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+
+        self.create_expect_400(data)
+
+    def test_sat_create_missing_password(self):
+        """Test Satellite without password."""
+        expected_error = {'non_field_errors': [messages.SAT_PWD_AND_USERNAME]}
+        url = reverse('cred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'ssh_keyfile': 'keyfile'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_sat_create_extra_keyfile(self):
+        """Test Satellite without password."""
+        expected_error = {'non_field_errors': [
+            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('cred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'ssh_keyfile': 'keyfile'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_sat_create_extra_sudopass(self):
+        """Test Satellite with extra sudo password."""
+        expected_error = {'non_field_errors': [
+            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('cred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'sudo_password': 'pass2'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_sat_create_extra_keyfile_pass(self):
+        """Test Satellite with extra keyfile passphase."""
+        expected_error = {'non_field_errors': [
+            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+        url = reverse('cred-list')
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'ssh_passphrase': 'pass2'}
+        response = self.client.post(url, json.dumps(data),
+                                    'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
