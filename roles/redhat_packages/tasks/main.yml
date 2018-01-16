@@ -1,24 +1,14 @@
 ---
 
-- name: gather a list of all rpms
-  raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}|%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}|\n"
-  register: redhat_packages_all
-  ignore_errors: yes
-  when: internal_have_rpm
-
-- name: set fact of all installed rpms
-  set_fact:
-    redhat_packages_all: "{{ redhat_packages_all }}"
-
-- name: gather a list of all red hat rpms
-  raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}|%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}|\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0'
+- name: check to see if any red hat rpms are installed
+  raw: if [ $(rpm -qa --qf "%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l) -gt 0 ]; then echo "Y"; else echo "N"; fi
   register: redhat_packages_gpg_is_redhat
   ignore_errors: yes
   when: internal_have_rpm
 
 - name: set fact of all installed red hat rpms
   set_fact:
-    redhat_packages_gpg_is_redhat: "{{ redhat_packages_gpg_is_redhat }}"
+    redhat_packages_gpg_is_redhat: "{{ redhat_packages_gpg_is_redhat['stdout_lines'][0] }}"
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
   raw: rpm -qa --qf "%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
@@ -28,7 +18,7 @@
 
 - name: set fact of number of installed red hat packages filtered by gpg keys
   set_fact:
-    redhat_packages_gpg_num_rh_packagespush: "{{ redhat_packages_gpg_num_rh_packages }}"
+    redhat_packages_gpg_num_rh_packages: "{{ redhat_packages_gpg_num_rh_packages['stdout_lines'][0] }}"
 
 - name: gather total number of installed packages
   raw: rpm -qa | wc -l
@@ -38,27 +28,29 @@
 
 - name: set fact of number of all installed rpm packages
   set_fact:
-    redhat_packages_gpg_num_installed_packages: "{{ redhat_packages_all_count }}"
+    redhat_packages_gpg_num_installed_packages: "{{ redhat_packages_all_count['stdout_lines'][0] }}"
 
 - name: gather the last installed red hat package filtered by gpg keys
-  raw: rpm -qa --qf "%{INSTALLTIME} - %{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}|%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}|\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1
+  raw: rpm -qa --qf "%{INSTALLTIME} %{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: redhat_packages_gpg_last_installed
   ignore_errors: yes
-  when: internal_have_rpm
+  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
 
 - name: set fact of last installed rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_installed: "{{ redhat_packages_gpg_last_installed }}"
+    redhat_packages_gpg_last_installed: "{{ redhat_packages_gpg_last_installed['stdout_lines'][0] | default('') }}"
+  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
 
 - name: gather the last built red hat package filtered by gpg keys
-  raw: rpm -qa --qf "%{BUILDTIME} - %{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}|%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}|\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1
+  raw: rpm -qa --qf "%{BUILDTIME} %{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: redhat_packages_gpg_last_built
   ignore_errors: yes
-  when: internal_have_rpm
+  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
 
 - name: set fact of last built rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_built: "{{ redhat_packages_gpg_last_built }}"
+    redhat_packages_gpg_last_built: "{{ redhat_packages_gpg_last_built['stdout_lines'][0] }}"
+  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
 
 - name: gather redhat-packages.certs fact
   raw: ls /etc/pki/product/ 2> /dev/null| grep '.pem'
