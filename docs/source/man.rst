@@ -30,6 +30,10 @@ Usage
 
 ``qpc`` performs four major tasks:
 
+* Server login:
+
+  ``qpc server login --username admin``
+
 * Creating credentials:
 
   ``qpc cred add ...``
@@ -48,8 +52,53 @@ Usage
 
 The following sections describe these commands, their subcommands, and their options in more detail.
 
+Server Authentication
+---------------------
+
+Use the ``qpc server`` command to configure connectivity and login and logout of the server.
+
+Configuring the server
+~~~~~~~~~~~~~~~~~~~~~~
+
+To configure connection to the server supply the host address and optionally the port.
+
+**qpc server config --host=** *host* **[--port=** *port* **]**
+
+``--host=host``
+
+  Required. Sets the host address for the server. If running QPC on the same system as the server you can use "127.0.0.1".
+
+``--port=port``
+
+  Optional. Sets the port to connect to the server on, defaulting to 8000.
+
+
+Authentication with the server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To log in to the server after the connection has been configured use the login subcommand.
+
+**qpc server login [--username=** *username* **]**
+
+``--username=username``
+
+  Optional. Sets the username used to authenticate with the server.
+
+
+This command retrieves a token used for authentication for subsequent CLI commands.
+
+Log out of the server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To log out of the server use the logout subcommand.
+
+**qpc server logout***
+
+This command removes the token used for authentication for subsequent CLI commands.
+
+
 Credentials
------------------------
+-----------
 
 Use the ``qpc cred`` command to create and manage credentials.
 
@@ -58,7 +107,7 @@ A credential defines a set of user authentication configuration to be used durin
 When a scan runs, it uses a source that contains the host names or IP addresses to be accessed. The source also contains references to the credentials that are required to access those systems. A single source can contain a reference to multiple credentials as needed to connect to all systems in that network.
 
 Creating and Editing Credentials
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
@@ -352,4 +401,4 @@ Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah
 Copyright
 ---------
 
-(c) 2017 Red Hat, Inc. Licensed under the GNU Public License version 3.
+(c) 2018 Red Hat, Inc. Licensed under the GNU Public License version 3.

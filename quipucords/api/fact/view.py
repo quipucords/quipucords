@@ -12,8 +12,12 @@
 """Viewset for system facts models."""
 
 import logging
+import os
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
+from rest_framework.authentication import (TokenAuthentication,
+                                           SessionAuthentication)
+from rest_framework.permissions import IsAuthenticated
 from api.models import FactCollection
 from api.serializers import FactCollectionSerializer
 from api.fact.util import (validate_fact_collection_json,
@@ -27,6 +31,10 @@ from fingerprinter import pfc_signal
 class FactViewSet(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
+
+    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        permission_classes = (IsAuthenticated,)
 
     # Get an instance of a logger
     logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

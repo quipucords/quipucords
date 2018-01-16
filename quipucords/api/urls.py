@@ -11,6 +11,7 @@
 """Describes the urls and patterns for the API application."""
 
 from django.conf.urls import url
+from rest_framework.authtoken import views
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 from api.views import (CredentialViewSet, FactViewSet,
@@ -38,5 +39,9 @@ urlpatterns = [
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+urlpatterns += [
+    url(r'^token/', views.obtain_auth_token)
+]
 
 urlpatterns += ROUTER.urls

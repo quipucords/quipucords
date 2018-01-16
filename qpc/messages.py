@@ -119,3 +119,9 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
 CONN_PASSWORD = 'Provide connection password.'
 SUDO_PASSWORD = 'Provide password for sudo.'
 SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'
+
+LOGIN_USER_HELP = 'The username to login to the server.'
+LOGIN_USERNAME_PROMPT = 'Username:'
+LOGIN_SUCCESS = 'Login successful.'
+
+LOGOUT_SUCCESS = 'Logged out.'
