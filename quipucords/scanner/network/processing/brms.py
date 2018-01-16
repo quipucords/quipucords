@@ -7,7 +7,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Initial processing of raw shell output from Ansible commands."""
+"""Initial processing of the shell output from the jboss_brms role."""
 
 import logging
 from scanner.network.processing import process
