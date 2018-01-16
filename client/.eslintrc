@@ -10,12 +10,14 @@
     "standard-react",
     "standard-jsx",
     "prettier",
-    "prettier/react"
+    "prettier/react",
+    "plugin:jest/recommended"
   ],
   "env": {
     "es6": true,
     "browser": true,
-    "node": true
+    "node": true,
+    "jest": true
   },
   "plugins": ["prettier", "react"]
 }

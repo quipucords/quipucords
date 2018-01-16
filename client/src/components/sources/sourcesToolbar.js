@@ -9,7 +9,7 @@ import { bindMethods } from '../../common/helpers';
 
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 import Store from '../../redux/store';
-import * as dispatchTypes from '../../redux/constants/viewToolbarConstants';
+import { viewToolbarTypes as dispatchTypes } from '../../redux/constants/';
 
 class SourcesToolbar extends React.Component {
   constructor() {
