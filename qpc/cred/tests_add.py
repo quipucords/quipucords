@@ -23,7 +23,8 @@ from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
                       VCENTER_CRED_TYPE,
-                      NETWORK_CRED_TYPE)
+                      NETWORK_CRED_TYPE,
+                      SATELLITE_CRED_TYPE)
 from qpc.cred.add import CredAddCommand
 from qpc.utils import get_server_location, write_server_config
 
@@ -166,6 +167,25 @@ class CredentialAddCliTests(unittest.TestCase):
             aac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1',
                              type=VCENTER_CRED_TYPE,
+                             username='root',
+                             password='sdf')
+            do_mock_raw_input.return_value = 'abc'
+            with redirect_stdout(cred_out):
+                aac.main(args)
+                self.assertEqual(cred_out.getvalue(),
+                                 'Provide connection password.\n'
+                                 'Credential "credential1" was added\n')
+
+    @patch('getpass._raw_input')
+    def test_add_sat_cred(self, do_mock_raw_input):
+        """Testing the add sat cred command successfully."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.post(url, status_code=201)
+            aac = CredAddCommand(SUBPARSER)
+            args = Namespace(name='credential1',
+                             type=SATELLITE_CRED_TYPE,
                              username='root',
                              password='sdf')
             do_mock_raw_input.return_value = 'abc'

@@ -21,5 +21,6 @@ CLEAR = 'clear'
 
 NETWORK_CRED_TYPE = 'network'
 VCENTER_CRED_TYPE = 'vcenter'
+SATELLITE_CRED_TYPE = 'satellite'
 
 CREDENTIAL_URI = '/api/v1/credentials/'

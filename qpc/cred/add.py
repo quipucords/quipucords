@@ -44,7 +44,8 @@ class CredAddCommand(CliCommand):
                                  required=True)
         self.parser.add_argument('--type', dest='type',
                                  choices=[credential.NETWORK_CRED_TYPE,
-                                          credential.VCENTER_CRED_TYPE],
+                                          credential.VCENTER_CRED_TYPE,
+                                          credential.SATELLITE_CRED_TYPE],
                                  metavar='TYPE',
                                  help=_(messages.CRED_TYPE_HELP),
                                  required=True)
