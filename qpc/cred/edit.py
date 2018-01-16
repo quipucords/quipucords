@@ -59,6 +59,11 @@ class CredEditCommand(CliCommand):
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.CRED_SUDO_HELP))
+        self.parser.add_argument('--become_method', dest='become_method',
+                                 choices=['sudo', 'su', 'pbrun', 'pfexec',
+                                          'doas', 'dzdo', 'ksu', 'runas'],
+                                 metavar='BECOME_METHOD',
+                                 help=_(messages.CRED_BECOME_METHOD_HELP))
         self.cred_type = None
 
     def _validate_args(self):
@@ -66,7 +71,7 @@ class CredEditCommand(CliCommand):
 
         if not(self.args.username or self.args.password or
                self.args.sudo_password or self.args.filename or
-               self.args.ssh_passphrase):
+               self.args.ssh_passphrase or self.args.become_method):
             print(_(messages.CRED_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

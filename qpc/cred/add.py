@@ -66,6 +66,11 @@ class CredAddCommand(CliCommand):
         self.parser.add_argument('--sudo-password', dest='sudo_password',
                                  action='store_true',
                                  help=_(messages.CRED_SUDO_HELP))
+        self.parser.add_argument('--become_method', dest='become_method',
+                                 choices=['sudo','su', 'pbrun', 'pfexec',
+                                          'doas', 'dzdo', 'ksu', 'runas'],
+                                 metavar='BECOME_METHOD',
+                                 help=_(messages.CRED_BECOME_METHOD_HELP))
 
     def _validate_args(self):
         CliCommand._validate_args(self)

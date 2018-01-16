@@ -36,6 +36,7 @@ class Credential(models.Model):
         null=False
     )
     username = models.CharField(max_length=64)
+    become_method = models.CharField(max_length=6, null=True)
     password = models.CharField(max_length=1024, null=True)
     sudo_password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)

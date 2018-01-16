@@ -78,6 +78,8 @@ def build_credential_payload(args, cred_type, add_none=True):
         req_payload['cred_type'] = cred_type
     if 'username' in args and args.username:
         req_payload['username'] = args.username
+    if 'become_method' in args and args.become_method:
+        req_payload['become_method'] = args.become_method
     if 'filename' in args and args.filename:
         req_payload['ssh_keyfile'] = args.filename
     elif add_none:
