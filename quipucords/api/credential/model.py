@@ -24,8 +24,10 @@ class Credential(models.Model):
 
     NETWORK_CRED_TYPE = 'network'
     VCENTER_CRED_TYPE = 'vcenter'
+    SATELLITE_CRED_TYPE = 'satellite'
     CRED_TYPE_CHOICES = ((NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
-                         (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE))
+                         (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
+                         (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE))
 
     name = models.CharField(max_length=64, unique=True)
     cred_type = models.CharField(
