@@ -111,7 +111,7 @@ Creating and Editing Credentials
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
-**qpc cred add --name=** *name* **--type=** *(network | vcenter)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 ``--name=name``
 
@@ -123,7 +123,7 @@ To create a credential, supply SSH credentials as either a username-password pai
 
 ``--type=type``
 
-  Required. Sets the type of credential.  Must be ``network`` or ``vcenter``.
+  Required. Sets the type of credential.  Must be ``network``, ``vcenter`` or ``satellite``.
 
 ``--password``
 
@@ -151,11 +151,11 @@ Listing and Showing Credentials
 
 The ``qpc cred list`` command returns the details for every credential that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
 
-**qpc cred list **--type=** *(network | vcenter)* **
+**qpc cred list **--type=** *(network | vcenter | satellite)* **
 
 ``--type=type``
 
-  Optional.  Filter list results by credential type.  Must be ``network`` or ``vcenter``.
+  Optional.  Filter list results by credential type.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 The ``qpc cred show`` command is the same as the ``qpc cred list`` command, except that it returns details for a single specified credential.
 
