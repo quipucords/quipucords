@@ -8,7 +8,7 @@
 
 - name: set fact whether red hat rpms are installed or not
   set_fact:
-    redhat_packages_gpg_is_redhat: "{{ redhat_packages_gpg_is_redhat['stdout_lines'][0] }}"
+    redhat_packages_gpg_is_redhat: '{{ redhat_packages_gpg_is_redhat["stdout_lines"][0] == "Y" }}'
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
   raw: rpm -qa --qf "%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
@@ -34,23 +34,27 @@
   raw: rpm -qa --qf "%{INSTALLTIME} %{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: redhat_packages_gpg_last_installed
   ignore_errors: yes
-  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
+  when:
+    internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: set fact of last installed rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_installed: "{{ redhat_packages_gpg_last_installed['stdout_lines'][0] | default('') }}"
-  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
+    redhat_packages_gpg_last_installed: "{{ redhat_packages_gpg_last_installed['stdout_lines'][0] }}"
+  when:
+    internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather the last built red hat package filtered by gpg keys
   raw: rpm -qa --qf "%{BUILDTIME} %{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: redhat_packages_gpg_last_built
   ignore_errors: yes
-  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
+  when:
+    internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: set fact of last built rh package filtered by gpg key
   set_fact:
     redhat_packages_gpg_last_built: "{{ redhat_packages_gpg_last_built['stdout_lines'][0] }}"
-  when: 'internal_have_rpm and redhat_packages_gpg_is_redhat == "Y"'
+  when:
+    internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather redhat-packages.certs fact
   raw: ls /etc/pki/product/ 2> /dev/null| grep '.pem'
