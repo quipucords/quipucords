@@ -1,12 +1,12 @@
 class ScansApi {
   static getScans() {
-    return fetch('http://localhost:4000/api/v1/scans/')
-      .then(response => {
+    return fetch(process.env.REACT_APP_SCANS_API).then(response => {
+      if (response.ok) {
         return response.json();
-      })
-      .catch(error => {
-        return error;
-      });
+      } else {
+        throw new Error(response.statusText);
+      }
+    });
   }
 }
 
