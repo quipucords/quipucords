@@ -106,6 +106,8 @@ class CredentialSerializer(NotEmptySerializer):
         cred_type = 'cred_type' in attrs and attrs['cred_type']
         if cred_type == Credential.VCENTER_CRED_TYPE:
             return self.validate_vcenter_cred(attrs)
+        elif cred_type == Credential.SATELLITE_CRED_TYPE:
+            return self.validate_satellite_cred(attrs)
         return self.validate_host_cred(attrs)
 
     def validate_host_cred(self, attrs):
@@ -163,6 +165,31 @@ class CredentialSerializer(NotEmptySerializer):
         if ssh_keyfile or ssh_passphrase or sudo_password:
             error = {
                 'non_field_errors': [_(messages.VC_KEY_FILE_NOT_ALLOWED)]
+            }
+            raise ValidationError(error)
+
+        return attrs
+
+    def validate_satellite_cred(self, attrs):
+        """Validate the attributes for satellite creds."""
+        # Required fields for satellite
+        username = 'username' in attrs and attrs['username']
+        password = 'password' in attrs and attrs['password']
+
+        if not (password and username):
+            error = {
+                'non_field_errors': [_(messages.SAT_PWD_AND_USERNAME)]
+            }
+            raise ValidationError(error)
+
+        # Not allowed fields for satellite
+        ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
+        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
+        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+
+        if ssh_keyfile or ssh_passphrase or sudo_password:
+            error = {
+                'non_field_errors': [_(messages.SAT_KEY_FILE_NOT_ALLOWED)]
             }
             raise ValidationError(error)
 
