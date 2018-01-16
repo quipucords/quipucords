@@ -123,6 +123,7 @@ class InspectTaskRunner(ScanTaskRunner):
             'file_contents',
             'jboss_eap',
             'jboss_brms',
+            'jboss_fuse_on_karaf',
             'ifconfig',
             'redhat_release',
             'subman',

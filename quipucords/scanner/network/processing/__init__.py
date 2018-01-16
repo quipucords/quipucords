@@ -12,3 +12,4 @@
 # flake8: noqa
 from . import eap
 from . import brms
+from . import karaf
