@@ -23,7 +23,8 @@ from api.models import (Credential,
                         ScanOptions,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.network.connect import construct_connect_inventory, connect
+from scanner.network.connect import construct_connect_inventory, connect, \
+    ConnectResultStore
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
 
@@ -152,6 +153,19 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
         self.conn_results = ConnectionResults(scan_job=self.scan_job)
         self.conn_results.save()
+
+    def test_result_store(self):
+        """Test ConnectResultStore."""
+        result_store = ConnectResultStore(self.scan_task, self.conn_results)
+
+        self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
+        self.assertEqual(result_store.get_stats(), (1, 0, 0))
+
+        result_store.record_result('1.2.3.4', self.cred,
+                                   SystemConnectionResult.SUCCESS)
+
+        self.assertEqual(result_store.remaining_hosts(), [])
+        self.assertEqual(result_store.get_stats(), (1, 1, 0))
 
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""
