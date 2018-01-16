@@ -1,12 +1,12 @@
 class CredentialsApi {
   static getCredentials() {
-    return fetch('http://localhost:4000/api/v1/credentials/')
-      .then(response => {
+    return fetch(process.env.REACT_APP_CREDENTIALS_API).then(response => {
+      if (response.ok) {
         return response.json();
-      })
-      .catch(error => {
-        return error;
-      });
+      } else {
+        throw new Error(response.statusText);
+      }
+    });
   }
 }
 
