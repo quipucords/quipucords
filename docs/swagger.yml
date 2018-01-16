@@ -94,6 +94,7 @@ paths:
           enum:
             - network
             - vcenter
+            - satellite
       responses:
         200:
           description: "Credential retrieved"
@@ -288,6 +289,7 @@ paths:
           enum:
             - network
             - vcenter
+            - satellite
       responses:
         200:
           description: "Sources retrieved"
@@ -622,6 +624,7 @@ definitions:
         enum:
           - network
           - vcenter
+          - satellite
       facts:
         type: "array"
         items:
@@ -645,6 +648,7 @@ definitions:
           enum:
             - network
             - vcenter
+            - satellite
         username:
           type: "string"
           description: "The connection username for the credential"
@@ -675,6 +679,7 @@ definitions:
         enum:
           - network
           - vcenter
+          - satellite
   CredentialOut:
     allOf:
       - $ref: "#/definitions/Credential"
@@ -705,6 +710,7 @@ definitions:
           enum:
             - network
             - vcenter
+            - satellite
           description: "The source type"
         bios_uuid:
           type: "string"
@@ -808,11 +814,12 @@ definitions:
         enum:
           - network
           - vcenter
+          - satellite
       hosts:
         type: "array"
         items:
           type: "string"
-        description: "The host(s) to scan.Can be an IP or hostname for vcenter; or ips, hostnames or IP ranges for network."
+        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
       port:
         type: "integer"
         format: "int32"
@@ -836,6 +843,7 @@ definitions:
         enum:
           - network
           - vcenter
+          - satellite
   SourceIn:
     allOf:
       - $ref: "#/definitions/Source"

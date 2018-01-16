@@ -18,6 +18,7 @@ from api.models import Credential, Source
 import api.messages as messages
 
 
+# pylint: disable=too-many-instance-attributes
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -44,6 +45,17 @@ class SourceTest(TestCase):
         self.vc_cred_for_upload = self.vc_cred.id
         self.vc_cred_for_response = {'id': self.vc_cred.id,
                                      'name': self.vc_cred.name}
+
+        self.sat_cred = Credential.objects.create(
+            name='sat_cred1',
+            cred_type=Credential.SATELLITE_CRED_TYPE,
+            username='username',
+            password='password',
+            sudo_password=None,
+            ssh_keyfile=None)
+        self.sat_cred_for_upload = self.sat_cred.id
+        self.sat_cred_for_response = {'id': self.sat_cred.id,
+                                      'name': self.sat_cred.name}
 
     def create(self, data):
         """Call the create endpoint."""
@@ -82,6 +94,15 @@ class SourceTest(TestCase):
                 'source_type': Source.VCENTER_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
                 'credentials': [self.vc_cred_for_upload]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_successful_sat_create(self):
+        """A valid create request should succeed."""
+        data = {'name': 'source1',
+                'source_type': Source.SATELLITE_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'credentials': [self.sat_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
@@ -264,12 +285,37 @@ class SourceTest(TestCase):
              'credentials': [self.vc_cred_for_upload,
                              self.net_cred_for_upload]})
 
+    def test_sat_too_many_creds(self):
+        """A sat source and have one credential."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.sat_cred_for_upload,
+                             self.net_cred_for_upload]})
+
+    def test_sat_bad_version(self):
+        """A sat source must have valid version option."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.sat_cred_for_upload],
+             'options': {'satellite_version': '1.0'}})
+
     def test_create_req_host(self):
         """A vcenter source must have an host."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.VCENTER_SOURCE_TYPE,
              'credentials': [self.vc_cred_for_upload]})
+
+    def test_sat_req_host(self):
+        """A satellite source must have an host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'credentials': [self.sat_cred_for_upload]})
 
     def test_create_vc_with_hosts(self):
         """A vcenter source cannot have a host."""
@@ -278,6 +324,14 @@ class SourceTest(TestCase):
              'source_type': Source.VCENTER_SOURCE_TYPE,
              'hosts': ['1.2.3.4', '1.2.3.5'],
              'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_sat_with_hosts(self):
+        """A satellite source cannot have a host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4', '1.2.3.5'],
+             'credentials': [self.sat_cred_for_upload]})
 
     def test_create_req_type(self):
         """A vcenter source must have an type."""
