@@ -11,3 +11,4 @@
 
 # flake8: noqa
 from . import eap
+from . import karaf
