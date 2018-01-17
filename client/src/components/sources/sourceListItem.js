@@ -6,11 +6,14 @@ import {
   DropdownKebab,
   Button,
   MenuItem,
-  Checkbox
+  Checkbox,
+  Icon
 } from 'patternfly-react';
 
 export const SourceListItem = ({ item }) => {
-  let hostCount = item.hosts ? item.hosts.length : 0;
+  let credentialCount = item.credentials ? item.credentials.length : 0;
+  let okHostCount = item.hosts ? item.hosts.length : 0;
+  let failedHostCount = Math.floor(Math.random() * 10);
 
   let itemIcon;
   switch (item.source_type) {
@@ -26,7 +29,6 @@ export const SourceListItem = ({ item }) => {
 
   return (
     <ListView.Item
-      stacked
       key={item.id}
       checkboxInput={<Checkbox value={item.selected} bsClass="" />}
       actions={
@@ -49,9 +51,32 @@ export const SourceListItem = ({ item }) => {
       leftContent={itemIcon}
       heading={item.name}
       additionalInfo={[
-        <ListView.InfoItem key="hosts">
-          <span className="pficon pficon-screen" />
-          {hostCount} {hostCount === 1 ? ' Source' : ' Sources'}
+        <ListView.InfoItem
+          key="credentials"
+          className="list-view-info-item-text-count"
+        >
+          {credentialCount}{' '}
+          {credentialCount === 1 ? ' Credential' : ' Credentials'}
+        </ListView.InfoItem>,
+        <ListView.InfoItem
+          key="okHosts"
+          className={
+            'list-view-info-item-icon-count ' +
+            (okHostCount === 0 ? 'invisible' : '')
+          }
+        >
+          <Icon type="pf" name="ok" />
+          {okHostCount}
+        </ListView.InfoItem>,
+        <ListView.InfoItem
+          key="failedHosts"
+          className={
+            'list-view-info-item-icon-count ' +
+            (failedHostCount === 0 ? 'invisible' : '')
+          }
+        >
+          <Icon type="pf" name="error-circle-o" />
+          {failedHostCount}
         </ListView.InfoItem>
       ]}
     >
