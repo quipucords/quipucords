@@ -45,7 +45,8 @@ CRED_UPDATED = 'Credential "%s" was updated'
 
 CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
-CRED_BECOME_METHOD_HELP = 'Method to become.  Valid values: sudo, su, pbrun, pfexec, doas, dzdo, ksu, runas'
+CRED_BECOME_METHOD_HELP = 'Method to become.  Valid values: sudo, su, pbrun,'\
+    ' pfexec, doas, dzdo, ksu, runas'
 
 SOURCE_NAME_HELP = 'source name'
 SOURCES_NAME_HELP = 'list of source names'

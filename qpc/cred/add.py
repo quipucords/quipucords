@@ -67,7 +67,7 @@ class CredAddCommand(CliCommand):
                                  action='store_true',
                                  help=_(messages.CRED_SUDO_HELP))
         self.parser.add_argument('--become_method', dest='become_method',
-                                 choices=['sudo','su', 'pbrun', 'pfexec',
+                                 choices=['sudo', 'su', 'pbrun', 'pfexec',
                                           'doas', 'dzdo', 'ksu', 'runas'],
                                  metavar='BECOME_METHOD',
                                  help=_(messages.CRED_BECOME_METHOD_HELP))
