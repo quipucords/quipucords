@@ -10,6 +10,7 @@
 #
 """ScanTask used for vcenter inspection task."""
 import logging
+import json
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
@@ -106,22 +107,23 @@ class InspectTaskRunner(ScanTaskRunner):
         if config.memorySizeMB is not None:
             vm_mem = int(config.memorySizeMB / 1024)
 
-        # Need to obtain "DNS Name"
-        facts = {'vm.name': vm_name,  # "Name"
-                 'vm.state': summary.runtime.powerState,  # "State"
-                 'vm.uuid': vm_uuid,  # "UUID"
-                 'vm.cpu_count': vm_cpu_count,  # "CPU"
-                 'vm.memory_size': vm_mem,  # "Memory"
-                 'vm.os': vm_os,  # "Guest OS"
-                 'vm.dns_name': summary.guest.hostName,  # "DNS NAME"
-                 'vm.mac_address': ';'.join(mac_addresses),  # "Mac Address"
-                 'vm.ip_address': ';'.join(ip_addresses),  # "IP Address"
-                 'vm.host.name': host_name,  # "Host Name"
-                 'vm.host.cpu_cores': host_cpu_cores,  # "Host CPU Cores"
-                 'vm.host.cpu_threads': host_cpu_threads,  # "Host CPU Threads"
-                 'vm.host.cpu_count': host_cpu_count,  # "Host CPU Count"
-                 'vm.datacenter': data_center,  # "Data Center"
-                 'vm.cluster': cluster}  # "Cluster"
+        # Need to obtain DNS Name
+        facts = {'vm.name': vm_name,  # Name
+                 'vm.state': summary.runtime.powerState,  # State
+                 'vm.uuid': vm_uuid,  # UUID
+                 'vm.cpu_count': vm_cpu_count,  # CPU
+                 'vm.memory_size': vm_mem,  # Memory
+                 'vm.os': vm_os,  # Guest OS
+                 'vm.dns_name': summary.guest.hostName,  # DNS NAME
+                 # Mac Addresses
+                 'vm.mac_addresses': json.dumps(mac_addresses),
+                 'vm.ip_address': json.dumps(ip_addresses),  # IP Addresses
+                 'vm.host.name': host_name,  # Host Name
+                 'vm.host.cpu_cores': host_cpu_cores,  # Host CPU Cores
+                 'vm.host.cpu_threads': host_cpu_threads,  # Host CPU Threads
+                 'vm.host.cpu_count': host_cpu_count,  # Host CPU Count
+                 'vm.datacenter': data_center,  # Data Center
+                 'vm.cluster': cluster}  # Cluster
 
         logger.debug('system %s facts=%s', vm_name, facts)
 
