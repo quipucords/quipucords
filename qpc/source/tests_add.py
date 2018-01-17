@@ -222,3 +222,21 @@ class SourceAddCliTests(unittest.TestCase):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
                                  'Source "source1" was added\n')
+
+    def test_add_source_sat(self):
+        """Testing the add satellite source command successfully."""
+        source_out = StringIO()
+        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        post_source_url = BASE_URL + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=201)
+            nac = SourceAddCommand(SUBPARSER)
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['1.2.3.4'], type='vcenter',
+                             satellite_version='6.2')
+            with redirect_stdout(source_out):
+                nac.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 'Source "source1" was added\n')
