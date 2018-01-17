@@ -27,14 +27,12 @@ class Scans extends React.Component {
     let re = new RegExp(filter.value, 'i');
 
     switch (filter.field.id) {
+      case 'name':
+        return (item.id + '').match(re) !== null; // Using ID for now until we get a name
       case 'status':
         return item.status === filter.value.id;
       case 'scanType':
         return item.scan_type === filter.value.id;
-      case 'source':
-        return item.sources.find(source => {
-          return source.name.match(re) !== null;
-        });
       default:
         return true;
     }
@@ -64,11 +62,13 @@ class Scans extends React.Component {
     const { sortType, sortAscending } = this.props;
 
     let sortId = sortType ? sortType.id : 'name';
-    console.log(sortId);
 
     items.sort((item1, item2) => {
       let compValue;
       switch (sortId) {
+        case 'name':
+          compValue = item1.id - item2.id; // Using ID for now until we get a name
+          break;
         case 'status':
           compValue = item1.status.localeCompare(item2.status);
           if (compValue === 0) {

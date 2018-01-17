@@ -1,5 +1,11 @@
 const ScanFilterFields = [
   {
+    id: 'name',
+    title: 'Name',
+    placeholder: 'Filter by Name',
+    filterType: 'text'
+  },
+  {
     id: 'status',
     title: 'Status',
     placeholder: 'Filter by Status',
@@ -23,16 +29,15 @@ const ScanFilterFields = [
       { title: 'Connect', id: 'connect' },
       { title: 'Inspect', id: 'inspect' }
     ]
-  },
-  {
-    id: 'source',
-    title: 'Source',
-    placeholder: 'Filter by sources',
-    filterType: 'text'
   }
 ];
 
 const ScanSortFields = [
+  {
+    id: 'name',
+    title: 'Name',
+    isNumeric: false
+  },
   {
     id: 'status',
     title: 'Status',
