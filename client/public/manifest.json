@@ -1,6 +1,6 @@
 {
-  "short_name": "Sonar",
-  "name": "Sonar Enterprise Application",
+  "short_name": "Entitlements",
+  "name": "Red Hat Entitlement Reporting",
   "icons": [
     {
       "src": "favicon.ico",

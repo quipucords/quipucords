@@ -1,4 +1,4 @@
-export const SourceFilterFields = [
+const SourceFilterFields = [
   {
     id: 'name',
     title: 'Name',
@@ -16,3 +16,23 @@ export const SourceFilterFields = [
     ]
   }
 ];
+
+const SourceSortFields = [
+  {
+    id: 'name',
+    title: 'Name',
+    isNumeric: false
+  },
+  {
+    id: 'sourceType',
+    title: 'Source Type',
+    isNumeric: false
+  },
+  {
+    id: 'hostCount',
+    title: 'Hosts Count',
+    isNumeric: true
+  }
+];
+
+export { SourceFilterFields, SourceSortFields };
