@@ -226,3 +226,35 @@ class TestProcessJbossEapInitFiles(unittest.TestCase):
                 processor.process(
                     ansible_result('  foo\n  eap bar\n  baz eap')),
                 ['eap bar'])
+
+
+class TestProcessEapHomeBinForFuse(unittest.TestCase):
+    """Test looking for fuse scripts."""
+
+    def test_fuse_not_found(self):
+        """Test failure to find a fuse script."""
+        found_files = ['foo.sh', 'README']
+
+        processor_input = ansible_results([{
+            'item': '/some/dir',
+            'stdout': '\n'.join(found_files)
+        }])
+        expected_result = {
+            '/some/dir': []
+        }
+        actual_result = eap.ProcessEapHomeBinForFuse.process(processor_input)
+        self.assertEqual(actual_result, expected_result)
+
+    def test_fuse_is_found(self):
+        """Test successfully finding a fuse script."""
+        found_files = ['foo.sh', 'README'] + \
+            eap.ProcessEapHomeBinForFuse.INDICATOR_FILES[:-1]
+        processor_input = ansible_results([{
+            'item': '/some/dir',
+            'stdout': '\n'.join(found_files)
+        }])
+        expected_result = {
+            '/some/dir': eap.ProcessEapHomeBinForFuse.INDICATOR_FILES[:-1]
+        }
+        actual_result = eap.ProcessEapHomeBinForFuse.process(processor_input)
+        self.assertEqual(actual_result, expected_result)
