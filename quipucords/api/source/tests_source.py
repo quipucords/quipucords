@@ -304,21 +304,21 @@ class SourceTest(TestCase):
              'options': {'satellite_version': '1.0'}})
 
     def test_create_req_host(self):
-        """A vcenter source must have an host."""
+        """A vcenter source must have a host."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.VCENTER_SOURCE_TYPE,
              'credentials': [self.vc_cred_for_upload]})
 
     def test_sat_req_host(self):
-        """A satellite source must have an host."""
+        """A satellite source must have a host."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.SATELLITE_SOURCE_TYPE,
              'credentials': [self.sat_cred_for_upload]})
 
     def test_create_vc_with_hosts(self):
-        """A vcenter source cannot have a host."""
+        """A vcenter source must not have multiple hosts."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.VCENTER_SOURCE_TYPE,
@@ -326,7 +326,7 @@ class SourceTest(TestCase):
              'credentials': [self.vc_cred_for_upload]})
 
     def test_create_sat_with_hosts(self):
-        """A satellite source cannot have a host."""
+        """A satellite source must not have multiple hosts."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.SATELLITE_SOURCE_TYPE,
