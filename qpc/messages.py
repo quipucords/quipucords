@@ -55,6 +55,7 @@ SOURCE_HOSTS_HELP = 'IP ranges to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_PORT_HELP = 'port for connection; network default=22, '\
     'vcenter default=443'
+SOURCE_SAT_VER_HELP = 'specify the version of Satellite (i.e. "6.2")'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
     '"--cred" input values. References for the'\
     ' following credential could not' \

@@ -17,13 +17,29 @@ from django.db import models
 from api.credential.model import Credential
 
 
+class SourceOptions(models.Model):
+    """The source options allows configuration of a sources."""
+
+    SATELLITE_VERSION_62 = '6.2'
+    SATELLITE_VERSION_CHOICES = ((SATELLITE_VERSION_62, SATELLITE_VERSION_62),)
+
+    satellite_version = models.CharField(
+        max_length=10,
+        choices=SATELLITE_VERSION_CHOICES,
+        null=False,
+        default=SATELLITE_VERSION_62
+    )
+
+
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
 
     NETWORK_SOURCE_TYPE = 'network'
     VCENTER_SOURCE_TYPE = 'vcenter'
+    SATELLITE_SOURCE_TYPE = 'satellite'
     SOURCE_TYPE_CHOICES = ((NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
-                           (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE))
+                           (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
+                           (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE))
 
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
@@ -32,6 +48,8 @@ class Source(models.Model):
         null=False
     )
     port = models.IntegerField(null=True)
+    options = models.ForeignKey(
+        SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
     # Source also has the field hosts, which is created by the
     # ForeignKey in HostRange below.
