@@ -661,6 +661,18 @@ definitions:
         sudo_password:
           type: "string"
           description: "The password for sudo permission escalation after connection for the credential"
+        become_method:
+          type: "string"
+          description: "The method to become for ansible privilege escalation"
+          enum:
+            - sudo
+            - su
+            - pbrun
+            - pfexec
+            - doas
+            - dzdo
+            - ksu
+            - runas
   CredentialMin:
     type: "object"
     required:
