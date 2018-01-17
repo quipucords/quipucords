@@ -24,15 +24,16 @@ class Sources extends React.Component {
   }
 
   matchesFilter(item, filter) {
-    let match = true;
     let re = new RegExp(filter.value, 'i');
 
-    if (filter.field.id === 'name') {
-      match = item.name.match(re) !== null;
-    } else if (filter.field.id === 'sourceType') {
-      match = item.source_type === filter.value.id;
+    switch (filter.field.id) {
+      case 'name':
+        return item.name.match(re) !== null;
+      case 'sourceType':
+        return item.source_type === filter.value.id;
+      default:
+        return true;
     }
-    return match;
   }
 
   matchesFilters(item, filters) {
@@ -61,13 +62,19 @@ class Sources extends React.Component {
     let sortId = sortType ? sortType.id : 'name';
 
     items.sort((item1, item2) => {
-      let compValue = 0;
-      if (sortId === 'name') {
-        compValue = item1.name.localeCompare(item2.name);
-      } else if (sortId === 'sourceType') {
-        compValue = item1.source_type.localeCompare(item2.source_type);
-      } else if (sortId === 'hostCount') {
-        compValue = item1.hosts.length - item2.hosts.length;
+      let compValue;
+      switch (sortId) {
+        case 'name':
+          compValue = item1.name.localeCompare(item2.name);
+          break;
+        case 'sourceType':
+          compValue = item1.source_type.localeCompare(item2.source_type);
+          break;
+        case 'hostCount':
+          compValue = item1.hosts.length - item2.hosts.length;
+          break;
+        default:
+          compValue = 0;
       }
 
       if (!sortAscending) {
@@ -102,7 +109,8 @@ class Sources extends React.Component {
           </Modal.Body>
         </Modal>
       );
-    } else if (loadError) {
+    }
+    if (loadError) {
       return (
         <EmptyState>
           <Alert type="danger">
@@ -110,7 +118,8 @@ class Sources extends React.Component {
           </Alert>
         </EmptyState>
       );
-    } else if (sources && sources.length > 0) {
+    }
+    if (sources && sources.length) {
       let filteredSources = this.filterSources(sources);
       this.sortSources(filteredSources);
 
@@ -124,9 +133,8 @@ class Sources extends React.Component {
           {this.renderList(filteredSources)}
         </Grid>
       ];
-    } else {
-      return <SourcesEmptyState />;
     }
+    return <SourcesEmptyState />;
   }
 }
 
