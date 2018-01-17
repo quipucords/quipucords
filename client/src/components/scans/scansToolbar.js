@@ -7,11 +7,11 @@ import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 
-import { SourceFilterFields, SourceSortFields } from './sourceConstants';
+import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import Store from '../../redux/store';
 import * as dispatchTypes from '../../redux/constants/viewToolbarConstants';
 
-class SourcesToolbar extends React.Component {
+class ScansToolbar extends React.Component {
   constructor() {
     super();
 
@@ -32,11 +32,11 @@ class SourcesToolbar extends React.Component {
     const { filterType, sortType } = this.props;
 
     if (!filterType) {
-      this.selectFilterType(SourceFilterFields[0]);
+      this.selectFilterType(ScanFilterFields[0]);
     }
 
     if (!sortType) {
-      this.updateCurrentSortType(SourceSortFields[0]);
+      this.updateCurrentSortType(ScanSortFields[0]);
     }
   }
 
@@ -161,7 +161,7 @@ class SourcesToolbar extends React.Component {
     return (
       <Filter>
         <Filter.TypeSelector
-          filterTypes={SourceFilterFields}
+          filterTypes={ScanFilterFields}
           currentFilterType={filterType}
           onFilterTypeSelected={this.selectFilterType}
         />
@@ -177,7 +177,7 @@ class SourcesToolbar extends React.Component {
       return (
         <Sort>
           <Sort.TypeSelector
-            sortTypes={SourceSortFields}
+            sortTypes={ScanSortFields}
             currentSortType={sortType}
             onSortTypeSelected={this.updateCurrentSortType}
           />
@@ -196,11 +196,11 @@ class SourcesToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
-        <Button className="unavailable">Authenticate</Button>
-        <Button className="unavailable">Scan</Button>
         <Button className="unavailable" bsStyle="primary">
-          Add
+          Scan Now
         </Button>
+        <Button className="unavailable">Repeat Scan</Button>
+        <Button className="unavailable">Download</Button>
       </div>
     );
   }
@@ -263,7 +263,7 @@ class SourcesToolbar extends React.Component {
   }
 }
 
-SourcesToolbar.propTypes = {
+ScansToolbar.propTypes = {
   totalCount: PropTypes.number,
   filteredCount: PropTypes.number,
   filterType: PropTypes.object,
@@ -275,8 +275,8 @@ SourcesToolbar.propTypes = {
 
 function mapStateToProps(state, ownProps) {
   return {
-    ...state.sourcesToolbar
+    ...state.scansToolbar
   };
 }
 
-export default withRouter(connect(mapStateToProps)(SourcesToolbar));
+export default withRouter(connect(mapStateToProps)(ScansToolbar));
