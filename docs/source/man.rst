@@ -196,7 +196,7 @@ Creating and Editing Sources
 
 To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]**
 
 ``--name=name``
 
@@ -204,7 +204,7 @@ To create a source, supply one or more host names or IP addresses to connect to 
 
 ``--type=type``
 
-  Required. Sets the type of source.  Must be ``network`` or ``vcenter``.
+  Required. Sets the type of source.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 ``--hosts ip_address``
 
@@ -257,11 +257,11 @@ Listing and Showing Sources
 
 The ``qpc source list`` command returns the details for all configured sources. The output of this command includes the host names, IP addresses, or IP ranges, the credentials, and the ports that are configured for each source.
 
-**qpc source list **--type=** *(network | vcenter)* **
+**qpc source list **--type=** *(network | vcenter | satellite)* **
 
 ``--type=type``
 
-  Optional.  Filter list results by source type.  Must be ``network`` or ``vcenter``.
+  Optional.  Filter list results by source type.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 
 The ``qpc source show`` command is the same as the ``qpc source list`` command, except that it returns details for a single specified source.

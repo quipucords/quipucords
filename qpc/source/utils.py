@@ -65,5 +65,8 @@ def build_source_payload(args, add_none=True):
         req_payload['credentials'] = args.credentials
     elif add_none:
         req_payload['credentials'] = None
+    if hasattr(args, 'satellite_version') and args.satellite_version:
+        options = {'satellite_version': args.satellite_version}
+        req_payload['options'] = options
 
     return req_payload
