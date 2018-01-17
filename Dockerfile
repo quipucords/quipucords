@@ -1,21 +1,25 @@
-FROM python:3.6
+FROM fedora:27
 
-# Add sshpass
-RUN apt-get update && apt-get install -y sshpass
+RUN yum -y groupinstall "Development tools"
+RUN yum -y install python-devel python-tools python3-devel python3-tools sshpass which
+
+RUN pip install virtualenv
+RUN virtualenv -p python3 ~/venv
 
 # Setup dependencies
 COPY requirements.txt /tmp/reqs.txt
 # Remove last 2 lines
 RUN sed -e :a -e '$d;N;2,3ba' -e 'P;D' /tmp/reqs.txt > /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-RUN pip install coverage==3.6
+RUN . ~/venv/bin/activate;pip install -r /tmp/requirements.txt
+RUN . ~/venv/bin/activate;pip install coverage==3.6
 
 # Copy server code
 COPY . /tmp/
 WORKDIR /tmp/
 
+
 # Initialize database
-RUN make server-init
+RUN . ~/venv/bin/activate;python -V;make server-init
 
 EXPOSE 8000
-CMD python /tmp/quipucords/manage.py runserver 0.0.0.0:8000
+CMD . ~/venv/bin/activate;python -V;python /tmp/quipucords/manage.py runserver 0.0.0.0:8000

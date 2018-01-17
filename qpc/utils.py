@@ -24,6 +24,7 @@ CONFIG_DIR = os.path.join(xdg_config_home, QPC_PATH)
 DATA_DIR = os.path.join(xdg_data_home, QPC_PATH)
 QPC_LOG = os.path.join(DATA_DIR, 'qpc.log')
 QPC_SERVER_CONFIG = os.path.join(CONFIG_DIR, 'server.config')
+QPC_CLIENT_TOKEN = os.path.join(CONFIG_DIR, 'client_token')
 
 CONFIG_HOST_KEY = 'host'
 CONFIG_PORT_KEY = 'port'
@@ -65,6 +66,25 @@ try:
     exception_class = json.decoder.JSONDecodeError
 except AttributeError:
     exception_class = ValueError
+
+
+def read_client_token():
+    """Retrieve client token for sonar server.
+
+    :returns: The client token or None
+    """
+    if not os.path.exists(QPC_CLIENT_TOKEN):
+        return None
+
+    token = None
+    with open(QPC_CLIENT_TOKEN) as client_token_file:
+        try:
+            token_json = json.load(client_token_file)
+            token = token_json.get('token')
+        except exception_class:
+            pass
+
+        return token
 
 
 def read_server_config():
@@ -114,6 +134,23 @@ def write_server_config(server_config):
         json.dump(server_config, configFile)
 
 
+def write_client_token(client_token):
+    """Write client token to file client_token.
+
+    :param client_token: dict containing client_token
+    """
+    ensure_config_dir_exists()
+
+    with open(QPC_CLIENT_TOKEN, 'w') as configFile:
+        json.dump(client_token, configFile)
+
+
+def delete_client_token():
+    """Remove file client_token."""
+    ensure_config_dir_exists()
+    os.remove(QPC_CLIENT_TOKEN)
+
+
 def ensure_data_dir_exists():
     """Ensure the qpc data directory exists."""
     if not os.path.exists(DATA_DIR):
@@ -156,13 +193,21 @@ def handle_error_response(response):
     """
     try:
         response_data = response.json()
+        if isinstance(response_data, str):
+            log.error('Error: %s', str(response_data))
         if isinstance(response_data, dict):
             for err_key, err_cases in response_data.items():
                 error_context = 'Error'
-                if err_key != 'non_field_errors':
+                if (err_key != 'non_field_errors' and
+                        err_key != 'detail' and err_key != 'options'):
                     error_context = err_key
-                for err_msg in err_cases:
-                    log.error('%s: %s', error_context, err_msg)
+                if isinstance(err_cases, str):
+                    log.error('%s: %s', error_context, err_cases)
+                elif isinstance(err_cases, dict):
+                    log.error('%s: %s', error_context, err_cases)
+                else:
+                    for err_msg in err_cases:
+                        log.error('%s: %s', error_context, err_msg)
         elif isinstance(response_data, list):
             for err in response_data:
                 log.error('Error: %s', err)

@@ -35,6 +35,10 @@ VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
     ' keyfile, or ssh passphrase.'
 
+SAT_PWD_AND_USERNAME = 'Satellite requires both username and password.'
+SAT_KEY_FILE_NOT_ALLOWED = 'Satellite cannot use a sudo password, ssh'\
+    ' keyfile, or ssh passphrase.'
+
 # source messages
 SOURCE_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
 SOURCE_NAME_VALIDATION = 'Source must have printable name.'
@@ -68,6 +72,9 @@ NET_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
 
 VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
 VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
+
+SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
+SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'

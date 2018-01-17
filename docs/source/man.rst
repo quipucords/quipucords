@@ -30,6 +30,10 @@ Usage
 
 ``qpc`` performs four major tasks:
 
+* Server login:
+
+  ``qpc server login --username admin``
+
 * Creating credentials:
 
   ``qpc cred add ...``
@@ -48,8 +52,53 @@ Usage
 
 The following sections describe these commands, their subcommands, and their options in more detail.
 
+Server Authentication
+---------------------
+
+Use the ``qpc server`` command to configure connectivity and login and logout of the server.
+
+Configuring the server
+~~~~~~~~~~~~~~~~~~~~~~
+
+To configure connection to the server supply the host address and optionally the port.
+
+**qpc server config --host=** *host* **[--port=** *port* **]**
+
+``--host=host``
+
+  Required. Sets the host address for the server. If running QPC on the same system as the server you can use "127.0.0.1".
+
+``--port=port``
+
+  Optional. Sets the port to connect to the server on, defaulting to 8000.
+
+
+Authentication with the server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To log in to the server after the connection has been configured use the login subcommand.
+
+**qpc server login [--username=** *username* **]**
+
+``--username=username``
+
+  Optional. Sets the username used to authenticate with the server.
+
+
+This command retrieves a token used for authentication for subsequent CLI commands.
+
+Log out of the server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To log out of the server use the logout subcommand.
+
+**qpc server logout***
+
+This command removes the token used for authentication for subsequent CLI commands.
+
+
 Credentials
------------------------
+-----------
 
 Use the ``qpc cred`` command to create and manage credentials.
 
@@ -58,11 +107,11 @@ A credential defines a set of user authentication configuration to be used durin
 When a scan runs, it uses a source that contains the host names or IP addresses to be accessed. The source also contains references to the credentials that are required to access those systems. A single source can contain a reference to multiple credentials as needed to connect to all systems in that network.
 
 Creating and Editing Credentials
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
-**qpc cred add --name=** *name* **--type=** *(network | vcenter)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
 
 ``--name=name``
 
@@ -74,7 +123,7 @@ To create a credential, supply SSH credentials as either a username-password pai
 
 ``--type=type``
 
-  Required. Sets the type of credential.  Must be ``network`` or ``vcenter``.
+  Required. Sets the type of credential.  Must be ``network``, ``vcenter`` or ``satellite``.
 
 ``--password``
 
@@ -102,11 +151,11 @@ Listing and Showing Credentials
 
 The ``qpc cred list`` command returns the details for every credential that is configured for Quipucords. This output includes the name, username, password, SSH keyfile and sudo password for each entry. Passwords are masked if provided, if not, they will appear as ``null``.
 
-**qpc cred list **--type=** *(network | vcenter)* **
+**qpc cred list **--type=** *(network | vcenter | satellite)* **
 
 ``--type=type``
 
-  Optional.  Filter list results by credential type.  Must be ``network`` or ``vcenter``.
+  Optional.  Filter list results by credential type.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 The ``qpc cred show`` command is the same as the ``qpc cred list`` command, except that it returns details for a single specified credential.
 
@@ -147,7 +196,7 @@ Creating and Editing Sources
 
 To create a source, supply one or more host names or IP addresses to connect to with the ``--hosts`` option and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for each of these options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]**
 
 ``--name=name``
 
@@ -155,7 +204,7 @@ To create a source, supply one or more host names or IP addresses to connect to 
 
 ``--type=type``
 
-  Required. Sets the type of source.  Must be ``network`` or ``vcenter``.
+  Required. Sets the type of source.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 ``--hosts ip_address``
 
@@ -208,11 +257,11 @@ Listing and Showing Sources
 
 The ``qpc source list`` command returns the details for all configured sources. The output of this command includes the host names, IP addresses, or IP ranges, the credentials, and the ports that are configured for each source.
 
-**qpc source list **--type=** *(network | vcenter)* **
+**qpc source list **--type=** *(network | vcenter | satellite)* **
 
 ``--type=type``
 
-  Optional.  Filter list results by source type.  Must be ``network`` or ``vcenter``.
+  Optional.  Filter list results by source type.  Must be ``network``, ``vcenter``, or ``satellite``.
 
 
 The ``qpc source show`` command is the same as the ``qpc source list`` command, except that it returns details for a single specified source.
@@ -352,4 +401,4 @@ Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah
 Copyright
 ---------
 
-(c) 2017 Red Hat, Inc. Licensed under the GNU Public License version 3.
+(c) 2018 Red Hat, Inc. Licensed under the GNU Public License version 3.

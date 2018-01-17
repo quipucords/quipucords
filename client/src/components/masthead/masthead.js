@@ -30,7 +30,7 @@ class NavBar extends Component {
             <img
               className="navbar-brand-name navbar-brand-txt"
               src="/assets/img/brand-alt.svg"
-              alt="SONAR Enterprise Application"
+              alt="Red Hat Entitlement Reporting"
             />
           </a>
         </div>

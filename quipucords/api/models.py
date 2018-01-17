@@ -15,7 +15,7 @@
 from api.fact.model import FactCollection
 from api.fingerprint.model import SystemFingerprint
 from api.credential.model import Credential
-from api.source.model import HostRange, Source
+from api.source.model import HostRange, Source, SourceOptions
 from api.scanjob.model import ScanJob, ScanOptions
 from api.connresults.model import (ConnectionResults, ConnectionResult,
                                    SystemConnectionResult)

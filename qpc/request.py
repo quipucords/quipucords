@@ -16,7 +16,7 @@ import requests
 from qpc.utils import log
 from qpc.translation import _
 from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
-from qpc.utils import get_server_location
+from qpc.utils import get_server_location, read_client_token
 
 # Need to determine how we get this information; config file at install?
 
@@ -27,7 +27,7 @@ DELETE = 'DELETE'
 PUT = 'PUT'
 
 
-def post(path, payload):
+def post(path, payload, headers=None):
     """Post JSON payload to the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials)
@@ -35,10 +35,10 @@ def post(path, payload):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.post(url, json=payload)
+    return requests.post(url, json=payload, headers=headers)
 
 
-def get(path, params=None):
+def get(path, params=None, headers=None):
     """Get JSON data from the given path with the configured server location.
 
     :param path:  path after server and port (i.e. /api/v1/credentials)
@@ -46,10 +46,10 @@ def get(path, params=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.get(url, params=params)
+    return requests.get(url, params=params, headers=headers)
 
 
-def patch(path, payload):
+def patch(path, payload, headers=None):
     """Patch JSON payload to the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials/1)
@@ -57,20 +57,20 @@ def patch(path, payload):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.patch(url, json=payload)
+    return requests.patch(url, json=payload, headers=headers)
 
 
-def delete(path):
+def delete(path, headers=None):
     """Delete the item with the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials/1)
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.delete(url)
+    return requests.delete(url, headers=headers)
 
 
-def put(path, payload):
+def put(path, payload, headers=None):
     """Put JSON payload to the given path with the configured server location.
 
     :param path: path after server and port (i.e. /api/v1/credentials)
@@ -78,10 +78,12 @@ def put(path, payload):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.put(url, json=payload)
+    return requests.put(url, json=payload, headers=headers)
 
 
-def request(method, path, params=None, payload=None, parser=None):
+# pylint: disable=too-many-arguments
+def request(method, path, params=None, payload=None,
+            parser=None, headers=None):
     """Create a generic handler for passing to specific request methods.
 
     :param method: the request method to execute
@@ -89,20 +91,28 @@ def request(method, path, params=None, payload=None, parser=None):
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
     :param payload: dictionary of payload to be posted
     :param parser: parser for printing usage on failure
+    :param headers: headers to include
     :returns: reponse object
     :raises: AssertionError error if method is not supported
     """
+    req_headers = {}
+    token = read_client_token()
+    if headers:
+        req_headers.update(headers)
+    if token:
+        req_headers['Authorization'] = 'Token {}'.format(token)
+
     try:
         if method == POST:
-            return post(path, payload)
+            return post(path, payload, req_headers)
         elif method == GET:
-            return get(path, params)
+            return get(path, params, req_headers)
         elif method == PATCH:
-            return patch(path, payload)
+            return patch(path, payload, req_headers)
         elif method == DELETE:
-            return delete(path)
+            return delete(path, req_headers)
         elif method == PUT:
-            return put(path, payload)
+            return put(path, payload, req_headers)
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()

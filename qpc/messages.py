@@ -52,6 +52,7 @@ SOURCE_HOSTS_HELP = 'IP ranges to scan. See "man qpc" for supported formats.'
 SOURCE_CREDS_HELP = 'credentials to associate with source'
 SOURCE_PORT_HELP = 'port for connection; network default=22, '\
     'vcenter default=443'
+SOURCE_SAT_VER_HELP = 'specify the version of Satellite (i.e. "6.2")'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the ' \
     '"--cred" input values. References for the'\
     ' following credential could not' \
@@ -119,3 +120,9 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
 CONN_PASSWORD = 'Provide connection password.'
 SUDO_PASSWORD = 'Provide password for sudo.'
 SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'
+
+LOGIN_USER_HELP = 'The username to login to the server.'
+LOGIN_USERNAME_PROMPT = 'Username:'
+LOGIN_SUCCESS = 'Login successful.'
+
+LOGOUT_SUCCESS = 'Logged out.'
