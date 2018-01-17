@@ -8,6 +8,7 @@ import 'patternfly/dist/css/patternfly-additions.css';
 import './index.css';
 
 import App from './components/app';
+import { baseName } from './routes';
 import store from './redux/store';
 
 import registerServiceWorker from './registerServiceWorker';
@@ -16,7 +17,7 @@ registerServiceWorker();
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router>
+    <Router basename={baseName}>
       <App />
     </Router>
   </Provider>,

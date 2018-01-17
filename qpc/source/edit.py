@@ -56,6 +56,11 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP))
+        self.parser.add_argument('--satellite_version',
+                                 dest='satellite_version',
+                                 metavar='SAT_VER',
+                                 help=_(messages.SOURCE_SAT_VER_HELP),
+                                 required=False)
 
     # pylint: disable=too-many-branches
     def _validate_args(self):

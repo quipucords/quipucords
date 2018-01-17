@@ -46,7 +46,8 @@ class SourceAddCommand(CliCommand):
                                  required=True)
         self.parser.add_argument('--type', dest='type',
                                  choices=[source.NETWORK_SOURCE_TYPE,
-                                          source.VCENTER_SOURCE_TYPE],
+                                          source.VCENTER_SOURCE_TYPE,
+                                          source.SATELLITE_SOURCE_TYPE],
                                  metavar='TYPE',
                                  help=_(messages.SOURCE_TYPE_HELP),
                                  required=True)
@@ -62,6 +63,11 @@ class SourceAddCommand(CliCommand):
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP),
+                                 required=False)
+        self.parser.add_argument('--satellite_version',
+                                 dest='satellite_version',
+                                 metavar='SAT_VER',
+                                 help=_(messages.SOURCE_SAT_VER_HELP),
                                  required=False)
 
     def _validate_args(self):

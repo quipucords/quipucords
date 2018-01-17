@@ -90,6 +90,7 @@
     subman: "{{ subman|default({}) | combine({ item: internal_subman_has_facts_file['stdout'] | trim | default(None) }) }}"
   with_items:
   - 'subman.has_facts_file'
+  when: 'internal_have_subscription_manager'
 
 # subman_consumed fact
 - name: gather subman.consumed fact
