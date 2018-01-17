@@ -299,6 +299,11 @@ def _create_index_for_fingerprint(id_key,
 def _merge_fingerprint(network_fingerprint, vcenter_fingerprint):
     """Merge network and vcenter facts."""
     # Add vcenter fact if not already set by network
+
+    logger.debug('Merging the following two fingerprints.')
+    logger.debug('Network fingerprint: %s', network_fingerprint)
+    logger.debug('VCenter fingerprint: %s', vcenter_fingerprint)
+
     for fact in COMMON_FACTS_TO_MERGE:
         existing_nfact = network_fingerprint.get(fact)
         new_vfact = vcenter_fingerprint.get(fact)
@@ -310,6 +315,8 @@ def _merge_fingerprint(network_fingerprint, vcenter_fingerprint):
         new_vfact = vcenter_fingerprint.get(fact)
         if new_vfact:
             network_fingerprint[fact] = new_vfact
+
+    logger.debug('Merged fingerprint: %s', network_fingerprint)
 
     return network_fingerprint
 
@@ -335,8 +342,8 @@ def _process_network_fact(fact):
         fingerprint['os_release'] = fact['etc_release_release']
 
     # Set ip address from either network or vcenter
-    if fact.get('ifconfig_ip_address'):
-        fingerprint['ip_addresses'] = fact['ifconfig_ip_address']
+    if fact.get('ifconfig_ip_addresses'):
+        fingerprint['ip_addresses'] = fact['ifconfig_ip_addresses']
 
     # Set mac address from either network or vcenter
     if fact.get('ifconfig_mac_addresses'):
@@ -445,8 +452,8 @@ def _process_vcenter_fact(fact):
         fingerprint['mac_addresses'] = fact['vm.mac_addresses']
 
     # Set vm.ip_address
-    if fact.get('vm.ip_address'):
-        fingerprint['ip_addresses'] = fact['vm.ip_address']
+    if fact.get('vm.ip_addresses'):
+        fingerprint['ip_addresses'] = fact['vm.ip_addresses']
 
     # Set vm.cpu_count
     if fact.get('vm.cpu_count'):

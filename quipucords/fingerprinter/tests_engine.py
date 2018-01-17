@@ -43,7 +43,7 @@ class EngineTest(TestCase):
             etc_release_name='RHEL',
             etc_release_version='7.4 (Maipo)',
             etc_release_release='RHEL 7.4 (Maipo)',
-            ifconfig_ip_address=None,
+            ifconfig_ip_addresses=None,
             ifconfig_mac_addresses=None,
             dmi_system_uuid='1234',
             subman_virt_uuid='4567',
@@ -78,10 +78,10 @@ class EngineTest(TestCase):
         if etc_release_release:
             fact['etc_release_release'] = etc_release_release
 
-        if ifconfig_ip_address:
-            fact['ifconfig_ip_address'] = ifconfig_ip_address
+        if ifconfig_ip_addresses:
+            fact['ifconfig_ip_addresses'] = ifconfig_ip_addresses
         else:
-            fact['ifconfig_ip_address'] = ['1.2.3.4', '2.3.4.5']
+            fact['ifconfig_ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if ifconfig_mac_addresses:
             fact['ifconfig_mac_addresses'] = ifconfig_mac_addresses
@@ -158,9 +158,9 @@ class EngineTest(TestCase):
             fact['vm.os'] = vm_os
 
         if vm_ip_address:
-            fact['vm.ip_address'] = vm_ip_address
+            fact['vm.ip_addresses'] = vm_ip_address
         else:
-            fact['vm.ip_address'] = ['1.2.3.4', '2.3.4.5']
+            fact['vm.ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if vm_mac_addresses:
             fact['vm.mac_addresses'] = vm_mac_addresses
@@ -202,7 +202,7 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('etc_release_version'),
                          fingerprint.get('os_version'))
 
-        self.assertListEqual(fact.get('ifconfig_ip_address'),
+        self.assertListEqual(fact.get('ifconfig_ip_addresses'),
                              fingerprint.get('ip_addresses'))
         self.assertListEqual(fact.get('ifconfig_mac_addresses'),
                              fingerprint.get('mac_addresses'))
@@ -251,7 +251,7 @@ class EngineTest(TestCase):
         """Help to validate fields."""
         self.assertEqual(fact.get('vm.os'), fingerprint.get('os_release'))
 
-        self.assertEqual(fact.get('vm.ip_address'),
+        self.assertEqual(fact.get('vm.ip_addresses'),
                          fingerprint.get('ip_addresses'))
         self.assertEqual(fact.get('vm.mac_addresses'),
                          fingerprint.get('mac_addresses'))

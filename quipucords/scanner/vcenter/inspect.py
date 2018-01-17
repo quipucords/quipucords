@@ -10,7 +10,6 @@
 #
 """ScanTask used for vcenter inspection task."""
 import logging
-import json
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
@@ -116,8 +115,8 @@ class InspectTaskRunner(ScanTaskRunner):
                  'vm.os': vm_os,  # Guest OS
                  'vm.dns_name': summary.guest.hostName,  # DNS NAME
                  # Mac Addresses
-                 'vm.mac_addresses': json.dumps(mac_addresses),
-                 'vm.ip_address': json.dumps(ip_addresses),  # IP Addresses
+                 'vm.mac_addresses': mac_addresses,
+                 'vm.ip_addresses': ip_addresses,  # IP Addresses
                  'vm.host.name': host_name,  # Host Name
                  'vm.host.cpu_cores': host_cpu_cores,  # Host CPU Cores
                  'vm.host.cpu_threads': host_cpu_threads,  # Host CPU Threads
