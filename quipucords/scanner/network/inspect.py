@@ -124,6 +124,7 @@ class InspectTaskRunner(ScanTaskRunner):
             'jboss_eap',
             'jboss_fuse_on_karaf',
             'ifconfig',
+            'redhat_packages',
             'redhat_release',
             'subman',
             'uname',
