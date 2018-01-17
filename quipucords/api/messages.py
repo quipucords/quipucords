@@ -73,6 +73,9 @@ NET_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
 VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
 VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
 
+SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
+SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
+
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
