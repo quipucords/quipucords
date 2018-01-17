@@ -58,7 +58,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
             username='username',
             password='password',
             sudo_password='sudo',
-            ssh_keyfile='keyfile')
+            ssh_keyfile='keyfile',
+            become_method='sudo')
         self.cred.save()
 
         self.source = Source(
@@ -98,7 +99,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
                     'ansible_ssh_pass': 'password',
                     'ansible_ssh_private_key_file': 'keyfile',
-                    'ansible_user': 'username'}
+                    'ansible_user': 'username',
+                    'ansible_become_method': 'sudo'}
         self.assertEqual(vars_dict, expected)
 
     def test_populate_callback(self):
@@ -144,7 +146,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
                                      'ansible_ssh_private_key_file': 'keyfile',
-                                     'ansible_user': 'username'}}}
+                                     'ansible_user': 'username',
+                                     'ansible_become_method': 'sudo'}}}
         self.assertEqual(inventory_dict, expected)
 
     def test_construct_error(self):

@@ -54,10 +54,7 @@ def _credential_vars(credential):
             decrypt_data_as_unicode(sudo_password)
     if become_method:
         ansible_dict['ansible_become_method'] = become_method
-    print("\n\n\n Credential: \n")
-    print(str(credential) + "\n")
-    print("\n\nansible dict: \n")
-    print(str(ansible_dict) + "\n\n")
+
     return ansible_dict
 
 
@@ -72,14 +69,11 @@ def _construct_vars(connection_port, credential=None):
     ansible_vars = {'ansible_port': connection_port}
 
     if credential is not None:
-        print("\n\n Construct vars Credential: \n")
-        print(str(credential) + "\n")
+
         ansible_dict = _credential_vars(credential)
-        print("\n\n Construct vars Ansible Dict: \n")
-        print(str(ansible_dict) + "\n")
+
         ansible_vars.update(ansible_dict)
-    print("\n\n Construct vars Ansible Vars: \n")
-    print(str(ansible_vars) + "\n")
+
     return ansible_vars
 
 

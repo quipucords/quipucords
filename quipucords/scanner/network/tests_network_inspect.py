@@ -57,7 +57,8 @@ class HostScannerTest(TestCase):
             username='username',
             password='password',
             sudo_password=None,
-            ssh_keyfile=None)
+            ssh_keyfile=None,
+            become_method=None)
         self.cred.save()
 
         self.source = Source(

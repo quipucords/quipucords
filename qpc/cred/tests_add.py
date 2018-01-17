@@ -151,7 +151,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
                              password=None, sudo_password=None,
-                             ssh_passphrase=None)
+                             ssh_passphrase=None, become_method='sudo')
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
