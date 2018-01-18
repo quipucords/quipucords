@@ -16,6 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -127,4 +128,4 @@ class ScanStartCliTests(unittest.TestCase):
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
-                                 'Scan "1" started\n')
+                                 messages.SCAN_STARTED % '1' + '\n')

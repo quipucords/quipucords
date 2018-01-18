@@ -17,6 +17,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.utils import read_in_file
@@ -147,7 +148,7 @@ class SourceEditCliTests(unittest.TestCase):
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
-                                 'Source "source1" was updated\n')
+                                 messages.SOURCE_UPDATED % 'source1' + '\n')
 
     def test_edit_vc_source(self):
         """Testing the edit vcenter source command successfully."""
@@ -169,7 +170,7 @@ class SourceEditCliTests(unittest.TestCase):
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
-                                 'Source "source1" was updated\n')
+                                 messages.SOURCE_UPDATED % 'source1' + '\n')
 
     def test_edit_source_no_val(self):
         """Testing the edit source command with source doesn't exist."""

@@ -98,7 +98,8 @@ SCAN_TYPE_FILTER_HELP = 'Filter for listing scan jobs by type. Valid '\
     'values: connect, inspect.'
 SCAN_STATUS_FILTER_HELP = 'Filter for listing scan jobs by status. Valid '\
     'values: created, pending, running, paused, canceled, completed, failed.'
-SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; default is 50.'
+SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; '\
+    'default is 50.'
 SCAN_RESULTS_HELP = 'View results of the specified scan.'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist.'
 SCAN_LIST_NO_SCANS = 'No scans found.'
