@@ -30,7 +30,7 @@ class ScanTaskTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.cred_for_upload = self.cred.id
 

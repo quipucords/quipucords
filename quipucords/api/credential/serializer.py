@@ -172,8 +172,10 @@ class CredentialSerializer(NotEmptySerializer):
 
         # Not allowed fields for vcenter
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
-        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        become_password = 'become_password' in attrs and attrs['become_password']
+        ssh_passphrase = 'ssh_passphrase' in attrs\
+                         and attrs['ssh_passphrase']
+        become_password = 'become_password' in attrs \
+                          and attrs['become_password']
 
         if ssh_keyfile or ssh_passphrase or become_password:
             error = {
@@ -197,8 +199,10 @@ class CredentialSerializer(NotEmptySerializer):
 
         # Not allowed fields for satellite
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
-        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        become_password = 'become_password' in attrs and attrs['become_password']
+        ssh_passphrase = 'ssh_passphrase' in attrs \
+                         and attrs['ssh_passphrase']
+        become_password = 'become_password' in attrs \
+                          and attrs['become_password']
 
         if ssh_keyfile or ssh_passphrase or become_password:
             error = {

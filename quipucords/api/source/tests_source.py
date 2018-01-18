@@ -29,7 +29,7 @@ class SourceTest(TestCase):
             cred_type=Credential.NETWORK_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.net_cred_for_upload = self.net_cred.id
         self.net_cred_for_response = {'id': self.net_cred.id,
@@ -40,7 +40,7 @@ class SourceTest(TestCase):
             cred_type=Credential.VCENTER_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.vc_cred_for_upload = self.vc_cred.id
         self.vc_cred_for_response = {'id': self.vc_cred.id,
@@ -51,7 +51,7 @@ class SourceTest(TestCase):
             cred_type=Credential.SATELLITE_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.sat_cred_for_upload = self.sat_cred.id
         self.sat_cred_for_response = {'id': self.sat_cred.id,

@@ -204,7 +204,7 @@ class CredentialTest(TestCase):
         long become_password.
         """
         expected_error = {'become_password': ['Ensure this field has no more '
-                                            'than 1024 characters.']}
+                                              'than 1024 characters.']}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
