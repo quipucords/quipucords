@@ -198,9 +198,12 @@ def handle_error_response(response):
         if isinstance(response_data, dict):
             for err_key, err_cases in response_data.items():
                 error_context = 'Error'
-                if err_key != 'non_field_errors' and err_key != 'detail':
+                if (err_key != 'non_field_errors' and
+                        err_key != 'detail' and err_key != 'options'):
                     error_context = err_key
                 if isinstance(err_cases, str):
+                    log.error('%s: %s', error_context, err_cases)
+                elif isinstance(err_cases, dict):
                     log.error('%s: %s', error_context, err_cases)
                 else:
                     for err_msg in err_cases:

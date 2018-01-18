@@ -260,3 +260,11 @@ class ProcessEapHomeCat(CatResultsProcessor):
     """Process the output of 'cat .../version.txt'."""
 
     KEY = 'eap_home_version_txt'
+
+
+class ProcessEapHomeBinForFuse(IndicatorFileFinder):
+    """Process the output of 'ls -1' for eap_home_bin to check for fuse."""
+
+    KEY = 'eap_home_bin'
+
+    INDICATOR_FILES = ['fuseconfig.sh', 'fusepatch.sh']

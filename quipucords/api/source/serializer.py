@@ -18,7 +18,7 @@ from rest_framework.serializers import (ValidationError,
                                         SlugRelatedField,
                                         PrimaryKeyRelatedField, CharField,
                                         IntegerField)
-from api.models import Credential, HostRange, Source
+from api.models import Credential, HostRange, Source, SourceOptions
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 
@@ -68,6 +68,19 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
+class SourceOptionsSerializer(NotEmptySerializer):
+    """Serializer for the ScanOptions model."""
+
+    satellite_version = ValidStringChoiceField(
+        required=False, choices=SourceOptions.SATELLITE_VERSION_CHOICES)
+
+    class Meta:
+        """Metadata for serializer."""
+
+        model = SourceOptions
+        fields = ['satellite_version']
+
+
 class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
 
@@ -81,7 +94,7 @@ class SourceSerializer(NotEmptySerializer):
         allow_null=True,
         slug_field='host_range',
         queryset=HostRange.objects.all())
-
+    options = SourceOptionsSerializer(required=False, many=False)
     credentials = CredentialsField(
         many=True,
         queryset=Credential.objects.all())
@@ -95,7 +108,7 @@ class SourceSerializer(NotEmptySerializer):
     # Have to implement explicit create() and update() methods to
     # allow creates/updates of nested HostRange field. See
     # http://www.django-rest-framework.org/api-guide/relations/
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches,too-many-statements
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
@@ -113,6 +126,8 @@ class SourceSerializer(NotEmptySerializer):
         port = None
         if 'port' in validated_data:
             port = validated_data['port']
+
+        options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if not hosts_data:
@@ -146,8 +161,38 @@ class SourceSerializer(NotEmptySerializer):
             elif credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
+        elif source_type == Source.SATELLITE_SOURCE_TYPE:
+            if port is None:
+                validated_data['port'] = 443
+            if not hosts_data:
+                error = {
+                    'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            elif hosts_data and len(hosts_data) != 1:
+                error = {
+                    'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            if credentials and len(credentials) > 1:
+                error = {
+                    'credentials': [_(messages.SAT_ONE_CRED)]
+                }
+                raise ValidationError(error)
+            elif credentials and len(credentials) == 1:
+                SourceSerializer.check_credential_type(source_type,
+                                                       credentials[0])
 
         source = Source.objects.create(**validated_data)
+
+        if options:
+            options = SourceOptions.objects.create(**options)
+            options.save()
+            source.options = options
+        elif not options and source_type == Source.SATELLITE_SOURCE_TYPE:
+            options = SourceOptions()
+            options.save()
+            source.options = options
 
         for host_data in hosts_data:
             HostRange.objects.create(source=source,
@@ -156,6 +201,7 @@ class SourceSerializer(NotEmptySerializer):
         for credential in credentials:
             source.credentials.add(credential)
 
+        source.save()
         return source
 
     @transaction.atomic
@@ -176,13 +222,14 @@ class SourceSerializer(NotEmptySerializer):
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
         hosts_data = validated_data.pop('hosts', None)
+        options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if not hosts_data:
+            if not hosts_data and self.partial is False:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -195,6 +242,25 @@ class SourceSerializer(NotEmptySerializer):
             if credentials and len(credentials) > 1:
                 error = {
                     'credentials': [_(messages.VC_ONE_CRED)]
+                }
+                raise ValidationError(error)
+            elif credentials and len(credentials) == 1:
+                SourceSerializer.check_credential_type(source_type,
+                                                       credentials[0])
+        elif source_type == Source.SATELLITE_SOURCE_TYPE:
+            if not hosts_data and self.partial is False:
+                error = {
+                    'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            elif hosts_data and len(hosts_data) != 1:
+                error = {
+                    'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            if credentials and len(credentials) > 1:
+                error = {
+                    'credentials': [_(messages.SAT_ONE_CRED)]
                 }
                 raise ValidationError(error)
             elif credentials and len(credentials) == 1:
@@ -224,6 +290,12 @@ class SourceSerializer(NotEmptySerializer):
         if credentials:
             instance.credentials.set(credentials)
 
+        if options:
+            options = SourceOptions.objects.create(**options)
+            options.save()
+            instance.options = options
+
+        instance.save()
         return instance
 
     @staticmethod

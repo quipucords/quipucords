@@ -8,7 +8,7 @@ const initialState = {
   sortAscending: true
 };
 
-export default function sourcesToolbarReducer(state = initialState, action) {
+export default function scansToolbarReducer(state = initialState, action) {
   switch (action.type) {
     case types.SET_FILTER_TYPE:
       if (state.filterType === action.filterType) {
