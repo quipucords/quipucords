@@ -11,6 +11,7 @@
 """Callback object for capturing ansible task execution."""
 
 import logging
+import json
 from django.db import transaction
 from ansible.plugins.callback import CallbackBase
 from api.models import (ScanTask, InspectionResult,
@@ -151,8 +152,10 @@ class InspectResultCallback(CallbackBase):
             if result_value == process.NO_DATA:
                 continue
 
+            # Convert all values to JSON.  Noop for str, int
+            final_value = json.dumps(result_value)
             stored_fact = RawFact(name=result_key,
-                                  value=result_value)
+                                  value=final_value)
             stored_fact.save()
             sys_result.facts.add(stored_fact)
         sys_result.save()

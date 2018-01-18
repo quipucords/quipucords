@@ -4,7 +4,7 @@ import { withRouter } from 'react-router';
 
 import { Button, EmptyState, Grid, Row } from 'patternfly-react';
 
-class SourcesEmptyState extends Component {
+class ScansEmptyState extends Component {
   render() {
     return (
       <Grid fluid>
@@ -20,7 +20,7 @@ class SourcesEmptyState extends Component {
             </EmptyState.Info>
             <EmptyState.Action>
               <Button bsStyle="primary" bsSize="large">
-                Add Source
+                Add Scan
               </Button>
             </EmptyState.Action>
             <EmptyState.Action secondary>
@@ -35,10 +35,10 @@ class SourcesEmptyState extends Component {
   }
 }
 
-SourcesEmptyState.propTypes = {};
+ScansEmptyState.propTypes = {};
 
 function mapStateToProps(state, ownProps) {
   return state;
 }
 
-export default withRouter(connect(mapStateToProps)(SourcesEmptyState));
+export default withRouter(connect(mapStateToProps)(ScansEmptyState));

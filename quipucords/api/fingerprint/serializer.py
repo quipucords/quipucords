@@ -11,59 +11,89 @@
 
 """Serializer for system fingerprint models."""
 
-from rest_framework.serializers import (IntegerField,
+import json
+from rest_framework.serializers import (PrimaryKeyRelatedField,
+                                        IntegerField,
                                         CharField,
                                         ChoiceField,
                                         DateField,
                                         NullBooleanField,
-                                        ModelSerializer)
-from api.models import SystemFingerprint
+                                        ModelSerializer,
+                                        Field)
+from api.models import (SystemFingerprint, FactCollection, Source)
+
+
+class CustomJSONField(Field):
+    """Serializer reading and writing JSON to CharField."""
+
+    def to_internal_value(self, data):
+        """Transform  python object to JSON str."""
+        return json.dumps(data)
+
+    def to_representation(self, value):
+        """Transform JSON str to python object."""
+        return json.loads(value)
 
 
 class FingerprintSerializer(ModelSerializer):
     """Serializer for the Fingerprint model."""
 
-    os_name = CharField(required=True, max_length=64)
+    # Scan information
+    fact_collection_id = PrimaryKeyRelatedField(
+        queryset=FactCollection.objects.all())
+    source_id = PrimaryKeyRelatedField(queryset=Source.objects.all())
+    source_type = ChoiceField(
+        required=True, choices=SystemFingerprint.SOURCE_TYPE)
+
+    # Common facts
+    name = CharField(required=False, max_length=256)
+
+    os_name = CharField(required=False, max_length=64)
     os_release = CharField(required=True, max_length=128)
     os_version = CharField(required=False, max_length=64)
 
+    infrastructure_type = ChoiceField(
+        required=True, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
+    virtualized_is_guest = NullBooleanField(required=True)
+
+    mac_addresses = CustomJSONField(required=False)
+    ip_addresses = CustomJSONField(required=False)
+
+    cpu_count = IntegerField(required=False, min_value=0)
+
+    # Network scan facts
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
 
-    cpu_count = IntegerField(required=False, min_value=0)
     cpu_core_per_socket = IntegerField(required=False, min_value=0)
+    cpu_siblings = IntegerField(required=False, min_value=0)
     cpu_hyperthreading = NullBooleanField(required=False)
     cpu_socket_count = IntegerField(required=False, min_value=0)
     cpu_core_count = IntegerField(required=False, min_value=0)
 
     system_creation_date = DateField(required=False)
-    source_type = ChoiceField(
-        required=True, choices=SystemFingerprint.SOURCE_TYPE)
-    infrastructure_type = ChoiceField(
-        required=True, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
 
-    virtualized_is_guest = NullBooleanField(required=True)
     virtualized_type = CharField(required=False, max_length=64)
     virtualized_num_guests = IntegerField(required=False, min_value=0)
     virtualized_num_running_guests = IntegerField(required=False, min_value=0)
 
-    virtualized_host = CharField(required=False, max_length=128)
-    virtualized_host_socket_count = IntegerField(required=False, min_value=0)
-    virtualized_cluster = CharField(required=False, max_length=128)
-    virtualized_datacenter = CharField(required=False, max_length=128)
+    # VCenter scan facts
+    vm_state = CharField(required=False, max_length=24)
+    vm_uuid = CharField(required=False, max_length=36)
+    vm_memory_size = IntegerField(required=False, min_value=0)
+    vm_dns_name = CharField(required=False, max_length=128)
+
+    vm_host = CharField(required=False, max_length=128)
+    vm_host_socket_count = IntegerField(required=False, min_value=0)
+    vm_host_cpu_cores = IntegerField(required=False, min_value=0)
+
+    vm_host_cpu_threads = IntegerField(required=False, min_value=0)
+
+    vm_cluster = CharField(required=False, max_length=128)
+    vm_datacenter = CharField(required=False, max_length=128)
 
     class Meta:
         """Meta class for FingerprintSerializer."""
 
         model = SystemFingerprint
-        fields = ['id', 'fact_collection_id', 'source_id', 'source_type',
-                  'os_name', 'os_version', 'os_release',
-                  'bios_uuid', 'subscription_manager_id',
-                  'cpu_count', 'cpu_socket_count', 'cpu_core_count',
-                  'cpu_hyperthreading', 'cpu_core_per_socket',
-                  'system_creation_date',
-                  'infrastructure_type',
-                  'virtualized_is_guest', 'virtualized_type',
-                  'virtualized_num_guests', 'virtualized_num_running_guests',
-                  'virtualized_host', 'virtualized_host_socket_count',
-                  'virtualized_cluster', 'virtualized_datacenter']
+        fields = '__all__'

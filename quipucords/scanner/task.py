@@ -10,6 +10,7 @@
 #
 """ScanTaskRunner is a logical breakdown of work."""
 
+import json
 from api.models import ScanTask, ConnectionResult, InspectionResult
 
 
@@ -55,9 +56,11 @@ class ScanTaskRunner(object):
                     for system_result in system_results.systems.all():
                         fact = {}
                         for raw_fact in system_result.facts.all():
-                            if raw_fact.value is None or raw_fact.value == '':
+                            if not raw_fact.value or raw_fact.value == '':
                                 continue
-                            fact[raw_fact.name] = raw_fact.value
+                            # Load values as JSON
+                            value_to_use = json.loads(raw_fact.value)
+                            fact[raw_fact.name] = value_to_use
                         temp_facts.append(fact)
 
                 self.facts = temp_facts
