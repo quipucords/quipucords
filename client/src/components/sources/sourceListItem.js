@@ -1,21 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
-import { ListView, DropdownKebab, Button, MenuItem } from 'patternfly-react';
+import {
+  ListView,
+  DropdownKebab,
+  Button,
+  MenuItem,
+  Checkbox
+} from 'patternfly-react';
 
 export const SourceListItem = ({ item }) => {
   let hostCount = item.hosts ? item.hosts.length : 0;
 
   let itemIcon;
-  if (item.source_type === 'vcenter') {
-    itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
-  } else if (item.source_type === 'network') {
-    itemIcon = <ListView.Icon type="pf" name="network" />;
+  switch (item.source_type) {
+    case 'vcenter':
+      itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
+      break;
+    case 'network':
+      itemIcon = <ListView.Icon type="pf" name="network" />;
+      break;
+    default:
+      itemIcon = null;
   }
+
   return (
     <ListView.Item
+      stacked
       key={item.id}
-      checkboxInput={<input value={item.selected} type="checkbox" />}
+      checkboxInput={<Checkbox value={item.selected} bsClass="" />}
       actions={
         <span>
           <Button className="unavailable" bsStyle="default" key="authButton">
@@ -38,7 +51,7 @@ export const SourceListItem = ({ item }) => {
       additionalInfo={[
         <ListView.InfoItem key="hosts">
           <span className="pficon pficon-screen" />
-          {hostCount} {hostCount === 1 ? ' Host' : ' Hosts'}
+          {hostCount} {hostCount === 1 ? ' Source' : ' Sources'}
         </ListView.InfoItem>
       ]}
     >

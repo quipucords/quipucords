@@ -22,3 +22,12 @@ button.unavailable:hover, li.unavailable > a:hover {
   cursor: default;
   opacity: 0;
 }
+
+.scan-list-source-name {
+  margin-left: 5px;
+}
+
+.list-view-pf-left .pficon.list-view-pf-icon-sm.scan-item-status {
+  border: none;
+  margin-right: 10px;
+}
