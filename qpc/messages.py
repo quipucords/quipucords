@@ -20,7 +20,6 @@ CRED_USER_HELP = 'user name for authenticating against target system'
 CRED_PWD_HELP = 'password for authenticating against target system'
 CRED_SSH_HELP = 'file containing SSH key'
 CRED_SSH_PSPH_HELP = 'ssh passphrase for authenticating against target system'
-CRED_SUDO_HELP = 'password for running sudo'
 CRED_CLEAR_ALL_HELP = 'remove all credentials'
 
 CRED_ADDED = 'Credential "%s" was added'
@@ -37,7 +36,7 @@ CRED_TYPE_REQUIRED = '--type is required; Must be set to vcenter or network'
 CRED_VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 CRED_VC_EDIT_PWD_OR_USERNAME = 'Must update either username or password '
 'for VCenter credentials'
-CRED_VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a sudo password, ssh'\
+CRED_VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\
     ' keyfile, or ssh passphrase.'
 CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
 CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
@@ -125,7 +124,6 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
     'system. Please provide a valid location for the "--sshkeyfile" argument.'
 
 CONN_PASSWORD = 'Provide connection password.'
-SUDO_PASSWORD = 'Provide password for sudo.'
 SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'
 BECOME_PASSWORD = 'Proved password for privilege escalation.'
 

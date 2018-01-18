@@ -56,16 +56,12 @@ def get_password(args, req_payload, add_none=True):
         req_payload['ssh_passphrase'] = pass_prompt or None
     elif add_none:
         req_payload['ssh_passphrase'] = None
-    if 'sudo_password' in args and args.sudo_password:
-        print(_(messages.SUDO_PASSWORD))
-        pass_prompt = getpass()
-        req_payload['sudo_password'] = pass_prompt or None
     if 'become_password' in args and args.become_password:
         print(_(messages.BECOME_PASSWORD))
         pass_prompt = getpass()
         req_payload['become_password'] = pass_prompt or None
     elif add_none:
-        req_payload['sudo_password'] = None
+        req_payload['become_password'] = None
 
     return req_payload
 

@@ -122,7 +122,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password='sudo',
             ssh_keyfile='keyfile',
             become_method='sudo',
             become_user='root',

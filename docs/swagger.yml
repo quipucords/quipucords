@@ -658,9 +658,6 @@ definitions:
         ssh_keyfile:
           type: "string"
           description: "The connection private ssh keyfile for the credential"
-        sudo_password:
-          type: "string"
-          description: "The password for sudo permission escalation after connection for the credential"
         become_method:
           type: "string"
           description: "The method to become for ansible privilege escalation"
@@ -677,7 +674,7 @@ definitions:
           type: "string"
           description: "The user to become when running an ansible playbook. The default is set to 'root' when the credential type is network."
         become_password:
-          type: "The privilege escalation password to be used when running an ansible playbook."
+          type: "The password for sudo permission escalation after connection for the credential."
   CredentialMin:
     type: "object"
     required:

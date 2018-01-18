@@ -41,8 +41,6 @@ class CredentialSerializer(NotEmptySerializer):
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
                          style={'input_type': 'password'})
-    sudo_password = CharField(required=False, max_length=1024, allow_null=True,
-                              style={'input_type': 'password'})
     ssh_keyfile = CharField(required=False, max_length=1024, allow_null=True)
     ssh_passphrase = CharField(required=False, max_length=1024,
                                allow_null=True,
@@ -175,9 +173,9 @@ class CredentialSerializer(NotEmptySerializer):
         # Not allowed fields for vcenter
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+        become_password = 'become_password' in attrs and attrs['become_password']
 
-        if ssh_keyfile or ssh_passphrase or sudo_password:
+        if ssh_keyfile or ssh_passphrase or become_password:
             error = {
                 'non_field_errors': [_(messages.VC_KEY_FILE_NOT_ALLOWED)]
             }
@@ -200,9 +198,9 @@ class CredentialSerializer(NotEmptySerializer):
         # Not allowed fields for satellite
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+        become_password = 'become_password' in attrs and attrs['become_password']
 
-        if ssh_keyfile or ssh_passphrase or sudo_password:
+        if ssh_keyfile or ssh_passphrase or become_password:
             error = {
                 'non_field_errors': [_(messages.SAT_KEY_FILE_NOT_ALLOWED)]
             }

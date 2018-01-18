@@ -197,19 +197,19 @@ class CredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
-    def test_hc_create_long_sudo(self):
-        """Test api with long sudo.
+    def test_hc_create_long_become(self):
+        """Test api with long become password.
 
         Ensure we cannot create a new host credential object with a
-        long sudo_password.
+        long become_password.
         """
-        expected_error = {'sudo_password': ['Ensure this field has no more '
+        expected_error = {'become_password': ['Ensure this field has no more '
                                             'than 1024 characters.']}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
                 'password': 'pass1',
-                'sudo_password': 'A' * 2000}
+                'become_password': 'A' * 2000}
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -371,8 +371,8 @@ class CredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
-    def test_vc_create_extra_sudopass(self):
-        """Test VCenter with extra sudo password."""
+    def test_vc_create_extra_become_pass(self):
+        """Test VCenter with extra become password."""
         expected_error = {'non_field_errors': [
             messages.VC_KEY_FILE_NOT_ALLOWED]}
         url = reverse('cred-list')
@@ -380,14 +380,14 @@ class CredentialTest(TestCase):
                 'cred_type': Credential.VCENTER_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1',
-                'sudo_password': 'pass2'}
+                'become_password': 'pass2'}
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
     def test_hostcred_default_become_method(self):
-        """Ensure we can create a new host credential object via API."""
+        """Ensure we can set the default become_method via API."""
         data = {'name': 'cred1',
                 'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
@@ -397,7 +397,7 @@ class CredentialTest(TestCase):
         self.assertEqual(Credential.objects.get().become_method, 'sudo')
 
     def test_hostcred_set_become_method(self):
-        """Ensure we can create a new host credential object via API."""
+        """Ensure we can set the credentials become method."""
         data = {'name': 'cred1',
                 'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
@@ -408,7 +408,7 @@ class CredentialTest(TestCase):
         self.assertEqual(Credential.objects.get().become_method, 'doas')
 
     def test_hostcred_default_become_user(self):
-        """Ensure we can create a new host credential object via API."""
+        """Ensure we can set the default become_user via API."""
         data = {'name': 'cred1',
                 'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
@@ -418,7 +418,7 @@ class CredentialTest(TestCase):
         self.assertEqual(Credential.objects.get().become_user, 'root')
 
     def test_hostcred_set_become_user(self):
-        """Ensure we can create a new host credential object via API."""
+        """Ensure we can set the become user."""
         data = {'name': 'cred1',
                 'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
@@ -430,7 +430,7 @@ class CredentialTest(TestCase):
         self.assertEqual(Credential.objects.get().become_user, 'newuser')
 
     def test_hostcred_set_become_pass(self):
-        """Ensure we can create a new host credential object via API."""
+        """Ensure we can set the become password."""
         data = {'name': 'cred1',
                 'cred_type': Credential.NETWORK_CRED_TYPE,
                 'username': 'user1',
@@ -508,8 +508,8 @@ class CredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
-    def test_sat_create_extra_sudopass(self):
-        """Test Satellite with extra sudo password."""
+    def test_sat_create_extra_becomepass(self):
+        """Test Satellite with extra become password."""
         expected_error = {'non_field_errors': [
             messages.SAT_KEY_FILE_NOT_ALLOWED]}
         url = reverse('cred-list')
@@ -517,7 +517,7 @@ class CredentialTest(TestCase):
                 'cred_type': Credential.SATELLITE_CRED_TYPE,
                 'username': 'user1',
                 'password': 'pass1',
-                'sudo_password': 'pass2'}
+                'become_password': 'pass2'}
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

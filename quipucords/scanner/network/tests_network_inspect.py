@@ -56,7 +56,6 @@ class HostScannerTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password=None,
             ssh_keyfile=None,
             become_method=None,
             become_user=None,
