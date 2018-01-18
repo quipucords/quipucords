@@ -25,7 +25,35 @@ def _construct_result(result):
     """Construct result object."""
     # pylint: disable=protected-access
     host = result._host
-    return {'host': host.name, 'result': result._result}
+    key = result._task.register or 'no_key'
+    return {'host': host.name, 'result': result._result, 'key': key}
+
+
+def normalize_result(result):
+    """Normalize the representation of an Ansible result.
+
+    We see Ansible results in three forms:
+      1) raw task with register variable whose name starts with 'internal_'
+      2) raw task with register variable whose name does not start
+         with 'internal_'
+      3) set_facts task with member called 'ansible_facts'
+
+    :param result: Ansible result dictionary
+    :returns: [] for case 1, and a list of dicts with keys 'key' and
+        'result' for cases 2 and 3.
+    """
+    # pylint: disable=protected-access
+    if result._result is not None and isinstance(result._result, dict):
+        if 'ansible_facts' in result._result:
+            return [{'key': key,
+                     'result': value}
+                    for key, value in result._result['ansible_facts'].items()]
+        elif (isinstance(result._task.register, str) and
+              not result._task.register.startswith('internal_')):
+            return [{'key': result._task.register,
+                     'result': result._result}]
+
+    return []
 
 
 class InspectResultCallback(CallbackBase):
@@ -45,30 +73,40 @@ class InspectResultCallback(CallbackBase):
         self.results = []
         self._ansible_facts = {}
 
+    # Ansible considers tasks failed when their return code is
+    # nonzero, even if we set ignore_errors=True. We want to be able
+    # to process those task results, so we need to handle failed
+    # results the same way we treat ok ones.
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
+        self.handle_result(result)
+
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        """Print a json representation of the result."""
+        self.handle_result(result)
+
+    def handle_result(self, result):
+        """Handle an incoming result object."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
-        # pylint: disable=protected-access
-        host = str(result._host)
-        if (result._result is not None and isinstance(result._result, dict) and
-                'ansible_facts' in result._result):
-            host_facts = result._result['ansible_facts']
-            facts = {}
-            for key, value in host_facts.items():
-                if key == 'host_done':
-                    self._finalize_host(host)
-                elif not key.startswith('internal'):
-                    facts[key] = value
-                # Facts starting with 'internal' are used only by the
-                # Ansible playbooks to compute other
-                # facts. Deliberately drop them here.
 
-            if host in self._ansible_facts:
-                self._ansible_facts[host].update(facts)
+        host = result_obj['host']
+        results_to_store = normalize_result(result)
+        host_facts = {}
+        for value in results_to_store:
+            key = value['key']
+            result = value['result']
+
+            if key == 'host_done':
+                self._finalize_host(host)
             else:
-                self._ansible_facts[host] = facts
+                host_facts[key] = result
+
+        if host in self._ansible_facts:
+            self._ansible_facts[host].update(host_facts)
+        else:
+            self._ansible_facts[host] = host_facts
 
     def _get_inspect_result(self):
         # Have to save inspect_result (if creating it) because
@@ -144,9 +182,3 @@ class InspectResultCallback(CallbackBase):
         self.scan_task.systems_failed += 1
         self.scan_task.status = ScanTask.FAILED
         self.scan_task.save()
-
-    def v2_runner_on_failed(self, result, ignore_errors=False):
-        """Print a json representation of the result."""
-        result_obj = _construct_result(result)
-        self.results.append(result_obj)
-        logger.error('%s', result_obj)

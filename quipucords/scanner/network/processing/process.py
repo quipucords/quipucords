@@ -26,6 +26,20 @@ PROCESSORS = {}
 NO_DATA = ''  # Result value when we have errors.
 
 
+def is_ansible_task_result(value):
+    """Check whether an object is an Ansible task result.
+
+    This function lets us distinguish between standard Ansible results
+    that need processing and values that have been postprocessed in
+    the playbook.
+    """
+    return (isinstance(value, dict) and
+            ('skipped' in value or
+             'failed' in value or
+             'rc' in value or
+             'results' in value))
+
+
 def process(facts):
     """Do initial processing of the given facts.
 
@@ -57,6 +71,18 @@ def process(facts):
                     result[key] = NO_DATA
                     raise StopIteration()
         except StopIteration:
+            continue
+
+        # Don't touch things that are not standard Ansible results,
+        # because we don't know what format they will have.
+        if not is_ansible_task_result(value):
+            logger.error('Value %s needs postprocessing but is not an '
+                         'Ansible result', value)
+            # We don't know what data is supposed to go here, because
+            # we can't run the postprocessor. Leaving the existing
+            # data would cause database corruption and maybe trigger
+            # other bugs later on. So treat this like any other error.
+            result[key] = NO_DATA
             continue
 
         if value.get('skipped', False):

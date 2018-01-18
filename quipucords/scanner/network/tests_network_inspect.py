@@ -10,6 +10,8 @@
 #
 """Test the inspect scanner capabilities."""
 
+from types import SimpleNamespace
+import unittest
 from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -28,7 +30,8 @@ from api.models import (Credential,
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.inspect import (construct_scan_inventory)
 from scanner.network import InspectTaskRunner
-from scanner.network.inspect_callback import InspectResultCallback
+from scanner.network.inspect_callback import InspectResultCallback, \
+    normalize_result
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -44,6 +47,74 @@ def mock_run_failed(play):  # pylint: disable=unused-argument
 def mock_scan_error():
     """Throws error."""
     raise AnsibleError('an error')
+
+
+class TestNormalizeResult(unittest.TestCase):
+    """Tests for inspect_callback.normalize_result."""
+
+    RESULT = {'rc': 0,
+              'stdout': 'a',
+              'stdout_lines': ['a']}
+
+    def test_no_register(self):
+        """A task with no register variable."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(_host=SimpleNamespace(name='hostname'),
+                                _result=self.RESULT,
+                                _task=SimpleNamespace(register=None))),
+            [])
+
+    def test_register_internal(self):
+        """A task that registers an internal variable."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(
+                    _host=SimpleNamespace(name='hostname'),
+                    _result=self.RESULT,
+                    _task=SimpleNamespace(register='internal_name'))),
+            [])
+
+    def test_register_not_internal(self):
+        """A task that registers a non-internal variable."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(
+                    _host=SimpleNamespace(name='hostname'),
+                    _result=self.RESULT,
+                    _task=SimpleNamespace(register='name'))),
+            [{'key': 'name',
+              'result': self.RESULT}])
+
+    def test_register_ansible_fact(self):
+        """A set_facts task that registers one fact."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(
+                    _host=SimpleNamespace(name='hostname'),
+                    _result={'ansible_facts':
+                             {'fact': 'fact_result'}},
+                    _task=SimpleNamespace())),
+            [{'key': 'fact',
+              'result': 'fact_result'}])
+
+    def test_register_ansible_facts(self):
+        """A set_facts task that registers multiple facts."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(
+                    _host=SimpleNamespace(name='hostname'),
+                    _result={'ansible_facts':
+                             {'fact1': 'result1',
+                              'fact2': 'result2',
+                              'fact3': 'result3'}},
+                    _task=SimpleNamespace())),
+            [{'key': 'fact1',
+              'result': 'result1'},
+             {'key': 'fact2',
+              'result': 'result2'},
+             {'key': 'fact3',
+              'result': 'result3'}])
 
 
 class HostScannerTest(TestCase):
