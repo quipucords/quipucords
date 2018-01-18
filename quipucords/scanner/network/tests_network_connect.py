@@ -27,6 +27,7 @@ from scanner.network.connect import construct_connect_inventory, connect, \
     ConnectResultStore
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.utils import _construct_vars
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -166,34 +167,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_user': 'username',
                     'ansible_become_method': 'sudo'}
         self.assertEqual(vars_dict, expected)
-
-    def test_populate_callback(self):
-        """Test the population of the callback object."""
-        callback = ConnectResultCallback()
-        host = Mock(name='1.2.3.4')
-        result = Mock(_host=host, _results={'rc': 0})
-        callback.v2_runner_on_ok(result)
-        self.assertTrue(len(callback.results) == 1)
-        callback.v2_runner_on_failed(result)
-        self.assertTrue(len(callback.results) == 2)
-        callback.v2_runner_on_unreachable(result)
-        self.assertTrue(len(callback.results) == 3)
-
-    def test_process_connect_callback(self):
-        """Test callback processing logic."""
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        callback = ConnectResultCallback()
-        success_result = {'host': '1.2.3.4', 'result': {'rc': 0}}
-        failed_result = {'host': '1.2.3.5', 'result': {'rc': 1}}
-        failed_result_format = {'host': '1.2.3.6'}
-        callback.results.append(success_result)
-        callback.results.append(failed_result)
-        callback.results.append(failed_result_format)
-        success, failed = _process_connect_callback(callback, cred)
-        del cred['password']
-        self.assertEqual(success, [('1.2.3.4', cred)])
-        self.assertEqual(failed, ['1.2.3.5', '1.2.3.6'])
 
     def test_result_store(self):
         """Test ConnectResultStore."""

@@ -385,6 +385,27 @@ class CredentialTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
 
+    def test_hostcred_default_become_method(self):
+        """Ensure we can create a new host credential object via API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().become_method, 'sudo')
+
+    def test_hostcred_set_become_method(self):
+        """Ensure we can create a new host credential object via API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'become_method': 'doas'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().become_method, 'doas')
+
     def test_vc_create_extra_keyfile_pass(self):
         """Test VCenter with extra keyfile passphase."""
         expected_error = {'non_field_errors': [

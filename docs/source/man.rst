@@ -111,7 +111,7 @@ Creating and Editing Credentials
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
-**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]** **[--become_method]**
 
 ``--name=name``
 
@@ -141,10 +141,13 @@ To create a credential, supply SSH credentials as either a username-password pai
 
   Prompts for the password to be used when running a command that uses sudo on the systems to be scanned.
 
+``--become_method``
+  Prompts for the method to become when running an ansible playbook. The default is set to 'sudo'.
 
-The information in a credential, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
 
-**qpc cred edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+The information in a credential, such as a password, sudo password, SSH keys, the become_method, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
+
+**qpc cred edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]** **[--become_method]**
 
 Listing and Showing Credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
