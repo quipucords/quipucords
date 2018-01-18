@@ -229,7 +229,7 @@ class SourceSerializer(NotEmptySerializer):
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if not hosts_data:
+            if not hosts_data and self.partial is False:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -248,7 +248,7 @@ class SourceSerializer(NotEmptySerializer):
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            if not hosts_data:
+            if not hosts_data and self.partial is False:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }

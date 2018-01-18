@@ -117,6 +117,10 @@ class SourceViewSet(ModelViewSet):
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
         """Update a source."""
+        # Note: This method's implementation is basically a straight copy of
+        # rest_framework.mixins.UpdateModelMixin but modified to include the
+        # call to expand_credential. We should probably refactor things here
+        # to reduce duplication of code.
         source = self.get_object()
         serializer = self.get_serializer(source, data=request.data,
                                          partial=kwargs.get('partial', False))
