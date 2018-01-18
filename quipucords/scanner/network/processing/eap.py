@@ -33,7 +33,7 @@ class ProcessJbossEapRunningPaths(process.Processor):
     def process(output):
         """Just preserve the output, except for a known issue."""
         if FIND_WARNING in output['stdout']:
-            logging.error('Find command failed')
+            logger.error('Find command failed')
             return process.NO_DATA
 
         return output['stdout'].strip()
@@ -67,7 +67,7 @@ class ProcessIdUJboss(process.Processor):
         if plain_output.lower() == 'id: jboss: no such user':
             return False
 
-        logging.error('id: unexpected output %s', plain_output)
+        logger.error('id: unexpected output %s', plain_output)
         return process.NO_DATA
 
 
@@ -113,7 +113,7 @@ class ProcessJbossEapProcesses(process.Processor):
         num_procs = len(output['stdout_lines'])
 
         if num_procs < 2:
-            logging.error('Bad result from ps (%s processes)', num_procs)
+            logger.error('Bad result from ps (%s processes)', num_procs)
             return process.NO_DATA
 
         return num_procs - 2
