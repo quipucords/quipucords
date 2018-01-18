@@ -71,9 +71,7 @@ def _construct_vars(connection_port, credential=None):
     ansible_vars = {'ansible_port': connection_port}
 
     if credential is not None:
-
         ansible_dict = _credential_vars(credential)
-
         ansible_vars.update(ansible_dict)
 
     return ansible_vars

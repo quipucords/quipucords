@@ -28,6 +28,22 @@ class Credential(models.Model):
     CRED_TYPE_CHOICES = ((NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
                          (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
                          (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE))
+    BECOME_SUDO = 'sudo'
+    BECOME_SU = 'su'
+    BECOME_PBRUN = 'pbrun'
+    BECOME_PFEXEC = 'pfexec'
+    BECOME_DOAS = 'doas'
+    BECOME_DZDO = 'dzdo'
+    BECOME_KSU = 'ksu'
+    BECOME_RUNAS = 'runas'
+    BECOME_METHOD_CHOICES = ((BECOME_SUDO, BECOME_SUDO),
+                             (BECOME_SU, BECOME_SU),
+                             (BECOME_PBRUN, BECOME_PBRUN),
+                             (BECOME_PFEXEC, BECOME_PFEXEC),
+                             (BECOME_DOAS, BECOME_DOAS),
+                             (BECOME_DZDO, BECOME_DZDO),
+                             (BECOME_KSU, BECOME_KSU),
+                             (BECOME_RUNAS, BECOME_RUNAS))
 
     name = models.CharField(max_length=64, unique=True)
     cred_type = models.CharField(
@@ -36,7 +52,10 @@ class Credential(models.Model):
         null=False
     )
     username = models.CharField(max_length=64)
-    become_method = models.CharField(max_length=6, null=True)
+    become_method = models.CharField(max_length=6,
+                                     choices= BECOME_METHOD_CHOICES,
+                                     null=True
+                                     )
     password = models.CharField(max_length=1024, null=True)
     sudo_password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
