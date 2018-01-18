@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 
 import navigationBarReducer from './navigationBarReducer';
+import aboutReducer from './aboutReducer';
 import credentialsReducer from './credentialsReducer';
 import sourcesReducer from './sourcesReducer';
 import sourcesToolbarReducer from './sourcesToolbarReducer';
@@ -9,6 +10,7 @@ import scansToolbarReducer from './scansToolbarReducer';
 
 const appReducer = combineReducers({
   navigationBar: navigationBarReducer,
+  about: aboutReducer,
   credentials: credentialsReducer,
   sources: sourcesReducer,
   sourcesToolbar: sourcesToolbarReducer,
