@@ -359,7 +359,7 @@ class CredentialTest(TestCase):
     def test_vc_create_extra_keyfile(self):
         """Test VCenter without password."""
         expected_error = {'non_field_errors': [
-            messages.VC_KEY_FILE_NOT_ALLOWED]}
+            messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
@@ -374,7 +374,7 @@ class CredentialTest(TestCase):
     def test_vc_create_extra_become_pass(self):
         """Test VCenter with extra become password."""
         expected_error = {'non_field_errors': [
-            messages.VC_KEY_FILE_NOT_ALLOWED]}
+            messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
@@ -446,7 +446,7 @@ class CredentialTest(TestCase):
     def test_vc_create_extra_keyfile_pass(self):
         """Test VCenter with extra keyfile passphase."""
         expected_error = {'non_field_errors': [
-            messages.VC_KEY_FILE_NOT_ALLOWED]}
+            messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.VCENTER_CRED_TYPE,
@@ -496,7 +496,7 @@ class CredentialTest(TestCase):
     def test_sat_create_extra_keyfile(self):
         """Test Satellite without password."""
         expected_error = {'non_field_errors': [
-            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+            messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.SATELLITE_CRED_TYPE,
@@ -511,7 +511,7 @@ class CredentialTest(TestCase):
     def test_sat_create_extra_becomepass(self):
         """Test Satellite with extra become password."""
         expected_error = {'non_field_errors': [
-            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+            messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.SATELLITE_CRED_TYPE,
@@ -526,7 +526,7 @@ class CredentialTest(TestCase):
     def test_sat_create_extra_keyfile_pass(self):
         """Test Satellite with extra keyfile passphase."""
         expected_error = {'non_field_errors': [
-            messages.SAT_KEY_FILE_NOT_ALLOWED]}
+            messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'cred_type': Credential.SATELLITE_CRED_TYPE,

@@ -36,7 +36,7 @@ CRED_TYPE_REQUIRED = '--type is required; Must be set to vcenter or network'
 CRED_VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 CRED_VC_EDIT_PWD_OR_USERNAME = 'Must update either username or password '
 'for VCenter credentials'
-CRED_VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\
+CRED_VC_FIELDS_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\
     ' keyfile, become user, become method, or ssh passphrase.'
 CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
 CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
@@ -48,8 +48,8 @@ CRED_BECOME_METHOD_HELP = 'Method to become for network privilege escalation.'\
     ' Valid values: sudo, su, pbrun, pfexec, doas, dzdo, ksu, runas.'
 CRED_BECOME_USER_HELP = 'The user to become when running a privileged command'\
     ' during network scan.'
-CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be used when'\
-    ' running a network scan.'
+CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be used' \
+    ' when running a network scan.'
 
 SOURCE_NAME_HELP = 'source name'
 SOURCES_NAME_HELP = 'list of source names'
