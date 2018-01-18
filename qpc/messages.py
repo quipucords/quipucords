@@ -45,8 +45,12 @@ CRED_UPDATED = 'Credential "%s" was updated'
 
 CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
-CRED_BECOME_METHOD_HELP = 'Method to become for network privilege escalation.  Valid values: sudo, su, pbrun,'\
-    ' pfexec, doas, dzdo, ksu, runas'
+CRED_BECOME_METHOD_HELP = 'Method to become for network privilege escalation.'\
+    ' Valid values: sudo, su, pbrun, pfexec, doas, dzdo, ksu, runas.'
+CRED_BECOME_USER_HELP = 'The user to become when running an ansible playbook.'\
+    ' The default is set to root when the credential type is network.'
+CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be used'\
+    ' when running an ansible playbook.'
 
 SOURCE_NAME_HELP = 'source name'
 SOURCES_NAME_HELP = 'list of source names'
@@ -123,6 +127,7 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
 CONN_PASSWORD = 'Provide connection password.'
 SUDO_PASSWORD = 'Provide password for sudo.'
 SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'
+BECOME_PASSWORD = 'Proved password for privilege escalation.'
 
 LOGIN_USER_HELP = 'The username to login to the server.'
 LOGIN_USERNAME_PROMPT = 'Username:'

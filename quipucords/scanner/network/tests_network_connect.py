@@ -124,7 +124,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
             password='password',
             sudo_password='sudo',
             ssh_keyfile='keyfile',
-            become_method='sudo')
+            become_method='sudo',
+            become_user='root',
+            become_password='become')
         self.cred.save()
 
         self.source = Source(
@@ -161,11 +163,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         vars_dict = _construct_vars(22, cred)
-        expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
+        expected = {'ansible_become_pass': 'become',
+                    'ansible_port': 22,
                     'ansible_ssh_pass': 'password',
                     'ansible_ssh_private_key_file': 'keyfile',
                     'ansible_user': 'username',
-                    'ansible_become_method': 'sudo'}
+                    'ansible_become_method': 'sudo',
+                    'ansible_become_user': 'root'}
         self.assertEqual(vars_dict, expected)
 
     def test_result_store(self):
@@ -192,12 +196,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port)
         expected = {'all': {'hosts': {'1.2.3.4': None},
-                            'vars': {'ansible_become_pass': 'sudo',
+                            'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
                                      'ansible_ssh_private_key_file': 'keyfile',
                                      'ansible_user': 'username',
-                                     'ansible_become_method': 'sudo'}}}
+                                     'ansible_become_method': 'sudo',
+                                     'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',

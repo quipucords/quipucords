@@ -49,6 +49,10 @@ class CredentialSerializer(NotEmptySerializer):
                                style={'input_type': 'password'})
     become_method = ValidStringChoiceField(
         required=False, choices=Credential.BECOME_METHOD_CHOICES)
+    become_user = CharField(required=False, max_length=64)
+    become_password = CharField(required=False, max_length=1024,
+                                allow_null=True,
+                                style={'input_type': 'password'})
 
     class Meta:
         """Metadata for the serializer."""
@@ -118,6 +122,7 @@ class CredentialSerializer(NotEmptySerializer):
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
         become_method = 'become_method' in attrs and attrs['become_method']
+        become_user = 'become_user' in attrs and attrs['become_user']
         if not (password or ssh_keyfile) and not self.partial:
             error = {
                 'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
@@ -150,6 +155,9 @@ class CredentialSerializer(NotEmptySerializer):
         if not become_method:
             # Set the default become_method to be sudo if not specified
             attrs['become_method'] = Credential.BECOME_SUDO
+        if not become_user:
+            # Set the default become_user to root if not specified
+            attrs['become_user'] = Credential.BECOME_USER_DEFAULT
         return attrs
 
     def validate_vcenter_cred(self, attrs):

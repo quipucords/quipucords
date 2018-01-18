@@ -42,8 +42,9 @@ def _credential_vars(credential):
     username = credential.get('username')
     password = credential.get('password')
     ssh_keyfile = credential.get('ssh_keyfile')
-    sudo_password = credential.get('sudo_password')
     become_method = credential.get('become_method')
+    become_user = credential.get('become_user')
+    become_password = credential.get('become_password')
 
     ansible_dict['ansible_user'] = username
     if password:
@@ -51,11 +52,13 @@ def _credential_vars(credential):
             decrypt_data_as_unicode(password)
     if ssh_keyfile:
         ansible_dict['ansible_ssh_private_key_file'] = ssh_keyfile
-    if sudo_password:
+    if become_password:
         ansible_dict['ansible_become_pass'] = \
-            decrypt_data_as_unicode(sudo_password)
+            decrypt_data_as_unicode(become_password)
     if become_method:
         ansible_dict['ansible_become_method'] = become_method
+    if become_user:
+        ansible_dict['ansible_become_user'] = become_user
 
     return ansible_dict
 

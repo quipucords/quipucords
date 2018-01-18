@@ -673,6 +673,11 @@ definitions:
             - dzdo
             - ksu
             - runas
+        become_user:
+          type: "string"
+          description: "The user to become when running an ansible playbook. The default is set to 'root' when the credential type is network."
+        become_password:
+          type: "The privilege escalation password to be used when running an ansible playbook."
   CredentialMin:
     type: "object"
     required:

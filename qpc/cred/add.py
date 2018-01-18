@@ -71,6 +71,12 @@ class CredAddCommand(CliCommand):
                                           'doas', 'dzdo', 'ksu', 'runas'],
                                  metavar='BECOME_METHOD',
                                  help=_(messages.CRED_BECOME_METHOD_HELP))
+        self.parser.add_argument('--become_user', dest='become_user',
+                                 metavar='BECOME_USER',
+                                 help=_(messages.CRED_BECOME_USER_HELP))
+        self.parser.add_argument('--become_password', dest='become_password',
+                                 action='store_true',
+                                 help=_(messages.CRED_BECOME_PASSWORD_HELP))
 
     def _validate_args(self):
         CliCommand._validate_args(self)

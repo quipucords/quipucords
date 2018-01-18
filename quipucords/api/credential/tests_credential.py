@@ -16,6 +16,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import Credential
 import api.messages as messages
+from api.vault import decrypt_data_as_unicode
 
 
 class CredentialTest(TestCase):
@@ -405,6 +406,42 @@ class CredentialTest(TestCase):
         self.create_expect_201(data)
         self.assertEqual(Credential.objects.count(), 1)
         self.assertEqual(Credential.objects.get().become_method, 'doas')
+
+    def test_hostcred_default_become_user(self):
+        """Ensure we can create a new host credential object via API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().become_user, 'root')
+
+    def test_hostcred_set_become_user(self):
+        """Ensure we can create a new host credential object via API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'become_method': 'doas',
+                'become_user': 'newuser'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().become_user, 'newuser')
+
+    def test_hostcred_set_become_pass(self):
+        """Ensure we can create a new host credential object via API."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1',
+                'become_method': 'doas',
+                'become_password': 'pass'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(
+            decrypt_data_as_unicode(Credential.objects.get().become_password),
+            'pass')
 
     def test_vc_create_extra_keyfile_pass(self):
         """Test VCenter with extra keyfile passphase."""

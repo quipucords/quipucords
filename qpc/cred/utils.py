@@ -60,6 +60,10 @@ def get_password(args, req_payload, add_none=True):
         print(_(messages.SUDO_PASSWORD))
         pass_prompt = getpass()
         req_payload['sudo_password'] = pass_prompt or None
+    if 'become_password' in args and args.become_password:
+        print(_(messages.BECOME_PASSWORD))
+        pass_prompt = getpass()
+        req_payload['become_password'] = pass_prompt or None
     elif add_none:
         req_payload['sudo_password'] = None
 
@@ -80,6 +84,8 @@ def build_credential_payload(args, cred_type, add_none=True):
         req_payload['username'] = args.username
     if 'become_method' in args and args.become_method:
         req_payload['become_method'] = args.become_method
+    if 'become_user' in args and args.become_user:
+        req_payload['become_user'] = args.become_user
     if 'filename' in args and args.filename:
         req_payload['ssh_keyfile'] = args.filename
     elif add_none:
