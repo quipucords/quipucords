@@ -15,6 +15,8 @@ from django.conf import settings
 from ansible import constants as C
 from ansible.errors import AnsibleError
 from ansible.parsing.dataloader import DataLoader
+from ansible.parsing.utils.addresses import parse_address
+from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
 from ansible.vars import VariableManager
 from ansible.inventory import Inventory
 from ansible.playbook.play import Play
@@ -156,3 +158,31 @@ def _construct_error_msg(return_code):
 
 def _construct_error(return_code):
     return AnsibleError(message=_construct_error_msg(return_code))
+
+
+def expand_hostpattern(hostpattern):
+    """Expand pattern into list of hosts.
+
+    Takes a single host pattern and returns a list of hostnames.
+    :param hostpattern: a single host pattern
+    :returns: list of hostnames
+    """
+    # Can the given hostpattern be parsed as a host with an optional port
+    # specification?
+
+    try:
+        # pylint: disable=unused-variable
+        (pattern, port) = parse_address(hostpattern, allow_ranges=True)
+    except:  # noqa pylint: disable=bare-except
+        # not a recognizable host pattern
+        pattern = hostpattern
+
+    # Once we have separated the pattern, we expand it into list of one or
+    # more hostnames, depending on whether it contains any [x:y] ranges.
+
+    if detect_range(pattern):
+        hostnames = expand_hostname_range(pattern)
+    else:
+        hostnames = [pattern]
+
+    return hostnames
