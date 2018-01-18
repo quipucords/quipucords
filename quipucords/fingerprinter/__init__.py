@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 NETWORK_IDENTIFICATION_KEYS = ['subscription_manager_id',
                                'bios_uuid']
+VCENTER_IDENTIFICATION_KEYS = ['vm_uuid']
 COMMON_FACTS_TO_MERGE = ['os_name',
                          'os_version',
                          'os_release',
@@ -58,11 +59,6 @@ def process_fact_collection(sender, instance, **kwargs):
 
     # Invoke ENGINE to create fingerprints from facts
     fingerprints_list = _process_sources(raw_facts)
-
-    # Deduplicate network fingerprints
-    for key in NETWORK_IDENTIFICATION_KEYS:
-        fingerprints_list = _remove_duplicate_fingerprints(key,
-                                                           fingerprints_list)
 
     number_valid = 0
     number_invalid = 0
@@ -101,24 +97,33 @@ def _process_sources(raw_facts):
             raw_facts['fact_collection_id'],
             source)
         if source['source_type'] == Source.NETWORK_SOURCE_TYPE:
-            network_fingerprints = network_fingerprints +\
-                source_fingerprints
+            network_fingerprints += source_fingerprints
         elif source['source_type'] == Source.VCENTER_SOURCE_TYPE:
-            vcenter_fingerprints = vcenter_fingerprints +\
-                source_fingerprints
+            vcenter_fingerprints += source_fingerprints
 
     # Deduplicate network fingerprints
     number_before = len(network_fingerprints)
-    for key in NETWORK_IDENTIFICATION_KEYS:
-        network_fingerprints = _remove_duplicate_fingerprints(
-            key,
-            network_fingerprints)
+    network_fingerprints = _remove_duplicate_fingerprints(
+        NETWORK_IDENTIFICATION_KEYS,
+        network_fingerprints)
 
     number_after = len(network_fingerprints)
     logger.debug('Remove duplicate network fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
                  number_before, number_after)
 
+    # Deduplicate vcenter fingerprints
+    number_before = len(vcenter_fingerprints)
+    vcenter_fingerprints = _remove_duplicate_fingerprints(
+        VCENTER_IDENTIFICATION_KEYS,
+        vcenter_fingerprints)
+
+    number_after = len(vcenter_fingerprints)
+    logger.debug('Remove duplicate vcenter fingerprints.')
+    logger.debug('Number before: %d, Number after: %d',
+                 number_before, number_after)
+
+    # Merge network and vcenter fingerprints
     logger.debug('Merging network and vcenter fingerprints.')
     number_before = len(network_fingerprints) + len(vcenter_fingerprints)
     all_fingerprints = _merge_network_and_vcenter(
@@ -230,14 +235,14 @@ def _merge_matching_fingerprints(base_key, base_list,
     # Merge base items without key, matched, and remainder
     # who did not match
     base_result_list = _remove_duplicate_fingerprints(
-        FINGERPRINT_GLOBAL_ID_KEY,
+        [FINGERPRINT_GLOBAL_ID_KEY],
         base_no_key + base_match_list +
         list(base_dict.values()),
         True)
 
     # Merge candidate items without key list with those that didn't match
     candidate_no_match_list = _remove_duplicate_fingerprints(
-        FINGERPRINT_GLOBAL_ID_KEY,
+        [FINGERPRINT_GLOBAL_ID_KEY],
         candidate_no_key +
         candidate_no_match_list,
         True)
@@ -245,37 +250,41 @@ def _merge_matching_fingerprints(base_key, base_list,
     return base_result_list, candidate_no_match_list
 
 
-def _remove_duplicate_fingerprints(id_key, fingerprint_list, remove_key=False):
+def _remove_duplicate_fingerprints(id_key_list,
+                                   fingerprint_list,
+                                   remove_key=False):
     """Given a list of dict remove duplicates.
 
     Takes fingerprint_list and retrieves dict value for
     FINGERPRINT_GLOBAL_ID_KEY. Builds a map using this.  A
     fingerprint that was duplicated for mac_address comparision will
     have the samme FINGERPRINT_GLOBAL_ID_KEY.
-    :param id_key: key used to evaulate uniqueness
+    :param id_key_list: keys used to evaulate uniqueness
     :param fingerprint_list: list of dict objects to be keyed by id_key
     :param remove_key: bool that determines if the id_key and its value
     should be removed from fingerprint
     :returns: list of fingerprints that is unique
     """
-    unique_dict = {}
-    no_global_id_list = []
-    for fingerprint in fingerprint_list:
-        unique_id_value = fingerprint.get(id_key)
-        if unique_id_value:
-            # Add or update fingerprint value
-            unique_dict[unique_id_value] = fingerprint
-        else:
-            no_global_id_list.append(fingerprint)
-
-    result_list = no_global_id_list + list(unique_dict.values())
-
-    # Strip id key from fingerprints if requested
-    if remove_key:
+    result_list = fingerprint_list[:]
+    for id_key in id_key_list:
+        unique_dict = {}
+        no_global_id_list = []
         for fingerprint in result_list:
             unique_id_value = fingerprint.get(id_key)
             if unique_id_value:
-                del fingerprint[id_key]
+                # Add or update fingerprint value
+                unique_dict[unique_id_value] = fingerprint
+            else:
+                no_global_id_list.append(fingerprint)
+
+        result_list = no_global_id_list + list(unique_dict.values())
+
+        # Strip id key from fingerprints if requested
+        if remove_key:
+            for fingerprint in result_list:
+                unique_id_value = fingerprint.get(id_key)
+                if unique_id_value:
+                    del fingerprint[id_key]
 
     return result_list
 
@@ -351,6 +360,9 @@ def _process_network_fact(fact):
 
     fingerprint = {}
     # Common facts
+    if fact.get('connection_host'):
+        fingerprint['name'] = fact['connection_host']
+
     # Set OS information
     if fact.get('etc_release_name'):
         fingerprint['os_name'] = fact.get('etc_release_name')
@@ -381,16 +393,6 @@ def _process_network_fact(fact):
     # Set subscription manager id
     if fact.get('subman_virt_uuid'):
         fingerprint['subscription_manager_id'] = fact['subman_virt_uuid']
-
-    # Set connection information
-    if fact.get('connection_uuid'):
-        fingerprint['connection_uuid'] = fact['connection_uuid']
-
-    if fact.get('connection_host'):
-        fingerprint['connection_host'] = fact['connection_host']
-
-    if fact.get('connection_port'):
-        fingerprint['connection_port'] = fact['connection_port']
 
     if fact.get('cpu_core_per_socket'):
         fingerprint['cpu_core_per_socket'] = fact['cpu_core_per_socket']
@@ -463,6 +465,10 @@ def _process_vcenter_fact(fact):
     fingerprint = {}
 
     # Common facts
+    # Set name
+    if fact.get('vm.name'):
+        fingerprint['name'] = fact['vm.name']
+
     # Set vm.os
     if fact.get('vm.os'):
         fingerprint['os_release'] = fact['vm.os']
@@ -483,10 +489,6 @@ def _process_vcenter_fact(fact):
         fingerprint['cpu_count'] = fact['vm.cpu_count']
 
     # VCenter specific facts
-    # Set vm.name
-    if fact.get('vm.name'):
-        fingerprint['vm_name'] = fact['vm.name']
-
     # Set vm.state
     if fact.get('vm.state'):
         fingerprint['vm_state'] = fact['vm.state']

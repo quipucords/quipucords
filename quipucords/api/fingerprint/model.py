@@ -39,6 +39,7 @@ class SystemFingerprint(models.Model):
         max_length=10, choices=SOURCE_TYPE)
 
     # Common facts
+    name = models.CharField(max_length=256, unique=False, null=True)
     os_name = models.CharField(max_length=64, unique=False)
     os_release = models.CharField(max_length=128, unique=False)
     os_version = models.CharField(max_length=64, unique=False, null=True)
@@ -57,10 +58,6 @@ class SystemFingerprint(models.Model):
     subscription_manager_id = models.CharField(
         max_length=36, unique=False, null=True)
 
-    connection_uuid = models.CharField(max_length=36, unique=False, null=True)
-    connection_host = models.CharField(max_length=128, unique=False, null=True)
-    connection_port = models.PositiveIntegerField(unique=False, null=True)
-
     cpu_core_per_socket = models.PositiveIntegerField(unique=False, null=True)
     cpu_siblings = models.PositiveIntegerField(unique=False, null=True)
     cpu_hyperthreading = models.NullBooleanField()
@@ -76,7 +73,6 @@ class SystemFingerprint(models.Model):
         unique=False, null=True)
 
     # VCenter scan facts
-    vm_name = models.CharField(max_length=256, unique=False, null=True)
     vm_state = models.CharField(max_length=24, unique=False, null=True)
     vm_uuid = models.CharField(max_length=36, unique=False, null=True)
     vm_memory_size = models.PositiveIntegerField(unique=False, null=True)

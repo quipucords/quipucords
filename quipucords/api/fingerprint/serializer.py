@@ -46,6 +46,8 @@ class FingerprintSerializer(ModelSerializer):
         required=True, choices=SystemFingerprint.SOURCE_TYPE)
 
     # Common facts
+    name = CharField(required=False, max_length=256)
+
     os_name = CharField(required=False, max_length=64)
     os_release = CharField(required=True, max_length=128)
     os_version = CharField(required=False, max_length=64)
@@ -63,10 +65,6 @@ class FingerprintSerializer(ModelSerializer):
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
 
-    connection_uuid = CharField(required=False, max_length=36)
-    connection_host = CharField(required=False, max_length=128)
-    connection_port = IntegerField(required=False, min_value=0)
-
     cpu_core_per_socket = IntegerField(required=False, min_value=0)
     cpu_siblings = IntegerField(required=False, min_value=0)
     cpu_hyperthreading = NullBooleanField(required=False)
@@ -80,7 +78,6 @@ class FingerprintSerializer(ModelSerializer):
     virtualized_num_running_guests = IntegerField(required=False, min_value=0)
 
     # VCenter scan facts
-    vm_name = CharField(required=False, max_length=256)
     vm_state = CharField(required=False, max_length=24)
     vm_uuid = CharField(required=False, max_length=36)
     vm_memory_size = IntegerField(required=False, min_value=0)

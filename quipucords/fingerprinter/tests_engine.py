@@ -195,6 +195,9 @@ class EngineTest(TestCase):
 
     def _validate_network_result(self, fingerprint, fact):
         """Help to validate fields."""
+        self.assertEqual(fact.get('connection_host'),
+                         fingerprint.get('name'))
+
         self.assertEqual(fact.get('etc_release_name'),
                          fingerprint.get('os_name'))
         self.assertEqual(fact.get('etc_release_release'),
@@ -213,13 +216,6 @@ class EngineTest(TestCase):
                          fingerprint.get('bios_uuid'))
         self.assertEqual(fact.get('subman_virt_uuid'),
                          fingerprint.get('subscription_manager_id'))
-
-        self.assertEqual(fact.get('connection_uuid'),
-                         fingerprint.get('connection_uuid'))
-        self.assertEqual(fact.get('connection_host'),
-                         fingerprint.get('connection_host'))
-        self.assertEqual(fact.get('connection_port'),
-                         fingerprint.get('connection_port'))
 
         self.assertEqual(fact.get('cpu_core_per_socket'),
                          fingerprint.get('cpu_core_per_socket'))
@@ -249,6 +245,8 @@ class EngineTest(TestCase):
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
+        self.assertEqual(fact.get('vm.name'), fingerprint.get('name'))
+
         self.assertEqual(fact.get('vm.os'), fingerprint.get('os_release'))
 
         self.assertEqual(fact.get('vm.ip_addresses'),
@@ -257,8 +255,6 @@ class EngineTest(TestCase):
                          fingerprint.get('mac_addresses'))
         self.assertEqual(fact.get('vm.cpu_count'),
                          fingerprint.get('cpu_count'))
-
-        self.assertEqual(fact.get('vm.name'), fingerprint.get('vm_name'))
 
         self.assertEqual(fact.get('vm.state'),
                          fingerprint.get('vm_state'))
@@ -596,7 +592,7 @@ class EngineTest(TestCase):
         # deplicate but leave unique key
         leave_key_list = list(index.values())
         unique_list = _remove_duplicate_fingerprints(
-            FINGERPRINT_GLOBAL_ID_KEY, leave_key_list)
+            [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list)
         self.assertEqual(len(unique_list), 2)
         self.assertIsNotNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
 
@@ -604,13 +600,13 @@ class EngineTest(TestCase):
         leave_key_list = list(index.values())
         leave_key_list.append({'id': 3, 'os_release': 'RHEL 6'})
         unique_list = _remove_duplicate_fingerprints(
-            FINGERPRINT_GLOBAL_ID_KEY, leave_key_list)
+            [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list)
         self.assertEqual(len(unique_list), 3)
 
         # now pass flag to strip id key
         remove_key_list = list(index.values())
         unique_list = _remove_duplicate_fingerprints(
-            FINGERPRINT_GLOBAL_ID_KEY, remove_key_list, True)
+            [FINGERPRINT_GLOBAL_ID_KEY], remove_key_list, True)
         self.assertEqual(len(unique_list), 2)
         self.assertIsNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
 
@@ -643,7 +639,6 @@ class EngineTest(TestCase):
         nfingerprint = self._create_network_fingerprint()
         vfingerprint = self._create_vcenter_fingerprint()
 
-        self.assertIsNone(nfingerprint.get('vm_name'))
         self.assertIsNone(nfingerprint.get('vm_state'))
         self.assertIsNone(nfingerprint.get('vm_uuid'))
         self.assertIsNone(nfingerprint.get('vm_memory_size'))
@@ -658,9 +653,6 @@ class EngineTest(TestCase):
         self.assertIsNone(vfingerprint.get('os_version'))
         self.assertIsNone(vfingerprint.get('bios_uuid'))
         self.assertIsNone(vfingerprint.get('subscription_manager_id'))
-        self.assertIsNone(vfingerprint.get('connection_uuid'))
-        self.assertIsNone(vfingerprint.get('connection_host'))
-        self.assertIsNone(vfingerprint.get('connection_port'))
         self.assertIsNone(vfingerprint.get('cpu_core_per_socket'))
         self.assertIsNone(vfingerprint.get('cpu_siblings'))
         self.assertIsNone(vfingerprint.get('cpu_hyperthreading'))
@@ -669,7 +661,6 @@ class EngineTest(TestCase):
 
         new_fingerprint = _merge_fingerprint(nfingerprint, vfingerprint)
 
-        self.assertIsNotNone(new_fingerprint.get('vm_name'))
         self.assertIsNotNone(new_fingerprint.get('vm_state'))
         self.assertIsNotNone(new_fingerprint.get('vm_uuid'))
         self.assertIsNotNone(new_fingerprint.get('vm_memory_size'))
@@ -680,13 +671,11 @@ class EngineTest(TestCase):
         self.assertIsNotNone(new_fingerprint.get('vm_datacenter'))
         self.assertIsNotNone(new_fingerprint.get('vm_cluster'))
 
+        self.assertIsNotNone(new_fingerprint.get('name'))
         self.assertIsNotNone(new_fingerprint.get('os_name'))
         self.assertIsNotNone(new_fingerprint.get('os_version'))
         self.assertIsNotNone(new_fingerprint.get('bios_uuid'))
         self.assertIsNotNone(new_fingerprint.get('subscription_manager_id'))
-        self.assertIsNotNone(new_fingerprint.get('connection_uuid'))
-        self.assertIsNotNone(new_fingerprint.get('connection_host'))
-        self.assertIsNotNone(new_fingerprint.get('connection_port'))
         self.assertIsNotNone(new_fingerprint.get('cpu_core_per_socket'))
         self.assertIsNotNone(new_fingerprint.get('cpu_siblings'))
         self.assertIsNotNone(new_fingerprint.get('cpu_hyperthreading'))
