@@ -176,10 +176,14 @@ class CredentialSerializer(NotEmptySerializer):
                          and attrs['ssh_passphrase']
         become_password = 'become_password' in attrs \
                           and attrs['become_password']
+        become_user = 'become_user' in attrs and attrs['become_user']
+        become_method = 'become_method' in attrs \
+                        and attrs['become_method']
 
-        if ssh_keyfile or ssh_passphrase or become_password:
+        if ssh_keyfile or ssh_passphrase or become_password or \
+                become_user or become_method:
             error = {
-                'non_field_errors': [_(messages.VC_KEY_FILE_NOT_ALLOWED)]
+                'non_field_errors': [_(messages.VC_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
 
@@ -203,10 +207,14 @@ class CredentialSerializer(NotEmptySerializer):
                          and attrs['ssh_passphrase']
         become_password = 'become_password' in attrs \
                           and attrs['become_password']
+        become_user = 'become_user' in attrs and attrs['become_user']
+        become_method = 'become_method' in attrs \
+                        and attrs['become_method']
 
-        if ssh_keyfile or ssh_passphrase or become_password:
+        if ssh_keyfile or ssh_passphrase or become_password or \
+                become_user or become_method:
             error = {
-                'non_field_errors': [_(messages.SAT_KEY_FILE_NOT_ALLOWED)]
+                'non_field_errors': [_(messages.SAT_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
 

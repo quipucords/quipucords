@@ -37,7 +37,7 @@ CRED_VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 CRED_VC_EDIT_PWD_OR_USERNAME = 'Must update either username or password '
 'for VCenter credentials'
 CRED_VC_KEY_FILE_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\
-    ' keyfile, or ssh passphrase.'
+    ' keyfile, become user, become method, or ssh passphrase.'
 CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
 CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
 CRED_UPDATED = 'Credential "%s" was updated'
@@ -46,10 +46,10 @@ CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
 CRED_BECOME_METHOD_HELP = 'Method to become for network privilege escalation.'\
     ' Valid values: sudo, su, pbrun, pfexec, doas, dzdo, ksu, runas.'
-CRED_BECOME_USER_HELP = 'The user to become when running an ansible playbook.'\
-    ' The default is set to root when the credential type is network.'
-CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be used'\
-    ' when running an ansible playbook.'
+CRED_BECOME_USER_HELP = 'The user to become when running a privileged command'\
+    ' during network scan.'
+CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be used when'\
+    ' running a network scan.'
 
 SOURCE_NAME_HELP = 'source name'
 SOURCES_NAME_HELP = 'list of source names'
@@ -125,7 +125,8 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the ' \
 
 CONN_PASSWORD = 'Provide connection password.'
 SSH_PASSPHRASE = 'Provide passphrase for ssh keyfile.'
-BECOME_PASSWORD = 'Proved password for privilege escalation.'
+BECOME_PASSWORD = 'Provide privilege escalation password to be used when'\
+    ' running a network scan.'
 
 LOGIN_USER_HELP = 'The username to login to the server.'
 LOGIN_USERNAME_PROMPT = 'Username:'

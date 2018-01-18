@@ -139,7 +139,7 @@ To create a credential, supply SSH credentials as either a username-password pai
 
 ``--become_password``
 
-  Prompts for the privilege escalation password to be used when running an ansible playbook.
+  Prompts for the privilege escalation password to be used when running a network scan.
 
 ``--become_method=become_method``
 
@@ -147,7 +147,7 @@ To create a credential, supply SSH credentials as either a username-password pai
 
 ``--become_user=user``
 
-  Sets the user to become when running an ansible playbook. The default is set to 'root' when the credential type is network.
+  Sets the user to become when running a privileged command during network scan.
 
 The information in a credential, such as a password, become password, SSH keys, the become_method, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
 

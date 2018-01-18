@@ -672,9 +672,9 @@ definitions:
             - runas
         become_user:
           type: "string"
-          description: "The user to become when running an ansible playbook. The default is set to 'root' when the credential type is network."
+          description: "The user to become when running a privileged command during network scan."
         become_password:
-          type: "The password for sudo permission escalation after connection for the credential."
+          type: "The privilege escalation password to be used when running a network scan."
   CredentialMin:
     type: "object"
     required:
