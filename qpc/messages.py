@@ -36,8 +36,6 @@ CRED_TYPE_REQUIRED = '--type is required; Must be set to vcenter or network'
 CRED_VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 CRED_VC_EDIT_PWD_OR_USERNAME = 'Must update either username or password '
 'for VCenter credentials'
-CRED_VC_FIELDS_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\
-    ' keyfile, become user, become method, or ssh passphrase.'
 CRED_EDIT_NO_ARGS = 'No arguments provided to edit credential "%s"'
 CRED_DOES_NOT_EXIST = 'Credential "%s" does not exist'
 CRED_UPDATED = 'Credential "%s" was updated'
