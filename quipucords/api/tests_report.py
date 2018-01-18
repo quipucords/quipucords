@@ -147,7 +147,7 @@ class SystemReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['report'][0].keys()), 24)
+        self.assertEqual(len(report['report'][0].keys()), 34)
 
     def test_get_fact_collection_filter_report(self):
         """Get a specific group count report with filter."""
