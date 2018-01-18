@@ -57,32 +57,40 @@ def process_fact_collection(sender, instance, **kwargs):
     raw_facts = read_raw_facts(instance.id)
 
     # Invoke ENGINE to create fingerprints from facts
-    fingerprints_list = _process_sources(instance, raw_facts)
+    fingerprints_list = _process_sources(raw_facts)
 
     # Deduplicate network fingerprints
     for key in NETWORK_IDENTIFICATION_KEYS:
         fingerprints_list = _remove_duplicate_fingerprints(key,
                                                            fingerprints_list)
 
+    number_valid = 0
+    number_invalid = 0
     for fingerprint_dict in fingerprints_list:
         serializer = FingerprintSerializer(data=fingerprint_dict)
         if serializer.is_valid():
+            number_valid += 1
             serializer.save()
         else:
-            logger.error('%s could not persist fingerprint. SystemFacts: %s',
-                         __name__, fingerprint_dict)
-            logger.error('Errors: %s', serializer.errors)
+            number_invalid += 1
+            logger.error('Fingerprint engine could not persist fingerprint.')
+            logger.error('Invalid fingerprint: %s', fingerprint_dict)
+            logger.error('Fingerprint errors: %s', serializer.errors)
+
+    logger.debug('FactCollection %d produced %d valid '
+                 'fingerprints and %d invalid fingerprints.',
+                 instance.id,
+                 number_valid,
+                 number_invalid)
 
     # Mark completed because engine has process raw facts
     instance.status = FactCollection.FC_STATUS_COMPLETE
     instance.save()
 
 
-def _process_sources(fact_collection, raw_facts):
+def _process_sources(raw_facts):
     """Process facts and convert to fingerprints.
 
-    :param fact_collection: FactCollection associated with
-    raw facts
     :param raw_facts: Collected raw facts for all sources
     :returns: list of fingerprints for all systems (all scans)
     """
@@ -100,16 +108,25 @@ def _process_sources(fact_collection, raw_facts):
                 source_fingerprints
 
     # Deduplicate network fingerprints
+    number_before = len(network_fingerprints)
     for key in NETWORK_IDENTIFICATION_KEYS:
         network_fingerprints = _remove_duplicate_fingerprints(
             key,
             network_fingerprints)
 
+    number_after = len(network_fingerprints)
+    logger.debug('Remove duplicate network fingerprints.')
+    logger.debug('Number before: %d, Number after: %d',
+                 number_before, number_after)
+
+    number_before = len(network_fingerprints) + len(vcenter_fingerprints)
     all_fingerprints = _merge_network_and_vcenter(
         network_fingerprints, vcenter_fingerprints)
+    number_after = len(all_fingerprints)
+    logger.debug('Merging network and vcenter fingerprints.')
+    logger.debug('Number before: %d, Number after: %d',
+                 number_before, number_after)
 
-    logger.debug('FactCollection %d produced %d fingerprints',
-                 fact_collection.id, len(all_fingerprints))
     return all_fingerprints
 
 
@@ -198,6 +215,8 @@ def _merge_matching_fingerprints(base_key, base_list,
         base_value = base_dict.pop(candidate_index_key, None)
         if base_value:
             # candidate_index_key == base_key so merge
+            logger.debug('Fingerprints matched on %s/%s with value %s',
+                         base_key, candidate_key, candidate_index_key)
             merged_value = _merge_fingerprint(
                 base_value, candidate_fingerprint)
 
@@ -446,6 +465,9 @@ def _process_vcenter_fact(fact):
     # Set vm.os
     if fact.get('vm.os'):
         fingerprint['os_release'] = fact['vm.os']
+
+    fingerprint['infrastructure_type'] = 'virtualized'
+    fingerprint['virtualized_is_guest'] = True
 
     # Set mac address from either network or vcenter
     if fact.get('vm.mac_addresses'):

@@ -46,9 +46,13 @@ class FingerprintSerializer(ModelSerializer):
         required=True, choices=SystemFingerprint.SOURCE_TYPE)
 
     # Common facts
-    os_name = CharField(required=True, max_length=64)
+    os_name = CharField(required=False, max_length=64)
     os_release = CharField(required=True, max_length=128)
     os_version = CharField(required=False, max_length=64)
+
+    infrastructure_type = ChoiceField(
+        required=True, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
+    virtualized_is_guest = NullBooleanField(required=True)
 
     mac_addresses = CustomJSONField(required=False)
     ip_addresses = CustomJSONField(required=False)
@@ -71,10 +75,6 @@ class FingerprintSerializer(ModelSerializer):
 
     system_creation_date = DateField(required=False)
 
-    infrastructure_type = ChoiceField(
-        required=True, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
-
-    virtualized_is_guest = NullBooleanField(required=True)
     virtualized_type = CharField(required=False, max_length=64)
     virtualized_num_guests = IntegerField(required=False, min_value=0)
     virtualized_num_running_guests = IntegerField(required=False, min_value=0)

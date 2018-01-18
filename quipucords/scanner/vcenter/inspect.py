@@ -10,6 +10,7 @@
 #
 """ScanTask used for vcenter inspection task."""
 import logging
+import json
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (ScanTask, InspectionResult,
                         SystemInspectionResult, RawFact)
@@ -131,7 +132,8 @@ class InspectTaskRunner(ScanTaskRunner):
         sys_result.save()
         for key, val in facts.items():
             if val is not None:
-                stored_fact = RawFact(name=key, value=val)
+                final_value = json.dumps(val)
+                stored_fact = RawFact(name=key, value=final_value)
                 stored_fact.save()
                 sys_result.facts.add(stored_fact)
         sys_result.save()

@@ -42,6 +42,11 @@ class SystemFingerprint(models.Model):
     os_name = models.CharField(max_length=64, unique=False)
     os_release = models.CharField(max_length=128, unique=False)
     os_version = models.CharField(max_length=64, unique=False, null=True)
+
+    infrastructure_type = models.CharField(
+        max_length=10, choices=INFRASTRUCTURE_TYPE)
+    virtualized_is_guest = models.NullBooleanField()
+
     mac_addresses = models.CharField(max_length=1024, unique=False, null=True)
     ip_addresses = models.CharField(max_length=1024, unique=False, null=True)
 
@@ -64,10 +69,6 @@ class SystemFingerprint(models.Model):
 
     system_creation_date = models.DateField(null=True)
 
-    infrastructure_type = models.CharField(
-        max_length=10, choices=INFRASTRUCTURE_TYPE)
-
-    virtualized_is_guest = models.NullBooleanField()
     virtualized_type = models.CharField(max_length=64, unique=False, null=True)
     virtualized_num_guests = models.PositiveIntegerField(
         unique=False, null=True)
