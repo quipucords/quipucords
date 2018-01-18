@@ -119,11 +119,12 @@ def _process_sources(raw_facts):
     logger.debug('Number before: %d, Number after: %d',
                  number_before, number_after)
 
+    logger.debug('Merging network and vcenter fingerprints.')
     number_before = len(network_fingerprints) + len(vcenter_fingerprints)
     all_fingerprints = _merge_network_and_vcenter(
         network_fingerprints, vcenter_fingerprints)
     number_after = len(all_fingerprints)
-    logger.debug('Merging network and vcenter fingerprints.')
+    logger.debug('Merged network and vcenter fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
                  number_before, number_after)
 
