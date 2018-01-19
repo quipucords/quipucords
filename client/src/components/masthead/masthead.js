@@ -25,7 +25,7 @@ class NavBar extends Component {
             <span className="icon-bar" />
             <span className="icon-bar" />
           </button>
-          <a href="javascript:void(0);" className="navbar-brand">
+          <span className="navbar-brand">
             <img
               className="navbar-brand-icon"
               src="/assets/img/logo.svg"
@@ -36,7 +36,7 @@ class NavBar extends Component {
               src="/public/assets/img/brand-alt.svg"
               alt="Red Hat Entitlements Reporting"
             />
-          </a>
+          </span>
         </div>
         <nav className="collapse navbar-collapse">
           <ButtonGroup className="nav navbar-nav navbar-right navbar-iconic navbar-utility">

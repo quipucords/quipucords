@@ -5,7 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import 'patternfly/dist/css/patternfly.css';
 import 'patternfly/dist/css/patternfly-additions.css';
-import './index.css';
+import './styles/css/entitlements.css';
 
 import App from './components/app';
 import { baseName } from './routes';
