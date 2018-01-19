@@ -1,4 +1,4 @@
-import * as types from '../constants/aboutConstants';
+import { aboutTypes as types } from '../constants';
 
 const initialState = {
   show: false

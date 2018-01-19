@@ -1,24 +1,24 @@
-import { credentialsTypes as types } from '../constants';
+import { factsTypes as types } from '../constants';
 
 const initialState = {
   error: false,
   errorMessage: '',
   loading: true,
-  data: []
+  data: {}
 };
 
-export default function credentialsReducer(state = initialState, action) {
+export default function factsReducer(state = initialState, action) {
   switch (action.type) {
-    case types.GET_CREDENTIALS_ERROR:
+    case types.ADD_FACTS_ERROR:
       return Object.assign({}, state, {
         error: action.error,
         errorMessage: action.message
       });
 
-    case types.GET_CREDENTIALS_LOADING:
+    case types.ADD_FACTS_LOADING:
       return Object.assign({}, state, { loading: action.loading });
 
-    case types.GET_CREDENTIALS_SUCCESS:
+    case types.ADD_FACTS_SUCCESS:
       return Object.assign({}, state, { data: action.data });
 
     default:
