@@ -4,18 +4,14 @@ body {
   font-family: sans-serif;
 }
 
+.navbar-brand .navbar-brand-icon, .modal-dialog .modal-footer > img {
+  height: 35px;
+  width: 35px;
+}
+
 .quipicords-list-view {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.quipicords-list-view .list-view-pf-description {
-  flex: 1 0 75%;
-}
-@media (min-width: 992px) {
-  .quipicords-list-view .list-view-pf-additional-info {
-    width: 25%;
-  }
 }
 
 button.unavailable:hover, li.unavailable > a:hover {
@@ -31,3 +27,16 @@ button.unavailable:hover, li.unavailable > a:hover {
   border: none;
   margin-right: 10px;
 }
+
+.blank-slate-pf.full-page-blank-slate {
+  border: none;
+}
+
+.list-view-info-item-text-count {
+  width: 80px;
+}
+
+.list-view-info-item-icon-count {
+  width: 50px;
+}
+
