@@ -3,15 +3,14 @@ import Store from '../../redux/store';
 
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
 import './masthead.css';
-import * as NavTypes from '../../redux/constants/navigationBarConstants';
-import * as AboutTypes from '../../redux/constants/aboutConstants';
+import { aboutTypes, navigationBarTypes } from '../../redux/constants';
 
 class NavBar extends Component {
   render() {
     let toggleCollapse = () =>
-      Store.dispatch({ type: NavTypes.NAV_TOGGLE_COLLAPSE });
+      Store.dispatch({ type: navigationBarTypes.NAV_TOGGLE_COLLAPSE });
     let showAbout = () =>
-      Store.dispatch({ type: AboutTypes.ABOUT_DIALOG_OPEN });
+      Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
 
     return (
       <nav className="navbar navbar-pf-vertical">

@@ -35,7 +35,7 @@
     "bootstrap": "^3.3.7",
     "jquery": "^3.2.1",
     "patternfly": "^3.35.1",
-    "patternfly-react": "^0.26.0",
+    "patternfly-react": "^1.0.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.31.5",
     "react-dom": "^16.2.0",
@@ -47,7 +47,7 @@
     "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
-    "create-react-app": "^1.4.3",
+    "create-react-app": "^1.5.0",
     "eslint": "^4.15.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-standard": "^10.2.1",
@@ -61,6 +61,8 @@
     "eslint-plugin-react": "^7.5.1",
     "eslint-plugin-standard": "^3.0.1",
     "express": "^4.16.2",
+    "jest": "^21.2.1",
+    "jest-cli": "^21.2.1",
     "npm-run-all": "^4.1.2",
     "prettier": "^1.10.2",
     "swagger-ui-express": "^2.0.14",
