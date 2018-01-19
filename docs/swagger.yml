@@ -886,6 +886,13 @@ definitions:
         enum:
           - inspect
           - connect
+      optional_products:
+        type: "string"
+        description: "The product capture limitations."
+        enum:
+          - JBoss_EAP
+          - JBoss_Fuse
+          - JBoss_BRMS
       status:
         type: "string"
         description: "The status of the scan task."
@@ -927,6 +934,13 @@ definitions:
             - connect
         options:
           $ref: "#/definitions/ScanOptions"
+        optional_products:
+          type: "string"
+          description: "The product capture limitations."
+          enum:
+            - JBoss_EAP
+            - JBoss_Fuse
+            - JBoss_BRMS
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"

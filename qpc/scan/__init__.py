@@ -33,3 +33,8 @@ SCAN_URI = '/api/v1/scans/'
 
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
+
+# Scan Options
+SCAN_JBOSS_EAP = 'JBoss_EAP'
+SCAN_JBOSS_FUSE = 'JBoss_Fuse'
+SCAN_JBOSS_BRMS = 'JBoss_BRMS'

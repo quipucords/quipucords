@@ -305,6 +305,10 @@ Use the ``qpc scan start`` command to run connect and inspection scans on the so
 
   The number of parallel system scans. If not provided the default of 50 is utilized.
 
+``--optional_products=products``
+
+  The product capture limitations. Valid choices are JBoss_EAP, JBoss_Fuse, and JBoss_BRMS.
+
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

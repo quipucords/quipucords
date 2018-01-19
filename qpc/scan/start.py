@@ -47,6 +47,13 @@ class ScanStartCommand(CliCommand):
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
+        self.parser.add_argument('--optional-products', dest='optional_products',
+                                 choices=[scan.SCAN_JBOSS_EAP,
+                                          scan.SCAN_JBOSS_FUSE,
+                                          scan.SCAN_JBOSS_BRMS],
+                                 metavar='OPTIONAL_PRODUCTS',
+                                 help=_(messages.SCAN_OPTIONAL_PRODUCTS_HELP),
+                                 required=False)
         self.source_ids = []
 
     def _get_source_ids(self, source_names):
@@ -91,6 +98,9 @@ class ScanStartCommand(CliCommand):
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {
                 'max_concurrency': self.args.max_concurrency
+            },
+            'optional_products': {
+                'products' : self.args.optional_products
             }
         }
 
