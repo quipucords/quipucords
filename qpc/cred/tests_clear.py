@@ -16,6 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import CREDENTIAL_URI
@@ -112,7 +113,7 @@ class CredentialClearCliTests(unittest.TestCase):
             args = Namespace(name='credential1')
             with redirect_stdout(cred_out):
                 acc.main(args)
-                expected = 'Credential "credential1" was removed\n'
+                expected = messages.CRED_REMOVED % 'credential1' + '\n'
                 self.assertEqual(cred_out.getvalue(), expected)
 
     def test_clear_by_name_err(self):
@@ -198,5 +199,5 @@ class CredentialClearCliTests(unittest.TestCase):
             args = Namespace(name=None)
             with redirect_stdout(cred_out):
                 acc.main(args)
-                expected = 'All credentials were removed\n'
+                expected = messages.CRED_CLEAR_ALL_SUCCESS + '\n'
                 self.assertEqual(cred_out.getvalue(), expected)

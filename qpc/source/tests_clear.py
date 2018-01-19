@@ -16,6 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.source import SOURCE_URI
@@ -116,7 +117,7 @@ class SourceClearCliTests(unittest.TestCase):
             args = Namespace(name='source1')
             with redirect_stdout(source_out):
                 ncc.main(args)
-                expected = 'Source "source1" was removed\n'
+                expected = messages.SOURCE_REMOVED % 'source1' + '\n'
                 self.assertEqual(source_out.getvalue(), expected)
 
     def test_clear_by_name_err(self):
@@ -199,5 +200,5 @@ class SourceClearCliTests(unittest.TestCase):
             args = Namespace(name=None)
             with redirect_stdout(source_out):
                 ncc.main(args)
-                expected = 'All sources were removed\n'
+                expected = messages.SOURCE_CLEAR_ALL_SUCCESS + '\n'
                 self.assertEqual(source_out.getvalue(), expected)

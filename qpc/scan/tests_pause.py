@@ -16,6 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
@@ -100,5 +101,5 @@ class ScanPauseCliTests(unittest.TestCase):
             args = Namespace(id='1')
             with redirect_stdout(scan_out):
                 nsc.main(args)
-                expected = 'Scan "1" paused\n'
+                expected = messages.SCAN_PAUSED % '1' + '\n'
                 self.assertEqual(scan_out.getvalue(), expected)
