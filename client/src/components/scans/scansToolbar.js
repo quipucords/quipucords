@@ -9,7 +9,7 @@ import { bindMethods } from '../../common/helpers';
 
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import Store from '../../redux/store';
-import * as dispatchTypes from '../../redux/constants/viewToolbarConstants';
+import { viewToolbarTypes as dispatchTypes } from '../../redux/constants/';
 
 class ScansToolbar extends React.Component {
   constructor() {

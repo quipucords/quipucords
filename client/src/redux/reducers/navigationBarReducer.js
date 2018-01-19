@@ -1,4 +1,4 @@
-import * as types from '../constants/navigationBarConstants';
+import { navigationBarTypes as types } from '../constants';
 
 const initialState = {
   collapsed: false

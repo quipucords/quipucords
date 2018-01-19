@@ -1,35 +1,35 @@
-import * as types from '../constants/sourcesConstants';
-import sourcesApi from '../../services/sourcesApi';
+import { sourcesTypes as types } from '../constants';
+import sourcesService from '../../services/sourcesService';
 
-const sourcesError = (bool, message) => ({
-  type: types.LOAD_SOURCES_ERROR,
+const getSourcesError = (bool, message) => ({
+  type: types.GET_SOURCES_ERROR,
   error: bool,
   message: message
 });
 
-const sourcesLoading = bool => ({
-  type: types.LOAD_SOURCES_LOADING,
+const getSourcesLoading = bool => ({
+  type: types.GET_SOURCES_LOADING,
   loading: bool
 });
 
-const sourcesSuccess = data => ({
-  type: types.LOAD_SOURCES_SUCCESS,
+const getSourcesSuccess = data => ({
+  type: types.GET_SOURCES_SUCCESS,
   data
 });
 
 const getSources = () => {
   return function(dispatch) {
-    dispatch(sourcesLoading(true));
-    return sourcesApi
+    dispatch(getSourcesLoading(true));
+    return sourcesService
       .getSources()
       .then(success => {
-        dispatch(sourcesSuccess(success));
+        dispatch(getSourcesSuccess(success));
       })
       .catch(error => {
-        dispatch(sourcesError(true, error.message));
+        dispatch(getSourcesError(true, error.message));
       })
-      .finally(() => dispatch(sourcesLoading(false)));
+      .finally(() => dispatch(getSourcesLoading(false)));
   };
 };
 
-export { sourcesError, sourcesLoading, sourcesSuccess, getSources };
+export { getSourcesError, getSourcesLoading, getSourcesSuccess, getSources };
