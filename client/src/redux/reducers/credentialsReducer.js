@@ -1,4 +1,4 @@
-import * as types from '../constants/credentialsConstants';
+import { credentialsTypes as types } from '../constants';
 
 const initialState = {
   error: false,
@@ -9,16 +9,16 @@ const initialState = {
 
 export default function credentialsReducer(state = initialState, action) {
   switch (action.type) {
-    case types.LOAD_CREDENTIALS_ERROR:
+    case types.GET_CREDENTIALS_ERROR:
       return Object.assign({}, state, {
         error: action.error,
         errorMessage: action.message
       });
 
-    case types.LOAD_CREDENTIALS_LOADING:
+    case types.GET_CREDENTIALS_LOADING:
       return Object.assign({}, state, { loading: action.loading });
 
-    case types.LOAD_CREDENTIALS_SUCCESS:
+    case types.GET_CREDENTIALS_SUCCESS:
       return Object.assign({}, state, { data: action.data });
 
     default:

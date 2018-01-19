@@ -9,10 +9,10 @@ class SourcesEmptyState extends Component {
     return (
       <Grid fluid>
         <Row>
-          <EmptyState>
+          <EmptyState className="full-page-blank-slate">
             <EmptyState.Icon />
             <EmptyState.Title>
-              Welcome to Red Hat Entitlement Reporting
+              Welcome to Red Hat Entitlements Reporting
             </EmptyState.Title>
             <EmptyState.Info>
               Add some networks to search for Red Hat products. You can add them
@@ -25,7 +25,7 @@ class SourcesEmptyState extends Component {
             </EmptyState.Action>
             <EmptyState.Action secondary>
               <Button bsStyle="default" bsSize="large">
-                Use Spreadsheet
+                Import Sources
               </Button>
             </EmptyState.Action>
           </EmptyState>

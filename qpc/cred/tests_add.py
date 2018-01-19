@@ -18,6 +18,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -155,7 +156,7 @@ class CredentialAddCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "credential1" was added\n')
+                                 messages.CRED_ADDED % 'credential1' + '\n')
 
     @patch('getpass._raw_input')
     def test_add_vcenter_cred(self, do_mock_raw_input):
@@ -173,8 +174,8 @@ class CredentialAddCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Provide connection password.\n'
-                                 'Credential "credential1" was added\n')
+                                 messages.CONN_PASSWORD + '\n' +
+                                 messages.CRED_ADDED % 'credential1' + '\n')
 
     @patch('getpass._raw_input')
     def test_add_sat_cred(self, do_mock_raw_input):
@@ -192,5 +193,5 @@ class CredentialAddCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Provide connection password.\n'
-                                 'Credential "credential1" was added\n')
+                                 messages.CONN_PASSWORD + '\n' +
+                                 messages.CRED_ADDED % 'credential1' + '\n')

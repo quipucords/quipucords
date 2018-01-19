@@ -3,10 +3,14 @@ import Store from '../../redux/store';
 
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
 import './masthead.css';
+import { aboutTypes, navigationBarTypes } from '../../redux/constants';
 
 class NavBar extends Component {
   render() {
-    let toggleCollapse = () => Store.dispatch({ type: 'NAV_TOGGLE_COLLAPSE' });
+    let toggleCollapse = () =>
+      Store.dispatch({ type: navigationBarTypes.NAV_TOGGLE_COLLAPSE });
+    let showAbout = () =>
+      Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
 
     return (
       <nav className="navbar navbar-pf-vertical">
@@ -21,16 +25,16 @@ class NavBar extends Component {
             <span className="icon-bar" />
             <span className="icon-bar" />
           </button>
-          <a href="/" className="navbar-brand">
+          <a href="javascript:void(0);" className="navbar-brand">
             <img
               className="navbar-brand-icon"
-              src="/assets/img/logo-alt.svg"
+              src="/assets/img/logo.svg"
               alt=""
             />
             <img
               className="navbar-brand-name navbar-brand-txt"
-              src="/assets/img/brand-alt.svg"
-              alt="Red Hat Entitlement Reporting"
+              src="/public/assets/img/brand-alt.svg"
+              alt="Red Hat Entitlements Reporting"
             />
           </a>
         </div>
@@ -43,7 +47,7 @@ class NavBar extends Component {
                 id="nav-help-dropdown"
               >
                 <MenuItem>Help</MenuItem>
-                <MenuItem>About</MenuItem>
+                <MenuItem onClick={showAbout}>About</MenuItem>
               </DropdownButton>
             </span>
           </ButtonGroup>
