@@ -157,7 +157,7 @@ class CredentialAddCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "credential1" was added\n')
+                                 'Credential "credential1" was added.\n')
 
     def test_add_host_cred_with_become(self):
         """Testing the add host cred command successfully."""
