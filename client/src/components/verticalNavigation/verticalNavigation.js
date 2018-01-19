@@ -7,7 +7,6 @@ import { withRouter } from 'react-router';
 
 import _ from 'lodash';
 import { OverlayTrigger, Tooltip } from 'patternfly-react';
-import './verticalNavigation.css';
 
 class VerticalNavigation extends Component {
   renderMenuItems() {
