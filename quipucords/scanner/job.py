@@ -16,7 +16,7 @@ from fingerprinter import pfc_signal
 from api.fact.util import (validate_fact_collection_json,
                            create_fact_collection)
 from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
-from scanner import network, vcenter
+from scanner import network, vcenter, satellite
 
 
 # Get an instance of a logger
@@ -113,6 +113,10 @@ class ScanJobRunner(Process):
         elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
               source_type == Source.VCENTER_SOURCE_TYPE):
             runner = vcenter.ConnectTaskRunner(
+                self.scan_job, scan_task, self.conn_results)
+        elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
+              source_type == Source.SATELLITE_SOURCE_TYPE):
+            runner = satellite.ConnectTaskRunner(
                 self.scan_job, scan_task, self.conn_results)
         elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
               source_type == Source.NETWORK_SOURCE_TYPE):
