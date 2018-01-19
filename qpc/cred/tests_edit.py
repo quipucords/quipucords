@@ -17,6 +17,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -149,7 +150,7 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')
 
     def test_partial_edit_host_cred(self):
         """Testing the edit credential command successfully."""
@@ -168,7 +169,7 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')
 
     def test_edit_vcenter_cred(self):
         """Testing the edit credential command successfully."""
@@ -187,7 +188,7 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')
 
     def test_partial_edit_vcenter_cred(self):
         """Testing the edit credential command successfully."""
@@ -206,7 +207,7 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')
 
     def test_edit_cred_get_error(self):
         """Testing the edit credential command server error occurs."""
@@ -242,7 +243,7 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')
 
     def test_partial_edit_sat_cred(self):
         """Testing the edit credential command successfully."""
@@ -261,4 +262,4 @@ class CredentialEditCliTests(unittest.TestCase):
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),
-                                 'Credential "cred1" was updated\n')
+                                 messages.CRED_UPDATED % 'cred1' + '\n')

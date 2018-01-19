@@ -17,6 +17,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace, ArgumentTypeError
 import requests
 import requests_mock
+import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -204,7 +205,7 @@ class SourceAddCliTests(unittest.TestCase):
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
-                                 'Source "source1" was added\n')
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
 
     def test_add_source_vc(self):
         """Testing the add vcenter source command successfully."""
@@ -221,7 +222,7 @@ class SourceAddCliTests(unittest.TestCase):
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
-                                 'Source "source1" was added\n')
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
 
     def test_add_source_sat(self):
         """Testing the add satellite source command successfully."""
@@ -239,4 +240,4 @@ class SourceAddCliTests(unittest.TestCase):
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
-                                 'Source "source1" was added\n')
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
