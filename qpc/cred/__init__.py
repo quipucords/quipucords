@@ -23,4 +23,13 @@ NETWORK_CRED_TYPE = 'network'
 VCENTER_CRED_TYPE = 'vcenter'
 SATELLITE_CRED_TYPE = 'satellite'
 
+BECOME_SUDO = 'sudo'
+BECOME_SU = 'su'
+BECOME_PBRUN = 'pbrun'
+BECOME_PFEXEC = 'pfexec'
+BECOME_DOAS = 'doas'
+BECOME_DZDO = 'dzdo'
+BECOME_KSU = 'ksu'
+BECOME_RUNAS = 'runas'
+
 CREDENTIAL_URI = '/api/v1/credentials/'

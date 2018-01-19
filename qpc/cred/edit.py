@@ -57,8 +57,14 @@ class CredEditCommand(CliCommand):
                                  action='store_true',
                                  help=_(messages.CRED_SSH_PSPH_HELP))
         self.parser.add_argument('--become_method', dest='become_method',
-                                 choices=['sudo', 'su', 'pbrun', 'pfexec',
-                                          'doas', 'dzdo', 'ksu', 'runas'],
+                                 choices=[credential.BECOME_SUDO,
+                                          credential.BECOME_SU,
+                                          credential.BECOME_PBRUN,
+                                          credential.BECOME_PFEXEC,
+                                          credential.BECOME_DOAS,
+                                          credential.BECOME_DZDO,
+                                          credential.BECOME_KSU,
+                                          credential.BECOME_RUNAS],
                                  metavar='BECOME_METHOD',
                                  help=_(messages.CRED_BECOME_METHOD_HELP))
         self.parser.add_argument('--become_user', dest='become_user',
