@@ -1,4 +1,4 @@
-import { reportsTypes as types } from '../constants';
+import { reportsTypes } from '../constants';
 import reportsReducer from './reportsReducer';
 
 describe('ReportsReducer', function() {
@@ -15,7 +15,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORTS_ERROR', () => {
     const dispatched = {
-      type: types.GET_REPORTS_ERROR,
+      type: reportsTypes.GET_REPORTS_ERROR,
       error: true,
       message: 'error message'
     };
@@ -30,7 +30,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORTS_LOADING', () => {
     const dispatched = {
-      type: types.GET_REPORTS_LOADING,
+      type: reportsTypes.GET_REPORTS_LOADING,
       loading: false
     };
 
@@ -41,7 +41,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORTS_SUCCESS', () => {
     const dispatched = {
-      type: types.GET_REPORTS_SUCCESS,
+      type: reportsTypes.GET_REPORTS_SUCCESS,
       data: ['test']
     };
 

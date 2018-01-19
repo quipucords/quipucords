@@ -1,11 +1,11 @@
-import { reportsTypes as types } from '../constants';
+import { reportsTypes } from '../constants';
 import * as actions from './reportsActions';
 
 describe('ReportsActions', function() {
   it('should create a GET error action', () => {
     const error = true;
     const expectedAction = {
-      type: types.GET_REPORTS_ERROR,
+      type: reportsTypes.GET_REPORTS_ERROR,
       error,
       message: undefined
     };
@@ -16,7 +16,7 @@ describe('ReportsActions', function() {
   it('should create a GET loading action', () => {
     const loading = true;
     const expectedAction = {
-      type: types.GET_REPORTS_LOADING,
+      type: reportsTypes.GET_REPORTS_LOADING,
       loading
     };
 
@@ -26,7 +26,7 @@ describe('ReportsActions', function() {
   it('should create a GET success action', () => {
     const data = {};
     const expectedAction = {
-      type: types.GET_REPORTS_SUCCESS,
+      type: reportsTypes.GET_REPORTS_SUCCESS,
       data
     };
 
