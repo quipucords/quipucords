@@ -83,8 +83,7 @@ class TestNormalizeResult(unittest.TestCase):
                     _host=SimpleNamespace(name='hostname'),
                     _result=self.RESULT,
                     _task=SimpleNamespace(register='name'))),
-            [{'key': 'name',
-              'result': self.RESULT}])
+            [('name', self.RESULT)])
 
     def test_register_ansible_fact(self):
         """A set_facts task that registers one fact."""
@@ -95,26 +94,24 @@ class TestNormalizeResult(unittest.TestCase):
                     _result={'ansible_facts':
                              {'fact': 'fact_result'}},
                     _task=SimpleNamespace())),
-            [{'key': 'fact',
-              'result': 'fact_result'}])
+            [('fact', 'fact_result')])
 
     def test_register_ansible_facts(self):
         """A set_facts task that registers multiple facts."""
         self.assertEqual(
-            normalize_result(
+            # Wrap normalize_result in set() to make comparison
+            # independent of order.
+            set(normalize_result(
                 SimpleNamespace(
                     _host=SimpleNamespace(name='hostname'),
                     _result={'ansible_facts':
                              {'fact1': 'result1',
                               'fact2': 'result2',
                               'fact3': 'result3'}},
-                    _task=SimpleNamespace())),
-            [{'key': 'fact1',
-              'result': 'result1'},
-             {'key': 'fact2',
-              'result': 'result2'},
-             {'key': 'fact3',
-              'result': 'result3'}])
+                    _task=SimpleNamespace()))),
+            {('fact1', 'result1'),
+             ('fact2', 'result2'),
+             ('fact3', 'result3')})
 
 
 class HostScannerTest(TestCase):

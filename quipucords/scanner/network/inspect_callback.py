@@ -40,19 +40,16 @@ def normalize_result(result):
       3) set_facts task with member called 'ansible_facts'
 
     :param result: Ansible result dictionary
-    :returns: [] for case 1, and a list of dicts with keys 'key' and
-        'result' for cases 2 and 3.
+    :returns: [] for case 1, and a list of key, value tuples for
+        cases 2 and 3.
     """
     # pylint: disable=protected-access
     if result._result is not None and isinstance(result._result, dict):
         if 'ansible_facts' in result._result:
-            return [{'key': key,
-                     'result': value}
-                    for key, value in result._result['ansible_facts'].items()]
+            return list(result._result['ansible_facts'].items())
         elif (isinstance(result._task.register, str) and
               not result._task.register.startswith('internal_')):
-            return [{'key': result._task.register,
-                     'result': result._result}]
+            return [(result._task.register, result._result)]
 
     return []
 
@@ -95,14 +92,11 @@ class InspectResultCallback(CallbackBase):
         host = result_obj['host']
         results_to_store = normalize_result(result)
         host_facts = {}
-        for value in results_to_store:
-            key = value['key']
-            result = value['result']
-
+        for key, value in results_to_store:
             if key == 'host_done':
                 self._finalize_host(host)
             else:
-                host_facts[key] = result
+                host_facts[key] = value
 
         if host in self._ansible_facts:
             self._ansible_facts[host].update(host_facts)
