@@ -1,4 +1,4 @@
-import { credentialsTypes as types } from '../constants';
+import { credentialsTypes } from '../constants';
 import credentialsReducer from './credentialsReducer';
 
 describe('CredentialsReducer', function() {
@@ -15,7 +15,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_ERROR', () => {
     const dispatched = {
-      type: types.GET_CREDENTIALS_ERROR,
+      type: credentialsTypes.GET_CREDENTIALS_ERROR,
       error: true,
       message: 'error message'
     };
@@ -30,7 +30,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_LOADING', () => {
     const dispatched = {
-      type: types.GET_CREDENTIALS_LOADING,
+      type: credentialsTypes.GET_CREDENTIALS_LOADING,
       loading: false
     };
 
@@ -41,7 +41,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_SUCCESS', () => {
     const dispatched = {
-      type: types.GET_CREDENTIALS_SUCCESS,
+      type: credentialsTypes.GET_CREDENTIALS_SUCCESS,
       data: ['test']
     };
 

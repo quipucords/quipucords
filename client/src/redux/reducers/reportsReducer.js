@@ -1,4 +1,4 @@
-import { reportsTypes as types } from '../constants';
+import { reportsTypes } from '../constants';
 
 const initialState = {
   error: false,
@@ -9,16 +9,16 @@ const initialState = {
 
 export default function reportsReducer(state = initialState, action) {
   switch (action.type) {
-    case types.GET_REPORTS_ERROR:
+    case reportsTypes.GET_REPORTS_ERROR:
       return Object.assign({}, state, {
         error: action.error,
         errorMessage: action.message
       });
 
-    case types.GET_REPORTS_LOADING:
+    case reportsTypes.GET_REPORTS_LOADING:
       return Object.assign({}, state, { loading: action.loading });
 
-    case types.GET_REPORTS_SUCCESS:
+    case reportsTypes.GET_REPORTS_SUCCESS:
       return Object.assign({}, state, { data: action.data });
 
     default:

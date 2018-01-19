@@ -1,11 +1,11 @@
-import { credentialsTypes as types } from '../constants';
+import { credentialsTypes } from '../constants';
 import * as actions from './credentialsActions';
 
 describe('CredentialsActions', function() {
   it('should create a GET error action', () => {
     const error = true;
     const expectedAction = {
-      type: types.GET_CREDENTIALS_ERROR,
+      type: credentialsTypes.GET_CREDENTIALS_ERROR,
       error,
       message: undefined
     };
@@ -16,7 +16,7 @@ describe('CredentialsActions', function() {
   it('should create a GET loading action', () => {
     const loading = true;
     const expectedAction = {
-      type: types.GET_CREDENTIALS_LOADING,
+      type: credentialsTypes.GET_CREDENTIALS_LOADING,
       loading
     };
 
@@ -26,7 +26,7 @@ describe('CredentialsActions', function() {
   it('should create a GET success action', () => {
     const data = {};
     const expectedAction = {
-      type: types.GET_CREDENTIALS_SUCCESS,
+      type: credentialsTypes.GET_CREDENTIALS_SUCCESS,
       data
     };
 

@@ -1,19 +1,19 @@
-import { credentialsTypes as types } from '../constants';
+import { credentialsTypes } from '../constants';
 import credentialsService from '../../services/credentialsService';
 
 const getCredentialsError = (bool, message) => ({
-  type: types.GET_CREDENTIALS_ERROR,
+  type: credentialsTypes.GET_CREDENTIALS_ERROR,
   error: bool,
   message: message
 });
 
 const getCredentialsLoading = bool => ({
-  type: types.GET_CREDENTIALS_LOADING,
+  type: credentialsTypes.GET_CREDENTIALS_LOADING,
   loading: bool
 });
 
 const getCredentialsSuccess = data => ({
-  type: types.GET_CREDENTIALS_SUCCESS,
+  type: credentialsTypes.GET_CREDENTIALS_SUCCESS,
   data
 });
 
