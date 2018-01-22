@@ -31,7 +31,7 @@ from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.inspect import (construct_scan_inventory)
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback, \
-    normalize_result
+    normalize_result, ANSIBLE_FACTS
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -91,7 +91,7 @@ class TestNormalizeResult(unittest.TestCase):
             normalize_result(
                 SimpleNamespace(
                     _host=SimpleNamespace(name='hostname'),
-                    _result={'ansible_facts':
+                    _result={ANSIBLE_FACTS:
                              {'fact': 'fact_result'}},
                     _task=SimpleNamespace())),
             [('fact', 'fact_result')])
@@ -104,7 +104,7 @@ class TestNormalizeResult(unittest.TestCase):
             set(normalize_result(
                 SimpleNamespace(
                     _host=SimpleNamespace(name='hostname'),
-                    _result={'ansible_facts':
+                    _result={ANSIBLE_FACTS:
                              {'fact1': 'result1',
                               'fact2': 'result2',
                               'fact3': 'result3'}},

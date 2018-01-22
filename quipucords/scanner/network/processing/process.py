@@ -25,6 +25,14 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 PROCESSORS = {}
 NO_DATA = ''  # Result value when we have errors.
 
+DEPS = 'DEPS'
+FAILED = 'failed'
+KEY = 'KEY'
+RC = 'rc'
+RESULTS = 'results'
+RETURN_CODE_ANY = 'RETURN_CODE_ANY'
+SKIPPED = 'skipped'
+
 
 def is_ansible_task_result(value):
     """Check whether an object is an Ansible task result.
@@ -34,10 +42,10 @@ def is_ansible_task_result(value):
     the playbook.
     """
     return (isinstance(value, dict) and
-            ('skipped' in value or
-             'failed' in value or
-             'rc' in value or
-             'results' in value))
+            (SKIPPED in value or
+             FAILED in value or
+             RC in value or
+             RESULTS in value))
 
 
 def process(facts):
@@ -62,7 +70,7 @@ def process(facts):
         # Use StopIteration to let the inner for loop continue the
         # outer for loop.
         try:
-            for dep in getattr(processor, 'DEPS', []):
+            for dep in getattr(processor, DEPS, []):
                 if dep not in facts or \
                    not facts[dep] or \
                    isinstance(facts[dep], Exception):
@@ -85,13 +93,13 @@ def process(facts):
             result[key] = NO_DATA
             continue
 
-        if value.get('skipped', False):
+        if value.get(SKIPPED, False):
             logger.error('Fact %s skipped, no results', key)
             result[key] = NO_DATA
             continue
 
-        if value.get('rc', 0) and \
-           not getattr(processor, 'RETURN_CODE_ANY', False):
+        if value.get(RC, 0) and \
+           not getattr(processor, RETURN_CODE_ANY, False):
             logger.error('Remote command returned %s', value['stdout'])
             result[key] = NO_DATA
             continue
@@ -120,8 +128,8 @@ class ProcessorMeta(abc.ABCMeta):
 
         # Setting a falsey KEY means "yes, I did this on purpose, I
         # really don't want this class registered."
-        if dct['KEY']:
-            PROCESSORS[dct['KEY']] = cls
+        if dct[KEY]:
+            PROCESSORS[dct[KEY]] = cls
         super().__init__(name, bases, dct)
 
 

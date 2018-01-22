@@ -35,7 +35,8 @@ class TestIsAnsibleTaskResult(unittest.TestCase):
 
     def test_skipped(self):
         """The result of a skipped task."""
-        self.assertTrue(process.is_ansible_task_result({'skipped': True}))
+        self.assertTrue(
+            process.is_ansible_task_result({process.SKIPPED: True}))
 
     def test_ansible_result(self):
         """A single Ansible result."""

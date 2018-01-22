@@ -21,13 +21,21 @@ from scanner.network.processing import process
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+ANSIBLE_FACTS = 'ansible_facts'
+HOST = 'host'
+HOST_DONE = 'host_done'
+INTERNAL_ = 'internal_'
+KEY = 'key'
+NO_KEY = 'no_key'
+RESULT = 'result'
+
 
 def _construct_result(result):
     """Construct result object."""
     # pylint: disable=protected-access
     host = result._host
-    key = result._task.register or 'no_key'
-    return {'host': host.name, 'result': result._result, 'key': key}
+    key = result._task.register or NO_KEY
+    return {HOST: host.name, RESULT: result._result, KEY: key}
 
 
 def normalize_result(result):
@@ -45,10 +53,10 @@ def normalize_result(result):
     """
     # pylint: disable=protected-access
     if result._result is not None and isinstance(result._result, dict):
-        if 'ansible_facts' in result._result:
-            return list(result._result['ansible_facts'].items())
+        if ANSIBLE_FACTS in result._result:
+            return list(result._result[ANSIBLE_FACTS].items())
         elif (isinstance(result._task.register, str) and
-              not result._task.register.startswith('internal_')):
+              not result._task.register.startswith(INTERNAL_)):
             return [(result._task.register, result._result)]
 
     return []
@@ -89,11 +97,11 @@ class InspectResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
 
-        host = result_obj['host']
+        host = result_obj[HOST]
         results_to_store = normalize_result(result)
         host_facts = {}
         for key, value in results_to_store:
-            if key == 'host_done':
+            if key == HOST_DONE:
                 self._finalize_host(host)
             else:
                 host_facts[key] = value
@@ -165,7 +173,7 @@ class InspectResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.warning('%s', result_obj)
 
-        unreachable_host = result_obj['host']
+        unreachable_host = result_obj[HOST]
         logger.error(
             'Host %s is no longer reachable.  Moving host to failed results',
             unreachable_host)
