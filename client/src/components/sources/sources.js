@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import {
   Alert,
@@ -17,10 +16,61 @@ import { getSources } from '../../redux/actions/sourcesActions';
 import SourcesToolbar from './sourcesToolbar';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
+import Store from '../../redux/store';
+import { toastNotificationTypes } from '../../redux/constants';
+import { bindMethods } from '../../common/helpers';
 
 class Sources extends React.Component {
+  constructor() {
+    super();
+
+    bindMethods(this, [
+      'addSource',
+      'importSources',
+      'authenticateSources',
+      'scanSources',
+      'itemSelectChange'
+    ]);
+    this.state = {
+      filteredItems: [],
+      selectedItems: []
+    };
+  }
+
   componentDidMount() {
     this.props.getSources();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.sources !== this.props.sources) {
+      // Reset selection state though we may want to keep selections over refreshes...
+      nextProps.sources.forEach(source => {
+        source.selected = false;
+      });
+
+      // TODO: Remove once we get real failed host data
+      let failedCount = Math.floor(Math.random() * 10);
+      nextProps.sources.forEach(source => {
+        source.selected = false;
+        source.failed_hosts = [];
+        for (let i = 0; i < failedCount; i++) {
+          source.failed_hosts.push('failedHost' + (i + 1));
+        }
+      });
+
+      let filteredItems = this.filterSources(
+        nextProps.sources,
+        nextProps.activeFilters
+      );
+
+      this.setState({ filteredItems: filteredItems, selectedItems: [] });
+    } else if (nextProps.activeFilters !== this.props.activeFilters) {
+      let filteredItems = this.filterSources(
+        nextProps.sources,
+        nextProps.activeFilters
+      );
+      this.setState({ filteredItems: filteredItems });
+    }
   }
 
   matchesFilter(item, filter) {
@@ -48,11 +98,13 @@ class Sources extends React.Component {
     return matches;
   }
 
-  filterSources() {
-    const { sources, activeFilters } = this.props;
+  filterSources(sources, filters) {
+    if (!filters || filters.length === 0) {
+      return sources;
+    }
 
     return sources.filter(item => {
-      return this.matchesFilters(item, activeFilters);
+      return this.matchesFilters(item, filters);
     });
   }
 
@@ -85,12 +137,63 @@ class Sources extends React.Component {
     });
   }
 
+  addSource() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Importing sources is not yet implemented'
+    });
+  }
+
+  importSources() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Adding sources is not yet implemented'
+    });
+  }
+
+  authenticateSources() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Authenticating sources is not yet implemented'
+    });
+  }
+
+  scanSources() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Scanning sources is not yet implemented'
+    });
+  }
+
+  itemSelectChange(item) {
+    const { filteredItems } = this.state;
+
+    item.selected = !item.selected;
+    let selectedItems = filteredItems.filter(item => {
+      return item.selected === true;
+    });
+
+    this.setState({ selectedItems: selectedItems });
+  }
+
   renderList(items) {
     return (
       <Row>
         <ListView className="quipicords-list-view">
           {items.map((item, index) => (
-            <SourceListItem item={item} key={index} />
+            <SourceListItem
+              item={item}
+              key={index}
+              onItemSelectChange={this.itemSelectChange}
+            />
           ))}
         </ListView>
       </Row>
@@ -99,6 +202,7 @@ class Sources extends React.Component {
 
   render() {
     const { loading, loadError, errorMessage, sources } = this.props;
+    const { filteredItems, selectedItems } = this.state;
 
     if (loading) {
       return (
@@ -119,22 +223,32 @@ class Sources extends React.Component {
         </EmptyState>
       );
     }
+
     if (sources && sources.length) {
-      let filteredSources = this.filterSources(sources);
-      this.sortSources(filteredSources);
+      this.sortSources(filteredItems);
 
       return [
         <SourcesToolbar
           totalCount={sources.length}
-          filteredCount={filteredSources.length}
+          filteredCount={filteredItems.length}
           key={1}
+          onAddSource={this.addSource}
+          authenticateAvailable={selectedItems && selectedItems.length > 0}
+          onAuthenticate={this.authenticateSources}
+          scanAvailable={selectedItems && selectedItems.length > 0}
+          onScan={this.scanSources}
         />,
         <Grid fluid key={2}>
-          {this.renderList(filteredSources)}
+          {this.renderList(filteredItems)}
         </Grid>
       ];
     }
-    return <SourcesEmptyState />;
+    return (
+      <SourcesEmptyState
+        onAddSource={this.addSource}
+        onImportSources={this.importSources}
+      />
+    );
   }
 }
 
@@ -169,6 +283,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(Sources)
-);
+export default connect(mapStateToProps, mapDispatchToProps)(Sources);

@@ -9,7 +9,7 @@ import {
   MenuItem
 } from 'patternfly-react';
 
-export const ScanListItem = ({ item }) => {
+export const ScanListItem = ({ item, onItemSelectChange }) => {
   let sourcesCount = item.sources ? item.sources.length : 0;
 
   let statusName = '';
@@ -25,7 +25,7 @@ export const ScanListItem = ({ item }) => {
       actionButtonLabel = 'Restart';
       break;
     case 'canceled':
-      statusName = 'error-circle-o';
+      statusName = 'warning-triangle-o';
       actionButtonLabel = 'Restart Scan';
       break;
     case 'created':
@@ -104,7 +104,13 @@ export const ScanListItem = ({ item }) => {
   return (
     <ListView.Item
       key={item.id}
-      checkboxInput={<Checkbox value={item.selected} bsClass="" />}
+      checkboxInput={
+        <Checkbox
+          checked={item.selected}
+          bsClass=""
+          onClick={e => onItemSelectChange(item)}
+        />
+      }
       actions={
         <span>
           <Button
@@ -140,5 +146,6 @@ export const ScanListItem = ({ item }) => {
 };
 
 ScanListItem.propTypes = {
-  item: PropTypes.object
+  item: PropTypes.object,
+  onItemSelectChange: PropTypes.func
 };

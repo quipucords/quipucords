@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
+import Store from '../../redux/store';
 
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
-import Store from '../../redux/store';
-import { viewToolbarTypes as dispatchTypes } from '../../redux/constants/';
+import { viewToolbarTypes } from '../../redux/constants';
 
 class SourcesToolbar extends React.Component {
   constructor() {
@@ -57,14 +56,14 @@ class SourcesToolbar extends React.Component {
 
     let filter = { field: field, value: value, label: filterText };
     Store.dispatch({
-      type: dispatchTypes.ADD_FILTER,
+      type: viewToolbarTypes.ADD_FILTER,
       filter
     });
   }
 
   selectFilterType(filterType) {
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_TYPE,
+      type: viewToolbarTypes.SET_FILTER_TYPE,
       filterType
     });
   }
@@ -74,7 +73,7 @@ class SourcesToolbar extends React.Component {
 
     let filterValue = newFilterValue;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
       filterValue
     });
     if (newFilterValue) {
@@ -85,7 +84,7 @@ class SourcesToolbar extends React.Component {
   updateCurrentValue(event) {
     let filterValue = event.target.value;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
       filterValue
     });
   }
@@ -102,27 +101,27 @@ class SourcesToolbar extends React.Component {
 
   removeFilter(filter) {
     Store.dispatch({
-      type: dispatchTypes.REMOVE_FILTER,
+      type: viewToolbarTypes.REMOVE_FILTER,
       filter
     });
   }
 
   clearFilters() {
     Store.dispatch({
-      type: dispatchTypes.CLEAR_FILTERS
+      type: viewToolbarTypes.CLEAR_FILTERS
     });
   }
 
   updateCurrentSortType(sortType) {
     Store.dispatch({
-      type: dispatchTypes.SET_SORT_TYPE,
+      type: viewToolbarTypes.SET_SORT_TYPE,
       sortType
     });
   }
 
   toggleCurrentSortDirection() {
     Store.dispatch({
-      type: dispatchTypes.TOGGLE_SORT_ASCENDING
+      type: viewToolbarTypes.TOGGLE_SORT_ASCENDING
     });
   }
 
@@ -196,9 +195,19 @@ class SourcesToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
-        <Button className="unavailable">Authenticate</Button>
-        <Button className="unavailable">Scan</Button>
-        <Button className="unavailable" bsStyle="primary">
+        <Button
+          disabled={this.props.authenticateAvailable === false}
+          onClick={this.props.onAuthenticate}
+        >
+          Authenticate
+        </Button>
+        <Button
+          disabled={this.props.scanAvailable === false}
+          onClick={this.props.onScan}
+        >
+          Scan
+        </Button>
+        <Button bsStyle="primary" onClick={this.props.onAddSource}>
           Add
         </Button>
       </div>
@@ -270,7 +279,12 @@ SourcesToolbar.propTypes = {
   filterValue: PropTypes.any,
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
-  sortAscending: PropTypes.bool
+  sortAscending: PropTypes.bool,
+  onAddSource: PropTypes.func,
+  authenticateAvailable: PropTypes.bool,
+  onAuthenticate: PropTypes.func,
+  scanAvailable: PropTypes.bool,
+  onScan: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {
@@ -279,4 +293,4 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-export default withRouter(connect(mapStateToProps)(SourcesToolbar));
+export default connect(mapStateToProps)(SourcesToolbar);
