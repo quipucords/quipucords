@@ -27,6 +27,7 @@ from scanner.network.connect import construct_connect_inventory, connect, \
     ConnectResultStore
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.utils import _construct_vars
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -121,8 +122,10 @@ class NetworkConnectTaskRunnerTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password='sudo',
-            ssh_keyfile='keyfile')
+            ssh_keyfile='keyfile',
+            become_method='sudo',
+            become_user='root',
+            become_password='become')
         self.cred.save()
 
         self.source = Source(
@@ -154,6 +157,20 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.conn_results = ConnectionResults(scan_job=self.scan_job)
         self.conn_results.save()
 
+    def test_construct_vars(self):
+        """Test constructing ansible vars dictionary."""
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        vars_dict = _construct_vars(22, cred)
+        expected = {'ansible_become_pass': 'become',
+                    'ansible_port': 22,
+                    'ansible_ssh_pass': 'password',
+                    'ansible_ssh_private_key_file': 'keyfile',
+                    'ansible_user': 'username',
+                    'ansible_become_method': 'sudo',
+                    'ansible_become_user': 'root'}
+        self.assertEqual(vars_dict, expected)
+
     def test_result_store(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task, self.conn_results)
@@ -178,11 +195,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port)
         expected = {'all': {'hosts': {'1.2.3.4': None},
-                            'vars': {'ansible_become_pass': 'sudo',
+                            'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
                                      'ansible_ssh_private_key_file': 'keyfile',
-                                     'ansible_user': 'username'}}}
+                                     'ansible_user': 'username',
+                                     'ansible_become_method': 'sudo',
+                                     'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',

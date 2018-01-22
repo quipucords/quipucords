@@ -28,6 +28,23 @@ class Credential(models.Model):
     CRED_TYPE_CHOICES = ((NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
                          (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
                          (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE))
+    BECOME_USER_DEFAULT = 'root'
+    BECOME_SUDO = 'sudo'
+    BECOME_SU = 'su'
+    BECOME_PBRUN = 'pbrun'
+    BECOME_PFEXEC = 'pfexec'
+    BECOME_DOAS = 'doas'
+    BECOME_DZDO = 'dzdo'
+    BECOME_KSU = 'ksu'
+    BECOME_RUNAS = 'runas'
+    BECOME_METHOD_CHOICES = ((BECOME_SUDO, BECOME_SUDO),
+                             (BECOME_SU, BECOME_SU),
+                             (BECOME_PBRUN, BECOME_PBRUN),
+                             (BECOME_PFEXEC, BECOME_PFEXEC),
+                             (BECOME_DOAS, BECOME_DOAS),
+                             (BECOME_DZDO, BECOME_DZDO),
+                             (BECOME_KSU, BECOME_KSU),
+                             (BECOME_RUNAS, BECOME_RUNAS))
 
     name = models.CharField(max_length=64, unique=True)
     cred_type = models.CharField(
@@ -37,9 +54,13 @@ class Credential(models.Model):
     )
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=1024, null=True)
-    sudo_password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
+    become_method = models.CharField(max_length=6,
+                                     choices=BECOME_METHOD_CHOICES,
+                                     null=True)
+    become_user = models.CharField(max_length=64, null=True)
+    become_password = models.CharField(max_length=1024, null=True)
 
     @staticmethod
     def is_encrypted(field):
@@ -50,16 +71,18 @@ class Credential(models.Model):
 
     def encrypt_fields(self):
         """Encrypt the sensitive fields of the object."""
-        # Uses is_encrypted() to make sure the password/sudo_password/
+        # Uses is_encrypted() to make sure the password/become_password/
         # passphrase is not already encrypted, which would be the case
         # in partial_updates that do not update the password
         # (as it grabs the old, encrypted one)
         if self.password and not self.is_encrypted(self.password):
             self.password = encrypt_data_as_unicode(self.password)
-        if self.sudo_password and not self.is_encrypted(self.sudo_password):
-            self.sudo_password = encrypt_data_as_unicode(self.sudo_password)
         if self.ssh_passphrase and not self.is_encrypted(self.ssh_passphrase):
             self.ssh_passphrase = encrypt_data_as_unicode(self.ssh_passphrase)
+        if self.become_password and not \
+                self.is_encrypted(self.become_password):
+            self.become_password = \
+                encrypt_data_as_unicode(self.become_password)
 
     # pylint: disable=arguments-differ
     def save(self, *args, **kwargs):
