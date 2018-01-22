@@ -5,6 +5,7 @@ import * as navigationBarTypes from './navigationBarConstants';
 import * as reportsTypes from './reportsConstants';
 import * as scansTypes from './scansConstants';
 import * as sourcesTypes from './sourcesConstants';
+import * as toastNotificationTypes from './toasNotificationConstants';
 import * as viewToolbarTypes from './viewToolbarConstants';
 
 const reduxTypes = {
@@ -15,6 +16,7 @@ const reduxTypes = {
   reports: reportsTypes,
   scans: scansTypes,
   sources: sourcesTypes,
+  toastNotifications: toastNotificationTypes,
   viewToolbar: viewToolbarTypes
 };
 
@@ -27,6 +29,7 @@ export {
   reportsTypes,
   scansTypes,
   sourcesTypes,
+  toastNotificationTypes,
   viewToolbarTypes
 };
 
