@@ -32,15 +32,15 @@ export default function toastNotificationsReducer(
 
       if (!displayedToast) {
         return Object.assign({}, state, { toasts: [] });
-      } else {
-        return Object.assign({}, state, {
-          toasts: [
-            ...state.toasts.slice(0, index),
-            action.toast,
-            ...state.toasts.slice(index + 1)
-          ]
-        });
       }
+
+      return Object.assign({}, state, {
+        toasts: [
+          ...state.toasts.slice(0, index),
+          action.toast,
+          ...state.toasts.slice(index + 1)
+        ]
+      });
 
     case toastNotificationTypes.TOAST_PAUSE:
       return Object.assign({}, state, { paused: true });

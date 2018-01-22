@@ -8,7 +8,7 @@ import { routes } from '../routes';
 import Store from '../redux/store';
 import Content from './content/content';
 import Masthead from './masthead/masthead';
-import ToastNotificationsList from './ToastNotificationList/toastNotificatinsList';
+import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import VerticalNavigation from './verticalNavigation/verticalNavigation';
 
 import logo from '../logo.svg';

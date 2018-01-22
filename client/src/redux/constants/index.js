@@ -16,7 +16,7 @@ const reduxTypes = {
   reports: reportsTypes,
   scans: scansTypes,
   sources: sourcesTypes,
-  toastNotifcations: toastNotificationTypes,
+  toastNotifications: toastNotificationTypes,
   viewToolbar: viewToolbarTypes
 };
 

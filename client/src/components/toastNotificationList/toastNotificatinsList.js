@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router';
 
 import {
   ToastNotificationList,
@@ -27,19 +26,18 @@ class ToastNotificationsList extends React.Component {
     Store.dispatch({ type: toastNotificationTypes.TOAST_RESUME });
   }
 
-  onDismiss = (toast) => {
+  onDismiss(toast) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_REMOVE,
       toast: toast
     });
-  };
+  }
 
   render() {
     const { toasts, paused } = this.props;
 
     return (
-      <ToastNotificationList
-      >
+      <ToastNotificationList>
         {toasts &&
           toasts.map((toast, index) => {
             if (!toast.removed) {
@@ -80,4 +78,4 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-export default withRouter(connect(mapStateToProps)(ToastNotificationsList));
+export default connect(mapStateToProps)(ToastNotificationsList);
