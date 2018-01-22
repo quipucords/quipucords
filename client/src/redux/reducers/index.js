@@ -9,6 +9,7 @@ import sourcesReducer from './sourcesReducer';
 import sourcesToolbarReducer from './sourcesToolbarReducer';
 import scansReducer from './scansReducer';
 import scansToolbarReducer from './scansToolbarReducer';
+import toastNotificationsReducer from './toastNotificationsReducer';
 
 const reducers = {
   about: aboutReducer,
@@ -19,7 +20,8 @@ const reducers = {
   sources: sourcesReducer,
   sourcesToolbar: sourcesToolbarReducer,
   scans: scansReducer,
-  scansToolbar: scansToolbarReducer
+  scansToolbar: scansToolbarReducer,
+  toastNotifications: toastNotificationsReducer
 };
 
 const reduxReducers = combineReducers(reducers);
