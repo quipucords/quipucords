@@ -1,0 +1,19 @@
+/* _overrides.scss */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+// TEMPORARY - This needs to be removed
+button.unavailable:hover, li.unavailable > a:hover {
+  cursor: default;
+  opacity: 0;
+}
+
+// This should be in Patternfly - https://github.com/patternfly/patternfly/issues/920
+.navbar-brand .navbar-brand-icon, .modal-dialog .modal-footer > img {
+  height: 35px;
+  width: 35px;
+}
+

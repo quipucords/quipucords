@@ -1,4 +1,4 @@
-import { scansTypes as types } from '../constants';
+import { scansTypes } from '../constants';
 import scansReducer from './scansReducer';
 
 describe('ScansReducer', function() {
@@ -15,7 +15,7 @@ describe('ScansReducer', function() {
 
   it('should handle GET_SCANS_ERROR', () => {
     const dispatched = {
-      type: types.GET_SCANS_ERROR,
+      type: scansTypes.GET_SCANS_ERROR,
       error: true,
       message: 'error message'
     };
@@ -28,7 +28,7 @@ describe('ScansReducer', function() {
 
   it('should handle GET_SCANS_LOADING', () => {
     const dispatched = {
-      type: types.GET_SCANS_LOADING,
+      type: scansTypes.GET_SCANS_LOADING,
       loading: false
     };
 
@@ -39,7 +39,7 @@ describe('ScansReducer', function() {
 
   it('should handle GET_SCANS_SUCCESS', () => {
     const dispatched = {
-      type: types.GET_SCANS_SUCCESS,
+      type: scansTypes.GET_SCANS_SUCCESS,
       data: ['test']
     };
 

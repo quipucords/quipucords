@@ -1,19 +1,19 @@
-import { sourcesTypes as types } from '../constants';
+import { sourcesTypes } from '../constants';
 import sourcesService from '../../services/sourcesService';
 
 const getSourcesError = (bool, message) => ({
-  type: types.GET_SOURCES_ERROR,
+  type: sourcesTypes.GET_SOURCES_ERROR,
   error: bool,
   message: message
 });
 
 const getSourcesLoading = bool => ({
-  type: types.GET_SOURCES_LOADING,
+  type: sourcesTypes.GET_SOURCES_LOADING,
   loading: bool
 });
 
 const getSourcesSuccess = data => ({
-  type: types.GET_SOURCES_SUCCESS,
+  type: sourcesTypes.GET_SOURCES_SUCCESS,
   data
 });
 

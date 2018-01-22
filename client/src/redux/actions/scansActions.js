@@ -1,19 +1,19 @@
-import { scansTypes as types } from '../constants';
+import { scansTypes } from '../constants';
 import scansService from '../../services/scansService';
 
 const getScansError = (bool, message) => ({
-  type: types.GET_SCANS_ERROR,
+  type: scansTypes.GET_SCANS_ERROR,
   error: bool,
   message: message
 });
 
 const getScansLoading = bool => ({
-  type: types.GET_SCANS_LOADING,
+  type: scansTypes.GET_SCANS_LOADING,
   loading: bool
 });
 
 const getScansSuccess = data => ({
-  type: types.GET_SCANS_SUCCESS,
+  type: scansTypes.GET_SCANS_SUCCESS,
   data
 });
 
