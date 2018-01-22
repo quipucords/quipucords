@@ -32,4 +32,13 @@ BECOME_DZDO = 'dzdo'
 BECOME_KSU = 'ksu'
 BECOME_RUNAS = 'runas'
 
+BECOME_CHOICES = [BECOME_SUDO,
+                  BECOME_SU,
+                  BECOME_PBRUN,
+                  BECOME_PFEXEC,
+                  BECOME_DOAS,
+                  BECOME_DZDO,
+                  BECOME_KSU,
+                  BECOME_RUNAS]
+
 CREDENTIAL_URI = '/api/v1/credentials/'
