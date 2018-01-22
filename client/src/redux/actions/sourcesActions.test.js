@@ -1,11 +1,11 @@
-import { sourcesTypes as types } from '../constants';
+import { sourcesTypes } from '../constants';
 import * as actions from './sourcesActions';
 
 describe('SourcesActions', function() {
   it('should create a GET error action', () => {
     const error = true;
     const expectedAction = {
-      type: types.GET_SOURCES_ERROR,
+      type: sourcesTypes.GET_SOURCES_ERROR,
       error,
       message: undefined
     };
@@ -16,7 +16,7 @@ describe('SourcesActions', function() {
   it('should create a GET loading action', () => {
     const loading = true;
     const expectedAction = {
-      type: types.GET_SOURCES_LOADING,
+      type: sourcesTypes.GET_SOURCES_LOADING,
       loading
     };
 
@@ -26,7 +26,7 @@ describe('SourcesActions', function() {
   it('should create a GET success action', () => {
     const data = {};
     const expectedAction = {
-      type: types.GET_SOURCES_SUCCESS,
+      type: sourcesTypes.GET_SOURCES_SUCCESS,
       data
     };
 

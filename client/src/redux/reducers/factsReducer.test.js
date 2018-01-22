@@ -1,4 +1,4 @@
-import { factsTypes as types } from '../constants';
+import { factsTypes } from '../constants';
 import factsReducer from './factsReducer';
 
 describe('FactsReducer', function() {
@@ -15,7 +15,7 @@ describe('FactsReducer', function() {
 
   it('should handle ADD_FACTS_ERROR', () => {
     const dispatched = {
-      type: types.ADD_FACTS_ERROR,
+      type: factsTypes.ADD_FACTS_ERROR,
       error: true,
       message: 'error message'
     };
@@ -28,7 +28,7 @@ describe('FactsReducer', function() {
 
   it('should handle ADD_FACTS_LOADING', () => {
     const dispatched = {
-      type: types.ADD_FACTS_LOADING,
+      type: factsTypes.ADD_FACTS_LOADING,
       loading: false
     };
 
@@ -39,7 +39,7 @@ describe('FactsReducer', function() {
 
   it('should handle ADD_FACTS_SUCCESS', () => {
     const dispatched = {
-      type: types.ADD_FACTS_SUCCESS,
+      type: factsTypes.ADD_FACTS_SUCCESS,
       data: { test: true }
     };
 

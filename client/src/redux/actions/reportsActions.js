@@ -1,19 +1,19 @@
-import { reportsTypes as types } from '../constants';
+import { reportsTypes } from '../constants';
 import reportsService from '../../services/reportsService';
 
 const getReportsError = (bool, message) => ({
-  type: types.GET_REPORTS_ERROR,
+  type: reportsTypes.GET_REPORTS_ERROR,
   error: bool,
   message: message
 });
 
 const getReportsLoading = bool => ({
-  type: types.GET_REPORTS_LOADING,
+  type: reportsTypes.GET_REPORTS_LOADING,
   loading: bool
 });
 
 const getReportsSuccess = data => ({
-  type: types.GET_REPORTS_SUCCESS,
+  type: reportsTypes.GET_REPORTS_SUCCESS,
   data
 });
 

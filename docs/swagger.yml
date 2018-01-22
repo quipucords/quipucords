@@ -658,9 +658,23 @@ definitions:
         ssh_keyfile:
           type: "string"
           description: "The connection private ssh keyfile for the credential"
-        sudo_password:
+        become_method:
           type: "string"
-          description: "The password for sudo permission escalation after connection for the credential"
+          description: "The method to become for ansible privilege escalation"
+          enum:
+            - sudo
+            - su
+            - pbrun
+            - pfexec
+            - doas
+            - dzdo
+            - ksu
+            - runas
+        become_user:
+          type: "string"
+          description: "The user to become when running a privileged command during network scan."
+        become_password:
+          type: "The privilege escalation password to be used when running a network scan."
   CredentialMin:
     type: "object"
     required:

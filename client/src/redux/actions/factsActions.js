@@ -1,19 +1,19 @@
-import { factsTypes as types } from '../constants';
+import { factsTypes } from '../constants';
 import reportsService from '../../services/factsService';
 
 const addFactsError = (bool, message) => ({
-  type: types.ADD_FACTS_ERROR,
+  type: factsTypes.ADD_FACTS_ERROR,
   error: bool,
   message: message
 });
 
 const addFactsLoading = bool => ({
-  type: types.ADD_FACTS_LOADING,
+  type: factsTypes.ADD_FACTS_LOADING,
   loading: bool
 });
 
 const addFactsSuccess = data => ({
-  type: types.ADD_FACTS_SUCCESS,
+  type: factsTypes.ADD_FACTS_SUCCESS,
   data
 });
 

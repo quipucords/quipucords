@@ -17,7 +17,7 @@ mockApi()
 
   if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "Starting API..."
-    docker run -d --rm -p $PORT:8000 -v $FILE:/data/swagger.yaml --name quipucords-mock $CONTAINER >/dev/null
+    docker run -d --rm -p $PORT:8000 -v "$FILE:/data/swagger.yaml" --name quipucords-mock $CONTAINER >/dev/null
   fi
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
@@ -65,7 +65,7 @@ api()
     do
       case $option in
         p ) PORT=$OPTARG;;
-        f ) FILE=${OPTARG// };;
+        f ) FILE="$OPTARG";;
         u ) UPDATE=true;;
       esac
   done
@@ -77,8 +77,8 @@ api()
   docker stop -t 3 quipucords >/dev/null
   docker stop -t 0 quipucords-mock >/dev/null
 
-  if [ -f $FILE ]; then
-    mockApi $PORT $FILE $UPDATE
+  if [ -f "$FILE" ]; then
+    mockApi $PORT "$FILE" $UPDATE
   else
     api $PORT $UPDATE
   fi

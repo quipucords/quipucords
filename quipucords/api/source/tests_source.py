@@ -29,7 +29,7 @@ class SourceTest(TestCase):
             cred_type=Credential.NETWORK_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.net_cred_for_upload = self.net_cred.id
         self.net_cred_for_response = {'id': self.net_cred.id,
@@ -40,7 +40,7 @@ class SourceTest(TestCase):
             cred_type=Credential.VCENTER_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.vc_cred_for_upload = self.vc_cred.id
         self.vc_cred_for_response = {'id': self.vc_cred.id,
@@ -51,7 +51,7 @@ class SourceTest(TestCase):
             cred_type=Credential.SATELLITE_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.sat_cred_for_upload = self.sat_cred.id
         self.sat_cred_for_response = {'id': self.sat_cred.id,
@@ -325,12 +325,28 @@ class SourceTest(TestCase):
              'hosts': ['1.2.3.4', '1.2.3.5'],
              'credentials': [self.vc_cred_for_upload]})
 
+    def test_create_vc_with_host_range(self):
+        """A vcenter source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': ['1.2.3.4/5'],
+             'credentials': [self.vc_cred_for_upload]})
+
     def test_create_sat_with_hosts(self):
         """A satellite source must not have multiple hosts."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.SATELLITE_SOURCE_TYPE,
              'hosts': ['1.2.3.4', '1.2.3.5'],
+             'credentials': [self.sat_cred_for_upload]})
+
+    def test_create_sat_with_host_range(self):
+        """A vcenter source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4/5'],
              'credentials': [self.sat_cred_for_upload]})
 
     def test_create_req_type(self):
@@ -519,6 +535,52 @@ class SourceTest(TestCase):
         json_rsp = response.json()
         self.assertEqual(json_rsp['hosts'][0],
                          messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
+
+    def test_update_vc_range_hosts(self):
+        """Fail update due to empty host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4/5'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_rsp = response.json()
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.VC_ONE_HOST)
+
+    def test_update_sat_range_hosts(self):
+        """Fail update due to empty host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4/5'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_rsp = response.json()
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.VC_ONE_HOST)
 
     def test_update_type_passed(self):
         """Fail update due to type passed."""

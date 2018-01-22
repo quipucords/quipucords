@@ -20,8 +20,12 @@ from api.credential.model import Credential
 class SourceOptions(models.Model):
     """The source options allows configuration of a sources."""
 
+    SATELLITE_VERSION_5 = '5'
     SATELLITE_VERSION_62 = '6.2'
-    SATELLITE_VERSION_CHOICES = ((SATELLITE_VERSION_62, SATELLITE_VERSION_62),)
+    SATELLITE_VERSION_63 = '6.3'
+    SATELLITE_VERSION_CHOICES = ((SATELLITE_VERSION_62, SATELLITE_VERSION_62),
+                                 (SATELLITE_VERSION_63, SATELLITE_VERSION_63),
+                                 (SATELLITE_VERSION_5, SATELLITE_VERSION_5))
 
     satellite_version = models.CharField(
         max_length=10,

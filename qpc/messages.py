@@ -50,6 +50,14 @@ CRED_UPDATED = 'Credential "%s" was updated.'
 
 CRED_LIST_NO_CREDS = 'No credentials exist yet.'
 
+CRED_BECOME_METHOD_HELP = 'The method to become for network privilege '\
+    'escalation. Valid values: sudo, su, pbrun, pfexec, doas, dzdo, '\
+    'ksu, runas.'
+CRED_BECOME_USER_HELP = 'The user to become when running a privileged '\
+    'command during network scan.'
+CRED_BECOME_PASSWORD_HELP = 'The privilege escalation password to be '\
+    'used when running a network scan.'
+
 SOURCE_NAME_HELP = 'Source name.'
 SOURCES_NAME_HELP = 'List of source names.'
 SOURCE_TYPE_HELP = 'Type of source. Valid values: vcenter, network.'
@@ -132,6 +140,8 @@ VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the '\
 CONN_PASSWORD = 'Provide a connection password.'
 SUDO_PASSWORD = 'Provide a password for sudo.'
 SSH_PASSPHRASE = 'Provide a passphrase for the SSH keyfile.'
+BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
+    'running a network scan.'
 
 
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
