@@ -49,9 +49,9 @@ class ScanOptions(models.Model):
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
             'optional_products: {}'.format(self.id,
-             self.max_concurrency,
-             self.optional_products) \
-               + '}'
+                                           self.max_concurrency,
+                                           self.optional_products) \
+            + '}'
 
 
 class ScanJob(models.Model):
