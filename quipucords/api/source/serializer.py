@@ -153,6 +153,11 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
+            elif hosts_data and '[' in hosts_data[0]['host_range']:
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
                 error = {
                     'credentials': [_(messages.VC_ONE_CRED)]
@@ -172,6 +177,11 @@ class SourceSerializer(NotEmptySerializer):
             elif hosts_data and len(hosts_data) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            elif hosts_data and '[' in hosts_data[0]['host_range']:
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
@@ -239,6 +249,11 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
+            elif hosts_data and '[' in hosts_data[0]['host_range']:
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
                 error = {
                     'credentials': [_(messages.VC_ONE_CRED)]
@@ -256,6 +271,11 @@ class SourceSerializer(NotEmptySerializer):
             elif hosts_data and len(hosts_data) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            elif hosts_data and '[' in hosts_data[0]['host_range']:
+                error = {
+                    'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
