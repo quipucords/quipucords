@@ -11,9 +11,9 @@
 """Test the vcenter connect capabilities."""
 
 from unittest.mock import Mock, patch, ANY
+from socket import gaierror
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from socket import gaierror
 from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult)
 from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
