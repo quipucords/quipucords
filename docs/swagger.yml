@@ -904,9 +904,9 @@ definitions:
         type: "string"
         description: "The product capture limitations."
         enum:
-          - JBoss_EAP
-          - JBoss_Fuse
-          - JBoss_BRMS
+          - jboss-eap
+          - jboss-fuse
+          - jboss-brms
       status:
         type: "string"
         description: "The status of the scan task."
@@ -952,9 +952,9 @@ definitions:
           type: "string"
           description: "The product capture limitations."
           enum:
-            - JBoss_EAP
-            - JBoss_Fuse
-            - JBoss_BRMS
+            - jboss-eap
+            - jboss-fuse
+            - jboss-brms
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"

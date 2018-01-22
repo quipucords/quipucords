@@ -25,13 +25,18 @@ from api.scantasks.serializer import SourceField
 class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
+    optional_products = ValidStringChoiceField(required=False,
+                                               read_only=True,
+                                               choices=ScanOptions.SCAN_CHOICES)
+
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
 
     class Meta:
         """Metadata for serializer."""
 
         model = ScanOptions
-        fields = ['max_concurrency']
+        fields = ['max_concurrency',
+                  'optional_products']
 
 
 class TaskField(PrimaryKeyRelatedField):

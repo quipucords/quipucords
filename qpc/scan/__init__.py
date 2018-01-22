@@ -35,6 +35,16 @@ SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
 
 # Scan Options
-SCAN_JBOSS_EAP = 'JBoss_EAP'
-SCAN_JBOSS_FUSE = 'JBoss_Fuse'
-SCAN_JBOSS_BRMS = 'JBoss_BRMS'
+SCAN_JBOSS_EAP = 'jboss-eap'
+SCAN_JBOSS_FUSE = 'jboss-fuse'
+SCAN_JBOSS_BRMS = 'jboss-brms'
+# SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
+# SCAN_EAP_BRMS = 'jboss-eap','jboss-brms'
+#SCAN_EAP_FUSE_BRMS = ['jboss-eap', 'jboss-fuse', 'jboss-brms']
+
+SCAN_OPTIONS = [SCAN_JBOSS_EAP,
+                SCAN_JBOSS_FUSE,
+                SCAN_JBOSS_BRMS]
+                # SCAN_EAP_FUSE,
+                # SCAN_EAP_BRMS,
+                # SCAN_EAP_FUSE_BRMS]

@@ -113,61 +113,57 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :returns: An array of dictionaries of facts
         """
-        roles = [
-            'check_dependencies',
-            'connection',
-            'cpu',
-            'date',
-            'dmi',
-            'etc_release',
-            'file_contents',
-            'jboss_eap',
-            'jboss_brms',
-            'jboss_fuse_on_karaf',
-            'ifconfig',
-            'redhat_packages',
-            'redhat_release',
-            'subman',
-            'uname',
-            'virt',
-            'virt_what',
-            'host_done',
-        ]
+        roles = ['check_dependencies',
+                 'connection',
+                 'cpu',
+                 'date',
+                 'dmi',
+                 'etc_release',
+                 'file_contents']
         limit = self.scan_job.optional_products
-        print('\n\n\n Limit: \n')
-        print(limit)
-        print('\n\n\n')
         if limit:
-            if limit == 'JBoss_EAP':
-                roles = ['check_dependencies',
-                         'connection',
-                         'cpu',
-                         'date',
-                         'dmi',
-                         'etc_release',
-                         'file_contents',
-                         'jboss_eap']
-            elif limit == 'JBoss_Fuse':
-                roles = ['check_dependencies',
-                         'connection',
-                         'cpu',
-                         'date',
-                         'dmi',
-                         'etc_release',
-                         'file_contents',
-                         'jboss_eap',
-                         'jboss_fuse_on_karaf']
-            elif limit == 'JBoss_BRMS':
-                roles = ['check_dependencies',
-                         'connection',
-                         'cpu',
-                         'date',
-                         'dmi',
-                         'etc_release',
-                         'file_contents',
-                         'jboss_eap',
-                         'jboss_brms']
+            if limit == 'jboss-eap':
+                print('\n\n\n Building roles for jboss-eap \n\n\n')
+                roles.extend(['jboss_eap',
+                             'host_done'])
+            elif limit == 'jboss-fuse':
+                print('\n\n\n Building roles for jboss-fuse \n\n\n')
+                roles.extend(['jboss_eap',
+                             'jboss_fuse_on_karaf',
+                             'host_done'])
+            elif limit == 'jboss-brms':
+                roles.extend(['jboss_eap',
+                             'jboss_brms',
+                             'host_done'])
+            else:
+                roles.extend(['jboss_eap',
+                             'jboss_brms',
+                             'jboss_fuse_on_karaf',
+                             'ifconfig',
+                             'redhat_packages',
+                             'redhat_release',
+                             'subman',
+                             'uname',
+                             'virt',
+                             'virt_what',
+                             'host_done'])
 
+        else:
+            roles.extend(['jboss_eap',
+                         'jboss_brms',
+                         'jboss_fuse_on_karaf',
+                         'ifconfig',
+                         'redhat_packages',
+                         'redhat_release',
+                         'subman',
+                         'uname',
+                         'virt',
+                         'virt_what',
+                         'host_done'])
+
+        print('\n\n\nRoles\n\n\n')
+        print(roles)
+        print('\n\n\n')
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,

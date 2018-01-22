@@ -314,7 +314,7 @@ Use the ``qpc scan start`` command to run connect and inspection scans on the so
 
 ``--optional_products=products``
 
-  The product capture limitations. Valid choices are JBoss_EAP, JBoss_Fuse, and JBoss_BRMS.
+  The product capture limitations. Valid choices are jboss-eap, jboss-fuse, and jboss-brms.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

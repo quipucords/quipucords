@@ -30,15 +30,21 @@ class ScanOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
     # Scan Options
-    SCAN_JBOSS_EAP = 'JBoss_EAP'
-    SCAN_JBOSS_FUSE = 'JBoss_Fuse'
-    SCAN_JBOSS_BRMS = 'JBoss_BRMS'
+    SCAN_JBOSS_EAP = 'jboss-eap'
+    SCAN_JBOSS_FUSE = 'jboss-fuse'
+    SCAN_JBOSS_BRMS = 'jboss-brms'
+    # SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
+    # SCAN_EAP_BRMS = 'jboss-eap', 'jboss-brms'
+    # SCAN_EAP_FUSE_BRMS = 'jboss-eap', 'jboss-fuse', 'jboss-brms'
     SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
                     (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
                     (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
+                    # (SCAN_EAP_FUSE, SCAN_EAP_FUSE),
+                    # (SCAN_EAP_BRMS, SCAN_EAP_BRMS),
+                    # (SCAN_EAP_FUSE_BRMS, SCAN_EAP_FUSE_BRMS))
 
     optional_products = models.CharField(
-        max_length=10,
+        max_length=50,
         choices=SCAN_CHOICES,
         null=True
     )
@@ -46,6 +52,9 @@ class ScanOptions(models.Model):
 
     def __str__(self):
         """Convert to string."""
+        print('\n\n\n Optional Products: \n\n\n')
+        print(self.optional_products)
+        print('\n\n\n')
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
             'optional_products: {}'.format(self.id,
@@ -71,12 +80,18 @@ class ScanJob(models.Model):
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
-    SCAN_JBOSS_EAP = 'JBoss_EAP'
-    SCAN_JBOSS_FUSE = 'JBoss_Fuse'
-    SCAN_JBOSS_BRMS = 'JBoss_BRMS'
+    SCAN_JBOSS_EAP = 'jboss-eap'
+    SCAN_JBOSS_FUSE = 'jboss-fuse'
+    SCAN_JBOSS_BRMS = 'jboss-brms'
+    # SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
+    # SCAN_EAP_BRMS = ['jboss-eap', 'jboss-brms']
+    # SCAN_EAP_FUSE_BRMS = ['jboss-eap', 'jboss-fuse', 'jboss-brms']
     SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
                     (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
                     (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
+                    # (SCAN_EAP_FUSE, SCAN_EAP_FUSE),
+                    # (SCAN_EAP_BRMS, SCAN_EAP_BRMS),
+                    # (SCAN_EAP_FUSE_BRMS, SCAN_EAP_FUSE_BRMS))
 
     optional_products = models.CharField(
         max_length=10,

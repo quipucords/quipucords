@@ -49,10 +49,10 @@ class ScanStartCommand(CliCommand):
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.parser.add_argument('--optional-products',
                                  dest='optional_products',
-                                 choices=[scan.SCAN_JBOSS_EAP,
-                                          scan.SCAN_JBOSS_FUSE,
-                                          scan.SCAN_JBOSS_BRMS],
+                                 #nargs='+',
+                                 choices=scan.SCAN_OPTIONS,
                                  metavar='OPTIONAL_PRODUCTS',
+                                 #default=[],
                                  help=_(messages.SCAN_OPTIONAL_PRODUCTS_HELP),
                                  required=False)
         self.source_ids = []
