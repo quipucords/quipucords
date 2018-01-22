@@ -1,4 +1,4 @@
-import { sourcesTypes as types } from '../constants';
+import { sourcesTypes } from '../constants';
 
 const initialState = {
   error: false,
@@ -9,16 +9,16 @@ const initialState = {
 
 export default function sourcesReducer(state = initialState, action) {
   switch (action.type) {
-    case types.GET_SOURCES_ERROR:
+    case sourcesTypes.GET_SOURCES_ERROR:
       return Object.assign({}, state, {
         error: action.error,
         errorMessage: action.message
       });
 
-    case types.GET_SOURCES_LOADING:
+    case sourcesTypes.GET_SOURCES_LOADING:
       return Object.assign({}, state, { loading: action.loading });
 
-    case types.GET_SOURCES_SUCCESS:
+    case sourcesTypes.GET_SOURCES_SUCCESS:
       return Object.assign({}, state, { data: action.data });
 
     default:

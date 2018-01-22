@@ -1,4 +1,4 @@
-import { sourcesTypes as types } from '../constants';
+import { sourcesTypes } from '../constants';
 import sourcesReducer from './sourcesReducer';
 
 describe('SourcesReducer', function() {
@@ -15,7 +15,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_ERROR', () => {
     const dispatched = {
-      type: types.GET_SOURCES_ERROR,
+      type: sourcesTypes.GET_SOURCES_ERROR,
       error: true,
       message: 'error message'
     };
@@ -30,7 +30,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_LOADING', () => {
     const dispatched = {
-      type: types.GET_SOURCES_LOADING,
+      type: sourcesTypes.GET_SOURCES_LOADING,
       loading: false
     };
 
@@ -41,7 +41,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_SUCCESS', () => {
     const dispatched = {
-      type: types.GET_SOURCES_SUCCESS,
+      type: sourcesTypes.GET_SOURCES_SUCCESS,
       data: ['test']
     };
 
