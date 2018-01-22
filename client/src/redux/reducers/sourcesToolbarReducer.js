@@ -1,4 +1,4 @@
-import { viewToolbarTypes as types } from '../constants';
+import { viewToolbarTypes } from '../constants';
 
 const initialState = {
   filterType: null,
@@ -10,7 +10,7 @@ const initialState = {
 
 export default function sourcesToolbarReducer(state = initialState, action) {
   switch (action.type) {
-    case types.SET_FILTER_TYPE:
+    case viewToolbarTypes.SET_FILTER_TYPE:
       if (state.filterType === action.filterType) {
         return state;
       }
@@ -19,10 +19,10 @@ export default function sourcesToolbarReducer(state = initialState, action) {
         filterValue: ''
       });
 
-    case types.SET_FILTER_VALUE:
+    case viewToolbarTypes.SET_FILTER_VALUE:
       return Object.assign({}, state, { filterValue: action.filterValue });
 
-    case types.ADD_FILTER:
+    case viewToolbarTypes.ADD_FILTER:
       // Don't rea-add the same filter
       let filterExists = state.activeFilters.find(filter => {
         return (
@@ -38,7 +38,7 @@ export default function sourcesToolbarReducer(state = initialState, action) {
         activeFilters: [...state.activeFilters, action.filter]
       });
 
-    case types.REMOVE_FILTER:
+    case viewToolbarTypes.REMOVE_FILTER:
       let index = state.activeFilters.indexOf(action.filter);
       if (index >= 0) {
         return Object.assign({}, state, {
@@ -51,10 +51,10 @@ export default function sourcesToolbarReducer(state = initialState, action) {
         return state;
       }
 
-    case types.CLEAR_FILTERS:
+    case viewToolbarTypes.CLEAR_FILTERS:
       return Object.assign({}, state, { activeFilters: [] });
 
-    case types.SET_SORT_TYPE:
+    case viewToolbarTypes.SET_SORT_TYPE:
       if (state.sortType === action.sortType) {
         return state;
       }
@@ -64,7 +64,7 @@ export default function sourcesToolbarReducer(state = initialState, action) {
         sortAscending: true
       });
 
-    case types.TOGGLE_SORT_ASCENDING:
+    case viewToolbarTypes.TOGGLE_SORT_ASCENDING:
       return Object.assign({}, state, {
         sortAscending: !state.sortAscending
       });
