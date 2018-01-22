@@ -208,7 +208,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 credential = {'name': host_cred.name,
                               'username': host_cred.username,
                               'password': host_cred.password,
-                              'sudo_password': host_cred.sudo_password,
+                              'become_password': host_cred.become_password,
                               'ssh_keyfile': host_cred.ssh_keyfile,
                               'ssh_passphrase':
                               host_cred.ssh_passphrase}

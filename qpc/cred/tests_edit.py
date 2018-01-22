@@ -94,7 +94,7 @@ class CredentialEditCliTests(unittest.TestCase):
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred_none', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)
@@ -111,7 +111,7 @@ class CredentialEditCliTests(unittest.TestCase):
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)
@@ -126,7 +126,7 @@ class CredentialEditCliTests(unittest.TestCase):
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)
@@ -145,7 +145,7 @@ class CredentialEditCliTests(unittest.TestCase):
             mocker.patch(url_patch, status_code=200)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
-                             password=None, sudo_password=None,
+                             password=None, become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aec.main(args)
@@ -164,7 +164,7 @@ class CredentialEditCliTests(unittest.TestCase):
             mocker.patch(url_patch, status_code=200)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
-                             password=None, sudo_password=None,
+                             password=None, become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aec.main(args)
@@ -219,7 +219,7 @@ class CredentialEditCliTests(unittest.TestCase):
             mocker.get(url_get, status_code=500, json=data)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
-                             password=None, sudo_password=None)
+                             password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)

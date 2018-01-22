@@ -111,7 +111,7 @@ Creating and Editing Credentials
 
 To create a credential, supply SSH credentials as either a username-password pair or a username-key pair. Quipucords stores each set of credentials in a separate credential entry.
 
-**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+**qpc cred add --name=** *name* **--type=** *(network | vcenter | satellite)* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **--become_method=** *(sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas )* **--become_user=** *user* **[--become_password]**
 
 ``--name=name``
 
@@ -137,14 +137,21 @@ To create a credential, supply SSH credentials as either a username-password pai
 
   Prompts for the passphrase to be used when connecting using an ssh keyfile that requires a passphrase. Can only be used with the ``--sshkeyfile`` option.
 
-``--sudo-password``
+``--become_password``
 
-  Prompts for the password to be used when running a command that uses sudo on the systems to be scanned.
+  Prompts for the privilege escalation password to be used when running a network scan.
 
+``--become_method=become_method``
 
-The information in a credential, such as a password, sudo password, SSH keys, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
+  Sets the method to become for privilege escalation when running an ansible playbook. Must be ``sudo``, ``su``, ``pbrun``, ``pfexec``, ``doas``, ``dzdo``, ``ksu``, ``runas``. The default is set to 'sudo' when the credential type is network.
 
-**qpc cred edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **[--sudo-password]**
+``--become_user=user``
+
+  Sets the user to become when running a privileged command during network scan.
+
+The information in a credential, such as a password, become password, SSH keys, the become_method, or even the username, might change. For example, network security might require passwords to be updated every few months. Use the ``qpc cred edit`` command to change the SSH credential information in a credential. The parameters for ``qpc cred edit`` are the same as those for ``qpc cred add``.
+
+**qpc cred edit --name=** *name* **--username=** *username* **(--password | --sshkeyfile=** *key_file* **)** **[--sshpassphrase]** **--become_method=** *(sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas )* **--become_user=** *user* **[--become_password]**
 
 Listing and Showing Credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -98,7 +98,7 @@ class CredentialAddCliTests(unittest.TestCase):
             args = Namespace(name='cred_dup', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
-                             password=None, sudo_password=None,
+                             password=None, become_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -117,7 +117,7 @@ class CredentialAddCliTests(unittest.TestCase):
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
-                             password=None, sudo_password=None,
+                             password=None, become_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -134,7 +134,7 @@ class CredentialAddCliTests(unittest.TestCase):
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
-                             password=None, sudo_password=None,
+                             password=None, become_password=None,
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
@@ -151,8 +151,27 @@ class CredentialAddCliTests(unittest.TestCase):
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
-                             password=None, sudo_password=None,
-                             ssh_passphrase=None)
+                             password=None, ssh_passphrase=None,
+                             become_method=None, become_user=None,
+                             become_password=None)
+            with redirect_stdout(cred_out):
+                aac.main(args)
+                self.assertEqual(cred_out.getvalue(),
+                                 'Credential "credential1" was added.\n')
+
+    def test_add_host_cred_with_become(self):
+        """Testing the add host cred command successfully."""
+        cred_out = StringIO()
+        url = BASE_URL + CREDENTIAL_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.post(url, status_code=201)
+            aac = CredAddCommand(SUBPARSER)
+            args = Namespace(name='credential1', username='root',
+                             type=NETWORK_CRED_TYPE,
+                             filename=TMP_KEY,
+                             password=None, ssh_passphrase=None,
+                             become_method='sudo', become_user='root',
+                             become_password=None)
             with redirect_stdout(cred_out):
                 aac.main(args)
                 self.assertEqual(cred_out.getvalue(),

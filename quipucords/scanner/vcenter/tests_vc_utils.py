@@ -26,7 +26,7 @@ class VCenterUtilsTest(TestCase):
             name='cred1',
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.cred.save()
 

@@ -35,7 +35,7 @@ class FactCollectionTest(TestCase):
             cred_type=Credential.NETWORK_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
             ssh_keyfile=None)
         self.net_source.credentials.add(self.net_cred)
 
