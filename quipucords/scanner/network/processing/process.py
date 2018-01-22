@@ -25,6 +25,28 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 PROCESSORS = {}
 NO_DATA = ''  # Result value when we have errors.
 
+DEPS = 'DEPS'
+FAILED = 'failed'
+KEY = 'KEY'
+RC = 'rc'
+RESULTS = 'results'
+RETURN_CODE_ANY = 'RETURN_CODE_ANY'
+SKIPPED = 'skipped'
+
+
+def is_ansible_task_result(value):
+    """Check whether an object is an Ansible task result.
+
+    This function lets us distinguish between standard Ansible results
+    that need processing and values that have been postprocessed in
+    the playbook.
+    """
+    return (isinstance(value, dict) and
+            (SKIPPED in value or
+             FAILED in value or
+             RC in value or
+             RESULTS in value))
+
 
 def process(facts):
     """Do initial processing of the given facts.
@@ -48,7 +70,7 @@ def process(facts):
         # Use StopIteration to let the inner for loop continue the
         # outer for loop.
         try:
-            for dep in getattr(processor, 'DEPS', []):
+            for dep in getattr(processor, DEPS, []):
                 if dep not in facts or \
                    not facts[dep] or \
                    isinstance(facts[dep], Exception):
@@ -59,13 +81,25 @@ def process(facts):
         except StopIteration:
             continue
 
-        if value.get('skipped', False):
+        # Don't touch things that are not standard Ansible results,
+        # because we don't know what format they will have.
+        if not is_ansible_task_result(value):
+            logger.error('Value %s needs postprocessing but is not an '
+                         'Ansible result', value)
+            # We don't know what data is supposed to go here, because
+            # we can't run the postprocessor. Leaving the existing
+            # data would cause database corruption and maybe trigger
+            # other bugs later on. So treat this like any other error.
+            result[key] = NO_DATA
+            continue
+
+        if value.get(SKIPPED, False):
             logger.error('Fact %s skipped, no results', key)
             result[key] = NO_DATA
             continue
 
-        if value.get('rc', 0) and \
-           not getattr(processor, 'RETURN_CODE_ANY', False):
+        if value.get(RC, 0) and \
+           not getattr(processor, RETURN_CODE_ANY, False):
             logger.error('Remote command returned %s', value['stdout'])
             result[key] = NO_DATA
             continue
@@ -94,8 +128,8 @@ class ProcessorMeta(abc.ABCMeta):
 
         # Setting a falsey KEY means "yes, I did this on purpose, I
         # really don't want this class registered."
-        if dct['KEY']:
-            PROCESSORS[dct['KEY']] = cls
+        if dct[KEY]:
+            PROCESSORS[dct[KEY]] = cls
         super().__init__(name, bases, dct)
 
 

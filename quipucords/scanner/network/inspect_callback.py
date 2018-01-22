@@ -21,12 +21,45 @@ from scanner.network.processing import process
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+ANSIBLE_FACTS = 'ansible_facts'
+HOST = 'host'
+HOST_DONE = 'host_done'
+INTERNAL_ = 'internal_'
+KEY = 'key'
+NO_KEY = 'no_key'
+RESULT = 'result'
+
 
 def _construct_result(result):
     """Construct result object."""
     # pylint: disable=protected-access
     host = result._host
-    return {'host': host.name, 'result': result._result}
+    key = result._task.register or NO_KEY
+    return {HOST: host.name, RESULT: result._result, KEY: key}
+
+
+def normalize_result(result):
+    """Normalize the representation of an Ansible result.
+
+    We see Ansible results in three forms:
+      1) raw task with register variable whose name starts with 'internal_'
+      2) raw task with register variable whose name does not start
+         with 'internal_'
+      3) set_facts task with member called 'ansible_facts'
+
+    :param result: Ansible result dictionary
+    :returns: [] for case 1, and a list of key, value tuples for
+        cases 2 and 3.
+    """
+    # pylint: disable=protected-access
+    if result._result is not None and isinstance(result._result, dict):
+        if ANSIBLE_FACTS in result._result:
+            return list(result._result[ANSIBLE_FACTS].items())
+        elif (isinstance(result._task.register, str) and
+              not result._task.register.startswith(INTERNAL_)):
+            return [(result._task.register, result._result)]
+
+    return []
 
 
 class InspectResultCallback(CallbackBase):
@@ -46,30 +79,37 @@ class InspectResultCallback(CallbackBase):
         self.results = []
         self._ansible_facts = {}
 
+    # Ansible considers tasks failed when their return code is
+    # nonzero, even if we set ignore_errors=True. We want to be able
+    # to process those task results, so we need to handle failed
+    # results the same way we treat ok ones.
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
+        self.handle_result(result)
+
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        """Print a json representation of the result."""
+        self.handle_result(result)
+
+    def handle_result(self, result):
+        """Handle an incoming result object."""
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
-        # pylint: disable=protected-access
-        host = str(result._host)
-        if (result._result is not None and isinstance(result._result, dict) and
-                'ansible_facts' in result._result):
-            host_facts = result._result['ansible_facts']
-            facts = {}
-            for key, value in host_facts.items():
-                if key == 'host_done':
-                    self._finalize_host(host)
-                elif not key.startswith('internal'):
-                    facts[key] = value
-                # Facts starting with 'internal' are used only by the
-                # Ansible playbooks to compute other
-                # facts. Deliberately drop them here.
 
-            if host in self._ansible_facts:
-                self._ansible_facts[host].update(facts)
+        host = result_obj[HOST]
+        results_to_store = normalize_result(result)
+        host_facts = {}
+        for key, value in results_to_store:
+            if key == HOST_DONE:
+                self._finalize_host(host)
             else:
-                self._ansible_facts[host] = facts
+                host_facts[key] = value
+
+        if host in self._ansible_facts:
+            self._ansible_facts[host].update(host_facts)
+        else:
+            self._ansible_facts[host] = host_facts
 
     def _get_inspect_result(self):
         # Have to save inspect_result (if creating it) because
@@ -133,7 +173,7 @@ class InspectResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.warning('%s', result_obj)
 
-        unreachable_host = result_obj['host']
+        unreachable_host = result_obj[HOST]
         logger.error(
             'Host %s is no longer reachable.  Moving host to failed results',
             unreachable_host)
@@ -147,9 +187,3 @@ class InspectResultCallback(CallbackBase):
         self.scan_task.systems_failed += 1
         self.scan_task.status = ScanTask.FAILED
         self.scan_task.save()
-
-    def v2_runner_on_failed(self, result, ignore_errors=False):
-        """Print a json representation of the result."""
-        result_obj = _construct_result(result)
-        self.results.append(result_obj)
-        logger.error('%s', result_obj)
