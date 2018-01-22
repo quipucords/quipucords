@@ -8,6 +8,7 @@ import { routes } from '../routes';
 import Store from '../redux/store';
 import Content from './content/content';
 import Masthead from './masthead/masthead';
+import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import VerticalNavigation from './verticalNavigation/verticalNavigation';
 
 import logo from '../logo.svg';
@@ -39,7 +40,8 @@ class App extends React.Component {
         <AboutModal.Versions>
           <AboutModal.VersionItem label="Label" versionText="Version" />
         </AboutModal.Versions>
-      </AboutModal>
+      </AboutModal>,
+      <ToastNotificationsList key="toastList" />
     ];
   }
 }

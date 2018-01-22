@@ -11,13 +11,42 @@
 
 import unittest
 from scanner.network.processing import process
-from scanner.network.processing.test_util import ansible_result
+from scanner.network.processing.test_util import ansible_result, \
+    ansible_results
 
 NOT_A_KEY = 'not_a_key'
 NO_PROCESSOR_KEY = 'no_processor_key'
 TEST_KEY = 'test_key'
 DEPENDENT_KEY = 'dependent_key'
 PROCESSOR_ERROR_KEY = 'processor_error_key'
+NOT_TASK_RESULT_KEY = 'not_task_result_key'
+
+
+class TestIsAnsibleTaskResult(unittest.TestCase):
+    """Test IsAnsibleTaskResult."""
+
+    def test_not_dict(self):
+        """A value that is not a dictionary."""
+        self.assertFalse(process.is_ansible_task_result('foo'))
+
+    def test_malformed_dict(self):
+        """A dictionary with the wrong contents."""
+        self.assertFalse(process.is_ansible_task_result({'a': 'b'}))
+
+    def test_skipped(self):
+        """The result of a skipped task."""
+        self.assertTrue(
+            process.is_ansible_task_result({process.SKIPPED: True}))
+
+    def test_ansible_result(self):
+        """A single Ansible result."""
+        self.assertTrue(process.is_ansible_task_result(ansible_result('a')))
+
+    def test_with_items_result(self):
+        """The result of a with_items task."""
+        self.assertTrue(process.is_ansible_task_result(ansible_results(
+            [{'item': 'a', 'stdout': 'a'},
+             {'item': 'b', 'stdout': 'b'}])))
 
 
 # pylint: disable=too-few-public-methods
@@ -59,6 +88,18 @@ class MyErroringProcessor(process.Processor):
 
 class TestProcess(unittest.TestCase):
     """Test the process() infrastructure."""
+
+    def test_not_result_no_processing(self):
+        """Test a value that is not a task result, and needs no processing."""
+        self.assertEqual(
+            process.process({NOT_TASK_RESULT_KEY: 'foo'}),
+            {NOT_TASK_RESULT_KEY: 'foo'})
+
+    def test_processing_bad_input(self):
+        """Test a key that is not a task result, but needs processing."""
+        self.assertEqual(
+            process.process({TEST_KEY: 'foo'}),
+            {TEST_KEY: process.NO_DATA})
 
     def test_no_processing(self):
         """Test a key that doesn't need to be processed."""

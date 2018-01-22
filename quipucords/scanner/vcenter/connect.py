@@ -10,6 +10,7 @@
 #
 """ScanTask used for vcenter connection task."""
 import logging
+from socket import gaierror
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (ScanTask, ConnectionResult, SystemConnectionResult)
 from scanner.task import ScanTaskRunner
@@ -103,6 +104,11 @@ class ConnectTaskRunner(ScanTaskRunner):
                          source.name, credential.name)
             logger.error('Connect scan failed for %s. %s', self.scan_task,
                          vm_error)
+            return ScanTask.FAILED
+        except gaierror as error:
+            logger.error(
+                'Unable to connect to VCenter source %s. ', source.name)
+            logger.error('Reason for failure: %s', error)
             return ScanTask.FAILED
 
         return ScanTask.COMPLETED
