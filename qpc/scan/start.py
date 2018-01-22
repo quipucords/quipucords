@@ -47,7 +47,8 @@ class ScanStartCommand(CliCommand):
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
-        self.parser.add_argument('--optional-products', dest='optional_products',
+        self.parser.add_argument('--optional-products',
+                                 dest='optional_products',
                                  choices=[scan.SCAN_JBOSS_EAP,
                                           scan.SCAN_JBOSS_FUSE,
                                           scan.SCAN_JBOSS_BRMS],

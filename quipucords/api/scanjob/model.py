@@ -48,9 +48,9 @@ class ScanOptions(models.Model):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
-                     'optional_products: {}'.format(self.id,
-                                         self.max_concurrency,
-                                         self.optional_products) \
+            'optional_products: {}'.format(self.id,
+             self.max_concurrency,
+             self.optional_products) \
                + '}'
 
 
