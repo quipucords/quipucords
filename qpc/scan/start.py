@@ -99,9 +99,7 @@ class ScanStartCommand(CliCommand):
             'options': {
                 'max_concurrency': self.args.max_concurrency
             },
-            'optional_products': {
-                'products' : self.args.optional_products
-            }
+            'optional_products': self.args.optional_products
         }
 
     def _handle_response_success(self):

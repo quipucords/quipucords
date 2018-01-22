@@ -133,6 +133,41 @@ class InspectTaskRunner(ScanTaskRunner):
             'virt_what',
             'host_done',
         ]
+        limit = self.scan_job.optional_products
+        print('\n\n\n Limit: \n')
+        print(limit)
+        print('\n\n\n')
+        if limit:
+            if limit == 'JBoss_EAP':
+                roles = ['check_dependencies',
+                         'connection',
+                         'cpu',
+                         'date',
+                         'dmi',
+                         'etc_release',
+                         'file_contents',
+                         'jboss_eap']
+            elif limit == 'JBoss_Fuse':
+                roles = ['check_dependencies',
+                         'connection',
+                         'cpu',
+                         'date',
+                         'dmi',
+                         'etc_release',
+                         'file_contents',
+                         'jboss_eap',
+                         'jboss_fuse_on_karaf']
+            elif limit == 'JBoss_BRMS':
+                roles = ['check_dependencies',
+                         'connection',
+                         'cpu',
+                         'date',
+                         'dmi',
+                         'etc_release',
+                         'file_contents',
+                         'jboss_eap',
+                         'jboss_brms']
+
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,

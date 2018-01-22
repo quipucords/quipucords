@@ -29,13 +29,29 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
+    # Scan Options
+    SCAN_JBOSS_EAP = 'JBoss_EAP'
+    SCAN_JBOSS_FUSE = 'JBoss_Fuse'
+    SCAN_JBOSS_BRMS = 'JBoss_BRMS'
+    SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
+                    (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
+                    (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
+
+    optional_products = models.CharField(
+        max_length=10,
+        choices=SCAN_CHOICES,
+        null=True
+    )
     max_concurrency = models.PositiveIntegerField(default=50)
 
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
-            'max_concurrency: {}'.format(self.id,
-                                         self.max_concurrency) + '}'
+            'max_concurrency: {}, '\
+                     'optional_products: {}'.format(self.id,
+                                         self.max_concurrency,
+                                         self.optional_products) \
+               + '}'
 
 
 class ScanJob(models.Model):
@@ -55,6 +71,18 @@ class ScanJob(models.Model):
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
+    SCAN_JBOSS_EAP = 'JBoss_EAP'
+    SCAN_JBOSS_FUSE = 'JBoss_Fuse'
+    SCAN_JBOSS_BRMS = 'JBoss_BRMS'
+    SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
+                    (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
+                    (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
+
+    optional_products = models.CharField(
+        max_length=10,
+        choices=SCAN_CHOICES,
+        null=True
+    )
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
@@ -65,12 +93,14 @@ class ScanJob(models.Model):
             'status:{}, '\
             'tasks: {}, '\
             'options: {}, '\
+            'optional_products: {}, '\
             'fact_collection_id: {}'.format(self.id,
                                             self.sources,
                                             self.scan_type,
                                             self.status,
                                             self.tasks,
                                             self.options,
+                                            self.optional_products,
                                             self.fact_collection_id) + '}'
 
     class Meta:
