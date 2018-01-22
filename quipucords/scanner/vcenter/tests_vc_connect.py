@@ -13,6 +13,7 @@
 from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
+from socket import gaierror
 from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult)
 from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
@@ -22,6 +23,11 @@ from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
 def invalid_login():
     """Mock with invalid login exception."""
     raise vim.fault.InvalidLogin()
+
+
+def unreachable_host():
+    """Mock with gaierror."""
+    raise gaierror('Unreachable')
 
 
 class ConnectTaskRunnerTest(TestCase):
@@ -141,6 +147,14 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the run method."""
         with patch.object(ConnectTaskRunner, 'connect',
                           side_effect=invalid_login) as mock_connect:
+            status = self.runner.run()
+            self.assertEqual(ScanTask.FAILED, status)
+            mock_connect.assert_called_once_with()
+
+    def test_unreachable_run(self):
+        """Test the run method with unreachable."""
+        with patch.object(ConnectTaskRunner, 'connect',
+                          side_effect=unreachable_host) as mock_connect:
             status = self.runner.run()
             self.assertEqual(ScanTask.FAILED, status)
             mock_connect.assert_called_once_with()
