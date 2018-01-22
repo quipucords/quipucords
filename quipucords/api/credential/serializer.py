@@ -41,12 +41,16 @@ class CredentialSerializer(NotEmptySerializer):
     username = CharField(required=True, max_length=64)
     password = CharField(required=False, max_length=1024, allow_null=True,
                          style={'input_type': 'password'})
-    sudo_password = CharField(required=False, max_length=1024, allow_null=True,
-                              style={'input_type': 'password'})
     ssh_keyfile = CharField(required=False, max_length=1024, allow_null=True)
     ssh_passphrase = CharField(required=False, max_length=1024,
                                allow_null=True,
                                style={'input_type': 'password'})
+    become_method = ValidStringChoiceField(
+        required=False, choices=Credential.BECOME_METHOD_CHOICES)
+    become_user = CharField(required=False, max_length=64)
+    become_password = CharField(required=False, max_length=1024,
+                                allow_null=True,
+                                style={'input_type': 'password'})
 
     class Meta:
         """Metadata for the serializer."""
@@ -115,6 +119,8 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
+        become_method = 'become_method' in attrs and attrs['become_method']
+        become_user = 'become_user' in attrs and attrs['become_user']
         if not (password or ssh_keyfile) and not self.partial:
             error = {
                 'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
@@ -143,6 +149,13 @@ class CredentialSerializer(NotEmptySerializer):
                 'ssh_passphrase': [_(messages.HC_NO_KEY_W_PASS)]
             }
             raise ValidationError(error)
+
+        if not become_method:
+            # Set the default become_method to be sudo if not specified
+            attrs['become_method'] = Credential.BECOME_SUDO
+        if not become_user:
+            # Set the default become_user to root if not specified
+            attrs['become_user'] = Credential.BECOME_USER_DEFAULT
         return attrs
 
     def validate_vcenter_cred(self, attrs):
@@ -159,12 +172,18 @@ class CredentialSerializer(NotEmptySerializer):
 
         # Not allowed fields for vcenter
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
-        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+        ssh_passphrase = 'ssh_passphrase' in attrs\
+                         and attrs['ssh_passphrase']
+        become_password = 'become_password' in attrs \
+                          and attrs['become_password']
+        become_user = 'become_user' in attrs and attrs['become_user']
+        become_method = 'become_method' in attrs \
+                        and attrs['become_method']
 
-        if ssh_keyfile or ssh_passphrase or sudo_password:
+        if ssh_keyfile or ssh_passphrase or become_password or \
+                become_user or become_method:
             error = {
-                'non_field_errors': [_(messages.VC_KEY_FILE_NOT_ALLOWED)]
+                'non_field_errors': [_(messages.VC_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
 
@@ -184,12 +203,18 @@ class CredentialSerializer(NotEmptySerializer):
 
         # Not allowed fields for satellite
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
-        ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        sudo_password = 'sudo_password' in attrs and attrs['sudo_password']
+        ssh_passphrase = 'ssh_passphrase' in attrs \
+                         and attrs['ssh_passphrase']
+        become_password = 'become_password' in attrs \
+                          and attrs['become_password']
+        become_user = 'become_user' in attrs and attrs['become_user']
+        become_method = 'become_method' in attrs \
+                        and attrs['become_method']
 
-        if ssh_keyfile or ssh_passphrase or sudo_password:
+        if ssh_keyfile or ssh_passphrase or become_password or \
+                become_user or become_method:
             error = {
-                'non_field_errors': [_(messages.SAT_KEY_FILE_NOT_ALLOWED)]
+                'non_field_errors': [_(messages.SAT_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
 

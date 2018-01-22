@@ -25,7 +25,7 @@ from api.serializers import CredentialSerializer
 from api.models import Credential
 
 PASSWORD_KEY = 'password'
-SUDO_PASSWORD_KEY = 'sudo_password'
+BECOME_PASSWORD_KEY = 'become_password'
 SSH_PASSPHRASE_KEY = 'ssh_passphrase'
 PASSWORD_MASK = '********'
 
@@ -38,8 +38,8 @@ def mask_credential(cred):
     """
     if cred.get(PASSWORD_KEY):
         cred[PASSWORD_KEY] = PASSWORD_MASK
-    if cred.get(SUDO_PASSWORD_KEY):
-        cred[SUDO_PASSWORD_KEY] = PASSWORD_MASK
+    if cred.get(BECOME_PASSWORD_KEY):
+        cred[BECOME_PASSWORD_KEY] = PASSWORD_MASK
     if cred.get(SSH_PASSPHRASE_KEY):
         cred[SSH_PASSPHRASE_KEY] = PASSWORD_MASK
     return cred

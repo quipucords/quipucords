@@ -28,7 +28,9 @@ class SatelliteFactoryTest(TestCase):
             cred_type=Credential.SATELLITE_CRED_TYPE,
             username='username',
             password='password',
-            sudo_password=None,
+            become_password=None,
+            become_method=None,
+            become_user=None,
             ssh_keyfile=None)
         self.cred.save()
 

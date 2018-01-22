@@ -28,12 +28,16 @@ class TestConstructVars(unittest.TestCase):
             'name': 'cred1',
             'username': 'username',
             'password': 'password',
-            'sudo_password': 'sudo',
-            'ssh_keyfile': 'keyfile'})
+            'become_password': 'sudo',
+            'ssh_keyfile': 'keyfile',
+            'become_method': 'sudo',
+            'become_user': 'root'})
         expected = {'ansible_become_pass': 'sudo', 'ansible_port': 22,
                     'ansible_ssh_pass': 'password',
                     'ansible_ssh_private_key_file': 'keyfile',
-                    'ansible_user': 'username'}
+                    'ansible_user': 'username',
+                    'ansible_become_user': 'root',
+                    'ansible_become_method': 'sudo'}
         self.assertEqual(vars_dict, expected)
 
 
