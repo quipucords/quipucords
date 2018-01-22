@@ -34,7 +34,7 @@ class SatelliteInterface(object):
 
     @transaction.atomic
     def initialize_stats(self, systems_count):
-        """Record a new result.
+        """Set initial status based on system counts.
 
         :param systems_count: The system count
         """
