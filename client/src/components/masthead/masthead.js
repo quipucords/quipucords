@@ -2,16 +2,14 @@ import React, { Component } from 'react';
 import Store from '../../redux/store';
 
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
-import './masthead.css';
-import * as NavTypes from '../../redux/constants/navigationBarConstants';
-import * as AboutTypes from '../../redux/constants/aboutConstants';
+import { aboutTypes, navigationBarTypes } from '../../redux/constants';
 
 class NavBar extends Component {
   render() {
     let toggleCollapse = () =>
-      Store.dispatch({ type: NavTypes.NAV_TOGGLE_COLLAPSE });
+      Store.dispatch({ type: navigationBarTypes.NAV_TOGGLE_COLLAPSE });
     let showAbout = () =>
-      Store.dispatch({ type: AboutTypes.ABOUT_DIALOG_OPEN });
+      Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
 
     return (
       <nav className="navbar navbar-pf-vertical">
@@ -26,7 +24,7 @@ class NavBar extends Component {
             <span className="icon-bar" />
             <span className="icon-bar" />
           </button>
-          <a href="javascript:void(0);" className="navbar-brand">
+          <span className="navbar-brand">
             <img
               className="navbar-brand-icon"
               src="/assets/img/logo.svg"
@@ -37,7 +35,7 @@ class NavBar extends Component {
               src="/public/assets/img/brand-alt.svg"
               alt="Red Hat Entitlements Reporting"
             />
-          </a>
+          </span>
         </div>
         <nav className="collapse navbar-collapse">
           <ButtonGroup className="nav navbar-nav navbar-right navbar-iconic navbar-utility">

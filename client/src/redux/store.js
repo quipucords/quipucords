@@ -1,7 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-
-import appReducer from './reducers/appReducer';
+import reduxReducers from './reducers';
 
 const hydrateStore = () => {
   // Create any initial state items based on stored data (cookies etc.)
@@ -9,7 +8,7 @@ const hydrateStore = () => {
 };
 
 const store = createStore(
-  appReducer,
+  reduxReducers,
   hydrateStore(),
   applyMiddleware(thunkMiddleware)
 );

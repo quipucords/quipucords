@@ -1,40 +1,40 @@
-import * as types from '../constants/credentialsConstants';
-import credentialsApi from '../../services/credentialsApi';
+import { credentialsTypes } from '../constants';
+import credentialsService from '../../services/credentialsService';
 
-const credentialsError = (bool, message) => ({
-  type: types.LOAD_CREDENTIALS_ERROR,
+const getCredentialsError = (bool, message) => ({
+  type: credentialsTypes.GET_CREDENTIALS_ERROR,
   error: bool,
   message: message
 });
 
-const credentialsLoading = bool => ({
-  type: types.LOAD_CREDENTIALS_LOADING,
+const getCredentialsLoading = bool => ({
+  type: credentialsTypes.GET_CREDENTIALS_LOADING,
   loading: bool
 });
 
-const credentialsSuccess = data => ({
-  type: types.LOAD_CREDENTIALS_SUCCESS,
+const getCredentialsSuccess = data => ({
+  type: credentialsTypes.GET_CREDENTIALS_SUCCESS,
   data
 });
 
 const getCredentials = () => {
   return function(dispatch) {
-    dispatch(credentialsLoading(true));
-    return credentialsApi
+    dispatch(getCredentialsLoading(true));
+    return credentialsService
       .getCredentials()
       .then(success => {
-        dispatch(credentialsSuccess(success));
+        dispatch(getCredentialsSuccess(success));
       })
       .catch(error => {
-        dispatch(credentialsError(true, error.message));
+        dispatch(getCredentialsError(true, error.message));
       })
-      .finally(() => dispatch(credentialsLoading(false)));
+      .finally(() => dispatch(getCredentialsLoading(false)));
   };
 };
 
 export {
-  credentialsError,
-  credentialsLoading,
-  credentialsSuccess,
+  getCredentialsError,
+  getCredentialsLoading,
+  getCredentialsSuccess,
   getCredentials
 };

@@ -10,7 +10,6 @@ import Content from './content/content';
 import Masthead from './masthead/masthead';
 import VerticalNavigation from './verticalNavigation/verticalNavigation';
 
-import './app.css';
 import logo from '../logo.svg';
 
 class App extends React.Component {

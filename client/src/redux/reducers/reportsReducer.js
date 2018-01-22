@@ -1,4 +1,4 @@
-import { credentialsTypes } from '../constants';
+import { reportsTypes } from '../constants';
 
 const initialState = {
   error: false,
@@ -7,18 +7,18 @@ const initialState = {
   data: []
 };
 
-export default function credentialsReducer(state = initialState, action) {
+export default function reportsReducer(state = initialState, action) {
   switch (action.type) {
-    case credentialsTypes.GET_CREDENTIALS_ERROR:
+    case reportsTypes.GET_REPORTS_ERROR:
       return Object.assign({}, state, {
         error: action.error,
         errorMessage: action.message
       });
 
-    case credentialsTypes.GET_CREDENTIALS_LOADING:
+    case reportsTypes.GET_REPORTS_LOADING:
       return Object.assign({}, state, { loading: action.loading });
 
-    case credentialsTypes.GET_CREDENTIALS_SUCCESS:
+    case reportsTypes.GET_REPORTS_SUCCESS:
       return Object.assign({}, state, { data: action.data });
 
     default:
