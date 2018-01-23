@@ -19,7 +19,7 @@ from api.common.serializer import NotEmptySerializer
 class SystemConnectionResultSerializer(NotEmptySerializer):
     """Serializer for the SystemConnectionResult model."""
 
-    name = CharField(required=True, max_length=1024)
+    name = CharField(required=True)
     status = ChoiceField(
         required=True, choices=SystemConnectionResult.CONN_STATUS_CHOICES)
 
