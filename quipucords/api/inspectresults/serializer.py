@@ -20,7 +20,7 @@ class RawFactSerializer(NotEmptySerializer):
     """Serializer for the SystemInspectionResult model."""
 
     name = CharField(required=True, max_length=1024)
-    value = CharField(required=True, max_length=1024)
+    value = CharField(required=True)
 
     class Meta:
         """Metadata for serialzer."""

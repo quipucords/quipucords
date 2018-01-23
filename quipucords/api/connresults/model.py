@@ -30,7 +30,7 @@ class SystemConnectionResult(models.Model):
     CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),
                            (UNREACHABLE, UNREACHABLE))
 
-    name = models.CharField(max_length=1024)
+    name = models.TextField()
     credential = models.ForeignKey(Credential,
                                    on_delete=models.CASCADE,
                                    null=True)

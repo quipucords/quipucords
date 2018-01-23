@@ -24,7 +24,7 @@ class RawFact(models.Model):
     """A model of a raw fact."""
 
     name = models.CharField(max_length=1024)
-    value = models.CharField(max_length=1024)
+    value = models.TextField()
 
     def __str__(self):
         """Convert to string."""
