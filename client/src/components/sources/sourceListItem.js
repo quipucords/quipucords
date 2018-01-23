@@ -10,10 +10,10 @@ import {
   Icon
 } from 'patternfly-react';
 
-export const SourceListItem = ({ item }) => {
+export const SourceListItem = ({ item, onItemSelectChange }) => {
   let credentialCount = item.credentials ? item.credentials.length : 0;
   let okHostCount = item.hosts ? item.hosts.length : 0;
-  let failedHostCount = Math.floor(Math.random() * 10);
+  let failedHostCount = item.failed_hosts ? item.hosts.length : 0;
 
   let itemIcon;
   switch (item.source_type) {
@@ -23,6 +23,9 @@ export const SourceListItem = ({ item }) => {
     case 'network':
       itemIcon = <ListView.Icon type="pf" name="network" />;
       break;
+    case 'satellite':
+      itemIcon = <ListView.Icon type="fa" name="space-shuttle" />;
+      break;
     default:
       itemIcon = null;
   }
@@ -30,7 +33,13 @@ export const SourceListItem = ({ item }) => {
   return (
     <ListView.Item
       key={item.id}
-      checkboxInput={<Checkbox value={item.selected} bsClass="" />}
+      checkboxInput={
+        <Checkbox
+          checked={item.selected}
+          bsClass=""
+          onClick={e => onItemSelectChange(item)}
+        />
+      }
       actions={
         <span>
           <Button className="unavailable" bsStyle="default" key="authButton">
@@ -86,5 +95,6 @@ export const SourceListItem = ({ item }) => {
 };
 
 SourceListItem.propTypes = {
-  item: PropTypes.object
+  item: PropTypes.object,
+  onItemSelectChange: PropTypes.func
 };

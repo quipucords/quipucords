@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
@@ -196,11 +195,24 @@ class ScansToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
-        <Button className="unavailable" bsStyle="primary">
+        <Button
+          disabled={this.props.runScansAvailable === false}
+          onClick={this.props.onRunScans}
+        >
           Scan Now
         </Button>
-        <Button className="unavailable">Repeat Scan</Button>
-        <Button className="unavailable">Download</Button>
+        <Button
+          disabled={this.props.repeatScansAvailable === false}
+          onClick={this.props.onRepeatScans}
+        >
+          Repeat Scan
+        </Button>
+        <Button
+          disabled={this.props.downloadScansAvailable === false}
+          onClick={this.props.onDownloadScans}
+        >
+          Download
+        </Button>
       </div>
     );
   }
@@ -270,7 +282,13 @@ ScansToolbar.propTypes = {
   filterValue: PropTypes.any,
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
-  sortAscending: PropTypes.bool
+  sortAscending: PropTypes.bool,
+  runScansAvailable: PropTypes.bool,
+  onRunScans: PropTypes.func,
+  repeatScansAvailable: PropTypes.bool,
+  onRepeatScans: PropTypes.func,
+  downloadScansAvailable: PropTypes.bool,
+  onDownloadScans: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {
@@ -279,4 +297,4 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-export default withRouter(connect(mapStateToProps)(ScansToolbar));
+export default connect(mapStateToProps)(ScansToolbar);
