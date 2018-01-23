@@ -24,11 +24,12 @@ const addFacts = () => {
       .addFacts()
       .then(success => {
         dispatch(addFactsSuccess(success));
+        dispatch(addFactsLoading(false));
       })
       .catch(error => {
         dispatch(addFactsError(true, error.message));
-      })
-      .finally(() => dispatch(addFactsLoading(false)));
+        dispatch(addFactsLoading(false));
+      });
   };
 };
 
