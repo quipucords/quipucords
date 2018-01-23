@@ -60,7 +60,8 @@ class Source(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s }' % (self.id, self.name)
+        return '{ id:%s, name:%s, type:%s }' %\
+            (self.id, self.name, self.source_type)
 
 
 class HostRange(models.Model):
