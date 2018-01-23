@@ -26,12 +26,8 @@
       # slash and the other doesn't, even without actual symlinks.
 
       raw: ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 realpath 2> /dev/null
-      register: internal_karaf_running_processes
+      register: karaf_running_processes
       ignore_errors: yes
-
-    - name: set karaf_running_processes
-      set_fact:
-        karaf_running_processes: "{{ internal_karaf_running_processes }}"
 
     - name: Use locate to look for karaf.jar
 
@@ -41,71 +37,51 @@
       # realpath to normalize paths.
 
       raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null
-      register: internal_karaf_locate_karaf_jar
+      register: karaf_locate_karaf_jar
       ignore_errors: yes
       when: 'have_locate'
-
-    - name: set karaf_locate_karaf_jar
-      set_fact:
-        karaf_locate_karaf_jar: "{{ internal_karaf_locate_karaf_jar }}"
 
     - name: Use find to look for karaf.jar
       raw: find {{scan_dirs}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null | sort -u
-      register: internal_karaf_find_karaf_jar
+      register: karaf_find_karaf_jar
       ignore_errors: yes
-      when: 'have_locate'
+      when: false
 
 # Combine the outputs of the above into a single fact
 
     - name: combine KARAF_HOME candidates into single list
       set_fact:
           karaf_homes: "{{
-              (internal_karaf_running_processes.get('stdout_lines', []) +
-               internal_karaf_locate_karaf_jar.get('stdout_lines', []) +
-               internal_karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
+              (karaf_running_processes.get('stdout_lines', []) +
+               karaf_locate_karaf_jar.get('stdout_lines', []) +
+               karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
       ignore_errors: yes
 
 # Look for fuse inside KARAF_HOME directories
 
     - name: check bin/fuse
       raw: ls -1 "{{ item }}/bin/fuse"
-      register: internal_karaf_home_bin_fuse
+      register: karaf_home_bin_fuse
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-
-    - name: set karaf_home_bin_fuse
-      set_fact:
-        karaf_home_bin_fuse: "{{ internal_karaf_home_bin_fuse }}"
 
     - name: check system/org/jboss/fuse
       raw: ls -1 "{{ item }}/system/org/jboss"
-      register: internal_karaf_home_system_org_jboss
+      register: karaf_home_system_org_jboss
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
-
-    - name: set karaf_home_system_org_jboss
-      set_fact:
-        karaf_home_system_org_jboss: "{{ internal_karaf_home_system_org_jboss }}"
 
 # Tests that can indicate the presence of Fuse, but can't tell us the
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
     - name: look for fuse systemd service
       raw: systemctl list-unit-files | grep fuse
-      register: internal_jboss_fuse_systemctl_unit_files
+      register: jboss_fuse_systemctl_unit_files
       ignore_errors: yes
       become: true
-
-    - name: set jboss_fuse_systemctl_unit_files
-      set_fact:
-        jboss_fuse_systemctl_unit_files: "{{ internal_jboss_fuse_systemctl_unit_files }}"
 
     - name: look for fuse in chkconfig
       raw: chkconfig 2> /dev/null | grep fuse
-      register: internal_jboss_fuse_chkconfig
+      register: jboss_fuse_chkconfig
       ignore_errors: yes
       become: true
-
-    - name: set jboss_fuse_chkconfig
-      set_fact:
-        jboss_fuse_chkconfig: "{{ internal_jboss_fuse_chkconfig }}"

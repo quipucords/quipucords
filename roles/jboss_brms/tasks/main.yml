@@ -42,28 +42,21 @@
 
     - name: cat MANIFEST.MF files
       raw: cat {{ item }}/META-INF/MANIFEST.MF
-      register: internal_jboss_brms_manifest_mf
+      register: jboss_brms_manifest_mf
       ignore_errors: yes
       with_items: "{{ business_central_candidates + kie_server_candidates }}"
-    
-    - name: set jboss_brms_manifest_mf
-      set_fact:
-        jboss_brms_manifest_mf: "{{ internal_jboss_brms_manifest_mf }}"
 
     - name: look for kie-api files inside candidate directories
       raw: ls -1 {{ item }}/WEB-INF/lib/kie-api*
-      register: internal_jboss_brms_kie_in_business_central
+      register: jboss_brms_kie_in_business_central
       ignore_errors: yes
       with_items: "{{ business_central_candidates }}"
-
-    - name: set jboss_brms_kie_in_business_central
-      set_fact:
-        jboss_brms_kie_in_business_central: "{{ internal_jboss_brms_kie_in_business_central }}"
 
     - name: look for all kie-api files on the system
       raw: locate --basename 'kie-api*'
       register: internal_jboss_brms_locate_kie_api
       ignore_errors: yes
+      when: have_locate
 
     - name: set jboss_brms_locate_kie_api
       set_fact:
