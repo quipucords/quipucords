@@ -13,7 +13,6 @@
 
 from django.db import models
 from api.fact.model import FactCollection
-from api.source.model import Source
 
 
 class SystemFingerprint(models.Model):
@@ -34,9 +33,6 @@ class SystemFingerprint(models.Model):
     # Scan information
     fact_collection_id = models.ForeignKey(FactCollection,
                                            models.CASCADE)
-    source_id = models.ForeignKey(Source, models.CASCADE)
-    source_type = models.CharField(
-        max_length=10, choices=SOURCE_TYPE)
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)
@@ -48,8 +44,8 @@ class SystemFingerprint(models.Model):
         max_length=10, choices=INFRASTRUCTURE_TYPE)
     virtualized_is_guest = models.NullBooleanField()
 
-    mac_addresses = models.CharField(max_length=1024, unique=False, null=True)
-    ip_addresses = models.CharField(max_length=1024, unique=False, null=True)
+    mac_addresses = models.TextField(unique=False, null=True)
+    ip_addresses = models.TextField(unique=False, null=True)
 
     cpu_count = models.PositiveIntegerField(unique=False, null=True)
 
@@ -84,12 +80,13 @@ class SystemFingerprint(models.Model):
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
 
+    metadata = models.TextField(unique=False, null=False)
+
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'fact_collection:{}, ' \
-            'source_id:{}, ' \
-            'source_type:{}, ' \
+            'name:{}, '\
             'os_name:{}, '\
             'os_version:{}, '\
             'os_release:{}, '\
@@ -98,9 +95,6 @@ class SystemFingerprint(models.Model):
             'cpu_count:{}, '\
             'bios_uuid:{}, '\
             'subscription_manager_id:{}, '\
-            'connection_uuid:{}, '\
-            'connection_host:{}, '\
-            'connection_port:{}, '\
             'cpu_core_per_socket:{}, '\
             'cpu_siblings:{}, '\
             'cpu_hyperthreading:{}, '\
@@ -112,7 +106,6 @@ class SystemFingerprint(models.Model):
             'virtualized_type:{}, '\
             'virtualized_num_guests:{}, '\
             'virtualized_num_running_guests:{}, '\
-            'vm_name:{}, '\
             'vm_state:{}, '\
             'vm_uuid:{}, '\
             'vm_memory_size:{}, '\
@@ -123,40 +116,36 @@ class SystemFingerprint(models.Model):
             'vm_host_socket_count:{}, '\
             'vm_datacenter:{}, '\
             'vm_cluster:{} '\
-            .format(self.id,
-                    self.fact_collection_id.id,
-                    self.source_id,
-                    self.source_type,
-                    self.os_name,
-                    self.os_version,
-                    self.os_release,
-                    self.mac_addresses,
-                    self.ip_addresses,
-                    self.cpu_count,
-                    self.bios_uuid,
-                    self.subscription_manager_id,
-                    self.connection_uuid,
-                    self.connection_host,
-                    self.connection_port,
-                    self.cpu_core_per_socket,
-                    self.cpu_siblings,
-                    self.cpu_hyperthreading,
-                    self.cpu_socket_count,
-                    self.cpu_core_count,
-                    self.system_creation_date,
-                    self.infrastructure_type,
-                    self.virtualized_is_guest,
-                    self.virtualized_type,
-                    self.virtualized_num_guests,
-                    self.virtualized_num_running_guests,
-                    self.vm_name,
-                    self.vm_state,
-                    self.vm_uuid,
-                    self.vm_memory_size,
-                    self.vm_dns_name,
-                    self.vm_host,
-                    self.vm_host_cpu_cores,
-                    self.vm_host_cpu_threads,
-                    self.vm_host_socket_count,
-                    self.vm_datacenter,
-                    self.vm_cluster) + '}'
+            'metadata:{} '.format(self.id,
+                                  self.fact_collection_id.id,
+                                  self.name,
+                                  self.os_name,
+                                  self.os_version,
+                                  self.os_release,
+                                  self.mac_addresses,
+                                  self.ip_addresses,
+                                  self.cpu_count,
+                                  self.bios_uuid,
+                                  self.subscription_manager_id,
+                                  self.cpu_core_per_socket,
+                                  self.cpu_siblings,
+                                  self.cpu_hyperthreading,
+                                  self.cpu_socket_count,
+                                  self.cpu_core_count,
+                                  self.system_creation_date,
+                                  self.infrastructure_type,
+                                  self.virtualized_is_guest,
+                                  self.virtualized_type,
+                                  self.virtualized_num_guests,
+                                  self.virtualized_num_running_guests,
+                                  self.vm_state,
+                                  self.vm_uuid,
+                                  self.vm_memory_size,
+                                  self.vm_dns_name,
+                                  self.vm_host,
+                                  self.vm_host_cpu_cores,
+                                  self.vm_host_cpu_threads,
+                                  self.vm_host_socket_count,
+                                  self.vm_datacenter,
+                                  self.vm_cluster,
+                                  self.metadata) + '}'

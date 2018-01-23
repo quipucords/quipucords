@@ -14,7 +14,6 @@
 from datetime import datetime
 from django.test import TestCase
 from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
-                           _process_network_fact,
                            _process_source,
                            _remove_duplicate_fingerprints,
                            _merge_fingerprint,
@@ -297,7 +296,7 @@ class EngineTest(TestCase):
         """Create test network/vcenter fingerprints."""
         v_fact_collection = self._create_vcenter_fc_json(*args, **kwargs)
         vfact = v_fact_collection['facts'][0]
-        source = {'source_id': 1,
+        source = {'source_id': 2,
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
         vfingerprints = _process_source(v_fact_collection['id'],
@@ -333,171 +332,6 @@ class EngineTest(TestCase):
         fingerprint = fingerprints[0]
         self._validate_vcenter_result(fingerprint, fact)
 
-    def test_basic_engine_process_network_fact(self):
-        """Test basic engine process_fact."""
-        fact_collection = self._create_network_fc_json()
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self._validate_network_result(fingerprint, fact)
-
-    def test_create_yum(self):
-        """Test date_yum_history used for sys create time."""
-        fact_collection = self._create_network_fc_json(
-            date_yum_history='2015-07-18')
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        fact_date = datetime.strptime(fact['date_yum_history'], '%Y-%m-%d')
-        fact_date = fact_date.date()
-        self.assertEqual(fact_date, fingerprint['system_creation_date'])
-
-    def test_infrastructure_baremetal(self):
-        """Test virt_what_type set to bare metal."""
-        fact_collection = self._create_network_fc_json(
-            virt_what_type='bare metal')
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertEqual('bare_metal', fingerprint['infrastructure_type'])
-
-    def test_infrastructure_unknown(self):
-        """Test virt_what_type not bear metal.
-
-        virt_type None yields unknown infrastructure type
-        """
-        fact_collection = self._create_network_fc_json(
-            virt_what_type='foobar', virt_type=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertEqual('unknown', fingerprint['infrastructure_type'])
-
-    def test_infrastructure_missing(self):
-        """Test missing virt_what_type and virt_type yields unknown type."""
-        fact_collection = self._create_network_fc_json(
-            virt_what_type=None, virt_type=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertEqual('unknown', fingerprint['infrastructure_type'])
-
-    # Test missing fields
-    def test_os_name_missing(self):
-        """Test missing etc_release_name."""
-        fact_collection = self._create_network_fc_json(
-            etc_release_name=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('os_name', fingerprint)
-
-    def test_os_version_missing(self):
-        """Test missing etc_release_version."""
-        fact_collection = self._create_network_fc_json(
-            etc_release_version=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('os_version', fingerprint)
-
-    def test_os_release_missing(self):
-        """Test missing etc_release_release."""
-        fact_collection = self._create_network_fc_json(
-            etc_release_release=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('os_release', fingerprint)
-
-    def test_connection_uuid_missing(self):
-        """Test missing connection_uuid."""
-        fact_collection = self._create_network_fc_json(
-            connection_uuid=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('connection_uuid', fingerprint)
-
-    def test_connection_host_missing(self):
-        """Test missing connection_host."""
-        fact_collection = self._create_network_fc_json(
-            connection_host=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('connection_host', fingerprint)
-
-    def test_connection_port_missing(self):
-        """Test missing connection_port."""
-        fact_collection = self._create_network_fc_json(
-            connection_port=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('connection_port', fingerprint)
-
-    def test_cpu_count_missing(self):
-        """Test missing cpu_count."""
-        fact_collection = self._create_network_fc_json(
-            cpu_count=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_count', fingerprint)
-
-    def test_cpu_core_per_socket_missing(self):
-        """Test missing cpu_core_per_socket."""
-        fact_collection = self._create_network_fc_json(
-            cpu_core_per_socket=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_core_per_socket', fingerprint)
-
-    def test_cpu_siblings_missing(self):
-        """Test missing cpu_siblings."""
-        fact_collection = self._create_network_fc_json(
-            cpu_siblings=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_siblings', fingerprint)
-
-    def test_cpu_hyperthreading_missing(self):
-        """Test missing cpu_hyperthreading."""
-        fact_collection = self._create_network_fc_json(
-            cpu_hyperthreading=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_hyperthreading', fingerprint)
-
-    def test_cpu_socket_count_missing(self):
-        """Test missing cpu_socket_count."""
-        fact_collection = self._create_network_fc_json(
-            cpu_socket_count=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_socket_count', fingerprint)
-
-    def test_cpu_core_count_missing(self):
-        """Test missing connection_port."""
-        fact_collection = self._create_network_fc_json(
-            cpu_core_count=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('cpu_core_count', fingerprint)
-
-    def test_virt_type_missing(self):
-        """Test missing virt_type."""
-        fact_collection = self._create_network_fc_json(
-            virt_type=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('virtualization_type', fingerprint)
-
-    def test_virt_num_guests_missing(self):
-        """Test missing virt_num_guests."""
-        fact_collection = self._create_network_fc_json(
-            virt_num_guests=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('virtualization_num_guests', fingerprint)
-
-    def test_virt_num_running_guests_missing(self):
-        """Test missing virt_num_running_guests."""
-        fact_collection = self._create_network_fc_json(
-            virt_num_running_guests=None)
-        fact = fact_collection['facts'][0]
-        fingerprint = _process_network_fact(fact)
-        self.assertNotIn('virtualization_num_running_guests', fingerprint)
-
     ################################################################
     # Test merge functions
     ################################################################
@@ -519,21 +353,54 @@ class EngineTest(TestCase):
 
     def test_merge_matching_fingerprints(self):
         """Test merge of two lists of fingerprints."""
+        nmetadata = {
+            'os_release': {
+                'source_id': 1,
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'raw_fact_key': 'etc_release_release'
+            },
+            'bios_uuid': {
+                'source_id': 1,
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'raw_fact_key': 'dmi_system_uuid'
+            }
+
+        }
         nfingerprint_to_merge = {
-            'id': 1, 'os_release': 'RHEL 7', 'bios_uuid': 'match'}
+            'id': 1, 'os_release': 'RHEL 7', 'bios_uuid': 'match',
+            'metadata': nmetadata}
         nfingerprint_no_match = {
-            'id': 2, 'os_release': 'RHEL 7', 'bios_uuid': '2345'}
-        nfingerprint_no_key = {'id': 3, 'os_release': 'RHEL 6'}
+            'id': 2, 'os_release': 'RHEL 7', 'bios_uuid': '2345',
+            'metadata': nmetadata}
+        nfingerprint_no_key = {
+            'id': 3, 'os_release': 'RHEL 6', 'metadata': nmetadata}
         nfingerprints = [
             nfingerprint_to_merge,
             nfingerprint_no_match,
             nfingerprint_no_key
         ]
+
+        vmetadata = {
+            'os_release': {
+                'source_id': 1,
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'raw_fact_key': 'etc_release_release'
+            },
+            'vm_uuid': {
+                'source_id': 1,
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'raw_fact_key': 'vm.uuid'
+            }
+
+        }
         vfingerprint_to_merge = {
-            'id': 5, 'os_release': 'Windows 7', 'vm_uuid': 'match'}
+            'id': 5, 'os_release': 'Windows 7', 'vm_uuid': 'match',
+            'metadata': vmetadata}
         vfingerprint_no_match = {
-            'id': 6, 'os_release': 'RHEL 7', 'vm_uuid': '9876'}
-        vfingerprint_no_key = {'id': 7, 'os_release': 'RHEL 6'}
+            'id': 6, 'os_release': 'RHEL 7', 'vm_uuid': '9876',
+            'metadata': vmetadata}
+        vfingerprint_no_key = {
+            'id': 7, 'os_release': 'RHEL 6', 'metadata': vmetadata}
         vfingerprints = [
             vfingerprint_to_merge,
             vfingerprint_no_match,
