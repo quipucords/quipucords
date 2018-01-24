@@ -21,27 +21,26 @@ from api.serializers import FingerprintSerializer
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+# Keys used to de-duplicate against other network sources
 NETWORK_IDENTIFICATION_KEYS = ['subscription_manager_id',
                                'bios_uuid']
+
+# Keys used to de-duplicate against other VCenter sources
 VCENTER_IDENTIFICATION_KEYS = ['vm_uuid']
-COMMON_FACTS_TO_MERGE = ['os_name',
-                         'os_version',
-                         'os_release',
-                         'mac_addresses',
-                         'ip_addresses',
-                         'cpu_count']
-VCENTER_FACTS_TO_MERGE = ['vm_name',
-                          'vm_state',
-                          'vm_uuid',
-                          'vm_memory_size',
-                          'vm_dns_name',
-                          'vm_host',
-                          'vm_host_cpu_cores',
-                          'vm_host_cpu_threads',
-                          'vm_host_socket_count',
-                          'vm_datacenter',
-                          'vm_cluster']
+
+# Keys used to de-duplicate against other satellite sources
+SATELLITE_IDENTIFICATION_KEYS = ['subscription_manager_id']
+
+# Keys used to de-duplicate against across sources
+NETWORK_SATELLITE_MERGE_KEYS = [
+    ('subscription_manager_id', 'subscription_manager_id'),
+    ('mac_addresses', 'mac_addresses')]
+NETWORK_VCENTER_MERGE_KEYS = [
+    ('bios_uuid', 'vm_uuid'),
+    ('mac_addresses', 'mac_addresses')]
+
 FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
+
 META_DATA_KEY = 'metadata'
 
 
@@ -93,6 +92,7 @@ def _process_sources(raw_facts):
     """
     network_fingerprints = []
     vcenter_fingerprints = []
+    satellite_fingerprints = []
     for source in raw_facts['sources']:
         source_fingerprints = _process_source(
             raw_facts['fact_collection_id'],
@@ -101,6 +101,8 @@ def _process_sources(raw_facts):
             network_fingerprints += source_fingerprints
         elif source['source_type'] == Source.VCENTER_SOURCE_TYPE:
             vcenter_fingerprints += source_fingerprints
+        elif source['source_type'] == Source.SATELLITE_SOURCE_TYPE:
+            satellite_fingerprints += source_fingerprints
 
     # Deduplicate network fingerprints
     number_before = len(network_fingerprints)
@@ -110,6 +112,17 @@ def _process_sources(raw_facts):
 
     number_after = len(network_fingerprints)
     logger.debug('Remove duplicate network fingerprints.')
+    logger.debug('Number before: %d, Number after: %d',
+                 number_before, number_after)
+
+    # Deduplicate satellite fingerprints
+    number_before = len(satellite_fingerprints)
+    satellite_fingerprints = _remove_duplicate_fingerprints(
+        SATELLITE_IDENTIFICATION_KEYS,
+        satellite_fingerprints)
+
+    number_after = len(satellite_fingerprints)
+    logger.debug('Remove duplicate satellite fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
                  number_before, number_after)
 
@@ -124,11 +137,25 @@ def _process_sources(raw_facts):
     logger.debug('Number before: %d, Number after: %d',
                  number_before, number_after)
 
+    # Merge network and satellite fingerprints
+    logger.debug('Merging network and satellite fingerprints.')
+    number_before = len(network_fingerprints) + len(satellite_fingerprints)
+    all_fingerprints = _merge_fingerprints_from_source_types(
+        NETWORK_SATELLITE_MERGE_KEYS,
+        network_fingerprints,
+        satellite_fingerprints)
+    number_after = len(all_fingerprints)
+    logger.debug('Merged network and satellite fingerprints.')
+    logger.debug('Number before: %d, Number after: %d',
+                 number_before, number_after)
+
     # Merge network and vcenter fingerprints
     logger.debug('Merging network and vcenter fingerprints.')
-    number_before = len(network_fingerprints) + len(vcenter_fingerprints)
-    all_fingerprints = _merge_network_and_vcenter(
-        network_fingerprints, vcenter_fingerprints)
+    number_before = len(all_fingerprints) + len(vcenter_fingerprints)
+    all_fingerprints = _merge_fingerprints_from_source_types(
+        NETWORK_VCENTER_MERGE_KEYS,
+        all_fingerprints,
+        vcenter_fingerprints)
     number_after = len(all_fingerprints)
     logger.debug('Merged network and vcenter fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
@@ -150,39 +177,45 @@ def _process_source(fact_collection_id, source):
     fingerprints = []
     for fact in source['facts']:
         fingerprint = None
-        if source['source_type'] == Source.NETWORK_SOURCE_TYPE:
+        source_type = source['source_type']
+        if source_type == Source.NETWORK_SOURCE_TYPE:
             fingerprint = _process_network_fact(source, fact)
-        else:
+        elif source_type == Source.VCENTER_SOURCE_TYPE:
             fingerprint = _process_vcenter_fact(source, fact)
-        fingerprint['fact_collection_id'] = fact_collection_id
-        fingerprints.append(fingerprint)
+        elif source_type == Source.SATELLITE_SOURCE_TYPE:
+            fingerprint = _process_satellite_fact(source, fact)
+        else:
+            logger.error('Could not process source, unknown source type: %s',
+                         source_type)
+
+        if fingerprint is not None:
+            fingerprint['fact_collection_id'] = fact_collection_id
+            fingerprints.append(fingerprint)
+
     return fingerprints
 
 
-def _merge_network_and_vcenter(network_fingerprints,
-                               vcenter_fingerprints):
-    """Merge facts from multiple sources.
+def _merge_fingerprints_from_source_types(merge_keys_list, base_list,
+                                          merge_list):
+    """Merge fingerprints from multiple sources.
 
-    :param network_fingerprints: fact to process
-    :param vcenter_fingerprints: fact to process
+    :param base_list: base list
+    :param merge_list: fact to process
     :returns: list of all fingerprints wihtout duplicates
     """
     # Check to make sure a merge is required at all
-    if not vcenter_fingerprints:
-        return network_fingerprints
+    if not merge_list:
+        return base_list
 
-    if not network_fingerprints:
-        return vcenter_fingerprints
+    if not base_list:
+        return merge_list
 
-    # start with the network fingerprints as base set
-    result = network_fingerprints[:]
-    to_merge = vcenter_fingerprints[:]
-
-    result, to_merge = _merge_matching_fingerprints(
-        'bios_uuid', result, 'vm_uuid', to_merge)
-
-    result, to_merge = _merge_matching_fingerprints(
-        'mac_addresses', result, 'mac_addresses', to_merge)
+    # start with the base_list fingerprints
+    result = base_list[:]
+    to_merge = merge_list[:]
+    for key_tuple in merge_keys_list:
+        result, to_merge = _merge_matching_fingerprints(
+            key_tuple[0], result, key_tuple[1], to_merge)
 
     # Add remaining as they didn't match anything (no merge)
     result = result + to_merge
@@ -264,6 +297,9 @@ def _remove_duplicate_fingerprints(id_key_list,
     should be removed from fingerprint
     :returns: list of fingerprints that is unique
     """
+    if not fingerprint_list:
+        return fingerprint_list
+
     result_list = fingerprint_list[:]
     for id_key in id_key_list:
         unique_dict = {}
@@ -324,33 +360,39 @@ def _create_index_for_fingerprint(id_key,
     return result_by_key, key_not_found_list
 
 
-def _merge_fingerprint(network_fingerprint, vcenter_fingerprint):
-    """Merge network and vcenter facts."""
-    # Add vcenter fact if not already set by network
+def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
+    """Merge two fingerprints.
+
+    The priority_fingerprint values are always used.  The
+    to_merge_fingerprint values are only used when the priority_fingerprint
+    is missing the same values.
+    :param priority_fingerprint: Fingerprint that has precedence if
+    both have the same attribute.
+    :param to_merge_fingerprint: Fingerprint whose values are used
+    when attributes are not in priority_fingerprint
+    """
+    priority_keys = set(priority_fingerprint.keys())
+    to_merge_keys = set(to_merge_fingerprint.keys())
+
+    keys_to_add_list = list(to_merge_keys - priority_keys)
+    if META_DATA_KEY in keys_to_add_list:
+        keys_to_add_list.remove(META_DATA_KEY)
 
     logger.debug('Merging the following two fingerprints.')
-    logger.debug('Network fingerprint: %s', network_fingerprint)
-    logger.debug('VCenter fingerprint: %s', vcenter_fingerprint)
-
-    for fact_key in COMMON_FACTS_TO_MERGE:
-        existing_nfact = network_fingerprint.get(fact_key)
-        new_vfact = vcenter_fingerprint.get(fact_key)
-        if not existing_nfact and new_vfact:
-            network_fingerprint[META_DATA_KEY][fact_key] = \
-                vcenter_fingerprint[META_DATA_KEY][fact_key]
-            network_fingerprint[fact_key] = new_vfact
+    logger.debug('Base fingerprint: %s', priority_fingerprint)
+    logger.debug('Overlay fingerprint: %s', to_merge_fingerprint)
 
     # Add vcenter facts
-    for fact_key in VCENTER_FACTS_TO_MERGE:
-        new_vfact = vcenter_fingerprint.get(fact_key)
-        if new_vfact:
-            network_fingerprint[META_DATA_KEY][fact_key] = \
-                vcenter_fingerprint[META_DATA_KEY][fact_key]
-            network_fingerprint[fact_key] = new_vfact
+    for fact_key in keys_to_add_list:
+        to_merge_fact = to_merge_fingerprint.get(fact_key)
+        if to_merge_fact:
+            priority_fingerprint[META_DATA_KEY][fact_key] = \
+                to_merge_fingerprint[META_DATA_KEY][fact_key]
+            priority_fingerprint[fact_key] = to_merge_fact
 
-    logger.debug('Merged fingerprint: %s', network_fingerprint)
+    logger.debug('Merged fingerprint: %s', priority_fingerprint)
 
-    return network_fingerprint
+    return priority_fingerprint
 
 
 def add_fact_to_fingerprint(source,
@@ -359,7 +401,7 @@ def add_fact_to_fingerprint(source,
                             fingerprint_key,
                             fingerprint,
                             fact_value=None):
-    """Create the FingerprintFact json.
+    """Create the fingerprint fact and metadata.
 
     :param source: Source used to gather raw facts.
     :param raw_fact_key: Raw fact key used to obtain value
@@ -389,8 +431,7 @@ def add_fact_to_fingerprint(source,
 def _process_network_fact(source, fact):
     """Process a fact and convert to a fingerprint.
 
-    :param source_id: The id of the source that provided
-    this fact.
+    :param source: The source that provided this fact.
     :param facts: fact to process
     :returns: fingerprint produced from fact
     """
@@ -505,8 +546,7 @@ def _process_network_fact(source, fact):
 def _process_vcenter_fact(source, fact):
     """Process a fact and convert to a fingerprint.
 
-    :param source_id: The id of the source that provided
-    this fact.
+    :param source: The source that provided this fact.
     :param facts: fact to process
     :returns: fingerprint produced from fact
     """
@@ -553,6 +593,64 @@ def _process_vcenter_fact(source, fact):
                             fact, 'vm_datacenter', fingerprint)
     add_fact_to_fingerprint(source, 'vm.cluster', fact,
                             'vm_cluster', fingerprint)
+
+    return fingerprint
+
+
+def _process_satellite_fact(source, fact):
+    """Process a fact and convert to a fingerprint.
+
+    :param source: The source that provided this fact.
+    :param facts: fact to process
+    :returns: fingerprint produced from fact
+    """
+    # pylint: disable=too-many-branches
+
+    fingerprint = {META_DATA_KEY: {}}
+
+    # Common facts
+    add_fact_to_fingerprint(source, 'hostname', fact, 'name', fingerprint)
+
+    add_fact_to_fingerprint(source, 'os_release', fact,
+                            'os_release', fingerprint)
+    add_fact_to_fingerprint(source, 'os_name', fact, 'os_name', fingerprint)
+    add_fact_to_fingerprint(source, 'os_version', fact,
+                            'os_version', fingerprint)
+
+    add_fact_to_fingerprint(source, 'mac_addresses',
+                            fact, 'mac_addresses', fingerprint)
+    add_fact_to_fingerprint(source, 'ip_addresses', fact,
+                            'ip_addresses', fingerprint)
+
+    add_fact_to_fingerprint(source, 'cores', fact, 'cpu_count', fingerprint)
+
+    # Common network/satellite
+    add_fact_to_fingerprint(source, 'uuid', fact,
+                            'subscription_manager_id', fingerprint)
+    add_fact_to_fingerprint(source, 'virt_type', fact,
+                            'virtualized_type', fingerprint)
+
+    is_virtualized = fact.get('is_virtualized')
+    if is_virtualized:
+        infrastructure_type = 'virtualized'
+    else:
+        infrastructure_type = 'unknown'
+    add_fact_to_fingerprint(source, 'is_virtualized', fact,
+                            'infrastructure_type', fingerprint,
+                            fact_value=infrastructure_type)
+
+    virtualized_is_guest = bool(
+        fact.get('virt_type') and
+        fact.get('virtual_host') != fact.get('hostname'))
+    add_fact_to_fingerprint(source, 'virt_type/virtual_host/hostname', fact,
+                            'virtualized_is_guest', fingerprint,
+                            fact_value=virtualized_is_guest)
+
+    # Satellite specific facts
+    add_fact_to_fingerprint(source, 'cores', fact,
+                            'cpu_core_count', fingerprint)
+    add_fact_to_fingerprint(source, 'num_sockets', fact,
+                            'cpu_socket_count', fingerprint)
 
     return fingerprint
 
