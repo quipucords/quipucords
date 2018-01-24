@@ -660,7 +660,7 @@ class ScanJobTest(TestCase):
                                             .SUCCESS)
         sys_result.save()
 
-        fact = RawFact(name='foo', value='value')
+        fact = RawFact(name='foo', value='"value"')
         fact.save()
         sys_result.facts.add(fact)
         sys_result.save()
