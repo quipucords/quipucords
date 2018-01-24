@@ -54,7 +54,10 @@ def normalize_result(result):
     # pylint: disable=protected-access
     if result._result is not None and isinstance(result._result, dict):
         if ANSIBLE_FACTS in result._result:
-            return list(result._result[ANSIBLE_FACTS].items())
+            return [(key, value)
+                    for key, value in result._result[ANSIBLE_FACTS].items()
+                    if not key.startswith(INTERNAL_)]
+            # return list(result._result[ANSIBLE_FACTS].items())
         elif (isinstance(result._task.register, str) and
               not result._task.register.startswith(INTERNAL_)):
             return [(result._task.register, result._result)]
