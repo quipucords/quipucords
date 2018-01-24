@@ -150,8 +150,15 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_task.systems_scanned = 0
         self.scan_task.save()
         getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
+        inspect_result = InspectionResult(
+            source=self.scan_task.source,
+            scan_task=self.scan_task)
+        inspect_result.save()
+        self.inspect_results.results.add(inspect_result)
+        self.inspect_results.save()
         with patch('scanner.vcenter.inspect.get_nics',
                    return_value=getnics):
+            self.runner.inspect_result = inspect_result
             self.runner.get_vm_info(data_center, cluster,
                                     host, virtual_machine)
 
@@ -213,8 +220,15 @@ class InspectTaskRunnerTest(TestCase):
         root_folder.childEntity = child_entity
         content.rootFolder = root_folder
         vcenter.RetrieveContent = Mock(return_value=content)
+        inspect_result = InspectionResult(
+            source=self.scan_task.source,
+            scan_task=self.scan_task)
+        inspect_result.save()
+        self.inspect_results.results.add(inspect_result)
+        self.inspect_results.save()
         with patch.object(InspectTaskRunner,
                           'get_vm_info') as mock_get_vm_info:
+            self.runner.inspect_result = inspect_result
             self.runner.recurse_datacenter(vcenter)
             mock_get_vm_info.assert_called_with(ANY, ANY, ANY, ANY)
 

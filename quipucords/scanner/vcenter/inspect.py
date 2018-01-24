@@ -58,6 +58,8 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.inspect_results = inspect_results
         self.connect_scan_task = None
+        self.source = scan_task.source
+        self.inspect_result = None
 
     def run(self):
         """Scan network range ang attempt connections."""
@@ -70,6 +72,18 @@ class InspectTaskRunner(ScanTaskRunner):
                 'Prerequisites scan task with id %d failed.',
                 self.connect_scan_task.id)
             return ScanTask.FAILED
+
+        # Prep inspect result
+        inspect_result = self.inspect_results.results.filter(
+            source__id=self.source.id).first()
+        if inspect_result is None:
+            inspect_result = InspectionResult(
+                source=self.scan_task.source,
+                scan_task=self.scan_task)
+            inspect_result.save()
+            self.inspect_results.results.add(inspect_result)
+            self.inspect_results.save()
+        self.inspect_result = inspect_result
 
         try:
             self.inspect()
@@ -138,17 +152,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 sys_result.facts.add(stored_fact)
         sys_result.save()
 
-        self.inspect_results.save()
-        inspect_result = InspectionResult.objects.filter(
-            scan_task=self.scan_task.id).first()
-        if inspect_result is None:
-            inspect_result = InspectionResult(source=self.scan_task.source,
-                                              scan_task=self.scan_task)
-            inspect_result.save()
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
+        self.inspect_result.systems.add(sys_result)
+        self.inspect_result.save()
 
         self.scan_task.systems_scanned += 1
         self.scan_task.save()
@@ -160,7 +165,7 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         content = vcenter.RetrieveContent()
         children = content.rootFolder.childEntity
-        for child in children:  # Iterate though DataCenters
+        for child in children:  # pylint: disable=too-many-nested-blocks
             data_center = child
             data_center_name = data_center.name
             if hasattr(data_center, 'hostFolder'):
@@ -171,8 +176,19 @@ class InspectTaskRunner(ScanTaskRunner):
                     for host in hosts:  # Iterate through Hosts in the Cluster
                         vms = host.vm
                         for virtual_machine in vms:
-                            self.get_vm_info(data_center_name, cluster_name,
-                                             host, virtual_machine)
+                            vm_name = virtual_machine.summary.config.name
+                            sys_results = self.inspect_result.systems.all()
+                            sys_result = None
+                            if sys_results:
+                                sys_result = sys_results.filter(
+                                    name=vm_name).first()
+                            if sys_result:
+                                logger.debug('Results already captured'
+                                             ' for vm_name=%s', vm_name)
+                            else:
+                                self.get_vm_info(data_center_name,
+                                                 cluster_name,
+                                                 host, virtual_machine)
 
     # pylint: disable=too-many-locals
     def inspect(self):
