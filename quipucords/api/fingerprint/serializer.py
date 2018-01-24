@@ -11,28 +11,15 @@
 
 """Serializer for system fingerprint models."""
 
-import json
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         IntegerField,
                                         CharField,
                                         ChoiceField,
                                         DateField,
                                         NullBooleanField,
-                                        ModelSerializer,
-                                        Field)
+                                        ModelSerializer)
 from api.models import (SystemFingerprint, FactCollection)
-
-
-class CustomJSONField(Field):
-    """Serializer reading and writing JSON to CharField."""
-
-    def to_internal_value(self, data):
-        """Transform  python object to JSON str."""
-        return json.dumps(data)
-
-    def to_representation(self, value):
-        """Transform JSON str to python object."""
-        return json.loads(value)
+from api.common.serializer import CustomJSONField
 
 
 class FingerprintSerializer(ModelSerializer):
