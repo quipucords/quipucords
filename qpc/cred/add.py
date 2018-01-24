@@ -63,14 +63,14 @@ class CredAddCommand(CliCommand):
         self.parser.add_argument('--sshpassphrase', dest='ssh_passphrase',
                                  action='store_true',
                                  help=_(messages.CRED_SSH_PSPH_HELP))
-        self.parser.add_argument('--become_method', dest='become_method',
+        self.parser.add_argument('--become-method', dest='become_method',
                                  choices=credential.BECOME_CHOICES,
                                  metavar='BECOME_METHOD',
                                  help=_(messages.CRED_BECOME_METHOD_HELP))
-        self.parser.add_argument('--become_user', dest='become_user',
+        self.parser.add_argument('--become-user', dest='become_user',
                                  metavar='BECOME_USER',
                                  help=_(messages.CRED_BECOME_USER_HELP))
-        self.parser.add_argument('--become_password', dest='become_password',
+        self.parser.add_argument('--become-password', dest='become_password',
                                  action='store_true',
                                  help=_(messages.CRED_BECOME_PASSWORD_HELP))
 

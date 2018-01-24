@@ -1,12 +1,12 @@
 import ClassNames from 'classnames';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { routes } from '../../routes';
 import { withRouter } from 'react-router';
 
-class Content extends Component {
+class Content extends React.Component {
   renderRoutes() {
     let redirectRoot = null;
 

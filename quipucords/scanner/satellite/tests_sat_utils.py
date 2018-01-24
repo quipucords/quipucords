@@ -16,7 +16,7 @@ from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, ConnectionResults)
 from scanner.satellite.utils import (get_credential, get_connect_data,
                                      construct_url, execute_request,
-                                     status)
+                                     status, data_map)
 
 
 class SatelliteUtilsTest(TestCase):
@@ -117,3 +117,21 @@ class SatelliteUtilsTest(TestCase):
 
             self.assertEqual(status_code, 401)
             self.assertEqual(api_version, None)
+
+    def test_data_map(self):
+        """Test a mapping of data from a response dictionary."""
+        map_dict = {
+            'id': 'uuid',
+            'color': 'new::color'
+        }
+        data = {
+            'uuid': '100',
+            'new::color': 'blue',
+            'key': 'value'
+        }
+        expected = {
+            'id': '100',
+            'color': 'blue'
+        }
+        mapped = data_map(map_dict, data)
+        self.assertEqual(mapped, expected)

@@ -24,11 +24,12 @@ const getSources = () => {
       .getSources()
       .then(success => {
         dispatch(getSourcesSuccess(success));
+        dispatch(getSourcesLoading(false));
       })
       .catch(error => {
         dispatch(getSourcesError(true, error.message));
-      })
-      .finally(() => dispatch(getSourcesLoading(false)));
+        dispatch(getSourcesLoading(false));
+      });
   };
 };
 

@@ -20,7 +20,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         NullBooleanField,
                                         ModelSerializer,
                                         Field)
-from api.models import (SystemFingerprint, FactCollection, Source)
+from api.models import (SystemFingerprint, FactCollection)
 
 
 class CustomJSONField(Field):
@@ -41,9 +41,6 @@ class FingerprintSerializer(ModelSerializer):
     # Scan information
     fact_collection_id = PrimaryKeyRelatedField(
         queryset=FactCollection.objects.all())
-    source_id = PrimaryKeyRelatedField(queryset=Source.objects.all())
-    source_type = ChoiceField(
-        required=True, choices=SystemFingerprint.SOURCE_TYPE)
 
     # Common facts
     name = CharField(required=False, max_length=256)
@@ -91,6 +88,8 @@ class FingerprintSerializer(ModelSerializer):
 
     vm_cluster = CharField(required=False, max_length=128)
     vm_datacenter = CharField(required=False, max_length=128)
+
+    metadata = CustomJSONField(required=True)
 
     class Meta:
         """Meta class for FingerprintSerializer."""

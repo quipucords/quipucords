@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import {
   Alert,
@@ -12,15 +11,57 @@ import {
   Modal
 } from 'patternfly-react';
 
+import { bindMethods } from '../../common/helpers';
+import Store from '../../redux/store';
+import { toastNotificationTypes } from '../../redux/constants';
 import { getScans } from '../../redux/actions/scansActions';
 
 import ScansToolbar from './scansToolbar';
-import ScansEmptyState from './scansEmptyState';
+import SourcesEmptyState from '../sources/sourcesEmptyState';
 import { ScanListItem } from './scanListItem';
 
 class Scans extends React.Component {
+  constructor() {
+    super();
+
+    bindMethods(this, [
+      'runScans',
+      'repeatScans',
+      'downloadScans',
+      'itemSelectChange',
+      'addSource',
+      'importSources'
+    ]);
+    this.state = {
+      filteredItems: [],
+      selectedItems: []
+    };
+  }
+
   componentDidMount() {
     this.props.getScans();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.scans !== this.props.scans) {
+      // Reset selection state though we may want to keep selections over refreshes...
+      nextProps.scans.forEach(scan => {
+        scan.selected = false;
+      });
+
+      let filteredItems = this.filterScans(
+        nextProps.scans,
+        nextProps.activeFilters
+      );
+
+      this.setState({ filteredItems: filteredItems, selectedItems: [] });
+    } else if (nextProps.activeFilters !== this.props.activeFilters) {
+      let filteredItems = this.filterScans(
+        nextProps.scans,
+        nextProps.activeFilters
+      );
+      this.setState({ filteredItems: filteredItems });
+    }
   }
 
   matchesFilter(item, filter) {
@@ -50,11 +91,9 @@ class Scans extends React.Component {
     return matches;
   }
 
-  filterScans() {
-    const { scans, activeFilters } = this.props;
-
+  filterScans(scans, filters) {
     return scans.filter(item => {
-      return this.matchesFilters(item, activeFilters);
+      return this.matchesFilters(item, filters);
     });
   }
 
@@ -102,11 +141,73 @@ class Scans extends React.Component {
     });
   }
 
+  runScans() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Running scans is not yet implemented'
+    });
+  }
+
+  repeatScans() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Repeating scans is not yet implemented'
+    });
+  }
+
+  downloadScans() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Downloading scans is not yet implemented'
+    });
+  }
+
+  itemSelectChange(item) {
+    const { filteredItems } = this.state;
+
+    item.selected = !item.selected;
+    let selectedItems = filteredItems.filter(item => {
+      return item.selected === true;
+    });
+
+    this.setState({ selectedItems: selectedItems });
+  }
+
+  addSource() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Importing sources is not yet implemented'
+    });
+  }
+
+  importSources() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Adding sources is not yet implemented'
+    });
+  }
+
   renderList(items) {
     return (
       <Row>
         <ListView className="quipicords-list-view">
-          {items.map((item, index) => <ScanListItem item={item} key={index} />)}
+          {items.map((item, index) => (
+            <ScanListItem
+              item={item}
+              key={index}
+              onItemSelectChange={this.itemSelectChange}
+            />
+          ))}
         </ListView>
       </Row>
     );
@@ -114,6 +215,7 @@ class Scans extends React.Component {
 
   render() {
     const { loading, loadError, errorMessage, scans } = this.props;
+    const { filteredItems, selectedItems } = this.state;
 
     if (loading) {
       return (
@@ -135,21 +237,26 @@ class Scans extends React.Component {
       );
     }
     if (scans && scans.length) {
-      let filteredScans = this.filterScans(scans);
-      this.sortScans(filteredScans);
+      this.sortScans(filteredItems);
 
       return [
         <ScansToolbar
           totalCount={scans.length}
-          filteredCount={filteredScans.length}
+          filteredCount={filteredItems.length}
           key={1}
+          runScansAvailable={selectedItems && selectedItems.length > 0}
+          onRunScans={this.runScans}
+          repeatScansAvailable={selectedItems && selectedItems.length > 0}
+          onRepeatScans={this.repeatScans}
+          downloadScansAvailable={selectedItems && selectedItems.length > 0}
+          onDownloadScans={this.downloadScans}
         />,
         <Grid fluid key={2}>
-          {this.renderList(filteredScans)}
+          {this.renderList(filteredItems)}
         </Grid>
       ];
     }
-    return <ScansEmptyState />;
+    return <SourcesEmptyState />;
   }
 }
 
@@ -184,4 +291,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Scans));
+export default connect(mapStateToProps, mapDispatchToProps)(Scans);

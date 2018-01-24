@@ -24,11 +24,12 @@ const getCredentials = () => {
       .getCredentials()
       .then(success => {
         dispatch(getCredentialsSuccess(success));
+        dispatch(getCredentialsLoading(false));
       })
       .catch(error => {
         dispatch(getCredentialsError(true, error.message));
-      })
-      .finally(() => dispatch(getCredentialsLoading(false)));
+        dispatch(getCredentialsLoading(false));
+      });
   };
 };
 

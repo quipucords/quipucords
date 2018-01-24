@@ -90,3 +90,17 @@ def status(scan_task):
         logger.error('Failure while obtaining Satellite status %s for %s. %s',
                      url, scan_task, response.json())
     return (status_code, api_version)
+
+
+def data_map(mapping_dict, data):
+    """Map data keys to new output.
+
+    :param mapping_dict: dictionary of key value mappings
+    :param data: Endpoint response data
+    :returns: mapped data dictionary
+    """
+    out = {}
+    if data:
+        for key, mapping_key in mapping_dict.items():
+            out[key] = data.get(mapping_key)
+    return out

@@ -93,7 +93,7 @@ class TestNormalizeResult(unittest.TestCase):
                     _host=SimpleNamespace(name='hostname'),
                     _result={ANSIBLE_FACTS:
                              {'fact': 'fact_result'}},
-                    _task=SimpleNamespace())),
+                    _task=SimpleNamespace(register='name'))),
             [('fact', 'fact_result')])
 
     def test_register_ansible_facts(self):
@@ -108,10 +108,21 @@ class TestNormalizeResult(unittest.TestCase):
                              {'fact1': 'result1',
                               'fact2': 'result2',
                               'fact3': 'result3'}},
-                    _task=SimpleNamespace()))),
+                    _task=SimpleNamespace(register='name')))),
             {('fact1', 'result1'),
              ('fact2', 'result2'),
              ('fact3', 'result3')})
+
+    def test_internal_ansible_fact(self):
+        """A set_facts task that registers an internal fact."""
+        self.assertEqual(
+            normalize_result(
+                SimpleNamespace(
+                    _host=SimpleNamespace(name='hostname'),
+                    _result={ANSIBLE_FACTS:
+                             {'internal_fact': 'fact_result'}},
+                    _task=SimpleNamespace(register='name'))),
+            [])
 
 
 class HostScannerTest(TestCase):
