@@ -14,12 +14,13 @@
 from datetime import datetime
 from django.test import TestCase
 from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
+                           NETWORK_VCENTER_MERGE_KEYS,
                            _process_source,
                            _remove_duplicate_fingerprints,
                            _merge_fingerprint,
                            _create_index_for_fingerprint,
                            _merge_matching_fingerprints,
-                           _merge_network_and_vcenter)
+                           _merge_fingerprints_from_source_types)
 from api.models import Source
 
 
@@ -346,8 +347,8 @@ class EngineTest(TestCase):
             self._create_vcenter_fingerprint(vm_uuid='match'),
             self._create_vcenter_fingerprint(vm_uuid='2')]
 
-        result_fingerprints = _merge_network_and_vcenter(
-            nfingerprints, vfingerprints)
+        result_fingerprints = _merge_fingerprints_from_source_types(NETWORK_VCENTER_MERGE_KEYS,
+                                                                    nfingerprints, vfingerprints)
 
         self.assertEqual(len(result_fingerprints), 3)
 
