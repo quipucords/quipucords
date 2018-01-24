@@ -18,7 +18,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         JSONField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField, CustomJSONField
 from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 
@@ -27,7 +27,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
-    optional_products = JSONField(required=False)
+    optional_products = CustomJSONField(required=False)
 
     class Meta:
         """Metadata for serializer."""

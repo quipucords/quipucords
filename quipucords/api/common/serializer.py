@@ -10,9 +10,11 @@
 #
 """Common serializer to remove empty or null values."""
 
+import json
 from collections import OrderedDict
 import api.messages as messages
 from rest_framework.serializers import (ModelSerializer,
+                                        Field,
                                         ChoiceField,
                                         ValidationError)
 
@@ -66,3 +68,15 @@ class NotEmptySerializer(ModelSerializer):
                               isinstance(result[key], (bool, int)) or
                               bool(result[key])])
         return result
+
+
+class CustomJSONField(Field):
+    """Serializer reading and writing JSON to CharField."""
+
+    def to_internal_value(self, data):
+        """Transform  python object to JSON str."""
+        return json.dumps(data)
+
+    def to_representation(self, value):
+        """Transform JSON str to python object."""
+        return json.loads(value)
