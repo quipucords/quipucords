@@ -13,14 +13,15 @@
 from rest_framework.serializers import CharField, ChoiceField
 from api.models import (InspectionResults, InspectionResult,
                         SystemInspectionResult, RawFact)
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import (NotEmptySerializer,
+                                   CustomJSONField)
 
 
 class RawFactSerializer(NotEmptySerializer):
     """Serializer for the SystemInspectionResult model."""
 
     name = CharField(required=True, max_length=1024)
-    value = CharField(required=True)
+    value = CustomJSONField(required=True)
 
     class Meta:
         """Metadata for serialzer."""
