@@ -11,7 +11,7 @@ import App from './components/app';
 import { baseName } from './routes';
 import store from './redux/store';
 
-import registerServiceWorker from './registerServiceWorker';
+import registerServiceWorker from './common/registerServiceWorker';
 
 registerServiceWorker();
 

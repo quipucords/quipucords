@@ -24,11 +24,12 @@ const getScans = () => {
       .getScans()
       .then(success => {
         dispatch(getScansSuccess(success));
+        dispatch(getScansLoading(false));
       })
       .catch(error => {
         dispatch(getScansError(true, error.message));
-      })
-      .finally(() => dispatch(getScansLoading(false)));
+        dispatch(getScansLoading(false));
+      });
   };
 };
 

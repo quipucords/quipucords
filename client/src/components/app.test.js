@@ -17,5 +17,7 @@ describe('Application', function() {
       </Provider>,
       div
     );
+
+    ReactDOM.unmountComponentAtNode(div);
   });
 });
