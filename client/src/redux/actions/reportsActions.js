@@ -24,11 +24,12 @@ const getReports = () => {
       .getReports()
       .then(success => {
         dispatch(getReportsSuccess(success));
+        dispatch(getReportsLoading(false));
       })
       .catch(error => {
         dispatch(getReportsError(true, error.message));
-      })
-      .finally(() => dispatch(getReportsLoading(false)));
+        dispatch(getReportsLoading(false));
+      });
   };
 };
 
