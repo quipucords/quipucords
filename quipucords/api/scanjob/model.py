@@ -29,32 +29,11 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
-    # Scan Options
-    SCAN_JBOSS_EAP = 'jboss-eap'
-    SCAN_JBOSS_FUSE = 'jboss-fuse'
-    SCAN_JBOSS_BRMS = 'jboss-brms'
-    # SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
-    # SCAN_EAP_BRMS = 'jboss-eap', 'jboss-brms'
-    # SCAN_EAP_FUSE_BRMS = 'jboss-eap', 'jboss-fuse', 'jboss-brms'
-    SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
-                    (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
-                    (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
-                    # (SCAN_EAP_FUSE, SCAN_EAP_FUSE),
-                    # (SCAN_EAP_BRMS, SCAN_EAP_BRMS),
-                    # (SCAN_EAP_FUSE_BRMS, SCAN_EAP_FUSE_BRMS))
-
-    optional_products = models.CharField(
-        max_length=50,
-        choices=SCAN_CHOICES,
-        null=True
-    )
     max_concurrency = models.PositiveIntegerField(default=50)
+    optional_products = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""
-        print('\n\n\n Optional Products: \n\n\n')
-        print(self.optional_products)
-        print('\n\n\n')
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
             'optional_products: {}'.format(self.id,
@@ -80,24 +59,6 @@ class ScanJob(models.Model):
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
-    SCAN_JBOSS_EAP = 'jboss-eap'
-    SCAN_JBOSS_FUSE = 'jboss-fuse'
-    SCAN_JBOSS_BRMS = 'jboss-brms'
-    # SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
-    # SCAN_EAP_BRMS = ['jboss-eap', 'jboss-brms']
-    # SCAN_EAP_FUSE_BRMS = ['jboss-eap', 'jboss-fuse', 'jboss-brms']
-    SCAN_CHOICES = ((SCAN_JBOSS_EAP, SCAN_JBOSS_EAP),
-                    (SCAN_JBOSS_FUSE, SCAN_JBOSS_FUSE),
-                    (SCAN_JBOSS_BRMS, SCAN_JBOSS_BRMS))
-                    # (SCAN_EAP_FUSE, SCAN_EAP_FUSE),
-                    # (SCAN_EAP_BRMS, SCAN_EAP_BRMS),
-                    # (SCAN_EAP_FUSE_BRMS, SCAN_EAP_FUSE_BRMS))
-
-    optional_products = models.CharField(
-        max_length=10,
-        choices=SCAN_CHOICES,
-        null=True
-    )
     fact_collection_id = models.IntegerField(null=True)
 
     def __str__(self):
@@ -108,14 +69,12 @@ class ScanJob(models.Model):
             'status:{}, '\
             'tasks: {}, '\
             'options: {}, '\
-            'optional_products: {}, '\
             'fact_collection_id: {}'.format(self.id,
                                             self.sources,
                                             self.scan_type,
                                             self.status,
                                             self.tasks,
                                             self.options,
-                                            self.optional_products,
                                             self.fact_collection_id) + '}'
 
     class Meta:

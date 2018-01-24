@@ -49,10 +49,10 @@ class ScanStartCommand(CliCommand):
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.parser.add_argument('--optional-products',
                                  dest='optional_products',
-                                 #nargs='+',
+                                 nargs='+',
                                  choices=scan.SCAN_OPTIONS,
                                  metavar='OPTIONAL_PRODUCTS',
-                                 #default=[],
+                                 default=[],
                                  help=_(messages.SCAN_OPTIONAL_PRODUCTS_HELP),
                                  required=False)
         self.source_ids = []
@@ -98,9 +98,8 @@ class ScanStartCommand(CliCommand):
             'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {
-                'max_concurrency': self.args.max_concurrency
-            },
-            'optional_products': self.args.optional_products
+                'max_concurrency': self.args.max_concurrency,
+                'optional_products': self.args.optional_products}
         }
 
     def _handle_response_success(self):

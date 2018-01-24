@@ -14,7 +14,8 @@ from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
-                                        IntegerField)
+                                        IntegerField,
+                                        JSONField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
@@ -25,11 +26,8 @@ from api.scantasks.serializer import SourceField
 class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
-    optional_products = ValidStringChoiceField(required=False,
-                                               read_only=True,
-                                               choices=ScanOptions.SCAN_CHOICES)
-
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
+    optional_products = JSONField(required=False)
 
     class Meta:
         """Metadata for serializer."""
@@ -71,7 +69,6 @@ class ScanJobSerializer(NotEmptySerializer):
         """Create a scan job."""
         options = validated_data.pop('options', None)
         scanjob = super().create(validated_data)
-
         if options:
             options = ScanOptions.objects.create(**options)
         else:

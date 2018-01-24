@@ -12,7 +12,7 @@
 import logging
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import (ScanTask, ConnectionResult,
+from api.models import (ScanTask, ScanOptions, ConnectionResult,
                         SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback
@@ -113,57 +113,26 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :returns: An array of dictionaries of facts
         """
-        roles = ['check_dependencies',
-                 'connection',
-                 'cpu',
-                 'date',
-                 'dmi',
-                 'etc_release',
-                 'file_contents']
-        limit = self.scan_job.optional_products
-        if limit:
-            if limit == 'jboss-eap':
-                print('\n\n\n Building roles for jboss-eap \n\n\n')
-                roles.extend(['jboss_eap',
-                             'host_done'])
-            elif limit == 'jboss-fuse':
-                print('\n\n\n Building roles for jboss-fuse \n\n\n')
-                roles.extend(['jboss_eap',
-                             'jboss_fuse_on_karaf',
-                             'host_done'])
-            elif limit == 'jboss-brms':
-                roles.extend(['jboss_eap',
-                             'jboss_brms',
-                             'host_done'])
-            else:
-                roles.extend(['jboss_eap',
-                             'jboss_brms',
-                             'jboss_fuse_on_karaf',
-                             'ifconfig',
-                             'redhat_packages',
-                             'redhat_release',
-                             'subman',
-                             'uname',
-                             'virt',
-                             'virt_what',
-                             'host_done'])
-
-        else:
-            roles.extend(['jboss_eap',
-                         'jboss_brms',
-                         'jboss_fuse_on_karaf',
-                         'ifconfig',
-                         'redhat_packages',
-                         'redhat_release',
-                         'subman',
-                         'uname',
-                         'virt',
-                         'virt_what',
-                         'host_done'])
-
-        print('\n\n\nRoles\n\n\n')
-        print(roles)
-        print('\n\n\n')
+        roles = [
+            'check_dependencies',
+            'connection',
+            'cpu',
+            'date',
+            'dmi',
+            'etc_release',
+            'file_contents',
+            'jboss_eap',
+            'jboss_brms',
+            'jboss_fuse_on_karaf',
+            'ifconfig',
+            'redhat_packages',
+            'redhat_release',
+            'subman',
+            'uname',
+            'virt',
+            'virt_what',
+            'host_done',
+        ]
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,
@@ -172,6 +141,10 @@ class InspectTaskRunner(ScanTaskRunner):
         connection_port = self.scan_task.source.port
 
         connected, failed, completed = self.obtain_discovery_data()
+        facts_to_collect = self.scan_job.options.optional_products
+        print("\n\n Facts to collect: \n\n")
+        print(facts_to_collect)
+        print("\n\n")
         forks = self.scan_job.options.max_concurrency
 
         num_completed = len(completed)
@@ -259,7 +232,7 @@ def construct_scan_inventory(hosts, connection_port, concurrency_count):
     :param hosts: The collection of hosts/credential tuples
     :param connection_port: The connection port
     :param concurrency_count: The number of concurrent scans
-    :returns: A dictionary of the ansible invetory
+    :returns: A dictionary of the ansible inventory
     """
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,

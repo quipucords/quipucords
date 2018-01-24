@@ -142,6 +142,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
+        optional_products = self.scan_job.options.optional_products
         forks = self.scan_job.options.max_concurrency
         connection_port = source['port']
         credentials = source['credentials']
