@@ -389,11 +389,8 @@ class SatelliteSixV1(SatelliteInterface):
         :returns: dictionary of host details
         """
         details = {}
-        sys_result = None
-        sys_results = self.inspect_result.systems.all()
-        if sys_results:
-            sys_result = sys_results.filter(
-                name=host_name).first()
+        sys_result = self.inspect_result.systems.filter(
+            name=host_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
@@ -492,11 +489,8 @@ class SatelliteSixV2(SatelliteInterface):
         :returns: dictionary of host details
         """
         details = {}
-        sys_result = None
-        sys_results = self.inspect_result.systems.all()
-        if sys_results:
-            sys_result = sys_results.filter(
-                name=host_name).first()
+        sys_result = self.inspect_result.systems.filter(
+            name=host_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',

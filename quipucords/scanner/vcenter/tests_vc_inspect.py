@@ -15,7 +15,8 @@ from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (Credential, Source, HostRange, ScanTask,
-                        ScanJob, InspectionResults, InspectionResult)
+                        ScanJob, InspectionResults, InspectionResult,
+                        SystemInspectionResult)
 from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
 
 
@@ -192,6 +193,17 @@ class InspectTaskRunnerTest(TestCase):
     # pylint: disable=too-many-locals
     def test_recurse_datacenter(self):
         """Test the recurse_datacenter method."""
+        inspect_result = InspectionResult(
+            source=self.scan_task.source,
+            scan_task=self.scan_task)
+        inspect_result.save()
+        sys_result = SystemInspectionResult(
+            name='vm1', status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
+        self.inspect_results.results.add(inspect_result)
+        self.inspect_results.save()
         vcenter = Mock()
         content = Mock()
         root_folder = Mock()
@@ -205,12 +217,14 @@ class InspectTaskRunnerTest(TestCase):
                 cluster = Mock()
                 cluster.name = 'cluster' + str(j)
                 host = Mock()
-                h_summary = Mock()
-                h_config = Mock()
+                h_summary = Mock(name='h_summary')
+                h_config = Mock(name='h_config')
                 h_config.name = 'host1'
                 h_summary.config = h_config
                 host.summary = h_summary
-                host.vm = [Mock()]
+                virtual_machine = Mock(name='vm')
+                virtual_machine.summary.config.name = 'host1'
+                host.vm = [virtual_machine]
                 hosts = [host]
                 cluster.host = hosts
                 clusters.append(cluster)
@@ -220,12 +234,6 @@ class InspectTaskRunnerTest(TestCase):
         root_folder.childEntity = child_entity
         content.rootFolder = root_folder
         vcenter.RetrieveContent = Mock(return_value=content)
-        inspect_result = InspectionResult(
-            source=self.scan_task.source,
-            scan_task=self.scan_task)
-        inspect_result.save()
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
         with patch.object(InspectTaskRunner,
                           'get_vm_info') as mock_get_vm_info:
             self.runner.inspect_result = inspect_result
