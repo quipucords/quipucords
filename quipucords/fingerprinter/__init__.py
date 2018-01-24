@@ -129,9 +129,10 @@ def _process_sources(raw_facts):
     # Merge network and satellite fingerprints
     logger.debug('Merging network and satellite fingerprints.')
     number_before = len(network_fingerprints) + len(satellite_fingerprints)
-    all_fingerprints = _merge_fingerprints_from_source_types(NETWORK_SATELLITE_MERGE_KEYS,
-                                                             network_fingerprints,
-                                                             satellite_fingerprints)
+    all_fingerprints = _merge_fingerprints_from_source_types(
+        NETWORK_SATELLITE_MERGE_KEYS,
+        network_fingerprints,
+        satellite_fingerprints)
     number_after = len(all_fingerprints)
     logger.debug('Merged network and satellite fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
@@ -139,10 +140,11 @@ def _process_sources(raw_facts):
 
     # Merge network and vcenter fingerprints
     logger.debug('Merging network and vcenter fingerprints.')
-    number_before = len(network_fingerprints) + len(vcenter_fingerprints)
-    all_fingerprints = _merge_fingerprints_from_source_types(NETWORK_VCENTER_MERGE_KEYS,
-                                                             network_fingerprints,
-                                                             vcenter_fingerprints)
+    number_before = len(all_fingerprints) + len(vcenter_fingerprints)
+    all_fingerprints = _merge_fingerprints_from_source_types(
+        NETWORK_VCENTER_MERGE_KEYS,
+        all_fingerprints,
+        vcenter_fingerprints)
     number_after = len(all_fingerprints)
     logger.debug('Merged network and vcenter fingerprints.')
     logger.debug('Number before: %d, Number after: %d',
@@ -361,33 +363,21 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     priority_keys = set(priority_fingerprint.keys())
     to_merge_keys = set(to_merge_fingerprint.keys())
 
-    common_key_list = list(priority_keys & to_merge_keys)
-    if META_DATA_KEY in common_key_list:
-        common_key_list.remove(META_DATA_KEY)
-
-    only_to_merge_key_list = list(to_merge_keys - priority_keys)
-    if META_DATA_KEY in only_to_merge_key_list:
-        only_to_merge_key_list.remove(META_DATA_KEY)
+    keys_to_add_list = list(to_merge_keys - priority_keys)
+    if META_DATA_KEY in keys_to_add_list:
+        keys_to_add_list.remove(META_DATA_KEY)
 
     logger.debug('Merging the following two fingerprints.')
     logger.debug('Base fingerprint: %s', priority_fingerprint)
     logger.debug('Overlay fingerprint: %s', to_merge_fingerprint)
 
-    for fact_key in common_key_list:
-        existing_nfact = priority_fingerprint.get(fact_key)
-        new_vfact = to_merge_fingerprint.get(fact_key)
-        if not existing_nfact and new_vfact:
-            priority_fingerprint[META_DATA_KEY][fact_key] = \
-                to_merge_fingerprint[META_DATA_KEY][fact_key]
-            priority_fingerprint[fact_key] = new_vfact
-
     # Add vcenter facts
-    for fact_key in only_to_merge_key_list:
-        new_vfact = to_merge_fingerprint.get(fact_key)
-        if new_vfact:
+    for fact_key in keys_to_add_list:
+        to_merge_fact = to_merge_fingerprint.get(fact_key)
+        if to_merge_fact:
             priority_fingerprint[META_DATA_KEY][fact_key] = \
                 to_merge_fingerprint[META_DATA_KEY][fact_key]
-            priority_fingerprint[fact_key] = new_vfact
+            priority_fingerprint[fact_key] = to_merge_fact
 
     logger.debug('Merged fingerprint: %s', priority_fingerprint)
 
@@ -607,79 +597,46 @@ def _process_satellite_fact(source, fact):
 
     fingerprint = {META_DATA_KEY: {}}
 
-# {
-#     "uuid": "74caa8b0-3dc1-4cd6-9af6-eb6c62c286e0",
-#     "hostname": "chost-regtest-c8h5lxxrrzbkcreg.lab.redhat.com",
-
-##     "registered_by": None,
-##     "registration_time": "2018-01-11 21:13:57 UTC",
-##     "last_checkin_time": "2018-01-11 21:14:05 UTC",
-##     "katello_agent_installed": False,
-#     "os_release": "RedHat 7.4",
-##     "organization": "ACME",
-##     "errata_out_of_date": 0,
-##     "packages_out_of_date": 0,
-#     "virt_type": "lxc",
-##     "kernel_version": "3.10.0-693.5.2.el7.x86_64",
-##     "architecture": "x86_64",
-#     "is_virtualized": "true",
-#     "cores": "32",
-#     "num_sockets": "2",
-##     "location": "Raleigh",
-## "ip_addresses": [
-##     "172.17.0.22"
-## ],
-## "mac_addresses": [
-##     "02:42:AC:11:00:16"
-## ],
-#     "os_name": "RedHat",
-#     "os_version": "7.4",
-##     "entitlements": [
-##         {
-##             "derived_entitlement": False,
-##             "name": "Satellite Tools 6.3",
-##             "amount": 1,
-##             "account_number": None,
-##             "contract_number": None,
-##             "start_date": "2017-12-01 14:50:59 UTC",
-##             "end_date": "2047-11-24 14:50:59 UTC"
-##         },
-##         {
-##             "derived_entitlement": False,
-##             "name": "Red Hat Satellite Employee Subscription",
-##             "amount": 1,
-##             "account_number": 1212729,
-##             "contract_number": 10845203,
-##             "start_date": "2015-12-15 05:00:00 UTC",
-##             "end_date": "2022-01-01 04:59:59 UTC"
-##         }
-##     ]
-# }
-
     # Common facts
     add_fact_to_fingerprint(source, 'hostname', fact, 'name', fingerprint)
 
-    add_fact_to_fingerprint(source, 'os_release', fact, 'os_release', fingerprint)
+    add_fact_to_fingerprint(source, 'os_release', fact,
+                            'os_release', fingerprint)
     add_fact_to_fingerprint(source, 'os_name', fact, 'os_name', fingerprint)
-    add_fact_to_fingerprint(source, 'os_version', fact, 'os_version', fingerprint)
-    add_fact_to_fingerprint(source, 'mac_addresses', fact, 'mac_addresses', fingerprint)
+    add_fact_to_fingerprint(source, 'os_version', fact,
+                            'os_version', fingerprint)
+
+    add_fact_to_fingerprint(source, 'mac_addresses',
+                            fact, 'mac_addresses', fingerprint)
     add_fact_to_fingerprint(source, 'ip_addresses', fact,
                             'ip_addresses', fingerprint)
-    # add_fact_to_fingerprint(source, 'raw_fact_key', fact, 'cpu_count', fingerprint)
+
+    add_fact_to_fingerprint(source, 'cores', fact, 'cpu_count', fingerprint)
 
     # Common network/satellite
     add_fact_to_fingerprint(source, 'uuid', fact,
                             'subscription_manager_id', fingerprint)
-    add_fact_to_fingerprint(source, 'is_virtualized',
-                            fact, 'virtualized_is_guest', fingerprint)
     add_fact_to_fingerprint(source, 'virt_type', fact,
                             'virtualized_type', fingerprint)
 
+    is_virtualized = fact.get('is_virtualized')
+    if is_virtualized:
+        infrastructure_type = 'virtualized'
+    else:
+        infrastructure_type = 'unknown'
+    add_fact_to_fingerprint(source, 'is_virtualized', fact,
+                            'infrastructure_type', fingerprint,
+                            fact_value=infrastructure_type)
+
+    if fact.get('virt_type') and fact.get('virtual_host') != fact.get('hostname'):
+        virtualized_is_guest = True
+    else:
+        virtualized_is_guest = False
+    add_fact_to_fingerprint(source, 'virt_type/virtual_host/hostname', fact,
+                            'virtualized_is_guest', fingerprint,
+                            fact_value=virtualized_is_guest)
+
     # Satellite specific facts
-    add_fact_to_fingerprint(source, 'kernel_version',
-                            fact, 'sat_kernel_version', fingerprint)
-    add_fact_to_fingerprint(source, 'architecture', fact,
-                            'sat_architecture', fingerprint)
     add_fact_to_fingerprint(source, 'cores', fact,
                             'cpu_core_count', fingerprint)
     add_fact_to_fingerprint(source, 'num_sockets', fact,

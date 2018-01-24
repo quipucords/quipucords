@@ -129,12 +129,12 @@ class EngineTest(TestCase):
     def _create_vcenter_fc_json(
             self,
             fact_collection_id=1,
-            source_id=1,
+            source_id=2,
             source_type=Source.VCENTER_SOURCE_TYPE,
             vm_cpu_count=2,
             vm_os='RHEL 7.3',
             vm_mac_addresses=None,
-            vm_ip_address=None,
+            vm_ip_addresses=None,
             vm_name='TestMachine',
             vm_state='On',
             vm_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
@@ -157,8 +157,8 @@ class EngineTest(TestCase):
         if vm_os:
             fact['vm.os'] = vm_os
 
-        if vm_ip_address:
-            fact['vm.ip_addresses'] = vm_ip_address
+        if vm_ip_addresses:
+            fact['vm.ip_addresses'] = vm_ip_addresses
         else:
             fact['vm.ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
@@ -189,6 +189,64 @@ class EngineTest(TestCase):
             fact['vm.datacenter'] = vm_datacenter
         if vm_cluster:
             fact['vm.cluster'] = vm_cluster
+
+        fact_collection = {'id': fact_collection_id, 'facts': [fact]}
+        return fact_collection
+
+    def _create_satellite_fc_json(
+            self,
+            fact_collection_id=1,
+            source_id=3,
+            source_type=Source.SATELLITE_SOURCE_TYPE,
+            hostname='9.8.7.6',
+            os_name='RHEL',
+            os_release='RHEL 7.3',
+            os_version='7.3',
+            mac_addresses=None,
+            ip_addresses=None,
+            cores=32,
+            uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
+            virt_type='lxc',
+            is_virtualized=True,
+            virtual_host='9.3.4.6',
+            num_sockets=8):
+        """Create an in memory FactCollection for tests."""
+        fact = {}
+        if source_id:
+            fact['source_id'] = source_id
+        if source_type:
+            fact['source_type'] = source_type
+        if hostname:
+            fact['hostname'] = hostname
+        if os_name:
+            fact['os_name'] = os_name
+        if os_release:
+            fact['os_release'] = os_release
+        if os_version:
+            fact['os_version'] = os_version
+
+        if ip_addresses:
+            fact['ip_addresses'] = ip_addresses
+        else:
+            fact['ip_addresses'] = ['1.2.3.4', '2.3.4.5']
+
+        if mac_addresses:
+            fact['mac_addresses'] = mac_addresses
+        else:
+            fact['mac_addresses'] = ['MAC1', 'MAC2']
+
+        if cores:
+            fact['cores'] = cores
+        if uuid:
+            fact['uuid'] = uuid
+        if virt_type:
+            fact['virt_type'] = virt_type
+        if is_virtualized:
+            fact['is_virtualized'] = is_virtualized
+        if virtual_host:
+            fact['virtual_host'] = virtual_host
+        if num_sockets:
+            fact['num_sockets'] = num_sockets
 
         fact_collection = {'id': fact_collection_id, 'facts': [fact]}
         return fact_collection
@@ -279,6 +337,25 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('vm.cluster'),
                          fingerprint.get('vm_cluster'))
 
+    def _validate_satellite_result(self, fingerprint, fact):
+        """Help to validate fields."""
+        self.assertEqual(fact.get('hostname'), fingerprint.get('name'))
+
+        self.assertEqual(fact.get('os_name'), fingerprint.get('os_name'))
+        self.assertEqual(fact.get('os_release'),fingerprint.get('os_release'))
+        self.assertEqual(fact.get('os_version'),fingerprint.get('os_version'))
+
+        self.assertEqual(fact.get('cores'),fingerprint.get('cpu_count'))
+        self.assertEqual(fact.get('ip_addresses'),fingerprint.get('ip_addresses'))
+        self.assertEqual(fact.get('mac_addresses'), fingerprint.get('mac_addresses'))
+        self.assertEqual(fact.get('uuid'),fingerprint.get('subscription_manager_id'))
+
+        self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
+        self.assertTrue(fingerprint.get('virtualized_is_guest'))
+
+        self.assertEqual(fact.get('cores'),fingerprint.get('cpu_core_count'))
+        self.assertEqual(fact.get('num_sockets'),fingerprint.get('cpu_socket_count'))
+
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""
         n_fact_collection = self._create_network_fc_json(*args, **kwargs)
@@ -305,6 +382,19 @@ class EngineTest(TestCase):
         vfingerprint = vfingerprints[0]
         self._validate_vcenter_result(vfingerprint, vfact)
         return vfingerprint
+
+    def _create_satellite_fingerprint(self, *args, **kwargs):
+        """Create test network/vcenter fingerprints."""
+        s_fact_collection = self._create_satellite_fc_json(*args, **kwargs)
+        vfact = s_fact_collection['facts'][0]
+        source = {'source_id': 2,
+                  'source_type': Source.SATELLITE_SOURCE_TYPE,
+                  'facts': s_fact_collection['facts']}
+        sfingerprints = _process_source(s_fact_collection['id'],
+                                        source)
+        sfingerprint = sfingerprints[0]
+        self._validate_vcenter_result(sfingerprint, vfact)
+        return sfingerprint
 
     ################################################################
     # Test Source functions
@@ -333,6 +423,18 @@ class EngineTest(TestCase):
         fingerprint = fingerprints[0]
         self._validate_vcenter_result(fingerprint, fact)
 
+    def test_process_satellite_source(self):
+        """Test process satellite source."""
+        fact_collection = self._create_satellite_fc_json()
+        fact = fact_collection['facts'][0]
+        source = {'source_id': 1,
+                  'source_type': Source.SATELLITE_SOURCE_TYPE,
+                  'facts': fact_collection['facts']}
+        fingerprints = _process_source(fact_collection['id'],
+                                       source)
+        fingerprint = fingerprints[0]
+        self._validate_satellite_result(fingerprint, fact)
+
     ################################################################
     # Test merge functions
     ################################################################
@@ -347,8 +449,9 @@ class EngineTest(TestCase):
             self._create_vcenter_fingerprint(vm_uuid='match'),
             self._create_vcenter_fingerprint(vm_uuid='2')]
 
-        result_fingerprints = _merge_fingerprints_from_source_types(NETWORK_VCENTER_MERGE_KEYS,
-                                                                    nfingerprints, vfingerprints)
+        result_fingerprints = _merge_fingerprints_from_source_types(
+            NETWORK_VCENTER_MERGE_KEYS,
+            nfingerprints, vfingerprints)
 
         self.assertEqual(len(result_fingerprints), 3)
 
