@@ -21,15 +21,26 @@ from api.serializers import FingerprintSerializer
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+# Keys used to de-duplicate against other network sources
 NETWORK_IDENTIFICATION_KEYS = ['subscription_manager_id',
                                'bios_uuid']
+
+# Keys used to de-duplicate against other VCenter sources
 VCENTER_IDENTIFICATION_KEYS = ['vm_uuid']
-NETWORK_SATELLITE_MERGE_KEYS = [
-    ('subscription_manager_id', 'subscription_manager_id')]
-NETWORK_VCENTER_MERGE_KEYS = [
-    ('bios_uuid', 'vm_uuid'), ('mac_addresses', 'mac_addresses')]
+
+# Keys used to de-duplicate against other satellite sources
 SATELLITE_IDENTIFICATION_KEYS = ['subscription_manager_id']
+
+# Keys used to de-duplicate against across sources
+NETWORK_SATELLITE_MERGE_KEYS = [
+    ('subscription_manager_id', 'subscription_manager_id'),
+    ('mac_addresses', 'mac_addresses')]
+NETWORK_VCENTER_MERGE_KEYS = [
+    ('bios_uuid', 'vm_uuid'),
+    ('mac_addresses', 'mac_addresses')]
+
 FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
+
 META_DATA_KEY = 'metadata'
 
 
