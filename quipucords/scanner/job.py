@@ -126,6 +126,10 @@ class ScanJobRunner(Process):
               source_type == Source.VCENTER_SOURCE_TYPE):
             runner = vcenter.InspectTaskRunner(
                 self.scan_job, scan_task, self.inspect_results)
+        elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
+              source_type == Source.SATELLITE_SOURCE_TYPE):
+            runner = satellite.InspectTaskRunner(
+                self.scan_job, scan_task, self.inspect_results)
         return runner
 
     def _send_facts_to_engine(self):

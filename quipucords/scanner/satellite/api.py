@@ -11,8 +11,11 @@
 """Satellite API Interface."""
 
 import logging
+import json
 from django.db import transaction
-from api.models import (SystemConnectionResult)
+from api.models import (SystemConnectionResult,
+                        SystemInspectionResult,
+                        RawFact)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -27,10 +30,11 @@ class SatelliteException(Exception):
 class SatelliteInterface(object):
     """Generic interface for dealing with Satellite."""
 
-    def __init__(self, scan_task, conn_result):
+    def __init__(self, scan_task, conn_result, inspect_result=None):
         """Set context for interface."""
         self.scan_task = scan_task
         self.conn_result = conn_result
+        self.inspect_result = inspect_result
 
     @transaction.atomic
     def initialize_stats(self, systems_count):
@@ -43,7 +47,7 @@ class SatelliteInterface(object):
         self.scan_task.save()
 
     @transaction.atomic
-    def record_result(self, name, credential):
+    def record_conn_result(self, name, credential):
         """Record a new result.
 
         :param name: The host name
@@ -61,10 +65,39 @@ class SatelliteInterface(object):
         self.scan_task.systems_scanned += 1
         self.scan_task.save()
 
+    @transaction.atomic
+    def record_inspect_result(self, name, facts):
+        """Record a new result.
+
+        :param name: The host name
+        :param facts: The dictionary of facts
+        """
+        sys_result = SystemInspectionResult(
+            name=name,
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+
+        for key, val in facts.items():
+            if val is not None:
+                final_value = json.dumps(val)
+                stored_fact = RawFact(name=key, value=final_value)
+                stored_fact.save()
+                sys_result.facts.add(stored_fact)
+
+        self.inspect_result.systems.add(sys_result)
+        self.inspect_result.save()
+
+        self.scan_task.systems_scanned += 1
+        self.scan_task.save()
+
     def host_count(self):
         """Obtain the count of managed hosts."""
         pass
 
     def hosts(self):
         """Obtain the managed hosts."""
+        pass
+
+    def hosts_facts(self):
+        """Obtain the managed hosts detail raw facts."""
         pass
