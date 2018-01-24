@@ -342,19 +342,23 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('hostname'), fingerprint.get('name'))
 
         self.assertEqual(fact.get('os_name'), fingerprint.get('os_name'))
-        self.assertEqual(fact.get('os_release'),fingerprint.get('os_release'))
-        self.assertEqual(fact.get('os_version'),fingerprint.get('os_version'))
+        self.assertEqual(fact.get('os_release'), fingerprint.get('os_release'))
+        self.assertEqual(fact.get('os_version'), fingerprint.get('os_version'))
 
-        self.assertEqual(fact.get('cores'),fingerprint.get('cpu_count'))
-        self.assertEqual(fact.get('ip_addresses'),fingerprint.get('ip_addresses'))
-        self.assertEqual(fact.get('mac_addresses'), fingerprint.get('mac_addresses'))
-        self.assertEqual(fact.get('uuid'),fingerprint.get('subscription_manager_id'))
+        self.assertEqual(fact.get('cores'), fingerprint.get('cpu_count'))
+        self.assertEqual(fact.get('ip_addresses'),
+                         fingerprint.get('ip_addresses'))
+        self.assertEqual(fact.get('mac_addresses'),
+                         fingerprint.get('mac_addresses'))
+        self.assertEqual(fact.get('uuid'), fingerprint.get(
+            'subscription_manager_id'))
 
         self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
         self.assertTrue(fingerprint.get('virtualized_is_guest'))
 
-        self.assertEqual(fact.get('cores'),fingerprint.get('cpu_core_count'))
-        self.assertEqual(fact.get('num_sockets'),fingerprint.get('cpu_socket_count'))
+        self.assertEqual(fact.get('cores'), fingerprint.get('cpu_core_count'))
+        self.assertEqual(fact.get('num_sockets'),
+                         fingerprint.get('cpu_socket_count'))
 
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""
