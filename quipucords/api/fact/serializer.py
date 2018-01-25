@@ -11,18 +11,18 @@
 
 """Serializer for system facts models."""
 
-from rest_framework.serializers import JSONField
 from api.models import FactCollection
-from api.common.serializer import NotEmptySerializer
+from api.common.serializer import (NotEmptySerializer,
+                                   CustomJSONField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
-    sources = JSONField(required=False)
+    sources = CustomJSONField(required=True)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""
 
         model = FactCollection
-        fields = ['id', 'sources']
+        fields = '__all__'

@@ -15,7 +15,6 @@ import logging
 import uuid
 from datetime import datetime
 import django.dispatch
-from api.fact.util import read_raw_facts
 from api.models import FactCollection, Source
 from api.serializers import FingerprintSerializer
 
@@ -55,10 +54,8 @@ def process_fact_collection(sender, instance, **kwargs):
     """
     # pylint: disable=unused-argument
 
-    raw_facts = read_raw_facts(instance.id)
-
     # Invoke ENGINE to create fingerprints from facts
-    fingerprints_list = _process_sources(raw_facts)
+    fingerprints_list = _process_sources(instance)
 
     number_valid = 0
     number_invalid = 0
@@ -84,19 +81,18 @@ def process_fact_collection(sender, instance, **kwargs):
     instance.save()
 
 
-def _process_sources(raw_facts):
+def _process_sources(fact_collection):
     """Process facts and convert to fingerprints.
 
-    :param raw_facts: Collected raw facts for all sources
+    :param json_fact_collection: Collected raw facts for all sources
     :returns: list of fingerprints for all systems (all scans)
     """
     network_fingerprints = []
     vcenter_fingerprints = []
     satellite_fingerprints = []
-    for source in raw_facts['sources']:
-        source_fingerprints = _process_source(
-            raw_facts['fact_collection_id'],
-            source)
+    for source in fact_collection.get_sources():
+        source_fingerprints = _process_source(fact_collection.id,
+                                              source)
         if source['source_type'] == Source.NETWORK_SOURCE_TYPE:
             network_fingerprints += source_fingerprints
         elif source['source_type'] == Source.VCENTER_SOURCE_TYPE:
