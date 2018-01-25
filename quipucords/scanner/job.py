@@ -14,8 +14,12 @@ from multiprocessing import Process
 from django.db.models import Q
 from fingerprinter import pfc_signal
 from api.fact.util import (validate_fact_collection_json,
-                           create_fact_collection)
-from api.models import (ScanTask, Source, ConnectionResults, InspectionResults)
+                           get_or_create_fact_collection)
+from api.models import (FactCollection,
+                        ScanTask,
+                        Source,
+                        ConnectionResults,
+                        InspectionResults)
 from scanner import network, vcenter, satellite
 
 
@@ -86,13 +90,7 @@ class ScanJobRunner(Process):
                 self.scan_job.fail()
 
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            fact_collection_id = self._send_facts_to_engine()
-            if not fact_collection_id:
-                logger.error(
-                    'Error: Facts not sent to fingerprint engine.  See logs.')
-                self.scan_job.fail()
-            else:
-                self.scan_job.fact_collection_id = fact_collection_id
+            self._send_facts_to_engine()
 
         # All tasks completed successfully and sent to endpoint
         if self.scan_job.status != ScanTask.FAILED:
@@ -160,21 +158,35 @@ class ScanJobRunner(Process):
             if has_errors:
                 logger.error('Scan producted invalid fact collection JSON: ')
                 logger.error(validation_result)
-                return None
+                self.scan_job.fail()
+                return
 
             # Create FC model and save data to JSON file
-            fact_collection = create_fact_collection(fact_collection_json)
-
-            # Log facts that were gathered
-            logger.debug('Fact collection complete for scan job %s:',
-                         self.scan_job.id)
-            logger.debug(fact_collection_json)
+            fact_collection = get_or_create_fact_collection(
+                fact_collection_json, scan_job=self.scan_job)
 
             # Send signal so fingerprint engine processes raw facts
-            pfc_signal.send(sender=self.__class__,
-                            instance=fact_collection)
+            try:
+                pfc_signal.send(sender=self.__class__,
+                                instance=fact_collection)
+                # Transition from persisted to complete after processing
+                fact_collection.status = FactCollection.FC_STATUS_COMPLETE
+                fact_collection.save()
+                logger.debug(
+                    'Fact collection %d successfully processed.',
+                    fact_collection.id)
+            except Exception as error:
+                # Transition from persisted to failed after engine failed
+                fact_collection.status = FactCollection.FC_STATUS_FAILED
+                fact_collection.save()
+                logger.error(
+                    'Fact collection %d failed to be processed.',
+                    fact_collection.id)
+                logger.error('%s:%s', error.__class__.__name__, error)
 
-            return fact_collection.id
+                # Mark scanjob failed to avoid re-running on restart
+                self.scan_job.fail()
+                raise error
         else:
             logger.error('No facts gathered from scan.')
             return None

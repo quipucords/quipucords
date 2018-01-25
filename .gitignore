@@ -112,9 +112,6 @@ migrations/
 # From ide
 .idea/
 
-# Facts
-raw_facts/
-
 # node
 node_modules
 package-lock.json

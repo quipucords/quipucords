@@ -163,6 +163,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'api.fact': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
         'api.scanjob': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
@@ -222,6 +226,3 @@ ES_CONFIGURATION = {
     'fingerprint_index_name': 'fingerprints_index',
     'doc_type': 'fingerprint'
 }
-
-
-FACTS_DIR = BASE_DIR + '/raw_facts'
