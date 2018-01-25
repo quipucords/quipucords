@@ -69,6 +69,8 @@ class CliCommand(object):
         self.response = request(method=self.req_method, path=self.req_path,
                                 params=self.req_params,
                                 payload=self.req_payload)
+
+        print(self.response.status_code)
         # pylint: disable=no-member
         if self.response.status_code not in self.success_codes:
             # handle error cases
