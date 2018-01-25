@@ -82,7 +82,6 @@ class InspectTaskRunner(ScanTaskRunner):
                     self.inspect_results.results.add(inspect_result)
                     self.inspect_results.save()
                 self.inspect_result = inspect_result
-                inspect_result.systems.all().delete()
 
                 api = create(satellite_version, api_version,
                              self.scan_task, self.conn_result,
