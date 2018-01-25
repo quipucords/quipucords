@@ -69,3 +69,11 @@ manpage:
 	  --variable=date:'November 14, 2017' \
 	  --variable=footer:'version 0.0.1' \
 	  --variable=header:'QPC Command Line Guide'
+
+manpage-html:
+	@mkdir -p build
+	pandoc docs/source/man.rst \
+	  --standalone -t html -o build/qpc.html \
+	  --variable=section:1 \
+	  --variable=footer:'version 0.0.1' \
+	  --variable=header:'QPC Command Line Guide'
