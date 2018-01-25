@@ -15,7 +15,7 @@ import requests_mock
 from django.test import TestCase
 from api.models import (Credential, Source, HostRange, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult,
-                        InspectionResult)
+                        InspectionResult, SystemInspectionResult)
 from scanner.satellite.utils import construct_url
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
@@ -235,6 +235,18 @@ class SatelliteSixV1Test(TestCase):
                 'mac_addresses': ['fe80::5054:ff:fe24:946e'],
                 'os_name': 'RedHat', 'os_version': '7.4'}
             self.assertEqual(host_info, expected)
+
+    def test_host_details_skip(self):
+        """Test host_details method for already captured data."""
+        sys_result = SystemInspectionResult(
+            name='sys1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        self.inspect_result.systems.add(sys_result)
+        self.inspect_result.save()
+        detail = self.api.host_details(1, 1, 'sys1')
+        self.assertEqual(len(self.inspect_result.systems.all()), 1)
+        self.assertEqual(detail, {})
 
     def test_host_details(self):
         """Test host_details method with mock data."""
@@ -721,6 +733,18 @@ class SatelliteSixV2Test(TestCase):
                 self.assertEqual(details, expected)
                 mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
                 mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY)
+
+    def test_host_details_skip(self):
+        """Test host_details method for already captured data."""
+        sys_result = SystemInspectionResult(
+            name='sys1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        self.inspect_result.systems.add(sys_result)
+        self.inspect_result.save()
+        detail = self.api.host_details(1, 'sys1')
+        self.assertEqual(len(self.inspect_result.systems.all()), 1)
+        self.assertEqual(detail, {})
 
     def test_hosts_facts_with_err(self):
         """Test the hosts_facts method."""

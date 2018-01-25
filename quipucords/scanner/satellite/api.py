@@ -43,7 +43,8 @@ class SatelliteInterface(object):
         :param systems_count: The system count
         """
         self.scan_task.systems_count = systems_count
-        self.scan_task.systems_scanned = 0
+        if self.scan_task.systems_scanned is None:
+            self.scan_task.systems_scanned = 0
         self.scan_task.save()
 
     @transaction.atomic
