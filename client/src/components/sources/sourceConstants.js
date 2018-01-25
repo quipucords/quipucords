@@ -12,6 +12,7 @@ const SourceFilterFields = [
     filterType: 'select',
     filterValues: [
       { title: 'Network', id: 'network' },
+      { title: 'Satellite', id: 'satellite' },
       { title: 'VCenter', id: 'vcenter' }
     ]
   }

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
+import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
@@ -196,12 +196,6 @@ class SourcesToolbar extends React.Component {
     return (
       <div className="form-group">
         <Button
-          disabled={this.props.authenticateAvailable === false}
-          onClick={this.props.onAuthenticate}
-        >
-          Authenticate
-        </Button>
-        <Button
           disabled={this.props.scanAvailable === false}
           onClick={this.props.onScan}
         >
@@ -209,6 +203,9 @@ class SourcesToolbar extends React.Component {
         </Button>
         <Button bsStyle="primary" onClick={this.props.onAddSource}>
           Add
+        </Button>
+        <Button onClick={this.props.onRefresh}>
+          <Icon type="fa" name="refresh" />
         </Button>
       </div>
     );
@@ -281,10 +278,9 @@ SourcesToolbar.propTypes = {
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool,
   onAddSource: PropTypes.func,
-  authenticateAvailable: PropTypes.bool,
-  onAuthenticate: PropTypes.func,
   scanAvailable: PropTypes.bool,
-  onScan: PropTypes.func
+  onScan: PropTypes.func,
+  onRefresh: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {

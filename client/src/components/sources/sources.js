@@ -27,9 +27,9 @@ class Sources extends React.Component {
     bindMethods(this, [
       'addSource',
       'importSources',
-      'authenticateSources',
       'scanSources',
-      'itemSelectChange'
+      'itemSelectChange',
+      'refresh'
     ]);
     this.state = {
       filteredItems: [],
@@ -155,15 +155,6 @@ class Sources extends React.Component {
     });
   }
 
-  authenticateSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Authenticating sources is not yet implemented'
-    });
-  }
-
   scanSources() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -182,6 +173,10 @@ class Sources extends React.Component {
     });
 
     this.setState({ selectedItems: selectedItems });
+  }
+
+  refresh() {
+    this.props.getSources();
   }
 
   renderList(items) {
@@ -233,10 +228,9 @@ class Sources extends React.Component {
           filteredCount={filteredItems.length}
           key={1}
           onAddSource={this.addSource}
-          authenticateAvailable={selectedItems && selectedItems.length > 0}
-          onAuthenticate={this.authenticateSources}
           scanAvailable={selectedItems && selectedItems.length > 0}
           onScan={this.scanSources}
+          onRefresh={this.refresh}
         />,
         <Grid fluid key={2}>
           {this.renderList(filteredItems)}
