@@ -21,13 +21,15 @@ from rest_framework.permissions import IsAuthenticated
 from api.models import FactCollection
 from api.serializers import FactCollectionSerializer
 from api.fact.util import (validate_fact_collection_json,
-                           create_fact_collection,
-                           SOURCES_KEY,
-                           VALID_SOURCES_KEY)
+                           get_or_create_fact_collection)
 from fingerprinter import pfc_signal
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # pylint: disable=too-many-ancestors
+
+
 class FactViewSet(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
@@ -35,9 +37,6 @@ class FactViewSet(mixins.CreateModelMixin,
     if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
         authentication_classes = (TokenAuthentication, SessionAuthentication)
         permission_classes = (IsAuthenticated,)
-
-    # Get an instance of a logger
-    logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
@@ -52,14 +51,29 @@ class FactViewSet(mixins.CreateModelMixin,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Create FC model and save data to JSON file
-        fact_collection = create_fact_collection(request.data)
+        fact_collection = get_or_create_fact_collection(request.data)
+
+        # Send signal so fingerprint engine processes raw facts
+        try:
+            pfc_signal.send(sender=self.__class__,
+                            instance=fact_collection)
+            # Transition from persisted to complete after processing
+            fact_collection.status = FactCollection.FC_STATUS_COMPLETE
+            fact_collection.save()
+            logger.debug(
+                'Fact collection %d successfully processed.',
+                fact_collection.id)
+        except Exception as error:
+            # Transition from persisted to failed after engine failed
+            fact_collection.status = FactCollection.FC_STATUS_FAILED
+            fact_collection.save()
+            logger.error(
+                'Fact collection %d failed to be processed.',
+                fact_collection.id)
+            logger.error('%s:%s', error.__class__.__name__, error)
+            raise error
 
         # Prepare REST response body
         serializer = self.get_serializer(fact_collection)
         result = serializer.data
-        result[SOURCES_KEY] = validation_result[VALID_SOURCES_KEY]
-
-        # Send signal so fingerprint engine processes raw facts
-        pfc_signal.send(sender=self.__class__,
-                        instance=fact_collection)
         return Response(result, status=status.HTTP_201_CREATED)

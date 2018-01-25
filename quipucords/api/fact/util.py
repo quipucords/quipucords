@@ -11,13 +11,12 @@
 
 """Util for validating and persisting source facts."""
 
-import os
-import json
-import copy
-from django.conf import settings
+import logging
+from django.db import transaction
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.models import Source, FactCollection
+from api.serializers import FactCollectionSerializer
 
 
 ERRORS_KEY = 'errors'
@@ -30,6 +29,8 @@ SOURCE_KEY = 'source'
 SOURCE_ID_KEY = 'source_id'
 SOURCE_TYPE_KEY = 'source_type'
 FACTS_KEY = 'facts'
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def validate_fact_collection_json(fact_collection_json):
@@ -123,59 +124,42 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_fact_collection(fact_collection_json):
+@transaction.atomic
+def get_or_create_fact_collection(json_fact_collection, scan_job=None):
     """Create fact collection.
 
     Fact collection consists of a FactCollection record and a
     corresponding JSON file with the name <fact_collection_id>.json
-    :param fact_collection_json: dict representing a fact collection
+    :param json_fact_collection: dict representing a fact collection
+    :param scan_job: scanjob to be associated with this fact_collection
     :returns: The newly created FactCollection
     """
-    # Create fact collection
-    fact_collection = FactCollection()
-    fact_collection.save()
+    fact_collection = None
+    if scan_job is not None:
+        # check for existing fact collection
+        fact_collection_id = scan_job.fact_collection_id
+        fact_collection = FactCollection.objects.filter(
+            id=fact_collection_id).first()
 
-    # Save raw facts and update fact collection
-    fact_collection.path = write_raw_facts(
-        fact_collection.id, fact_collection_json)
-    fact_collection.save()
+    if fact_collection is None:
+        # Create new fact collection
+        serializer = FactCollectionSerializer(data=json_fact_collection)
+        if serializer.is_valid():
+            fact_collection = serializer.save()
+            logger.debug('Fact collection created: %s', fact_collection)
+        else:
+            logger.error('Fact collection could not be persisted.')
+            logger.error('Invalid json_fact_collection: %s',
+                         json_fact_collection)
+            logger.error('FactCollection errors: %s', serializer.errors)
+
+        # Update scan job if there is one
+        if scan_job is not None:
+            scan_job.fact_collection_id = fact_collection.id
+            scan_job.save()
+            fact_collection.save()
+            logger.debug('Fact collection %d associated with scanjob %d',
+                         fact_collection.id,
+                         scan_job.id)
 
     return fact_collection
-
-
-def read_raw_facts(fc_id):
-    """Read raw facts from json file.
-
-    :param fc_id: Fact collection id to read
-    "returns: JSON data as dict or None if invalid fc_id
-    """
-    if os.path.exists(settings.FACTS_DIR):
-        with open(_build_path(fc_id), 'r') as raw_fact_file:
-            data = json.load(raw_fact_file)
-            return data
-
-    return None
-
-
-def write_raw_facts(fc_id, data):
-    """Write raw facts to json file.
-
-    :param fc_id: Fact collection id to write
-    :param data: JSON data as dict to write
-    "returns: Fully qualified path to json file
-    """
-    if not os.path.exists(settings.FACTS_DIR):
-        os.makedirs(settings.FACTS_DIR)
-
-    file_path = _build_path(fc_id)
-    data_copy = copy.deepcopy(data)
-    data_copy['fact_collection_id'] = fc_id
-    with open(file_path, 'w') as raw_fact_file:
-        json.dump(data_copy, raw_fact_file)
-
-    return file_path
-
-
-def _build_path(fc_id):
-    """Build path to json file."""
-    return '%s/%d.json' % (settings.FACTS_DIR, fc_id)

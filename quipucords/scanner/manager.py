@@ -14,7 +14,8 @@
 import logging
 from time import sleep
 from threading import Thread
-from api.models import ScanTask, ScanJob
+from api.models import (ScanTask,
+                        ScanJob)
 from scanner import ScanJobRunner
 from django.db.models import Q
 
@@ -81,8 +82,8 @@ class Manager(Thread):
                              task_id)
             return killed
 
-    def look_for_incomplete_scans(self):
-        """Look for incomplete scans."""
+    def restart_incomplete_scansjobs(self):
+        """Look for incomplete scans and restart."""
         logger.debug('Scan manager searching for incomplete scans')
 
         incomplete_scans = ScanJob.objects.filter(
@@ -102,7 +103,7 @@ class Manager(Thread):
 
     def run(self):
         """Trigger thread execution."""
-        self.look_for_incomplete_scans()
+        self.restart_incomplete_scansjobs()
         logger.debug('Scan manager started.')
         while self.running:
             queue_len = len(self.scan_queue)
