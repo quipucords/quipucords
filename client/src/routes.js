@@ -1,5 +1,6 @@
 import Scans from './components/scans/scans';
 import Sources from './components/sources/sources';
+import Credentials from './components/credentials/credentials';
 
 const baseName = '/client';
 
@@ -16,10 +17,16 @@ const routes = () => [
     component: Sources
   },
   {
-    icon: 'fa fa-list-alt',
+    icon: 'fa fa-wifi',
     title: 'Scans',
     to: '/scans',
     component: Scans
+  },
+  {
+    icon: 'fa fa-key',
+    title: 'Credentials',
+    to: '/credentials',
+    component: Credentials
   }
 ];
 
