@@ -27,12 +27,10 @@ BuildRequires: pandoc
 Requires: epel-release
 Requires: python34
 Requires: python34-requests
-Requires: python34-pyxdg
 %endif
 %if 0%{?fedora} >= 26
 Requires: python3
 Requires: python3-requests
-Requires: python3-pyxdg
 %endif
 
 %description
