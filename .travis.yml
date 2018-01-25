@@ -8,12 +8,15 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install coveralls
+  - nvm install node
+  - npm install swagger-cli
 # command to run tests
 script:
   - make build
   - make lint
   - make server-init
   - make test-coverage
+  - make swagger-valid
 after_success:
   - coveralls
 notifications:

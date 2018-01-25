@@ -18,9 +18,11 @@ help:
 	@echo "  lint-pylint    to run the pylint linter"
 	@echo "  test           to run unit tests"
 	@echo "  test-coverage  to run unit tests and measure test coverage"
+	@echo "  swagger-valid  to run swagger-cli validation"
 	@echo "  server-init    to run server initializion steps"
 	@echo "  serve          to run the server"
 	@echo "  manpage        to build the manpage"
+	@echo "  manpage-html   to build the manpage"
 
 all: build lint test-coverage
 
@@ -46,6 +48,9 @@ test-case:
 test-coverage:
 	QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/
 	coverage report -m --omit $(OMIT_PATTERNS)
+
+swagger-valid:
+	node_modules/swagger-cli/bin/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
 	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv
