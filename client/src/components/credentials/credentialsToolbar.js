@@ -7,10 +7,13 @@ import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
 
-import { SourceFilterFields, SourceSortFields } from './sourceConstants';
+import {
+  CredentialFilterFields,
+  CredentialSortFields
+} from './crendentialConstants';
 import { viewToolbarTypes } from '../../redux/constants';
 
-class SourcesToolbar extends React.Component {
+class CredentialsToolbar extends React.Component {
   constructor() {
     super();
 
@@ -31,11 +34,11 @@ class SourcesToolbar extends React.Component {
     const { filterType, sortType } = this.props;
 
     if (!filterType) {
-      this.selectFilterType(SourceFilterFields[0]);
+      this.selectFilterType(CredentialFilterFields[0]);
     }
 
     if (!sortType) {
-      this.updateCurrentSortType(SourceSortFields[0]);
+      this.updateCurrentSortType(CredentialSortFields[0]);
     }
   }
 
@@ -160,7 +163,7 @@ class SourcesToolbar extends React.Component {
     return (
       <Filter>
         <Filter.TypeSelector
-          filterTypes={SourceFilterFields}
+          filterTypes={CredentialFilterFields}
           currentFilterType={filterType}
           onFilterTypeSelected={this.selectFilterType}
         />
@@ -176,7 +179,7 @@ class SourcesToolbar extends React.Component {
       return (
         <Sort>
           <Sort.TypeSelector
-            sortTypes={SourceSortFields}
+            sortTypes={CredentialSortFields}
             currentSortType={sortType}
             onSortTypeSelected={this.updateCurrentSortType}
           />
@@ -195,14 +198,14 @@ class SourcesToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
-        <Button
-          disabled={this.props.scanAvailable === false}
-          onClick={this.props.onScan}
-        >
-          Scan
-        </Button>
-        <Button bsStyle="primary" onClick={this.props.onAddSource}>
+        <Button bsStyle="primary" onClick={this.props.onAddCredential}>
           Add
+        </Button>
+        <Button
+          disabled={this.props.deleteAvailable === false}
+          onClick={this.props.onDelete}
+        >
+          Delete
         </Button>
         <Button onClick={this.props.onRefresh}>
           <Icon type="fa" name="refresh" />
@@ -269,7 +272,7 @@ class SourcesToolbar extends React.Component {
   }
 }
 
-SourcesToolbar.propTypes = {
+CredentialsToolbar.propTypes = {
   totalCount: PropTypes.number,
   filteredCount: PropTypes.number,
   filterType: PropTypes.object,
@@ -277,16 +280,16 @@ SourcesToolbar.propTypes = {
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool,
-  onAddSource: PropTypes.func,
-  scanAvailable: PropTypes.bool,
-  onScan: PropTypes.func,
+  onAddCredential: PropTypes.func,
+  deleteAvailable: PropTypes.bool,
+  onDelete: PropTypes.func,
   onRefresh: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {
   return {
-    ...state.sourcesToolbar
+    ...state.credentialsToolbar
   };
 }
 
-export default connect(mapStateToProps)(SourcesToolbar);
+export default connect(mapStateToProps)(CredentialsToolbar);

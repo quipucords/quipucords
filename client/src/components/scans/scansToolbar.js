@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
+import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 
@@ -213,6 +213,9 @@ class ScansToolbar extends React.Component {
         >
           Download
         </Button>
+        <Button onClick={this.props.onRefresh}>
+          <Icon type="fa" name="refresh" />
+        </Button>
       </div>
     );
   }
@@ -288,7 +291,8 @@ ScansToolbar.propTypes = {
   repeatScansAvailable: PropTypes.bool,
   onRepeatScans: PropTypes.func,
   downloadScansAvailable: PropTypes.bool,
-  onDownloadScans: PropTypes.func
+  onDownloadScans: PropTypes.func,
+  onRefresh: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {

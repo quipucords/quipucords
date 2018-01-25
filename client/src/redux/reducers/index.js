@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 
 import aboutReducer from './aboutReducer';
 import credentialsReducer from './credentialsReducer';
+import credentialsToolbarReducer from './credentialsToolbarReducer';
 import factsReducer from './factsReducer';
 import navigationBarReducer from './navigationBarReducer';
 import reportsReducer from './reportsReducer';
@@ -14,6 +15,7 @@ import toastNotificationsReducer from './toastNotificationsReducer';
 const reducers = {
   about: aboutReducer,
   credentials: credentialsReducer,
+  credentialsToolbar: credentialsToolbarReducer,
   facts: factsReducer,
   navigationBar: navigationBarReducer,
   reports: reportsReducer,

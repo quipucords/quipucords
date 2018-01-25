@@ -7,3 +7,16 @@
 .blank-slate-pf.full-page-blank-slate {
   border: none;
 }
+
+.list-view-info-item-text-count {
+  width: 110px;
+}
+
+.list-view-info-item-icon-count {
+  width: 80px;
+}
+
+.list-view-compound-item-icon:before {
+  position: relative;
+  top: 2px;
+}

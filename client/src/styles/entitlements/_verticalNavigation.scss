@@ -1,5 +1,10 @@
 /* _verticalNavigation.scss */
 /* Why react is different from straight bootstrap and angular-bootstrap is beyond me! */
 .nav-pf-vertical-tooltip.tooltip .tooltip-arrow {
-  border-top-color: #fff;
+  border-top-color: $color-pf-white;
+}
+
+/* Likely this should be part of Patternfly */
+.nav-pf-vertical a:focus {
+  text-decoration: none;
 }
