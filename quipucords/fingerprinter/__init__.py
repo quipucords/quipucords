@@ -84,7 +84,7 @@ def process_fact_collection(sender, instance, **kwargs):
 def _process_sources(fact_collection):
     """Process facts and convert to fingerprints.
 
-    :param json_fact_collection: Collected raw facts for all sources
+    :param fact_collection: FactCollection containing raw facts
     :returns: list of fingerprints for all systems (all scans)
     """
     network_fingerprints = []
