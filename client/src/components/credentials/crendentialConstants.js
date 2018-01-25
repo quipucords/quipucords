@@ -1,4 +1,4 @@
-const SourceFilterFields = [
+const CredentialFilterFields = [
   {
     id: 'name',
     title: 'Name',
@@ -15,10 +15,20 @@ const SourceFilterFields = [
       { title: 'Satellite', id: 'satellite' },
       { title: 'VCenter', id: 'vcenter' }
     ]
+  },
+  {
+    id: 'credentialType',
+    title: 'Credential Type',
+    placeholder: 'Filter by Credential Type',
+    filterType: 'select',
+    filterValues: [
+      { title: 'SSH Key', id: 'sshKey' },
+      { title: 'Username & Password', id: 'usernamePassword' }
+    ]
   }
 ];
 
-const SourceSortFields = [
+const CredentialSortFields = [
   {
     id: 'name',
     title: 'Name',
@@ -30,10 +40,10 @@ const SourceSortFields = [
     isNumeric: false
   },
   {
-    id: 'hostCount',
-    title: 'Hosts Count',
-    isNumeric: true
+    id: 'credentialType',
+    title: 'Credential Type',
+    isNumeric: false
   }
 ];
 
-export { SourceFilterFields, SourceSortFields };
+export { CredentialFilterFields, CredentialSortFields };

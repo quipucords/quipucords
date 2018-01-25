@@ -30,7 +30,8 @@ class Scans extends React.Component {
       'downloadScans',
       'itemSelectChange',
       'addSource',
-      'importSources'
+      'importSources',
+      'refresh'
     ]);
     this.state = {
       filteredItems: [],
@@ -184,7 +185,7 @@ class Scans extends React.Component {
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Importing sources is not yet implemented'
+      message: 'Adding sources is not yet implemented'
     });
   }
 
@@ -193,8 +194,12 @@ class Scans extends React.Component {
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Adding sources is not yet implemented'
+      message: 'Importing sources is not yet implemented'
     });
+  }
+
+  refresh() {
+    this.props.getScans();
   }
 
   renderList(items) {
@@ -230,7 +235,7 @@ class Scans extends React.Component {
     if (loadError) {
       return (
         <EmptyState>
-          <Alert type="danger">
+          <Alert type="error">
             <span>Error retrieving scans: {errorMessage}</span>
           </Alert>
         </EmptyState>
@@ -250,13 +255,19 @@ class Scans extends React.Component {
           onRepeatScans={this.repeatScans}
           downloadScansAvailable={selectedItems && selectedItems.length > 0}
           onDownloadScans={this.downloadScans}
+          onRefresh={this.refresh}
         />,
         <Grid fluid key={2}>
           {this.renderList(filteredItems)}
         </Grid>
       ];
     }
-    return <SourcesEmptyState />;
+    return (
+      <SourcesEmptyState
+        onAddSource={this.addSource}
+        onImportSources={this.importSources}
+      />
+    );
   }
 }
 

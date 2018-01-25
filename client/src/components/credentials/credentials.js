@@ -11,24 +11,25 @@ import {
   Modal
 } from 'patternfly-react';
 
-import { getSources } from '../../redux/actions/sourcesActions';
+import { getCredentials } from '../../redux/actions/credentialsActions';
 
-import SourcesToolbar from './sourcesToolbar';
-import SourcesEmptyState from './sourcesEmptyState';
-import { SourceListItem } from './sourceListItem';
+import CredentialsToolbar from './credentialsToolbar';
+import CredentialsEmptyState from './credentialsEmptyState';
+import { CredentialListItem } from './credentialListItem';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
-class Sources extends React.Component {
+class Credentials extends React.Component {
   constructor() {
     super();
 
     bindMethods(this, [
+      'addCredential',
+      'deleteCredentials',
+      'itemSelectChange',
       'addSource',
       'importSources',
-      'scanSources',
-      'itemSelectChange',
       'refresh'
     ]);
     this.state = {
@@ -38,35 +39,35 @@ class Sources extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getSources();
+    this.props.getCredentials();
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.sources !== this.props.sources) {
+    if (nextProps.credentials !== this.props.credentials) {
       // Reset selection state though we may want to keep selections over refreshes...
-      nextProps.sources.forEach(source => {
-        source.selected = false;
+      nextProps.credentials.forEach(credential => {
+        credential.selected = false;
       });
 
       // TODO: Remove once we get real failed host data
       let failedCount = Math.floor(Math.random() * 10);
-      nextProps.sources.forEach(source => {
-        source.selected = false;
-        source.failed_hosts = [];
+      nextProps.credentials.forEach(credential => {
+        credential.selected = false;
+        credential.failed_hosts = [];
         for (let i = 0; i < failedCount; i++) {
-          source.failed_hosts.push('failedHost' + (i + 1));
+          credential.failed_hosts.push('failedHost' + (i + 1));
         }
       });
 
-      let filteredItems = this.filterSources(
-        nextProps.sources,
+      let filteredItems = this.filterCredentials(
+        nextProps.credentials,
         nextProps.activeFilters
       );
 
       this.setState({ filteredItems: filteredItems, selectedItems: [] });
     } else if (nextProps.activeFilters !== this.props.activeFilters) {
-      let filteredItems = this.filterSources(
-        nextProps.sources,
+      let filteredItems = this.filterCredentials(
+        nextProps.credentials,
         nextProps.activeFilters
       );
       this.setState({ filteredItems: filteredItems });
@@ -79,8 +80,12 @@ class Sources extends React.Component {
     switch (filter.field.id) {
       case 'name':
         return item.name.match(re) !== null;
-      case 'sourceType':
-        return item.source_type === filter.value.id;
+      case 'credentialType':
+        let credentialType = 'usernamePassword';
+        if (item.ssh_keyfile && item.ssh_keyfile !== '') {
+          credentialType = 'sshKey';
+        }
+        return credentialType === filter.value.id;
       default:
         return true;
     }
@@ -98,17 +103,17 @@ class Sources extends React.Component {
     return matches;
   }
 
-  filterSources(sources, filters) {
+  filterCredentials(credentials, filters) {
     if (!filters || filters.length === 0) {
-      return sources;
+      return credentials;
     }
 
-    return sources.filter(item => {
+    return credentials.filter(item => {
       return this.matchesFilters(item, filters);
     });
   }
 
-  sortSources(items) {
+  sortCredentials(items) {
     const { sortType, sortAscending } = this.props;
 
     let sortId = sortType ? sortType.id : 'name';
@@ -120,10 +125,19 @@ class Sources extends React.Component {
           compValue = item1.name.localeCompare(item2.name);
           break;
         case 'sourceType':
-          compValue = item1.source_type.localeCompare(item2.source_type);
+          compValue = item1.cred_type.localeCompare(item2.cred_type);
           break;
-        case 'hostCount':
-          compValue = item1.hosts.length - item2.hosts.length;
+        case 'credentialType':
+          let credentialType1 = 'Username & Password';
+          if (item1.ssh_keyfile && item1.ssh_keyfile !== '') {
+            credentialType1 = 'SSH Key';
+          }
+          let credentialType2 = 'Username & Password';
+          if (item2.ssh_keyfile && item2.ssh_keyfile !== '') {
+            credentialType2 = 'SSH Key';
+          }
+
+          compValue = credentialType1.localeCompare(credentialType2);
           break;
         default:
           compValue = 0;
@@ -137,30 +151,21 @@ class Sources extends React.Component {
     });
   }
 
-  addSource() {
+  addCredential() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Importing sources is not yet implemented'
+      message: 'Adding credentials is not yet implemented'
     });
   }
 
-  importSources() {
+  deleteCredentials() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Adding sources is not yet implemented'
-    });
-  }
-
-  scanSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Scanning sources is not yet implemented'
+      message: 'Deleting credentials is not yet implemented'
     });
   }
 
@@ -175,8 +180,26 @@ class Sources extends React.Component {
     this.setState({ selectedItems: selectedItems });
   }
 
+  addSource() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Adding sources is not yet implemented'
+    });
+  }
+
+  importSources() {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: 'NYI',
+      message: 'Importing sources is not yet implemented'
+    });
+  }
+
   refresh() {
-    this.props.getSources();
+    this.props.getCredentials();
   }
 
   renderList(items) {
@@ -184,7 +207,7 @@ class Sources extends React.Component {
       <Row>
         <ListView className="quipicords-list-view">
           {items.map((item, index) => (
-            <SourceListItem
+            <CredentialListItem
               item={item}
               key={index}
               onItemSelectChange={this.itemSelectChange}
@@ -196,7 +219,7 @@ class Sources extends React.Component {
   }
 
   render() {
-    const { loading, loadError, errorMessage, sources } = this.props;
+    const { loading, loadError, errorMessage, credentials } = this.props;
     const { filteredItems, selectedItems } = this.state;
 
     if (loading) {
@@ -204,7 +227,7 @@ class Sources extends React.Component {
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
             <div className="spinner spinner-xl" />
-            <div className="text-center">Loading sources...</div>
+            <div className="text-center">Loading credentials...</div>
           </Modal.Body>
         </Modal>
       );
@@ -212,24 +235,24 @@ class Sources extends React.Component {
     if (loadError) {
       return (
         <EmptyState>
-          <Alert type="danger">
-            <span>Error retrieving sources: {errorMessage}</span>
+          <Alert type="error">
+            <span>Error retrieving credentials: {errorMessage}</span>
           </Alert>
         </EmptyState>
       );
     }
 
-    if (sources && sources.length) {
-      this.sortSources(filteredItems);
+    if (credentials && credentials.length) {
+      this.sortCredentials(filteredItems);
 
       return [
-        <SourcesToolbar
-          totalCount={sources.length}
+        <CredentialsToolbar
+          totalCount={credentials.length}
           filteredCount={filteredItems.length}
           key={1}
-          onAddSource={this.addSource}
-          scanAvailable={selectedItems && selectedItems.length > 0}
-          onScan={this.scanSources}
+          onAddCredential={this.addCredential}
+          deleteAvailable={selectedItems && selectedItems.length > 0}
+          onDelete={this.deleteCredentials}
           onRefresh={this.refresh}
         />,
         <Grid fluid key={2}>
@@ -238,7 +261,8 @@ class Sources extends React.Component {
       ];
     }
     return (
-      <SourcesEmptyState
+      <CredentialsEmptyState
+        onAddCredential={this.addCredential}
         onAddSource={this.addSource}
         onImportSources={this.importSources}
       />
@@ -246,35 +270,35 @@ class Sources extends React.Component {
   }
 }
 
-Sources.propTypes = {
-  getSources: PropTypes.func,
+Credentials.propTypes = {
+  getCredentials: PropTypes.func,
   loadError: PropTypes.bool,
   errorMessage: PropTypes.string,
   loading: PropTypes.bool,
-  sources: PropTypes.array,
+  credentials: PropTypes.array,
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
 };
 
-Sources.defaultProps = {
+Credentials.defaultProps = {
   loading: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getSources: () => dispatch(getSources())
+  getCredentials: () => dispatch(getCredentials())
 });
 
 function mapStateToProps(state) {
   return {
-    loading: state.sources.loading,
-    sources: state.sources.data,
-    loadError: state.sources.error,
-    errorMessage: state.sources.errorMessage,
-    activeFilters: state.sourcesToolbar.activeFilters,
-    sortType: state.sourcesToolbar.sortType,
-    sortAscending: state.sourcesToolbar.sortAscending
+    loading: state.credentials.loading,
+    credentials: state.credentials.data,
+    loadError: state.credentials.error,
+    errorMessage: state.credentials.errorMessage,
+    activeFilters: state.credentialsToolbar.activeFilters,
+    sortType: state.credentialsToolbar.sortType,
+    sortAscending: state.credentialsToolbar.sortAscending
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Sources);
+export default connect(mapStateToProps, mapDispatchToProps)(Credentials);
