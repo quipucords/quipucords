@@ -15,13 +15,16 @@ from __future__ import print_function
 import logging
 import os
 import json
-from xdg.BaseDirectory import xdg_data_home, xdg_config_home
 from qpc.translation import _ as t
 import qpc.messages as messages
 
 QPC_PATH = 'qpc'
-CONFIG_DIR = os.path.join(xdg_config_home, QPC_PATH)
-DATA_DIR = os.path.join(xdg_data_home, QPC_PATH)
+CONFIG_HOME_PATH = '~/.config/'
+DATA_HOME_PATH = '~/.local/share/'
+CONFIG_HOME = os.path.expanduser(CONFIG_HOME_PATH)
+DATA_HOME = os.path.expanduser(DATA_HOME_PATH)
+CONFIG_DIR = os.path.join(CONFIG_HOME, QPC_PATH)
+DATA_DIR = os.path.join(DATA_HOME, QPC_PATH)
 QPC_LOG = os.path.join(DATA_DIR, 'qpc.log')
 QPC_SERVER_CONFIG = os.path.join(CONFIG_DIR, 'server.config')
 QPC_CLIENT_TOKEN = os.path.join(CONFIG_DIR, 'client_token')
