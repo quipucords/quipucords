@@ -389,6 +389,14 @@ class SatelliteSixV1(SatelliteInterface):
         :returns: dictionary of host details
         """
         details = {}
+        sys_result = self.inspect_result.systems.filter(
+            name=host_name).first()
+
+        if sys_result:
+            logger.debug('Results already captured for host_name=%s',
+                         host_name)
+            return details
+
         details.update(host_fields(self.scan_task, 1, HOSTS_FIELDS_V1_URL,
                                    org_id, host_id))
         details.update(host_subscriptions(self.scan_task,
@@ -481,6 +489,14 @@ class SatelliteSixV2(SatelliteInterface):
         :returns: dictionary of host details
         """
         details = {}
+        sys_result = self.inspect_result.systems.filter(
+            name=host_name).first()
+
+        if sys_result:
+            logger.debug('Results already captured for host_name=%s',
+                         host_name)
+            return details
+
         details.update(host_fields(self.scan_task, 2, HOSTS_FIELDS_V2_URL,
                                    None, host_id))
         details.update(host_subscriptions(self.scan_task, HOSTS_SUBS_V2_URL,
