@@ -18,7 +18,7 @@ from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            _process_source,
                            _remove_duplicate_fingerprints,
                            _merge_fingerprint,
-                           _create_index_for_fingerprint,
+                           _create_index_for_fingerprints,
                            _merge_matching_fingerprints,
                            _merge_fingerprints_from_source_types)
 from api.models import Source
@@ -453,7 +453,7 @@ class EngineTest(TestCase):
             self._create_vcenter_fingerprint(vm_uuid='match'),
             self._create_vcenter_fingerprint(vm_uuid='2')]
 
-        result_fingerprints = _merge_fingerprints_from_source_types(
+        _, result_fingerprints = _merge_fingerprints_from_source_types(
             NETWORK_VCENTER_MERGE_KEYS,
             nfingerprints, vfingerprints)
 
@@ -515,7 +515,7 @@ class EngineTest(TestCase):
             vfingerprint_no_key
         ]
 
-        merge_list, no_match_found_list = _merge_matching_fingerprints(
+        _, merge_list, no_match_found_list = _merge_matching_fingerprints(
             'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
 
         # merge list should always contain all nfingerprints (base_list)
@@ -552,7 +552,7 @@ class EngineTest(TestCase):
             {'id': 3,
              'os_release': 'RHEL 6'}
         ]
-        index, no_key_found = _create_index_for_fingerprint(
+        index, no_key_found = _create_index_for_fingerprints(
             'mac_addresses', fingerprints)
 
         self.assertEqual(len(no_key_found), 1)
@@ -594,12 +594,12 @@ class EngineTest(TestCase):
         ]
 
         # Test that unique id not in objects
-        index, no_key_found = _create_index_for_fingerprint(
+        index, no_key_found = _create_index_for_fingerprints(
             'bios_uuid', fingerprints, False)
         self.assertIsNone(no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY))
 
         # Tests with unique id in objects
-        index, no_key_found = _create_index_for_fingerprint(
+        index, no_key_found = _create_index_for_fingerprints(
             'bios_uuid', fingerprints)
 
         self.assertEqual(len(no_key_found), 1)

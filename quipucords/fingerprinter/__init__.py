@@ -101,62 +101,92 @@ def _process_sources(fact_collection):
             satellite_fingerprints += source_fingerprints
 
     # Deduplicate network fingerprints
-    number_before = len(network_fingerprints)
+    logger.debug('Remove duplicate network fingerprints by %s',
+                 NETWORK_IDENTIFICATION_KEYS)
+    logger.debug(
+        'Number network fingerprints before de-duplication: %d',
+        len(network_fingerprints))
     network_fingerprints = _remove_duplicate_fingerprints(
         NETWORK_IDENTIFICATION_KEYS,
         network_fingerprints)
-
-    number_after = len(network_fingerprints)
-    logger.debug('Remove duplicate network fingerprints.')
-    logger.debug('Number before: %d, Number after: %d',
-                 number_before, number_after)
+    logger.debug(
+        'Number network fingerprints after de-duplication: %d\n',
+        len(network_fingerprints))
 
     # Deduplicate satellite fingerprints
-    number_before = len(satellite_fingerprints)
+    logger.debug('Remove duplicate satellite fingerprints by %s',
+                 SATELLITE_IDENTIFICATION_KEYS)
+    logger.debug(
+        'Number satellite fingerprints before de-duplication: %d',
+        len(satellite_fingerprints))
     satellite_fingerprints = _remove_duplicate_fingerprints(
         SATELLITE_IDENTIFICATION_KEYS,
         satellite_fingerprints)
-
-    number_after = len(satellite_fingerprints)
-    logger.debug('Remove duplicate satellite fingerprints.')
-    logger.debug('Number before: %d, Number after: %d',
-                 number_before, number_after)
+    logger.debug(
+        'Number satellite fingerprints after de-duplication: %d\n',
+        len(satellite_fingerprints))
 
     # Deduplicate vcenter fingerprints
-    number_before = len(vcenter_fingerprints)
+    logger.debug('Remove duplicate vcenter fingerprints by %s',
+                 VCENTER_IDENTIFICATION_KEYS)
+    logger.debug(
+        'Number vcenter fingerprints before de-duplication: %d',
+        len(vcenter_fingerprints))
     vcenter_fingerprints = _remove_duplicate_fingerprints(
         VCENTER_IDENTIFICATION_KEYS,
         vcenter_fingerprints)
-
-    number_after = len(vcenter_fingerprints)
-    logger.debug('Remove duplicate vcenter fingerprints.')
-    logger.debug('Number before: %d, Number after: %d',
-                 number_before, number_after)
+    logger.debug(
+        'Number vcenter fingerprints after de-duplication: %d\n',
+        len(vcenter_fingerprints))
 
     # Merge network and satellite fingerprints
-    logger.debug('Merging network and satellite fingerprints.')
-    number_before = len(network_fingerprints) + len(satellite_fingerprints)
-    all_fingerprints = _merge_fingerprints_from_source_types(
-        NETWORK_SATELLITE_MERGE_KEYS,
-        network_fingerprints,
-        satellite_fingerprints)
+    logger.debug(
+        'Merged network and satellite fingerprints using keypairs.'
+        ' Pairs: [(network_key, satellite_key)]=%s',
+        NETWORK_SATELLITE_MERGE_KEYS)
+    number_network_before = len(network_fingerprints)
+    number_satellite_before = len(satellite_fingerprints)
+    logger.debug('Number network before: %d', number_network_before)
+    logger.debug('Number satellite before: %d', number_satellite_before)
+    number_network_satellite_merged, all_fingerprints = \
+        _merge_fingerprints_from_source_types(
+            NETWORK_SATELLITE_MERGE_KEYS,
+            network_fingerprints,
+            satellite_fingerprints)
     number_after = len(all_fingerprints)
-    logger.debug('Merged network and satellite fingerprints.')
-    logger.debug('Number before: %d, Number after: %d',
-                 number_before, number_after)
+    logger.debug('Number fingerprints merged together: %d',
+                 number_network_satellite_merged)
+    logger.debug(
+        'Total number network/satellite after merge: %d',
+        number_after)
+    logger.debug('Total merged count decreased by %d\n',
+                 (number_network_before +
+                  number_satellite_before - number_after))
 
     # Merge network and vcenter fingerprints
-    logger.debug('Merging network and vcenter fingerprints.')
-    number_before = len(all_fingerprints) + len(vcenter_fingerprints)
-    all_fingerprints = _merge_fingerprints_from_source_types(
-        NETWORK_VCENTER_MERGE_KEYS,
-        all_fingerprints,
-        vcenter_fingerprints)
+    logger.debug(
+        'Merged network/satellite and vcenter fingerprints using keypairs.'
+        ' Pairs: [(network/satelllite, vcenter)]=%s',
+        NETWORK_VCENTER_MERGE_KEYS)
+    number_network_satellite_before = len(all_fingerprints)
+    number_vcenter_before = len(vcenter_fingerprints)
+    logger.debug('Number merged network/satellite before: %d',
+                 number_network_satellite_before)
+    logger.debug('Number vcenter before: %d', number_vcenter_before)
+    number_network_vcenter_merged, all_fingerprints = \
+        _merge_fingerprints_from_source_types(
+            NETWORK_VCENTER_MERGE_KEYS,
+            all_fingerprints,
+            vcenter_fingerprints)
     number_after = len(all_fingerprints)
-    logger.debug('Merged network and vcenter fingerprints.')
-    logger.debug('Number before: %d, Number after: %d',
-                 number_before, number_after)
-
+    logger.debug('Number fingerprints merged together: %d',
+                 number_network_vcenter_merged)
+    logger.debug(
+        'Total number network/satellite/vcenter after merge: %d',
+        number_after)
+    logger.debug('Total merged count decreased by %d\n',
+                 (number_network_satellite_before +
+                  number_vcenter_before - number_after))
     return all_fingerprints
 
 
@@ -197,25 +227,30 @@ def _merge_fingerprints_from_source_types(merge_keys_list, base_list,
 
     :param base_list: base list
     :param merge_list: fact to process
-    :returns: list of all fingerprints wihtout duplicates
+    :returns: int indicating number merged and
+    list of all fingerprints wihtout duplicates
     """
+    number_merged = 0
+
     # Check to make sure a merge is required at all
     if not merge_list:
-        return base_list
+        return number_merged, base_list
 
     if not base_list:
-        return merge_list
+        return number_merged, merge_list
 
     # start with the base_list fingerprints
+
     result = base_list[:]
     to_merge = merge_list[:]
     for key_tuple in merge_keys_list:
-        result, to_merge = _merge_matching_fingerprints(
+        key_merged_count, result, to_merge = _merge_matching_fingerprints(
             key_tuple[0], result, key_tuple[1], to_merge)
+        number_merged += key_merged_count
 
     # Add remaining as they didn't match anything (no merge)
     result = result + to_merge
-    return result
+    return number_merged, result
 
 
 def _merge_matching_fingerprints(base_key, base_list,
@@ -229,18 +264,20 @@ def _merge_matching_fingerprints(base_key, base_list,
     :param candidate_key: candidate_key used to create an index of
     candidate_list
     :param candidate_list: list of dict objects
-    :returns: fingerprint produced from fact
+    :returns: int indicating number merged and
+    fingerprint produced from fact
     """
     # pylint: disable=too-many-locals,consider-iterating-dictionary
-    base_dict, base_no_key = _create_index_for_fingerprint(
+    base_dict, base_no_key = _create_index_for_fingerprints(
         base_key, base_list)
-    candidate_dict, candidate_no_key = _create_index_for_fingerprint(
+    candidate_dict, candidate_no_key = _create_index_for_fingerprints(
         candidate_key, candidate_list)
 
     # Initialize lists with values that cannot be compared
     base_match_list = []
     candidate_no_match_list = []
 
+    number_merged = 0
     # Match candidate to base fingerprint using index key
     for candidate_index_key, candidate_fingerprint in candidate_dict.items():
         # For each overlay fingerprint check for matching base fingerprint
@@ -249,10 +286,9 @@ def _merge_matching_fingerprints(base_key, base_list,
         base_value = base_dict.pop(candidate_index_key, None)
         if base_value:
             # candidate_index_key == base_key so merge
-            logger.debug('Fingerprints matched on %s/%s with value %s',
-                         base_key, candidate_key, candidate_index_key)
             merged_value = _merge_fingerprint(
                 base_value, candidate_fingerprint)
+            number_merged += 1
 
             # Add merged value to key
             base_match_list.append(merged_value)
@@ -262,20 +298,16 @@ def _merge_matching_fingerprints(base_key, base_list,
 
     # Merge base items without key, matched, and remainder
     # who did not match
+    base_result_list = base_no_key + base_match_list + list(base_dict.values())
     base_result_list = _remove_duplicate_fingerprints(
-        [FINGERPRINT_GLOBAL_ID_KEY],
-        base_no_key + base_match_list +
-        list(base_dict.values()),
-        True)
+        [FINGERPRINT_GLOBAL_ID_KEY], base_result_list, True)
 
     # Merge candidate items without key list with those that didn't match
+    candidate_no_match_list = candidate_no_key + candidate_no_match_list
     candidate_no_match_list = _remove_duplicate_fingerprints(
-        [FINGERPRINT_GLOBAL_ID_KEY],
-        candidate_no_key +
-        candidate_no_match_list,
-        True)
+        [FINGERPRINT_GLOBAL_ID_KEY], candidate_no_match_list, True)
 
-    return base_result_list, candidate_no_match_list
+    return number_merged, base_result_list, candidate_no_match_list
 
 
 def _remove_duplicate_fingerprints(id_key_list,
@@ -320,9 +352,9 @@ def _remove_duplicate_fingerprints(id_key_list,
     return result_list
 
 
-def _create_index_for_fingerprint(id_key,
-                                  fingerprint_list,
-                                  create_global_id=True):
+def _create_index_for_fingerprints(id_key,
+                                   fingerprint_list,
+                                   create_global_id=True):
     """Given a list of dict, create index by id_key.
 
     Takes fingerprint_list and retrieves dict value for id_key.
@@ -339,6 +371,7 @@ def _create_index_for_fingerprint(id_key,
     """
     result_by_key = {}
     key_not_found_list = []
+    number_duplicates = 0
     for value_dict in fingerprint_list:
         # Add globally unique key for de-duplication later
         if create_global_id:
@@ -348,11 +381,22 @@ def _create_index_for_fingerprint(id_key,
             if isinstance(id_key_value, list):
                 # value is list so explode
                 for list_value in id_key_value:
-                    result_by_key[list_value] = value_dict
+                    if result_by_key.get(list_value) is None:
+                        result_by_key[list_value] = value_dict
+                    else:
+                        number_duplicates += 1
             else:
-                result_by_key[id_key_value] = value_dict
+                if result_by_key.get(id_key_value) is None:
+                    result_by_key[id_key_value] = value_dict
+                else:
+                    number_duplicates += 1
         else:
             key_not_found_list.append(value_dict)
+    if number_duplicates:
+        logger.debug(
+            '_create_index_for_fingerprints - '
+            'Potential lost fingerprint due to duplicate %s: %d.',
+            id_key, number_duplicates)
     return result_by_key, key_not_found_list
 
 
@@ -374,10 +418,6 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     if META_DATA_KEY in keys_to_add_list:
         keys_to_add_list.remove(META_DATA_KEY)
 
-    logger.debug('Merging the following two fingerprints.')
-    logger.debug('Base fingerprint: %s', priority_fingerprint)
-    logger.debug('Overlay fingerprint: %s', to_merge_fingerprint)
-
     # Add vcenter facts
     for fact_key in keys_to_add_list:
         to_merge_fact = to_merge_fingerprint.get(fact_key)
@@ -385,8 +425,6 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
             priority_fingerprint[META_DATA_KEY][fact_key] = \
                 to_merge_fingerprint[META_DATA_KEY][fact_key]
             priority_fingerprint[fact_key] = to_merge_fact
-
-    logger.debug('Merged fingerprint: %s', priority_fingerprint)
 
     return priority_fingerprint
 
