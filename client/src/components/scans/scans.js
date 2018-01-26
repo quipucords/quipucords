@@ -27,6 +27,9 @@ class Scans extends React.Component {
     bindMethods(this, [
       'downloadSummaryReport',
       'downloadDetailedReport',
+      'pauseScan',
+      'cancelScan',
+      'startScan',
       'addSource',
       'importSources',
       'refresh'
@@ -158,15 +161,31 @@ class Scans extends React.Component {
     });
   }
 
-  itemSelectChange(item) {
-    const { filteredItems } = this.state;
-
-    item.selected = !item.selected;
-    let selectedItems = filteredItems.filter(item => {
-      return item.selected === true;
+  pauseScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Pausing scans is not yet implemented'
     });
+  }
 
-    this.setState({ selectedItems: selectedItems });
+  cancelScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Cancelling scans is not yet implemented'
+    });
+  }
+
+  startScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Starting scans is not yet implemented'
+    });
   }
 
   addSource() {
@@ -201,6 +220,9 @@ class Scans extends React.Component {
               key={index}
               onSummaryDownload={this.downloadSummaryReport}
               onDetailedDownload={this.downloadDetailedReport}
+              onPause={this.pauseScan}
+              onCancel={this.cancelScan}
+              onStart={this.startScan}
             />
           ))}
         </ListView>

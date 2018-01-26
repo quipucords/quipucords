@@ -17,7 +17,10 @@ import CredentialsToolbar from './credentialsToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import {
+  confirmationModalTypes,
+  toastNotificationTypes
+} from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
 class Credentials extends React.Component {
@@ -28,6 +31,8 @@ class Credentials extends React.Component {
       'addCredential',
       'deleteCredentials',
       'itemSelectChange',
+      'editCredential',
+      'deleteCredential',
       'addSource',
       'importSources',
       'refresh'
@@ -176,6 +181,47 @@ class Credentials extends React.Component {
     this.setState({ selectedItems: selectedItems });
   }
 
+  editCredential(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Editing credentials is not yet implemented'
+    });
+  }
+
+  doDeleteCredential(item) {
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Deleting credentials is not yet implemented'
+    });
+  }
+
+  deleteCredential(item) {
+    let heading = (
+      <h3>
+        Are you sure you want to delete the credential{' '}
+        <strong>{item.name}</strong>?
+      </h3>
+    );
+
+    let onConfirm = () => this.doDeleteCredential(item);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Source',
+      heading: heading,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
+    });
+  }
+
   addSource() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -207,6 +253,8 @@ class Credentials extends React.Component {
               item={item}
               key={index}
               onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editCredential}
+              onDelete={this.deleteCredential}
             />
           ))}
         </ListView>

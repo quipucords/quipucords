@@ -1,14 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
-import {
-  ListView,
-  DropdownKebab,
-  Button,
-  MenuItem,
-  Checkbox,
-  Icon
-} from 'patternfly-react';
+import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
 import { bindMethods } from '../../common/helpers';
 
 class SourceListItem extends React.Component {
@@ -42,7 +35,7 @@ class SourceListItem extends React.Component {
   }
 
   render() {
-    const { item, onItemSelectChange } = this.props;
+    const { item, onItemSelectChange, onEdit, onDelete } = this.props;
     const { expanded, expandType } = this.state;
 
     let credentialCount = item.credentials ? item.credentials.length : 0;
@@ -76,19 +69,20 @@ class SourceListItem extends React.Component {
         }
         actions={
           <span>
-            <Button className="unavailable" bsStyle="default" key="scanButton">
-              {'Scan'}
-            </Button>
-            <DropdownKebab
-              id={'dropdownActions_' + item.id}
-              key="kebab"
-              pullRight
+            <Button
+              onClick={() => onEdit(item)}
+              bsStyle="link"
+              key="editButton"
             >
-              <MenuItem className="unavailable">Edit</MenuItem>
-              <MenuItem className="unavailable">Search</MenuItem>
-              <MenuItem className="unavailable">Duplicate</MenuItem>
-              <MenuItem className="unavailable">Remove</MenuItem>
-            </DropdownKebab>
+              <Icon type="pf" name="edit" />
+            </Button>
+            <Button
+              onClick={() => onDelete(item)}
+              bsStyle="link"
+              key="removeButton"
+            >
+              <Icon type="pf" name="delete" />
+            </Button>
           </span>
         }
         leftContent={itemIcon}
@@ -163,7 +157,9 @@ class SourceListItem extends React.Component {
 
 SourceListItem.propTypes = {
   item: PropTypes.object,
-  onItemSelectChange: PropTypes.func
+  onItemSelectChange: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export { SourceListItem };
