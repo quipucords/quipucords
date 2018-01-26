@@ -1,4 +1,4 @@
-FROM fedora:27
+FROM fedora:26
 
 RUN yum -y groupinstall "Development tools"
 RUN yum -y install python-devel python-tools python3-devel python3-tools sshpass which
