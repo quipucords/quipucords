@@ -49,7 +49,7 @@ class Credentials extends React.Component {
         credential.selected = false;
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
           credential.auth_type = 'sshKey';
-        } else if (credential.become_useer && credential.become_useer !== '') {
+        } else if (credential.become_user && credential.become_user !== '') {
           credential.auth_type = 'becomeUser';
         } else {
           credential.auth_type = 'usernamePassword';

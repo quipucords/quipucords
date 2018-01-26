@@ -28,11 +28,16 @@ class CredentialListItem extends React.Component {
         itemIcon = null;
     }
 
-    let credentialType = 'Username & Password';
-    if (item.auth_type === 'sshKey') {
-      credentialType = 'SSH Key';
-    } else if (item.auth_type === 'becomeUser') {
-      credentialType = 'Become User';
+    let credentialType;
+    switch (item.auth_type) {
+      case 'sshKey':
+        credentialType = 'SSH Key';
+        break;
+      case 'becomeUser':
+        credentialType = 'Become User';
+        break;
+      default:
+        credentialType = 'Username & Password';
     }
 
     return (

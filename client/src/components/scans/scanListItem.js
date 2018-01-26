@@ -133,7 +133,7 @@ class ScanListItem extends React.Component {
               bsStyle="primary"
               title="Download"
               pullRight
-              id={'downloadButton_' + item.id}
+              id={`downloadButton_${item.id}`}
             >
               <MenuItem eventKey="1" onClick={onSummaryDownload}>
                 Summary Report
@@ -143,7 +143,7 @@ class ScanListItem extends React.Component {
               </MenuItem>
             </DropdownButton>
             <DropdownKebab
-              id={'dropdownActions_' + item.id}
+              id={`dropdownActions_${item.id}`}
               key="kebab"
               pullRight
             >
@@ -155,7 +155,7 @@ class ScanListItem extends React.Component {
           </span>
         }
         leftContent={leftContent}
-        heading={'ID: ' + item.id}
+        heading={`ID: ${item.id}`}
         additionalInfo={[
           <ListView.InfoItem
             key="sources"
