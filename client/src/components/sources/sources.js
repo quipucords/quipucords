@@ -17,7 +17,10 @@ import SourcesToolbar from './sourcesToolbar';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import {
+  toastNotificationTypes,
+  confirmationModalTypes
+} from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
 class Sources extends React.Component {
@@ -29,6 +32,8 @@ class Sources extends React.Component {
       'importSources',
       'scanSources',
       'itemSelectChange',
+      'editSource',
+      'deleteSource',
       'refresh'
     ]);
     this.state = {
@@ -142,7 +147,7 @@ class Sources extends React.Component {
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Importing sources is not yet implemented'
+      message: 'Adding sources is not yet implemented'
     });
   }
 
@@ -151,7 +156,7 @@ class Sources extends React.Component {
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Adding sources is not yet implemented'
+      message: 'Importing sources is not yet implemented'
     });
   }
 
@@ -175,6 +180,46 @@ class Sources extends React.Component {
     this.setState({ selectedItems: selectedItems });
   }
 
+  editSource(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Editing sources is not yet implemented'
+    });
+  }
+
+  doDeleteSource(item) {
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Deleting sources is not yet implemented'
+    });
+  }
+
+  deleteSource(item) {
+    let heading = (
+      <h3>
+        Are you sure you want to delete the source <strong>{item.name}</strong>?
+      </h3>
+    );
+
+    let onConfirm = () => this.doDeleteSource(item);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Source',
+      heading: heading,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
+    });
+  }
+
   refresh() {
     this.props.getSources();
   }
@@ -188,6 +233,8 @@ class Sources extends React.Component {
               item={item}
               key={index}
               onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editSource}
+              onDelete={this.deleteSource}
             />
           ))}
         </ListView>

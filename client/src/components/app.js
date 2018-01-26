@@ -10,6 +10,7 @@ import Content from './content/content';
 import Masthead from './masthead/masthead';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import VerticalNavigation from './verticalNavigation/verticalNavigation';
+import ConfirmationModal from './confirmationModal/confirmationModal';
 
 import logo from '../logo.svg';
 
@@ -41,7 +42,8 @@ class App extends React.Component {
           <AboutModal.VersionItem label="Label" versionText="Version" />
         </AboutModal.Versions>
       </AboutModal>,
-      <ToastNotificationsList key="toastList" />
+      <ToastNotificationsList key="toastList" />,
+      <ConfirmationModal key="confirmationModal" />
     ];
   }
 }
