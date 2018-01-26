@@ -674,7 +674,8 @@ definitions:
           type: "string"
           description: "The user to become when running a privileged command during network scan."
         become_password:
-          type: "The privilege escalation password to be used when running a network scan."
+          type: "string"
+          description: "The privilege escalation password to be used when running a network scan."
   CredentialMin:
     type: "object"
     required:
@@ -900,9 +901,9 @@ definitions:
         enum:
           - inspect
           - connect
-      optional_products:
+      disable_optional_products:
         type: "string"
-        description: "The product capture limitations."
+        description: "The product capture exclusions."
         enum:
           - jboss-eap
           - jboss-fuse
@@ -948,9 +949,9 @@ definitions:
             - connect
         options:
           $ref: "#/definitions/ScanOptions"
-        optional_products:
+        disable_optional_products:
           type: "string"
-          description: "The product capture limitations."
+          description: "The product capture exclusions."
           enum:
             - jboss-eap
             - jboss-fuse

@@ -312,9 +312,9 @@ Use the ``qpc scan start`` command to run connect and inspection scans on the so
 
   The number of parallel system scans. If not provided the default of 50 is utilized.
 
-``--optional_products=products``
+``--disable-optional_products=products_list``
 
-  The product capture limitations. Valid choices are jboss-eap, jboss-fuse, and jboss-brms.
+  The product capture exclusions. Contains the list of products to exclude from fact collection. Valid choices are jboss-eap, jboss-fuse, and jboss-brms.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

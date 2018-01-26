@@ -168,7 +168,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_ssh_private_key_file': 'keyfile',
                     'ansible_user': 'username',
                     'ansible_become_method': 'sudo',
-                    'ansible_become_user': 'root'}
+                    'ansible_become_user': 'root'
+                    }
         self.assertEqual(vars_dict, expected)
 
     def test_result_store(self):
@@ -201,7 +202,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
                                      'ansible_ssh_private_key_file': 'keyfile',
                                      'ansible_user': 'username',
                                      'ansible_become_method': 'sudo',
-                                     'ansible_become_user': 'root'}}}
+                                     'ansible_become_user': 'root'
+                                     }}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',

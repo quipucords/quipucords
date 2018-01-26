@@ -5,13 +5,13 @@
       raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*"); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
       register: jboss_eap_running_paths
       ignore_errors: yes
-      when: 'have_java and ("jboss-eap" in facts_to_collect)'
+      when: 'have_locate and jboss_eap'
 
     - name: use locate to look for jboss-modules.jar
       raw: locate jboss-modules.jar | xargs -n 1 dirname 2> /dev/null
       register: jboss_eap_locate_jboss_modules_jar
       ignore_errors: yes
-      when: 'have_locate and ("jboss-eap" in facts_to_collect)'
+      when: 'have_locate and jboss_eap'
 
     - name: use find to look for jboss-modules.jar
       raw: find {{scan_dirs}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 dirname 2> /dev/null | sort -u
@@ -31,6 +31,7 @@
              jboss_eap_locate_jboss_modules_jar.get('stdout_lines', []) +
              jboss_eap_find_jboss_modules_jar.get('stdout_lines', [])) | unique }}"
       ignore_errors: yes
+      when: 'jboss_eap'
 
 # Filters that will help us find true EAP_HOME directories
 
@@ -39,12 +40,14 @@
       register: ls_eap_home
       ignore_errors: yes
       with_items: "{{ eap_home_candidates }}"
+      when: 'jboss_eap'
 
     - name: get version.txt from EAP_HOME candidates
       raw: cat "{{ item }}"/version.txt
       register: eap_home_version_txt
       ignore_errors: yes
       with_items: "{{ eap_home_candidates }}"
+      when: 'jboss_eap'
 
 # Look for fuse inside EAP_HOME directories
 
@@ -53,18 +56,21 @@
       register: eap_home_bin
       ignore_errors: yes
       with_items: "{{ eap_home_candidates }}"
+      when: 'jboss_eap'
 
     - name: check JBoss layers.conf
       raw: cat "{{ item }}"/modules/layers.conf
       register: eap_home_layers_conf
       ignore_errors: yes
       with_items: "{{ eap_home_candidates }}"
+      when: 'jboss_eap'
 
     - name: check JBoss modules/system/layers
       raw: ls -1 "{{ item }}"/modules/system/layers
       register: eap_home_layers
       ignore_errors: yes
       with_items: "{{ eap_home_candidates }}"
+      when: 'jboss_eap'
 
 # Tests that can indicate the presence of EAP, but don't let us
 # automatically locate EAP_HOME
@@ -92,30 +98,36 @@
         - /usr/share/java/jboss-modules.jar
         - /usr/share/jbossas/jboss-modules.jar
         - /etc/init.d/jboss-as-standalone.sh
+      when: 'jboss_eap'
 
     - name: gather jboss.eap.processes
       raw: ps -A -f e | grep eap
       register: jboss_eap_processes
       ignore_errors: yes
+      when: 'jboss_eap'
 
     - name: check for jboss packages
       raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}\n" | grep -E '(eap7)|(jbossas)' | sort
       register: jboss_eap_packages
       ignore_errors: yes
+      when: 'jboss_eap'
 
     - name: check for user 'jboss'
       raw: id -u jboss
       register: jboss_eap_id_jboss
       ignore_errors: yes
+      when: 'jboss_eap'
 
     - name: look for jboss systemd service
       raw: systemctl list-unit-files --no-pager
       register: jboss_eap_systemctl_unit_files
       ignore_errors: yes
       become: true
+      when: 'jboss_eap'
 
     - name: look for jboss in chkconfig
       raw: chkconfig
       register: jboss_eap_chkconfig
       ignore_errors: yes
       become: true
+      when: 'jboss_eap'

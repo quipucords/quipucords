@@ -10,10 +10,11 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
+import json
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
-from api.models import (ScanTask, ScanOptions, ConnectionResult,
-                        SystemConnectionResult)
+from api.models import (ScanTask, ConnectionResult,
+                        SystemConnectionResult, ScanOptions)
 from scanner.task import ScanTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
@@ -21,6 +22,7 @@ from scanner.network.utils import (_construct_error_msg,
                                    _construct_vars,
                                    run_playbook,
                                    write_inventory)
+from scanner.network.processing.facts import expand_facts
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -141,10 +143,15 @@ class InspectTaskRunner(ScanTaskRunner):
         connection_port = self.scan_task.source.port
 
         connected, failed, completed = self.obtain_discovery_data()
-        facts_to_collect = self.scan_job.options.optional_products
-        print("\n\n Facts to collect: \n\n")
-        print(facts_to_collect)
-        print("\n\n")
+        # product_status = self.ScanOptions.create_product_status_dict()
+        # print("\nproduct_status \n\n")
+        # print(product_status)
+        # print("\n\n")
+        optional_products_status = \
+            self.scan_job.options.disable_optional_products
+        optional_products_status = \
+            expand_facts(json.loads(optional_products_status))
+
         forks = self.scan_job.options.max_concurrency
 
         num_completed = len(completed)
@@ -183,7 +190,8 @@ class InspectTaskRunner(ScanTaskRunner):
                         'gather_facts': False,
                         'roles': roles}
             result = run_playbook(
-                inventory_file, callback, playbook, forks=forks)
+                inventory_file, callback, playbook,
+                optional_products_status, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)

@@ -10,6 +10,7 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
+import json
 import pexpect
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -27,6 +28,7 @@ from scanner.network.utils import (run_playbook,
                                    decrypt_data_as_unicode,
                                    expand_hostpattern,
                                    write_inventory)
+from scanner.network.processing.facts import expand_facts
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -142,7 +144,11 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
-        optional_products = self.scan_job.options.optional_products
+        optional_products_status = \
+            self.scan_job.options.disable_optional_products
+        optional_products_status = \
+            expand_facts(json.loads(optional_products_status))
+
         forks = self.scan_job.options.max_concurrency
         connection_port = source['port']
         credentials = source['credentials']
@@ -158,7 +164,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             callback = ConnectResultCallback(result_store, credential)
             try:
                 connect(remaining_hosts, callback, cred_data,
-                        connection_port, forks=forks)
+                        connection_port, optional_products_status, forks=forks)
             except AnsibleError as ansible_error:
                 logger.error('Connect scan task failed for %s. %s',
                              self.scan_task, ansible_error)
@@ -184,13 +190,17 @@ class ConnectTaskRunner(ScanTaskRunner):
         return ScanTask.COMPLETED
 
 
-def connect(hosts, callback, credential, connection_port, forks=50):
+# pylint: disable=too-many-arguments
+def connect(hosts, callback, credential, connection_port,
+            optional_products_status, forks=50):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
     :param callback: The Ansible callback to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
+    :param optional_products_status: The dictionary containing
+           the collection status of the optional products.
     :param forks: number of forks to run with, default of 50
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
@@ -205,7 +215,8 @@ def connect(hosts, callback, credential, connection_port, forks=50):
                                       'args': parse_kv('echo "Hello"')}}]}
 
     _handle_ssh_passphrase(credential)
-    result = run_playbook(inventory_file, callback, playbook, forks=forks)
+    result = run_playbook(inventory_file, callback, playbook,
+                          optional_products_status, forks=forks)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)

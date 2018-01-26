@@ -34,17 +34,17 @@ SCAN_URI = '/api/v1/scans/'
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
 
-# Scan Options
-SCAN_JBOSS_EAP = 'jboss-eap'
-SCAN_JBOSS_FUSE = 'jboss-fuse'
-SCAN_JBOSS_BRMS = 'jboss-brms'
-# SCAN_EAP_FUSE = [SCAN_JBOSS_EAP, SCAN_JBOSS_FUSE]
-# SCAN_EAP_BRMS = 'jboss-eap','jboss-brms'
-#SCAN_EAP_FUSE_BRMS = ['jboss-eap', 'jboss-fuse', 'jboss-brms']
+JBOSS_EAP = 'jboss-eap'
+JBOSS_FUSE = 'jboss-fuse'
+JBOSS_BRMS = 'jboss-brms'
+EAP_FUSE = [JBOSS_EAP, JBOSS_FUSE]
+EAP_BRMS = [JBOSS_EAP, JBOSS_BRMS]
+FUSE_BRMS = [JBOSS_FUSE, JBOSS_BRMS]
+EAP_FUSE_BRMS = [JBOSS_EAP,
+                 JBOSS_BRMS,
+                 JBOSS_FUSE]
 
-SCAN_OPTIONS = [SCAN_JBOSS_EAP,
-                SCAN_JBOSS_FUSE,
-                SCAN_JBOSS_BRMS]
-                # SCAN_EAP_FUSE,
-                # SCAN_EAP_BRMS,
-                # SCAN_EAP_FUSE_BRMS]
+OPTIONAL_PRODUCTS = [JBOSS_EAP, JBOSS_FUSE,
+                     JBOSS_BRMS, EAP_FUSE,
+                     EAP_FUSE_BRMS, FUSE_BRMS,
+                     EAP_FUSE_BRMS]

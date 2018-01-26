@@ -13,6 +13,7 @@
 These models are used in the REST definitions.
 """
 import logging
+import json
 from django.utils.translation import ugettext as _
 from django.db import models
 from django.db.models import Q
@@ -29,17 +30,54 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
+    JBOSS_EAP = 'jboss_eap'
+    JBOSS_FUSE = 'jboss_fuse'
+    JBOSS_BRMS = 'jboss_brms'
+
     max_concurrency = models.PositiveIntegerField(default=50)
-    optional_products = models.TextField(null=True)
+    disable_optional_products = models.TextField(null=False)
 
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
-            'optional_products: {}'.format(self.id,
-                                           self.max_concurrency,
-                                           self.optional_products) \
+            'disable_optional_products: {}'.format(self.id,
+                                                   self.max_concurrency,
+                                                   self.disable_optional_products)\
             + '}'
+
+    def create_product_status_dict(self):
+        """Construct a dictionary based on the disabled products.
+
+        :returns: a dictionary representing the collection status of optional
+        products
+        """
+        product_status = self.get_disabled_optional_products()
+        product_default = {self.JBOSS_EAP: True,
+                           self.JBOSS_FUSE: True,
+                           self.JBOSS_BRMS: True}
+
+        if not product_status[self.JBOSS_FUSE]:
+            product_default[self.JBOSS_FUSE] = False
+        if not product_status[self.JBOSS_BRMS]:
+            product_default[self.self.JBOSS_BRMS] = False
+        if not product_status[self.JBOSS_EAP] and \
+                (not product_default[self.JBOSS_FUSE]) and \
+                (not product_default[self.JBOSS_BRMS]):
+            product_default[self.JBOSS_EAP] = False
+
+        print("\n\n\nProduct status dict: \n")
+        print(product_default)
+        print("\n\n")
+
+        return product_default
+
+    def get_disabled_optional_products(self):
+        """Access disabled_optional_products as a dict instead of a string.
+
+        :returns: disabled_optional_products as a python dict
+        """
+        return json.loads(self.disabled_optional_products)
 
 
 class ScanJob(models.Model):

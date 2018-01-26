@@ -108,8 +108,6 @@ SCAN_STATUS_FILTER_HELP = 'Filter for listing scan jobs by status. Valid '\
     'values: created, pending, running, paused, canceled, completed, failed.'
 SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; '\
     'default is 50.'
-SCAN_OPTIONAL_PRODUCTS_HELP = 'The product capture limitations. Valid '\
-    'choices are jboss-eap, jboss-fuse, and jboss-brms.'
 SCAN_RESULTS_HELP = 'View results of the specified scan.'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist.'
 SCAN_LIST_NO_SCANS = 'No scans found.'
@@ -117,6 +115,10 @@ SCAN_STARTED = 'Scan "%s" started.'
 SCAN_PAUSED = 'Scan "%s" paused.'
 SCAN_RESTARTED = 'Scan "%s" restarted.'
 SCAN_CANCELED = 'Scan "%s" canceled.'
+
+DISABLE_OPT_PRODUCTS_HELP = 'The product capture exclusions. '\
+    'Contains the list of products to exclude from fact collection. '\
+    'Valid choices are jboss-eap, jboss-fuse, and jboss-brms.'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
 

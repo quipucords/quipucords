@@ -80,5 +80,3 @@ class CustomJSONField(Field):
     def to_representation(self, value):
         """Transform JSON str to python object."""
         return json.loads(value)
-
-

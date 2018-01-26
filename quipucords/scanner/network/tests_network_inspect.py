@@ -208,8 +208,10 @@ class HostScannerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
+        optional_products = []
         inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
                                                   connection_port,
+                                                  optional_products,
                                                   50)
         expected = {
             'all': {
@@ -237,6 +239,7 @@ class HostScannerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
+        optional_products = []
         inventory_dict = construct_scan_inventory(
             [
                 ('1.2.3.1', cred),
@@ -245,6 +248,7 @@ class HostScannerTest(TestCase):
                 ('1.2.3.4', cred)
             ],
             connection_port,
+            optional_products,
             1)
         expected = {
             'all': {
@@ -283,7 +287,25 @@ class HostScannerTest(TestCase):
                     }
                 },
                 'vars': {
-                    'ansible_port': 22}
+                    'ansible_port': 22,
+                    'optional_products': ['connection.port',
+                                          'jboss.fuse.summary',
+                                          'jboss.eap.summary',
+                                          'jboss.eap.jboss-user',
+                                          'connection.uuid',
+                                          'jboss.brms.summary',
+                                          'jboss.eap.packages',
+                                          'jboss.brms',
+                                          'jboss.eap.processes',
+                                          'jboss.fuse.fuse-on-eap',
+                                          'jboss.fuse-on-karaf.karaf-home',
+                                          'jboss.fuse.init-files',
+                                          'jboss.eap.init-files',
+                                          'jboss.eap.running-paths',
+                                          'connection.host',
+                                          'jboss.eap.eap-home',
+                                          'jboss.eap.locate-jboss-modules-jar',
+                                          'jboss.eap.common-files']}
             }
         }
 
