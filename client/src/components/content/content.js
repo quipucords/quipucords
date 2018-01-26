@@ -32,8 +32,10 @@ class Content extends React.Component {
 
     return (
       <div className={classes}>
-        <Switch>{renderRoutes}</Switch>
-        {redirectRoot}
+        <Switch>
+          {renderRoutes}
+          {redirectRoot}
+        </Switch>
       </div>
     );
   }
