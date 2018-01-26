@@ -129,6 +129,7 @@ You can install Docker in different ways, depending on your needs:
   $ sudo yum install /path/to/package.rpm
 
 **Start Docker**
+
 Now that Docker has been installed on the system perform the following steps to get running.
 
 1. Start Docker::
