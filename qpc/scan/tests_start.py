@@ -107,7 +107,9 @@ class ScanStartCliTests(unittest.TestCase):
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=4,
-                             optional_products=[])
+                             disable_optional_products={'jboss-eap': True,
+                                                        'jboss-fuse': True,
+                                                        'jboss-brms': True})
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -126,26 +128,30 @@ class ScanStartCliTests(unittest.TestCase):
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=4,
-                             optional_products=[])
+                             disable_optional_products={'jboss-eap': True,
+                                                        'jboss-fuse': True,
+                                                        'jboss-brms': True})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
                                  messages.SCAN_STARTED % '1' + '\n')
 
-    def test_start_optional_products(self):
+    def test_disable_optional_products(self):
         """Testing the start scan command successfully."""
         scan_out = StringIO()
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}],
-                        'optional_products': ['jboss-eap']}]
+                        'disable_optional_products': ['jboss-fuse']}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=4,
-                             optional_products=['jboss-eap'])
+                             disable_optional_products={'jboss-eap': True,
+                                                        'jboss-fuse': False,
+                                                        'jboss-brms': True})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

@@ -10,7 +10,6 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
-import json
 import pexpect
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -28,7 +27,6 @@ from scanner.network.utils import (run_playbook,
                                    decrypt_data_as_unicode,
                                    expand_hostpattern,
                                    write_inventory)
-from scanner.network.processing.facts import expand_facts
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -144,11 +142,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
-        optional_products_status = \
-            self.scan_job.options.disable_optional_products
-        optional_products_status = \
-            expand_facts(json.loads(optional_products_status))
-
+        optional_products_status = self.scan_job.create_product_status_dict()
         forks = self.scan_job.options.max_concurrency
         connection_port = source['port']
         credentials = source['credentials']

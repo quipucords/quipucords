@@ -150,6 +150,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.scan_job.sources.add(self.source)
         self.scan_job.tasks.add(self.scan_task)
         scan_options = ScanOptions()
+        scan_options.disable_optional_products = {'jboss-eap': True,
+                                                  'jboss-fuse': True,
+                                                  'jboss-brms': True}
         scan_options.save()
         self.scan_job.options = scan_options
         self.scan_job.save()
@@ -168,8 +171,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_ssh_private_key_file': 'keyfile',
                     'ansible_user': 'username',
                     'ansible_become_method': 'sudo',
-                    'ansible_become_user': 'root'
-                    }
+                    'ansible_become_user': 'root'}
         self.assertEqual(vars_dict, expected)
 
     def test_result_store(self):
@@ -202,8 +204,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                                      'ansible_ssh_private_key_file': 'keyfile',
                                      'ansible_user': 'username',
                                      'ansible_become_method': 'sudo',
-                                     'ansible_become_user': 'root'
-                                     }}}
+                                     'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -215,11 +216,16 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        optional_product_status = {'jboss_eap': True,
+                                   'jboss_fuse': True,
+                                   'jboss_brms': True}
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred, connection_port)
+            connect(hosts, Mock(), cred,
+                    connection_port,
+                    optional_product_status)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -230,18 +236,28 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        optional_product_status = {'jboss_eap': True,
+                                   'jboss_fuse': True,
+                                   'jboss_brms': True}
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        connect(hosts, Mock(), cred, connection_port)
+        connect(hosts, Mock(), cred,
+                connection_port, optional_product_status)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')
     def test_connect_runner(self, mock_connect):
         """Test running a connect scan with mocked connection."""
+        optional_product_status = {'jboss_eap': True,
+                                   'jboss_fuse': True,
+                                   'jboss_brms': True}
         scanner = ConnectTaskRunner(
             self.scan_job, self.scan_task, self.conn_results)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
+        mock_connect.assert_called_with(ANY, ANY,
+                                        ANY, 22,
+                                        optional_product_status,
+                                        forks=50)
         self.assertEqual(conn_dict, ScanTask.COMPLETED)
