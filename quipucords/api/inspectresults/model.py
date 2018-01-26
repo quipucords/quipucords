@@ -73,7 +73,7 @@ class InspectionResult(models.Model):
         return '{ ' + 'id:{}, '\
             'source:{}, '\
             'scan_job:{}, '\
-            'sytems:{}'\
+            'systems:{}'\
             .format(self.id,
                     self.source,
                     self.scan_task,

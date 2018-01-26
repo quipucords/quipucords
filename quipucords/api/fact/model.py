@@ -11,29 +11,40 @@
 
 """Models to capture system facts."""
 
+import json
 from django.db import models
 
 
 class FactCollection(models.Model):
     """A reported set of facts."""
 
-    FC_STATUS_PERSISTED = 'persisted'
+    FC_STATUS_PENDING = 'pending'
+    FC_STATUS_FAILED = 'failed'
     FC_STATUS_COMPLETE = 'complete'
-    FC_STATUS_CHOICES = ((FC_STATUS_PERSISTED,
-                          FC_STATUS_PERSISTED),
+    FC_STATUS_CHOICES = ((FC_STATUS_PENDING,
+                          FC_STATUS_PENDING),
+                         (FC_STATUS_FAILED,
+                          FC_STATUS_FAILED),
                          (FC_STATUS_COMPLETE,
                           FC_STATUS_COMPLETE))
 
     status = models.CharField(
         max_length=16,
         choices=FC_STATUS_CHOICES,
-        default=FC_STATUS_PERSISTED
+        default=FC_STATUS_PENDING
     )
-    path = models.CharField(max_length=256)
+    sources = models.TextField(null=False)
 
     def __str__(self):
         """Convert to string."""
         return '{' +\
-            'id:{}, status:{}, path:{}'.format(self.id,
-                                               self.status,
-                                               self.path) + '}'
+            'id:{}, status:{}, sources:{}'.format(self.id,
+                                                  self.status,
+                                                  self.sources) + '}'
+
+    def get_sources(self):
+        """Access facts as python dict instead of str.
+
+        :returns: facts as a python dict
+        """
+        return json.loads(self.sources)
