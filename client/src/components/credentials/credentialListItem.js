@@ -28,9 +28,16 @@ class CredentialListItem extends React.Component {
         itemIcon = null;
     }
 
-    let credentialType = 'Username & Password';
-    if (item.ssh_keyfile && item.ssh_keyfile !== '') {
-      credentialType = 'SSH Key';
+    let credentialType;
+    switch (item.auth_type) {
+      case 'sshKey':
+        credentialType = 'SSH Key';
+        break;
+      case 'becomeUser':
+        credentialType = 'Become User';
+        break;
+      default:
+        credentialType = 'Username & Password';
     }
 
     return (
@@ -56,6 +63,20 @@ class CredentialListItem extends React.Component {
         leftContent={itemIcon}
         heading={item.name}
         description={credentialType}
+        additionalInfo={[
+          <ListView.InfoItem
+            key="userName"
+            className="list-view-info-item-text-count"
+          >
+            {item.authType === 'becomeUser' ? item.become_user : item.username}
+          </ListView.InfoItem>,
+          <ListView.InfoItem
+            key="becomeMethod"
+            className="list-view-info-item-text-count"
+          >
+            {item.authType === 'becomeUser' ? item.become_method : ''}
+          </ListView.InfoItem>
+        ]}
       >
         {this.renderExpansionContents()}
       </ListView.Item>

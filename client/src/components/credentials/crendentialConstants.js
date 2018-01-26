@@ -6,9 +6,9 @@ const CredentialFilterFields = [
     filterType: 'text'
   },
   {
-    id: 'sourceType',
-    title: 'Source Type',
-    placeholder: 'Filter by Source Type',
+    id: 'credentialType',
+    title: 'Credential Type',
+    placeholder: 'Filter by Credential Type',
     filterType: 'select',
     filterValues: [
       { title: 'Network', id: 'network' },
@@ -17,13 +17,14 @@ const CredentialFilterFields = [
     ]
   },
   {
-    id: 'credentialType',
-    title: 'Credential Type',
-    placeholder: 'Filter by Credential Type',
+    id: 'authenticationType',
+    title: 'Authentication Type',
+    placeholder: 'Filter by Authentication Type',
     filterType: 'select',
     filterValues: [
       { title: 'SSH Key', id: 'sshKey' },
-      { title: 'Username & Password', id: 'usernamePassword' }
+      { title: 'Username & Password', id: 'usernamePassword' },
+      { title: 'Become User', id: 'becomeUser' }
     ]
   }
 ];
@@ -35,13 +36,13 @@ const CredentialSortFields = [
     isNumeric: false
   },
   {
-    id: 'sourceType',
-    title: 'Source Type',
+    id: 'credentialType',
+    title: 'Credential Type',
     isNumeric: false
   },
   {
-    id: 'credentialType',
-    title: 'Credential Type',
+    id: 'authenticationType',
+    title: 'Authentication Type',
     isNumeric: false
   }
 ];

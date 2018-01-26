@@ -204,7 +204,7 @@ class SourcesToolbar extends React.Component {
         <Button bsStyle="primary" onClick={this.props.onAddSource}>
           Add
         </Button>
-        <Button onClick={this.props.onRefresh}>
+        <Button onClick={this.props.onRefresh} bsStyle="success">
           <Icon type="fa" name="refresh" />
         </Button>
       </div>
