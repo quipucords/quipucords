@@ -42,7 +42,14 @@ class ScanListItem extends React.Component {
   }
 
   render() {
-    const { item, onSummaryDownload, onDetailedDownload } = this.props;
+    const {
+      item,
+      onSummaryDownload,
+      onDetailedDownload,
+      onPause,
+      onCancel,
+      onStart
+    } = this.props;
     const { expanded, expandType } = this.state;
 
     let sourcesCount = item.sources ? item.sources.length : 0;
@@ -147,10 +154,10 @@ class ScanListItem extends React.Component {
               key="kebab"
               pullRight
             >
-              <MenuItem className="unavailable">Pause</MenuItem>
-              <MenuItem className="unavailable">Cancel</MenuItem>
+              <MenuItem onClick={() => onPause(item)}>Pause</MenuItem>
+              <MenuItem onClick={() => onCancel(item)}>Cancel</MenuItem>
               <MenuItem divider />
-              <MenuItem className="unavailable">Start Scan</MenuItem>
+              <MenuItem onClick={() => onStart(item)}>Start Scan</MenuItem>
             </DropdownKebab>
           </span>
         }
@@ -242,7 +249,10 @@ class ScanListItem extends React.Component {
 ScanListItem.propTypes = {
   item: PropTypes.object,
   onSummaryDownload: PropTypes.func,
-  onDetailedDownload: PropTypes.func
+  onDetailedDownload: PropTypes.func,
+  onPause: PropTypes.func,
+  onCancel: PropTypes.func,
+  onStart: PropTypes.func
 };
 
 export { ScanListItem };
