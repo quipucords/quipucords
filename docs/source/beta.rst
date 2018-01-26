@@ -107,19 +107,25 @@ You can install Docker in different ways, depending on your needs:
 - Some users download the RPM package and install it manually and manage upgrades completely manually. This is useful in situations such as installing Docker on air-gapped systems with no access to the internet.
 
 **Install using the repository**
-1. Install required packages::
+
+1. Log into your machine as a user with ``sudo`` or ``root`` privileges.
+
+2. Install required packages::
   $ sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 
-2. Add repository::
+3. Add repository::
   $ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-3. Install docker from repository::
+4. Install docker from repository::
   $ sudo yum install docker-ce
 
 **Install from a package**
-1. Go to https://download.docker.com/linux/centos/7/x86_64/stable/Packages/ and download the .rpm file for the Docker version you want to install.
 
-2. Install Docker, changing the path below to the path where you downloaded the Docker package::
+1. Go to https://download.docker.com/linux/centos/7/x86_64/stable/Packages/ and download the .rpm file for the Docker version you want to install and place it on the intended install system.
+
+2. Log into your machine as a user with ``sudo`` or ``root`` privileges.
+
+3. Install Docker, changing the path below to the path where you downloaded the Docker package::
   $ sudo yum install /path/to/package.rpm
 
 **Start Docker**
