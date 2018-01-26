@@ -11,9 +11,7 @@ button.unavailable:hover, li.unavailable > a:hover {
   opacity: 0;
 }
 
-// This should be in Patternfly - https://github.com/patternfly/patternfly/issues/920
 .navbar-brand .navbar-brand-icon, .modal-dialog .modal-footer > img {
   height: 35px;
-  width: 35px;
 }
 

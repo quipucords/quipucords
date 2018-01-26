@@ -47,6 +47,13 @@ class Credentials extends React.Component {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
         credential.selected = false;
+        if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
+          credential.auth_type = 'sshKey';
+        } else if (credential.become_useer && credential.become_useer !== '') {
+          credential.auth_type = 'becomeUser';
+        } else {
+          credential.auth_type = 'usernamePassword';
+        }
       });
 
       // TODO: Remove once we get real failed host data
@@ -81,11 +88,9 @@ class Credentials extends React.Component {
       case 'name':
         return item.name.match(re) !== null;
       case 'credentialType':
-        let credentialType = 'usernamePassword';
-        if (item.ssh_keyfile && item.ssh_keyfile !== '') {
-          credentialType = 'sshKey';
-        }
-        return credentialType === filter.value.id;
+        return item.cred_type === filter.value.id;
+      case 'authenticationType':
+        return item.auth_type === filter.value.id;
       default:
         return true;
     }
@@ -124,20 +129,11 @@ class Credentials extends React.Component {
         case 'name':
           compValue = item1.name.localeCompare(item2.name);
           break;
-        case 'sourceType':
+        case 'credentialType':
           compValue = item1.cred_type.localeCompare(item2.cred_type);
           break;
-        case 'credentialType':
-          let credentialType1 = 'Username & Password';
-          if (item1.ssh_keyfile && item1.ssh_keyfile !== '') {
-            credentialType1 = 'SSH Key';
-          }
-          let credentialType2 = 'Username & Password';
-          if (item2.ssh_keyfile && item2.ssh_keyfile !== '') {
-            credentialType2 = 'SSH Key';
-          }
-
-          compValue = credentialType1.localeCompare(credentialType2);
+        case 'authenticationType':
+          compValue = item1.auth_type.localeCompare(item2.auth_type);
           break;
         default:
           compValue = 0;

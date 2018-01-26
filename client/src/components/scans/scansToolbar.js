@@ -195,25 +195,7 @@ class ScansToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
-        <Button
-          disabled={this.props.runScansAvailable === false}
-          onClick={this.props.onRunScans}
-        >
-          Scan Now
-        </Button>
-        <Button
-          disabled={this.props.repeatScansAvailable === false}
-          onClick={this.props.onRepeatScans}
-        >
-          Repeat Scan
-        </Button>
-        <Button
-          disabled={this.props.downloadScansAvailable === false}
-          onClick={this.props.onDownloadScans}
-        >
-          Download
-        </Button>
-        <Button onClick={this.props.onRefresh}>
+        <Button onClick={this.props.onRefresh} bsStyle="success">
           <Icon type="fa" name="refresh" />
         </Button>
       </div>
@@ -286,12 +268,6 @@ ScansToolbar.propTypes = {
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool,
-  runScansAvailable: PropTypes.bool,
-  onRunScans: PropTypes.func,
-  repeatScansAvailable: PropTypes.bool,
-  onRepeatScans: PropTypes.func,
-  downloadScansAvailable: PropTypes.bool,
-  onDownloadScans: PropTypes.func,
   onRefresh: PropTypes.func
 };
 
