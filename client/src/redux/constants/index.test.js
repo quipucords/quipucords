@@ -8,10 +8,11 @@ import * as scansTypes from './scansConstants';
 import * as sourcesTypes from './sourcesConstants';
 import * as toastNotificationTypes from './toasNotificationConstants';
 import * as viewToolbarTypes from './viewToolbarConstants';
+import * as confirmationModalTypes from './confirmationModalConstants';
 
 describe('reduxTypes', function() {
   it('should export the same number of name-spaced types as imported', () => {
-    expect(Object.keys(reduxTypes)).toHaveLength(9);
+    expect(Object.keys(reduxTypes)).toHaveLength(10);
   });
 
   it('should return types that are defined', () => {
@@ -30,5 +31,6 @@ describe('reduxTypes', function() {
     expect(reduxTypes.sources).toEqual(sourcesTypes);
     expect(reduxTypes.toastNotifications).toEqual(toastNotificationTypes);
     expect(reduxTypes.viewToolbar).toEqual(viewToolbarTypes);
+    expect(reduxTypes.confirmationModal).toEqual(confirmationModalTypes);
   });
 });

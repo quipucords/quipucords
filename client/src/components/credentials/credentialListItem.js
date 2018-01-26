@@ -1,17 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Icon, Checkbox } from 'patternfly-react';
 
 class CredentialListItem extends React.Component {
-  renderExpansionContents() {
-    const { item } = this.props;
-
-    return <JSONPretty json={item} />;
-  }
-
   render() {
-    const { item, onItemSelectChange } = this.props;
+    const { item, onItemSelectChange, onEdit, onDelete } = this.props;
 
     let itemIcon;
     switch (item.cred_type) {
@@ -28,9 +21,16 @@ class CredentialListItem extends React.Component {
         itemIcon = null;
     }
 
-    let credentialType = 'Username & Password';
-    if (item.ssh_keyfile && item.ssh_keyfile !== '') {
-      credentialType = 'SSH Key';
+    let credentialType;
+    switch (item.auth_type) {
+      case 'sshKey':
+        credentialType = 'SSH Key';
+        break;
+      case 'becomeUser':
+        credentialType = 'Become User';
+        break;
+      default:
+        credentialType = 'Username & Password';
     }
 
     return (
@@ -45,10 +45,22 @@ class CredentialListItem extends React.Component {
         }
         actions={
           <span>
-            <Button className="unavailable" bsStyle="link" key="editButton">
+            <Button
+              onClick={() => {
+                onEdit(item);
+              }}
+              bsStyle="link"
+              key="editButton"
+            >
               <Icon type="pf" name="edit" />
             </Button>
-            <Button className="unavailable" bsStyle="link" key="removeButton">
+            <Button
+              onClick={() => {
+                onDelete(item);
+              }}
+              bsStyle="link"
+              key="removeButton"
+            >
               <Icon type="pf" name="delete" />
             </Button>
           </span>
@@ -56,16 +68,30 @@ class CredentialListItem extends React.Component {
         leftContent={itemIcon}
         heading={item.name}
         description={credentialType}
-      >
-        {this.renderExpansionContents()}
-      </ListView.Item>
+        additionalInfo={[
+          <ListView.InfoItem
+            key="userName"
+            className="list-view-info-item-text-count"
+          >
+            {item.authType === 'becomeUser' ? item.become_user : item.username}
+          </ListView.InfoItem>,
+          <ListView.InfoItem
+            key="becomeMethod"
+            className="list-view-info-item-text-count"
+          >
+            {item.authType === 'becomeUser' ? item.become_method : ''}
+          </ListView.InfoItem>
+        ]}
+      />
     );
   }
 }
 
 CredentialListItem.propTypes = {
   item: PropTypes.object,
-  onItemSelectChange: PropTypes.func
+  onItemSelectChange: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export { CredentialListItem };

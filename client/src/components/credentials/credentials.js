@@ -17,7 +17,10 @@ import CredentialsToolbar from './credentialsToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import {
+  confirmationModalTypes,
+  toastNotificationTypes
+} from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
 class Credentials extends React.Component {
@@ -28,6 +31,8 @@ class Credentials extends React.Component {
       'addCredential',
       'deleteCredentials',
       'itemSelectChange',
+      'editCredential',
+      'deleteCredential',
       'addSource',
       'importSources',
       'refresh'
@@ -47,6 +52,13 @@ class Credentials extends React.Component {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
         credential.selected = false;
+        if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
+          credential.auth_type = 'sshKey';
+        } else if (credential.become_user && credential.become_user !== '') {
+          credential.auth_type = 'becomeUser';
+        } else {
+          credential.auth_type = 'usernamePassword';
+        }
       });
 
       // TODO: Remove once we get real failed host data
@@ -81,11 +93,9 @@ class Credentials extends React.Component {
       case 'name':
         return item.name.match(re) !== null;
       case 'credentialType':
-        let credentialType = 'usernamePassword';
-        if (item.ssh_keyfile && item.ssh_keyfile !== '') {
-          credentialType = 'sshKey';
-        }
-        return credentialType === filter.value.id;
+        return item.cred_type === filter.value.id;
+      case 'authenticationType':
+        return item.auth_type === filter.value.id;
       default:
         return true;
     }
@@ -124,20 +134,11 @@ class Credentials extends React.Component {
         case 'name':
           compValue = item1.name.localeCompare(item2.name);
           break;
-        case 'sourceType':
+        case 'credentialType':
           compValue = item1.cred_type.localeCompare(item2.cred_type);
           break;
-        case 'credentialType':
-          let credentialType1 = 'Username & Password';
-          if (item1.ssh_keyfile && item1.ssh_keyfile !== '') {
-            credentialType1 = 'SSH Key';
-          }
-          let credentialType2 = 'Username & Password';
-          if (item2.ssh_keyfile && item2.ssh_keyfile !== '') {
-            credentialType2 = 'SSH Key';
-          }
-
-          compValue = credentialType1.localeCompare(credentialType2);
+        case 'authenticationType':
+          compValue = item1.auth_type.localeCompare(item2.auth_type);
           break;
         default:
           compValue = 0;
@@ -180,6 +181,47 @@ class Credentials extends React.Component {
     this.setState({ selectedItems: selectedItems });
   }
 
+  editCredential(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Editing credentials is not yet implemented'
+    });
+  }
+
+  doDeleteCredential(item) {
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.name,
+      message: 'Deleting credentials is not yet implemented'
+    });
+  }
+
+  deleteCredential(item) {
+    let heading = (
+      <h3>
+        Are you sure you want to delete the credential{' '}
+        <strong>{item.name}</strong>?
+      </h3>
+    );
+
+    let onConfirm = () => this.doDeleteCredential(item);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Source',
+      heading: heading,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
+    });
+  }
+
   addSource() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -211,6 +253,8 @@ class Credentials extends React.Component {
               item={item}
               key={index}
               onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editCredential}
+              onDelete={this.deleteCredential}
             />
           ))}
         </ListView>

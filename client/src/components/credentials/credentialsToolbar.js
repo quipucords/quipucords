@@ -207,7 +207,7 @@ class CredentialsToolbar extends React.Component {
         >
           Delete
         </Button>
-        <Button onClick={this.props.onRefresh}>
+        <Button onClick={this.props.onRefresh} bsStyle="success">
           <Icon type="fa" name="refresh" />
         </Button>
       </div>

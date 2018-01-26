@@ -9,10 +9,14 @@
 }
 
 .list-view-info-item-text-count {
+  overflow: hidden;
+  text-overflow: ellipsis;
   width: 110px;
 }
 
 .list-view-info-item-icon-count {
+  overflow: hidden;
+  text-overflow: ellipsis;
   width: 80px;
 }
 

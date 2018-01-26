@@ -25,17 +25,17 @@ class Scans extends React.Component {
     super();
 
     bindMethods(this, [
-      'runScans',
-      'repeatScans',
-      'downloadScans',
-      'itemSelectChange',
+      'downloadSummaryReport',
+      'downloadDetailedReport',
+      'pauseScan',
+      'cancelScan',
+      'startScan',
       'addSource',
       'importSources',
       'refresh'
     ]);
     this.state = {
-      filteredItems: [],
-      selectedItems: []
+      filteredItems: []
     };
   }
 
@@ -45,9 +45,10 @@ class Scans extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.scans !== this.props.scans) {
-      // Reset selection state though we may want to keep selections over refreshes...
       nextProps.scans.forEach(scan => {
-        scan.selected = false;
+        scan.systems_scanned = Math.abs(scan.systems_scanned) % 100;
+        scan.systems_failed = Math.abs(scan.systems_failed) % 100;
+        scan.scans_count = Math.floor(Math.random() * 10);
       });
 
       let filteredItems = this.filterScans(
@@ -142,42 +143,49 @@ class Scans extends React.Component {
     });
   }
 
-  runScans() {
+  downloadSummaryReport() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Running scans is not yet implemented'
+      message: 'Downloading summary reports is not yet implemented'
     });
   }
 
-  repeatScans() {
+  downloadDetailedReport() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Repeating scans is not yet implemented'
+      message: 'Downloading summary reports is not yet implemented'
     });
   }
 
-  downloadScans() {
+  pauseScan(item) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
-      header: 'NYI',
-      message: 'Downloading scans is not yet implemented'
+      header: item.id,
+      message: 'Pausing scans is not yet implemented'
     });
   }
 
-  itemSelectChange(item) {
-    const { filteredItems } = this.state;
-
-    item.selected = !item.selected;
-    let selectedItems = filteredItems.filter(item => {
-      return item.selected === true;
+  cancelScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Cancelling scans is not yet implemented'
     });
+  }
 
-    this.setState({ selectedItems: selectedItems });
+  startScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Starting scans is not yet implemented'
+    });
   }
 
   addSource() {
@@ -210,7 +218,11 @@ class Scans extends React.Component {
             <ScanListItem
               item={item}
               key={index}
-              onItemSelectChange={this.itemSelectChange}
+              onSummaryDownload={this.downloadSummaryReport}
+              onDetailedDownload={this.downloadDetailedReport}
+              onPause={this.pauseScan}
+              onCancel={this.cancelScan}
+              onStart={this.startScan}
             />
           ))}
         </ListView>
@@ -220,7 +232,7 @@ class Scans extends React.Component {
 
   render() {
     const { loading, loadError, errorMessage, scans } = this.props;
-    const { filteredItems, selectedItems } = this.state;
+    const { filteredItems } = this.state;
 
     if (loading) {
       return (
@@ -249,12 +261,6 @@ class Scans extends React.Component {
           totalCount={scans.length}
           filteredCount={filteredItems.length}
           key={1}
-          runScansAvailable={selectedItems && selectedItems.length > 0}
-          onRunScans={this.runScans}
-          repeatScansAvailable={selectedItems && selectedItems.length > 0}
-          onRepeatScans={this.repeatScans}
-          downloadScansAvailable={selectedItems && selectedItems.length > 0}
-          onDownloadScans={this.downloadScans}
           onRefresh={this.refresh}
         />,
         <Grid fluid key={2}>
