@@ -5,7 +5,7 @@
       raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*"); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
       register: jboss_eap_running_paths
       ignore_errors: yes
-      when: 'have_locate and jboss_eap'
+      when: 'have_java and jboss_eap'
 
     - name: use locate to look for jboss-modules.jar
       raw: locate jboss-modules.jar | xargs -n 1 dirname 2> /dev/null
