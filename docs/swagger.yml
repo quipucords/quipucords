@@ -901,13 +901,6 @@ definitions:
         enum:
           - inspect
           - connect
-      disable_optional_products:
-        type: "string"
-        description: "The product capture exclusions."
-        enum:
-          - jboss-eap
-          - jboss-fuse
-          - jboss-brms
       status:
         type: "string"
         description: "The status of the scan task."
@@ -938,6 +931,15 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The maximum concurrent host scans. default is 50."
+      disable_optional_products:
+        type: "array"
+        description: "The product capture exclusions."
+        items:
+          type: "string"
+          enum:
+            - jboss_eap
+            - jboss_fuse
+            - jboss_brms
   ScanJob:
     type: "object"
     properties:
@@ -949,13 +951,6 @@ definitions:
             - connect
         options:
           $ref: "#/definitions/ScanOptions"
-        disable_optional_products:
-          type: "string"
-          description: "The product capture exclusions."
-          enum:
-            - jboss-eap
-            - jboss-fuse
-            - jboss-brms
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"
