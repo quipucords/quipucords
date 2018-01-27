@@ -11,6 +11,7 @@ import sourcesToolbarReducer from './sourcesToolbarReducer';
 import scansReducer from './scansReducer';
 import scansToolbarReducer from './scansToolbarReducer';
 import toastNotificationsReducer from './toastNotificationsReducer';
+import confirmationModalReducer from './confirmationModalReducer';
 
 const reducers = {
   about: aboutReducer,
@@ -23,7 +24,8 @@ const reducers = {
   sourcesToolbar: sourcesToolbarReducer,
   scans: scansReducer,
   scansToolbar: scansToolbarReducer,
-  toastNotifications: toastNotificationsReducer
+  toastNotifications: toastNotificationsReducer,
+  confirmationModal: confirmationModalReducer
 };
 
 const reduxReducers = combineReducers(reducers);

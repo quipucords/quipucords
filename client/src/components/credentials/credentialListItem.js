@@ -1,17 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Icon, Checkbox } from 'patternfly-react';
 
 class CredentialListItem extends React.Component {
-  renderExpansionContents() {
-    const { item } = this.props;
-
-    return <JSONPretty json={item} />;
-  }
-
   render() {
-    const { item, onItemSelectChange } = this.props;
+    const { item, onItemSelectChange, onEdit, onDelete } = this.props;
 
     let itemIcon;
     switch (item.cred_type) {
@@ -52,10 +45,22 @@ class CredentialListItem extends React.Component {
         }
         actions={
           <span>
-            <Button className="unavailable" bsStyle="link" key="editButton">
+            <Button
+              onClick={() => {
+                onEdit(item);
+              }}
+              bsStyle="link"
+              key="editButton"
+            >
               <Icon type="pf" name="edit" />
             </Button>
-            <Button className="unavailable" bsStyle="link" key="removeButton">
+            <Button
+              onClick={() => {
+                onDelete(item);
+              }}
+              bsStyle="link"
+              key="removeButton"
+            >
               <Icon type="pf" name="delete" />
             </Button>
           </span>
@@ -77,16 +82,16 @@ class CredentialListItem extends React.Component {
             {item.authType === 'becomeUser' ? item.become_method : ''}
           </ListView.InfoItem>
         ]}
-      >
-        {this.renderExpansionContents()}
-      </ListView.Item>
+      />
     );
   }
 }
 
 CredentialListItem.propTypes = {
   item: PropTypes.object,
-  onItemSelectChange: PropTypes.func
+  onItemSelectChange: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export { CredentialListItem };
