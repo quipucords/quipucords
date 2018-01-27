@@ -137,7 +137,7 @@ class ScanStartCliTests(unittest.TestCase):
                                  messages.SCAN_STARTED % '1' + '\n')
 
     def test_disable_optional_products(self):
-        """Testing the start scan command successfully."""
+        """Testing that the disable-optional-products flag works correctly."""
         scan_out = StringIO()
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
