@@ -60,12 +60,11 @@ class ScanJobRunner(Process):
         for scan_task in incomplete_scan_tasks:
             runner = self._create_task_runner(scan_task)
             if not runner:
-                logger.error(
-                    'Scan Job failed.  Scan task does not'
-                    ' have recognized type/source combination: %s',
-                    scan_task)
-                scan_task.status = ScanTask.FAILED
-                self.scan_job.fail()
+                error_message = 'Scan task does not  have recognized '\
+                    'type/source combination: %s' % scan_task
+
+                scan_task.fail(error_message)
+                self.scan_job.fail(error_message)
                 return
 
             task_runners.append(runner)
@@ -74,20 +73,29 @@ class ScanJobRunner(Process):
 
         for runner in task_runners:
             # Mark runner as running
-            runner.scan_task.status = ScanTask.RUNNING
-            runner.scan_task.save()
+            runner.scan_task.start()
 
             logger.info('Running task: %s', runner)
             # run runner
-            task_status = runner.run()
+            status_message, task_status = runner.run()
 
             # Save Task status
-            runner.scan_task.status = task_status
-            runner.scan_task.save()
+            if task_status == ScanTask.FAILED:
+                runner.scan_task.fail(status_message)
+            elif task_status == ScanTask.COMPLETED:
+                runner.scan_task.complete(status_message)
+            else:
+                error_message = 'ScanTask %d failed.  Scan task must return '\
+                    'ScanTask.COMPLETED or ScanTask.FAILED.  '\
+                    'ScanTask returned %s' %\
+                    (runner.scan_task.id, task_status)
+                runner.scan_task.fail(error_message)
 
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully so save job status as fail
-                self.scan_job.fail()
+                error_message = 'One of more tasks did not complete.  '\
+                    'See tasks for details.'
+                self.scan_job.fail(error_message)
 
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             self._send_facts_to_engine()
@@ -156,9 +164,9 @@ class ScanJobRunner(Process):
                 fact_collection_json)
 
             if has_errors:
-                logger.error('Scan producted invalid fact collection JSON: ')
-                logger.error(validation_result)
-                self.scan_job.fail()
+                message = 'Scan producted invalid fact collection JSON: %s' % \
+                    validation_result
+                self.scan_job.fail(message)
                 return
 
             # Create FC model and save data to JSON file
@@ -179,13 +187,12 @@ class ScanJobRunner(Process):
                 # Transition from persisted to failed after engine failed
                 fact_collection.status = FactCollection.FC_STATUS_FAILED
                 fact_collection.save()
-                logger.error(
-                    'Fact collection %d failed to be processed.',
-                    fact_collection.id)
-                logger.error('%s:%s', error.__class__.__name__, error)
-
+                error_message = 'Fact collection %d failed'\
+                    ' to be processed.' % fact_collection.id
                 # Mark scanjob failed to avoid re-running on restart
-                self.scan_job.fail()
+                self.scan_job.fail(error_message)
+
+                logger.error('%s:%s', error.__class__.__name__, error)
                 raise error
         else:
             logger.error('No facts gathered from scan.')

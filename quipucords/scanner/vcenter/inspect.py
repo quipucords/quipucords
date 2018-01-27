@@ -84,24 +84,23 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            logger.error(
-                'Prerequisites scan task with id %d failed.',
-                self.connect_scan_task.id)
-            return ScanTask.FAILED
+            error_message = 'Prerequisites scan task with id %d failed.' %\
+                self.connect_scan_task.id
+            return error_message, ScanTask.FAILED
 
         self._init_inspect_result()
 
         try:
             self.inspect()
         except vim.fault.InvalidLogin as vm_error:
-            logger.error('Unable to connect to VCenter source, %s, '
-                         'with supplied credential, %s.',
-                         source.name, credential.name)
-            logger.error('Discovery scan failed for %s. %s', self.scan_task,
-                         vm_error)
-            return ScanTask.FAILED
+            error_message = 'Unable to connect to VCenter source, %s, '\
+                'with supplied credential, %s.\n' %\
+                (source.name, credential.name)
+            error_message += 'Discovery scan failed for %s. %s' %\
+                (self.scan_task, vm_error)
+            return error_message, ScanTask.FAILED
 
-        return ScanTask.COMPLETED
+        return None, ScanTask.COMPLETED
 
     # pylint: disable=too-many-locals
     @transaction.atomic

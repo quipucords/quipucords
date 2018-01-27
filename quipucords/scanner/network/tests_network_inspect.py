@@ -310,7 +310,7 @@ class HostScannerTest(TestCase):
             self.scan_job, self.inspect_scan_task, self.inspect_results)
         scan_task_status = scanner.run()
         mock_scan.assert_called_with()
-        self.assertEqual(scan_task_status, ScanTask.FAILED)
+        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
            side_effect=mock_run_success)
@@ -324,7 +324,7 @@ class HostScannerTest(TestCase):
                 self.scan_job, self.inspect_scan_task, self.inspect_results)
             scan_task_status = scanner.run()
             mock_run.assert_called_with(ANY)
-            self.assertEqual(scan_task_status, ScanTask.FAILED)
+            self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""

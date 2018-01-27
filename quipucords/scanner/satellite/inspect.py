@@ -49,10 +49,9 @@ class InspectTaskRunner(ScanTaskRunner):
         """Scan satellite manager and obtain host facts."""
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            logger.error(
-                'Prerequisites scan task with id %d failed.',
-                self.connect_scan_task.id)
-            return ScanTask.FAILED
+            error_message = 'Prerequisites scan task with id %d failed.' %\
+                (self.connect_scan_task.id)
+            return error_message, ScanTask.FAILED
 
         satellite_version = None
         options = self.source.options
@@ -61,10 +60,10 @@ class InspectTaskRunner(ScanTaskRunner):
 
         if (satellite_version is None or
                 satellite_version == SourceOptions.SATELLITE_VERSION_5):
-            logger.error('Satellite version %s is not yet supported.',
-                         SourceOptions.SATELLITE_VERSION_5)
-            logger.error('Inspect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite version %s is not yet supported.\n' %\
+                (SourceOptions.SATELLITE_VERSION_5)
+            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
 
         try:
             logger.info('Inspect scan started for %s.', self.scan_task)
@@ -87,23 +86,24 @@ class InspectTaskRunner(ScanTaskRunner):
                              self.scan_task, self.conn_result,
                              self.inspect_result)
                 if not api:
-                    logger.error('Satellite version %s with '
-                                 'api version %s is not supported.',
-                                 satellite_version, api_version)
-                    logger.error('Inspect scan failed for %s.', self.scan_task)
-                    return ScanTask.FAILED
+                    error_message = 'Satellite version %s with '\
+                        'api version %s is not supported.\n' %\
+                        (satellite_version, api_version)
+                    error_message += 'Inspect scan failed for %s.' % \
+                        (self.scan_task)
+                    return error_message, ScanTask.FAILED
                 api.hosts_facts()
                 logger.info('Inspect scan completed for %s.', self.scan_task)
             else:
-                logger.error('Inspect scan failed for %s.', self.scan_task)
-                return ScanTask.FAILED
+                error_message = 'Inspect scan failed for %s.' % self.scan_task
+                return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            logger.error('Satellite error encountered: %s', sat_error)
-            logger.error('Inspect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite error encountered: %s\n' % sat_error
+            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
         except exceptions.ConnectionError as conn_error:
-            logger.error('Satellite error encountered: %s', conn_error)
-            logger.error('Inspect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite error encountered: %s\n' % conn_error
+            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
 
-        return ScanTask.COMPLETED
+        return None, ScanTask.COMPLETED

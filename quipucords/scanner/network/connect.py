@@ -159,9 +159,9 @@ class ConnectTaskRunner(ScanTaskRunner):
                 connect(remaining_hosts, callback, cred_data,
                         connection_port, forks=forks)
             except AnsibleError as ansible_error:
-                logger.error('Connect scan task failed for %s. %s',
-                             self.scan_task, ansible_error)
-                return ScanTask.FAILED
+                error_message = 'Connect scan task failed for %s. %s' %\
+                    (self.scan_task, ansible_error)
+                return error_message, ScanTask.FAILED
 
             remaining_hosts = result_store.remaining_hosts()
 
@@ -180,7 +180,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         # Clear cache as results changed
         self.result = None
 
-        return ScanTask.COMPLETED
+        return None, ScanTask.COMPLETED
 
 
 def connect(hosts, callback, credential, connection_port, forks=50):
