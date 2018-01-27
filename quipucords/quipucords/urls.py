@@ -26,13 +26,21 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 
 urlpatterns = [
+    url(r'^login/$', auth_views.login, name='login'),
+    url(r'^logout/$', auth_views.logout, name='logout'),
+
     url(r'^admin/', admin.site.urls),
     url(r'^api/v1/', include('api.urls')),
 
+    url(r'^$', RedirectView.as_view(url='/login', permanent=False),
+        name='home'),
+
     # static files (*.css, *.js, *.jpg etc.)
     url(r'^(?!/?client/)(?P<path>.*\..*)$',
-        RedirectView.as_view(url='/client/%(path)s', permanent=False)),
+        RedirectView.as_view(url='/client/%(path)s', permanent=False),
+        name='client'),
 ]

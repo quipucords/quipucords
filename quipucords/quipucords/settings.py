@@ -70,7 +70,10 @@ ROOT_URLCONF = 'quipucords.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(os.path.dirname(__file__),
+                         'templates').replace('\\', '/'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,6 +85,8 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGIN_REDIRECT_URL = '/client/index.html'
 
 WSGI_APPLICATION = 'quipucords.wsgi.application'
 
