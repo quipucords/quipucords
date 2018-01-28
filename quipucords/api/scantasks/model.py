@@ -56,7 +56,8 @@ class ScanTask(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING
     )
-    status_message = models.CharField(max_length=256, null=True)
+    status_message = models.CharField(
+        max_length=256, null=True, default=_(messages.ST_STATUS_MSG_PENDING))
     prerequisites = models.ManyToManyField('ScanTask')
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
@@ -89,7 +90,7 @@ class ScanTask(models.Model):
     def start(self):
         """Start a task."""
         self.status = ScanTask.RUNNING
-        self.status_message = 'Task is running'
+        self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
 
     def restart(self):
@@ -101,13 +102,13 @@ class ScanTask(models.Model):
     def pause(self):
         """Pause a task."""
         self.status = ScanTask.PAUSED
-        self.status_message = 'Task is paused'
+        self.status_message = _(messages.ST_STATUS_MSG_PAUSED)
         self.save()
 
     def cancel(self):
         """Cancel a task."""
         self.status = ScanTask.CANCELED
-        self.status_message = 'Task was canceled'
+        self.status_message = _(messages.ST_STATUS_MSG_CANCELED)
         self.save()
 
     def complete(self, message=None):
@@ -117,7 +118,7 @@ class ScanTask(models.Model):
             self.status_message = message
             logger.info(self.status_message)
         else:
-            self.status_message = 'Task completed successfully'
+            self.status_message = _(messages.ST_STATUS_MSG_COMPLETED)
         self.save()
 
     def fail(self, message):

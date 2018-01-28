@@ -52,9 +52,10 @@ class ScanJob(models.Model):
         choices=ScanTask.STATUS_CHOICES,
         default=ScanTask.CREATED,
     )
-    status_message = models.CharField(max_length=256,
-                                      null=True,
-                                      default='Job has been created')
+    status_message = models.CharField(
+        max_length=256,
+        null=True,
+        default=_(messages.SJ_STATUS_MSG_CREATED))
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
@@ -109,7 +110,8 @@ class ScanJob(models.Model):
             conn_task = ScanTask(source=source,
                                  scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                  status=ScanTask.PENDING,
-                                 status_message='Task pending',
+                                 status_message=_(
+                                     messages.ST_STATUS_MSG_PENDING),
                                  sequence_number=count)
             conn_task.save()
             self.tasks.add(conn_task)
@@ -122,7 +124,8 @@ class ScanJob(models.Model):
                 inspect_task = ScanTask(source=conn_task.source,
                                         scan_type=ScanTask.SCAN_TYPE_INSPECT,
                                         status=ScanTask.PENDING,
-                                        status_message='Task pending',
+                                        status_message=_(
+                                            messages.ST_STATUS_MSG_PENDING),
                                         sequence_number=count)
                 inspect_task.save()
                 inspect_task.prerequisites.add(conn_task)
@@ -141,7 +144,7 @@ class ScanJob(models.Model):
             temp_inspect_results.save()
 
         self.status = target_status
-        self.status_message = 'Job ready to run and in queue'
+        self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
 
     def start(self):
@@ -156,7 +159,7 @@ class ScanJob(models.Model):
             return
 
         self.status = target_status
-        self.status_message = 'Job is running'
+        self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
 
     def restart(self):
@@ -181,7 +184,7 @@ class ScanJob(models.Model):
                 task.restart()
 
         self.status = target_status
-        self.status_message = 'Job was restarted'
+        self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
 
     def pause(self):
@@ -205,7 +208,7 @@ class ScanJob(models.Model):
                 task.pause()
 
         self.status = target_status
-        self.status_message = 'Job is paused'
+        self.status_message = _(messages.SJ_STATUS_MSG_PAUSED)
         self.save()
 
     def cancel(self):
@@ -233,7 +236,7 @@ class ScanJob(models.Model):
                 task.cancel()
 
         self.status = target_status
-        self.status_message = 'Job was canceled'
+        self.status_message = _(messages.SJ_STATUS_MSG_CANCELED)
         self.save()
 
     def complete(self):
@@ -248,7 +251,7 @@ class ScanJob(models.Model):
             return
 
         self.status = target_status
-        self.status_message = 'Job completed successfully'
+        self.status_message = _(messages.SJ_STATUS_MSG_COMPLETED)
         self.save()
 
     def fail(self, message):

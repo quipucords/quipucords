@@ -15,6 +15,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
+import api.messages as messages
 from api.models import (Credential,
                         Source,
                         ScanTask,
@@ -300,14 +301,14 @@ class ScanJobTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
-                     'status_message': 'Job has been created'},
+                     'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
-                     'status_message': 'Job has been created'}]
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -331,7 +332,7 @@ class ScanJobTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
-                     'status_message': 'Job has been created'}]
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -353,14 +354,14 @@ class ScanJobTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
-                     'status_message': 'Job has been created'},
+                     'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
-                     'status_message': 'Job has been created'}]
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)

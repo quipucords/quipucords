@@ -82,10 +82,21 @@ SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
 SJ_SOURCE_IDS_INV = 'Source identitiers must be integer values.'
 SJ_SOURCE_DO_NOT_EXIST = 'Source with id=%d could not be'\
     ' found in database.'
+SJ_STATUS_MSG_CREATED = 'Job is created.'
+SJ_STATUS_MSG_RUNNING = 'Job is running.'
+SJ_STATUS_MSG_PENDING = 'Job is pending.'
+SJ_STATUS_MSG_PAUSED = 'Job is paused.'
+SJ_STATUS_MSG_CANCELED = 'Job is canceled.'
+SJ_STATUS_MSG_COMPLETED = 'Job is complete.'
 
 
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'
+ST_STATUS_MSG_RUNNING = 'Task is running.'
+ST_STATUS_MSG_PENDING = 'Task is pending.'
+ST_STATUS_MSG_PAUSED = 'Task is paused.'
+ST_STATUS_MSG_CANCELED = 'Task is canceled.'
+ST_STATUS_MSG_COMPLETED = 'Task is complete.'
 ST_REQ_SOURCE = 'Scan task must have a source.'
 
 # scan results messages
