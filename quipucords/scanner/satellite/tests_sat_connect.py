@@ -78,7 +78,7 @@ class ConnectTaskRunnerTest(TestCase):
                                  self.conn_results)
         status = task.run()
 
-        self.assertEqual(status, ScanTask.FAILED)
+        self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat5(self):
         """Test the running connect task for Satellite 5."""
@@ -91,7 +91,7 @@ class ConnectTaskRunnerTest(TestCase):
                                  self.conn_results)
         status = task.run()
 
-        self.assertEqual(status, ScanTask.FAILED)
+        self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_status(self):
         """Test the running connect task for Sat 6 with bad status."""
@@ -107,7 +107,7 @@ class ConnectTaskRunnerTest(TestCase):
                    return_value=(401, None)) as mock_sat_status:
             status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status, ScanTask.FAILED)
+            self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_api_version(self):
         """Test the running connect task for Sat6 with bad api version."""
@@ -123,7 +123,7 @@ class ConnectTaskRunnerTest(TestCase):
                    return_value=(200, 3)) as mock_sat_status:
             status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status, ScanTask.FAILED)
+            self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_conn_err(self):
         """Test the running connect task with connection error."""
@@ -139,7 +139,7 @@ class ConnectTaskRunnerTest(TestCase):
                    side_effect=mock_conn_exception) as mock_sat_status:
             status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status, ScanTask.FAILED)
+            self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_sat_err(self):
         """Test the running connect task with satellite error."""
@@ -155,7 +155,7 @@ class ConnectTaskRunnerTest(TestCase):
                    side_effect=mock_sat_exception) as mock_sat_status:
             status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status, ScanTask.FAILED)
+            self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_v2(self):
         """Test the running connect task for Sat6 with api version 2."""
@@ -177,4 +177,4 @@ class ConnectTaskRunnerTest(TestCase):
                     mock_sat_status.assert_called_once_with(ANY)
                     mock_host_count.assert_called_once_with()
                     mock_hosts.assert_called_once_with()
-                    self.assertEqual(status, ScanTask.COMPLETED)
+                    self.assertEqual(status[1], ScanTask.COMPLETED)

@@ -11,6 +11,7 @@
 """Test the API application."""
 
 from django.test import TestCase
+import api.messages as messages
 from api.models import Credential, Source, ScanTask
 from api.serializers import ScanTaskSerializer
 
@@ -52,5 +53,6 @@ class ScanTaskTest(TestCase):
         self.assertEqual(
             {'source': 1,
              'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-             'status': 'pending'},
+             'status': 'pending',
+             'status_message': messages.ST_STATUS_MSG_PENDING},
             json_task)

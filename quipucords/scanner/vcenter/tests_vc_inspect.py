@@ -256,7 +256,7 @@ class InspectTaskRunnerTest(TestCase):
         with patch.object(InspectTaskRunner, 'inspect',
                           side_effect=invalid_login) as mock_connect:
             status = self.runner.run()
-            self.assertEqual(ScanTask.FAILED, status)
+            self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
     def test_prereq_failed(self):
@@ -264,11 +264,11 @@ class InspectTaskRunnerTest(TestCase):
         self.conn_task.status = ScanTask.FAILED
         self.conn_task.save()
         status = self.runner.run()
-        self.assertEqual(ScanTask.FAILED, status)
+        self.assertEqual(ScanTask.FAILED, status[1])
 
     def test_run(self):
         """Test the run method."""
         with patch.object(InspectTaskRunner, 'inspect') as mock_connect:
             status = self.runner.run()
-            self.assertEqual(ScanTask.COMPLETED, status)
+            self.assertEqual(ScanTask.COMPLETED, status[1])
             mock_connect.assert_called_once_with()
