@@ -66,10 +66,10 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         if (satellite_version is None or
                 satellite_version == SourceOptions.SATELLITE_VERSION_5):
-            logger.error('Satellite version %s is not yet supported.',
-                         SourceOptions.SATELLITE_VERSION_5)
-            logger.error('Connect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite version %s is not yet supported.\n' %\
+                SourceOptions.SATELLITE_VERSION_5
+            error_message += 'Connect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
 
         try:
             status_code, api_version = utils.status(self.scan_task)
@@ -77,24 +77,25 @@ class ConnectTaskRunner(ScanTaskRunner):
                 api = create(satellite_version, api_version,
                              self.scan_task, self.conn_result)
                 if not api:
-                    logger.error('Satellite version %s with '
-                                 'api version %s is not supported.',
-                                 satellite_version, api_version)
-                    logger.error('Connect scan failed for %s.', self.scan_task)
-                    return ScanTask.FAILED
+                    error_message = 'Satellite version %s with '\
+                        'api version %s is not supported.\n' %\
+                        (satellite_version, api_version)
+                    error_message += 'Connect scan failed for %s.' % \
+                        self.scan_task
+                    return error_message, ScanTask.FAILED
                 api.host_count()
                 api.hosts()
             else:
-                logger.error('Connect scan failed for %s.', self.scan_task)
-                return ScanTask.FAILED
+                error_message = 'Connect scan failed for %s.' % self.scan_task
+                return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            logger.error('Satellite error encountered: %s', sat_error)
-            logger.error('Connect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite error encountered: %s\n' % sat_error
+            error_message += 'Connect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
         except exceptions.ConnectionError as conn_error:
-            logger.error('Satellite error encountered: %s', conn_error)
-            logger.error('Connect scan failed for %s.', self.scan_task)
-            return ScanTask.FAILED
+            error_message = 'Satellite error encountered: %s\n' % conn_error
+            error_message += 'Connect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
 
         logger.info('Connect scan completed for %s.', self.scan_task)
-        return ScanTask.COMPLETED
+        return None, ScanTask.COMPLETED

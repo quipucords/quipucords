@@ -99,19 +99,19 @@ class ConnectTaskRunner(ScanTaskRunner):
             connected = self.connect()
             self._store_connect_data(connected, credential)
         except vim.fault.InvalidLogin as vm_error:
-            logger.error('Unable to connect to VCenter source, %s, '
-                         'with supplied credential, %s.',
-                         source.name, credential.name)
-            logger.error('Connect scan failed for %s. %s', self.scan_task,
-                         vm_error)
-            return ScanTask.FAILED
+            error_message = 'Unable to connect to VCenter source, %s,'\
+                ' with supplied credential, %s.\n' % \
+                (source.name, credential.name)
+            error_message += 'Connect scan failed for %s. %s' %\
+                (self.scan_task, vm_error)
+            return error_message, ScanTask.FAILED
         except gaierror as error:
-            logger.error(
-                'Unable to connect to VCenter source %s. ', source.name)
-            logger.error('Reason for failure: %s', error)
-            return ScanTask.FAILED
+            error_message = 'Unable to connect to VCenter source %s.\n' %\
+                source.name
+            error_message += 'Reason for failure: %s' % error
+            return error_message, ScanTask.FAILED
 
-        return ScanTask.COMPLETED
+        return None, ScanTask.COMPLETED
 
     # pylint: disable=too-many-locals
     def connect(self):

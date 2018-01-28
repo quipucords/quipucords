@@ -12,10 +12,14 @@
 
 These models are used in the REST definitions.
 """
+import logging
 from django.utils.translation import ugettext as _
 from django.db import models
 from api.source.model import Source
 import api.messages as messages
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class ScanTask(models.Model):
@@ -52,6 +56,8 @@ class ScanTask(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING
     )
+    status_message = models.CharField(
+        max_length=256, null=True, default=_(messages.ST_STATUS_MSG_PENDING))
     prerequisites = models.ManyToManyField('ScanTask')
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
@@ -80,3 +86,47 @@ class ScanTask(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_TASKS_MSG)
+
+    def start(self):
+        """Start a task."""
+        self.status = ScanTask.RUNNING
+        self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
+        self.save()
+
+    def restart(self):
+        """Start a task."""
+        self.status = ScanTask.PENDING
+        self.status_message = 'Task was restarted'
+        self.save()
+
+    def pause(self):
+        """Pause a task."""
+        self.status = ScanTask.PAUSED
+        self.status_message = _(messages.ST_STATUS_MSG_PAUSED)
+        self.save()
+
+    def cancel(self):
+        """Cancel a task."""
+        self.status = ScanTask.CANCELED
+        self.status_message = _(messages.ST_STATUS_MSG_CANCELED)
+        self.save()
+
+    def complete(self, message=None):
+        """Complete a task."""
+        self.status = ScanTask.COMPLETED
+        if message:
+            self.status_message = message
+            logger.info(self.status_message)
+        else:
+            self.status_message = _(messages.ST_STATUS_MSG_COMPLETED)
+        self.save()
+
+    def fail(self, message):
+        """Fail a task.
+
+        :param message: The error message associated with failure
+        """
+        self.status = ScanTask.FAILED
+        self.status_message = message
+        logger.error(self.status_message)
+        self.save()
