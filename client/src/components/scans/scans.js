@@ -49,6 +49,16 @@ class Scans extends React.Component {
         scan.systems_scanned = Math.abs(scan.systems_scanned) % 100;
         scan.systems_failed = Math.abs(scan.systems_failed) % 100;
         scan.scans_count = Math.floor(Math.random() * 10);
+
+        // TODO: Get real hosts or wait until expansion?
+        scan.hosts = [];
+        for (let i = 0; i < scan.systems_scanned; i++) {
+          scan.hosts.push('host' + (i + 1));
+        }
+        scan.failed_hosts = [];
+        for (let i = 0; i < scan.systems_failed; i++) {
+          scan.failed_hosts.push('failedHost' + (i + 1));
+        }
       });
 
       let filteredItems = this.filterScans(
