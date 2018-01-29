@@ -61,7 +61,8 @@ class CredentialFilter(FilterSet):
 class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     """A view set for the Credential model."""
 
-    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+    authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+    if authentication_enabled:
         authentication_classes = (TokenAuthentication, SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
