@@ -116,8 +116,8 @@ SCAN_PAUSED = 'Scan "%s" paused.'
 SCAN_RESTARTED = 'Scan "%s" restarted.'
 SCAN_CANCELED = 'Scan "%s" canceled.'
 
-DISABLE_OPT_PRODUCTS_HELP = 'The product capture exclusions. '\
-    'Contains the list of products to exclude from fact collection. '\
+DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
+    'Contains the list of products to exclude from inspection. '\
     'Valid choices are jboss_eap, jboss_fuse, and jboss_brms.'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
