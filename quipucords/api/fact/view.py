@@ -35,7 +35,8 @@ class FactViewSet(mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
 
-    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+    authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+    if authentication_enabled:
         authentication_classes = (TokenAuthentication, SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
