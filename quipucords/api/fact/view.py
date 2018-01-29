@@ -30,11 +30,13 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # pylint: disable=too-many-ancestors
 
 
-class FactViewSet(mixins.CreateModelMixin,
+class FactViewSet(mixins.RetrieveModelMixin,
+                  mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
 
-    if not os.getenv('QPC_DISABLE_AUTHENTICATION', False):
+    authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+    if authentication_enabled:
         authentication_classes = (TokenAuthentication, SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
@@ -43,6 +45,7 @@ class FactViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
+        # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_fact_collection_json(
             request.data)
