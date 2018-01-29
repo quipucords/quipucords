@@ -11,6 +11,9 @@ import {
 
 import { bindMethods } from '../../common/helpers';
 
+import { ScanSourceList } from './scanSourceList';
+import { ScanHostsList } from './scanHostList';
+
 class ScanListItem extends React.Component {
   constructor() {
     super();
@@ -37,8 +40,22 @@ class ScanListItem extends React.Component {
 
   renderExpansionContents() {
     const { item } = this.props;
+    const { expandType } = this.state;
 
-    return <JSONPretty json={item} />;
+    switch (expandType) {
+      case 'systemsScanned':
+        return <ScanHostsList hosts={item.hosts} status="ok" />;
+      case 'systemsFailed':
+        return (
+          <ScanHostsList hosts={item.failed_hosts} status="error-circle-o" />
+        );
+      case 'sources':
+        return <ScanSourceList scan={item} />;
+      case 'scans':
+        return <JSONPretty json={item} />;
+      default:
+        return <JSONPretty json={item} />;
+    }
   }
 
   render() {
@@ -165,19 +182,6 @@ class ScanListItem extends React.Component {
         heading={`ID: ${item.id}`}
         additionalInfo={[
           <ListView.InfoItem
-            key="sources"
-            className="list-view-info-item-text-count"
-          >
-            <ListView.Expand
-              expanded={expanded && expandType === 'sources'}
-              toggleExpanded={() => {
-                this.toggleExpand('sources');
-              }}
-            >
-              {sourcesCount} {sourcesCount === 1 ? ' Source' : ' Sources'}
-            </ListView.Expand>
-          </ListView.InfoItem>,
-          <ListView.InfoItem
             key="systemsScanned"
             className={
               'list-view-info-item-icon-count ' +
@@ -220,6 +224,19 @@ class ScanListItem extends React.Component {
             </ListView.Expand>
           </ListView.InfoItem>,
           <ListView.InfoItem
+            key="sources"
+            className="list-view-info-item-text-count"
+          >
+            <ListView.Expand
+              expanded={expanded && expandType === 'sources'}
+              toggleExpanded={() => {
+                this.toggleExpand('sources');
+              }}
+            >
+              {sourcesCount} {sourcesCount === 1 ? ' Source' : ' Sources'}
+            </ListView.Expand>
+          </ListView.InfoItem>,
+          <ListView.InfoItem
             key="scansCount"
             className={
               'list-view-info-item-text-count ' +
@@ -227,9 +244,9 @@ class ScanListItem extends React.Component {
             }
           >
             <ListView.Expand
-              expanded={expanded && expandType === 'scansCount'}
+              expanded={expanded && expandType === 'scans'}
               toggleExpanded={() => {
-                this.toggleExpand('scansCount');
+                this.toggleExpand('scans');
               }}
             >
               {item.scans_count} {item.scans_count === 1 ? ' Scan' : ' Scans'}
