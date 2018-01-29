@@ -17,6 +17,7 @@ import json
 from django.utils.translation import ugettext as _
 from django.db import models
 from django.db.models import Q
+from rest_framework.serializers import ValidationError
 from api.source.model import Source
 from api.scantasks.model import ScanTask
 from api.connresults.model import ConnectionResults
@@ -299,6 +300,23 @@ class ScanJob(models.Model):
             return True
         return False
 
+    def validate_extra_vars(self):
+        """Make sure that extra vars are a dictionary with boolean values.
+
+        :return extra_vars if no ValidationErrors are raised
+        """
+        extra_vars = self.get_optional_products_args()
+        if not isinstance(extra_vars, dict):
+            raise ValidationError(_(messages.SJ_EXTRA_VARS_DICT))
+        for key in extra_vars:
+            if not isinstance(extra_vars[key], bool):
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_BOOL))
+            elif key not in [ScanJob.JBOSS_EAP,
+                             ScanJob.JBOSS_BRMS,
+                             ScanJob.JBOSS_FUSE]:
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_KEY))
+        return extra_vars
+
     def create_extra_vars(self):
         """Construct a dictionary based on the disabled products.
 
@@ -308,7 +326,7 @@ class ScanJob(models.Model):
         """
         # Grab the optional products status dict and create
         # a default dict (all products default to True)
-        product_status = self.get_optional_products_args()
+        product_status = self.validate_extra_vars()
         product_default = {self.JBOSS_EAP: True,
                            self.JBOSS_FUSE: True,
                            self.JBOSS_BRMS: True}

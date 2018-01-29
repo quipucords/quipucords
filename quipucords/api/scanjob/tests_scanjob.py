@@ -14,6 +14,7 @@ from unittest.mock import patch
 import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from rest_framework.serializers import ValidationError
 from rest_framework import status
 import api.messages as messages
 from api.models import (Credential,
@@ -805,3 +806,25 @@ class ScanJobTest(TestCase):
                          'jboss_fuse': True,
                          'jboss_brms': True}
         self.assertEqual(extra_vars, expected_vars)
+
+    def test_create_extra_vars_fail_validate_key(self):
+        """Tests the create_extra_vars method with None."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = {'foo': True}
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        with self.assertRaises(ValidationError):
+            scan_job.create_extra_vars()
+
+    def test_create_extra_vars_fail_validate_val(self):
+        """Tests the create_extra_vars method with None."""
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = {'jboss_eap': 1}
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        with self.assertRaises(ValidationError):
+            scan_job.create_extra_vars()

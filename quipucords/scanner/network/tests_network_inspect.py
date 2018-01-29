@@ -172,9 +172,9 @@ class HostScannerTest(TestCase):
         self.scan_job.tasks.add(self.connect_scan_task)
         self.scan_job.tasks.add(self.inspect_scan_task)
         scan_options = ScanOptions()
-        scan_options.disable_optional_products = {'jboss-eap': False,
-                                                  'jboss-fuse': False,
-                                                  'jboss-brms': False}
+        scan_options.disable_optional_products = {'jboss_eap': False,
+                                                  'jboss_fuse': False,
+                                                  'jboss_brms': False}
         scan_options.save()
         self.scan_job.options = scan_options
         self.scan_job.save()
