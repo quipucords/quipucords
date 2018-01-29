@@ -19,6 +19,7 @@ import api.messages as messages
 from api.models import (Credential,
                         Source,
                         ScanTask,
+                        ScanOptions,
                         ScanJob,
                         ConnectionResults,
                         ConnectionResult,
@@ -290,11 +291,7 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
         """List all ScanJob objects."""
-        data_default = {'sources': [self.source.id],
-                        'options': {'disable_optional_products':
-                                    {'jboss_eap': True,
-                                     'jboss_fuse': True,
-                                     'jboss_brms': True}}}
+        data_default = {'sources': [self.source.id]}
         data_discovery = {'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                           'options': {'disable_optional_products':
@@ -310,11 +307,7 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 1,
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                     {'jboss_eap': True,
-                                      'jboss_fuse': True,
-                                      'jboss_brms': True}},
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
@@ -410,11 +403,7 @@ class ScanJobTest(TestCase):
     def test_retrieve(self, start_scan):
         """Get ScanJob details by primary key."""
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         initial = self.create_expect_201(data_discovery)
 
         url = reverse('scanjob-detail', args=(initial['id'],))
@@ -755,3 +744,60 @@ class ScanJobTest(TestCase):
             inspect_results_json['results'][0]['systems'][0]
             ['facts'][0]['name'],
             'foo')
+
+    def test_create_extra_vars(self):
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.save()
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = {}
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        extra_vars = scan_job.create_extra_vars()
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True}
+        self.assertEqual(extra_vars, expected_vars)
+
+    def test_create_extra_vars_mixed(self):
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = {'jboss_eap': False,
+                                                  'jboss_fuse': False,
+                                                  'jboss_brms': True}
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        extra_vars = scan_job.create_extra_vars()
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': False,
+                         'jboss_brms': True}
+        self.assertEqual(extra_vars, expected_vars)
+
+    def test_create_extra_vars_false(self):
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = {'jboss_eap': False,
+                                                  'jboss_fuse': False,
+                                                  'jboss_brms': False}
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        extra_vars = scan_job.create_extra_vars()
+        expected_vars = {'jboss_eap': False,
+                         'jboss_fuse': False,
+                         'jboss_brms': False}
+        self.assertEqual(extra_vars, expected_vars)
+
+    def test_create_extra_vars_none(self):
+        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_options = ScanOptions()
+        scan_options.disable_optional_products = None
+        scan_options.save()
+        scan_job.options = scan_options
+        scan_job.save()
+        extra_vars = scan_job.create_extra_vars()
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True}
+        self.assertEqual(extra_vars, expected_vars)
