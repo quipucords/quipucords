@@ -23,15 +23,19 @@ Installing
     $ cd client
     $ npm install
 
-3. Set up and run the mock API::
-
-    $ npm run api:mock
-
 Development Server & Mock API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To run the development server, use this command::
+To run the development server and mock API, use this command::
 
-    $ npm run start:client
+    $ npm start
+
+If you have Docker running, this will automatically setup the mock API.
+
+Mock API
+********
+To setup the mock API separately you can run::
+
+    $ npm run api:mock
 
 Unit Tests
 ^^^^^^^^^^
@@ -39,18 +43,24 @@ To run the unit tests, use this command::
 
     $ npm test
 
-Building the UI
-^^^^^^^^^^^^^^^
+Building the Production UI
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 The UI is compiled for production within a `client` directory underneath `./quipucords/client`. To build the UI, use this command::
 
     $ npm run build:prod
 
-
-Serving the UI
-^^^^^^^^^^^^^^
+Serving the Production UI & API
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If you've gone through the Python quipucords installation you can serve the UI and API with this command::
 
     $ npm run start:quipucords
 
-*This NPM script is not intended as a replacement for serving the application, but as a shortcut during development.*
+Using Docker
+************
+If you'd rather run quipucords through Docker you can serve the UI and API with this set of commands::
+
+    $ docker stop quipucords || docker ps && npm run api:update && npm run api:quipucords
+
+
+*This set of NPM scripts are not intended as a replacement for serving the application, but as a shortcut during development.*
 
