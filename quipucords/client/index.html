@@ -1,75 +1,84 @@
 <!DOCTYPE html>
-<!--[if IE 9]><html lang="en-us" class="ie9 login-pf"><![endif]-->
-<!--[if gt IE 9]><!--><html lang="en-us" class="login-pf"><!--<![endif]-->
+<!--[if IE 9]><html lang="en-us" class="ie9 layout-pf layout-pf-fixed"><![endif]-->
+<!--[if gt IE 9]><!--><html lang="en-us" class="layout-pf layout-pf-fixed"><!--<![endif]-->
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Patternfly Enterprise Application</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Red Hat Entitlements Reporting</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/css/patternfly.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/css/patternfly-additions.min.css">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/css/patternfly.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/css/patternfly-additions.min.css">
 
     <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/js/patternfly.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/js/patternfly.min.js"></script>
   </head>
   <body>
-    <span id="badge">
-      <img src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/img/logo.svg" alt="PatternFly logo" />
-    </span>
+    <nav class="navbar navbar-pf-vertical">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="/" class="navbar-brand">
+          <img class="navbar-brand-icon" src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/img/logo-alt.svg" alt=""/><img class="navbar-brand-name" src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/img/brand-alt.svg" alt="PatternFly Enterprise Application" />
+        </a>
+      </div>
+      <nav class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right navbar-iconic navbar-utility">
 
-    <div class="container">
+          <li class="dropdown">
+            <a href="javascript:void(0)" class="dropdown-toggle nav-item-iconic" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              <span title="Help" class="fa pficon-help" ></span>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a href="javascript:void(0)">Help</a></li>
+              <li><a href="javascript:void(0)">About</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </nav>
+
+    <div class="nav-pf-vertical nav-pf-vertical-with-sub-menus nav-pf-persistent-secondary">
+      <ul class="list-group">
+        <li class="list-group-item">
+          <a href="javascript:void(0)">
+            <span class="fa fa-dashboard" data-toggle="tooltip" title="Sources"></span>
+            <span class="list-group-item-value">Sources</span>
+          </a>
+        </li>
+        <li class="list-group-item">
+          <a href="javascript:void(0)">
+            <span class="fa fa-shield" data-toggle="tooltip" title="Scans"></span>
+            <span class="list-group-item-value">Scans</span>
+          </a>
+        </li>
+        <li class="list-group-item">
+          <a href="javascript:void(0)">
+            <span class="fa fa-space-shuttle" data-toggle="tooltip" title="Credentials"></span>
+            <span class="list-group-item-value">Credentials</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="container-fluid container-cards-pf container-pf-nav-pf-vertical nav-pf-persistent-secondary">
       <div class="row">
-        <div class="col-sm-12">
-          <div id="brand">
-            <img src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.30.1/img/brand.svg" alt="PatternFly Enterprise Application">
-          </div>
-        </div>
-
-        <div class="col-sm-7 col-md-6 col-lg-5 login">
-          <form class="form-horizontal" role="form">
-            <div class="form-group">
-              <label for="inputUsername" class="col-sm-2 col-md-2 control-label">Username</label>
-              <div class="col-sm-10 col-md-10">
-                <input type="text" class="form-control" id="inputUsername" placeholder="" tabindex="1">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="inputPassword" class="col-sm-2 col-md-2 control-label">Password</label>
-              <div class="col-sm-10 col-md-10">
-                <input type="password" class="form-control" id="inputPassword" placeholder="" tabindex="2">
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="col-xs-8 col-sm-offset-2 col-sm-6 col-md-offset-2 col-md-6">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" tabindex="3"> Remember username
-                  </label>
-                </div>
-                <span class="help-block"> Forgot <a href="#" tabindex="5">username</a> or <a href="#" tabindex="6">password</a>?</span>
-              </div>
-              <div class="col-xs-4 col-sm-4 col-md-4 submit">
-                <button type="submit" class="btn btn-primary btn-lg" tabindex="4">Log In</button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="col-sm-5 col-md-6 col-lg-7 details">
-          <p>
-             <strong>Welcome to PatternFly!</strong>
-             This is placeholder text, only. Use this area to place any information or introductory
-              message about your application that may be relevant for users. For example, you might
-              include news or information about the latest release of your product here&mdash;such
-              as a version number.
-          </p>
-        </div>
+        Lorem ipsum content...
       </div>
     </div>
 
+    <script>
+      $(document).ready(function() {
+        $().setupVerticalNavigation(true);
+      });
+    </script>
   </body>
 </html>
-
