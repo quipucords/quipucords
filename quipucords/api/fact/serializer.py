@@ -13,13 +13,16 @@
 
 from api.models import FactCollection
 from api.common.serializer import (NotEmptySerializer,
-                                   CustomJSONField)
+                                   CustomJSONField,
+                                   ChoiceField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
     sources = CustomJSONField(required=True)
+    status = ChoiceField(
+        read_only=True, choices=FactCollection.FC_STATUS_CHOICES)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""

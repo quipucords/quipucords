@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # pylint: disable=too-many-ancestors
 
 
-class FactViewSet(mixins.CreateModelMixin,
+class FactViewSet(mixins.RetrieveModelMixin,
+                  mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
 
@@ -43,6 +44,7 @@ class FactViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
+        # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_fact_collection_json(
             request.data)
