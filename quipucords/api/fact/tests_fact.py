@@ -69,6 +69,17 @@ class FactCollectionTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
+    def retrieve_expect_200(self, identifier):
+        """Create a source, return the response as a dict."""
+        url = reverse('facts-detail', args=(identifier,))
+        response = self.client.get(url)
+
+        if response.status_code != status.HTTP_200_OK:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.json()
+
     ################################################################
     # Test Model Create
     ################################################################
@@ -216,3 +227,19 @@ class FactCollectionTest(TestCase):
         self.assertEqual(
             response_json['invalid_sources'][0]['errors']['facts'],
             messages.FC_REQUIRED_ATTRIBUTE)
+
+    ##############################################################
+    # Test Model Retrieve
+    ##############################################################
+    def test_greenpath_retreive(self):
+        """Retrieve fact collection object via API."""
+        request_json = {'sources':
+                        [{'source_id': self.net_source.id,
+                          'source_type': self.net_source.source_type,
+                          'facts': [{'key': 'value'}]}]}
+
+        response_json = self.create_expect_201(
+            request_json)
+        identifier = response_json['id']
+        response_json = self.retrieve_expect_200(identifier)
+        self.assertEqual(response_json['id'], identifier)
