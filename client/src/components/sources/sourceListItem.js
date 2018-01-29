@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
 import { bindMethods } from '../../common/helpers';
+import { SourceCredentialsList } from './sourceCredentialsList';
+import { SourceHostsList } from './sourceHostList';
 
 class SourceListItem extends React.Component {
   constructor() {
@@ -30,8 +32,20 @@ class SourceListItem extends React.Component {
 
   renderExpansionContents() {
     const { item } = this.props;
+    const { expandType } = this.state;
 
-    return <JSONPretty json={item} />;
+    switch (expandType) {
+      case 'okHosts':
+        return <SourceHostsList hosts={item.hosts} status="ok" />;
+      case 'failedHosts':
+        return (
+          <SourceHostsList hosts={item.failed_hosts} status="error-circle-o" />
+        );
+      case 'credentials':
+        return <SourceCredentialsList source={item} />;
+      default:
+        return <JSONPretty json={item} />;
+    }
   }
 
   render() {
@@ -40,7 +54,7 @@ class SourceListItem extends React.Component {
 
     let credentialCount = item.credentials ? item.credentials.length : 0;
     let okHostCount = item.hosts ? item.hosts.length : 0;
-    let failedHostCount = item.failed_hosts ? item.hosts.length : 0;
+    let failedHostCount = item.failed_hosts ? item.failed_hosts.length : 0;
 
     let itemIcon;
     switch (item.source_type) {
@@ -90,7 +104,10 @@ class SourceListItem extends React.Component {
         additionalInfo={[
           <ListView.InfoItem
             key="credentials"
-            className="list-view-info-item-text-count"
+            className={
+              'list-view-info-item-text-count ' +
+              (credentialCount === 0 ? 'invisible' : '')
+            }
           >
             <ListView.Expand
               expanded={expanded && expandType === 'credentials'}
