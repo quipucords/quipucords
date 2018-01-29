@@ -52,9 +52,6 @@ class ScanStartCommand(CliCommand):
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
                                  metavar='DISABLE_OPTIONAL_PRODUCTS',
-                                 default={scan.JBOSS_EAP: True,
-                                          scan.JBOSS_FUSE: True,
-                                          scan.JBOSS_BRMS: True},
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
                                  required=False)
         self.source_ids = []
@@ -87,13 +84,13 @@ class ScanStartCommand(CliCommand):
         :returns: a dictionary representing the collection status of optional
         products
         """
-        optional_product_status = {scan.JBOSS_EAP: True,
-                                   scan.JBOSS_FUSE: True,
-                                   scan.JBOSS_BRMS: True}
+        optional_product_status = {}
 
-        if self.args.disable_optional_products != optional_product_status:
+        if self.args.disable_optional_products:
             for product in self.args.disable_optional_products:
                 optional_product_status[product] = False
+        else:
+            return None
 
         return optional_product_status
 
@@ -116,10 +113,12 @@ class ScanStartCommand(CliCommand):
             'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {
-                'max_concurrency': self.args.max_concurrency,
-                'disable_optional_products':
-                    self._create_optional_product_status_dict()}
+                'max_concurrency': self.args.max_concurrency}
         }
+        disable_optional_products = self._create_optional_product_status_dict()
+        if disable_optional_products is not None:
+            self.req_payload['options']['disable_optional_products']\
+                = disable_optional_products
 
     def _handle_response_success(self):
         json_data = self.response.json()

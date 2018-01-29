@@ -31,7 +31,7 @@ class ScanOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
     max_concurrency = models.PositiveIntegerField(default=50)
-    disable_optional_products = models.TextField(null=False)
+    disable_optional_products = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -47,12 +47,9 @@ class ScanOptions(models.Model):
 class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
-    OPT_JBOSS_EAP = 'jboss_eap'
-    OPT_JBOSS_FUSE = 'jboss_fuse'
-    OPT_JBOSS_BRMS = 'jboss_brms'
-    ARG_JBOSS_EAP = 'jboss-eap'
-    ARG_JBOSS_FUSE = 'jboss-fuse'
-    ARG_JBOSS_BRMS = 'jboss-brms'
+    JBOSS_EAP = 'jboss_eap'
+    JBOSS_FUSE = 'jboss_fuse'
+    JBOSS_BRMS = 'jboss_brms'
 
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
@@ -302,31 +299,34 @@ class ScanJob(models.Model):
             return True
         return False
 
-    def create_product_status_dict(self):
+    def create_extra_vars(self):
         """Construct a dictionary based on the disabled products.
 
         :returns: a dictionary representing the updated collection
-        status of the optional products
+        status of the optional products to be assigned as the extra
+        vars for the ansibile task runner
         """
         # Grab the optional products status dict and create
         # a default dict (all products default to True)
         product_status = self.get_optional_products_args()
-        product_default = {self.OPT_JBOSS_EAP: True,
-                           self.OPT_JBOSS_FUSE: True,
-                           self.OPT_JBOSS_BRMS: True}
+        product_default = {self.JBOSS_EAP: True,
+                           self.JBOSS_FUSE: True,
+                           self.JBOSS_BRMS: True}
 
+        if product_status == {}:
+            return product_default
         # If specified, turn off fact collection for fuse
-        if not product_status[self.ARG_JBOSS_FUSE]:
-            product_default[self.OPT_JBOSS_FUSE] = False
+        if product_status.get(self.JBOSS_FUSE) is False:
+            product_default[self.JBOSS_FUSE] = False
         # If specified, turn off fact collection for brms
-        if not product_status[self.ARG_JBOSS_BRMS]:
-            product_default[self.OPT_JBOSS_BRMS] = False
+        if product_status.get(self.JBOSS_BRMS) is False:
+            product_default[self.JBOSS_BRMS] = False
         # If specified and both brms & fuse are false
         # turn off fact collection for eap
-        if not product_status[self.ARG_JBOSS_EAP] and \
-                (not product_default[self.OPT_JBOSS_FUSE]) and \
-                (not product_default[self.OPT_JBOSS_BRMS]):
-            product_default[self.OPT_JBOSS_EAP] = False
+        if product_status.get(self.JBOSS_EAP) is False and \
+                (not product_default.get(self.JBOSS_FUSE)) and \
+                (not product_default.get(self.JBOSS_BRMS)):
+            product_default[self.JBOSS_EAP] = False
 
         return product_default
 
@@ -335,6 +335,8 @@ class ScanJob(models.Model):
 
         :returns: python dict containing the status of optional products
         """
-        if isinstance(self.options.disable_optional_products, dict):
-            return self.options.disable_optional_products
-        return json.loads(self.options.disable_optional_products)
+        if self.options.disable_optional_products is not None:
+            if isinstance(self.options.disable_optional_products, dict):
+                return self.options.disable_optional_products
+            return json.loads(self.options.disable_optional_products)
+        return {}

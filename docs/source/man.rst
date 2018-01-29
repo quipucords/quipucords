@@ -314,7 +314,7 @@ Use the ``qpc scan start`` command to run connect and inspection scans on the so
 
 ``--disable-optional-products=products_list``
 
-  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss-eap, jboss-fuse, and jboss-brms.
+  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

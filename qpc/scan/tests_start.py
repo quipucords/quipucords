@@ -106,10 +106,7 @@ class ScanStartCliTests(unittest.TestCase):
             mocker.get(url_get_source, status_code=500, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'], max_concurrency=4,
-                             disable_optional_products={'jboss-eap': True,
-                                                        'jboss-fuse': True,
-                                                        'jboss-brms': True})
+            args = Namespace(sources=['source1'], max_concurrency=4)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
@@ -122,15 +119,18 @@ class ScanStartCliTests(unittest.TestCase):
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}],
+                        'disable-optional-products': {'jboss-eap': False,
+                                                      'jboss-fuse': False,
+                                                      'jboss-brms': False}}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=4,
-                             disable_optional_products={'jboss-eap': True,
-                                                        'jboss-fuse': True,
-                                                        'jboss-brms': True})
+                             disable_optional_products={'jboss-eap': False,
+                                                        'jboss-fuse': False,
+                                                        'jboss-brms': False})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

@@ -216,10 +216,7 @@ class ScanJobTest(TestCase):
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
         data = {'sources': [self.source.id],
-                'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                'options': {'disable_optional_products': {'jboss_eap': True,
-                                                          'jboss_fuse': True,
-                                                          'jboss_brms': True}}}
+                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 

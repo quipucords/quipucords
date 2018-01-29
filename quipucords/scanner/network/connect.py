@@ -142,7 +142,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
-        optional_products_status = self.scan_job.create_product_status_dict()
         forks = self.scan_job.options.max_concurrency
         connection_port = source['port']
         credentials = source['credentials']
@@ -158,7 +157,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             callback = ConnectResultCallback(result_store, credential)
             try:
                 connect(remaining_hosts, callback, cred_data,
-                        connection_port, optional_products_status, forks=forks)
+                        connection_port, forks=forks)
             except AnsibleError as ansible_error:
                 error_message = 'Connect scan task failed for %s. %s' %\
                     (self.scan_task, ansible_error)
@@ -185,22 +184,20 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments
-def connect(hosts, callback, credential, connection_port,
-            optional_products_status, forks=50):
+def connect(hosts, callback, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
     :param callback: The Ansible callback to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
-    :param optional_products_status: The dictionary containing
-           the collection status of the optional products.
     :param forks: number of forks to run with, default of 50
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
     inventory = construct_connect_inventory(hosts, credential, connection_port)
     inventory_file = write_inventory(inventory)
+    extra_vars = {}
 
     playbook = {'name': 'discovery play',
                 'hosts': 'all',
@@ -210,7 +207,7 @@ def connect(hosts, callback, credential, connection_port,
 
     _handle_ssh_passphrase(credential)
     result = run_playbook(inventory_file, callback, playbook,
-                          optional_products_status, forks=forks)
+                          extra_vars, forks=forks)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)

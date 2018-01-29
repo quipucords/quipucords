@@ -145,7 +145,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connection_port = self.scan_task.source.port
 
         connected, failed, completed = self.obtain_discovery_data()
-        optional_products_status = self.scan_job.create_product_status_dict()
+        extra_vars = self.scan_job.create_extra_vars()
         forks = self.scan_job.options.max_concurrency
 
         num_completed = len(completed)
@@ -185,7 +185,7 @@ class InspectTaskRunner(ScanTaskRunner):
                         'roles': roles}
             result = run_playbook(
                 inventory_file, callback, playbook,
-                optional_products_status, forks=forks)
+                extra_vars, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
