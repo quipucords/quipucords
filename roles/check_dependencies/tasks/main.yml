@@ -7,7 +7,7 @@
 
 - name: set internal_have_dmidecode
   set_fact:
-    internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.rc == 0 }}"
+    internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_tune2fs_cmd
   raw: command -v tune2fs
@@ -16,7 +16,7 @@
 
 - name: set internal_have_tune2fs
   set_fact:
-    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.rc == 0 }}"
+    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_yum_cmd
   raw: command -v yum
@@ -25,7 +25,7 @@
 
 - name: set internal_have_yum
   set_fact:
-    internal_have_yum: "{{ internal_have_yum_cmd.rc == 0 }}"
+    internal_have_yum: "{{ internal_have_yum_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_java_cmd
   raw: command -v java
@@ -36,7 +36,7 @@
 # collect it and pass it to the postprocessor.
 - name: set have_java
   set_fact:
-    have_java: "{{ internal_have_java_cmd.rc == 0 }}"
+    have_java: "{{ internal_have_java_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_rpm_cmd
   raw: command -v rpm
@@ -45,7 +45,7 @@
 
 - name: set internal_have_rpm
   set_fact:
-    internal_have_rpm: "{{ internal_have_rpm_cmd.rc == 0 }}"
+    internal_have_rpm: "{{ internal_have_rpm_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_subscription_manager_cmd
   raw: command -v subscription-manager
@@ -54,7 +54,7 @@
 
 - name: set internal_have_subscription_manager
   set_fact:
-    internal_have_subscription_manager: "{{ internal_have_subscription_manager_cmd.rc == 0 }}"
+    internal_have_subscription_manager: "{{ internal_have_subscription_manager_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_virsh_cmd
   raw: command -v virsh
@@ -63,7 +63,7 @@
 
 - name: set internal_have_virsh
   set_fact:
-    internal_have_virsh: "{{ internal_have_virsh_cmd.rc == 0 }}"
+    internal_have_virsh: "{{ internal_have_virsh_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_virt_what_cmd
   raw: command -v virt-what
@@ -72,7 +72,7 @@
 
 - name: set internal_have_virt_what
   set_fact:
-    internal_have_virt_what: "{{ internal_have_virt_what_cmd.rc == 0 }}"
+    internal_have_virt_what: "{{ internal_have_virt_what_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_locate_cmd
   raw: command -v locate
@@ -82,7 +82,7 @@
 # Not internal for the same reason as have_java.
 - name: set have_locate
   set_fact:
-    have_locate: "{{ internal_have_locate_cmd.rc == 0 }}"
+    have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_systemctl
   raw: command -v systemctl
@@ -91,7 +91,7 @@
 
 - name: set internal_have_systemctl
   set_fact:
-    internal_have_systemctl: "{{ internal_have_systemctl.rc == 0 }}"
+    internal_have_systemctl: "{{ internal_have_systemctl.get('rc') == 0 }}"
 
 - name: gather internal_have_chkconfig
   raw: command -v chkconfig
@@ -100,7 +100,7 @@
 
 - name: set internal_have_chkconfig
   set_fact:
-    internal_have_chkconfig: "{{ internal_have_chkconfig.rc == 0 }}"
+    internal_have_chkconfig: "{{ internal_have_chkconfig.get('rc') == 0 }}"
 
 - name: gather internal_have_ifconfig_cmd
   raw: command -v ifconfig
@@ -109,4 +109,4 @@
 
 - name: set internal_have_ifconfig
   set_fact:
-    internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.rc == 0 }}"
+    internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.get('rc') == 0 }}"
