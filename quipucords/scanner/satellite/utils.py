@@ -36,7 +36,7 @@ def get_connect_data(scan_task):
     credential = get_credential(scan_task)
     user = credential.username
     password = decrypt_data_as_unicode(credential.password)
-    host = scan_task.source.hosts.all().first().host_range
+    host = scan_task.source.get_hosts()[0]
     port = scan_task.source.port
     return (host, port, user, password)
 

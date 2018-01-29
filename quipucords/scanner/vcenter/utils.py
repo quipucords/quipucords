@@ -23,7 +23,7 @@ def vcenter_connect(scan_task):
     """
     credential = scan_task.source.credentials.all().first()
     user = credential.username
-    host = scan_task.source.hosts.all().first().host_range
+    host = scan_task.source.get_hosts()[0]
     password = decrypt_data_as_unicode(credential.password)
     port = scan_task.source.port
 

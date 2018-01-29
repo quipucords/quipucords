@@ -15,8 +15,7 @@ import uuid
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from api.models import (Source,
-                        Credential,
-                        HostRange)
+                        Credential)
 from rest_framework import status
 
 
@@ -38,10 +37,8 @@ class SystemReportTest(TestCase):
             ssh_keyfile=None)
         self.net_source.credentials.add(self.net_cred)
 
-        host_range = HostRange(source=self.net_source, host_range='1.2.3.4')
-        host_range.save()
-
-        self.net_source.hosts.add(host_range)
+        self.net_source.hosts = '["1.2.3.4"]'
+        self.net_source.save()
 
     def create_fact_collection(self, data):
         """Call the create endpoint."""

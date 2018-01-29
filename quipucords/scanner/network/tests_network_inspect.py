@@ -19,7 +19,6 @@ import requests_mock
 from ansible.errors import AnsibleError
 from api.models import (Credential,
                         Source,
-                        HostRange,
                         ScanJob,
                         ScanTask,
                         ScanOptions,
@@ -143,15 +142,10 @@ class HostScannerTest(TestCase):
 
         self.source = Source(
             name='source1',
-            port=22)
+            port=22,
+            hosts='["1.2.3.4"]')
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
 
         self.connect_scan_task = ScanTask(source=self.source,
                                           scan_type=ScanTask.SCAN_TYPE_CONNECT,
