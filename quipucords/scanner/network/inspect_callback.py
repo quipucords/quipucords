@@ -23,12 +23,16 @@ from scanner.network.processing import process
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 ANSIBLE_FACTS = 'ansible_facts'
+FAILED = 'failed'
 HOST = 'host'
 HOST_DONE = 'host_done'
 INTERNAL_ = 'internal_'
 KEY = 'key'
 NO_KEY = 'no_key'
+RC = 'rc'
 RESULT = 'result'
+
+TIMEOUT_RC = 124  # 'timeout's return code when it times out.
 
 
 def _construct_result(result):
@@ -100,6 +104,11 @@ class InspectResultCallback(CallbackBase):
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
+
+        # 'timeout' returns 124 on timeouts
+        if result_obj[RESULT].get(FAILED) and \
+           result_obj[RESULT].get(RC) == TIMEOUT_RC:
+            logger.warning('Task %s timed out', result_obj[KEY])
 
         host = result_obj[HOST]
         results_to_store = normalize_result(result)

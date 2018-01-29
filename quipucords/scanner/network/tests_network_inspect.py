@@ -10,6 +10,7 @@
 #
 """Test the inspect scanner capabilities."""
 
+import os.path
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch, Mock, ANY
@@ -44,7 +45,7 @@ def mock_run_failed(play):  # pylint: disable=unused-argument
     return 255
 
 
-def mock_scan_error():
+def mock_scan_error(hosts):  # pylint: disable=unused-argument
     """Throws error."""
     raise AnsibleError('an error')
 
@@ -141,6 +142,9 @@ class HostScannerTest(TestCase):
             become_password=None)
         self.cred.save()
 
+        hc_serializer = CredentialSerializer(self.cred)
+        self.cred_data = hc_serializer.data
+
         self.source = Source(
             name='source1',
             port=22)
@@ -152,6 +156,8 @@ class HostScannerTest(TestCase):
         self.host.save()
 
         self.source.hosts.add(self.host)
+
+        self.host_list = [('1.2.3.4', self.cred_data)]
 
         self.connect_scan_task = ScanTask(source=self.source,
                                           scan_type=ScanTask.SCAN_TYPE_CONNECT,
@@ -206,9 +212,7 @@ class HostScannerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        inventory_dict = construct_scan_inventory([('1.2.3.4', cred)],
+        inventory_dict = construct_scan_inventory(self.host_list,
                                                   connection_port,
                                                   50)
         expected = {
@@ -299,7 +303,7 @@ class HostScannerTest(TestCase):
         # Init for unit test as run is not called
         scanner.connect_scan_task = self.connect_scan_task
         with self.assertRaises(AnsibleError):
-            scanner.inspect_scan()
+            scanner.inspect_scan(self.host_list)
             mock_run.assert_called()
 
     @patch('scanner.network.inspect.InspectTaskRunner.inspect_scan',
@@ -309,7 +313,7 @@ class HostScannerTest(TestCase):
         scanner = InspectTaskRunner(
             self.scan_job, self.inspect_scan_task, self.inspect_results)
         scan_task_status = scanner.run()
-        mock_scan.assert_called_with()
+        mock_scan.assert_called_with(self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -336,3 +340,27 @@ class HostScannerTest(TestCase):
         result = Mock(_host=host, _results={'rc': 3})
 
         callback.v2_runner_on_unreachable(result)
+
+    def test_ssh_crash(self):
+        """Simulate an ssh crash."""
+        scanner = InspectTaskRunner(
+            self.scan_job, self.inspect_scan_task, self.inspect_results)
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../../test_util/crash.py'))
+        with self.assertRaises(AnsibleError):
+            scanner.inspect_scan(
+                self.host_list,
+                base_ssh_executable=path)
+
+    def test_ssh_hang(self):
+        """Simulate an ssh hang."""
+        scanner = InspectTaskRunner(
+            self.scan_job, self.inspect_scan_task, self.inspect_results)
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../../test_util/hang.py'))
+        scanner.inspect_scan(
+            self.host_list,
+            base_ssh_executable=path,
+            ssh_timeout='0.1s')
