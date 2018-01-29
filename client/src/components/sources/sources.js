@@ -54,9 +54,8 @@ class Sources extends React.Component {
       });
 
       // TODO: Remove once we get real failed host data
-      let failedCount = Math.floor(Math.random() * 10);
       nextProps.sources.forEach(source => {
-        source.selected = false;
+        let failedCount = Math.floor(Math.random() * 10);
         source.failed_hosts = [];
         for (let i = 0; i < failedCount; i++) {
           source.failed_hosts.push('failedHost' + (i + 1));
