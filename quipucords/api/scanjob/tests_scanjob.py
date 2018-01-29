@@ -746,6 +746,7 @@ class ScanJobTest(TestCase):
             'foo')
 
     def test_create_extra_vars(self):
+        """Tests the create_extra_vars method with empty dict."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
         scan_options = ScanOptions()
@@ -760,6 +761,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(extra_vars, expected_vars)
 
     def test_create_extra_vars_mixed(self):
+        """Tests the create_extra_vars method with mixed values."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
@@ -775,6 +777,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(extra_vars, expected_vars)
 
     def test_create_extra_vars_false(self):
+        """Tests the create_extra_vars method with all False."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
@@ -790,6 +793,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(extra_vars, expected_vars)
 
     def test_create_extra_vars_none(self):
+        """Tests the create_extra_vars method with None."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = None
