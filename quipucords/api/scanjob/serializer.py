@@ -14,7 +14,8 @@ from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
-                                        IntegerField)
+                                        IntegerField,
+                                        CharField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
@@ -55,6 +56,7 @@ class ScanJobSerializer(NotEmptySerializer):
                                        choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ValidStringChoiceField(required=False, read_only=True,
                                     choices=ScanTask.STATUS_CHOICES)
+    status_message = CharField(required=False, max_length=256)
     tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)

@@ -14,7 +14,8 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         ChoiceField,
-                                        IntegerField)
+                                        IntegerField,
+                                        CharField)
 from api.models import Source, ScanTask
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
@@ -50,6 +51,7 @@ class ScanTaskSerializer(NotEmptySerializer):
     scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
+    status_message = CharField(required=False, max_length=256)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
@@ -58,7 +60,7 @@ class ScanTaskSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanTask
-        fields = ['source', 'scan_type', 'status',
+        fields = ['source', 'scan_type', 'status', 'status_message',
                   'systems_count', 'systems_scanned',
                   'systems_failed']
 

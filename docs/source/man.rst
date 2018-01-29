@@ -302,7 +302,7 @@ Scanning
 Use the ``qpc scan start`` command to run connect and inspection scans on the sources. This command scans all of the host names or IP addresses that are defined in the supplied source, and then writes the report information to a comma separated values (CSV) file. Note: Any ssh-agent connection setup for a target host '
               'will be used as a fallback if it exists.
 
-**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]**
+**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
 ``--sources=source_list``
 
@@ -312,9 +312,9 @@ Use the ``qpc scan start`` command to run connect and inspection scans on the so
 
   The number of parallel system scans. If not provided the default of 50 is utilized.
 
-``--disable-optional_products=products_list``
+``--disable-optional-products=products_list``
 
-  The product capture exclusions. Contains the list of products to exclude from fact collection. Valid choices are jboss-eap, jboss-fuse, and jboss-brms.
+  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss-eap, jboss-fuse, and jboss-brms.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

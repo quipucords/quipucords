@@ -14,8 +14,9 @@ import logging
 import json
 from django.db import transaction
 from ansible.plugins.callback import CallbackBase
-from api.models import (ScanTask, InspectionResult,
-                        SystemInspectionResult, RawFact)
+from api.models import (InspectionResult,
+                        SystemInspectionResult,
+                        RawFact)
 from scanner.network.processing import process
 
 # Get an instance of a logger
@@ -188,5 +189,3 @@ class InspectResultCallback(CallbackBase):
         sys_result.save()
 
         self.scan_task.systems_failed += 1
-        self.scan_task.status = ScanTask.FAILED
-        self.scan_task.save()

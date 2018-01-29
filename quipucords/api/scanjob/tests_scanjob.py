@@ -15,6 +15,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
+import api.messages as messages
 from api.models import (Credential,
                         Source,
                         ScanTask,
@@ -140,11 +141,11 @@ class ScanJobTest(TestCase):
         scan_job.restart()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.fail()
+        scan_job.fail('test failure')
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.status = ScanTask.CREATED
-        scan_job.fail()
+        scan_job.fail('test failure')
         self.assertEqual(scan_job.status, ScanTask.CREATED)
 
         scan_job.status = ScanTask.RUNNING
@@ -320,7 +321,8 @@ class ScanJobTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created'},
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'options': {'max_concurrency': 50,
                                  'disable_optional_products':
@@ -330,7 +332,8 @@ class ScanJobTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created'}]
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -365,7 +368,8 @@ class ScanJobTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created'}]
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -390,7 +394,8 @@ class ScanJobTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created'},
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'options': {'max_concurrency': 50,
                                  'disable_optional_products':
@@ -400,7 +405,8 @@ class ScanJobTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created'}]
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)

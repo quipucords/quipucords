@@ -37,11 +37,11 @@ class ScanTaskRunner(object):
         self.scan_task should be updated with status COMPLETE/FAILED
         before returning.
 
-        :returns: Returns the status.  Must be one of the
-        ScanTask.STATUS_CHOICES values
+        :returns: Returns a status message to be saved/displayed and
+        the ScanTask.STATUS_CHOICES status
         """
         # pylint: disable=no-self-use
-        return ScanTask.COMPLETED
+        return 'Task ran successfully', ScanTask.COMPLETED
 
     def get_facts(self):
         """Access inspection facts."""

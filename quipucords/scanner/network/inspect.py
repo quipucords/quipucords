@@ -67,28 +67,26 @@ class InspectTaskRunner(ScanTaskRunner):
         failures (host/ip). Runs a host scan on the set of systems that are
         reachable. Collects the associated facts for the scanned systems
         """
+        # pylint: disable=too-many-return-statements
         logger.info('Inspect scan task started for task: %s.',
                     self.scan_task.id)
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            logger.error(
-                'Prerequisites scan task with id %d failed.',
-                self.connect_scan_task.id)
-            return ScanTask.FAILED
+            error_message = 'Prerequisites scan task with id %d failed.' %\
+                self.connect_scan_task.id
+            return error_message, ScanTask.FAILED
 
         try:
             # Execute scan
             self.inspect_scan()
 
-            # Send temp_facts to fact endpoint
             temp_facts = self.get_facts()
             fact_size = len(temp_facts)
             if temp_facts is None or fact_size == 0:
                 msg = 'SystemFacts set is empty.  '\
                     'No results will be reported to fact endpoint.'
-                logger.error(msg)
-                return ScanTask.FAILED
+                return msg, ScanTask.FAILED
 
             # Clear cache as results changed
             self.result = None
@@ -96,16 +94,22 @@ class InspectTaskRunner(ScanTaskRunner):
             logger.info('Inspect scan task %s completed.',
                         self.scan_task.id)
         except AnsibleError as ansible_error:
-            logger.error(ansible_error)
-            return ScanTask.FAILED
+            error_message = 'Scan task encountered error: %s' % \
+                ansible_error
+            return error_message, ScanTask.FAILED
         except AssertionError as assertion_error:
-            logger.error(assertion_error)
-            return ScanTask.FAILED
+            error_message = 'Scan task encountered error: %s' % \
+                assertion_error
+            return error_message, ScanTask.FAILED
         except ScannerException as scan_error:
-            logger.error(scan_error)
-            return ScanTask.FAILED
+            error_message = 'Scan task encountered error: %s' % \
+                scan_error
+            return error_message, ScanTask.FAILED
 
-        return ScanTask.COMPLETED
+        if self.scan_task.systems_failed > 0:
+            return '%d systems could not be scanned.' % \
+                self.scan_task.systems_failed, ScanTask.FAILED
+        return None, ScanTask.COMPLETED
 
     # pylint: disable=too-many-locals
     def inspect_scan(self):

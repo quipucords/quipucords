@@ -256,8 +256,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             self.scan_job, self.scan_task, self.conn_results)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY,
-                                        ANY, 22,
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22,
                                         optional_product_status,
                                         forks=50)
-        self.assertEqual(conn_dict, ScanTask.COMPLETED)
+        self.assertEqual(conn_dict[1], ScanTask.COMPLETED)

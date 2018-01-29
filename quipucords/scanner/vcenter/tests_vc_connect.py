@@ -148,7 +148,7 @@ class ConnectTaskRunnerTest(TestCase):
         with patch.object(ConnectTaskRunner, 'connect',
                           side_effect=invalid_login) as mock_connect:
             status = self.runner.run()
-            self.assertEqual(ScanTask.FAILED, status)
+            self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
     def test_unreachable_run(self):
@@ -156,7 +156,7 @@ class ConnectTaskRunnerTest(TestCase):
         with patch.object(ConnectTaskRunner, 'connect',
                           side_effect=unreachable_host) as mock_connect:
             status = self.runner.run()
-            self.assertEqual(ScanTask.FAILED, status)
+            self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
     def test_run(self):
@@ -164,5 +164,5 @@ class ConnectTaskRunnerTest(TestCase):
         with patch.object(ConnectTaskRunner, 'connect',
                           return_value=['vm1', 'vm2']) as mock_connect:
             status = self.runner.run()
-            self.assertEqual(ScanTask.COMPLETED, status)
+            self.assertEqual(ScanTask.COMPLETED, status[1])
             mock_connect.assert_called_once_with()
