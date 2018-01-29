@@ -96,11 +96,11 @@
 
 - name: set virt.virt fact due to internal_cpu_model_name_kvm
   set_fact: virt_virt="virt-guest"
-  when: 'internal_cpu_model_name_kvm["stdout_lines"][0] == "Y"'
+  when: '(internal_cpu_model_name_kvm | json_query("stdout_lines[0]")) == "Y"'
 
 - name: set virt.type fact due to internal_cpu_model_name_kvm
   set_fact: virt_type="kvm"
-  when: 'internal_cpu_model_name_kvm["stdout_lines"][0] == "Y"'
+  when: '(internal_cpu_model_name_kvm | json_query("stdout_lines[0]")) == "Y"'
 
 - name: set virt.virt fact due to internal_sys_manu_vmware
   set_fact: virt_virt="virt-guest"
@@ -152,19 +152,19 @@
 
 - name: set virt.virt fact due to kvm
   set_fact: virt_virt="virt-host"
-  when: 'internal_kvm_found["stdout_lines"][0] == "Y"'
+  when: '(internal_kvm_found | json_query("stdout_lines[0]")) == "Y"'
 
 - name: set virt.type fact due to kvm
   set_fact: virt_type="kvm"
-  when: 'internal_kvm_found["stdout_lines"][0] == "Y"'
+  when: '(internal_kvm_found | json_query("stdout_lines[0]")) == "Y"'
 
 - name: set virt.virt fact due to privcmd
   set_fact: virt_virt="virt-guest"
-  when: 'internal_privcmd_found["stdout_lines"][0] == "Y"'
+  when: '(internal_privcmd_found | json_query("stdout_lines[0]")) == "Y"'
 
 - name: set virt.type fact due to privcmd
   set_fact: virt_type="xen"
-  when: 'internal_privcmd_found["stdout_lines"][0] == "Y"'
+  when: '(internal_privcmd_found | json_query("stdout_lines[0]")) == "Y"'
 
 - name: gather virt.num_guests fact
   raw: virsh -c qemu:///system --readonly list --all | wc -l
@@ -173,7 +173,7 @@
   when: 'internal_have_virsh'
 
 - name: extract output virt.num_guests fact
-  set_fact: virt_num_guests="{{ virt_num_guests['stdout_lines'][0] if internal_have_virsh else None }}"
+  set_fact: virt_num_guests="{{ (virt_num_guests | json_query('stdout_lines[0]')) if internal_have_virsh else None }}"
 
 - name: gather virt.num_running_guests fact
   raw: virsh -c qemu:///system --readonly list --uuid | wc -l
@@ -182,4 +182,4 @@
   when: 'internal_have_virsh'
 
 - name: extract output virt.num_running_guests fact
-  set_fact: virt_num_running_guests="{{ internal_virt_num_running_guests['stdout_lines'][0] if internal_have_virsh else None }}"
+  set_fact: virt_num_running_guests="{{ (internal_virt_num_running_guests | json_query('stdout_lines[0]')) if internal_have_virsh else None }}"
