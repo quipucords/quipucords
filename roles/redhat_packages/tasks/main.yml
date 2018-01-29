@@ -6,9 +6,13 @@
   ignore_errors: yes
   when: internal_have_rpm
 
+# Using json_query means that the filter will always succeed and
+# return a result, which simplifies later processing. If
+# redhat_packages_gpg_is_redhat doesn't have 'stdout_lines' (because
+# it failed or never ran), then the result will be null.
 - name: set fact whether red hat rpms are installed or not
   set_fact:
-    redhat_packages_gpg_is_redhat: '{{ redhat_packages_gpg_is_redhat["stdout_lines"][0] == "Y" }}'
+    redhat_packages_gpg_is_redhat: '{{ (redhat_packages_gpg_is_redhat | json_query("stdout_lines[0]")) == "Y" }}'
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
   raw: rpm -qa --qf "%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
@@ -18,17 +22,17 @@
 
 - name: set fact of number of installed red hat packages filtered by gpg keys
   set_fact:
-    redhat_packages_gpg_num_rh_packages: "{{ redhat_packages_gpg_num_rh_packages['stdout_lines'][0] }}"
+    redhat_packages_gpg_num_rh_packages: '{{ redhat_packages_gpg_num_rh_packages | json_query("stdout_lines[0]") }}'
 
 - name: gather total number of installed packages
   raw: rpm -qa | wc -l
-  register: redhat_packages_all_count
+  register: internal_redhat_packages_all_count
   ignore_errors: yes
   when: internal_have_rpm
 
 - name: set fact of number of all installed rpm packages
   set_fact:
-    redhat_packages_gpg_num_installed_packages: "{{ redhat_packages_all_count['stdout_lines'][0] }}"
+    redhat_packages_gpg_num_installed_packages: '{{ internal_redhat_packages_all_count | json_query("stdout_lines[0]") }}'
 
 - name: gather the last installed red hat package filtered by gpg keys
   raw: rpm -qa --qf "%{INSTALLTIME} %{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
@@ -39,7 +43,7 @@
 
 - name: set fact of last installed rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_installed: "{{ redhat_packages_gpg_last_installed['stdout_lines'][0] }}"
+    redhat_packages_gpg_last_installed: '{{ redhat_packages_gpg_last_installed | json_query("stdout_lines[0]") }}'
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
@@ -52,16 +56,16 @@
 
 - name: set fact of last built rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_built: "{{ redhat_packages_gpg_last_built['stdout_lines'][0] }}"
+    redhat_packages_gpg_last_built: '{{ redhat_packages_gpg_last_built | json_query("stdout_lines[0]") }}'
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather redhat-packages.certs fact
   raw: ls /etc/pki/product/ 2> /dev/null| grep '.pem'
-  register: redhat_packages_certs_cmd
+  register: internal_redhat_packages_certs_cmd
   ignore_errors: yes
 
 - name: extract result value for redhat-packages.certs
   set_fact:
-    redhat_packages_certs: "{{  redhat_packages_certs_cmd['stdout'] | trim | default('error') }}"
-  when: '"stdout" in redhat_packages_certs_cmd'
+    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("error") }}'
+  when: '"stdout" in internal_redhat_packages_certs_cmd'
