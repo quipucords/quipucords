@@ -1,2 +1,3 @@
-quipucords was written by Chris Hambridge <chambrid@redhat.com>
-and Noah Lavine <nlavine@redhat.com>.
+quipucords was written by Chris Hambridge <chambrid@redhat.com>,
+Noah Lavine <nlavine@redhat.com>, Kevan Holdaway<kholdawa@redhat.com>,
+and Ashley Aiken <aaiken@redhat.com>.

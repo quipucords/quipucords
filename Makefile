@@ -7,7 +7,7 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/es_receiver.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -53,15 +53,26 @@ swagger-valid:
 	node_modules/swagger-cli/bin/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 
-server-init:
-	$(PYTHON) quipucords/manage.py makemigrations api; $(PYTHON) quipucords/manage.py migrate; echo "from django.contrib.auth.models import User; User.objects.filter(email='admin@example.com').delete(); User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | $(PYTHON) quipucords/manage.py shell
+server-makemigrations:
+	$(PYTHON) quipucords/manage.py makemigrations api
+
+server-migragte:
+	$(PYTHON) quipucords/manage.py migrate
+
+server-set-superuser:
+	echo "from django.contrib.auth.models import User; User.objects.filter(email='admin@example.com').delete(); User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | $(PYTHON) quipucords/manage.py shell
+
+server-init: server-makemigrations server-migragte server-set-superuser
+
+server-static:
+	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver

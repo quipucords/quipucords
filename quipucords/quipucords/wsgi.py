@@ -19,12 +19,12 @@ https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/
 
 import os
 from django.core.wsgi import get_wsgi_application
-from scanner.manager import SCAN_MANAGER
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'quipucords.settings')
 
 # pylint: disable=invalid-name
 application = get_wsgi_application()
 
-
+from scanner.manager import SCAN_MANAGER  # noqa: E402 pylint: disable=C0413
 SCAN_MANAGER.start()

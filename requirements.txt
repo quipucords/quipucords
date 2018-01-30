@@ -39,6 +39,7 @@ pyvmomi
 PyYAML==3.12
 requests==2.18.4
 six==1.10.0
+whitenoise==3.3.1
 wrapt==1.10.11
 
 # These requirements are for DEVELOPMENT ONLY!
