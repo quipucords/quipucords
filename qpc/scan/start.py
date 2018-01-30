@@ -78,7 +78,7 @@ class ScanStartCommand(CliCommand):
                 not_found = True
         return not_found, source_ids
 
-    def _create_optional_product_status_dict(self):
+    def _get_optional_products(self):
         """Construct a dictionary based on the disable-optional-products args.
 
         :returns: a dictionary representing the collection status of optional
@@ -115,7 +115,7 @@ class ScanStartCommand(CliCommand):
             'options': {
                 'max_concurrency': self.args.max_concurrency}
         }
-        disable_optional_products = self._create_optional_product_status_dict()
+        disable_optional_products = self._get_optional_products()
         if disable_optional_products is not None:
             self.req_payload['options']['disable_optional_products']\
                 = disable_optional_products

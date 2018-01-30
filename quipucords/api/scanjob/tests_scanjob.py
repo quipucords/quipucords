@@ -14,7 +14,6 @@ from unittest.mock import patch
 import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-from rest_framework.serializers import ValidationError
 from rest_framework import status
 import api.messages as messages
 from api.models import (Credential,
@@ -283,22 +282,28 @@ class ScanJobTest(TestCase):
     def test_create_invalid_forks(self):
         """Test valid number of forks."""
         data = {'sources': [self.source.id],
-                'options': {'max_concurrency': -5}}
+                'options': {'max_concurrency': -5,
+                            'disable_optional_products': {'jboss_eap': True}}}
         self.create_expect_400(data, {
             'options': {'max_concurrency':
                         ['Ensure this value is greater than or equal '
                          'to 1.']}})
+
+    def test_create_invalid_disable_optional_products(self):
+        """Test valid number of forks."""
+        data = {'sources': [self.source.id],
+                'options': {'disable_optional_products': 'foo'}}
+        self.create_expect_400(data, {
+            'options': {'disable_optional_products':
+                        ['Extra vars must be a dictionary.']}})
+
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
         """List all ScanJob objects."""
         data_default = {'sources': [self.source.id]}
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         self.create_expect_201(data_default)
         self.create_expect_201(data_discovery)
 
@@ -315,11 +320,7 @@ class ScanJobTest(TestCase):
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                     {'jboss_eap': True,
-                                      'jboss_fuse': True,
-                                      'jboss_brms': True}},
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
@@ -330,17 +331,9 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_filtered_list(self, start_scan):
         """List filtered ScanJob objects."""
-        data_default = {'sources': [self.source.id],
-                        'options': {'disable_optional_products':
-                                    {'jboss_eap': True,
-                                     'jboss_fuse': True,
-                                     'jboss_brms': True}}}
+        data_default = {'sources': [self.source.id]}
         data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         self.create_expect_201(data_default)
         self.create_expect_201(data_discovery)
 
@@ -351,11 +344,7 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 2,
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                     {'jboss_eap': True,
-                                      'jboss_fuse': True,
-                                      'jboss_brms': True}},
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
@@ -377,22 +366,14 @@ class ScanJobTest(TestCase):
 
         content = response.json()
         expected = [{'id': 1,
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                     {'jboss_eap': True,
-                                      'jboss_fuse': True,
-                                      'jboss_brms': True}},
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                     {'jboss_eap': True,
-                                      'jboss_fuse': True,
-                                      'jboss_brms': True}},
+                     'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
@@ -506,6 +487,28 @@ class ScanJobTest(TestCase):
                             {'jboss_eap': True,
                              'jboss_fuse': True,
                              'jboss_brms': True}}}
+        url = reverse('scanjob-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_update_not_allowed_disable_optional_products(self, start_scan):
+        """Completely update a Source."""
+        data_discovery = {'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disable_optional_products':
+                                          {'jboss_eap': True,
+                                           'jboss_fuse': True,
+                                           'jboss_brms': True}}}
+        initial = self.create_expect_201(data_discovery)
+
+        data = {'sources': [self.source.id],
+                'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                'options': {'disable_optional_products':'bar'}}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -746,8 +749,8 @@ class ScanJobTest(TestCase):
             ['facts'][0]['name'],
             'foo')
 
-    def test_create_extra_vars(self):
-        """Tests the create_extra_vars method with empty dict."""
+    def test_get_extra_vars(self):
+        """Tests the get_extra_vars method with empty dict."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
         scan_options = ScanOptions()
@@ -755,14 +758,14 @@ class ScanJobTest(TestCase):
         scan_options.save()
         scan_job.options = scan_options
         scan_job.save()
-        extra_vars = scan_job.create_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True}
         self.assertEqual(extra_vars, expected_vars)
 
-    def test_create_extra_vars_mixed(self):
-        """Tests the create_extra_vars method with mixed values."""
+    def test_get_extra_vars_mixed(self):
+        """Tests the get_extra_vars method with mixed values."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
@@ -771,14 +774,14 @@ class ScanJobTest(TestCase):
         scan_options.save()
         scan_job.options = scan_options
         scan_job.save()
-        extra_vars = scan_job.create_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': False,
                          'jboss_brms': True}
         self.assertEqual(extra_vars, expected_vars)
 
-    def test_create_extra_vars_false(self):
-        """Tests the create_extra_vars method with all False."""
+    def test_get_extra_vars_false(self):
+        """Tests the get_extra_vars method with all False."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
@@ -787,44 +790,8 @@ class ScanJobTest(TestCase):
         scan_options.save()
         scan_job.options = scan_options
         scan_job.save()
-        extra_vars = scan_job.create_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
         expected_vars = {'jboss_eap': False,
                          'jboss_fuse': False,
                          'jboss_brms': False}
         self.assertEqual(extra_vars, expected_vars)
-
-    def test_create_extra_vars_none(self):
-        """Tests the create_extra_vars method with None."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_options = ScanOptions()
-        scan_options.disable_optional_products = None
-        scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        extra_vars = scan_job.create_extra_vars()
-        expected_vars = {'jboss_eap': True,
-                         'jboss_fuse': True,
-                         'jboss_brms': True}
-        self.assertEqual(extra_vars, expected_vars)
-
-    def test_create_extra_vars_fail_validate_key(self):
-        """Tests the create_extra_vars method with None."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_options = ScanOptions()
-        scan_options.disable_optional_products = {'foo': True}
-        scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        with self.assertRaises(ValidationError):
-            scan_job.create_extra_vars()
-
-    def test_create_extra_vars_fail_validate_val(self):
-        """Tests the create_extra_vars method with None."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_options = ScanOptions()
-        scan_options.disable_optional_products = {'jboss_eap': 1}
-        scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        with self.assertRaises(ValidationError):
-            scan_job.create_extra_vars()

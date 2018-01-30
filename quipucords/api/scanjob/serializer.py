@@ -38,6 +38,22 @@ class ScanOptionsSerializer(NotEmptySerializer):
         fields = ['max_concurrency',
                   'disable_optional_products']
 
+    @staticmethod
+    def validate_disable_optional_products(disable_optional_products):
+        """Make sure that extra vars are a dictionary with boolean values."""
+        disable_optional_products = ScanJob.get_optional_products(
+            disable_optional_products)
+
+        if not isinstance(disable_optional_products, dict):
+            raise ValidationError(_(messages.SJ_EXTRA_VARS_DICT))
+        for key in disable_optional_products:
+            if not isinstance(disable_optional_products[key], bool):
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_BOOL))
+            elif key not in [ScanJob.JBOSS_EAP,
+                             ScanJob.JBOSS_BRMS,
+                             ScanJob.JBOSS_FUSE]:
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_KEY))
+
 
 class TaskField(PrimaryKeyRelatedField):
     """Representation of the source associated with a scan job."""
@@ -73,6 +89,9 @@ class ScanJobSerializer(NotEmptySerializer):
         options = validated_data.pop('options', None)
         scanjob = super().create(validated_data)
         if options:
+            if 'disable_optional_products' in options:
+                ScanOptionsSerializer.validate_disable_optional_products(
+                    options['disable_optional_products'])
             options = ScanOptions.objects.create(**options)
         else:
             options = ScanOptions()
