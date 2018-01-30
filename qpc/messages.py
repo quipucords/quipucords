@@ -118,7 +118,7 @@ SCAN_CANCELED = 'Scan "%s" canceled.'
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\
-    'Valid choices are jboss_eap, jboss_fuse, and jboss_brms.'
+    'Valid values: jboss_eap, jboss_fuse, jboss_brms.'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
 
