@@ -449,10 +449,13 @@ class SourceTest(TestCase):
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('credentials', response.json())
-        creds = response.json()['credentials']
+        response_json = response.json()
+        self.assertIn('credentials', response_json)
+        creds = response_json['credentials']
 
         self.assertEqual(creds, [self.net_cred_for_response])
+        self.assertIn('hosts', response_json)
+        self.assertEqual(response_json['hosts'][0], '1.2.3.4')
 
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
