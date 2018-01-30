@@ -132,7 +132,7 @@ class SourceTest(TestCase):
         """A create request must have a string name."""
         self.create_expect_400(
             {'name': 1,
-            'hosts': '1.2.3.4',
+             'hosts': '1.2.3.4',
              'source_type': Source.NETWORK_SOURCE_TYPE,
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
@@ -730,7 +730,8 @@ class SourceTest(TestCase):
         data = {'name': 'source',
                 'hosts': ['1.2.3.4'],
                 'port': 22,
-                'credentials': [self.vc_cred_for_upload, self.vc_cred_for_upload]}
+                'credentials': [self.vc_cred_for_upload,
+                                self.vc_cred_for_upload]}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -912,7 +913,8 @@ class SourceTest(TestCase):
         data = {'name': 'source',
                 'hosts': ['1.2.3.4'],
                 'port': 22,
-                'credentials': [self.sat_cred_for_upload, self.sat_cred_for_upload]}
+                'credentials': [self.sat_cred_for_upload,
+                                self.sat_cred_for_upload]}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
