@@ -32,7 +32,7 @@
 
 - name: extract or default cpu.count fact
   set_fact:
-    cpu_count: "{{ internal_cpu_count_cmd['stdout_lines'][0] | default(None)}}"
+    cpu_count: "{{ internal_cpu_count_cmd | json_query('stdout_lines[0]') }}"
 
 - name: gather cpu.core_per_socket fact
   raw: cat /proc/cpuinfo | grep '^cpu cores\s*.' | sed -n -e 's/^.*cpu cores\s*.\s*//p'
@@ -41,7 +41,7 @@
 
 - name: extract or default cpu.core_per_socket fact
   set_fact:
-    cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd['stdout_lines'][0] | default(None)}}"
+    cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd | json_query('stdout_lines[0]') }}"
 
 - name: gather cpu.siblings fact
   raw: cat /proc/cpuinfo | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p'
@@ -50,7 +50,7 @@
 
 - name: extract or default cpu.siblings fact
   set_fact:
-    cpu_siblings: "{{ internal_cpu_siblings_cmd['stdout_lines'][0] | default(None)}}"
+    cpu_siblings: "{{ internal_cpu_siblings_cmd | json_query('stdout_lines[0]') }}"
 
 - name: determine cpu.hyperthreading fact
   set_fact:
@@ -69,7 +69,7 @@
 
 - name: extract result value for cpu.socket_count
   set_fact:
-    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    cpu_socket_count: "{{ internal_cpu_socket_count_cmd.get('stdout') | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
   when: '"stdout" in internal_cpu_socket_count_cmd'
 
 - name: gather cpu.socket_count fact with fallback
