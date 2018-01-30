@@ -90,9 +90,9 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 3. Run the docker image::
 
-    docker run -d -p8000:8000 -i quipucords:latest
+    docker run -d -p443:443 -i quipucords:latest
 
-Now the server should be running and you can launch the `Credential Browseable API <http://127.0.0.1:8000/api/v1/credentials/>`_.
+Now the server should be running and you can launch the `login <https://127.0.0.1/>`_.
 You can work with the APIs directly or you can use the CLI. You can configure the CLI with the following command::
 
     qpc server config --host 127.0.0.1
@@ -177,20 +177,6 @@ If you intend to run on Mac OS there are several more steps required.
   See explanation `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
 
 
-Piping data to Elasticsearch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Before starting the server, set the following environment variables::
-
-    USE_ELASTICSEARCH=True
-    ES_HOSTS=http://ES_HOST1,http://ES_HOST2
-
-Additionally, there is a `docker-compose.yml` file located in the `elasticsearch` directory. To start a local docker image do the following:
- * Ensure you have docker and docker-compose installed
- * Open a terminal window and switch to the `elasticsearch` folder
- * Run `docker-compose up` to start Elasticsearch and Kibana
- * Run `docker-compose down` to stop Elasticsearch and Kibana
-
-
 Testing
 ^^^^^^^
 
@@ -226,6 +212,6 @@ Reference the `CONTRIBUTING <CONTRIBUTING.rst>`_ guide for information to the pr
 
 Copyright & License
 -------------------
-Copyright 2017, Red Hat, Inc.
+Copyright 2017-2018, Red Hat, Inc.
 
 quipucords is released under the `GNU Public License version 3 <LICENSE>`_.

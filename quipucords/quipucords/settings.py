@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'quipucords.urls'
@@ -149,72 +150,99 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 STATIC_URL = '/client/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'client'),
 ]
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+LOGGING_FORMATTER = os.getenv('DJANGO_LOG_FORMATTER', 'simple')
+LOGGING_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
+VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
+    '%(process)d %(thread)d %(message)s'
+DEFAULT_LOG_FILE = os.path.join(BASE_DIR, 'server.log')
+LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': VERBOSE_FORMATTING
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': LOGGING_FORMATTER
+        },
+        'file': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.FileHandler',
+            'filename': LOGGING_FILE,
+            'formatter': LOGGING_FORMATTER
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'api.fact': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'api.scanjob': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'fingerprinter': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'api.signals.es_receiver': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'api.signals.scanjob_signal': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.callback': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.manager': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.job': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.task': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.network': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.vcenter': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
         'scanner.satellite': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
         },
     },
 }

@@ -30,6 +30,27 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # Timeout for individual tasks. Must match format in 'man timeout'.
 DEFAULT_TIMEOUT = '120s'
 
+DEFAULT_ROLES = [
+    'check_dependencies',
+    'connection',
+    'cpu',
+    'date',
+    'dmi',
+    'etc_release',
+    'file_contents',
+    'jboss_eap',
+    'jboss_brms',
+    'jboss_fuse_on_karaf',
+    'ifconfig',
+    'redhat_packages',
+    'redhat_release',
+    'subman',
+    'uname',
+    'virt',
+    'virt_what',
+    'host_done',
+]
+
 
 class ScannerException(Exception):
     """Exception for issues detected during scans."""
@@ -133,12 +154,14 @@ class InspectTaskRunner(ScanTaskRunner):
                 self.scan_task.systems_failed, ScanTask.FAILED
         return None, ScanTask.COMPLETED
 
-    # pylint: disable=too-many-locals
-    def inspect_scan(self, connected, base_ssh_executable=None,
+    # pylint: disable=too-many-locals,W0102
+    def inspect_scan(self, connected, roles=DEFAULT_ROLES,
+                     base_ssh_executable=None,
                      ssh_timeout=None):
         """Execute the host scan with the initialized source.
 
         :param connected: list of (host, credential) pairs to inspect
+        :param roles: list of roles to execute
         :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
             to Ansible.
@@ -147,26 +170,6 @@ class InspectTaskRunner(ScanTaskRunner):
         :returns: An array of dictionaries of facts
 
         """
-        roles = [
-            'check_dependencies',
-            'connection',
-            'cpu',
-            'date',
-            'dmi',
-            'etc_release',
-            'file_contents',
-            'jboss_eap',
-            'jboss_brms',
-            'jboss_fuse_on_karaf',
-            'ifconfig',
-            'redhat_packages',
-            'redhat_release',
-            'subman',
-            'uname',
-            'virt',
-            'virt_what',
-            'host_done',
-        ]
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,
@@ -174,6 +177,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
+        extra_vars = self.scan_job.get_extra_vars()
         forks = self.scan_job.options.max_concurrency
 
         # Save counts
@@ -207,7 +211,8 @@ class InspectTaskRunner(ScanTaskRunner):
                         'gather_facts': False,
                         'roles': roles}
             result = run_playbook(
-                inventory_file, callback, playbook, forks=forks)
+                inventory_file, callback, playbook,
+                extra_vars, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
@@ -254,7 +259,7 @@ def construct_scan_inventory(hosts, connection_port, concurrency_count,
     :param concurrency_count: The number of concurrent scans
     :param ssh_executable: the ssh executable to use, or None for 'ssh'
     :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible invetory
+    :returns: A dictionary of the ansible inventory
     """
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,

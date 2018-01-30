@@ -28,6 +28,7 @@
       raw: ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 realpath 2> /dev/null
       register: karaf_running_processes
       ignore_errors: yes
+      when: 'jboss_fuse'
 
     - name: Use locate to look for karaf.jar
 
@@ -39,7 +40,7 @@
       raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null
       register: karaf_locate_karaf_jar
       ignore_errors: yes
-      when: 'have_locate'
+      when: 'have_locate and jboss_fuse'
 
     - name: Use find to look for karaf.jar
       raw: find {{scan_dirs}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 realpath  2> /dev/null | sort -u
@@ -56,6 +57,7 @@
                karaf_locate_karaf_jar.get('stdout_lines', []) +
                karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
       ignore_errors: yes
+      when: 'jboss_fuse'
 
 # Look for fuse inside KARAF_HOME directories
 
@@ -64,12 +66,15 @@
       register: karaf_home_bin_fuse
       ignore_errors: yes
       with_items: "{{ karaf_homes }}"
+      when: 'jboss_fuse'
+
 
     - name: check system/org/jboss/fuse
       raw: ls -1 "{{ item }}/system/org/jboss"
       register: karaf_home_system_org_jboss
       ignore_errors: yes
-      with_items: "{{ karaf_homes }}"
+      when: 'jboss_fuse'
+
 
 # Tests that can indicate the presence of Fuse, but can't tell us the
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
@@ -79,9 +84,12 @@
       register: jboss_fuse_systemctl_unit_files
       ignore_errors: yes
       become: true
+      when: 'jboss_fuse'
 
     - name: look for fuse in chkconfig
       raw: chkconfig 2> /dev/null | grep fuse
       register: jboss_fuse_chkconfig
       ignore_errors: yes
       become: true
+      when: 'jboss_fuse'
+
