@@ -89,9 +89,6 @@ class ScanJobSerializer(NotEmptySerializer):
         options = validated_data.pop('options', None)
         scanjob = super().create(validated_data)
         if options:
-            if 'disable_optional_products' in options:
-                ScanOptionsSerializer.validate_disable_optional_products(
-                    options['disable_optional_products'])
             options = ScanOptions.objects.create(**options)
         else:
             options = ScanOptions()
