@@ -104,11 +104,6 @@ class SourceSerializer(NotEmptySerializer):
         options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
-            if not hosts_list:
-                error = {
-                    'hosts': [_(messages.NET_MIN_HOST)]
-                }
-                raise ValidationError(error)
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
@@ -117,12 +112,7 @@ class SourceSerializer(NotEmptySerializer):
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if port is None:
                 validated_data['port'] = 443
-            if not hosts_list:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_list and len(hosts_list) != 1:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -143,12 +133,7 @@ class SourceSerializer(NotEmptySerializer):
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             if port is None:
                 validated_data['port'] = 443
-            if not hosts_list:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_list and len(hosts_list) != 1:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
@@ -211,12 +196,7 @@ class SourceSerializer(NotEmptySerializer):
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if not hosts_list and self.partial is False:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_list and len(hosts_list) != 1:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -235,12 +215,7 @@ class SourceSerializer(NotEmptySerializer):
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            if not hosts_list and self.partial is False:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_list and len(hosts_list) != 1:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }

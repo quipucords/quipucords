@@ -78,6 +78,9 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
+    #################################################
+    # Network Tests
+    #################################################
     def test_successful_net_create(self):
         """A valid create request should succeed."""
         data = {'name': 'source1',
@@ -88,21 +91,12 @@ class SourceTest(TestCase):
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
-    def test_successful_vc_create(self):
-        """A valid create request should succeed."""
+    def test_successful_net_create_no_port(self):
+        """A valid create request should succeed without port."""
         data = {'name': 'source1',
-                'source_type': Source.VCENTER_SOURCE_TYPE,
+                'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
-                'credentials': [self.vc_cred_for_upload]}
-        response = self.create_expect_201(data)
-        self.assertIn('id', response)
-
-    def test_successful_sat_create(self):
-        """A valid create request should succeed."""
-        data = {'name': 'source1',
-                'source_type': Source.SATELLITE_SOURCE_TYPE,
-                'hosts': ['1.2.3.4'],
-                'credentials': [self.sat_cred_for_upload]}
+                'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
@@ -130,6 +124,15 @@ class SourceTest(TestCase):
         """A create request must have a name."""
         self.create_expect_400(
             {'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_invalid_name(self):
+        """A create request must have a string name."""
+        self.create_expect_400(
+            {'name': 1,
+            'hosts': '1.2.3.4',
              'source_type': Source.NETWORK_SOURCE_TYPE,
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
@@ -280,14 +283,23 @@ class SourceTest(TestCase):
              'port': '22',
              'credentials': []})
 
-    def test_create_invalid_credentials(self):
-        """A random int is not a valid credential."""
+    def test_create_credential_does_not_exist(self):
+        """A random int is not a valid credential id."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': ['1.2.3.4'],
              'port': '22',
              'credentials': [42]})
+
+    def test_create_credential_not_valid_id(self):
+        """A random int is not a valid credential id."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'port': '22',
+             'credentials': ['hi']})
 
     def test_create_invalid_cred_type(self):
         """A source type and credential type must be the same."""
@@ -296,86 +308,6 @@ class SourceTest(TestCase):
              'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': ['1.2.3.4'],
              'port': '22',
-             'credentials': [self.vc_cred_for_upload]})
-
-    def test_create_too_many_creds(self):
-        """A vcenter source and have one credential."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.VCENTER_SOURCE_TYPE,
-             'hosts': ['1.2.3.4'],
-             'credentials': [self.vc_cred_for_upload,
-                             self.net_cred_for_upload]})
-
-    def test_sat_too_many_creds(self):
-        """A sat source and have one credential."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'hosts': ['1.2.3.4'],
-             'credentials': [self.sat_cred_for_upload,
-                             self.net_cred_for_upload]})
-
-    def test_sat_bad_version(self):
-        """A sat source must have valid version option."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'hosts': ['1.2.3.4'],
-             'credentials': [self.sat_cred_for_upload],
-             'options': {'satellite_version': '1.0'}})
-
-    def test_create_req_host(self):
-        """A vcenter source must have a host."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.VCENTER_SOURCE_TYPE,
-             'credentials': [self.vc_cred_for_upload]})
-
-    def test_sat_req_host(self):
-        """A satellite source must have a host."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'credentials': [self.sat_cred_for_upload]})
-
-    def test_create_vc_with_hosts(self):
-        """A vcenter source must not have multiple hosts."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.VCENTER_SOURCE_TYPE,
-             'hosts': ['1.2.3.4', '1.2.3.5'],
-             'credentials': [self.vc_cred_for_upload]})
-
-    def test_create_vc_with_host_range(self):
-        """A vcenter source must not have multiple hosts."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.VCENTER_SOURCE_TYPE,
-             'hosts': ['1.2.3.4/5'],
-             'credentials': [self.vc_cred_for_upload]})
-
-    def test_create_sat_with_hosts(self):
-        """A satellite source must not have multiple hosts."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'hosts': ['1.2.3.4', '1.2.3.5'],
-             'credentials': [self.sat_cred_for_upload]})
-
-    def test_create_sat_with_host_range(self):
-        """A vcenter source must not have multiple hosts."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'hosts': ['1.2.3.4/5'],
-             'credentials': [self.sat_cred_for_upload]})
-
-    def test_create_req_type(self):
-        """A vcenter source must have an type."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'hosts': ['1.2.3.4'],
              'credentials': [self.vc_cred_for_upload]})
 
     def test_list(self):
@@ -538,6 +470,64 @@ class SourceTest(TestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_partial_update_missing_hosts(self):
+        """Partial update should succeed with missing hosts."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source',
+                'port': 22,
+                'credentials': [self.net_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_partial_update_empty_hosts(self):
+        """Partial update should succeed with missing hosts."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source',
+                'port': 22,
+                'hosts': [],
+                'credentials': [self.net_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_missing_hosts(self):
+        """Fail update due to missing host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.NETWORK_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.net_cred_for_upload]})
+
+        data = {'name': 'source',
+                'port': 22,
+                'credentials': [self.net_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_empty_hosts(self):
         """Fail update due to empty host array."""
         initial = self.create_expect_201({
@@ -560,52 +550,6 @@ class SourceTest(TestCase):
         json_rsp = response.json()
         self.assertEqual(json_rsp['hosts'][0],
                          messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
-
-    def test_update_vc_range_hosts(self):
-        """Fail update due to empty host array."""
-        initial = self.create_expect_201({
-            'name': 'source',
-            'source_type': Source.VCENTER_SOURCE_TYPE,
-            'hosts': ['1.2.3.4'],
-            'port': '22',
-            'credentials': [self.vc_cred_for_upload]})
-
-        data = {'name': 'source',
-                'hosts': ['1.2.3.4/5'],
-                'port': 22,
-                'credentials': [self.vc_cred_for_upload]}
-        url = reverse('source-detail', args=(initial['id'],))
-        response = self.client.put(url,
-                                   json.dumps(data),
-                                   content_type='application/json',
-                                   format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        json_rsp = response.json()
-        self.assertEqual(json_rsp['hosts'][0],
-                         messages.VC_ONE_HOST)
-
-    def test_update_sat_range_hosts(self):
-        """Fail update due to empty host array."""
-        initial = self.create_expect_201({
-            'name': 'source',
-            'source_type': Source.SATELLITE_SOURCE_TYPE,
-            'hosts': ['1.2.3.4'],
-            'port': '22',
-            'credentials': [self.sat_cred_for_upload]})
-
-        data = {'name': 'source',
-                'hosts': ['1.2.3.4/5'],
-                'port': 22,
-                'credentials': [self.sat_cred_for_upload]}
-        url = reverse('source-detail', args=(initial['id'],))
-        response = self.client.put(url,
-                                   json.dumps(data),
-                                   content_type='application/json',
-                                   format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        json_rsp = response.json()
-        self.assertEqual(json_rsp['hosts'][0],
-                         messages.VC_ONE_HOST)
 
     def test_update_type_passed(self):
         """Fail update due to type passed."""
@@ -681,3 +625,320 @@ class SourceTest(TestCase):
         url = reverse('source-detail', args=(response['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    #################################################
+    # VCenter Tests
+    #################################################
+    def test_successful_vc_create(self):
+        """A valid create request should succeed."""
+        data = {'name': 'source1',
+                'source_type': Source.VCENTER_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'credentials': [self.vc_cred_for_upload]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_create_too_many_creds(self):
+        """A vcenter source and have one credential."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.vc_cred_for_upload,
+                             self.net_cred_for_upload]})
+
+    def test_create_req_host(self):
+        """A vcenter source must have a host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_empty_hosts(self):
+        """A vcenter source not have empty hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': [],
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_vc_with_hosts(self):
+        """A vcenter source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': ['1.2.3.4', '1.2.3.5'],
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_create_vc_with_host_range(self):
+        """A vcenter source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': ['1.2.3.4/5'],
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_update_vc_greenpath(self):
+        """VC - Success full update."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_vc_more_than_one_host(self):
+        """VC - Fail more than one host."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4', '2.3.4.5'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_vc_more_than_one_cred(self):
+        """VC - Fail more than one cred."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload, self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_vc_range_hosts(self):
+        """Fail update due to empty host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4/5'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_rsp = response.json()
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.VC_ONE_HOST)
+
+    #################################################
+    # Satellite Tests
+    #################################################
+    def test_successful_sat_create(self):
+        """A valid create request should succeed."""
+        data = {'name': 'source1',
+                'source_type': Source.SATELLITE_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'credentials': [self.sat_cred_for_upload]}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_successful_sat_create_with_options(self):
+        """A valid create request should succeed."""
+        data = {'name': 'source1',
+                'source_type': Source.SATELLITE_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'credentials': [self.sat_cred_for_upload],
+                'options': {'satellite_version': '6.2'}}
+        response = self.create_expect_201(data)
+        self.assertIn('id', response)
+
+    def test_sat_too_many_creds(self):
+        """A sat source and have one credential."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.sat_cred_for_upload,
+                             self.net_cred_for_upload]})
+
+    def test_sat_bad_version(self):
+        """A sat source must have valid version option."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.sat_cred_for_upload],
+             'options': {'satellite_version': '1.0'}})
+
+    def test_sat_req_host(self):
+        """A satellite source must have a host."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'credentials': [self.sat_cred_for_upload]})
+
+    def test_sat_req_empty_hosts(self):
+        """A satellite source must not have empty hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': [],
+             'credentials': [self.sat_cred_for_upload]})
+
+    def test_create_sat_with_hosts(self):
+        """A satellite source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4', '1.2.3.5'],
+             'credentials': [self.sat_cred_for_upload]})
+
+    def test_create_sat_with_host_range(self):
+        """A vcenter source must not have multiple hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4/5'],
+             'credentials': [self.sat_cred_for_upload]})
+
+    def test_create_req_type(self):
+        """A vcenter source must have an type."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.vc_cred_for_upload]})
+
+    def test_update_sat_greenpath(self):
+        """Sat - Valid full update."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_sat_with_options(self):
+        """Sat - Valid full update with options."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload],
+                'options': {'satellite_version': '6.2'}}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_sat_more_than_one_hosts(self):
+        """Sat- Fail update due to multiple hosts."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4', '2.3.4.5'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_sat_more_than_one_cred(self):
+        """Sat- Fail update due to multiple hosts."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload, self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_sat_range_hosts(self):
+        """Fail update due to invalid host array."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4/5'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_rsp = response.json()
+        self.assertEqual(json_rsp['hosts'][0],
+                         messages.VC_ONE_HOST)
