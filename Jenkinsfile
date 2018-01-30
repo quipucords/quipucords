@@ -1,4 +1,4 @@
-node('f25-np') {
+node('f25-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients"
         sh "which oc"
