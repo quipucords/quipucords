@@ -333,14 +333,13 @@ class SourceSerializer(NotEmptySerializer):
         if not isinstance(hosts_list, list):
             raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
-        len_list = len(hosts_list)
-        hosts_list = [
-            string for string in hosts_list if isinstance(string, str)]
-        if len_list != len(hosts_list):
-            raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
-
         if not hosts_list:
             raise ValidationError(_(messages.SOURCE_HOSTS_CANNOT_BE_EMPTY))
+
+        for host_value in hosts_list:
+            if not isinstance(host_value, str):
+                raise ValidationError(
+                    _(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
