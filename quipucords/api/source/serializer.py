@@ -96,9 +96,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(error)
         source_type = validated_data.get('source_type')
         credentials = validated_data.pop('credentials')
-        hosts_data = validated_data.pop('hosts', None)
-        if hosts_data:
-            hosts_list = json.loads(hosts_data)
+        hosts_list = validated_data.pop('hosts', None)
         port = None
         if 'port' in validated_data:
             port = validated_data['port']
@@ -180,7 +178,7 @@ class SourceSerializer(NotEmptySerializer):
             options.save()
             source.options = options
 
-        source.hosts = hosts_data
+        source.hosts = json.dumps(hosts_list)
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -205,10 +203,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(error)
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
-        hosts_data = validated_data.pop('hosts', None)
-        if hosts_data:
-            hosts_list = json.loads(hosts_data)
-        value = not hosts_list and self.partial is False
+        hosts_list = validated_data.pop('hosts', None)
         options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
@@ -241,7 +236,6 @@ class SourceSerializer(NotEmptySerializer):
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             if not hosts_list and self.partial is False:
-                print('here2')
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
@@ -273,6 +267,7 @@ class SourceSerializer(NotEmptySerializer):
         # then we should already have raised a ValidationError before
         # this point, so it's safe to use hosts_data as an indicator
         # of whether to replace the hosts.
+        hosts_data = json.dumps(hosts_list)
         if hosts_data:
             instance.hosts = hosts_data
 
@@ -335,6 +330,15 @@ class SourceSerializer(NotEmptySerializer):
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
         hosts_list = json.loads(hosts)
+        if not isinstance(hosts_list, list):
+            raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
+
+        len_list = len(hosts_list)
+        hosts_list = [
+            string for string in hosts_list if isinstance(string, str)]
+        if len_list != len(hosts_list):
+            raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
+
         if not hosts_list:
             raise ValidationError(_(messages.SOURCE_HOSTS_CANNOT_BE_EMPTY))
 
@@ -370,31 +374,31 @@ class SourceSerializer(NotEmptySerializer):
 
         normalized_hosts = []
         host_errors = []
-        for host in hosts_list:
+        for host_range in hosts_list:
             result = None
 
-            ip_match = re.match(relaxed_ip_pattern, host)
-            cidr_match = re.match(relaxed_cidr_pattern, host)
+            ip_match = re.match(relaxed_ip_pattern, host_range)
+            cidr_match = re.match(relaxed_cidr_pattern, host_range)
             invalid_ip_range_match = re.match(relaxed_invalid_ip_range,
-                                              host)
-            is_likely_ip = ip_match and ip_match.end() == len(host)
-            is_likely_cidr = cidr_match and cidr_match.end() == len(host)
+                                              host_range)
+            is_likely_ip = ip_match and ip_match.end() == len(host_range)
+            is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
             is_likely_invalid_ip_range = (invalid_ip_range_match and
                                           invalid_ip_range_match.end() ==
-                                          len(host))
+                                          len(host_range))
 
             if is_likely_invalid_ip_range:
                 err_message = _(messages.NET_INVALID_RANGE_FORMAT %
-                                (host,))
+                                (host_range,))
                 result = ValidationError(err_message)
 
             elif is_likely_ip or is_likely_cidr:
                 # This is formatted like an IP or CIDR
                 # (e.g. #.#.#.# or #.#.#.#/#)
                 for reg in ip_regex_list:
-                    match = re.match(reg, host)
-                    if match and match.end() == len(host):
-                        result = host
+                    match = re.match(reg, host_range)
+                    if match and match.end() == len(host_range):
+                        result = host_range
                         break
 
                 if result is None or is_likely_cidr:
@@ -402,23 +406,23 @@ class SourceSerializer(NotEmptySerializer):
                     if is_likely_cidr:
                         try:
                             normalized_cidr = SourceSerializer \
-                                .cidr_to_ansible(host)
+                                .cidr_to_ansible(host_range)
                             result = normalized_cidr
                         except ValidationError as validate_error:
                             result = validate_error
                     else:
                         err_message = _(messages.NET_INVALID_RANGE_CIDR %
-                                        (host,))
+                                        (host_range,))
                         result = ValidationError(err_message)
             else:
-                # Possibly a host addr
+                # Possibly a host_range addr
                 for reg in host_regex_list:
-                    match = re.match(reg, host)
-                    if match and match.end() == len(host):
-                        result = host
+                    match = re.match(reg, host_range)
+                    if match and match.end() == len(host_range):
+                        result = host_range
                         break
                 if result is None:
-                    err_message = _(messages.NET_INVALID_HOST % (host,))
+                    err_message = _(messages.NET_INVALID_HOST % (host_range,))
                     result = ValidationError(err_message)
 
             if isinstance(result, ValidationError):
@@ -427,11 +431,11 @@ class SourceSerializer(NotEmptySerializer):
                 normalized_hosts.append(result)
             else:
                 # This is an unexpected case. Allow/log for analysis
-                normalized_hosts.append(host)
+                normalized_hosts.append(host_range)
                 logging.warning('%s did not match a pattern or produce error',
-                                host)
+                                host_range)
         if len(host_errors) is 0:
-            return json.dumps(normalized_hosts)
+            return normalized_hosts
         else:
             error_message = [error.detail.pop() for error in host_errors]
             raise ValidationError(error_message)

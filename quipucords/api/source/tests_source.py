@@ -18,7 +18,7 @@ from api.models import Credential, Source
 import api.messages as messages
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,invalid-name
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -157,6 +157,28 @@ class SourceTest(TestCase):
             {'name': 'source1',
              'source_type': Source.NETWORK_SOURCE_TYPE,
              'hosts': [],
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_hosts_not_array(self):
+        """Test error when hosts is not an array."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': {
+                 '1.2.3.4': '1.2.3.4'
+             },
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_hosts_not_array_of_strings(self):
+        """Test error when hosts is not an array of strings."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': [
+                 1, 2, 3, 4
+             ],
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
 

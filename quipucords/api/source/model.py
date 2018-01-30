@@ -60,8 +60,8 @@ class Source(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, type:%s , hosts:%s}' %\
-            (self.id, self.name, self.source_type, self.hosts)
+        return '{ id:%s, name:%s, type:%s}' %\
+            (self.id, self.name, self.source_type)
 
     def get_hosts(self):
         """Access hosts as python list instead of str.
