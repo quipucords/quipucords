@@ -10,6 +10,7 @@
 #
 """Module for serializing all model object for database storage."""
 
+import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
@@ -38,6 +39,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
         fields = ['max_concurrency',
                   'disable_optional_products']
 
+    # pylint: disable=invalid-name
     @staticmethod
     def validate_disable_optional_products(disable_optional_products):
         """Make sure that extra vars are a dictionary with boolean values."""
@@ -53,6 +55,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
                              ScanJob.JBOSS_BRMS,
                              ScanJob.JBOSS_FUSE]:
                 raise ValidationError(_(messages.SJ_EXTRA_VARS_KEY))
+        return json.dumps(disable_optional_products)
 
 
 class TaskField(PrimaryKeyRelatedField):
