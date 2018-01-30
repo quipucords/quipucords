@@ -290,7 +290,7 @@ class ScanJobTest(TestCase):
                          'to 1.']}})
 
     def test_create_invalid_disable_optional_products(self):
-        """Test valid number of forks."""
+        """Test invalid type for disable_optional_products."""
         data = {'sources': [self.source.id],
                 'options': {'disable_optional_products': 'foo'}}
         self.create_expect_400(data, {
@@ -496,7 +496,7 @@ class ScanJobTest(TestCase):
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed_disable_optional_products(self, start_scan):
-        """Completely update a Source."""
+        """Completely update a Source & fail due to disable_opt_products."""
         data_discovery = {'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                           'options': {'disable_optional_products':
