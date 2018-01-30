@@ -297,7 +297,6 @@ class ScanJobTest(TestCase):
             'options': {'disable_optional_products':
                         ['Extra vars must be a dictionary.']}})
 
-
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
         """List all ScanJob objects."""
@@ -501,14 +500,14 @@ class ScanJobTest(TestCase):
         data_discovery = {'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                           'options': {'disable_optional_products':
-                                          {'jboss_eap': True,
-                                           'jboss_fuse': True,
-                                           'jboss_brms': True}}}
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
         initial = self.create_expect_201(data_discovery)
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                'options': {'disable_optional_products':'bar'}}
+                'options': {'disable_optional_products': 'bar'}}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
