@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch, ANY
 from socket import gaierror
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (Credential, Source, HostRange, ScanTask,
+from api.models import (Credential, Source, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult)
 from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
                                      get_vm_container)
@@ -47,15 +47,11 @@ class ConnectTaskRunnerTest(TestCase):
 
         self.source = Source(
             name='source1',
-            port=22)
+            port=22,
+            hosts='["1.2.3.4"]')
+
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                   source=self.source, sequence_number=2)

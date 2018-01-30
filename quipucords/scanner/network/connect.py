@@ -64,8 +64,9 @@ class ConnectResultStore(object):
         # like '1.2.3.[4:6]'. Expand the patterns so hosts is a list
         # of single hosts we can try to connect to.
         hosts = []
-        for host_range in source.hosts.all():
-            hosts.extend(expand_hostpattern(host_range.host_range))
+        hosts_list = source.get_hosts()
+        for host in hosts_list:
+            hosts.extend(expand_hostpattern(host))
         self._remaining_hosts = set(hosts)
 
         if scan_task.systems_count is None:

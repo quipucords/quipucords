@@ -13,7 +13,7 @@
 from unittest.mock import patch, ANY
 import requests_mock
 from django.test import TestCase
-from api.models import (Credential, Source, HostRange, ScanTask,
+from api.models import (Credential, Source, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult,
                         InspectionResult, SystemInspectionResult)
 from scanner.satellite.utils import construct_url
@@ -41,15 +41,11 @@ class SatelliteSixV1Test(TestCase):
 
         self.source = Source(
             name='source1',
-            port=443)
+            port=443,
+            hosts='["1.2.3.4"]')
+
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                   source=self.source, sequence_number=1)
@@ -393,15 +389,11 @@ class SatelliteSixV2Test(TestCase):
 
         self.source = Source(
             name='source1',
-            port=443)
+            port=443,
+            hosts='["1.2.3.4"]')
+
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                   source=self.source, sequence_number=1)

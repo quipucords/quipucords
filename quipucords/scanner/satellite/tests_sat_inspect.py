@@ -13,7 +13,7 @@
 from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
-from api.models import (Credential, Source, HostRange, ScanTask,
+from api.models import (Credential, Source, ScanTask,
                         ScanJob, ConnectionResults, ConnectionResult,
                         InspectionResults, SourceOptions)
 from scanner.satellite.inspect import InspectTaskRunner
@@ -46,15 +46,11 @@ class InspectTaskRunnerTest(TestCase):
 
         self.source = Source(
             name='source1',
-            port=443)
+            port=443,
+            hosts='["1.2.3.4"]')
+
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
                                   source=self.source, sequence_number=2)
