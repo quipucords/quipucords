@@ -7,7 +7,7 @@
 
 - name: set etc_issue
   set_fact:
-    etc_issue: "{{ internal_etc_issue_cmd['stdout'] | default('') }}"
+    etc_issue: "{{ internal_etc_issue_cmd.get('stdout') | default('') }}"
 
 - name: gather instnum.instnum fact
   raw: if [ -f /etc/sysconfig/rhn/install-num ] ; then cat /etc/sysconfig/rhn/install-num ; fi
@@ -16,7 +16,7 @@
 
 - name: set instnum
   set_fact:
-    instnum: "{{ internal_instnum_cmd['stdout'] | default('') }}"
+    instnum: "{{ internal_instnum_cmd.get('stdout') | default('') }}"
 
 - name: gather systemid fact
   raw: if [ -f /etc/sysconfig/rhn/systemid ] ; then cat /etc/sysconfig/rhn/systemid ; fi
@@ -25,4 +25,4 @@
 
 - name: set systemid
   set_fact:
-    systemid: "{{ internal_systemid_cmd['stdout'] | default('') }}"
+    systemid: "{{ internal_systemid_cmd.get('stdout') | default('') }}"
