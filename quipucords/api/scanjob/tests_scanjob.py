@@ -289,13 +289,31 @@ class ScanJobTest(TestCase):
                         ['Ensure this value is greater than or equal '
                          'to 1.']}})
 
-    def test_create_invalid_disable_optional_products(self):
-        """Test invalid type for disable_optional_products."""
+    def test_create_invalid_disable_optional_products_type(self):
+        """Test invalid type for disable_optional_products type."""
         data = {'sources': [self.source.id],
                 'options': {'disable_optional_products': 'foo'}}
         self.create_expect_400(data, {
             'options': {'disable_optional_products':
                         ['Extra vars must be a dictionary.']}})
+
+    def test_create_invalid_disable_optional_products_key(self):
+        """Test invalid type for disable_optional_products key."""
+        data = {'sources': [self.source.id],
+                'options': {'disable_optional_products': {'foo': True}}}
+        self.create_expect_400(data, {
+            'options': {'disable_optional_products':
+                        ['Extra vars keys must be jboss_eap,'
+                         ' jboss_fuse, or jboss_brms.']}})
+
+    def test_create_invalid_disable_optional_products_val(self):
+        """Test invalid type for disable_optional_products value."""
+        data = {'sources': [self.source.id],
+                'options': {'disable_optional_products':
+                            {'jboss_eap': 'True'}}}
+        self.create_expect_400(data, {
+            'options': {'disable_optional_products':
+                        ['Extra vars values must be type boolean.']}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
