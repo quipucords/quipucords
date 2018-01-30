@@ -11,6 +11,7 @@
 """Run ssh with a timeout."""
 
 import os
+import platform
 import sys
 
 ARG_EXECUTABLE = '--executable='
@@ -45,13 +46,18 @@ def main(argv):
         print('Error: must pass --timeout to timeout_ssh. Got:', argv)
         sys.exit(1)
 
+    if platform.system() == 'Darwin':
+        timeout_command = 'gtimeout'
+    else:
+        timeout_command = 'timeout'
+
     executable_args = [arg for arg in argv[1:]
                        if (not arg.startswith(ARG_EXECUTABLE) and
                            not arg.startswith(ARG_TIMEOUT))]
 
-    timeout_args = ['timeout', timeout, executable] + executable_args
+    timeout_args = [timeout_command, timeout, executable] + executable_args
 
-    os.execvp('timeout', timeout_args)
+    os.execvp(timeout_command, timeout_args)
 
 
 if __name__ == '__main__':
