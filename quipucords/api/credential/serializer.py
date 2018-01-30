@@ -69,6 +69,17 @@ class CredentialSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
+        cred_type = validated_data.get('cred_type')
+        become_method = validated_data.get('become_method')
+        become_user = validated_data.get('become_user')
+
+        if cred_type == Credential.NETWORK_CRED_TYPE and not become_method:
+            # Set the default become_method to be sudo if not specified
+            validated_data['become_method'] = Credential.BECOME_SUDO
+        if cred_type == Credential.NETWORK_CRED_TYPE and not become_user:
+            # Set the default become_user to root if not specified
+            validated_data['become_user'] = Credential.BECOME_USER_DEFAULT
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -119,8 +130,6 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         password = 'password' in attrs and attrs['password']
         ssh_passphrase = 'ssh_passphrase' in attrs and attrs['ssh_passphrase']
-        become_method = 'become_method' in attrs and attrs['become_method']
-        become_user = 'become_user' in attrs and attrs['become_user']
         if not (password or ssh_keyfile) and not self.partial:
             error = {
                 'non_field_errors': [_(messages.HC_PWD_OR_KEYFILE)]
@@ -150,12 +159,6 @@ class CredentialSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
-        if not become_method:
-            # Set the default become_method to be sudo if not specified
-            attrs['become_method'] = Credential.BECOME_SUDO
-        if not become_user:
-            # Set the default become_user to root if not specified
-            attrs['become_user'] = Credential.BECOME_USER_DEFAULT
         return attrs
 
     def validate_vcenter_cred(self, attrs):
