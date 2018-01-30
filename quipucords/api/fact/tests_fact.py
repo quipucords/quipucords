@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import api.messages as messages
 from api.models import (FactCollection,
-                        Source, Credential, HostRange)
+                        Source, Credential)
 from rest_framework import status
 
 
@@ -39,10 +39,8 @@ class FactCollectionTest(TestCase):
             ssh_keyfile=None)
         self.net_source.credentials.add(self.net_cred)
 
-        host_range = HostRange(source=self.net_source, host_range='1.2.3.4')
-        host_range.save()
-
-        self.net_source.hosts.add(host_range)
+        self.net_source.hosts = '["1.2.3.4"]'
+        self.net_source.save()
 
     def create(self, data):
         """Call the create endpoint."""

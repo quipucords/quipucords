@@ -43,6 +43,7 @@ SAT_FIELDS_NOT_ALLOWED = 'Satellite cannot use a become password, ssh'\
 SOURCE_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
 SOURCE_NAME_VALIDATION = 'Source must have printable name.'
 SOURCE_HOSTS_CANNOT_BE_EMPTY = 'hosts cannot be the empty list.'
+SOURCE_HOST_MUST_BE_JSON_ARRAY = 'hosts must be a JSON array of strings'
 SOURCE_CRED_DISPLAY = 'Credential: %s'
 SOURCE_CRED_WRONG_TYPE = 'Credentials must have the same type as source.'
 SOURCE_TYPE_REQ = 'A value for source_type must be provided to ' \

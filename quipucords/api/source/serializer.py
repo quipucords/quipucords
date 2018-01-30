@@ -12,36 +12,18 @@
 
 import re
 import logging
+import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
-                                        SlugRelatedField,
-                                        PrimaryKeyRelatedField, CharField,
+                                        PrimaryKeyRelatedField,
+                                        CharField,
                                         IntegerField)
-from api.models import Credential, HostRange, Source, SourceOptions
+from api.models import Credential, Source, SourceOptions
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
-
-
-class HostRangeField(SlugRelatedField):
-    """Representation of the host range with in a source."""
-
-    # SlugRelatedField is *almost* what we want for HostRanges, but it
-    # doesn't allow creating new HostRanges because it requires them
-    # to already exist or else to_internal_value raises a
-    # ValidationError, and Serializer.is_valid() will call
-    # to_internal_value() before it calls our custom create() method.
-
-    def to_internal_value(self, data):
-        """Create internal value."""
-        if not isinstance(data, str):
-            raise ValidationError(_(messages.NET_HOST_AS_STRING))
-
-        return {'host_range': data}
-
-    def display_value(self, instance):
-        """Create display value."""
-        return instance.host_range
+from api.common.serializer import (NotEmptySerializer,
+                                   ValidStringChoiceField,
+                                   CustomJSONField)
 
 
 class CredentialsField(PrimaryKeyRelatedField):
@@ -88,12 +70,7 @@ class SourceSerializer(NotEmptySerializer):
     source_type = ValidStringChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
     port = IntegerField(required=False, min_value=0, allow_null=True)
-    hosts = HostRangeField(
-        required=False,
-        many=True,
-        allow_null=True,
-        slug_field='host_range',
-        queryset=HostRange.objects.all())
+    hosts = CustomJSONField(required=True)
     options = SourceOptionsSerializer(required=False, many=False)
     credentials = CredentialsField(
         many=True,
@@ -105,9 +82,6 @@ class SourceSerializer(NotEmptySerializer):
         model = Source
         fields = '__all__'
 
-    # Have to implement explicit create() and update() methods to
-    # allow creates/updates of nested HostRange field. See
-    # http://www.django-rest-framework.org/api-guide/relations/
     # pylint: disable=too-many-branches,too-many-statements
     @transaction.atomic
     def create(self, validated_data):
@@ -122,7 +96,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(error)
         source_type = validated_data.get('source_type')
         credentials = validated_data.pop('credentials')
-        hosts_data = validated_data.pop('hosts', None)
+        hosts_list = validated_data.pop('hosts', None)
         port = None
         if 'port' in validated_data:
             port = validated_data['port']
@@ -130,11 +104,6 @@ class SourceSerializer(NotEmptySerializer):
         options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
-            if not hosts_data:
-                error = {
-                    'hosts': [_(messages.NET_MIN_HOST)]
-                }
-                raise ValidationError(error)
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
@@ -143,17 +112,12 @@ class SourceSerializer(NotEmptySerializer):
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if port is None:
                 validated_data['port'] = 443
-            if not hosts_data:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_data and len(hosts_data) != 1:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_data and '[' in hosts_data[0]['host_range']:
+            elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -169,17 +133,12 @@ class SourceSerializer(NotEmptySerializer):
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             if port is None:
                 validated_data['port'] = 443
-            if not hosts_data:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_data and len(hosts_data) != 1:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_data and '[' in hosts_data[0]['host_range']:
+            elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -204,9 +163,7 @@ class SourceSerializer(NotEmptySerializer):
             options.save()
             source.options = options
 
-        for host_data in hosts_data:
-            HostRange.objects.create(source=source,
-                                     **host_data)
+        source.hosts = json.dumps(hosts_list)
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -231,7 +188,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(error)
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
-        hosts_data = validated_data.pop('hosts', None)
+        hosts_list = validated_data.pop('hosts', None)
         options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
@@ -239,17 +196,12 @@ class SourceSerializer(NotEmptySerializer):
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if not hosts_data and self.partial is False:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_data and len(hosts_data) != 1:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_data and '[' in hosts_data[0]['host_range']:
+            elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -263,17 +215,12 @@ class SourceSerializer(NotEmptySerializer):
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            if not hosts_data and self.partial is False:
+            if hosts_list and len(hosts_list) != 1:
                 error = {
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_data and len(hosts_data) != 1:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
-                raise ValidationError(error)
-            elif hosts_data and '[' in hosts_data[0]['host_range']:
+            elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -295,15 +242,9 @@ class SourceSerializer(NotEmptySerializer):
         # then we should already have raised a ValidationError before
         # this point, so it's safe to use hosts_data as an indicator
         # of whether to replace the hosts.
+        hosts_data = json.dumps(hosts_list)
         if hosts_data:
-            old_hosts = list(instance.hosts.all())
-            new_hosts = [
-                HostRange.objects.create(source=instance,
-                                         **host_data)
-                for host_data in hosts_data]
-            instance.hosts.set(new_hosts)
-            for host in old_hosts:
-                host.delete()
+            instance.hosts = hosts_data
 
         # credentials is safe to use as a flag for the same reason as
         # hosts_data above.
@@ -363,8 +304,17 @@ class SourceSerializer(NotEmptySerializer):
     @staticmethod
     def validate_hosts(hosts):
         """Make sure the hosts list is present."""
-        if not hosts:
+        hosts_list = json.loads(hosts)
+        if not isinstance(hosts_list, list):
+            raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
+
+        if not hosts_list:
             raise ValidationError(_(messages.SOURCE_HOSTS_CANNOT_BE_EMPTY))
+
+        for host_value in hosts_list:
+            if not isinstance(host_value, str):
+                raise ValidationError(
+                    _(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
@@ -398,9 +348,8 @@ class SourceSerializer(NotEmptySerializer):
 
         normalized_hosts = []
         host_errors = []
-        for host in hosts:
+        for host_range in hosts_list:
             result = None
-            host_range = host['host_range']
 
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
@@ -423,7 +372,7 @@ class SourceSerializer(NotEmptySerializer):
                 for reg in ip_regex_list:
                     match = re.match(reg, host_range)
                     if match and match.end() == len(host_range):
-                        result = host
+                        result = host_range
                         break
 
                 if result is None or is_likely_cidr:
@@ -432,9 +381,7 @@ class SourceSerializer(NotEmptySerializer):
                         try:
                             normalized_cidr = SourceSerializer \
                                 .cidr_to_ansible(host_range)
-                            normalized_cidr_host = {
-                                'host_range': normalized_cidr}
-                            result = normalized_cidr_host
+                            result = normalized_cidr
                         except ValidationError as validate_error:
                             result = validate_error
                     else:
@@ -442,11 +389,11 @@ class SourceSerializer(NotEmptySerializer):
                                         (host_range,))
                         result = ValidationError(err_message)
             else:
-                # Possibly a host addr
+                # Possibly a host_range addr
                 for reg in host_regex_list:
                     match = re.match(reg, host_range)
                     if match and match.end() == len(host_range):
-                        result = host
+                        result = host_range
                         break
                 if result is None:
                     err_message = _(messages.NET_INVALID_HOST % (host_range,))
@@ -458,7 +405,7 @@ class SourceSerializer(NotEmptySerializer):
                 normalized_hosts.append(result)
             else:
                 # This is an unexpected case. Allow/log for analysis
-                normalized_hosts.append(host)
+                normalized_hosts.append(host_range)
                 logging.warning('%s did not match a pattern or produce error',
                                 host_range)
         if len(host_errors) is 0:

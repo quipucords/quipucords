@@ -18,7 +18,6 @@ from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
                         Source,
                         ConnectionResults,
-                        HostRange,
                         ScanJob,
                         ScanOptions,
                         ScanTask)
@@ -134,11 +133,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.host = HostRange(host_range='1.2.3.4',
-                              source_id=self.source.id)
-        self.host.save()
-
-        self.source.hosts.add(self.host)
+        self.source.hosts = '["1.2.3.4"]'
+        self.source.save()
 
         self.scan_task = ScanTask(
             source=self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
