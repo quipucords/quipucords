@@ -365,5 +365,6 @@ class HostScannerTest(TestCase):
                          '../../../test_util/hang.py'))
         scanner.inspect_scan(
             self.host_list,
+            roles=['redhat_release'],
             base_ssh_executable=path,
             ssh_timeout='0.1s')

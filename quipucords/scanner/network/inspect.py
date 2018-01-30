@@ -30,6 +30,27 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # Timeout for individual tasks. Must match format in 'man timeout'.
 DEFAULT_TIMEOUT = '120s'
 
+DEFAULT_ROLES = [
+    'check_dependencies',
+    'connection',
+    'cpu',
+    'date',
+    'dmi',
+    'etc_release',
+    'file_contents',
+    'jboss_eap',
+    'jboss_brms',
+    'jboss_fuse_on_karaf',
+    'ifconfig',
+    'redhat_packages',
+    'redhat_release',
+    'subman',
+    'uname',
+    'virt',
+    'virt_what',
+    'host_done',
+]
+
 
 class ScannerException(Exception):
     """Exception for issues detected during scans."""
@@ -133,12 +154,14 @@ class InspectTaskRunner(ScanTaskRunner):
                 self.scan_task.systems_failed, ScanTask.FAILED
         return None, ScanTask.COMPLETED
 
-    # pylint: disable=too-many-locals
-    def inspect_scan(self, connected, base_ssh_executable=None,
+    # pylint: disable=too-many-locals,W0102
+    def inspect_scan(self, connected, roles=DEFAULT_ROLES,
+                     base_ssh_executable=None,
                      ssh_timeout=None):
         """Execute the host scan with the initialized source.
 
         :param connected: list of (host, credential) pairs to inspect
+        :param roles: list of roles to execute
         :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
             to Ansible.
@@ -147,26 +170,6 @@ class InspectTaskRunner(ScanTaskRunner):
         :returns: An array of dictionaries of facts
 
         """
-        roles = [
-            'check_dependencies',
-            'connection',
-            'cpu',
-            'date',
-            'dmi',
-            'etc_release',
-            'file_contents',
-            'jboss_eap',
-            'jboss_brms',
-            'jboss_fuse_on_karaf',
-            'ifconfig',
-            'redhat_packages',
-            'redhat_release',
-            'subman',
-            'uname',
-            'virt',
-            'virt_what',
-            'host_done',
-        ]
         playbook = {'name': 'scan systems for product fingerprint facts',
                     'hosts': 'all',
                     'gather_facts': False,
