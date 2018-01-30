@@ -47,6 +47,13 @@ class ScanStartCommand(CliCommand):
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
+        self.parser.add_argument('--disable-optional-products',
+                                 dest='disable_optional_products',
+                                 nargs='+',
+                                 choices=scan.OPTIONAL_PRODUCTS,
+                                 metavar='DISABLE_OPTIONAL_PRODUCTS',
+                                 help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
+                                 required=False)
         self.source_ids = []
 
     def _get_source_ids(self, source_names):
@@ -71,6 +78,22 @@ class ScanStartCommand(CliCommand):
                 not_found = True
         return not_found, source_ids
 
+    def _get_optional_products(self):
+        """Construct a dictionary based on the disable-optional-products args.
+
+        :returns: a dictionary representing the collection status of optional
+        products
+        """
+        optional_product_status = {}
+
+        if self.args.disable_optional_products:
+            for product in self.args.disable_optional_products:
+                optional_product_status[product] = False
+        else:
+            return None
+
+        return optional_product_status
+
     def _validate_args(self):
         CliCommand._validate_args(self)
         source_ids = []
@@ -90,9 +113,12 @@ class ScanStartCommand(CliCommand):
             'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {
-                'max_concurrency': self.args.max_concurrency
-            }
+                'max_concurrency': self.args.max_concurrency}
         }
+        disable_optional_products = self._get_optional_products()
+        if disable_optional_products is not None:
+            self.req_payload['options']['disable_optional_products']\
+                = disable_optional_products
 
     def _handle_response_success(self):
         json_data = self.response.json()

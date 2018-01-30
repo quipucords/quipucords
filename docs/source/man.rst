@@ -299,7 +299,7 @@ Use the ``qpc scan start`` command to run scans on one or more sources. This com
 
 **IMPORTANT:** If any ssh-agent connection is set up for a target host, that connection will be used as a fallback connection.
 
-**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]**
+**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
 ``--sources=source_list``
 
@@ -308,6 +308,10 @@ Use the ``qpc scan start`` command to run scans on one or more sources. This com
 ``--max-concurrency=concurrency``
 
   Contains the maximum number of parallel system scans. If this value is not provided, the default is ``50``.
+
+``--disable-optional-products=products_list``
+
+  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~

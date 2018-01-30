@@ -174,6 +174,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
+        extra_vars = self.scan_job.get_extra_vars()
         forks = self.scan_job.options.max_concurrency
 
         # Save counts
@@ -207,7 +208,8 @@ class InspectTaskRunner(ScanTaskRunner):
                         'gather_facts': False,
                         'roles': roles}
             result = run_playbook(
-                inventory_file, callback, playbook, forks=forks)
+                inventory_file, callback, playbook,
+                extra_vars, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
@@ -254,7 +256,7 @@ def construct_scan_inventory(hosts, connection_port, concurrency_count,
     :param concurrency_count: The number of concurrent scans
     :param ssh_executable: the ssh executable to use, or None for 'ssh'
     :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible invetory
+    :returns: A dictionary of the ansible inventory
     """
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,

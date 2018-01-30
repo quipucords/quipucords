@@ -217,7 +217,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred, connection_port)
+            connect(hosts, Mock(), cred,
+                    connection_port)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 

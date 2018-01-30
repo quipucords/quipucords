@@ -89,10 +89,12 @@ def write_inventory(inventory):
     return write_to_yaml(inventory)
 
 
-def create_ansible_objects(inventory_file, forks=50):
+def create_ansible_objects(inventory_file, extra_vars, forks=50):
     """Create the default ansible objects needed to run a playbook.
 
     :param inventory_file: The path to the inventory file
+    :param extra_vars: The dictionary containing
+           the collection status of the optional products.
     :param forks: number of forks to run with, default of 50
     :returns: tuple of (options, variable_manager, loader, inventory)
     """
@@ -109,26 +111,30 @@ def create_ansible_objects(inventory_file, forks=50):
     loader = DataLoader()
     loader.set_vault_password(settings.SECRET_KEY)
 
-    # create inventory and pass to var manager
+    # create inventory and extra vars and pass to var manager
     inventory = Inventory(loader=loader,
                           variable_manager=variable_manager,
                           host_list=inventory_file)
+    variable_manager.extra_vars = extra_vars
     variable_manager.set_inventory(inventory)
 
     return options, variable_manager, loader, inventory
 
 
-def run_playbook(inventory_file, callback, play, forks=50):
+def run_playbook(inventory_file, callback, play,
+                 extra_vars, forks=50):
     """Run an ansible playbook.
 
     :param inventory_file: The path to the inventory file
     :param callback: The callback handler
     :param play: The playbook dictionary to run
+    :param extra_vars: The dictionary containing
+           the collection status of the optional products.
     :param forks: number of forks to run with, default of 50
     :returns: The result of executing the play (return code)
     """
     options, variable_manager, loader, ansible_inventory = \
-        create_ansible_objects(inventory_file, forks)
+        create_ansible_objects(inventory_file, extra_vars, forks)
 
     playbook = Play().load(play,
                            variable_manager=variable_manager,

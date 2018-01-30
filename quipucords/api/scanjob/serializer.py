@@ -10,6 +10,7 @@
 #
 """Module for serializing all model object for database storage."""
 
+import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
@@ -18,7 +19,9 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         CharField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.serializer import (NotEmptySerializer,
+                                   ValidStringChoiceField,
+                                   CustomJSONField)
 from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 
@@ -27,12 +30,32 @@ class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
+    disable_optional_products = CustomJSONField(required=False)
 
     class Meta:
         """Metadata for serializer."""
 
         model = ScanOptions
-        fields = ['max_concurrency']
+        fields = ['max_concurrency',
+                  'disable_optional_products']
+
+    # pylint: disable=invalid-name
+    @staticmethod
+    def validate_disable_optional_products(disable_optional_products):
+        """Make sure that extra vars are a dictionary with boolean values."""
+        disable_optional_products = ScanJob.get_optional_products(
+            disable_optional_products)
+
+        if not isinstance(disable_optional_products, dict):
+            raise ValidationError(_(messages.SJ_EXTRA_VARS_DICT))
+        for key in disable_optional_products:
+            if not isinstance(disable_optional_products[key], bool):
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_BOOL))
+            elif key not in [ScanJob.JBOSS_EAP,
+                             ScanJob.JBOSS_BRMS,
+                             ScanJob.JBOSS_FUSE]:
+                raise ValidationError(_(messages.SJ_EXTRA_VARS_KEY))
+        return json.dumps(disable_optional_products)
 
 
 class TaskField(PrimaryKeyRelatedField):
@@ -68,7 +91,6 @@ class ScanJobSerializer(NotEmptySerializer):
         """Create a scan job."""
         options = validated_data.pop('options', None)
         scanjob = super().create(validated_data)
-
         if options:
             options = ScanOptions.objects.create(**options)
         else:

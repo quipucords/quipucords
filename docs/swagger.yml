@@ -924,6 +924,18 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The total number of systems that failed during the scan task."
+  DisableOptionalProducts:
+    type: "object"
+    properties:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
   ScanOptions:
     type: "object"
     properties:
@@ -931,6 +943,9 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The maximum concurrent host scans. default is 50."
+      disabled_optional_products:
+        $ref: "#definitions/DisableOptionalProducts"
+        description: "The dictionary representing the inspection status of optional products."
   ScanJob:
     type: "object"
     properties:
