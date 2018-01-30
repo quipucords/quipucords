@@ -119,12 +119,39 @@ class ScanStartCliTests(unittest.TestCase):
         url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
         url_post = BASE_URL + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+                        'credentials':[{'id': 2, 'name': 'cred2'}],
+                        'disable-optional-products': {'jboss-eap': False,
+                                                      'jboss-fuse': False,
+                                                      'jboss-brms': False}}]
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'], max_concurrency=4)
+            args = Namespace(sources=['source1'], max_concurrency=4,
+                             disable_optional_products={'jboss-eap': False,
+                                                        'jboss-fuse': False,
+                                                        'jboss-brms': False})
+            with redirect_stdout(scan_out):
+                ssc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_STARTED % '1' + '\n')
+
+    def test_disable_optional_products(self):
+        """Testing that the disable-optional-products flag works correctly."""
+        scan_out = StringIO()
+        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_post = BASE_URL + SCAN_URI
+        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                        'credentials':[{'id': 2, 'name': 'cred2'}],
+                        'disable_optional_products': ['jboss-fuse']}]
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.post(url_post, status_code=201, json={'id': 1})
+            ssc = ScanStartCommand(SUBPARSER)
+            args = Namespace(sources=['source1'], max_concurrency=4,
+                             disable_optional_products={'jboss-eap': True,
+                                                        'jboss-fuse': False,
+                                                        'jboss-brms': True})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

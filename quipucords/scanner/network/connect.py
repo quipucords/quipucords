@@ -183,6 +183,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
+# pylint: disable=too-many-arguments
 def connect(hosts, callback, credential, connection_port, forks=50):
     """Attempt to connect to hosts using the given credential.
 
@@ -196,6 +197,7 @@ def connect(hosts, callback, credential, connection_port, forks=50):
     """
     inventory = construct_connect_inventory(hosts, credential, connection_port)
     inventory_file = write_inventory(inventory)
+    extra_vars = {}
 
     playbook = {'name': 'discovery play',
                 'hosts': 'all',
@@ -204,7 +206,8 @@ def connect(hosts, callback, credential, connection_port, forks=50):
                                       'args': parse_kv('echo "Hello"')}}]}
 
     _handle_ssh_passphrase(credential)
-    result = run_playbook(inventory_file, callback, playbook, forks=forks)
+    result = run_playbook(inventory_file, callback, playbook,
+                          extra_vars, forks=forks)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
         raise _construct_error(result)
