@@ -174,7 +174,6 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
-        connected, failed, completed = self.obtain_discovery_data()
         extra_vars = self.scan_job.get_extra_vars()
         forks = self.scan_job.options.max_concurrency
 
