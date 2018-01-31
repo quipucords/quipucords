@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -19,7 +19,7 @@ import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
                       NETWORK_CRED_TYPE,
@@ -32,15 +32,13 @@ TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class CredentialEditCliTests(unittest.TestCase):
     """Class for testing the credential edit commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -88,7 +86,7 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_cred_none(self):
         """Testing the edit credential command for none existing credential."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=cred_none'
+        url = get_server_location() + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             aec = CredEditCommand(SUBPARSER)
@@ -105,7 +103,7 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_cred_ssl_err(self):
         """Testing the edit credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             aec = CredEditCommand(SUBPARSER)
@@ -120,7 +118,7 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_cred_conn_err(self):
         """Testing the edit credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             aec = CredEditCommand(SUBPARSER)
@@ -135,8 +133,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_host_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
                  'username': 'root',
                  'password': '********'}]
@@ -155,8 +153,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_partial_edit_host_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
                  'username': 'root'}]
         with requests_mock.Mocker() as mocker:
@@ -174,8 +172,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_vcenter_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1',
                  'cred_type': VCENTER_CRED_TYPE, 'username': 'root',
                  'password': '********'}]
@@ -193,8 +191,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_partial_edit_vcenter_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1',
                  'cred_type': VCENTER_CRED_TYPE,
                  'password': '********'}]
@@ -212,7 +210,7 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_cred_get_error(self):
         """Testing the edit credential command server error occurs."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
+        url_get = get_server_location() + CREDENTIAL_URI
         data = [{'id': 1, 'name': 'cred1', 'username': 'root',
                  'password': '********'}]
         with requests_mock.Mocker() as mocker:
@@ -229,8 +227,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_edit_sat_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1',
                  'cred_type': SATELLITE_CRED_TYPE, 'username': 'root',
                  'password': '********'}]
@@ -248,8 +246,8 @@ class CredentialEditCliTests(unittest.TestCase):
     def test_partial_edit_sat_cred(self):
         """Testing the edit credential command successfully."""
         cred_out = StringIO()
-        url_get = BASE_URL + CREDENTIAL_URI
-        url_patch = BASE_URL + CREDENTIAL_URI + '1/'
+        url_get = get_server_location() + CREDENTIAL_URI
+        url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         data = [{'id': 1, 'name': 'cred1',
                  'cred_type': SATELLITE_CRED_TYPE,
                  'password': '********'}]
