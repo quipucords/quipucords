@@ -10,7 +10,7 @@
 """Initial processing of the shell output from the jboss_fuse_on_karaf role."""
 
 import logging
-from scanner.network.processing import process
+from scanner.network.processing import process, util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -63,44 +63,20 @@ class ProcessLocateKaraf(process.Processor):
         return output['stdout_lines']
 
 
-class InitLineFinder(process.Processor):
-    """Process the output of an init system.
-
-    For both chkconfig and systemctl list-unit-files, we look for
-    lines where the first (whitespace-delineated) element contains
-    'jboss' or 'fuse'.
-    """
-
-    # This same code is in eap but I wasn't sure how to make the keyword an
-    # argument since it is in a class (without doing an __init__)
-    KEY = None
-
-    @staticmethod
-    def process(output):
-        """Find lines where the first element contains 'jboss' or 'fuse'."""
-        matches = []
-
-        for line in output['stdout_lines']:
-            if not line:
-                continue
-
-            start = line.split()[0]
-            if 'jboss' in start or 'fuse' in start:
-                matches.append(line.strip())
-
-        return matches
-
-
-class ProcessJbossFuseChkconfig(InitLineFinder):
+class ProcessJbossFuseChkconfig(util.InitLineFinder):
     """Process the output of 'chkconfig'."""
 
+    DEPS = ['have_chkconfig']
     KEY = 'jboss_fuse_chkconfig'
+    KEYWORDS = ['jboss', 'fuse']
 
 
-class ProcessJbossFuseSystemctl(InitLineFinder):
+class ProcessJbossFuseSystemctl(util.InitLineFinder):
     """Process the output of 'systemctl list-unit-files'."""
 
+    DEPS = ['have_systemctl']
     KEY = 'jboss_fuse_systemctl_unit_files'
+    KEYWORDS = ['jboss', 'fuse']
 
 
 class ProcessKarafHomeBinFuse(process.Processor):

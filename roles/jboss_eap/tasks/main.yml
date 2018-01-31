@@ -123,11 +123,11 @@
       register: jboss_eap_systemctl_unit_files
       ignore_errors: yes
       become: true
-      when: 'jboss_eap'
+      when: 'jboss_eap and have_systemctl'
 
     - name: look for jboss in chkconfig
-      raw: chkconfig
+      raw: chkconfig --list
       register: jboss_eap_chkconfig
       ignore_errors: yes
       become: true
-      when: 'jboss_eap'
+      when: 'jboss_eap and have_chkconfig'
