@@ -48,11 +48,12 @@ def is_ansible_task_result(value):
              RESULTS in value))
 
 
-def process(facts):
+def process(facts, host):
     """Do initial processing of the given facts.
 
     :param facts: a dictionary of key, value pairs, where values are
       Ansible result dictionaries.
+    :param host: the host the facts are from. Used for error messages.
 
     :returns: a dictionary of key, value pairs, where the values are
       strings. They will either be JSON-encoded data, or the empty
@@ -74,8 +75,8 @@ def process(facts):
                 if dep not in facts or \
                    not facts[dep] or \
                    isinstance(facts[dep], Exception):
-                    logger.error('Fact %s missing dependency %s',
-                                 key, dep)
+                    logger.debug('%s: fact %s missing dependency %s',
+                                 host, key, dep)
                     result[key] = NO_DATA
                     raise StopIteration()
         except StopIteration:
@@ -84,8 +85,8 @@ def process(facts):
         # Don't touch things that are not standard Ansible results,
         # because we don't know what format they will have.
         if not is_ansible_task_result(value):
-            logger.error('Value %s needs postprocessing but is not an '
-                         'Ansible result', value)
+            logger.error('%s: value %s needs postprocessing but is not an '
+                         'Ansible result', host, value)
             # We don't know what data is supposed to go here, because
             # we can't run the postprocessor. Leaving the existing
             # data would cause database corruption and maybe trigger
@@ -94,20 +95,21 @@ def process(facts):
             continue
 
         if value.get(SKIPPED, False):
-            logger.error('Fact %s skipped, no results', key)
+            logger.debug('%s: fact %s skipped, no results', host, key)
             result[key] = NO_DATA
             continue
 
-        if value.get(RC, 0) and \
-           not getattr(processor, RETURN_CODE_ANY, False):
-            logger.error('Remote command returned %s', value['stdout'])
+        return_code = value.get(RC, 0)
+        if return_code and not getattr(processor, RETURN_CODE_ANY, False):
+            logger.error('%s: remote command %s exited with %s: %s',
+                         host, key, return_code, value['stdout'])
             result[key] = NO_DATA
             continue
 
         try:
             processor_out = processor.process(value)
         except Exception as ex:  # pylint: disable=broad-except
-            logger.error('Processor returned %s', str(ex))
+            logger.error('%s: processor returned %s', host, str(ex))
             result[key] = NO_DATA
             continue
 
