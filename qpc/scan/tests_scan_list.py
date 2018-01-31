@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
 from qpc.scan.list import ScanListCommand
@@ -26,15 +26,13 @@ from qpc import messages
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class ScanListCliTests(unittest.TestCase):
     """Class for testing the scan list commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -48,7 +46,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_scan_ssl_err(self):
         """Testing the list scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             slc = ScanListCommand(SUBPARSER)
@@ -61,7 +59,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_scan_conn_err(self):
         """Testing the list scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             slc = ScanListCommand(SUBPARSER)
@@ -75,7 +73,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_scan_internal_err(self):
         """Testing the list scan command with an internal error."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             slc = ScanListCommand(SUBPARSER)
@@ -88,7 +86,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_scan_empty(self):
         """Testing the list scan command successfully with empty data."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             slc = ScanListCommand(SUBPARSER)
@@ -101,7 +99,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_scan_data(self):
         """Testing the list scan command successfully with stubbed data."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         scan_entry = {'id': 1,
                       'scan_type': 'inspect',
                       'source': {
@@ -124,7 +122,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_filter_type(self):
         """Testing the list scan with filter by type."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         scan_entry = {'id': 1,
                       'scan_type': 'inspect',
                       'source': {
@@ -147,7 +145,7 @@ class ScanListCliTests(unittest.TestCase):
     def test_list_filter_status(self):
         """Testing the list scan with filter by state."""
         scan_out = StringIO()
-        url = BASE_URL + SCAN_URI
+        url = get_server_location() + SCAN_URI
         scan_entry = {'id': 1,
                       'scan_type': 'inspect',
                       'source': {

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,7 +18,7 @@ import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
 from qpc.source import SOURCE_URI
@@ -28,15 +28,13 @@ from qpc.utils import get_server_location, write_server_config
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class ScanStartCliTests(unittest.TestCase):
     """Class for testing the scan start commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -56,7 +54,7 @@ class ScanStartCliTests(unittest.TestCase):
     def test_scan_source_none(self):
         """Testing the scan start command for none existing source."""
         scan_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source_none'
+        url = get_server_location() + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             ssc = ScanStartCommand(SUBPARSER)
@@ -71,7 +69,7 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan_ssl_err(self):
         """Testing the start scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source1'
+        url = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             ssc = ScanStartCommand(SUBPARSER)
@@ -84,7 +82,7 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan_conn_err(self):
         """Testing the start scan command with a connection error."""
         scan_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source1'
+        url = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             ssc = ScanStartCommand(SUBPARSER)
@@ -98,8 +96,8 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan_bad_resp(self):
         """Testing the start scan command successfully."""
         scan_out = StringIO()
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        url_post = BASE_URL + SCAN_URI
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_post = get_server_location() + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
@@ -116,8 +114,8 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_scan(self):
         """Testing the start scan command successfully."""
         scan_out = StringIO()
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        url_post = BASE_URL + SCAN_URI
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_post = get_server_location() + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}],
                         'disable-optional-products': {'jboss-eap': False,
@@ -139,8 +137,8 @@ class ScanStartCliTests(unittest.TestCase):
     def test_disable_optional_products(self):
         """Testing that the disable-optional-products flag works correctly."""
         scan_out = StringIO()
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        url_post = BASE_URL + SCAN_URI
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_post = get_server_location() + SCAN_URI
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}],
                         'disable_optional_products': ['jboss-fuse']}]

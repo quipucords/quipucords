@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import CREDENTIAL_URI
 from qpc.cred.show import CredShowCommand
@@ -25,15 +25,13 @@ from qpc.utils import get_server_location, write_server_config
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class CredentialShowCliTests(unittest.TestCase):
     """Class for testing the credential show commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -47,7 +45,7 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_ssl_err(self):
         """Testing the show credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             asc = CredShowCommand(SUBPARSER)
@@ -60,7 +58,7 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_conn_err(self):
         """Testing the show credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             asc = CredShowCommand(SUBPARSER)
@@ -73,7 +71,7 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_internal_err(self):
         """Testing the show credential command with an internal error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             asc = CredShowCommand(SUBPARSER)
@@ -86,7 +84,7 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_empty(self):
         """Testing the show credential command successfully with empty data."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             asc = CredShowCommand(SUBPARSER)
@@ -100,7 +98,7 @@ class CredentialShowCliTests(unittest.TestCase):
     def test_show_cred_data(self):
         """Testing the show credential command with stubbed data."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         credential_entry = {'id': 1, 'name': 'cred1', 'username': 'root',
                             'password': '********'}
         data = [credential_entry]

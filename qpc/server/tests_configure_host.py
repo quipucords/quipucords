@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,6 +16,8 @@ from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr
 from qpc.utils import read_server_config, write_server_config
 
+DEFAULT_PORT = 443
+
 
 class ConfigureHostTests(unittest.TestCase):
     """Class for testing the server host configuration."""
@@ -31,12 +33,12 @@ class ConfigureHostTests(unittest.TestCase):
         """Remove test case setup."""
         # Reset server config to default ip/port
         sys.argv = ['/bin/qpc', 'server', 'config',
-                    '--host', '127.0.0.1', '--port', '8000']
+                    '--host', '127.0.0.1', '--port', '443']
 
         CLI().main()
         config = read_server_config()
         self.assertEqual(config['host'], '127.0.0.1')
-        self.assertEqual(config['port'], 8000)
+        self.assertEqual(config['port'], 443)
 
         # Restore stderr
         sys.stderr = self.orig_stderr
@@ -70,7 +72,7 @@ class ConfigureHostTests(unittest.TestCase):
         CLI().main()
         config = read_server_config()
         self.assertEqual(config['host'], '127.0.0.1')
-        self.assertEqual(config['port'], 8000)
+        self.assertEqual(config['port'], 443)
 
     def test_invalid_configuration(self):
         """Test reading bad JSON on cli start."""
@@ -81,7 +83,7 @@ class ConfigureHostTests(unittest.TestCase):
         CLI().main()
         config = read_server_config()
         self.assertEqual(config['host'], '127.0.0.1')
-        self.assertEqual(config['port'], 8000)
+        self.assertEqual(config['port'], 443)
 
     def test_run_command_no_config(self):
         """Test running command without config."""
