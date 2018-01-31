@@ -12,7 +12,8 @@ import ToastNotificationsList from './toastNotificationList/toastNotificatinsLis
 import VerticalNavigation from './verticalNavigation/verticalNavigation';
 import ConfirmationModal from './confirmationModal/confirmationModal';
 
-import logo from '../logo.svg';
+import logo from '../styles/images/Red_Hat_logo.svg';
+import productTitle from '../styles/images/title.svg';
 
 class App extends React.Component {
   constructor() {
@@ -33,12 +34,20 @@ class App extends React.Component {
         key="aboutModal"
         show={showAbout}
         onHide={closeAbout}
-        productTitle="Red Hat Entitlements Reporting"
+        productTitle={
+          <img src={productTitle} alt="Red Hat Entitlements Reporting" />
+        }
         logo={logo}
         altLogo="RH ER"
         trademarkText="Copyright (c) 2018 Red Hat Inc."
       >
         <AboutModal.Versions>
+          <AboutModal.VersionItem label="Label" versionText="Version" />
+          <AboutModal.VersionItem label="Label" versionText="Version" />
+          <AboutModal.VersionItem label="Label" versionText="Version" />
+          <AboutModal.VersionItem label="Label" versionText="Version" />
+          <AboutModal.VersionItem label="Label" versionText="Version" />
+          <AboutModal.VersionItem label="Label" versionText="Version" />
           <AboutModal.VersionItem label="Label" versionText="Version" />
         </AboutModal.Versions>
       </AboutModal>,
