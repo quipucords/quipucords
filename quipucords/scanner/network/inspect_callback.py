@@ -144,7 +144,7 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def _finalize_host(self, host):
         facts = self._ansible_facts.get(host, {})
-        results = process.process(facts)
+        results = process.process(facts, host)
 
         logger.debug('host scan complete for %s with facts %s',
                      host, results)
