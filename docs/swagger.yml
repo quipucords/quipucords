@@ -944,8 +944,7 @@ definitions:
         format: "int64"
         description: "The maximum concurrent host scans. default is 50."
       disabled_optional_products:
-        $ref: "#definitions/DisableOptionalProducts"
-        description: "The dictionary representing the inspection status of optional products."
+        $ref: "#/definitions/DisableOptionalProducts"
   ScanJob:
     type: "object"
     properties:
