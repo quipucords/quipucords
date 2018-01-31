@@ -258,7 +258,7 @@ class Sources extends React.Component {
     if (loadError) {
       return (
         <EmptyState>
-          <Alert type="danger">
+          <Alert type="error">
             <span>Error retrieving sources: {errorMessage}</span>
           </Alert>
         </EmptyState>

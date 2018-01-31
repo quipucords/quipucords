@@ -17,7 +17,7 @@ mockApi()
 
   if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "Starting API..."
-    docker run -d --rm -p $PORT:8000 -v "$FILE:/data/swagger.yaml" --name quipucords-mock $CONTAINER >/dev/null
+    docker run -d --rm -p $PORT:8000 -v "$FILE:/data/swagger.yaml" --name quipucords-mock $CONTAINER 
   fi
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then

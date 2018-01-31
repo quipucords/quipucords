@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import 'patternfly/dist/css/patternfly.css';
-import 'patternfly/dist/css/patternfly-additions.css';
+import 'rcue/dist/css/rcue.css';
+import 'rcue/dist/css/rcue-additions.css';
 import './styles/css/entitlements.css';
 
 import App from './components/app';

@@ -3,6 +3,7 @@ import Store from '../../redux/store';
 
 import { ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
 import { aboutTypes, navigationBarTypes } from '../../redux/constants';
+import productTitle from '../../styles/images/title.svg';
 
 class NavBar extends Component {
   render() {
@@ -26,13 +27,8 @@ class NavBar extends Component {
           </button>
           <span className="navbar-brand">
             <img
-              className="navbar-brand-icon"
-              src="/assets/img/logo.svg"
-              alt=""
-            />
-            <img
               className="navbar-brand-name navbar-brand-txt"
-              src="/public/assets/img/brand-alt.svg"
+              src={productTitle}
               alt="Red Hat Entitlements Reporting"
             />
           </span>

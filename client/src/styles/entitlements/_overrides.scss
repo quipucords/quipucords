@@ -11,7 +11,12 @@ button.unavailable:hover, li.unavailable > a:hover {
   opacity: 0;
 }
 
-.navbar-brand .navbar-brand-icon, .modal-dialog .modal-footer > img {
-  height: 35px;
-}
+.about-modal-pf {
+  background-color: #1a1a1a;
+  background-image: url('/assets/img/About-Modal-background.png');
+  background-size: 50% auto;
 
+  .modal-footer > img {
+    height: 28px;
+  }
+}
