@@ -17,7 +17,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         IntegerField,
                                         CharField,
-                                        TimeField)
+                                        DateTimeField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
@@ -80,8 +80,8 @@ class ScanJobSerializer(NotEmptySerializer):
     tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)
-    start_time = TimeField(required=False)
-    end_time = TimeField(required=False)
+    start_time = DateTimeField(required=False, read_only=True)
+    end_time = DateTimeField(required=False, read_only=True)
 
     class Meta:
         """Metadata for serializer."""

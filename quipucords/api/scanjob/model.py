@@ -12,6 +12,7 @@
 
 These models are used in the REST definitions.
 """
+from datetime import datetime
 import logging
 import json
 from django.utils.translation import ugettext as _
@@ -70,8 +71,8 @@ class ScanJob(models.Model):
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
     fact_collection_id = models.IntegerField(null=True)
-    start_time = models.TimeField(null=True)
-    end_time = models.TimeField(null=True)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -168,6 +169,7 @@ class ScanJob(models.Model):
 
         Change job state from PENDING TO RUNNING.
         """
+        self.start_time = datetime.utcnow()
         target_status = ScanTask.RUNNING
         has_error = self.validate_status_change(
             target_status, [ScanTask.PENDING])
@@ -233,6 +235,7 @@ class ScanJob(models.Model):
         Change job state from CREATED, PENDING, RUNNING, or
         PAUSED to CANCELED.
         """
+        self.end_time = datetime.utcnow()
         target_status = ScanTask.CANCELED
         has_error = self.validate_status_change(target_status,
                                                 [ScanTask.CREATED,
@@ -260,6 +263,7 @@ class ScanJob(models.Model):
 
         Change job state from RUNNING TO COMPLETE.
         """
+        self.end_time = datetime.utcnow()
         target_status = ScanTask.COMPLETED
         has_error = self.validate_status_change(target_status,
                                                 [ScanTask.RUNNING])
@@ -276,6 +280,7 @@ class ScanJob(models.Model):
         Change job state from RUNNING TO COMPLETE.
         :param message: The error message associated with failure
         """
+        self.end_time = datetime.utcnow()
         target_status = ScanTask.FAILED
         has_error = self.validate_status_change(target_status,
                                                 [ScanTask.RUNNING])

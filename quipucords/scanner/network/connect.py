@@ -9,9 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for network connection discovery."""
-import datetime
 import logging
-from pytz import timezone
 import pexpect
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -131,11 +129,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.conn_results = conn_results
         self.scan_task = scan_task
-        self.timezone = timezone('EST')
 
     def run(self):
         """Scan network range ang attempt connections."""
-        self.scan_task.start_time = datetime.datetime.now(self.timezone).time()
         logger.info('Connect scan task started for %s.', self.scan_task)
 
         result_store = ConnectResultStore(self.scan_task, self.conn_results)
@@ -166,8 +162,6 @@ class ConnectTaskRunner(ScanTaskRunner):
             except AnsibleError as ansible_error:
                 error_message = 'Connect scan task failed for %s. %s' %\
                     (self.scan_task, ansible_error)
-                self.scan_task.end_time = datetime.datetime.now(
-                    self.timezone).time()
                 return error_message, ScanTask.FAILED
 
             remaining_hosts = result_store.remaining_hosts()
@@ -187,7 +181,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         # Clear cache as results changed
         self.result = None
 
-        self.scan_task.end_time = datetime.datetime.now(self.timezone).time()
         return None, ScanTask.COMPLETED
 
 

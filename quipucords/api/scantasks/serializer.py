@@ -16,7 +16,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ChoiceField,
                                         IntegerField,
                                         CharField,
-                                        TimeField)
+                                        DateTimeField)
 from api.models import Source, ScanTask
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
@@ -56,8 +56,8 @@ class ScanTaskSerializer(NotEmptySerializer):
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
-    start_time = TimeField(required=False)
-    end_time = TimeField(required=False)
+    start_time = DateTimeField(required=False, read_only=True)
+    end_time = DateTimeField(required=False, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
