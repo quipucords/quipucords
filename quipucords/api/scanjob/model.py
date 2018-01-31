@@ -70,6 +70,8 @@ class ScanJob(models.Model):
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
     fact_collection_id = models.IntegerField(null=True)
+    start_time = models.TimeField(null=True)
+    end_time = models.TimeField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -79,13 +81,17 @@ class ScanJob(models.Model):
             'status:{}, '\
             'tasks: {}, '\
             'options: {}, '\
-            'fact_collection_id: {}'.format(self.id,
-                                            self.sources,
-                                            self.scan_type,
-                                            self.status,
-                                            self.tasks,
-                                            self.options,
-                                            self.fact_collection_id) + '}'
+            'fact_collection_id: {}, '\
+            'start_time: {}, '\
+            'end_time: {} '.format(self.id,
+                                   self.sources,
+                                   self.scan_type,
+                                   self.status,
+                                   self.tasks,
+                                   self.options,
+                                   self.fact_collection_id,
+                                   self.start_time,
+                                   self.end_time) + '}'
 
     class Meta:
         """Metadata for model."""

@@ -63,6 +63,8 @@ class ScanTask(models.Model):
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
     sequence_number = models.PositiveIntegerField(null=True)
+    start_time = models.TimeField(null=True)
+    end_time = models.TimeField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -73,14 +75,18 @@ class ScanTask(models.Model):
             'sequence_number:{}, '\
             'systems_count: {}, '\
             'systems_scanned: {}, '\
-            'systems_failed: {}, '.format(self.id,
-                                          self.scan_type,
-                                          self.status,
-                                          self.source,
-                                          self.sequence_number,
-                                          self.systems_count,
-                                          self.systems_scanned,
-                                          self.systems_failed) + '}'
+            'systems_failed: {}, '\
+            'start_time: {} '\
+            'end_time: {} '.format(self.id,
+                                   self.scan_type,
+                                   self.status,
+                                   self.source,
+                                   self.sequence_number,
+                                   self.systems_count,
+                                   self.systems_scanned,
+                                   self.systems_failed,
+                                   self.start_time,
+                                   self.end_time) + '}'
 
     class Meta:
         """Metadata for model."""

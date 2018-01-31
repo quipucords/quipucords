@@ -9,8 +9,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for network connection discovery."""
+import datetime
 import logging
 import os.path
+from pytz import timezone
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.credential.serializer import CredentialSerializer
@@ -84,6 +86,7 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.inspect_results = inspect_results
         self.connect_scan_task = None
+        self.timezone = timezone('EST')
 
     def run(self):
         """Scan target systems to collect facts.
@@ -94,6 +97,7 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
+        self.scan_job.start_time = datetime.datetime.now(self.timezone).time()
         logger.info('Inspect scan task started for task: %s.',
                     self.scan_task.id)
 
@@ -101,6 +105,8 @@ class InspectTaskRunner(ScanTaskRunner):
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task with id %d failed.' %\
                 self.connect_scan_task.id
+            self.scan_job.end_time = datetime.datetime.now(
+                self.timezone).time()
             return error_message, ScanTask.FAILED
 
         try:
@@ -129,6 +135,8 @@ class InspectTaskRunner(ScanTaskRunner):
             if temp_facts is None or fact_size == 0:
                 msg = 'SystemFacts set is empty.  '\
                     'No results will be reported to fact endpoint.'
+                self.scan_job.end_time = datetime.datetime.now(
+                    self.timezone).time()
                 return msg, ScanTask.FAILED
 
             # Clear cache as results changed
@@ -136,17 +144,25 @@ class InspectTaskRunner(ScanTaskRunner):
 
             logger.info('Inspect scan task %s completed.',
                         self.scan_task.id)
+            self.scan_job.end_time = datetime.datetime.now(
+                self.timezone).time()
         except AnsibleError as ansible_error:
             error_message = 'Scan task encountered error: %s' % \
                 ansible_error
+            self.scan_job.end_time = datetime.datetime.now(
+                self.timezone).time()
             return error_message, ScanTask.FAILED
         except AssertionError as assertion_error:
             error_message = 'Scan task encountered error: %s' % \
                 assertion_error
+            self.scan_job.end_time = datetime.datetime.now(
+                self.timezone).time()
             return error_message, ScanTask.FAILED
         except ScannerException as scan_error:
             error_message = 'Scan task encountered error: %s' % \
                 scan_error
+            self.scan_job.end_time = datetime.datetime.now(
+                self.timezone).time()
             return error_message, ScanTask.FAILED
 
         if self.scan_task.systems_failed > 0:

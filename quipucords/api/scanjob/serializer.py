@@ -16,7 +16,8 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         IntegerField,
-                                        CharField)
+                                        CharField,
+                                        TimeField)
 from api.models import Source, ScanTask, ScanJob, ScanOptions
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
@@ -79,6 +80,8 @@ class ScanJobSerializer(NotEmptySerializer):
     tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)
+    start_time = TimeField(required=False)
+    end_time = TimeField(required=False)
 
     class Meta:
         """Metadata for serializer."""
