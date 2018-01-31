@@ -80,14 +80,14 @@
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
     - name: look for fuse systemd service
-      raw: systemctl list-unit-files | grep fuse
+      raw: systemctl list-unit-files --no-pager
       register: jboss_fuse_systemctl_unit_files
       ignore_errors: yes
       become: true
       when: 'jboss_fuse'
 
     - name: look for fuse in chkconfig
-      raw: chkconfig 2> /dev/null | grep fuse
+      raw: chkconfig --list
       register: jboss_fuse_chkconfig
       ignore_errors: yes
       become: true
