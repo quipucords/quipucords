@@ -10,7 +10,7 @@
 """Initial processing of raw shell output from Ansible commands."""
 
 import logging
-from scanner.network.processing import process
+from scanner.network.processing import process, util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -169,16 +169,20 @@ class InitLineFinder(process.Processor):
         return matches
 
 
-class ProcessJbossEapChkconfig(InitLineFinder):
+class ProcessJbossEapChkconfig(util.InitLineFinder):
     """Process the output of 'chkconfig'."""
 
+    DEPS = ['have_chkconfig']
     KEY = 'jboss_eap_chkconfig'
+    KEYWORDS = ['jboss', 'eap']
 
 
 class ProcessJbossEapSystemctl(InitLineFinder):
     """Process the output of 'systemctl list-unit-files'."""
 
+    DEPS = ['have_systemctl']
     KEY = 'jboss_eap_systemctl_unit_files'
+    KEYWORDS = ['jboss', 'eap']
 
 
 class IndicatorFileFinder(process.Processor):

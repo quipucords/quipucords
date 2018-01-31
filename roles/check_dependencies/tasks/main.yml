@@ -84,23 +84,23 @@
   set_fact:
     have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 }}"
 
-- name: gather internal_have_systemctl
+- name: gather internal_have_systemctl_cmd
   raw: command -v systemctl
-  register: internal_have_systemctl
+  register: internal_have_systemctl_cmd
   ignore_errors: yes
 
-- name: set internal_have_systemctl
+- name: set have_systemctl
   set_fact:
-    internal_have_systemctl: "{{ internal_have_systemctl.get('rc') == 0 }}"
+    have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
 
-- name: gather internal_have_chkconfig
+- name: gather internal_have_chkconfig_cmd
   raw: command -v chkconfig
-  register: internal_have_chkconfig
+  register: internal_have_chkconfig_cmd
   ignore_errors: yes
 
-- name: set internal_have_chkconfig
+- name: set have_chkconfig
   set_fact:
-    internal_have_chkconfig: "{{ internal_have_chkconfig.get('rc') == 0 }}"
+    have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
 
 - name: gather internal_have_ifconfig_cmd
   raw: command -v ifconfig
