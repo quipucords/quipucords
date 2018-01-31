@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -19,7 +19,7 @@ import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.utils import read_in_file
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import CREDENTIAL_URI
@@ -31,15 +31,13 @@ TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class SourceEditCliTests(unittest.TestCase):
     """Class for testing the source edit commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -86,7 +84,7 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_none(self):
         """Testing the edit cred command for none existing cred."""
         source_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source_none'
+        url = get_server_location() + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             aec = SourceEditCommand(SUBPARSER)
@@ -102,7 +100,7 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_ssl_err(self):
         """Testing the edit source command with a connection error."""
         source_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source1'
+        url = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             aec = SourceEditCommand(SUBPARSER)
@@ -116,7 +114,7 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_conn_err(self):
         """Testing the edit source command with a connection error."""
         source_out = StringIO()
-        url = BASE_URL + SOURCE_URI + '?name=source1'
+        url = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             aec = SourceEditCommand(SUBPARSER)
@@ -131,9 +129,10 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_net_source(self):
         """Testing the edit network source command successfully."""
         source_out = StringIO()
-        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1'
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        url_patch = BASE_URL + SOURCE_URI + '1/'
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_patch = get_server_location() + SOURCE_URI + '1/'
         cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
@@ -153,9 +152,10 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_vc_source(self):
         """Testing the edit vcenter source command successfully."""
         source_out = StringIO()
-        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1'
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
-        url_patch = BASE_URL + SOURCE_URI + '1/'
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_patch = get_server_location() + SOURCE_URI + '1/'
         cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
@@ -175,7 +175,7 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_no_val(self):
         """Testing the edit source command with source doesn't exist."""
         source_out = StringIO()
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=500, json=[])
             aec = SourceEditCommand(SUBPARSER)
@@ -190,8 +190,9 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_cred_nf(self):
         """Testing the edit source command where cred is not found."""
         source_out = StringIO()
-        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1%2Ccred2'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
                       'password': '********'}]
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
@@ -212,8 +213,9 @@ class SourceEditCliTests(unittest.TestCase):
     def test_edit_source_cred_err(self):
         """Testing the edit source command where cred request hits error."""
         source_out = StringIO()
-        url_get_cred = BASE_URL + CREDENTIAL_URI + '?name=credential1%2Ccred2'
-        url_get_source = BASE_URL + SOURCE_URI + '?name=source1'
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1%2Ccred2'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:

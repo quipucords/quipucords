@@ -14,6 +14,9 @@ import contextlib
 import sys
 
 
+DEFAULT_CONFIG = {'host': '127.0.0.1', 'port': 8000, 'use_http': True}
+
+
 # pylint: disable=too-few-public-methods
 class HushUpStderr(object):
     """Class used to quiet standard error output."""

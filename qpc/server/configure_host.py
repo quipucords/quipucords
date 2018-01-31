@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,6 +12,7 @@
 """ConfigureHostCommand is used to set target host and port server."""
 
 from __future__ import print_function
+from argparse import SUPPRESS
 from qpc.clicommand import CliCommand
 import qpc.server as config
 from qpc.source.utils import validate_port
@@ -41,11 +42,21 @@ class ConfigureHostCommand(CliCommand):
                                  help=_(messages.SERVER_CONFIG_HOST_HELP),
                                  required=True)
         self.parser.add_argument('--port', dest='port', metavar='PORT',
-                                 type=validate_port, default=8000,
+                                 type=validate_port, default=443,
                                  help=_(messages.SERVER_CONFIG_PORT_HELP),
                                  required=False)
+        self.parser.add_argument('--ssl-verify', dest='ssl_verify',
+                                 metavar='CERT_PATH',
+                                 help=_(messages.SERVER_CONFIG_SSL_CERT_HELP),
+                                 required=False)
+        self.parser.add_argument('--use-http', dest='use_http',
+                                 action='store_true',
+                                 help=SUPPRESS, required=False)
 
     def _do_command(self):
         """Persist the server configuration."""
-        server_config = {'host': self.args.host, 'port': int(self.args.port)}
+        server_config = {'host': self.args.host,
+                         'port': int(self.args.port),
+                         'use_http': self.args.use_http,
+                         'ssl_verify': self.args.ssl_verify}
         write_server_config(server_config)

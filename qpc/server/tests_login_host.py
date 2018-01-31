@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
 import requests_mock
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.utils import get_server_location, write_server_config
 from qpc.server import LOGIN_URI
 from qpc.server.login_host import LoginHostCommand
@@ -26,15 +26,13 @@ TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class LoginCliTests(unittest.TestCase):
     """Class for testing the login server command for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -49,7 +47,7 @@ class LoginCliTests(unittest.TestCase):
     def test_login_bad_cred(self, do_mock_raw_input):
         """Testing the login with bad creds."""
         server_out = StringIO()
-        url = BASE_URL + LOGIN_URI
+        url = get_server_location() + LOGIN_URI
         e_msg = 'Unable to log in with provided credentials.'
         error = {'detail': [e_msg]}
         with requests_mock.Mocker() as mocker:
@@ -67,7 +65,7 @@ class LoginCliTests(unittest.TestCase):
     def test_login_good(self, do_mock_raw_input):
         """Testing the login with good creds."""
         server_out = StringIO()
-        url = BASE_URL + LOGIN_URI
+        url = get_server_location() + LOGIN_URI
         error = {'token': 'a_token'}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=200, json=error)

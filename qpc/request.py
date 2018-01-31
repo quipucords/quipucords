@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ import requests
 from qpc.utils import log
 from qpc.translation import _
 from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
-from qpc.utils import get_server_location, read_client_token
+from qpc.utils import (get_server_location, read_client_token, get_ssl_verify)
 
 # Need to determine how we get this information; config file at install?
 
@@ -35,7 +35,8 @@ def post(path, payload, headers=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.post(url, json=payload, headers=headers)
+    ssl_verify = get_ssl_verify()
+    return requests.post(url, json=payload, headers=headers, verify=ssl_verify)
 
 
 def get(path, params=None, headers=None):
@@ -46,7 +47,8 @@ def get(path, params=None, headers=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.get(url, params=params, headers=headers)
+    ssl_verify = get_ssl_verify()
+    return requests.get(url, params=params, headers=headers, verify=ssl_verify)
 
 
 def patch(path, payload, headers=None):
@@ -57,7 +59,9 @@ def patch(path, payload, headers=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.patch(url, json=payload, headers=headers)
+    ssl_verify = get_ssl_verify()
+    return requests.patch(url, json=payload, headers=headers,
+                          verify=ssl_verify)
 
 
 def delete(path, headers=None):
@@ -67,7 +71,8 @@ def delete(path, headers=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.delete(url, headers=headers)
+    ssl_verify = get_ssl_verify()
+    return requests.delete(url, headers=headers, verify=ssl_verify)
 
 
 def put(path, payload, headers=None):
@@ -78,7 +83,8 @@ def put(path, payload, headers=None):
     :returns: reponse object
     """
     url = get_server_location() + path
-    return requests.put(url, json=payload, headers=headers)
+    ssl_verify = get_ssl_verify()
+    return requests.put(url, json=payload, headers=headers, verify=ssl_verify)
 
 
 # pylint: disable=too-many-arguments
