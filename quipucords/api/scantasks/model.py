@@ -12,7 +12,7 @@
 
 These models are used in the REST definitions.
 """
-from datetime import datetime 
+from datetime import datetime
 import logging
 from django.utils.translation import ugettext as _
 from django.db import models
