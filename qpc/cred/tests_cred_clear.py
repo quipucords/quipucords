@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -17,7 +17,7 @@ from argparse import ArgumentParser, Namespace
 import requests
 import requests_mock
 import qpc.messages as messages
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import CREDENTIAL_URI
 from qpc.cred.clear import CredClearCommand
@@ -26,15 +26,13 @@ from qpc.utils import get_server_location, write_server_config
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class CredentialClearCliTests(unittest.TestCase):
     """Class for testing the credential clear commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -48,7 +46,7 @@ class CredentialClearCliTests(unittest.TestCase):
     def test_clear_cred_ssl_err(self):
         """Testing the clear credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             acc = CredClearCommand(SUBPARSER)
@@ -61,7 +59,7 @@ class CredentialClearCliTests(unittest.TestCase):
     def test_clear_cred_conn_err(self):
         """Testing the clear credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             acc = CredClearCommand(SUBPARSER)
@@ -74,7 +72,7 @@ class CredentialClearCliTests(unittest.TestCase):
     def test_clear_cred_internal_err(self):
         """Testing the clear credential command with an internal error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             acc = CredClearCommand(SUBPARSER)
@@ -87,7 +85,7 @@ class CredentialClearCliTests(unittest.TestCase):
     def test_clear_cred_empty(self):
         """Testing the clear credential command with empty data."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=[])
             acc = CredClearCommand(SUBPARSER)
@@ -101,8 +99,8 @@ class CredentialClearCliTests(unittest.TestCase):
     def test_clear_by_name(self):
         """Testing the clear credential command with stubbed data."""
         cred_out = StringIO()
-        get_url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
-        delete_url = BASE_URL + CREDENTIAL_URI + '1/'
+        get_url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
+        delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
         data = [credential_entry]
@@ -122,8 +120,8 @@ class CredentialClearCliTests(unittest.TestCase):
         When specifying a name with an error response
         """
         cred_out = StringIO()
-        get_url = BASE_URL + CREDENTIAL_URI + '?name=credential1'
-        delete_url = BASE_URL + CREDENTIAL_URI + '1/'
+        get_url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
+        delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
         data = [credential_entry]
@@ -145,7 +143,7 @@ class CredentialClearCliTests(unittest.TestCase):
         With empty list of credentials.
         """
         cred_out = StringIO()
-        get_url = BASE_URL + CREDENTIAL_URI
+        get_url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=[])
             acc = CredClearCommand(SUBPARSER)
@@ -162,8 +160,8 @@ class CredentialClearCliTests(unittest.TestCase):
         With a list of credentials with delete error.
         """
         cred_out = StringIO()
-        get_url = BASE_URL + CREDENTIAL_URI
-        delete_url = BASE_URL + CREDENTIAL_URI + '1/'
+        get_url = get_server_location() + CREDENTIAL_URI
+        delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
         data = [credential_entry]
@@ -187,8 +185,8 @@ class CredentialClearCliTests(unittest.TestCase):
         With a list of credentials.
         """
         cred_out = StringIO()
-        get_url = BASE_URL + CREDENTIAL_URI
-        delete_url = BASE_URL + CREDENTIAL_URI + '1/'
+        get_url = get_server_location() + CREDENTIAL_URI
+        delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
         data = [credential_entry]

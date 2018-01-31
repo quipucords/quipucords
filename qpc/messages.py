@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -147,7 +147,9 @@ BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
 
 
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
-SERVER_CONFIG_PORT_HELP = 'Port number for the server; the default is 8000.'
+SERVER_CONFIG_PORT_HELP = 'Port number for the server; the default is 443.'
+SERVER_CONFIG_SSL_CERT_HELP = 'File path to the SSL certificate '\
+    'to use for verification.'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
 LOGIN_USERNAME_PROMPT = 'User name:'

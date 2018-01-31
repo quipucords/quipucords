@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -19,7 +19,7 @@ import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import CREDENTIAL_URI
 from qpc.source import SOURCE_URI
@@ -31,15 +31,13 @@ TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class SourceAddCliTests(unittest.TestCase):
     """Class for testing the source add commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -106,9 +104,9 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_name_dup(self):
         """Testing the add source command duplicate name."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
-        post_source_url = BASE_URL + SOURCE_URI
+        post_source_url = get_server_location() + SOURCE_URI
         error = {'name': ['source with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
@@ -126,7 +124,8 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_cred_less(self):
         """Testing the add source command with a some invalid cred."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1%2Ccred2'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + \
+            '?name=cred1%2Ccred2'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
@@ -144,7 +143,8 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_cred_err(self):
         """Testing the add source command with an cred err."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1%2Ccred2'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + \
+            '?name=cred1%2Ccred2'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=500)
             nac = SourceAddCommand(SUBPARSER)
@@ -161,7 +161,7 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_ssl_err(self):
         """Testing the add source command with a connection error."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, exc=requests.exceptions.SSLError)
             nac = SourceAddCommand(SUBPARSER)
@@ -176,7 +176,7 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_conn_err(self):
         """Testing the add source command with a connection error."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, exc=requests.exceptions.ConnectTimeout)
             nac = SourceAddCommand(SUBPARSER)
@@ -192,9 +192,9 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_net(self):
         """Testing the add network source command successfully."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
-        post_source_url = BASE_URL + SOURCE_URI
+        post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             mocker.post(post_source_url, status_code=201)
@@ -210,9 +210,9 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_vc(self):
         """Testing the add vcenter source command successfully."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
-        post_source_url = BASE_URL + SOURCE_URI
+        post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             mocker.post(post_source_url, status_code=201)
@@ -227,9 +227,9 @@ class SourceAddCliTests(unittest.TestCase):
     def test_add_source_sat(self):
         """Testing the add satellite source command successfully."""
         source_out = StringIO()
-        get_cred_url = BASE_URL + CREDENTIAL_URI + '?name=cred1'
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         get_cred_data = [{'id': 1, 'name': 'cred1'}]
-        post_source_url = BASE_URL + SOURCE_URI
+        post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             mocker.post(post_source_url, status_code=201)
