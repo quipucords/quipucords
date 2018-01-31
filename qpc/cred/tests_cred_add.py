@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -20,7 +20,7 @@ import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout
+from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
                       VCENTER_CRED_TYPE,
@@ -34,15 +34,13 @@ TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
-BASE_URL = get_server_location()
-
 
 class CredentialAddCliTests(unittest.TestCase):
     """Class for testing the credential add commands for qpc."""
 
     def setUp(self):
         """Create test setup."""
+        write_server_config(DEFAULT_CONFIG)
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
@@ -90,7 +88,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_cred_name_dup(self):
         """Testing the add credential command duplicate name."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=400, json=error)
@@ -110,7 +108,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_cred_ssl_err(self):
         """Testing the add credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
             aac = CredAddCommand(SUBPARSER)
@@ -127,7 +125,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_cred_conn_err(self):
         """Testing the add credential command with a connection error."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
             aac = CredAddCommand(SUBPARSER)
@@ -144,7 +142,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_host_cred(self):
         """Testing the add host cred command successfully."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)
@@ -162,7 +160,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_host_cred_with_become(self):
         """Testing the add host cred command successfully."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)
@@ -181,7 +179,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_vcenter_cred(self, do_mock_raw_input):
         """Testing the add vcenter cred command successfully."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)
@@ -200,7 +198,7 @@ class CredentialAddCliTests(unittest.TestCase):
     def test_add_sat_cred(self, do_mock_raw_input):
         """Testing the add sat cred command successfully."""
         cred_out = StringIO()
-        url = BASE_URL + CREDENTIAL_URI
+        url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
             aac = CredAddCommand(SUBPARSER)

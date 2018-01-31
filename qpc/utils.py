@@ -31,6 +31,8 @@ QPC_CLIENT_TOKEN = os.path.join(CONFIG_DIR, 'client_token')
 
 CONFIG_HOST_KEY = 'host'
 CONFIG_PORT_KEY = 'port'
+CONFIG_USE_HTTP = 'use_http'
+CONFIG_SSL_VERIFY = 'ssl_verify'
 
 
 # 'log' is a convenience for getting the appropriate logger from the
@@ -41,6 +43,7 @@ CONFIG_PORT_KEY = 'port'
 #   log.error('Too many Tribbles!')
 
 # pylint: disable=invalid-name
+logging.captureWarnings(True)
 log = logging.getLogger('qpc')
 
 
@@ -48,6 +51,18 @@ def ensure_config_dir_exists():
     """Ensure the qpc configuration directory exists."""
     if not os.path.exists(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
+
+
+def get_ssl_verify():
+    """Obtain configuration for using ssl cert verification."""
+    config = read_server_config()
+    if config is None:
+        # No configuration written to server.config
+        return None
+    ssl_verify = config.get(CONFIG_SSL_VERIFY, False)
+    if not ssl_verify:
+        ssl_verify = False
+    return ssl_verify
 
 
 def get_server_location():
@@ -60,9 +75,14 @@ def get_server_location():
         # No configuration written to server.config
         return None
 
-    server_locataion = 'http://{}:{}'.format(
-        config[CONFIG_HOST_KEY], config[CONFIG_PORT_KEY])
-    return server_locataion
+    use_http = config.get(CONFIG_USE_HTTP, False)
+    protocol = 'https'
+    if use_http:
+        protocol = 'http'
+
+    server_location = '{}://{}:{}'.format(
+        protocol, config[CONFIG_HOST_KEY], config[CONFIG_PORT_KEY])
+    return server_location
 
 
 try:
@@ -97,6 +117,8 @@ def read_server_config():
     """
     # pylint: disable=too-many-return-statements
     if not os.path.exists(QPC_SERVER_CONFIG):
+        log.error('Server config %s was not found.',
+                  QPC_SERVER_CONFIG)
         return None
 
     with open(QPC_SERVER_CONFIG) as server_config_file:
@@ -105,25 +127,53 @@ def read_server_config():
         except exception_class:
             return None
 
-        if CONFIG_HOST_KEY not in config or CONFIG_PORT_KEY not in config:
-            return None
+        host = config.get(CONFIG_HOST_KEY)
+        port = config.get(CONFIG_PORT_KEY)
+        use_http = config.get(CONFIG_USE_HTTP)
+        ssl_verify = config.get(CONFIG_SSL_VERIFY, False)
 
-        host = config[CONFIG_HOST_KEY]
-        port = config[CONFIG_PORT_KEY]
+        host_empty = host is None or host == ''
+        port_empty = port is None or port == ''
 
-        if host is None or host == '':
-            return None
-
-        if port is None or port == '':
+        if host_empty or port_empty:
             return None
 
         if not isinstance(host, str):
+            log.error('Server config %s has invalid value for host %s',
+                      QPC_SERVER_CONFIG, host)
             return None
 
         if not isinstance(port, int):
+            log.error('Server config %s has invalid value for port %s',
+                      QPC_SERVER_CONFIG, port)
             return None
 
-        return {CONFIG_HOST_KEY: host, CONFIG_PORT_KEY: port}
+        if use_http is None:
+            use_http = True
+
+        if not isinstance(use_http, bool):
+            log.error('Server config %s has invalid value for use_http %s',
+                      QPC_SERVER_CONFIG, use_http)
+            return None
+
+        if (ssl_verify is not None and
+                not isinstance(ssl_verify, bool) and
+                not isinstance(ssl_verify, str)):
+            log.error('Server config %s has invalid value for ssl_verify %s',
+                      QPC_SERVER_CONFIG, ssl_verify)
+            return None
+
+        if (ssl_verify is not None and
+                isinstance(ssl_verify, str) and
+                not os.path.exists(ssl_verify)):
+            log.error('Server config %s has invalid path for ssl_verify %s',
+                      QPC_SERVER_CONFIG, ssl_verify)
+            return None
+
+        return {CONFIG_HOST_KEY: host,
+                CONFIG_PORT_KEY: port,
+                CONFIG_USE_HTTP: use_http,
+                CONFIG_SSL_VERIFY: ssl_verify}
 
 
 def write_server_config(server_config):
@@ -184,7 +234,7 @@ def setup_logging(verbosity):
     # only for messages going to the 'rho' logger, i.e. Rho
     # output.
     stderr_handler = logging.StreamHandler()
-    stderr_handler.setLevel(logging.WARNING)
+    stderr_handler.setLevel(logging.ERROR)
     log.addHandler(stderr_handler)
 
 

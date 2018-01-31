@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -25,8 +25,9 @@ from qpc.utils import get_server_location, write_server_config
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
-write_server_config({'host': '127.0.0.1', 'port': 8000})
+write_server_config({'host': '127.0.0.1', 'port': 8000, 'use_http': True})
 BASE_URL = get_server_location()
+print(BASE_URL)
 
 
 class SourceShowCliTests(unittest.TestCase):
