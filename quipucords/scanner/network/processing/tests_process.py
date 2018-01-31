@@ -14,6 +14,8 @@ from scanner.network.processing import process
 from scanner.network.processing.test_util import ansible_result, \
     ansible_results
 
+HOST = 'host'
+
 NOT_A_KEY = 'not_a_key'
 NO_PROCESSOR_KEY = 'no_processor_key'
 TEST_KEY = 'test_key'
@@ -92,57 +94,58 @@ class TestProcess(unittest.TestCase):
     def test_not_result_no_processing(self):
         """Test a value that is not a task result, and needs no processing."""
         self.assertEqual(
-            process.process({NOT_TASK_RESULT_KEY: 'foo'}),
+            process.process({NOT_TASK_RESULT_KEY: 'foo'}, HOST),
             {NOT_TASK_RESULT_KEY: 'foo'})
 
     def test_processing_bad_input(self):
         """Test a key that is not a task result, but needs processing."""
         self.assertEqual(
-            process.process({TEST_KEY: 'foo'}),
+            process.process({TEST_KEY: 'foo'}, HOST),
             {TEST_KEY: process.NO_DATA})
 
     def test_no_processing(self):
         """Test a key that doesn't need to be processed."""
         self.assertEqual(
-            process.process({NOT_A_KEY: ansible_result('')}),
+            process.process({NOT_A_KEY: ansible_result('')}, HOST),
             {NOT_A_KEY: ansible_result('')})
 
     def test_simple_processor(self):
         """Test a key whose processor succeeds."""
         self.assertEqual(
-            process.process({TEST_KEY: ansible_result('')}),
+            process.process({TEST_KEY: ansible_result('')}, HOST),
             {TEST_KEY: '1'})
 
     def test_missing_dependency(self):
         """Test a key whose processor is missing a dependency."""
         self.assertEqual(
-            process.process({DEPENDENT_KEY: ansible_result('')}),
+            process.process({DEPENDENT_KEY: ansible_result('')}, HOST),
             {DEPENDENT_KEY: process.NO_DATA})
 
     def test_satisfied_dependency(self):
         """Test a key whose processor has a dependency, which is present."""
         self.assertEqual(
             process.process({NO_PROCESSOR_KEY: 'result',
-                             DEPENDENT_KEY: ansible_result('')}),
+                             DEPENDENT_KEY: ansible_result('')},
+                            HOST),
             {NO_PROCESSOR_KEY: 'result',
              DEPENDENT_KEY: '2'})
 
     def test_skipped_task(self):
         """Test a task that Ansible skipped."""
         self.assertEqual(
-            process.process({TEST_KEY: {'skipped': True}}),
+            process.process({TEST_KEY: {'skipped': True}}, HOST),
             {TEST_KEY: process.NO_DATA})
 
     def test_task_errored(self):
         """Test a task that errored on the remote machine."""
         self.assertEqual(
-            process.process({TEST_KEY: ansible_result('error!', rc=1)}),
+            process.process({TEST_KEY: ansible_result('error!', rc=1)}, HOST),
             {TEST_KEY: process.NO_DATA})
 
     def test_processor_errored(self):
         """Test a task where the processor itself errors."""
         self.assertEqual(
-            process.process({PROCESSOR_ERROR_KEY: ansible_result('')}),
+            process.process({PROCESSOR_ERROR_KEY: ansible_result('')}, HOST),
             {PROCESSOR_ERROR_KEY: process.NO_DATA})
 
 
