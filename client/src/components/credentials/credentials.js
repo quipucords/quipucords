@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
+  Form,
   Grid,
   EmptyState,
   Row,
@@ -152,21 +153,51 @@ class Credentials extends React.Component {
     });
   }
 
-  addCredential() {
+  addCredential(credentialType) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
-      header: 'NYI',
+      header: credentialType,
       message: 'Adding credentials is not yet implemented'
     });
   }
 
   deleteCredentials() {
+    const { selectedItems } = this.state;
+
+    let heading = (
+      <h3>
+        Are you sure you want to delete the following credentials?
+      </h3>
+    );
+
+    let credentialsList = '';
+    selectedItems.forEach((item, index) => {
+      return (credentialsList += (index > 0 ? '\n' : '') + item.name);
+    });
+
+    let body = (
+      <Grid.Col sm={12}>
+        <Form.FormControl
+          className="quipucords-text-area-output"
+          componentClass="textarea"
+          type="textarea"
+          readOnly
+          rows={selectedItems.length}
+          value={credentialsList}
+        />
+      </Grid.Col>
+    );
+
+    let onConfirm = () => this.doDeleteCredentials(selectedItems);
+
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Deleting credentials is not yet implemented'
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Credentials',
+      heading: heading,
+      body: body,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
     });
   }
 
@@ -190,7 +221,7 @@ class Credentials extends React.Component {
     });
   }
 
-  doDeleteCredential(item) {
+  doDeleteCredentials(items) {
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
     });
@@ -198,7 +229,7 @@ class Credentials extends React.Component {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
-      header: item.name,
+      header: items[0].name,
       message: 'Deleting credentials is not yet implemented'
     });
   }
@@ -211,7 +242,7 @@ class Credentials extends React.Component {
       </h3>
     );
 
-    let onConfirm = () => this.doDeleteCredential(item);
+    let onConfirm = () => this.doDeleteCredentials([item]);
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,

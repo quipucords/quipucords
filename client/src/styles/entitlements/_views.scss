@@ -2,6 +2,29 @@
 .quipicords-list-view {
   margin-top: 0;
   margin-bottom: 0;
+
+  .list-view-pf-actions {
+    min-width: 200px;
+    text-align: right;
+
+    .btn-link {
+      color: $color-pf-black-700;
+      .pficon, .fa {
+        font-size: 14px;
+      }
+      &:hover, &:focus {
+        color: $color-pf-blue;
+      }
+    }
+    .dropdown.btn-group {
+      margin-left: 10px;
+    }
+  }
+
+  .list-view-pf-left .pficon.list-view-pf-icon-sm, .list-view-pf-left .fa.list-view-pf-icon-sm {
+    border: 0;
+    padding-top: 2px;
+  }
 }
 
 .blank-slate-pf.full-page-blank-slate {
@@ -11,16 +34,27 @@
 .list-view-info-item-text-count {
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 110px;
+  width: 90px;
 }
 
 .list-view-info-item-icon-count {
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 110px;
+  width: 85px;
 }
 
-.list-view-compound-item-icon:before {
-  position: relative;
-  top: 2px;
+.quipucords-text-area-output.form-control[readonly] {
+  background-color: $color-pf-white;
+  border: 0;
+  color: inherit;
+  font-weight: 700;
+  resize: none;
+}
+
+.blank-slate-pf button {
+  width: 155px;
+}
+
+.list-view-pf-actions .dropdown.btn-group {
+  margin-left: 10px;
 }
