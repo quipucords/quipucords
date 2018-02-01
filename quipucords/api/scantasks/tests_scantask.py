@@ -10,6 +10,7 @@
 #
 """Test the API application."""
 
+from datetime import datetime
 from django.test import TestCase
 import api.messages as messages
 from api.models import Credential, Source, ScanTask
@@ -56,3 +57,89 @@ class ScanTaskTest(TestCase):
              'status': 'pending',
              'status_message': messages.ST_STATUS_MSG_PENDING},
             json_task)
+
+    def test_successful_start(self):
+        """Create a scan task and start it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        start_time = datetime.utcnow()
+        task.start()
+        task.save()
+        self.assertEqual(messages.ST_STATUS_MSG_RUNNING,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.RUNNING)
+        self.assertEqual(start_time.replace(microsecond=0),
+                         task.start_time.replace(microsecond=0))
+
+    def test_successful_restart(self):
+        """Create a scan task and restart it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        task.restart()
+        task.save()
+        self.assertEqual(messages.ST_STATUS_MSG_RESTARTED,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.PENDING)
+
+    def test_successful_pause(self):
+        """Create a scan task and pause it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        task.pause()
+        task.save()
+        self.assertEqual(messages.ST_STATUS_MSG_PAUSED,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.PAUSED)
+
+    def test_successful_cancel(self):
+        """Create a scan task and cancel it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        end_time = datetime.utcnow()
+        task.cancel()
+        task.save()
+        self.assertEqual(messages.ST_STATUS_MSG_CANCELED,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.CANCELED)
+        self.assertEqual(end_time.replace(microsecond=0),
+                         task.end_time.replace(microsecond=0))
+
+    def test_successful_complete(self):
+        """Create a scan task and complete it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        end_time = datetime.utcnow()
+        task.complete()
+        task.save()
+        self.assertEqual(messages.ST_STATUS_MSG_COMPLETED,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.COMPLETED)
+        self.assertEqual(end_time.replace(microsecond=0),
+                         task.end_time.replace(microsecond=0))
+
+    def test_scantask_fail(self):
+        """Create a scan task and fail it."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        # pylint: disable=invalid-name
+        MSG = 'Test Fail.'
+        end_time = datetime.utcnow()
+        task.fail(MSG)
+        task.save()
+        self.assertEqual(MSG,
+                         task.status_message)
+        self.assertEqual(task.status, ScanTask.FAILED)
+        self.assertEqual(end_time.replace(microsecond=0),
+                         task.end_time.replace(microsecond=0))

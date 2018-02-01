@@ -15,7 +15,8 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         ChoiceField,
                                         IntegerField,
-                                        CharField)
+                                        CharField,
+                                        DateTimeField)
 from api.models import Source, ScanTask
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer
@@ -55,6 +56,8 @@ class ScanTaskSerializer(NotEmptySerializer):
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
+    start_time = DateTimeField(required=False, read_only=True)
+    end_time = DateTimeField(required=False, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
@@ -62,7 +65,7 @@ class ScanTaskSerializer(NotEmptySerializer):
         model = ScanTask
         fields = ['source', 'scan_type', 'status', 'status_message',
                   'systems_count', 'systems_scanned',
-                  'systems_failed']
+                  'systems_failed', 'start_time', 'end_time']
 
     @staticmethod
     def validate_source(source):
