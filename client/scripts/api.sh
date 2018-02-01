@@ -1,6 +1,46 @@
 #!/usr/bin/env bash
 #
 #
+# Check container running
+checkContainerRunning()
+{
+  local CONTAINER=$1
+  local FILE=$2
+  local COUNT=1
+  local DURATION=10
+  local DELAY=0.1
+
+  printf "Check container running..."
+
+  while [ $COUNT -le $DURATION ]; do
+    sleep $DELAY
+    (( COUNT++ ))
+    if [ -z "$(docker ps | grep $CONTAINER)" ]; then
+      break
+    fi
+  done
+
+  if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
+    printf "\e[32mContainer SUCCESS"
+    printf "\n\n\e[39m"
+  else
+    local HASH=$(git rev-list -1 --all --abbrev-commit $FILE)
+    local COMMIT=$(git rev-list -1 --all --oneline $FILE)
+    local BLAME=$(git blame $FILE | grep $HASH | sed 's/^/  /')
+    local GITHUB="https://github.com/quipucords/quipucords/commit/$HASH"
+
+    echo "Last Commit:\n\n  $COMMIT\n\nVisit:\n\n  $GITHUB\n\nAssigning Blame:\n\n$BLAME"  > api-debug.txt
+
+    printf "\e[31mContainer ERROR"
+    printf "\n\e[31m  Review the Swagger doc for errors."
+    printf "\n\e[31m  Last commit: $COMMIT"
+    printf "\n\e[31m  See api-debug.txt for details."
+    printf "\n\e[31m  Visit: $GITHUB"
+    printf "\e[39m\n"
+  fi
+}
+#
+#
 # Install & Run Quipucords API Mock
 #
 mockApi()
@@ -19,6 +59,8 @@ mockApi()
     echo "Starting API..."
     docker run -d --rm -p $PORT:8000 -v "$FILE:/data/swagger.yaml" --name quipucords-mock $CONTAINER >/dev/null
   fi
+
+  checkContainerRunning $CONTAINER $FILE
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
