@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
+import { Button, DropdownButton, Filter, Icon, MenuItem, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
@@ -196,18 +196,33 @@ class CredentialsToolbar extends React.Component {
   }
 
   renderActions() {
+    const { onAddCredential, deleteAvailable, onDelete, onRefresh } = this.props;
+
     return (
       <div className="form-group">
-        <Button bsStyle="primary" onClick={this.props.onAddCredential}>
-          Add
-        </Button>
+        <DropdownButton
+          bsStyle="primary"
+          title="Create"
+          pullRight
+          id="createCredentialButton"
+        >
+          <MenuItem eventKey="1" onClick={() => onAddCredential('network')}>
+            Network Credential
+          </MenuItem>
+          <MenuItem eventKey="2" onClick={() => onAddCredential('satellite')}>
+            Satellite Credential
+          </MenuItem>
+          <MenuItem eventKey="2" onClick={() => onAddCredential('vcenter')}>
+            VCenter Credential
+          </MenuItem>
+        </DropdownButton>
         <Button
-          disabled={this.props.deleteAvailable === false}
-          onClick={this.props.onDelete}
+          disabled={deleteAvailable === false}
+          onClick={onDelete}
         >
           Delete
         </Button>
-        <Button onClick={this.props.onRefresh} bsStyle="success">
+        <Button onClick={onRefresh} bsStyle="success">
           <Icon type="fa" name="refresh" />
         </Button>
       </div>
