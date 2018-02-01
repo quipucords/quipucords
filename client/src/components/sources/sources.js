@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
+import Store from '../../redux/store';
 
 import {
   Alert,
@@ -12,16 +13,16 @@ import {
 } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
-
-import SourcesToolbar from './sourcesToolbar';
-import SourcesEmptyState from './sourcesEmptyState';
-import { SourceListItem } from './sourceListItem';
-import Store from '../../redux/store';
 import {
   toastNotificationTypes,
   confirmationModalTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
+
+import SourcesToolbar from './sourcesToolbar';
+import SourcesEmptyState from './sourcesEmptyState';
+import { SourceListItem } from './sourceListItem';
+import { CreateScanDialog } from './createScanDialog';
 
 class Sources extends React.Component {
   constructor() {
@@ -30,15 +31,21 @@ class Sources extends React.Component {
     bindMethods(this, [
       'addSource',
       'importSources',
+      'scanSource',
       'scanSources',
       'itemSelectChange',
       'editSource',
       'deleteSource',
+      'hideScanDialog',
+      'createScan',
       'refresh'
     ]);
     this.state = {
       filteredItems: [],
-      selectedItems: []
+      selectedItems: [],
+      scanDialogShown: false,
+      multiSourceScan: false,
+      currentScanSource: null
     };
   }
 
@@ -159,13 +166,20 @@ class Sources extends React.Component {
     });
   }
 
-  scanSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Scanning sources is not yet implemented'
+  scanSource(source) {
+    this.setState({
+      scanDialogShown: true,
+      multiSourceScan: false,
+      currentScanSource: source
     });
+  }
+
+  scanSources() {
+    this.setState({ scanDialogShown: true, multiSourceScan: true });
+  }
+
+  hideScanDialog() {
+    this.setState({ scanDialogShown: false });
   }
 
   itemSelectChange(item) {
@@ -219,6 +233,16 @@ class Sources extends React.Component {
     });
   }
 
+  createScan(scanName, sources) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: scanName,
+      message: 'Scanning sources is not yet implemented'
+    });
+    this.hideScanDialog();
+  }
+
   refresh() {
     this.props.getSources();
   }
@@ -234,6 +258,7 @@ class Sources extends React.Component {
               onItemSelectChange={this.itemSelectChange}
               onEdit={this.editSource}
               onDelete={this.deleteSource}
+              onScan={this.scanSource}
             />
           ))}
         </ListView>
@@ -243,7 +268,13 @@ class Sources extends React.Component {
 
   render() {
     const { loading, loadError, errorMessage, sources } = this.props;
-    const { filteredItems, selectedItems } = this.state;
+    const {
+      filteredItems,
+      selectedItems,
+      scanDialogShown,
+      multiSourceScan,
+      currentScanSource
+    } = this.state;
 
     if (loading) {
       return (
@@ -280,7 +311,14 @@ class Sources extends React.Component {
         />,
         <Grid fluid key={2}>
           {this.renderList(filteredItems)}
-        </Grid>
+        </Grid>,
+        <CreateScanDialog
+          key="createScanDialog"
+          show={scanDialogShown}
+          sources={multiSourceScan ? selectedItems : [currentScanSource]}
+          onCancel={this.hideScanDialog}
+          onScan={this.createScan}
+        />
       ];
     }
     return (
