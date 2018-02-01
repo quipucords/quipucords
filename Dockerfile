@@ -17,33 +17,50 @@ RUN . ~/venv/bin/activate;pip install -r /app/requirements.txt
 RUN . ~/venv/bin/activate;pip install coverage==3.6
 RUN . ~/venv/bin/activate;pip install gunicorn==19.7.1
 
-# Create /deploy
-RUN mkdir -p /deploy
-COPY deploy/gunicorn.conf.py  /deploy
-COPY deploy/run.sh  /deploy
-
 # Create /etc/ssl
 RUN mkdir -p /etc/ssl/
 COPY deploy/ssl/* /etc/ssl/
 VOLUME /etc/ssl
 
-# Create /var/logs
-RUN mkdir -p /var/logs
-VOLUME /var/logs
+# Create /deploy
+RUN mkdir -p /deploy
+COPY deploy/gunicorn.conf.py  /deploy
+COPY deploy/run.sh  /deploy
+
+# Config supervisor
+COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create log directories
+RUN mkdir -p /var/log/supervisor/
+VOLUME /var/log
+
+# Create /sshkeys
+RUN mkdir -p /sshkeys
+VOLUME /sshkeys
+
+# Create /var/data
+RUN mkdir -p /var/data
+VOLUME /var/data
 
 # Copy server code
 COPY . /app/
-WORKDIR /app/
+WORKDIR /app
 
-# Initialize database & Collect static files
-RUN . ~/venv/bin/activate;make server-init server-static
-
-WORKDIR /app/quipucords
-
+# Set production environment
+ENV PRODUCTION=True
+ENV DJANGO_SECRET_PATH=/var/data/secret.txt
+ENV DJANGO_DB_PATH=/var/data/
+ENV DJANGO_DEBUG=False
 ENV DJANGO_LOG_LEVEL=INFO
 ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
-ENV DJANGO_LOG_FILE=/var/logs/app.log
+ENV DJANGO_LOG_FILE=/var/log/app.log
+
+# Initialize database & Collect static files
+RUN . ~/venv/bin/activate;make server-init server-static
+RUN ls -lta /var/data
+
+WORKDIR /var/log
 
 EXPOSE 443
-CMD /deploy/run.sh
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

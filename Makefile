@@ -61,15 +61,15 @@ lint-pylint:
 lint: lint-flake8 lint-pylint
 
 server-makemigrations:
-	$(PYTHON) quipucords/manage.py makemigrations api
+	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
 
-server-migragte:
-	$(PYTHON) quipucords/manage.py migrate
+server-migrate:
+	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
 
 server-set-superuser:
-	echo "from django.contrib.auth.models import User; User.objects.filter(email='admin@example.com').delete(); User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | $(PYTHON) quipucords/manage.py shell
+	echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass');print(User.objects.filter(email='admin@example.com'))" | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
 
-server-init: server-makemigrations server-migragte server-set-superuser
+server-init: server-makemigrations server-migrate server-set-superuser
 
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
