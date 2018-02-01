@@ -31,6 +31,11 @@ def mock_sat_exception(param1):  # pylint: disable=unused-argument
     raise SatelliteException()
 
 
+def mock_exception(param1):  # pylint: disable=unused-argument
+    """Mock method to throw exception."""
+    raise Exception()
+
+
 # pylint: disable=too-many-instance-attributes
 class InspectTaskRunnerTest(TestCase):
     """Tests Satellite connect capabilities."""
@@ -173,6 +178,22 @@ class InspectTaskRunnerTest(TestCase):
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_sat_exception) as mock_sat_status:
+            status = task.run()
+            mock_sat_status.assert_called_once_with(ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
+
+    def test_run_with_excep(self):
+        """Test the running connect task with general exception."""
+        options = SourceOptions(
+            satellite_version=SourceOptions.SATELLITE_VERSION_62)
+        options.save()
+        self.source.options = options
+        self.source.save()
+        task = InspectTaskRunner(self.scan_job, self.scan_task,
+                                 self.inspect_results)
+
+        with patch('scanner.satellite.connect.utils.status',
+                   side_effect=mock_exception) as mock_sat_status:
             status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)

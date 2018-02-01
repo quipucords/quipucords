@@ -159,10 +159,10 @@ def host_fields(scan_task, api_version, url, org_id, host_id):
     cf_errata_counts = None
     sub_facet_attributes = fields.get(SUBSCRIPTION_FACET)
     content_facet_attributes = fields.get(CONTENT_FACET)
-    facts = fields.get(FACTS)
-    virtual_host = fields.get(VIRTUAL_HOST)
+    facts = fields.get(FACTS, {})
+    virtual_host = fields.get(VIRTUAL_HOST, {})
     virtual_guests = fields.get(VIRTUAL_GUESTS)
-    errata_counts = fields.get(ERRATA_COUNTS)
+    errata_counts = fields.get(ERRATA_COUNTS, {})
 
     if sub_facet_attributes:
         sub_virt_host = sub_facet_attributes.get(VIRTUAL_HOST)
