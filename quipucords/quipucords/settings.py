@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -29,11 +29,32 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)'
+PRODUCTION = bool(os.environ.get('PRODUCTION', False))
+
+if PRODUCTION:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    DJANGO_SECRET_PATH = os.environ.get('DJANGO_SECRET_PATH',
+                                        os.path.join(BASE_DIR, 'secret.txt'))
+    if not os.path.exists(DJANGO_SECRET_PATH):
+        import random
+        import string
+        SECRET_KEY = ''.join([random.SystemRandom().choice(
+            '{}{}{}'.format(string.ascii_letters,
+                            string.digits,
+                            string.punctuation)) for i in range(50)])
+        with open(DJANGO_SECRET_PATH, 'w') as secret_file:
+            secret_file.write(SECRET_KEY)
+    else:
+        with open(DJANGO_SECRET_PATH, 'r') as secret_file:
+            SECRET_KEY = secret_file.read().splitlines()[0]
+else:
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = '79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
 
 ALLOWED_HOSTS = []
 
@@ -99,10 +120,15 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
+PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
+                       'db.sqlite3')
+DB_PATH = PROD_DB if PRODUCTION else DEV_DB
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': DB_PATH,
     }
 }
 
@@ -165,7 +191,7 @@ LOGGING_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
 LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
 VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
     '%(process)d %(thread)d %(message)s'
-DEFAULT_LOG_FILE = os.path.join(BASE_DIR, 'server.log')
+DEFAULT_LOG_FILE = os.path.join(BASE_DIR, 'app.log')
 LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
 
 LOGGING = {
