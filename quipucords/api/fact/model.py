@@ -34,6 +34,7 @@ class FactCollection(models.Model):
         default=FC_STATUS_PENDING
     )
     sources = models.TextField(null=False)
+    csv_content = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""
