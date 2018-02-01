@@ -77,6 +77,9 @@ server-static:
 serve:
 	$(PYTHON) quipucords/manage.py runserver
 
+html:
+	@cd docs; $(MAKE) html
+
 manpage:
 	@mkdir -p build
 	pandoc docs/source/man.rst \
