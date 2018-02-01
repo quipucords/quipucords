@@ -99,6 +99,7 @@ SJ_EXTRA_VARS_KEY = 'Extra vars keys must be jboss_eap, jboss_fuse, '\
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'
 ST_STATUS_MSG_RUNNING = 'Task is running.'
+ST_STATUS_MSG_RESTARTED = 'Task was restarted.'
 ST_STATUS_MSG_PENDING = 'Task is pending.'
 ST_STATUS_MSG_PAUSED = 'Task is paused.'
 ST_STATUS_MSG_CANCELED = 'Task is canceled.'

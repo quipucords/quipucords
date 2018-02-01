@@ -104,7 +104,7 @@ class ScanTask(models.Model):
     def restart(self):
         """Start a task."""
         self.status = ScanTask.PENDING
-        self.status_message = 'Task was restarted'
+        self.status_message = _(messages.ST_STATUS_MSG_RESTARTED)
         self.save()
 
     def pause(self):
