@@ -105,5 +105,9 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = 'Satellite error encountered: %s\n' % conn_error
             error_message += 'Inspect scan failed for %s.' % self.scan_task
             return error_message, ScanTask.FAILED
+        except Exception as unknown_error:  # pylint: disable=broad-except
+            error_message = 'Satellite error encountered: %s\n' % unknown_error
+            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

@@ -5,6 +5,7 @@ import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
 import { bindMethods } from '../../common/helpers';
 import { SourceCredentialsList } from './sourceCredentialsList';
 import { SourceHostsList } from './sourceHostList';
+import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class SourceListItem extends React.Component {
   constructor() {
@@ -30,6 +31,131 @@ class SourceListItem extends React.Component {
     this.setState({ expanded: false });
   }
 
+  renderActions() {
+    const { item, onEdit, onDelete, onScan } = this.props;
+
+    return (
+      <span>
+        <SimpleTooltip id="editTip" tooltip="Edit">
+          <Button onClick={() => onEdit(item)} bsStyle="link" key="editButton">
+            <Icon type="pf" name="edit" atria-label="Edit" />
+          </Button>
+        </SimpleTooltip>
+        <SimpleTooltip id="deleteTip" tooltip="Delete">
+          <Button
+            onClick={() => onDelete(item)}
+            bsStyle="link"
+            key="removeButton"
+          >
+            <Icon type="pf" name="delete" atria-label="Delete" />
+          </Button>
+        </SimpleTooltip>
+        <Button onClick={() => onScan(item)} bsStyle="primary" key="scanButton">
+          Scan
+        </Button>
+      </span>
+    );
+  }
+
+  renderStatusItems() {
+    const { item } = this.props;
+    const { expanded, expandType } = this.state;
+
+    let credentialCount = item.credentials ? item.credentials.length : 0;
+    let okHostCount = item.hosts ? item.hosts.length : 0;
+    let failedHostCount = item.failed_hosts ? item.failed_hosts.length : 0;
+
+    return [
+      <ListView.InfoItem
+        key="credentials"
+        className={
+          'list-view-info-item-icon-count ' +
+          (credentialCount === 0 ? 'invisible' : '')
+        }
+      >
+        <SimpleTooltip
+          id="credentialsTip"
+          tooltip={
+            credentialCount +
+            (credentialCount === 1 ? ' Credential' : ' Credentials')
+          }
+        >
+          <ListView.Expand
+            expanded={expanded && expandType === 'credentials'}
+            toggleExpanded={() => {
+              this.toggleExpand('credentials');
+            }}
+          >
+            <Icon
+              className="list-view-compound-item-icon"
+              type="fa"
+              name="key"
+            />
+            <strong>{credentialCount}</strong>
+          </ListView.Expand>
+        </SimpleTooltip>
+      </ListView.InfoItem>,
+      <ListView.InfoItem
+        key="okHosts"
+        className={
+          'list-view-info-item-icon-count ' +
+          (okHostCount === 0 ? 'invisible' : '')
+        }
+      >
+        <SimpleTooltip
+          id="okHostsTip"
+          tooltip={
+            okHostCount +
+            (okHostCount === 1 ? ' Successful System' : ' Successful Systems')
+          }
+        >
+          <ListView.Expand
+            expanded={expanded && expandType === 'okHosts'}
+            toggleExpanded={() => {
+              this.toggleExpand('okHosts');
+            }}
+          >
+            <Icon
+              className="list-view-compound-item-icon"
+              type="pf"
+              name="ok"
+            />
+            <strong>{okHostCount}</strong>
+          </ListView.Expand>
+        </SimpleTooltip>
+      </ListView.InfoItem>,
+      <ListView.InfoItem
+        key="failedHosts"
+        className={
+          'list-view-info-item-icon-count ' +
+          (failedHostCount === 0 ? 'invisible' : '')
+        }
+      >
+        <SimpleTooltip
+          id="failedHostsTip"
+          tooltip={
+            failedHostCount +
+            (failedHostCount === 1 ? ' Failed System' : ' Failed Systems')
+          }
+        >
+          <ListView.Expand
+            expanded={expanded && expandType === 'failedHosts'}
+            toggleExpanded={() => {
+              this.toggleExpand('failedHosts');
+            }}
+          >
+            <Icon
+              className="list-view-compound-item-icon"
+              type="pf"
+              name="error-circle-o"
+            />
+            <strong>{failedHostCount}</strong>
+          </ListView.Expand>
+        </SimpleTooltip>
+      </ListView.InfoItem>
+    ];
+  }
+
   renderExpansionContents() {
     const { item } = this.props;
     const { expandType } = this.state;
@@ -49,26 +175,27 @@ class SourceListItem extends React.Component {
   }
 
   render() {
-    const { item, onItemSelectChange, onEdit, onDelete } = this.props;
-    const { expanded, expandType } = this.state;
-
-    let credentialCount = item.credentials ? item.credentials.length : 0;
-    let okHostCount = item.hosts ? item.hosts.length : 0;
-    let failedHostCount = item.failed_hosts ? item.failed_hosts.length : 0;
+    const { item, onItemSelectChange } = this.props;
+    const { expanded } = this.state;
 
     let itemIcon;
+    let sourceTypeText;
     switch (item.source_type) {
       case 'vcenter':
         itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
+        sourceTypeText = 'VCenter';
         break;
       case 'network':
         itemIcon = <ListView.Icon type="pf" name="network" />;
+        sourceTypeText = 'Network';
         break;
       case 'satellite':
         itemIcon = <ListView.Icon type="fa" name="space-shuttle" />;
+        sourceTypeText = 'Satellite';
         break;
       default:
         itemIcon = null;
+        sourceTypeText = '';
     }
 
     return (
@@ -81,87 +208,14 @@ class SourceListItem extends React.Component {
             onClick={e => onItemSelectChange(item)}
           />
         }
-        actions={
-          <span>
-            <Button
-              onClick={() => onEdit(item)}
-              bsStyle="link"
-              key="editButton"
-            >
-              <Icon type="pf" name="edit" />
-            </Button>
-            <Button
-              onClick={() => onDelete(item)}
-              bsStyle="link"
-              key="removeButton"
-            >
-              <Icon type="pf" name="delete" />
-            </Button>
-          </span>
+        actions={this.renderActions()}
+        leftContent={
+          <SimpleTooltip id="sourceTypeTip" tooltip={sourceTypeText}>
+            {itemIcon}
+          </SimpleTooltip>
         }
-        leftContent={itemIcon}
         heading={item.name}
-        additionalInfo={[
-          <ListView.InfoItem
-            key="credentials"
-            className={
-              'list-view-info-item-text-count ' +
-              (credentialCount === 0 ? 'invisible' : '')
-            }
-          >
-            <ListView.Expand
-              expanded={expanded && expandType === 'credentials'}
-              toggleExpanded={() => {
-                this.toggleExpand('credentials');
-              }}
-            >
-              {credentialCount}{' '}
-              {credentialCount === 1 ? ' Credential' : ' Credentials'}
-            </ListView.Expand>
-          </ListView.InfoItem>,
-          <ListView.InfoItem
-            key="okHosts"
-            className={
-              'list-view-info-item-icon-count ' +
-              (okHostCount === 0 ? 'invisible' : '')
-            }
-          >
-            <ListView.Expand
-              expanded={expanded && expandType === 'okHosts'}
-              toggleExpanded={() => {
-                this.toggleExpand('okHosts');
-              }}
-            >
-              <Icon
-                className="list-view-compound-item-icon"
-                type="pf"
-                name="ok"
-              />
-              {okHostCount}
-            </ListView.Expand>
-          </ListView.InfoItem>,
-          <ListView.InfoItem
-            key="failedHosts"
-            className={
-              'list-view-info-item-icon-count ' +
-              (failedHostCount === 0 ? 'invisible' : '')
-            }
-          >
-            <ListView.Expand
-              expanded={expanded && expandType === 'failedHosts'}
-              toggleExpanded={() => {
-                this.toggleExpand('failedHosts');
-              }}
-            >
-              <Icon
-                className="list-view-compound-item-icon"
-                type="pf"
-                name="error-circle-o"
-              />
-              {failedHostCount}
-            </ListView.Expand>
-          </ListView.InfoItem>
-        ]}
+        additionalInfo={this.renderStatusItems()}
         compoundExpand
         compoundExpanded={expanded}
         onCloseCompoundExpand={this.closeExpand}
@@ -176,7 +230,8 @@ SourceListItem.propTypes = {
   item: PropTypes.object,
   onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
+  onScan: PropTypes.func
 };
 
 export { SourceListItem };
