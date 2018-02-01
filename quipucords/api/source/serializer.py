@@ -238,12 +238,12 @@ class SourceSerializer(NotEmptySerializer):
             setattr(instance, name, value)
         instance.save()
 
-        # If hosts_data was not supplied and this is a full update,
+        # If hosts_list was not supplied and this is a full update,
         # then we should already have raised a ValidationError before
-        # this point, so it's safe to use hosts_data as an indicator
+        # this point, so it's safe to use hosts_list as an indicator
         # of whether to replace the hosts.
-        hosts_data = json.dumps(hosts_list)
-        if hosts_data:
+        if hosts_list:
+            hosts_data = json.dumps(hosts_list)
             instance.hosts = hosts_data
 
         # credentials is safe to use as a flag for the same reason as
