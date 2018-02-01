@@ -258,7 +258,7 @@ class ScanListItem extends React.Component {
     switch (item.status) {
       case 'completed':
         return [
-          <SimpleTooltip id="startTip" tooltip="Run Scan">
+          <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
             <Button
               key="restartButton"
               onClick={() => onStart(item)}

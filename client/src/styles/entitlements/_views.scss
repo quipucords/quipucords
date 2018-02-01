@@ -43,12 +43,14 @@
   width: 85px;
 }
 
-.quipucords-text-area-output.form-control[readonly] {
+.quipucords-form-control.form-control[readonly] {
   background-color: $color-pf-white;
   border: 0;
   color: inherit;
   font-weight: 700;
-  resize: none;
+  &[type=textarea] {
+    resize: none;
+  }
 }
 
 .blank-slate-pf button {
