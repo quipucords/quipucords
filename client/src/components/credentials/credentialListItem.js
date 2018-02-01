@@ -1,36 +1,43 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ListView, Button, Icon, Checkbox } from 'patternfly-react';
+import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class CredentialListItem extends React.Component {
   render() {
     const { item, onItemSelectChange, onEdit, onDelete } = this.props;
 
     let itemIcon;
+    let credentialTypeText;
+
     switch (item.cred_type) {
       case 'vcenter':
         itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
+        credentialTypeText = 'VCenter';
         break;
       case 'network':
         itemIcon = <ListView.Icon type="pf" name="network" />;
+        credentialTypeText = 'Network';
         break;
       case 'satellite':
         itemIcon = <ListView.Icon type="fa" name="space-shuttle" />;
+        credentialTypeText = 'Satellite';
         break;
       default:
         itemIcon = null;
+        credentialTypeText = '';
     }
 
-    let credentialType;
+    let authType;
     switch (item.auth_type) {
       case 'sshKey':
-        credentialType = 'SSH Key';
+        authType = 'SSH Key';
         break;
       case 'becomeUser':
-        credentialType = 'Become User';
+        authType = 'Become User';
         break;
       default:
-        credentialType = 'Username & Password';
+        authType = 'Username & Password';
     }
 
     return (
@@ -43,8 +50,12 @@ class CredentialListItem extends React.Component {
             onClick={e => onItemSelectChange(item)}
           />
         }
-        actions={
-          <span>
+        actions={[
+          <SimpleTooltip
+            key="editButton"
+            id="editTip"
+            tooltip="Edit Credential"
+          >
             <Button
               onClick={() => {
                 onEdit(item);
@@ -54,6 +65,12 @@ class CredentialListItem extends React.Component {
             >
               <Icon type="pf" name="edit" />
             </Button>
+          </SimpleTooltip>,
+          <SimpleTooltip
+            key="deleteButton"
+            id="deleteTip"
+            tooltip="Delete Credential"
+          >
             <Button
               onClick={() => {
                 onDelete(item);
@@ -63,23 +80,42 @@ class CredentialListItem extends React.Component {
             >
               <Icon type="pf" name="delete" />
             </Button>
-          </span>
+          </SimpleTooltip>
+        ]}
+        leftContent={
+          <SimpleTooltip id="credentialTypeTip" tooltip={credentialTypeText}>
+            {itemIcon}
+          </SimpleTooltip>
         }
-        leftContent={itemIcon}
         heading={item.name}
-        description={credentialType}
+        description={
+          <SimpleTooltip id="methodTip" tooltip="Authorization Type">
+            {authType}
+          </SimpleTooltip>
+        }
         additionalInfo={[
           <ListView.InfoItem
             key="userName"
             className="list-view-info-item-text-count"
           >
-            {item.authType === 'becomeUser' ? item.become_user : item.username}
+            <SimpleTooltip
+              id="userTip"
+              tooltip={
+                item.authType === 'becomeUser' ? 'Become User' : 'Username'
+              }
+            >
+              {item.authType === 'becomeUser'
+                ? item.become_user
+                : item.username}
+            </SimpleTooltip>
           </ListView.InfoItem>,
           <ListView.InfoItem
             key="becomeMethod"
             className="list-view-info-item-text-count"
           >
-            {item.authType === 'becomeUser' ? item.become_method : ''}
+            <SimpleTooltip id="methodTip" tooltip="Become Method">
+              {item.authType === 'becomeUser' ? item.become_method : ''}
+            </SimpleTooltip>
           </ListView.InfoItem>
         ]}
       />
