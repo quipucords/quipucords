@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class FactCollectionCSVRenderer(renderers.BaseRenderer):
     """Class to render FactCollection as CSV."""
 
+    ANSIBLE_ERROR_MESSAGE = 'Error. See logs.'
     media_type = 'text/csv'
     format = 'csv'
 
@@ -137,7 +138,7 @@ class FactCollectionCSVRenderer(renderers.BaseRenderer):
             logger.error(
                 'Fact appears to be raw ansible output. %s=%s',
                 header, fact_dict)
-            return 'ERROR_SEE_LOGS'
+            return self.ANSIBLE_ERROR_MESSAGE
 
         result = '{'
         value_string = '%s:%s;'

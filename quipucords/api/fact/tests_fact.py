@@ -371,7 +371,8 @@ class FactCollectionTest(TestCase):
         # Test ansible error
         test_python = {'rc': 0}
         value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, 'ERROR_SEE_LOGS')
+        self.assertEqual(
+            value, FactCollectionCSVRenderer.ANSIBLE_ERROR_MESSAGE)
 
     def test_csv_generate_headers(self):
         """Test csv_generate_headers method."""
