@@ -19,3 +19,6 @@ pylint-plugin-utils==0.2.6
 
 #Doc
 pandoc==1.0.2
+sphinx
+sphinx-autobuild==0.7.1
+sphinx-rtd-theme==0.2.4
