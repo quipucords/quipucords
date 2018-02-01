@@ -3,7 +3,7 @@ Quipucords Beta
 
 Installation
 ------------
-quipucords is delivered via a RPM command line tool and a server container image. Below you will find instructions for installing each of these items.
+Quipucords is delivered via a RPM command line tool and a server container image. Below you will find instructions for installing each of these items.
 
 Command Line
 ^^^^^^^^^^^^
@@ -38,7 +38,7 @@ Red Hat Enterprise Linux 6::
 
 Preparing for Server Setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-The quipucords server is delivered as a container image that will be run on your server. First you must install the necessary dependency, Docker, in order to run the container.
+The Quipucords server is delivered as a container image that will be run on your server. First you must install the necessary dependency, Docker, in order to run the container.
 
 Installing Docker on Red Hat Enterprise Linux 6.6+
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -137,3 +137,60 @@ Now that Docker has been installed on the system perform the following steps to 
 
 2. Verify that docker is installed correctly by running the hello-world image::
   $ sudo docker run hello-world
+
+
+Obtaining the Server Image
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Now that Docker has been installed we can obtain the container image that will enable the use of the Quipucords server.
+
+**TBD**
+
+
+Running the Quipucords Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+With the Quipucords container image now available on your system's image registry we can start the server.
+
+There are several configurable options that must be considered:
+
+- Exposed server port
+- Selecting a directory for SSH keys
+- Selecting a directory for the SQLlite database
+- Selecting a directory for log output
+
+
+The server exposes port 443, which is the standard HTTPS port. You may choose to utilize that port or re-map the port on your server.
+
+If you selected to expose port 443 then you would use the following option when running the image ``-p443:443``. If you wish to re-map the port on your system Docker's mapping is -p<host_port>:<container_port>. If you choose for example to re-map the port to 8443 the option to supply would be ``-p8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``docker ps`` command.
+
+
+For the next three configuration options we will take a simple setup strategy for the Quipucords server and create a "home directory" for the server.
+
+1. Create the home directory ``/opt/quipucords``::
+
+  mkdir -p /opt/quipucords
+
+2. Change to that directory::
+
+  cd /opt/quipucords
+
+3. Create directories to house the SSH keys (``/opt/quipucords/sshkeys``), database (``/opt/quipucords/data``), and log output (``/opt/quipucords/log``)::
+
+  mkdir sshkeys
+  mkdir data
+  mkdir log
+
+
+Following these steps we can now launch the Quipucords server with the following docker command::
+
+  docker run --name quipucords -d -p443:443 -v /opt/quipucords/sshkeys:/sshkeys -v /opt/quipucords/data:/var/data -v /opt/quipucords/log:/var/log -i quipucords:latest
+
+The above command starts the server running on port ``443`` mapping the server's directories to the home directory we just created. You can view the status of the running server with ``docker ps``.
+
+Verify the server is responding correctly by launching a browser to **https://<ip_address>:<port>/admin**. If your browser is on the same system as the server and you exposed port ``443`` the URL would be **https://localhost/admin**. When your browser loads you should see the administrative login dialog. From here you can log into the server and change the default password. The server comes defaulted with a user **admin** and password **pass**. You should find the "Change Password" selection in the upper right navigation bar.
+
+
+Configuring the Command Line
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+With the server up and running you can now configure **qpc** to work with the server. You can do this with the ``qpc server config`` command. The ``qpc server config`` command takes a ``--host <host>`` flag and an optional ``--port <port>`` flag; defaults to ``443``. If you are using qpc on the same system where the server is running you can supply ``--host 127.0.0.1`` otherwise supply the correct IP address. If you decided to remap the port to another port you must supply that to the port option (i.e. ``--port 8443``).
+
+Now the command line has been configured you can log in with the ``qpc server login`` command. Verify your ability to log into the server.
