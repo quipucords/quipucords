@@ -285,7 +285,7 @@ class FactCollectionTest(TestCase):
         # These would be different if not cached
         self.assertEqual(csv_result, expected)
 
-        # Clear cach
+        # Clear cache
         fact_collection = FactCollection.objects.get(id=response_json['id'])
         fact_collection.csv_content = None
         fact_collection.save()
@@ -298,7 +298,7 @@ class FactCollectionTest(TestCase):
         expected = 'Fact Collection,Number Sources\r\n1,0\r\n'
         self.assertEqual(csv_result, expected)
 
-        # Clear cach
+        # Clear cache
         fact_collection = FactCollection.objects.get(id=response_json['id'])
         fact_collection.csv_content = None
         fact_collection.save()
@@ -311,7 +311,7 @@ class FactCollectionTest(TestCase):
         expected = 'Fact Collection,Number Sources\r\n1,0\r\n\r\n\r\n'
         self.assertEqual(csv_result, expected)
 
-        # Clear cach
+        # Clear cache
         fact_collection = FactCollection.objects.get(id=response_json['id'])
         fact_collection.csv_content = None
         fact_collection.save()
