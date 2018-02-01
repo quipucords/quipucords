@@ -12,6 +12,7 @@
 
 import copy
 import json
+from collections import OrderedDict
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import api.messages as messages
@@ -345,7 +346,9 @@ class FactCollectionTest(TestCase):
         self.assertEqual(value, '[value]')
 
         # Test flat with 2 entries
-        test_python = {'key1': 'value1', 'key2': 'value2'}
+        test_python = OrderedDict()
+        test_python['key1'] = 'value1'
+        test_python['key2'] = 'value2'
         value = renderer.serialize_value('header', test_python)
         self.assertEqual(value, '{key1:value1;key2:value2}')
 
@@ -354,8 +357,10 @@ class FactCollectionTest(TestCase):
         self.assertEqual(value, '[value1;value2]')
 
         # Test nested
-        test_python = {'key': 'value', 'dict': {
-            'nkey': 'nvalue'}, 'list': ['a']}
+        test_python = OrderedDict()
+        test_python['key'] = 'value'
+        test_python['dict'] = {'nkey': 'nvalue'}
+        test_python['list'] = ['a']
         value = renderer.serialize_value('header', test_python)
         self.assertEqual(value, '{key:value;dict:{nkey:nvalue};list:[a]}')
 
