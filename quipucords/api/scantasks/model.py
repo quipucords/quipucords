@@ -12,6 +12,7 @@
 
 These models are used in the REST definitions.
 """
+from datetime import datetime
 import logging
 from django.utils.translation import ugettext as _
 from django.db import models
@@ -63,6 +64,8 @@ class ScanTask(models.Model):
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
     sequence_number = models.PositiveIntegerField(null=True)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -73,14 +76,18 @@ class ScanTask(models.Model):
             'sequence_number:{}, '\
             'systems_count: {}, '\
             'systems_scanned: {}, '\
-            'systems_failed: {}, '.format(self.id,
-                                          self.scan_type,
-                                          self.status,
-                                          self.source,
-                                          self.sequence_number,
-                                          self.systems_count,
-                                          self.systems_scanned,
-                                          self.systems_failed) + '}'
+            'systems_failed: {}, '\
+            'start_time: {} '\
+            'end_time: {} '.format(self.id,
+                                   self.scan_type,
+                                   self.status,
+                                   self.source,
+                                   self.sequence_number,
+                                   self.systems_count,
+                                   self.systems_scanned,
+                                   self.systems_failed,
+                                   self.start_time,
+                                   self.end_time) + '}'
 
     class Meta:
         """Metadata for model."""
@@ -89,6 +96,7 @@ class ScanTask(models.Model):
 
     def start(self):
         """Start a task."""
+        self.start_time = datetime.utcnow()
         self.status = ScanTask.RUNNING
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
@@ -96,7 +104,7 @@ class ScanTask(models.Model):
     def restart(self):
         """Start a task."""
         self.status = ScanTask.PENDING
-        self.status_message = 'Task was restarted'
+        self.status_message = _(messages.ST_STATUS_MSG_RESTARTED)
         self.save()
 
     def pause(self):
@@ -107,12 +115,14 @@ class ScanTask(models.Model):
 
     def cancel(self):
         """Cancel a task."""
+        self.end_time = datetime.utcnow()
         self.status = ScanTask.CANCELED
         self.status_message = _(messages.ST_STATUS_MSG_CANCELED)
         self.save()
 
     def complete(self, message=None):
         """Complete a task."""
+        self.end_time = datetime.utcnow()
         self.status = ScanTask.COMPLETED
         if message:
             self.status_message = message
@@ -126,6 +136,7 @@ class ScanTask(models.Model):
 
         :param message: The error message associated with failure
         """
+        self.end_time = datetime.utcnow()
         self.status = ScanTask.FAILED
         self.status_message = message
         logger.error(self.status_message)
