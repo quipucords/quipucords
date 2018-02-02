@@ -208,3 +208,134 @@ Configuring the Command Line
 With the server up and running you can now configure **qpc** to work with the server. You can do this with the ``qpc server config`` command. The ``qpc server config`` command takes a ``--host <host>`` flag and an optional ``--port <port>`` flag; defaults to ``443``. If you are using qpc on the same system where the server is running you can supply ``--host 127.0.0.1`` otherwise supply the correct IP address. If you decided to remap the port to another port you must supply that to the port option (i.e. ``--port 8443``).
 
 Now the command line has been configured you can log in with the ``qpc server login`` command. Verify your ability to log into the server.
+
+
+Getting Started
+---------------
+Now that everything is installed and configured you can begin to utilize the capabilities of Quipucords to gather information on your IT infrastructure.
+
+Quipucords inspects various sources using credentials. You must first identify what sources will be inspected from the supported list:
+
+- Network
+- vCenter server
+- Satellite
+
+Network sources are composed of IP address, IP ranges, or hostnames. vCenter server and Satellite sources are created with the IP address or hostname of the server. Sources additionally are composed of credentials. A Network source can have a list of credentials as it is expected that many may be needed for a broad IP range, whereas vCenter server and Satellite use a single credential.
+
+Working with a Network Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Let's walk through the various commands needed to use a Network source.
+
+Complete the following steps, repeating them as necessary to access all parts of your environment that you want to scan:
+
+1. Create at least one Network credential with root-level access::
+
+  # qpc cred add --type network --name cred_name --username root_name [--sshkeyfile key_file] [--password]
+
+If you did not use the ``sshkeyfile`` option to provide an SSH key for the username value, enter the password of the user with root-level access at the connection password prompt.
+
+For example, for a Network credential where the name is **roothost1**, the user with root-level access is ``root``, and the SSH key for the user is in the ``~/.ssh/id_rsa`` file, you would enter the following command::
+
+  # qpc cred add --type network --name roothost1 --username root --sshkeyfile ~/.ssh/id_rsa
+
+qpc also supports privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options to create a Network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
+
+For example, for a Network credential where the name is **sudouser1**, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command::
+
+  # qpc cred add --type network --name sudouser1 --username sysadmin --password --become-password
+
+After you enter this command, you are prompted to enter two passwords. First, you would enter the connection password for the username user, and then you would enter the password for the **become-method** which is the ``sudo`` command by default.
+
+2. Create at least one Network source that specifies one or more network identifiers, such as a host name, an IP address, a list of IP addresses, or an IP range, and one or more network credentials to be used for the scan::
+
+  # qpc source add --type network --name source_name --hosts host_name_or_file --cred cred_name
+
+For example, for a Network source where the name is **mynetwork**, the network to be scanned is the **192.0.2.0/24** subnet, and the Network credentials that are used to run the scan are **roothost1** and **roothost2**, you would enter the following command::
+
+  # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2
+
+You can also use a file to pass in the network identifiers. If you use a file to enter multiple network identifiers, such as multiple individual IP addresses, enter each on a single line. For example, for a network profile where the path to this file is /home/user1/hosts_file, you would enter the following command::
+
+  # qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
+
+
+Working with a vCenter Server Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Let's walk through the various commands needed to use a vCenter server source.
+
+Complete the following steps, repeating them as necessary to access all parts of your environment that you want to scan:
+
+1. Create at least one vCenter credential::
+
+  # qpc cred add --type vcenter --name cred_name --username vcenter_user --password
+
+Enter the password of the user with access to the vCenter server at the connection password prompt.
+
+For example, for a vCenter credential where the name is **vcenter_admin** and the user with access is ``admin`` would enter the following command::
+
+  # qpc cred add --type vcenter --name vcenter_admin --username admin --password
+
+2. Create at least one vCenter source that specifies a network identifiers, such as a host name or an IP address of the vCenter server, and one vCenter credential to be used for the scan::
+
+  # qpc source add --type vcenter --name source_name --hosts host_name --cred cred_name
+
+For example, for a vCenter source where the name is **myvcenter**, the vCenter server to be scanned is the **192.0.2.10**, and the vCenter credential used to run the scan is **vcenter_admin**, you would enter the following command::
+
+  # qpc source add --type vcenter --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin
+
+
+Working with a Satellite Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Let's walk through the various commands needed to use a Satellite source.
+
+Complete the following steps, repeating them as necessary to access all parts of your environment that you want to scan:
+
+1. Create at least one Satellite credential::
+
+  # qpc cred add --type satellite --name cred_name --username satellite_user --password
+
+Enter the password of the user with access to the Satellite server at the connection password prompt.
+
+For example, for a Satellite credential where the name is **satellite_admin** and the user with access is ``admin`` would enter the following command::
+
+  # qpc cred add --type satellite --name satellite_admin --username admin --password
+
+2. Create at least one Satellite source that specifies a network identifiers, such as a host name or an IP address of the Satellite server, and one Satellite credential to be used for the scan::
+
+  # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name
+
+For example, for a Satellite source where the name is **mysatellite6**, the Satellite server to be scanned is the **192.0.2.15**, and the Satellite credential used to run the scan is **satellite_admin**, you would enter the following command::
+
+  # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin
+
+
+Running a scan
+^^^^^^^^^^^^^^
+After you set up your credentials and sources, you can run a Quipucords scan.
+
+Run the scan by using the ``scan start`` command, specifying one or more sources for the ``sources`` option::
+
+  # qpc scan --sources source_name1 source_name2
+
+For example, if you want to use the Network source **mynetwork** and the Satellite source **mysatellite6**, you would enter the following command::
+
+  # qpc scan start --sources mynetwork mysatellite6
+
+After executing the command you will be provided an identifier for the scan that is being run. You can follow the status of the scan by using the ``scan show`` command, specifying the provided identifier.
+
+For example, if the ``scan start`` provided the following output::
+
+  # qpc scan start --sources mynetwork mysatellite6
+  Scan "1" started
+
+To follow the status of the scan you would enter the following command::
+
+  # qpc scan show --id 1
+
+When the scan completes you can obtain the report by using the ``report summary`` command and specifying the identifier for the scan along with the desired format **JSON** or **CSV** and the ``output-file``.
+
+For example, if you wanted to see the report summary for a scan with identifier **1** as a CSV file stored in ~/scan_result.csv, you would enter the following command::
+
+  # qpc report summary --id 1 --csv --output-file=~/scan_result.CSV
+
+The ``report summary`` command produces a report that has attempted to deduplicate and merge facts from hosts found from multiple sources. If you wish to see the raw facts used to create this report you can use the ``report detail`` command which takes the same options as the ``report summary`` command but with output from each source.
