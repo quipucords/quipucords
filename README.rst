@@ -2,7 +2,14 @@
     :target: https://travis-ci.org/quipucords/quipucords
 .. image:: https://coveralls.io/repos/github/quipucords/quipucords/badge.svg?branch=master
     :target: https://coveralls.io/github/quipucords/quipucords?branch=master
-
+.. image:: https://readthedocs.org/projects/quipucords/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://quipucords.readthedocs.io/en/latest/?badge=latest
+.. image:: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/status_image/last_build.png
+    :alt: CLI RPM Build Status
+    :scale: 100%
+    :target: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/
 
 quipucords - Tool for discovery, inspection, collection/deduplication, and reporting on an IT environment
 ==========================================================================================================
