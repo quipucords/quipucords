@@ -22,6 +22,9 @@ from rest_framework import status
 from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import (BrowsableAPIRenderer,
+                                      JSONRenderer)
+from api.report.renderer import ReportCSVRenderer
 from api.models import SystemFingerprint
 from api.serializers import FingerprintSerializer
 import api.messages as messages
@@ -33,6 +36,9 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 class ReportListView(APIView):
     """List all system reports."""
+
+    renderer_classes = (JSONRenderer, BrowsableAPIRenderer,
+                        ReportCSVRenderer)
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
