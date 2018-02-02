@@ -5,11 +5,12 @@ import Store from '../../redux/store';
 
 import {
   Alert,
-  Grid,
   EmptyState,
-  Row,
+  Grid,
+  Icon,
   ListView,
-  Modal
+  Modal,
+  Row
 } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
@@ -23,13 +24,13 @@ import SourcesToolbar from './sourcesToolbar';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
+import { AddSourceWizard } from './addSourceWizard';
 
 class Sources extends React.Component {
   constructor() {
     super();
 
     bindMethods(this, [
-      'addSource',
       'importSources',
       'scanSource',
       'scanSources',
@@ -38,14 +39,18 @@ class Sources extends React.Component {
       'deleteSource',
       'hideScanDialog',
       'createScan',
-      'refresh'
+      'refresh',
+      'showAddSourceWizard',
+      'quitAddSourceWizard'
     ]);
+
     this.state = {
       filteredItems: [],
       selectedItems: [],
       scanDialogShown: false,
       multiSourceScan: false,
-      currentScanSource: null
+      currentScanSource: null,
+      addSourceWizardShown: false
     };
   }
 
@@ -148,12 +153,38 @@ class Sources extends React.Component {
     });
   }
 
-  addSource() {
+  showAddSourceWizard() {
+    this.setState({ addSourceWizardShown: true });
+
+    /*
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
       message: 'Adding sources is not yet implemented'
+    });
+    */
+  }
+
+  quitAddSourceWizard() {
+    let heading = <h3>Are you sure you want to stop adding a source?</h3>;
+
+    let onConfirm = () => {
+      Store.dispatch({
+        type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+      });
+
+      this.setState({ addSourceWizardShown: false });
+    };
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Stop Adding Source',
+      heading: heading,
+      cancelButtonText: 'No',
+      confirmButtonText: 'Yes',
+      icon: '<Icon name="pf" type="warning-triangle-o" />',
+      onConfirm: onConfirm
     });
   }
 
@@ -273,7 +304,8 @@ class Sources extends React.Component {
       selectedItems,
       scanDialogShown,
       multiSourceScan,
-      currentScanSource
+      currentScanSource,
+      addSourceWizardShown
     } = this.state;
 
     if (loading) {
@@ -286,6 +318,7 @@ class Sources extends React.Component {
         </Modal>
       );
     }
+
     if (loadError) {
       return (
         <EmptyState>
@@ -299,33 +332,46 @@ class Sources extends React.Component {
     if (sources && sources.length) {
       this.sortSources(filteredItems);
 
-      return [
-        <SourcesToolbar
-          totalCount={sources.length}
-          filteredCount={filteredItems.length}
-          key={1}
-          onAddSource={this.addSource}
-          scanAvailable={selectedItems && selectedItems.length > 0}
-          onScan={this.scanSources}
-          onRefresh={this.refresh}
-        />,
-        <Grid fluid key={2}>
-          {this.renderList(filteredItems)}
-        </Grid>,
-        <CreateScanDialog
-          key="createScanDialog"
-          show={scanDialogShown}
-          sources={multiSourceScan ? selectedItems : [currentScanSource]}
-          onCancel={this.hideScanDialog}
-          onScan={this.createScan}
-        />
-      ];
+      return (
+        <React.Fragment>
+          <SourcesToolbar
+            totalCount={sources.length}
+            filteredCount={filteredItems.length}
+            key={1}
+            onAddSource={this.showAddSourceWizard}
+            scanAvailable={selectedItems && selectedItems.length > 0}
+            onScan={this.scanSources}
+            onRefresh={this.refresh}
+          />
+          <Grid fluid key={2}>
+            {this.renderList(filteredItems)}
+          </Grid>
+          <AddSourceWizard
+            show={addSourceWizardShown}
+            onCancel={this.quitAddSourceWizard}
+          />
+          <CreateScanDialog
+            key="createScanDialog"
+            show={scanDialogShown}
+            sources={multiSourceScan ? selectedItems : [currentScanSource]}
+            onCancel={this.hideScanDialog}
+            onScan={this.createScan}
+          />
+        </React.Fragment>
+      );
     }
+
     return (
-      <SourcesEmptyState
-        onAddSource={this.addSource}
-        onImportSources={this.importSources}
-      />
+      <React.Fragment>
+        <SourcesEmptyState
+          onAddSource={this.showAddSourceWizard}
+          onImportSources={this.importSources}
+        />
+        <AddSourceWizard
+          show={addSourceWizardShown}
+          onCancel={this.quitAddSourceWizard}
+        />
+      </React.Fragment>
     );
   }
 }
