@@ -2,7 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Button, EmptyState, Grid, Row } from 'patternfly-react';
+import {
+  Button,
+  DropdownButton,
+  EmptyState,
+  Grid,
+  MenuItem,
+  Row
+} from 'patternfly-react';
 
 class CredentialsEmptyState extends React.Component {
   render() {
@@ -21,13 +28,31 @@ class CredentialsEmptyState extends React.Component {
               them from a spreadsheet template.
             </EmptyState.Info>
             <EmptyState.Action>
-              <Button
+              <DropdownButton
                 bsStyle="primary"
-                bsSize="large"
-                onClick={this.props.onAddCredential}
+                title="Add Credential"
+                pullRight
+                id="createCredentialButton"
               >
-                Add Credential
-              </Button>
+                <MenuItem
+                  eventKey="1"
+                  onClick={() => this.props.onAddCredential('network')}
+                >
+                  Network Credential
+                </MenuItem>
+                <MenuItem
+                  eventKey="2"
+                  onClick={() => this.props.onAddCredential('satellite')}
+                >
+                  Satellite Credential
+                </MenuItem>
+                <MenuItem
+                  eventKey="2"
+                  onClick={() => this.props.onAddCredential('vcenter')}
+                >
+                  VCenter Credential
+                </MenuItem>
+              </DropdownButton>
             </EmptyState.Action>
             <EmptyState.Action secondary>
               <Button bsStyle="default" onClick={this.props.onAddSource}>

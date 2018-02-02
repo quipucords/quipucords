@@ -1,3 +1,5 @@
+import { helpers } from '../../common/helpers';
+
 const ScanFilterFields = [
   {
     id: 'name',
@@ -26,8 +28,8 @@ const ScanFilterFields = [
     placeholder: 'Filter by Scan Type',
     filterType: 'select',
     filterValues: [
-      { title: 'Connect', id: 'connect' },
-      { title: 'Inspect', id: 'inspect' }
+      { title: helpers.scanTypeString('connect'), id: 'connect' },
+      { title: helpers.scanTypeString('inspect'), id: 'inspect' }
     ]
   }
 ];
