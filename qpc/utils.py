@@ -201,7 +201,10 @@ def write_client_token(client_token):
 def delete_client_token():
     """Remove file client_token."""
     ensure_config_dir_exists()
-    os.remove(QPC_CLIENT_TOKEN)
+    try:
+        os.remove(QPC_CLIENT_TOKEN)
+    except FileNotFoundError:
+        pass
 
 
 def ensure_data_dir_exists():
