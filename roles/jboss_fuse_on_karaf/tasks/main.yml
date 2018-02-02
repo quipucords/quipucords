@@ -73,6 +73,7 @@
       raw: ls -1 "{{ item }}/system/org/jboss"
       register: karaf_home_system_org_jboss
       ignore_errors: yes
+      with_items: "{{ karaf_homes }}"
       when: 'jboss_fuse'
 
 
