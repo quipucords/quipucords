@@ -315,6 +315,13 @@ class ScanJobTest(TestCase):
             'options': {'disable_optional_products':
                         ['Extra vars values must be type boolean.']}})
 
+    def test_get_optional_products(self):
+        """Test the get_optional_products method when arg is None."""
+        disable_optional_products = None
+        expected = {}
+        content = ScanJob.get_optional_products(disable_optional_products)
+        self.assertEqual(content, expected)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_list(self, start_scan):
         """List all ScanJob objects."""
