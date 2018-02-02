@@ -220,7 +220,7 @@ Quipucords inspects various sources using credentials. You must first identify w
 - vCenter server
 - Satellite
 
-Network sources are composed of IP address, IP ranges, or hostnames. vCenter server and Satellite is created with the IP address or hostname of the server. Sources additionally are composed of credentials. A Network source can have a list of credentials as it is expected that many may be needed for a broad IP range, whereas vCenter server and Satellite use a single credential.
+Network sources are composed of IP address, IP ranges, or hostnames. vCenter server and Satellite sources are created with the IP address or hostname of the server. Sources additionally are composed of credentials. A Network source can have a list of credentials as it is expected that many may be needed for a broad IP range, whereas vCenter server and Satellite use a single credential.
 
 Working with a Network Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -240,7 +240,7 @@ For example, for a Network credential where the name is **roothost1**, the user 
 
 qpc also supports privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options to create a Network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
 
-For example, for a Network credential where the is **sudouser1**, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command::
+For example, for a Network credential where the name is **sudouser1**, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command::
 
   # qpc cred add --type network --name sudouser1 --username sysadmin --password --become-password
 
@@ -252,11 +252,11 @@ After you enter this command, you are prompted to enter two passwords. First, yo
 
 For example, for a Network source where the name is **mynetwork**, the network to be scanned is the **192.0.2.0/24** subnet, and the Network credentials that are used to run the scan are **roothost1** and **roothost2**, you would enter the following command::
 
-  # qpc source add --type --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2
+  # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2
 
 You can also use a file to pass in the network identifiers. If you use a file to enter multiple network identifiers, such as multiple individual IP addresses, enter each on a single line. For example, for a network profile where the path to this file is /home/user1/hosts_file, you would enter the following command::
 
-  # qpc source add --type --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
+  # qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
 
 
 Working with a vCenter Server Source
@@ -281,7 +281,7 @@ For example, for a vCenter credential where the name is **vcenter_admin** and th
 
 For example, for a vCenter source where the name is **myvcenter**, the vCenter server to be scanned is the **192.0.2.10**, and the vCenter credential used to run the scan is **vcenter_admin**, you would enter the following command::
 
-  # qpc source add --type --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin
+  # qpc source add --type vcenter --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin
 
 
 Working with a Satellite Source
@@ -306,7 +306,7 @@ For example, for a Satellite credential where the name is **satellite_admin** an
 
 For example, for a Satellite source where the name is **mysatellite6**, the Satellite server to be scanned is the **192.0.2.15**, and the Satellite credential used to run the scan is **satellite_admin**, you would enter the following command::
 
-  # qpc source add --type --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin
+  # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin
 
 
 Running a scan
