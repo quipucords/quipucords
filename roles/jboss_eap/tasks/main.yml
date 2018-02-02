@@ -8,13 +8,13 @@
       when: 'have_java and jboss_eap'
 
     - name: use locate to look for jboss-modules.jar
-      raw: locate jboss-modules.jar | xargs -n 1 dirname 2> /dev/null
+      raw: locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
       register: jboss_eap_locate_jboss_modules_jar
       ignore_errors: yes
       when: 'have_locate and jboss_eap'
 
     - name: use find to look for jboss-modules.jar
-      raw: find {{scan_dirs}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 dirname 2> /dev/null | sort -u
+      raw: find {{scan_dirs}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
       register: jboss_eap_find_jboss_modules_jar
       ignore_errors: yes
       # This task should not run by default. We need a programmatic
@@ -101,7 +101,7 @@
       when: 'jboss_eap'
 
     - name: gather jboss.eap.processes
-      raw: ps -A -f e | grep eap
+      raw: ps -A -o comm -o args e --columns 10000 | grep eap
       register: jboss_eap_processes
       ignore_errors: yes
       when: 'jboss_eap'

@@ -16,7 +16,7 @@ from getpass import getpass
 from requests import codes
 from qpc.clicommand import CliCommand
 from qpc.request import POST
-from qpc.utils import write_client_token
+from qpc.utils import write_client_token, delete_client_token
 import qpc.server as server
 from qpc.translation import _
 import qpc.messages as messages
@@ -50,6 +50,7 @@ class LoginHostCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
+        delete_client_token()
         if 'username' in self.args and self.args.username:
             # check for file existence on system
             self.username = self.args.username

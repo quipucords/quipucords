@@ -20,6 +20,7 @@ import qpc.source as source
 import qpc.scan as scan
 from qpc.utils import (ensure_config_dir_exists,
                        get_server_location,
+                       read_client_token,
                        ensure_data_dir_exists,
                        setup_logging,
                        log)
@@ -109,8 +110,13 @@ class CLI(object):
             server_location = get_server_location()
             if server_location is None or server_location == '':
                 log.error(
-                    'Please configure server location using command below.')
-                log.error('qpc server config --host HOST --port PORT')
+                    'Please configure server location using command below:')
+                log.error('$ qpc server config --host HOST --port PORT')
+                sys.exit(1)
+            # ...and sure we are logged in
+            if not read_client_token():
+                log.error('Please log in using the command below:')
+                log.error('$ qpc server login')
                 sys.exit(1)
 
         if self.args.subcommand in self.subcommands:

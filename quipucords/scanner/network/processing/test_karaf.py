@@ -14,7 +14,8 @@
 
 import unittest
 from scanner.network.processing import process, karaf
-from scanner.network.processing.test_util import ansible_result
+from scanner.network.processing.test_util import ansible_result, \
+    ansible_results
 
 
 class TestProcessKarafRunningProcesses(unittest.TestCase):
@@ -101,11 +102,13 @@ class TestProcessKarafHomeBinFuse(unittest.TestCase):
     def test_success(self):
         """Found karaf.jar."""
         self.assertEqual(
-            karaf.ProcessKarafHomeBinFuse.process(ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            karaf.ProcessKarafHomeBinFuse.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
+            {'foo': True})
 
     def test_not_found(self):
         """Did not find karaf home bin fuse."""
         self.assertEqual(
-            karaf.ProcessKarafHomeBinFuse.process(ansible_result('')),
-            [])
+            karaf.ProcessKarafHomeBinFuse.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'foo': False})

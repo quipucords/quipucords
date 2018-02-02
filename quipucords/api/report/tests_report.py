@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,6 +16,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from api.models import (Source,
                         Credential)
+from api.report.renderer import ReportCSVRenderer
 from rest_framework import status
 
 
@@ -216,3 +217,64 @@ class SystemReportTest(TestCase):
                    'os_name': 'true'}
         response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    ##############################################################
+    # Test CSV Renderer
+    ##############################################################
+    def test_csv_renderer(self):
+        """Test ReportCSVRenderer."""
+        renderer = ReportCSVRenderer()
+        # Test no FC id
+        test_json = {}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Test doesn't exist
+        test_json = {'id': 42}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+        filters = {'fact_collection_id': 1}
+        url = '/api/v1/reports/'
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+
+        print(report)
+        csv_result = renderer.render(report)
+
+        # pylint: disable=line-too-long
+        expected = 'Fact Collection\r\n1\r\n\r\n\r\nReport:\r\nbios_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,infrastructure_type,ip_addresses,mac_addresses,name,os_name,os_release,os_version,subscription_manager_id,system_creation_date,virtualized_is_guest,virtualized_num_guests,virtualized_num_running_guests,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_cpu_cores,vm_host_cpu_threads,vm_host_socket_count,vm_memory_size,vm_state,vm_uuid\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.5,7.5,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n\r\n'  # noqa
+        self.assertEqual(csv_result, expected)
+
+    def test_csv_renderer_only_name(self):
+        """Test ReportCSVRenderer name filter."""
+        renderer = ReportCSVRenderer()
+        # Test no FC id
+        test_json = {}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Test doesn't exist
+        test_json = {'id': 42}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+        filters = {'fact_collection_id': 1, 'name': True}
+        url = '/api/v1/reports/'
+        response = self.client.get(url, filters)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+
+        print(report)
+        csv_result = renderer.render(report)
+
+        # pylint: disable=line-too-long
+        expected = 'Fact Collection\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
+        self.assertEqual(csv_result, expected)
