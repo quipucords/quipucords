@@ -259,3 +259,39 @@ class TestProcessEapHomeBinForFuse(unittest.TestCase):
         }
         actual_result = eap.ProcessEapHomeBinForFuse.process(processor_input)
         self.assertEqual(actual_result, expected_result)
+
+
+class TestProcessEapHomeLayers(unittest.TestCase):
+    """Test looking for eap home layers."""
+
+    def test_success(self):
+        """Found eap home layers."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayers.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
+            {'foo': True})
+
+    def test_not_found(self):
+        """Did not find eap home layers."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayers.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'foo': False})
+
+
+class TestProcessEapHomeLayersConf(unittest.TestCase):
+    """Test looking for eap home layers conf."""
+
+    def test_success(self):
+        """Found eap home layers conf."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayersConf.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
+            {'foo': True})
+
+    def test_not_found(self):
+        """Did not find eap home layers conf."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayersConf.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'foo': False})

@@ -274,3 +274,27 @@ class ProcessEapHomeBinForFuse(IndicatorFileFinder):
     KEY = 'eap_home_bin'
 
     INDICATOR_FILES = ['fuseconfig.sh', 'fusepatch.sh']
+
+
+class ProcessEapHomeLayers(process.Processor):
+    """Process the output of eap home layers."""
+
+    KEY = 'eap_home_layers'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}
+
+
+class ProcessEapHomeLayersConf(process.Processor):
+    """Process the output of eap home layers conf."""
+
+    KEY = 'eap_home_layers_conf'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}
