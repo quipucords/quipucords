@@ -206,6 +206,7 @@ def delete_client_token():
     except FileNotFoundError:
         pass
 
+
 def ensure_data_dir_exists():
     """Ensure the qpc data directory exists."""
     if not os.path.exists(DATA_DIR):
