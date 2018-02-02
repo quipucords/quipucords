@@ -87,4 +87,5 @@ class ProcessKarafHomeBinFuse(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}

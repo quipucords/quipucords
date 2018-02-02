@@ -12,6 +12,7 @@
 import abc
 import json
 import logging
+import traceback
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -85,8 +86,8 @@ def process(facts, host):
         # Don't touch things that are not standard Ansible results,
         # because we don't know what format they will have.
         if not is_ansible_task_result(value):
-            logger.error('%s: value %s needs postprocessing but is not an '
-                         'Ansible result', host, value)
+            logger.error('%s: value %s:%s needs postprocessing but is not an '
+                         'Ansible result', host, key, value)
             # We don't know what data is supposed to go here, because
             # we can't run the postprocessor. Leaving the existing
             # data would cause database corruption and maybe trigger
@@ -101,15 +102,16 @@ def process(facts, host):
 
         return_code = value.get(RC, 0)
         if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-            logger.error('%s: remote command %s exited with %s: %s',
+            logger.error('%s: remote command for %s exited with %s: %s',
                          host, key, return_code, value['stdout'])
             result[key] = NO_DATA
             continue
 
         try:
             processor_out = processor.process(value)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error('%s: processor returned %s', host, str(ex))
+        except Exception:  # pylint: disable=broad-except
+            logger.error('%s: processor for %s got value %s, returned %s',
+                         host, key, value, traceback.format_exc())
             result[key] = NO_DATA
             continue
 
