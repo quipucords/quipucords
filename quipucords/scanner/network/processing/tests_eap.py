@@ -93,21 +93,22 @@ class TestProcessJbossEapProcesses(unittest.TestCase):
     def test_no_processes(self):
         """No processes found."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(ansible_result('', rc=1)),
+            eap.ProcessJbossEapProcesses.process(ansible_result('')),
             0)
 
     def test_found_processes(self):
         """Found one process."""
         self.assertEqual(
             eap.ProcessJbossEapProcesses.process(
-                ansible_result('1\n2\n3')),
+                ansible_result('java\nbash\ngrep')),
             1)
 
-    def test_bad_data(self):
-        """Found too few processes."""
+    def test_no_grep(self):
+        """Grep sometimes doesn't appear in the ps output."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(ansible_result('1')),
-            process.NO_DATA)
+            eap.ProcessJbossEapProcesses.process(
+                ansible_result('java\nbash')),
+            1)
 
 
 class TestProcessJbossEapPackages(unittest.TestCase):
