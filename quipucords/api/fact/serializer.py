@@ -11,16 +11,18 @@
 
 """Serializer for system facts models."""
 
+from rest_framework.serializers import (ChoiceField,
+                                        CharField)
 from api.models import FactCollection
 from api.common.serializer import (NotEmptySerializer,
-                                   CustomJSONField,
-                                   ChoiceField)
+                                   CustomJSONField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
     sources = CustomJSONField(required=True)
+    csv_content = CharField(required=False, read_only=True)
     status = ChoiceField(
         read_only=True, choices=FactCollection.FC_STATUS_CHOICES)
 

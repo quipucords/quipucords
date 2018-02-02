@@ -1,5 +1,5 @@
-Quipucords Beta
-===============
+Beta
+====
 
 Installation
 ------------
@@ -56,15 +56,19 @@ If your system meets the minimum required kernel version you can proceed with th
 
 
 2. Download the Docker RPM to the current directory::
+
   $ curl -O -sSL https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
 
 3. Use yum to install the package::
+
   $ sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm
 
 4. Start the Docker daemon::
+
   $ sudo service docker start
 
 5. Verify that docker is installed correctly by running the hello-world image.::
+
   $ sudo docker run hello-world
   Unable to find image 'hello-world:latest' locally
   latest: Pulling from hello-world
@@ -95,6 +99,7 @@ If your system meets the minimum required kernel version you can proceed with th
    http://docs.docker.com/userguide/
 
 6. To ensure Docker starts when you boot your system, do the following::
+
   $ sudo chkconfig docker on
 
 
@@ -111,12 +116,15 @@ You can install Docker in different ways, depending on your needs:
 1. Log into your machine as a user with ``sudo`` or ``root`` privileges.
 
 2. Install required packages::
+
   $ sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 
 3. Add repository::
+
   $ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 4. Install docker from repository::
+
   $ sudo yum install docker-ce
 
 **Install from a package**
@@ -126,6 +134,7 @@ You can install Docker in different ways, depending on your needs:
 2. Log into your machine as a user with ``sudo`` or ``root`` privileges.
 
 3. Install Docker, changing the path below to the path where you downloaded the Docker package::
+
   $ sudo yum install /path/to/package.rpm
 
 **Start Docker**
@@ -133,9 +142,11 @@ You can install Docker in different ways, depending on your needs:
 Now that Docker has been installed on the system perform the following steps to get running.
 
 1. Start Docker::
+
   $ sudo systemctl start docker
 
 2. Verify that docker is installed correctly by running the hello-world image::
+
   $ sudo docker run hello-world
 
 
@@ -145,6 +156,9 @@ Now that Docker has been installed we can obtain the container image that will e
 
 **TBD**
 
+
+Configuration
+-------------
 
 Running the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

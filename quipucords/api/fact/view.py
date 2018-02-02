@@ -18,11 +18,15 @@ from rest_framework.response import Response
 from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import (BrowsableAPIRenderer,
+                                      JSONRenderer)
 from api.models import FactCollection
 from api.serializers import FactCollectionSerializer
 from api.fact.util import (validate_fact_collection_json,
                            get_or_create_fact_collection)
+from api.fact.renderer import FactCollectionCSVRenderer
 from fingerprinter import pfc_signal
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -42,6 +46,8 @@ class FactViewSet(mixins.RetrieveModelMixin,
 
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
+    renderer_classes = (JSONRenderer, BrowsableAPIRenderer,
+                        FactCollectionCSVRenderer)
 
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
