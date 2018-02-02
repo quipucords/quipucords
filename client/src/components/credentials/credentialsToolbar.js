@@ -2,7 +2,15 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Button, DropdownButton, Filter, Icon, MenuItem, Sort, Toolbar } from 'patternfly-react';
+import {
+  Button,
+  DropdownButton,
+  Filter,
+  Icon,
+  MenuItem,
+  Sort,
+  Toolbar
+} from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
@@ -196,7 +204,12 @@ class CredentialsToolbar extends React.Component {
   }
 
   renderActions() {
-    const { onAddCredential, deleteAvailable, onDelete, onRefresh } = this.props;
+    const {
+      onAddCredential,
+      deleteAvailable,
+      onDelete,
+      onRefresh
+    } = this.props;
 
     return (
       <div className="form-group">
@@ -216,10 +229,7 @@ class CredentialsToolbar extends React.Component {
             VCenter Credential
           </MenuItem>
         </DropdownButton>
-        <Button
-          disabled={deleteAvailable === false}
-          onClick={onDelete}
-        >
+        <Button disabled={deleteAvailable === false} onClick={onDelete}>
           Delete
         </Button>
         <Button onClick={onRefresh} bsStyle="success">

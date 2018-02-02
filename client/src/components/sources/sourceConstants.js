@@ -1,3 +1,4 @@
+import { helpers } from '../../common/helpers';
 const SourceFilterFields = [
   {
     id: 'name',
@@ -11,9 +12,9 @@ const SourceFilterFields = [
     placeholder: 'Filter by Source Type',
     filterType: 'select',
     filterValues: [
-      { title: 'Network', id: 'network' },
-      { title: 'Satellite', id: 'satellite' },
-      { title: 'VCenter', id: 'vcenter' }
+      { title: helpers.sourceTypeString('network'), id: 'network' },
+      { title: helpers.sourceTypeString('satellite'), id: 'satellite' },
+      { title: helpers.sourceTypeString('vcenter'), id: 'vcenter' }
     ]
   }
 ];

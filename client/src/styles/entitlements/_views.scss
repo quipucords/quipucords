@@ -60,3 +60,16 @@
 .list-view-pf-actions .dropdown.btn-group {
   margin-left: 10px;
 }
+
+.form-split-button {
+  .dropdown {
+    display: flex;
+    width: 100%;
+    .form-control.btn {
+      text-align: left;
+    }
+    ul {
+      min-width: 100%;
+    }
+  }
+}
