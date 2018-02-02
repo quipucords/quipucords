@@ -1,44 +1,47 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ListView, Button, Icon, Checkbox } from 'patternfly-react';
+import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class CredentialListItem extends React.Component {
+  renderActions() {
+    const { item, onEdit, onDelete } = this.props;
+
+    return [
+      <SimpleTooltip key="editButton" id="editTip" tooltip="Edit Credential">
+        <Button
+          onClick={() => {
+            onEdit(item);
+          }}
+          bsStyle="link"
+          key="editButton"
+        >
+          <Icon type="pf" name="edit" />
+        </Button>
+      </SimpleTooltip>,
+      <SimpleTooltip
+        key="deleteButton"
+        id="deleteTip"
+        tooltip="Delete Credential"
+      >
+        <Button
+          onClick={() => {
+            onDelete(item);
+          }}
+          bsStyle="link"
+          key="removeButton"
+        >
+          <Icon type="pf" name="delete" />
+        </Button>
+      </SimpleTooltip>
+    ];
+  }
+
   render() {
-    const { item, onItemSelectChange, onEdit, onDelete } = this.props;
+    const { item, onItemSelectChange } = this.props;
 
-    let itemIcon;
-    let credentialTypeText;
-
-    switch (item.cred_type) {
-      case 'vcenter':
-        itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
-        credentialTypeText = 'VCenter';
-        break;
-      case 'network':
-        itemIcon = <ListView.Icon type="pf" name="network" />;
-        credentialTypeText = 'Network';
-        break;
-      case 'satellite':
-        itemIcon = <ListView.Icon type="fa" name="space-shuttle" />;
-        credentialTypeText = 'Satellite';
-        break;
-      default:
-        itemIcon = null;
-        credentialTypeText = '';
-    }
-
-    let authType;
-    switch (item.auth_type) {
-      case 'sshKey':
-        authType = 'SSH Key';
-        break;
-      case 'becomeUser':
-        authType = 'Become User';
-        break;
-      default:
-        authType = 'Username & Password';
-    }
+    let sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
 
     return (
       <ListView.Item
@@ -50,47 +53,22 @@ class CredentialListItem extends React.Component {
             onClick={e => onItemSelectChange(item)}
           />
         }
-        actions={[
-          <SimpleTooltip
-            key="editButton"
-            id="editTip"
-            tooltip="Edit Credential"
-          >
-            <Button
-              onClick={() => {
-                onEdit(item);
-              }}
-              bsStyle="link"
-              key="editButton"
-            >
-              <Icon type="pf" name="edit" />
-            </Button>
-          </SimpleTooltip>,
-          <SimpleTooltip
-            key="deleteButton"
-            id="deleteTip"
-            tooltip="Delete Credential"
-          >
-            <Button
-              onClick={() => {
-                onDelete(item);
-              }}
-              bsStyle="link"
-              key="removeButton"
-            >
-              <Icon type="pf" name="delete" />
-            </Button>
-          </SimpleTooltip>
-        ]}
+        actions={this.renderActions()}
         leftContent={
-          <SimpleTooltip id="credentialTypeTip" tooltip={credentialTypeText}>
-            {itemIcon}
+          <SimpleTooltip
+            id="credentialTypeTip"
+            tooltip={helpers.sourceTypeString(item.cred_type)}
+          >
+            <ListView.Icon
+              type={sourceTypeIcon.type}
+              name={sourceTypeIcon.name}
+            />
           </SimpleTooltip>
         }
         heading={item.name}
         description={
           <SimpleTooltip id="methodTip" tooltip="Authorization Type">
-            {authType}
+            {helpers.authorizationTypeString(item.auth_type)}
           </SimpleTooltip>
         }
         additionalInfo={[

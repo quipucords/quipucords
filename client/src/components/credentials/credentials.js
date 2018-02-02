@@ -13,16 +13,18 @@ import {
 } from 'patternfly-react';
 
 import { getCredentials } from '../../redux/actions/credentialsActions';
+import Store from '../../redux/store';
+import {
+  confirmationModalTypes,
+  credentialsTypes,
+  toastNotificationTypes
+} from '../../redux/constants';
+import { bindMethods } from '../../common/helpers';
 
 import CredentialsToolbar from './credentialsToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
-import Store from '../../redux/store';
-import {
-  confirmationModalTypes,
-  toastNotificationTypes
-} from '../../redux/constants';
-import { bindMethods } from '../../common/helpers';
+import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 
 class Credentials extends React.Component {
   constructor() {
@@ -155,10 +157,8 @@ class Credentials extends React.Component {
 
   addCredential(credentialType) {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: credentialType,
-      message: 'Adding credentials is not yet implemented'
+      type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
+      credentialType: credentialType
     });
   }
 
@@ -166,9 +166,7 @@ class Credentials extends React.Component {
     const { selectedItems } = this.state;
 
     let heading = (
-      <h3>
-        Are you sure you want to delete the following credentials?
-      </h3>
+      <h3>Are you sure you want to delete the following credentials?</h3>
     );
 
     let credentialsList = '';
@@ -332,16 +330,25 @@ class Credentials extends React.Component {
         />,
         <Grid fluid key={2}>
           {this.renderList(filteredItems)}
-        </Grid>
+        </Grid>,
+        <CreateCredentialDialog
+          key="createCredentialDialog"
+          credentials={credentials}
+        />
       ];
     }
-    return (
+    return [
       <CredentialsEmptyState
+        key="emptyState"
         onAddCredential={this.addCredential}
         onAddSource={this.addSource}
         onImportSources={this.importSources}
+      />,
+      <CreateCredentialDialog
+        key="createCredentialDialog"
+        credentials={credentials}
       />
-    );
+    ];
   }
 }
 
