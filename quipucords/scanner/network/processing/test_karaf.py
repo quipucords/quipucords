@@ -112,3 +112,21 @@ class TestProcessKarafHomeBinFuse(unittest.TestCase):
             karaf.ProcessKarafHomeBinFuse.process(ansible_results(
                 [{'item': 'foo', 'stdout': '', 'rc': 1}])),
             {'foo': False})
+
+
+class TestProcessKarafHomeSystemOrgJboss(unittest.TestCase):
+    """Test using locate to find karaf home bin fuse."""
+
+    def test_success(self):
+        """Found karaf.jar."""
+        self.assertEqual(
+            karaf.ProcessKarafHomeSystemOrgJboss.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bar'}])),
+            {str(['bar']): True})
+
+    def test_not_found(self):
+        """Did not find karaf home bin fuse."""
+        self.assertEqual(
+            karaf.ProcessKarafHomeSystemOrgJboss.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'[]': False})
