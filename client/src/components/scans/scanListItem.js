@@ -9,7 +9,7 @@ import {
   MenuItem
 } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import { helpers } from '../../common/helpers';
 
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
@@ -19,7 +19,7 @@ class ScanListItem extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, ['toggleExpand', 'closeExpand']);
+    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
 
     this.state = {
       expanded: false,
@@ -42,29 +42,13 @@ class ScanListItem extends React.Component {
   renderScanType() {
     const { item } = this.props;
 
-    let itemIconType;
-    let itemIconName;
-    let scanTypeText;
-    switch (item.scan_type) {
-      case 'connect':
-        itemIconType = 'pf';
-        itemIconName = 'connected';
-        scanTypeText = 'Connection Scan';
-        break;
-      case 'inspect':
-        itemIconType = 'fa';
-        itemIconName = 'search';
-        scanTypeText = 'Inspection Scan';
-        break;
-      default:
-        itemIconType = '';
-        itemIconName = '';
-        scanTypeText = '';
-    }
-
+    let scanIcon = helpers.scanTypeIcon(item.scan_type);
     return (
-      <SimpleTooltip id="scanTypeTip" tooltip={scanTypeText}>
-        <ListView.Icon type={itemIconType} name={itemIconName} />
+      <SimpleTooltip
+        id="scanTypeTip"
+        tooltip={helpers.scanTypeString(item.scan_type)}
+      >
+        <ListView.Icon type={scanIcon.type} name={scanIcon.name} />
       </SimpleTooltip>
     );
   }

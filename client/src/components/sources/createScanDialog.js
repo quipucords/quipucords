@@ -31,6 +31,7 @@ class CreateScanDialog extends React.Component {
       })
     );
   }
+
   validateScanName(scanName) {
     return scanName && scanName.length > 0 && !this.nameExists(scanName);
   }

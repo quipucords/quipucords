@@ -33,9 +33,51 @@ const getCredentials = () => {
   };
 };
 
+const addCredentialLoading = bool => ({
+  type: credentialsTypes.ADD_CREDENTIAL_LOADING,
+  loading: bool
+});
+
+const addCredentialSuccess = data => ({
+  type: credentialsTypes.ADD_CREDENTIAL_SUCCESS,
+  data
+});
+
+const addCredentialError = (bool, message) => ({
+  type: credentialsTypes.ADD_CREDENTIAL_ERROR,
+  error: bool,
+  message: message
+});
+
+const addCredential = (data, addCallback) => {
+  return function(dispatch) {
+    dispatch(addCredentialLoading(true));
+    return credentialsService
+      .addCredential(data)
+      .then(success => {
+        dispatch(addCredentialSuccess(success));
+        dispatch(addCredentialLoading(false));
+        if (addCallback) {
+          addCallback(false, success);
+        }
+      })
+      .catch(error => {
+        dispatch(addCredentialError(true, error.message));
+        dispatch(addCredentialLoading(false));
+        if (addCallback) {
+          addCallback(true, error.message);
+        }
+      });
+  };
+};
+
 export {
   getCredentialsError,
   getCredentialsLoading,
   getCredentialsSuccess,
-  getCredentials
+  getCredentials,
+  addCredentialError,
+  addCredentialLoading,
+  addCredentialSuccess,
+  addCredential
 };

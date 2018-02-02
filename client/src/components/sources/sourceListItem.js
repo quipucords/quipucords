@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
-import { bindMethods } from '../../common/helpers';
+import { helpers } from '../../common/helpers';
 import { SourceCredentialsList } from './sourceCredentialsList';
 import { SourceHostsList } from './sourceHostList';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
@@ -11,7 +11,7 @@ class SourceListItem extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, ['toggleExpand', 'closeExpand']);
+    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
 
     this.state = {
       expanded: false,
@@ -29,6 +29,21 @@ class SourceListItem extends React.Component {
 
   closeExpand() {
     this.setState({ expanded: false });
+  }
+
+  renderSourceType() {
+    const { item } = this.props;
+
+    let typeIcon = helpers.sourceTypeIcon(item.source_type);
+
+    return (
+      <SimpleTooltip
+        id="sourceTypeTip"
+        tooltip={helpers.sourceTypeString(item.source_type)}
+      >
+        <ListView.Icon type={typeIcon.type} name={typeIcon.name} />
+      </SimpleTooltip>
+    );
   }
 
   renderActions() {
@@ -50,7 +65,7 @@ class SourceListItem extends React.Component {
             <Icon type="pf" name="delete" atria-label="Delete" />
           </Button>
         </SimpleTooltip>
-        <Button onClick={() => onScan(item)} bsStyle="primary" key="scanButton">
+        <Button onClick={() => onScan(item)} key="scanButton">
           Scan
         </Button>
       </span>
@@ -178,26 +193,6 @@ class SourceListItem extends React.Component {
     const { item, onItemSelectChange } = this.props;
     const { expanded } = this.state;
 
-    let itemIcon;
-    let sourceTypeText;
-    switch (item.source_type) {
-      case 'vcenter':
-        itemIcon = <ListView.Icon type="pf" name="virtual-machine" />;
-        sourceTypeText = 'VCenter';
-        break;
-      case 'network':
-        itemIcon = <ListView.Icon type="pf" name="network" />;
-        sourceTypeText = 'Network';
-        break;
-      case 'satellite':
-        itemIcon = <ListView.Icon type="fa" name="space-shuttle" />;
-        sourceTypeText = 'Satellite';
-        break;
-      default:
-        itemIcon = null;
-        sourceTypeText = '';
-    }
-
     return (
       <ListView.Item
         key={item.id}
@@ -209,11 +204,7 @@ class SourceListItem extends React.Component {
           />
         }
         actions={this.renderActions()}
-        leftContent={
-          <SimpleTooltip id="sourceTypeTip" tooltip={sourceTypeText}>
-            {itemIcon}
-          </SimpleTooltip>
-        }
+        leftContent={this.renderSourceType()}
         heading={item.name}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
