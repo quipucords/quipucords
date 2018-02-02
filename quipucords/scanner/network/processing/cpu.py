@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
 
 # #### Processors ####
+
+
 class ProcessCpuModelVer(process.Processor):
     """Process the model version of the cpu."""
 
@@ -70,5 +72,3 @@ class ProcessCpuBogomips(process.Processor):
     def process(output):
         """Pass the output back through."""
         return output['stdout_lines']
-
-
