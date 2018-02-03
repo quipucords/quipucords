@@ -73,3 +73,26 @@
     }
   }
 }
+
+.confirm-modal-body {
+  display: flex;
+  font-size: 16px;
+
+  .confirm-modal-icon {
+    font-size: 3em;
+    margin-right: 20px;
+  }
+
+  .confirm-modal-content {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      flex: 1;
+    }
+
+    p:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+}

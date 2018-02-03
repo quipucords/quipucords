@@ -7,7 +7,6 @@ import {
   Alert,
   EmptyState,
   Grid,
-  Icon,
   ListView,
   Modal,
   Row
@@ -155,20 +154,9 @@ class Sources extends React.Component {
 
   showAddSourceWizard() {
     this.setState({ addSourceWizardShown: true });
-
-    /*
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Adding sources is not yet implemented'
-    });
-    */
   }
 
   quitAddSourceWizard() {
-    let heading = <h3>Are you sure you want to stop adding a source?</h3>;
-
     let onConfirm = () => {
       Store.dispatch({
         type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
@@ -179,11 +167,11 @@ class Sources extends React.Component {
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Stop Adding Source',
-      heading: heading,
+      title: 'Cancel Add Source',
+      heading: 'Are you sure you want to exit this wizard?',
+      body: 'Exiting this wizard will cancel adding the source.',
       cancelButtonText: 'No',
       confirmButtonText: 'Yes',
-      icon: '<Icon name="pf" type="warning-triangle-o" />',
       onConfirm: onConfirm
     });
   }
@@ -248,9 +236,9 @@ class Sources extends React.Component {
 
   deleteSource(item) {
     let heading = (
-      <h3>
+      <span>
         Are you sure you want to delete the source <strong>{item.name}</strong>?
-      </h3>
+      </span>
     );
 
     let onConfirm = () => this.doDeleteSource(item);

@@ -166,7 +166,7 @@ class Credentials extends React.Component {
     const { selectedItems } = this.state;
 
     let heading = (
-      <h3>Are you sure you want to delete the following credentials?</h3>
+      <span>Are you sure you want to delete the following credentials?</span>
     );
 
     let credentialsList = '';
@@ -234,10 +234,10 @@ class Credentials extends React.Component {
 
   deleteCredential(item) {
     let heading = (
-      <h3>
+      <span>
         Are you sure you want to delete the credential{' '}
         <strong>{item.name}</strong>?
-      </h3>
+      </span>
     );
 
     let onConfirm = () => this.doDeleteCredentials([item]);

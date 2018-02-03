@@ -357,6 +357,7 @@ class CreateCredentialDialog extends React.Component {
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
+                  autoFocus
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
                 />

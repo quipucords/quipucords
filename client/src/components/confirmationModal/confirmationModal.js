@@ -31,7 +31,9 @@ class ConfirmationModal extends React.Component {
       confirmTitle,
       confirmHeading,
       confirmBody,
+      confirmIcon,
       confirmButtonText,
+      cancelButtonText,
       onConfirm
     } = this.props;
 
@@ -49,16 +51,26 @@ class ConfirmationModal extends React.Component {
           <Modal.Title>{confirmTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {confirmHeading}
-          <p>{confirmBody}</p>
+          <div className="confirm-modal-body">
+            {confirmIcon && (
+              <span className="confirm-modal-icon">{confirmIcon}</span>
+            )}
+            <span className="confirm-modal-content">
+              <span className="spacer" />
+              <p>{confirmHeading}</p>
+              <p>{confirmBody}</p>
+              <span className="spacer" />
+            </span>
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <Button
+            autoFocus
             bsStyle="default"
             className="btn-cancel"
             onClick={this.cancel}
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button bsStyle="primary" onClick={onConfirm}>
             {confirmButtonText}
@@ -72,9 +84,11 @@ class ConfirmationModal extends React.Component {
 ConfirmationModal.propTypes = {
   show: PropTypes.bool.isRequired,
   confirmTitle: PropTypes.string,
-  confirmHeading: PropTypes.object,
-  confirmBody: PropTypes.object,
+  confirmHeading: PropTypes.node,
+  confirmIcon: PropTypes.node,
+  confirmBody: PropTypes.node,
   confirmButtonText: PropTypes.string,
+  cancelButtonText: PropTypes.string,
   onConfirm: PropTypes.func,
   onCancel: PropTypes.func
 };
@@ -82,6 +96,7 @@ ConfirmationModal.defaultProps = {
   confirmTitle: 'Confirm',
   confirmHeading: null,
   confirmBody: null,
+  confirmIcon: <Icon type="pf" name="warning-triangle-o" />,
   confirmButtonText: 'Confirm'
 };
 
@@ -90,8 +105,10 @@ function mapStateToProps(state, ownProps) {
     show: state.confirmationModal.show,
     confirmTitle: state.confirmationModal.title,
     confirmHeading: state.confirmationModal.heading,
+    confirmIcon: state.confirmationModal.icon,
     confirmBody: state.confirmationModal.body,
     confirmButtonText: state.confirmationModal.confirmButtonText,
+    cancelButtonText: state.confirmationModal.cancelButtonText,
     onConfirm: state.confirmationModal.onConfirm,
     onCancel: state.confirmationModal.onCancel
   };
