@@ -32,6 +32,7 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 class ReportSummaryTests(unittest.TestCase):
     """Class for testing the scan show commands for qpc."""
 
+    # pylint: disable=invalid-name
     def setUp(self):
         """Create test setup."""
         write_server_config(DEFAULT_CONFIG)
