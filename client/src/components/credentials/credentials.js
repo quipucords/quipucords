@@ -318,24 +318,24 @@ class Credentials extends React.Component {
     if (credentials && credentials.length) {
       this.sortCredentials(filteredItems);
 
-      return [
-        <CredentialsToolbar
-          totalCount={credentials.length}
-          filteredCount={filteredItems.length}
-          key={1}
-          onAddCredential={this.addCredential}
-          deleteAvailable={selectedItems && selectedItems.length > 0}
-          onDelete={this.deleteCredentials}
-          onRefresh={this.refresh}
-        />,
-        <Grid fluid key={2}>
-          {this.renderList(filteredItems)}
-        </Grid>,
-        <CreateCredentialDialog
-          key="createCredentialDialog"
-          credentials={credentials}
-        />
-      ];
+      return (
+        <React.Fragment>
+          <div className="quipucords-view-container">
+            <CredentialsToolbar
+              totalCount={credentials.length}
+              filteredCount={filteredItems.length}
+              onAddCredential={this.addCredential}
+              deleteAvailable={selectedItems && selectedItems.length > 0}
+              onDelete={this.deleteCredentials}
+              onRefresh={this.refresh}
+            />
+            <Grid fluid className="quipucords-list-container">
+              {this.renderList(filteredItems)}
+            </Grid>
+          </div>
+          <CreateCredentialDialog credentials={credentials} />
+        </React.Fragment>
+      );
     }
     return [
       <CredentialsEmptyState

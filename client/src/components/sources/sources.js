@@ -322,29 +322,29 @@ class Sources extends React.Component {
 
       return (
         <React.Fragment>
-          <SourcesToolbar
-            totalCount={sources.length}
-            filteredCount={filteredItems.length}
-            key={1}
-            onAddSource={this.showAddSourceWizard}
-            scanAvailable={selectedItems && selectedItems.length > 0}
-            onScan={this.scanSources}
-            onRefresh={this.refresh}
-          />
-          <Grid fluid key={2}>
-            {this.renderList(filteredItems)}
-          </Grid>
-          <AddSourceWizard
-            show={addSourceWizardShown}
-            onCancel={this.quitAddSourceWizard}
-          />
-          <CreateScanDialog
-            key="createScanDialog"
-            show={scanDialogShown}
-            sources={multiSourceScan ? selectedItems : [currentScanSource]}
-            onCancel={this.hideScanDialog}
-            onScan={this.createScan}
-          />
+          <div className="quipucords-view-container">
+            <SourcesToolbar
+              totalCount={sources.length}
+              filteredCount={filteredItems.length}
+              onAddSource={this.showAddSourceWizard}
+              scanAvailable={selectedItems && selectedItems.length > 0}
+              onScan={this.scanSources}
+              onRefresh={this.refresh}
+            />
+            <Grid fluid className="quipucords-list-container">
+              {this.renderList(filteredItems)}
+            </Grid>
+            <AddSourceWizard
+              show={addSourceWizardShown}
+              onCancel={this.quitAddSourceWizard}
+            />
+            <CreateScanDialog
+              show={scanDialogShown}
+              sources={multiSourceScan ? selectedItems : [currentScanSource]}
+              onCancel={this.hideScanDialog}
+              onScan={this.createScan}
+            />
+          </div>
         </React.Fragment>
       );
     }
