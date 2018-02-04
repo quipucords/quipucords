@@ -16,8 +16,9 @@ import sys
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
+from qpc.request import request, GET
 import qpc.report as report
-from qpc.request import GET
+import qpc.scan as scan
 from qpc.translation import _
 import qpc.messages as messages
 from qpc.utils import (validate_write_file,
@@ -41,7 +42,7 @@ class ReportSummaryCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             self.SUMMARY_URI, [codes.ok])
-        self.parser.add_argument('--id', dest='id', metavar='ID',
+        self.parser.add_argument('--id', dest='scan_id', metavar='SCAN_ID',
                                  help=_(messages.REPORT_SUMMARY_ID_HELP),
                                  required=True)
 
@@ -54,12 +55,10 @@ class ReportSummaryCommand(CliCommand):
         self.parser.add_argument('--output-file', dest='path', metavar='PATH',
                                  help=_(messages.REPORT_SUMMARY_PATH_HELP),
                                  required=True)
+        self.fact_collection_id = None
 
     def _validate_args(self):
         CliCommand._validate_args(self)
-        if self.args.id:
-            self.req_path = '%s?fact_collection_id=%s' % (
-                self.req_path, self.args.id)
         if self.args.output_json:
             self.req_headers = {'Accept': 'application/json'}
         if self.args.output_csv:
@@ -69,6 +68,25 @@ class ReportSummaryCommand(CliCommand):
             validate_write_file(self.args.path, 'output-file')
         except ValueError as error:
             print(error)
+            sys.exit(1)
+
+        # Lookup scan job id
+        response = request(parser=self.parser, method=GET,
+                           path='%s%s' % (scan.SCAN_URI, self.args.scan_id),
+                           payload=None)
+        if response.status_code == codes.ok:  # pylint: disable=no-member
+            json_data = response.json()
+            self.fact_collection_id = json_data.get('fact_collection_id')
+            if self.fact_collection_id:
+                self.req_path = '%s?fact_collection_id=%s' % (
+                    self.req_path, self.fact_collection_id)
+            else:
+                print(_(messages.REPORT_SUMMARY_NO_REPORT_FOR_SJ %
+                        self.args.scan_id))
+                sys.exit(1)
+        else:
+            print(_(messages.REPORT_SUMMARY_SJ_DOES_NOT_EXIST %
+                    self.args.scan_id))
             sys.exit(1)
 
     def _handle_response_success(self):
@@ -82,5 +100,6 @@ class ReportSummaryCommand(CliCommand):
         write_file(self.args.path, file_content)
 
     def _handle_response_error(self):
-        print(_(messages.REPORT_SUMMARY_FC_DOES_NOT_EXIST % self.args.id))
+        print(_(messages.REPORT_SUMMARY_NO_REPORT_FOR_SJ %
+                self.args.scan_id))
         sys.exit(1)

@@ -21,6 +21,7 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.report import REPORT_URI
+from qpc.scan import SCAN_URI
 from qpc.report.summary import ReportSummaryCommand
 from qpc.utils import get_server_location, write_server_config
 import qpc.messages as messages
@@ -59,14 +60,20 @@ class ReportSummaryTests(unittest.TestCase):
     def test_summary_report_as_json(self):
         """Testing retreiving summary report as json."""
         report_out = StringIO()
+
+        get_scanjob_url = get_server_location() + \
+            SCAN_URI + '1'
+        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
         get_report_url = get_server_location() + \
             REPORT_URI + '?fact_collection_id=1'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
+            mocker.get(get_scanjob_url, status_code=200,
+                       json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
             nac = ReportSummaryCommand(SUBPARSER)
-            args = Namespace(id='1', output_json=True, output_csv=False,
+            args = Namespace(scan_id='1', output_json=True, output_csv=False,
                              path=self.test_json_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -81,6 +88,9 @@ class ReportSummaryTests(unittest.TestCase):
     def test_summary_report_as_csv(self):
         """Testing retreiving summary report as csv."""
         report_out = StringIO()
+        get_scanjob_url = get_server_location() + \
+            SCAN_URI + '1'
+        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
         get_report_url = get_server_location() + \
             REPORT_URI + '?fact_collection_id=1'
         get_report_csv_data = 'Fact Collection\n'
@@ -90,10 +100,12 @@ class ReportSummaryTests(unittest.TestCase):
 
         get_report_csv_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
+            mocker.get(get_scanjob_url, status_code=200,
+                       json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_csv_data)
             nac = ReportSummaryCommand(SUBPARSER)
-            args = Namespace(id='1', output_json=False, output_csv=True,
+            args = Namespace(scan_id='1', output_json=False, output_csv=True,
                              path=self.test_csv_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -106,6 +118,7 @@ class ReportSummaryTests(unittest.TestCase):
                     print(file_content_dict)
                 self.assertDictEqual(get_report_csv_data, file_content_dict)
 
+    # Test validation
     def test_summary_report_output_directory(self):
         """Testing fail because output directory."""
         with self.assertRaises(SystemExit):
@@ -126,3 +139,41 @@ class ReportSummaryTests(unittest.TestCase):
             sys.argv = ['/bin/qpc', 'report', 'summary',
                         '--json', '--output-file', '']
             CLI().main()
+
+    def test_summary_report_scan_job_not_exist(self):
+        """Summary report with nonexistent scanjob."""
+        report_out = StringIO()
+
+        get_scanjob_url = get_server_location() + \
+            SCAN_URI + '1'
+        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_scanjob_url, status_code=400,
+                       json=get_scanjob_json_data)
+            nac = ReportSummaryCommand(SUBPARSER)
+            args = Namespace(scan_id='1', output_json=True, output_csv=False,
+                             path=self.test_json_filename)
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(report_out):
+                    nac.main(args)
+                    self.assertEqual(report_out.getvalue(),
+                                     messages.REPORT_SUMMARY_SJ_DOES_NOT_EXIST)
+
+    def test_summary_report_invalid_scan_job(self):
+        """Summary report with scanjob but no fact_collection_id."""
+        report_out = StringIO()
+
+        get_scanjob_url = get_server_location() + \
+            SCAN_URI + '1'
+        get_scanjob_json_data = {'id': 1}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_scanjob_url, status_code=200,
+                       json=get_scanjob_json_data)
+            nac = ReportSummaryCommand(SUBPARSER)
+            args = Namespace(scan_id='1', output_json=True, output_csv=False,
+                             path=self.test_json_filename)
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(report_out):
+                    nac.main(args)
+                    self.assertEqual(report_out.getvalue(),
+                                     messages.REPORT_SUMMARY_NO_REPORT_FOR_SJ)
