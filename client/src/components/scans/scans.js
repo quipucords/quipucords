@@ -266,17 +266,18 @@ class Scans extends React.Component {
     if (scans && scans.length) {
       this.sortScans(filteredItems);
 
-      return [
-        <ScansToolbar
-          totalCount={scans.length}
-          filteredCount={filteredItems.length}
-          key={1}
-          onRefresh={this.refresh}
-        />,
-        <Grid fluid key={2}>
-          {this.renderList(filteredItems)}
-        </Grid>
-      ];
+      return (
+        <div className="quipucords-view-container">
+          <ScansToolbar
+            totalCount={scans.length}
+            filteredCount={filteredItems.length}
+            onRefresh={this.refresh}
+          />
+          <Grid fluid className="quipucords-list-container">
+            {this.renderList(filteredItems)}
+          </Grid>
+        </div>
+      );
     }
     return (
       <SourcesEmptyState

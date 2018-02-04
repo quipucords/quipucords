@@ -81,6 +81,7 @@ class CreateScanDialog extends React.Component {
               <Grid.Col sm={9}>
                 <Form.FormControl
                   type="text"
+                  autoFocus
                   value={scanName}
                   onChange={e => this.updateScanName(e)}
                 />

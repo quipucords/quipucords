@@ -70,6 +70,9 @@ class AddSourceWizard extends React.Component {
         case 2:
           stepContent = <div className="form-group required">Step Three</div>;
           break;
+        default:
+          stepContent = null;
+          break;
       }
 
       return (

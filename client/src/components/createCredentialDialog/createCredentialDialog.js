@@ -39,17 +39,22 @@ class CreateCredentialDialog extends React.Component {
     super();
 
     this.state = {
-      formValid: false,
       credentialName: '',
-      validCredentialName: true,
       authorizationType: 'usernamePassword',
       sshKeyFile: '',
+      passphrase: '',
       username: '',
       password: '',
       becomeMethod: 'sudo',
       becomeUser: '',
-      becomePassword: ''
+      becomePassword: '',
+      credentialNameError: '',
+      usernameError: '',
+      sskKeyFileError: '',
+      becomeUserError: ''
     };
+
+    this.sshKeyFileValidator = new RegExp(/^\/.*$/);
 
     helpers.bindMethods(this, ['cancel', 'save', 'addResultsCallback']);
   }
@@ -63,16 +68,19 @@ class CreateCredentialDialog extends React.Component {
 
   resetIntialState() {
     this.setState({
-      formValid: false,
       credentialName: '',
-      validCredentialName: true,
       authorizationType: 'usernamePassword',
       sshKeyFile: '',
+      passphrase: '',
       username: '',
       password: '',
       becomeMethod: 'sudo',
       becomeUser: '',
-      becomePassword: ''
+      becomePassword: '',
+      credentialNameError: '',
+      usernameError: '',
+      sskKeyFileError: '',
+      becomeUserError: ''
     });
   }
 
@@ -133,9 +141,14 @@ class CreateCredentialDialog extends React.Component {
     this.setState({ authorizationType: authType });
   }
 
-  validateForm(changeObj) {
-    return this.validateCredentialName(
-      changeObj.credentialName || this.state.credentialName
+  validateForm() {
+    return (
+      this.state.credentialName !== '' &&
+      this.state.credentialNameError === '' &&
+      this.state.username !== '' &&
+      this.state.usernameError === '' &&
+      (this.state.authorizationType === 'usernamePassword' ||
+        (this.state.sshKeyFile !== '' && this.state.sskKeyFileError === ''))
     );
   }
 
@@ -150,24 +163,40 @@ class CreateCredentialDialog extends React.Component {
   }
 
   validateCredentialName(credentialName) {
-    return (
-      credentialName &&
-      credentialName.length &&
-      !this.nameExists(credentialName)
-    );
+    if (!credentialName) {
+      return 'You must enter a credential name';
+    }
+
+    if (credentialName.length > 64) {
+      return 'The credential name can only contain up to 64 characters';
+    }
+
+    if (this.nameExists(credentialName)) {
+      return 'Credential name already exists';
+    }
+
+    return '';
   }
 
   updateCredentialName(event) {
     this.setState({
       credentialName: event.target.value,
-      validCredentialName: this.validateCredentialName(event.target.value),
-      formValid: this.validateForm({ credentialName: event.target.value })
+      credentialNameError: this.validateCredentialName(event.target.value)
     });
+  }
+
+  validateUsername(username) {
+    if (!username || !username.length) {
+      return 'You must enter a user name';
+    }
+
+    return '';
   }
 
   updateUsername(event) {
     this.setState({
-      username: event.target.value
+      username: event.target.value,
+      usernameError: this.validateUsername(event.target.value)
     });
   }
 
@@ -177,9 +206,24 @@ class CreateCredentialDialog extends React.Component {
     });
   }
 
+  validateSshKeyFile(keyFile) {
+    if (!this.sshKeyFileValidator.test(keyFile)) {
+      return 'Please enter the full path to the SSH Key File';
+    }
+
+    return '';
+  }
+
   updateSshKeyFile(event) {
     this.setState({
-      sshKeyFile: event.target.value
+      sshKeyFile: event.target.value,
+      sskKeyFileError: this.validateSshKeyFile(event.target.value)
+    });
+  }
+
+  updatePassphrase(event) {
+    this.setState({
+      passphrase: event.target.value
     });
   }
 
@@ -210,7 +254,13 @@ class CreateCredentialDialog extends React.Component {
   }
 
   renderAuthForm() {
-    const { authorizationType, password, sshKeyFile } = this.state;
+    const {
+      authorizationType,
+      password,
+      sshKeyFile,
+      passphrase,
+      sskKeyFileError
+    } = this.state;
 
     switch (authorizationType) {
       case 'usernamePassword':
@@ -221,6 +271,7 @@ class CreateCredentialDialog extends React.Component {
               <Form.FormControl
                 type="password"
                 value={password}
+                placeholder="optional"
                 onChange={e => this.updatePassword(e)}
               />
             </Grid.Col>
@@ -228,16 +279,33 @@ class CreateCredentialDialog extends React.Component {
         );
       case 'sshKey':
         return (
-          <Form.FormGroup>
-            {this.renderFormLabel('SSH Key File')}
-            <Grid.Col sm={7}>
-              <Form.FormControl
-                type="text"
-                value={sshKeyFile}
-                onChange={e => this.updateSshKeyFile(e)}
-              />
-            </Grid.Col>
-          </Form.FormGroup>
+          <React.Fragment>
+            <Form.FormGroup validationState={sskKeyFileError ? 'error' : null}>
+              {this.renderFormLabel('SSH Key File')}
+              <Grid.Col sm={7}>
+                <Form.FormControl
+                  type="text"
+                  value={sshKeyFile}
+                  placeholder="Enter the full path to the SSH key file"
+                  onChange={e => this.updateSshKeyFile(e)}
+                />
+                {sskKeyFileError && (
+                  <Form.HelpBlock>{sskKeyFileError}</Form.HelpBlock>
+                )}
+              </Grid.Col>
+            </Form.FormGroup>
+            <Form.FormGroup>
+              {this.renderFormLabel('Passphrase')}
+              <Grid.Col sm={7}>
+                <Form.FormControl
+                  type="password"
+                  value={passphrase}
+                  placeholder="optional"
+                  onChange={e => this.updatePassphrase(e)}
+                />
+              </Grid.Col>
+            </Form.FormGroup>
+          </React.Fragment>
         );
       default:
         return null;
@@ -246,7 +314,12 @@ class CreateCredentialDialog extends React.Component {
 
   renderNetworkForm() {
     const { credentialType } = this.props;
-    const { becomeMethod, becomeUser, becomePassword } = this.state;
+    const {
+      becomeMethod,
+      becomeUser,
+      becomePassword,
+      becomeUserError
+    } = this.state;
 
     if (credentialType !== 'network') {
       return null;
@@ -277,11 +350,12 @@ class CreateCredentialDialog extends React.Component {
             </div>
           </Grid.Col>
         </Form.FormGroup>
-        <Form.FormGroup>
+        <Form.FormGroup validationState={becomeUserError ? 'error' : null}>
           {this.renderFormLabel('Become User')}
           <Grid.Col sm={7}>
             <Form.FormControl
               type="text"
+              placeholder="optional"
               value={becomeUser}
               onChange={e => this.updateBecomeUser(e)}
             />
@@ -293,6 +367,7 @@ class CreateCredentialDialog extends React.Component {
             <Form.FormControl
               type="password"
               value={becomePassword}
+              placeholder="optional"
               onChange={e => this.updateBecomePassword(e)}
             />
           </Grid.Col>
@@ -303,7 +378,13 @@ class CreateCredentialDialog extends React.Component {
 
   render() {
     const { show, credentialType } = this.props;
-    const { credentialName, authorizationType, username } = this.state;
+    const {
+      credentialName,
+      authorizationType,
+      username,
+      credentialNameError,
+      usernameError
+    } = this.state;
 
     let credentialTypeText;
 
@@ -338,9 +419,7 @@ class CreateCredentialDialog extends React.Component {
         <Grid fluid>
           <Form horizontal>
             <Form.FormGroup>
-              <Grid.Col componentClass={Form.ControlLabel} sm={5}>
-                Source Type
-              </Grid.Col>
+              {this.renderFormLabel('Source Type')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   className="quipucords-form-control"
@@ -350,22 +429,25 @@ class CreateCredentialDialog extends React.Component {
                 />
               </Grid.Col>
             </Form.FormGroup>
-            <Form.FormGroup>
-              <Grid.Col componentClass={Form.ControlLabel} sm={5}>
-                Credential Name
-              </Grid.Col>
+            <Form.FormGroup
+              validationState={credentialNameError ? 'error' : null}
+            >
+              {this.renderFormLabel('Credential Name')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
+                  placeholder="Enter the new credential name"
+                  autoFocus
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
                 />
+                {credentialNameError && (
+                  <Form.HelpBlock>{credentialNameError}</Form.HelpBlock>
+                )}
               </Grid.Col>
             </Form.FormGroup>
             <Form.FormGroup>
-              <Grid.Col componentClass={Form.ControlLabel} sm={5}>
-                Authentication Type
-              </Grid.Col>
+              {this.renderFormLabel('Authentication Type')}
               <Grid.Col sm={7}>
                 <div className="form-split-button">
                   <SplitButton
@@ -390,16 +472,18 @@ class CreateCredentialDialog extends React.Component {
                 </div>
               </Grid.Col>
             </Form.FormGroup>
-            <Form.FormGroup>
-              <Grid.Col componentClass={Form.ControlLabel} sm={5}>
-                Username
-              </Grid.Col>
+            <Form.FormGroup validationState={usernameError ? 'error' : null}>
+              {this.renderFormLabel('Username')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
+                  placeholder="Enter the username"
                   value={username}
                   onChange={e => this.updateUsername(e)}
                 />
+                {usernameError && (
+                  <Form.HelpBlock>{usernameError}</Form.HelpBlock>
+                )}
               </Grid.Col>
             </Form.FormGroup>
             {this.renderAuthForm()}
@@ -414,7 +498,11 @@ class CreateCredentialDialog extends React.Component {
           >
             Cancel
           </Button>
-          <Button bsStyle="primary" onClick={this.save}>
+          <Button
+            bsStyle="primary"
+            onClick={this.save}
+            disabled={!this.validateForm()}
+          >
             Save
           </Button>
         </Modal.Footer>
