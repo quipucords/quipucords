@@ -184,7 +184,7 @@ def write_server_config(server_config):
     ensure_config_dir_exists()
 
     with open(QPC_SERVER_CONFIG, 'w') as configFile:
-        json.dump(server_config, configFile)
+        json.dump(server_config, configFile, indent=4)
 
 
 def write_client_token(client_token):
@@ -303,3 +303,40 @@ def read_in_file(filename):
         return result
     else:
         raise ValueError(t(messages.NOT_A_FILE % input_path))
+
+
+def validate_write_file(filename, param_name):
+    """Write content to a file.
+
+    :param filename: the filename to write
+    :param param_name: the parameter name that provided
+    the filename
+    :raises: ValueError for validation errors
+    """
+    input_path = os.path.expanduser(os.path.expandvars(filename))
+    if not input_path:
+        raise ValueError(
+            t(messages.REPORT_SUMMARY_OUTPUT_CANNOT_BE_EMPTY % param_name))
+    if os.path.isdir(input_path):
+        raise ValueError(
+            t(messages.REPORT_SUMMARY_OUTPUT_IS_A_DIRECTORY %
+              (param_name, input_path)))
+    directory = os.path.dirname(input_path)
+    if directory and not os.path.exists(directory):
+        raise ValueError(
+            t(messages.REPORT_SUMMARY_DIRECTORY_DOES_NOT_EXIST % directory))
+
+
+def write_file(filename, content):
+    """Write content to a file.
+
+    :param filename: the filename to write
+    :param content: the file content to write
+    :raises: EnvironmentError if file cannot be written
+    """
+    result = None
+    input_path = os.path.expanduser(os.path.expandvars(filename))
+
+    with open(input_path, 'w') as out_file:
+        out_file.write(content)
+    return result

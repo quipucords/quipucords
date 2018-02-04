@@ -116,6 +116,20 @@ SCAN_PAUSED = 'Scan "%s" paused.'
 SCAN_RESTARTED = 'Scan "%s" restarted.'
 SCAN_CANCELED = 'Scan "%s" canceled.'
 
+REPORT_SUMMARY_ID_HELP = 'Scan job identifier.'
+REPORT_SUMMARY_OUTPUT_JSON_HELP = 'Output as a JSON file.'
+REPORT_SUMMARY_OUTPUT_CSV_HELP = 'Output as a CSV file.'
+REPORT_SUMMARY_PATH_HELP = 'Output file location.'
+REPORT_SUMMARY_SJ_DOES_NOT_EXIST = \
+    'Scan Job %s does not exist.'
+REPORT_SUMMARY_NO_REPORT_FOR_SJ = \
+    'No report summary available for scan job %s.'
+REPORT_SUMMARY_OUTPUT_CANNOT_BE_EMPTY = '%s cannot be empty string.'
+REPORT_SUMMARY_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
+REPORT_SUMMARY_DIRECTORY_DOES_NOT_EXIST = \
+    'The directory %s does not exist.  Cannot write here.'
+REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
+
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\
     'Valid values: jboss_eap, jboss_fuse, jboss_brms.'
@@ -134,6 +148,7 @@ SSL_ERROR_MSG = 'A connection error occurred while attempting to '\
                 'status of the server.'
 
 READ_FILE_ERROR = 'Error reading from %s: %s.'
+WRITE_FILE_ERROR = 'Error writing to %s: %s.'
 NOT_A_FILE = 'Input %s was not a file.'
 
 VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the '\

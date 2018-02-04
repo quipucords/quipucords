@@ -18,6 +18,7 @@ import qpc.server as server
 import qpc.cred as cred
 import qpc.source as source
 import qpc.scan as scan
+import qpc.report as report
 from qpc.utils import (ensure_config_dir_exists,
                        get_server_location,
                        read_client_token,
@@ -38,6 +39,7 @@ from qpc.source.commands import (SourceAddCommand, SourceListCommand,
 from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
                                ScanShowCommand, ScanPauseCommand,
                                ScanCancelCommand, ScanRestartCommand)
+from qpc.report.summary import (ReportSummaryCommand)
 from qpc.translation import _
 import qpc.messages as messages
 from . import __version__
@@ -82,6 +84,8 @@ class CLI(object):
                              [ScanStartCommand, ScanListCommand,
                               ScanShowCommand, ScanPauseCommand,
                               ScanCancelCommand, ScanRestartCommand])
+        self._add_subcommand(report.SUBCOMMAND,
+                             [ReportSummaryCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 
