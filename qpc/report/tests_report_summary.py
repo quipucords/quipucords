@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -78,8 +78,7 @@ class ReportSummaryTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
-                                 messages.FILE_SUCCESSFULLY_WRITTEN %
-                                 self.test_json_filename)
+                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
                 with open(self.test_json_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)
@@ -110,8 +109,7 @@ class ReportSummaryTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
-                                 messages.FILE_SUCCESSFULLY_WRITTEN %
-                                 self.test_csv_filename)
+                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
                 with open(self.test_csv_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)

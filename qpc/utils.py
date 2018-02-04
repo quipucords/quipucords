@@ -337,11 +337,6 @@ def write_file(filename, content):
     result = None
     input_path = os.path.expanduser(os.path.expandvars(filename))
 
-    try:
-        with open(input_path, 'w') as out_file:
-            out_file.write(content)
-        print(t(messages.FILE_SUCCESSFULLY_WRITTEN % input_path))
-    except EnvironmentError as err:
-        err_msg = t(messages.WRITE_FILE_ERROR % (input_path, err))
-        log.error(err_msg)
+    with open(input_path, 'w') as out_file:
+        out_file.write(content)
     return result

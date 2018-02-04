@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -97,7 +97,13 @@ class ReportSummaryCommand(CliCommand):
         else:
             file_content = self.response.text
             print()
-        write_file(self.args.path, file_content)
+
+        try:
+            write_file(self.args.path, file_content)
+            print(_(messages.REPORT_SUCCESSFULLY_WRITTEN))
+        except EnvironmentError as err:
+            err_msg = _(messages.WRITE_FILE_ERROR % (self.args.path, err))
+            print(err_msg)
 
     def _handle_response_error(self):
         print(_(messages.REPORT_SUMMARY_NO_REPORT_FOR_SJ %
