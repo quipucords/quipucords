@@ -96,5 +96,4 @@ def build_source_payload(args, add_none=True):
     if options is not None:
         req_payload['options'] = options
 
-    print(req_payload)
     return req_payload
