@@ -63,4 +63,35 @@ describe('CredentialsActions', function() {
 
     expect(actions.addCredentialSuccess(data)).toEqual(expectedAction);
   });
+
+  it('should create a UPDATE error action', () => {
+    const error = true;
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_ERROR,
+      error,
+      message: undefined
+    };
+
+    expect(actions.updateCredentialError(error)).toEqual(expectedAction);
+  });
+
+  it('should create a UPDATE loading action', () => {
+    const loading = true;
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_LOADING,
+      loading
+    };
+
+    expect(actions.updateCredentialLoading(loading)).toEqual(expectedAction);
+  });
+
+  it('should create a UPDATE success action', () => {
+    const data = {};
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_SUCCESS,
+      data
+    };
+
+    expect(actions.updateCredentialSuccess(data)).toEqual(expectedAction);
+  });
 });

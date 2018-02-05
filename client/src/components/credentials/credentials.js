@@ -212,10 +212,8 @@ class Credentials extends React.Component {
 
   editCredential(item) {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.name,
-      message: 'Editing credentials is not yet implemented'
+      type: credentialsTypes.EDIT_CREDENTIAL_SHOW,
+      credential: item
     });
   }
 
