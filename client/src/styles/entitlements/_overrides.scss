@@ -20,3 +20,14 @@ button.unavailable:hover, li.unavailable > a:hover {
     height: 28px;
   }
 }
+
+// Override so that we get internal vertical scroll
+.layout-pf.layout-pf-fixed .container-pf-nav-pf-vertical {
+  bottom: 0;
+  top: $navbar-pf-vertical-height;
+  position: fixed;
+  width: unquote("calc(100% - #{$nav-pf-vertical-width})");
+  &.collapsed-nav {
+    width: unquote("calc(100% - #{$nav-pf-vertical-collapsed-width})");
+  }
+}

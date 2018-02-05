@@ -1,0 +1,52 @@
+# Copyright (c) 2018 Red Hat, Inc.
+#
+# This software is licensed to you under the GNU General Public License,
+# version 3 (GPLv3). There is NO WARRANTY for this software, express or
+# implied, including the implied warranties of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv3
+# along with this software; if not, see
+# https://www.gnu.org/licenses/gpl-3.0.txt.
+
+"""Initial processing of the shell output from the date role."""
+
+import logging
+from scanner.network.processing import process
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+# pylint: disable=too-few-public-methods
+
+# #### Processors ####
+
+
+class ProcessDateDate(process.Processor):
+    """Process the date fact."""
+
+    KEY = 'date_date'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return output['stdout_lines']
+
+
+class ProcessDateFilesystemCreate(process.Processor):
+    """Process the date filesystem create fact."""
+
+    KEY = 'date_filesystem_create'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return output['stdout_lines']
+
+
+class ProcessDateMachineId(process.Processor):
+    """Process the date machine id fact."""
+
+    KEY = 'date_machine_id'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return output['stdout_lines']

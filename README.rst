@@ -2,7 +2,14 @@
     :target: https://travis-ci.org/quipucords/quipucords
 .. image:: https://coveralls.io/repos/github/quipucords/quipucords/badge.svg?branch=master
     :target: https://coveralls.io/github/quipucords/quipucords?branch=master
-
+.. image:: https://readthedocs.org/projects/quipucords/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://quipucords.readthedocs.io/en/latest/?badge=latest
+.. image:: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/status_image/last_build.png
+    :alt: CLI RPM Build Status
+    :scale: 100%
+    :target: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/
 
 quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment
 ===================================================================================================================
@@ -139,7 +146,7 @@ This command creates a superuser with name *admin* and password of *pass*.
 
 Running the Server
 ^^^^^^^^^^^^^^^^^^
-To run the server, run the following command::
+To run the development server, run the following command::
 
     make serve
 
@@ -152,7 +159,7 @@ If you intend to run on Mac OS, there are several more steps that are required.
 
 - Increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
 - Install sshpass as described `here <https://github.com/ansible-tw/AMA/issues/21>`_.
-- Install coreutils to obtains the gtimeout command. To do this step, run the `brew install coreutils` command.
+- Install coreutils to obtain the gtimeout command. To do this step, run the `brew install coreutils` command.
 - If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
   See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.

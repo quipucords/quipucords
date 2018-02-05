@@ -61,12 +61,18 @@ class SourceEditCommand(CliCommand):
                                  metavar='SAT_VER',
                                  help=_(messages.SOURCE_SAT_VER_HELP),
                                  required=False)
+        self.parser.add_argument('--ssl-cert-verify',
+                                 dest='ssl_cert_verify',
+                                 choices=['True', 'False'],
+                                 help=_(messages.SOURCE_SSL_CERT_HELP),
+                                 required=False)
 
     # pylint: disable=too-many-branches
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if not(self.args.hosts or self.args.cred or self.args.port):
+        if not(self.args.hosts or self.args.cred or self.args.port or
+               self.args.satellite_version or self.args.ssl_cert_verify):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

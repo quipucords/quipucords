@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -34,6 +34,13 @@ class SourceOptions(models.Model):
         null=False,
         default=SATELLITE_VERSION_62
     )
+
+    ssl_cert_verify = models.NullBooleanField()
+
+    def __str__(self):
+        """Convert to string."""
+        return '{ id:%s, satellite_version:%s, ssl_cert_verify:%s}' %\
+            (self.id, self.satellite_version, self.ssl_cert_verify)
 
 
 class Source(models.Model):

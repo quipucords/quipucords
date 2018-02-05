@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -43,6 +43,7 @@ def validate_port(arg):
     return arg
 
 
+# pylint: disable=R0912
 def build_source_payload(args, add_none=True):
     """Construct payload from command line arguments.
 
@@ -51,6 +52,7 @@ def build_source_payload(args, add_none=True):
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
+    options = None
 
     if hasattr(args, 'type') and args.type:
         req_payload['source_type'] = args.type
@@ -66,7 +68,19 @@ def build_source_payload(args, add_none=True):
     elif add_none:
         req_payload['credentials'] = None
     if hasattr(args, 'satellite_version') and args.satellite_version:
-        options = {'satellite_version': args.satellite_version}
+        if options is None:
+            options = {'satellite_version': args.satellite_version}
+        else:
+            options['satellite_version'] = args.satellite_version
+    if (hasattr(args, 'ssl_cert_verify') and
+            args.ssl_cert_verify is not None):
+        ssl_cert_verify = args.ssl_cert_verify == 'True'
+        if options is None:
+            options = {'ssl_cert_verify': ssl_cert_verify}
+        else:
+            options['ssl_cert_verify'] = ssl_cert_verify
+
+    if options is not None:
         req_payload['options'] = options
 
     return req_payload

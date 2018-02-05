@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,8 +18,10 @@ import qpc.server as server
 import qpc.cred as cred
 import qpc.source as source
 import qpc.scan as scan
+import qpc.report as report
 from qpc.utils import (ensure_config_dir_exists,
                        get_server_location,
+                       read_client_token,
                        ensure_data_dir_exists,
                        setup_logging,
                        log)
@@ -37,6 +39,8 @@ from qpc.source.commands import (SourceAddCommand, SourceListCommand,
 from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
                                ScanShowCommand, ScanPauseCommand,
                                ScanCancelCommand, ScanRestartCommand)
+from qpc.report.commands import (ReportSummaryCommand,
+                                 ReportDetailCommand)
 from qpc.translation import _
 import qpc.messages as messages
 from . import __version__
@@ -81,6 +85,8 @@ class CLI(object):
                              [ScanStartCommand, ScanListCommand,
                               ScanShowCommand, ScanPauseCommand,
                               ScanCancelCommand, ScanRestartCommand])
+        self._add_subcommand(report.SUBCOMMAND,
+                             [ReportSummaryCommand, ReportDetailCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 
@@ -109,8 +115,13 @@ class CLI(object):
             server_location = get_server_location()
             if server_location is None or server_location == '':
                 log.error(
-                    'Please configure server location using command below.')
-                log.error('qpc server config --host HOST --port PORT')
+                    'Please configure server location using command below:')
+                log.error('$ qpc server config --host HOST --port PORT')
+                sys.exit(1)
+            # ...and sure we are logged in
+            if not read_client_token():
+                log.error('Please log in using the command below:')
+                log.error('$ qpc server login')
                 sys.exit(1)
 
         if self.args.subcommand in self.subcommands:

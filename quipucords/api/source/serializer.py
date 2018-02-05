@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-18 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,7 +18,8 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (ValidationError,
                                         PrimaryKeyRelatedField,
                                         CharField,
-                                        IntegerField)
+                                        IntegerField,
+                                        NullBooleanField)
 from api.models import Credential, Source, SourceOptions
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
@@ -56,11 +57,13 @@ class SourceOptionsSerializer(NotEmptySerializer):
     satellite_version = ValidStringChoiceField(
         required=False, choices=SourceOptions.SATELLITE_VERSION_CHOICES)
 
+    ssl_cert_verify = NullBooleanField(required=False)
+
     class Meta:
         """Metadata for serializer."""
 
         model = SourceOptions
-        fields = ['satellite_version']
+        fields = ['satellite_version', 'ssl_cert_verify']
 
 
 class SourceSerializer(NotEmptySerializer):
@@ -160,6 +163,7 @@ class SourceSerializer(NotEmptySerializer):
             source.options = options
         elif not options and source_type == Source.SATELLITE_SOURCE_TYPE:
             options = SourceOptions()
+            options.ssl_cert_verify = True
             options.save()
             source.options = options
 

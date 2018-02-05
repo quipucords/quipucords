@@ -2,10 +2,12 @@ import { confirmationModalTypes } from '../constants';
 
 const initialState = {
   show: false,
-  confirmTitle: 'Confirm',
-  confirmHeading: null,
-  confirmBody: null,
-  confirmButtonText: 'Confirm'
+  title: 'Confirm',
+  heading: null,
+  icon: null,
+  body: null,
+  confirmButtonText: 'Confirm',
+  cancelButtonText: 'Cancel'
 };
 
 export default function confirmationModalReducer(state = initialState, action) {
@@ -15,8 +17,10 @@ export default function confirmationModalReducer(state = initialState, action) {
         show: true,
         title: action.title,
         heading: action.heading,
+        icon: action.icon,
         body: action.body,
         confirmButtonText: action.confirmButtonText || 'Confirm',
+        cancelButtonText: action.cancelButtonText || 'Cancel',
         onConfirm: action.onConfirm,
         onCancel: action.onCancel
       });

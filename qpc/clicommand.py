@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -34,6 +34,7 @@ class CliCommand(object):
         self.args = None
         self.req_payload = None
         self.req_params = None
+        self.req_headers = None
         self.response = None
 
     def _validate_args(self):
@@ -66,9 +67,11 @@ class CliCommand(object):
         """
         self._build_req_params()
         self._build_data()
-        self.response = request(method=self.req_method, path=self.req_path,
+        self.response = request(method=self.req_method,
+                                path=self.req_path,
                                 params=self.req_params,
-                                payload=self.req_payload)
+                                payload=self.req_payload,
+                                headers=self.req_headers)
         # pylint: disable=no-member
         if self.response.status_code not in self.success_codes:
             # handle error cases

@@ -87,4 +87,17 @@ class ProcessKarafHomeBinFuse(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}
+
+
+class ProcessKarafHomeSystemOrgJboss(process.Processor):
+    """Process the karaf_home_system_org_jboss fact."""
+
+    KEY = 'karaf_home_system_org_jboss'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return {str(result['stdout_lines']): result['rc'] == 0
+                for result in output['results']}

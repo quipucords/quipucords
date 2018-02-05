@@ -63,8 +63,11 @@ class ProcessIdUJboss(process.Processor):
         if output['rc'] == 0:
             return True
 
-        plain_output = output['stdout'].strip()
-        if plain_output.lower() == 'id: jboss: no such user':
+        plain_output = output['stdout'].strip().lower()
+        # Yes, id outputs Unicode left and right single quotation
+        # marks around the username it doesn't recognize.
+        if plain_output == 'id: jboss: no such user' or \
+           plain_output == 'id: ‘jboss’: no such user':
             return False
 
         logger.error('id: unexpected output %s', plain_output)
@@ -102,21 +105,20 @@ class ProcessJbossEapProcesses(process.Processor):
     @staticmethod
     def process(output):
         """Return the number of jboss eap processes on the system."""
-        # pgrep exists with status 0 if it finds processes matching its
-        # pattern, and status 1 if not.
-        if output['rc']:
-            return 0
+        # The task on the remote host requires three processes: a ps,
+        # a grep, and a bash to run the pipeline. Of those, the bash
+        # and the grep will both match the pattern we are searching
+        # for. However, there is a race condition - sometimes the ps
+        # starts and grabs the process table before the grep is in it,
+        # and sometimes not.
+        num_matches = 0
+        for line in output['stdout_lines']:
+            parts = line.split(None, 1)
+            if parts[0] == 'bash' or parts[0] == 'grep':
+                continue
+            num_matches += 1
 
-        # There should always be two processes matching 'eap', one for
-        # the grep that's searching for 'eap', and one for the bash
-        # that's running the pipeline.
-        num_procs = len(output['stdout_lines'])
-
-        if num_procs < 2:
-            logger.error('Bad result from ps (%s processes)', num_procs)
-            return process.NO_DATA
-
-        return num_procs - 2
+        return num_matches
 
 
 class ProcessJbossEapPackages(process.Processor):
@@ -272,3 +274,27 @@ class ProcessEapHomeBinForFuse(IndicatorFileFinder):
     KEY = 'eap_home_bin'
 
     INDICATOR_FILES = ['fuseconfig.sh', 'fusepatch.sh']
+
+
+class ProcessEapHomeLayers(process.Processor):
+    """Process the output of eap home layers."""
+
+    KEY = 'eap_home_layers'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}
+
+
+class ProcessEapHomeLayersConf(process.Processor):
+    """Process the output of eap home layers conf."""
+
+    KEY = 'eap_home_layers_conf'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        return {result['item']: result['rc'] == 0
+                for result in output['results']}

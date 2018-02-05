@@ -93,21 +93,22 @@ class TestProcessJbossEapProcesses(unittest.TestCase):
     def test_no_processes(self):
         """No processes found."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(ansible_result('', rc=1)),
+            eap.ProcessJbossEapProcesses.process(ansible_result('')),
             0)
 
     def test_found_processes(self):
         """Found one process."""
         self.assertEqual(
             eap.ProcessJbossEapProcesses.process(
-                ansible_result('1\n2\n3')),
+                ansible_result('java\nbash\ngrep')),
             1)
 
-    def test_bad_data(self):
-        """Found too few processes."""
+    def test_no_grep(self):
+        """Grep sometimes doesn't appear in the ps output."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(ansible_result('1')),
-            process.NO_DATA)
+            eap.ProcessJbossEapProcesses.process(
+                ansible_result('java\nbash')),
+            1)
 
 
 class TestProcessJbossEapPackages(unittest.TestCase):
@@ -258,3 +259,39 @@ class TestProcessEapHomeBinForFuse(unittest.TestCase):
         }
         actual_result = eap.ProcessEapHomeBinForFuse.process(processor_input)
         self.assertEqual(actual_result, expected_result)
+
+
+class TestProcessEapHomeLayers(unittest.TestCase):
+    """Test looking for eap home layers."""
+
+    def test_success(self):
+        """Found eap home layers."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayers.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
+            {'foo': True})
+
+    def test_not_found(self):
+        """Did not find eap home layers."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayers.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'foo': False})
+
+
+class TestProcessEapHomeLayersConf(unittest.TestCase):
+    """Test looking for eap home layers conf."""
+
+    def test_success(self):
+        """Found eap home layers conf."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayersConf.process(ansible_results(
+                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
+            {'foo': True})
+
+    def test_not_found(self):
+        """Did not find eap home layers conf."""
+        self.assertEqual(
+            eap.ProcessEapHomeLayersConf.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            {'foo': False})

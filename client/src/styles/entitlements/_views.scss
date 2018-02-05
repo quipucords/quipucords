@@ -1,4 +1,21 @@
 /* _views.scss */
+.quipucords-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  > .container-fluid {
+    width: 100%;
+  }
+}
+
+// List container should scroll
+.quipucords-list-container {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+}
+
 .quipicords-list-view {
   margin-top: 0;
   margin-bottom: 0;
@@ -59,4 +76,40 @@
 
 .list-view-pf-actions .dropdown.btn-group {
   margin-left: 10px;
+}
+
+.form-split-button {
+  .dropdown {
+    display: flex;
+    width: 100%;
+    .form-control.btn {
+      text-align: left;
+    }
+    ul {
+      min-width: 100%;
+    }
+  }
+}
+
+.confirm-modal-body {
+  display: flex;
+  font-size: 16px;
+
+  .confirm-modal-icon {
+    font-size: 3em;
+    margin-right: 20px;
+  }
+
+  .confirm-modal-content {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      flex: 1;
+    }
+
+    p:last-of-type {
+      margin-bottom: 0;
+    }
+  }
 }

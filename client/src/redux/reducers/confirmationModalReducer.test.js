@@ -5,10 +5,12 @@ describe('ConfirmationModalReducer', function() {
   it('should return the initial state', () => {
     const initialState = {
       show: false,
-      confirmTitle: 'Confirm',
-      confirmHeading: null,
-      confirmBody: null,
-      confirmButtonText: 'Confirm'
+      title: 'Confirm',
+      heading: null,
+      icon: null,
+      body: null,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel'
     };
 
     expect(confirmationModalReducer(undefined, {})).toEqual(initialState);
@@ -17,12 +19,12 @@ describe('ConfirmationModalReducer', function() {
   it('should handle CONFIRMATION_MODAL_SHOW', () => {
     const dispatched = {
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      confirmTitle: 'Confirm',
-      confirmHeading: null,
-      confirmBody: null,
+      title: 'Confirm',
+      heading: null,
+      icon: null,
+      body: null,
       confirmButtonText: 'Confirm',
-      cancelActionType: '',
-      confirmActionType: ''
+      cancelActionText: ''
     };
 
     expect(confirmationModalReducer(undefined, dispatched).show).toEqual(true);

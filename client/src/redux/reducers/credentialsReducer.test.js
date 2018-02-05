@@ -7,7 +7,19 @@ describe('CredentialsReducer', function() {
       error: false,
       errorMessage: '',
       loading: true,
-      data: []
+      data: [],
+      showCreateDialog: false,
+      showEditDialog: false,
+      addError: false,
+      addErrorMessage: '',
+      addLoading: false,
+      updateError: false,
+      updateErrorMessage: '',
+      editCredential: null,
+      updateLoading: false,
+      createCredentialType: '',
+      newData: null,
+      updateData: null
     };
 
     expect(credentialsReducer(undefined, {})).toEqual(initialState);

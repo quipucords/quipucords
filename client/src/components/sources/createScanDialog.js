@@ -31,6 +31,7 @@ class CreateScanDialog extends React.Component {
       })
     );
   }
+
   validateScanName(scanName) {
     return scanName && scanName.length > 0 && !this.nameExists(scanName);
   }
@@ -80,6 +81,7 @@ class CreateScanDialog extends React.Component {
               <Grid.Col sm={9}>
                 <Form.FormControl
                   type="text"
+                  autoFocus
                   value={scanName}
                   onChange={e => this.updateScanName(e)}
                 />

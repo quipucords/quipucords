@@ -13,16 +13,18 @@ import {
 } from 'patternfly-react';
 
 import { getCredentials } from '../../redux/actions/credentialsActions';
+import Store from '../../redux/store';
+import {
+  confirmationModalTypes,
+  credentialsTypes,
+  toastNotificationTypes
+} from '../../redux/constants';
+import { bindMethods } from '../../common/helpers';
 
 import CredentialsToolbar from './credentialsToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
-import Store from '../../redux/store';
-import {
-  confirmationModalTypes,
-  toastNotificationTypes
-} from '../../redux/constants';
-import { bindMethods } from '../../common/helpers';
+import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 
 class Credentials extends React.Component {
   constructor() {
@@ -155,10 +157,8 @@ class Credentials extends React.Component {
 
   addCredential(credentialType) {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: credentialType,
-      message: 'Adding credentials is not yet implemented'
+      type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
+      credentialType: credentialType
     });
   }
 
@@ -166,9 +166,7 @@ class Credentials extends React.Component {
     const { selectedItems } = this.state;
 
     let heading = (
-      <h3>
-        Are you sure you want to delete the following credentials?
-      </h3>
+      <span>Are you sure you want to delete the following credentials?</span>
     );
 
     let credentialsList = '';
@@ -214,10 +212,8 @@ class Credentials extends React.Component {
 
   editCredential(item) {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.name,
-      message: 'Editing credentials is not yet implemented'
+      type: credentialsTypes.EDIT_CREDENTIAL_SHOW,
+      credential: item
     });
   }
 
@@ -236,10 +232,10 @@ class Credentials extends React.Component {
 
   deleteCredential(item) {
     let heading = (
-      <h3>
+      <span>
         Are you sure you want to delete the credential{' '}
         <strong>{item.name}</strong>?
-      </h3>
+      </span>
     );
 
     let onConfirm = () => this.doDeleteCredentials([item]);
@@ -320,28 +316,37 @@ class Credentials extends React.Component {
     if (credentials && credentials.length) {
       this.sortCredentials(filteredItems);
 
-      return [
-        <CredentialsToolbar
-          totalCount={credentials.length}
-          filteredCount={filteredItems.length}
-          key={1}
-          onAddCredential={this.addCredential}
-          deleteAvailable={selectedItems && selectedItems.length > 0}
-          onDelete={this.deleteCredentials}
-          onRefresh={this.refresh}
-        />,
-        <Grid fluid key={2}>
-          {this.renderList(filteredItems)}
-        </Grid>
-      ];
+      return (
+        <React.Fragment>
+          <div className="quipucords-view-container">
+            <CredentialsToolbar
+              totalCount={credentials.length}
+              filteredCount={filteredItems.length}
+              onAddCredential={this.addCredential}
+              deleteAvailable={selectedItems && selectedItems.length > 0}
+              onDelete={this.deleteCredentials}
+              onRefresh={this.refresh}
+            />
+            <Grid fluid className="quipucords-list-container">
+              {this.renderList(filteredItems)}
+            </Grid>
+          </div>
+          <CreateCredentialDialog credentials={credentials} />
+        </React.Fragment>
+      );
     }
-    return (
+    return [
       <CredentialsEmptyState
+        key="emptyState"
         onAddCredential={this.addCredential}
         onAddSource={this.addSource}
         onImportSources={this.importSources}
+      />,
+      <CreateCredentialDialog
+        key="createCredentialDialog"
+        credentials={credentials}
       />
-    );
+    ];
   }
 }
 

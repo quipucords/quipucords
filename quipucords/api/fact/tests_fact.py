@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,7 +12,6 @@
 
 import copy
 import json
-from collections import OrderedDict
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import api.messages as messages
@@ -294,7 +293,6 @@ class FactCollectionTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = None
         csv_result = renderer.render(test_json)
-        print(csv_result)
         expected = 'Fact Collection,Number Sources\r\n1,0\r\n'
         self.assertEqual(csv_result, expected)
 
@@ -307,7 +305,6 @@ class FactCollectionTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = []
         csv_result = renderer.render(test_json)
-        print(csv_result)
         expected = 'Fact Collection,Number Sources\r\n1,0\r\n\r\n\r\n'
         self.assertEqual(csv_result, expected)
 
@@ -320,67 +317,7 @@ class FactCollectionTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
-        print(csv_result)
         expected = 'Fact Collection,Number Sources\r\n1,1\r\n\r\n\r\n'\
             'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\n'\
             '\r\n'
         self.assertEqual(csv_result, expected)
-
-    def test_csv_serialize_value(self):
-        """Test csv_csv_serialize_value method."""
-        renderer = FactCollectionCSVRenderer()
-
-        # Test Empty case
-        value = renderer.serialize_value('header', {})
-        self.assertEqual('', value)
-        value = renderer.serialize_value('header', [])
-        self.assertEqual('', value)
-
-        # Test flat 1 entry
-        test_python = {'key': 'value'}
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '{key:value}')
-
-        test_python = ['value']
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '[value]')
-
-        # Test flat with 2 entries
-        test_python = OrderedDict()
-        test_python['key1'] = 'value1'
-        test_python['key2'] = 'value2'
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '{key1:value1;key2:value2}')
-
-        test_python = ['value1', 'value2']
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '[value1;value2]')
-
-        # Test nested
-        test_python = OrderedDict()
-        test_python['key'] = 'value'
-        test_python['dict'] = {'nkey': 'nvalue'}
-        test_python['list'] = ['a']
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '{key:value;dict:{nkey:nvalue};list:[a]}')
-
-        test_python = ['value', {'nkey': 'nvalue'}, ['a']]
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(value, '[value;{nkey:nvalue};[a]]')
-
-        # Test ansible error
-        test_python = {'rc': 0}
-        value = renderer.serialize_value('header', test_python)
-        self.assertEqual(
-            value, FactCollectionCSVRenderer.ANSIBLE_ERROR_MESSAGE)
-
-    def test_csv_generate_headers(self):
-        """Test csv_generate_headers method."""
-        fact_list = [{'header1': 'value1'},
-                     {'header2': 'value2'},
-                     {'header1': 'value2',
-                      'header3': 'value3'}]
-        headers = FactCollectionCSVRenderer.generate_headers(fact_list)
-        self.assertEqual(3, len(headers))
-        expected = set(['header1', 'header2', 'header3'])
-        self.assertSetEqual(expected, set(headers))

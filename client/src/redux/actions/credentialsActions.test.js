@@ -32,4 +32,66 @@ describe('CredentialsActions', function() {
 
     expect(actions.getCredentialsSuccess(data)).toEqual(expectedAction);
   });
+
+  it('should create a ADD error action', () => {
+    const error = true;
+    const expectedAction = {
+      type: credentialsTypes.ADD_CREDENTIAL_ERROR,
+      error,
+      message: undefined
+    };
+
+    expect(actions.addCredentialError(error)).toEqual(expectedAction);
+  });
+
+  it('should create a ADD loading action', () => {
+    const loading = true;
+    const expectedAction = {
+      type: credentialsTypes.ADD_CREDENTIAL_LOADING,
+      loading
+    };
+
+    expect(actions.addCredentialLoading(loading)).toEqual(expectedAction);
+  });
+
+  it('should create a ADD success action', () => {
+    const data = {};
+    const expectedAction = {
+      type: credentialsTypes.ADD_CREDENTIAL_SUCCESS,
+      data
+    };
+
+    expect(actions.addCredentialSuccess(data)).toEqual(expectedAction);
+  });
+
+  it('should create a UPDATE error action', () => {
+    const error = true;
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_ERROR,
+      error,
+      message: undefined
+    };
+
+    expect(actions.updateCredentialError(error)).toEqual(expectedAction);
+  });
+
+  it('should create a UPDATE loading action', () => {
+    const loading = true;
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_LOADING,
+      loading
+    };
+
+    expect(actions.updateCredentialLoading(loading)).toEqual(expectedAction);
+  });
+
+  it('should create a UPDATE success action', () => {
+    const data = {};
+    const expectedAction = {
+      type: credentialsTypes.UPDATE_CREDENTIAL_SUCCESS,
+      data
+    };
+
+    expect(actions.updateCredentialSuccess(data)).toEqual(expectedAction);
+  });
 });
