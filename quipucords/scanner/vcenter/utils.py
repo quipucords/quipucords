@@ -50,7 +50,7 @@ def vcenter_connect(scan_task):
     else:
         ssl_context = None
         if ssl_protocol is None:
-            ssl_context = ssl.SSLContext()
+            ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
         else:
             ssl_context = ssl.SSLContext(protocol=ssl_protocol)
         if ssl_cert_verify is False:
