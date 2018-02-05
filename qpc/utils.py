@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -316,15 +316,15 @@ def validate_write_file(filename, param_name):
     input_path = os.path.expanduser(os.path.expandvars(filename))
     if not input_path:
         raise ValueError(
-            t(messages.REPORT_SUMMARY_OUTPUT_CANNOT_BE_EMPTY % param_name))
+            t(messages.REPORT_OUTPUT_CANNOT_BE_EMPTY % param_name))
     if os.path.isdir(input_path):
         raise ValueError(
-            t(messages.REPORT_SUMMARY_OUTPUT_IS_A_DIRECTORY %
+            t(messages.REPORT_OUTPUT_IS_A_DIRECTORY %
               (param_name, input_path)))
     directory = os.path.dirname(input_path)
     if directory and not os.path.exists(directory):
         raise ValueError(
-            t(messages.REPORT_SUMMARY_DIRECTORY_DOES_NOT_EXIST % directory))
+            t(messages.REPORT_DIRECTORY_DOES_NOT_EXIST % directory))
 
 
 def write_file(filename, content):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -39,7 +39,8 @@ from qpc.source.commands import (SourceAddCommand, SourceListCommand,
 from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
                                ScanShowCommand, ScanPauseCommand,
                                ScanCancelCommand, ScanRestartCommand)
-from qpc.report.summary import (ReportSummaryCommand)
+from qpc.report.commands import (ReportSummaryCommand,
+                                 ReportDetailCommand)
 from qpc.translation import _
 import qpc.messages as messages
 from . import __version__
@@ -85,7 +86,7 @@ class CLI(object):
                               ScanShowCommand, ScanPauseCommand,
                               ScanCancelCommand, ScanRestartCommand])
         self._add_subcommand(report.SUBCOMMAND,
-                             [ReportSummaryCommand])
+                             [ReportSummaryCommand, ReportDetailCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

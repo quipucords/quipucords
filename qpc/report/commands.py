@@ -12,4 +12,5 @@
 """Commands for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
-from qpc.report.summary import (ReportSummaryCommand)
+from qpc.report.summary import ReportSummaryCommand
+from qpc.report.detail import ReportDetailCommand
