@@ -893,7 +893,8 @@ class SourceTest(TestCase):
                 'hosts': ['1.2.3.4'],
                 'port': 22,
                 'credentials': [self.sat_cred_for_upload],
-                'options': {'satellite_version': '6.2'}}
+                'options': {'satellite_version': '6.2',
+                            'ssl_cert_verify': False}}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),

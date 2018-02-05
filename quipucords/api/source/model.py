@@ -35,6 +35,13 @@ class SourceOptions(models.Model):
         default=SATELLITE_VERSION_62
     )
 
+    ssl_cert_verify = models.NullBooleanField()
+
+    def __str__(self):
+        """Convert to string."""
+        return '{ id:%s, satellite_version:%s, ssl_cert_verify:%s}' %\
+            (self.id, self.satellite_version, self.ssl_cert_verify)
+
 
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""

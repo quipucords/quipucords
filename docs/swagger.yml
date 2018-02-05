@@ -812,6 +812,19 @@ definitions:
           items:
             $ref: "#/definitions/SystemReport"
           description: "The report for the systems that were scanned"
+  SourceOptions:
+    type: "object"
+    properties:
+      satellite_version:
+        type: "string"
+        description: "The version of the Satellite server."
+        enum:
+          - "5"
+          - "6.2"
+          - "6.3"
+      ssl_cert_verify:
+        type: "boolean"
+        description: "If true disable SSL certificate verification."
   Source:
     type: "object"
     required:
@@ -872,6 +885,8 @@ definitions:
               type: "integer"
               format: "int64"
             description: "The credentials to try with these hosts."
+          options:
+            $ref: "#/definitions/SourceOptions"
   SourceOut:
     allOf:
       - $ref: "#/definitions/Source"
@@ -888,6 +903,8 @@ definitions:
             items:
               $ref: "#/definitions/CredentialMin"
             description: "The credentials to try with these hosts."
+          options:
+            $ref: "#/definitions/SourceOptions"
   ScanTask:
     type: "object"
     properties:
