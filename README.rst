@@ -4,124 +4,106 @@
     :target: https://coveralls.io/github/quipucords/quipucords?branch=master
 
 
-quipucords - Tool for discovery, inspection, collection/deduplication, and reporting on an IT environment
-==========================================================================================================
+quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment
+===================================================================================================================
 
-quipucords is a tool for discovery, inspection, collection/deduplication, and
-reporting on an IT environment.
+quipucords is a tool for discovery, inspection, collection, deduplication, and reporting on an IT environment.
 
 
-This *README* contains information about running and development of quipucords,
-basic usage, known issues, and best practices.
+This *README* file contains information about the installation and development of quipucords, as well as instructions about where to find basic usage, known issue, and best practices information.
 
-- `Intro to quipucords`_
-- `Requirements & Assumptions`_
+- `Introduction to quipucords`_
+- `Requirements and Assumptions`_
 - `Installation`_
-- `Command Syntax & Usage`_
+- `Command Syntax and Usage`_
 - `Development`_
 - `Issues`_
 - `Changes`_
 - `Authors`_
 - `Contributing`_
-- `Copyright & License`_
+- `Copyright and License`_
 
 
-Intro to quipucords
--------------------
-quipucords is a *Python* based information gathering tool. quipucords provides a
-server base infrastructure for process tasks that discover and inspect remote
-systems utilizing *Ansible* while additionally looking to integrate and extract
-data from management engines. quipucords collects basic information about the
-operating system, hardware, and application data for each system. quipucords is
-intended to help simplify some basic sysadmin tasks, like
-managing licensing renewals and new deployments.
-
-
-Requirements & Assumptions
+Introduction to quipucords
 --------------------------
-Before installing quipucords, there are some guidelines about which system it should be installed on:
- * quipucords is written to run on RHEL or Fedora servers.
- * The system that quipucords is installed on must have access to the source systems to be discovered and inspected.
- * The target systems must be running SSH.
- * The user account that quipucords uses to SSH into the systems must have adequate permissions to run commands and read certain files.
- * The user account quipucords uses for a machine should have a sh like shell. For example, it *cannot* be a /sbin/nologin or /bin/false shell.
+quipucords is a *Python* based information gathering tool. quipucords provides a server base infrastructure for process tasks that discover and inspect remote systems by utilizing *Ansible* while additionally looking to integrate and extract data from systems management solutions. quipucords collects basic information about the operating system, hardware, and application data for each system. quipucords is intended to help simplify some of the basic system administrator tasks that are a part of the larger goal of managing licensing renewals and new deployments.
 
-The python packages required for running quipucords on a system can be found in
- the ``requirements.txt`` file. The python packages required to build & test
- quipucords from source can be found in the ``requirements.txt`` and
- ``dev-requirements.txt`` files.
+
+Requirements and Assumptions
+----------------------------
+Before installing quipucords on a system, review the following guidelines about installing and running quipucords:
+
+ * quipucords is written to run on RHEL or Fedora servers.
+ * The system that quipucords is installed on must have access to the systems to be discovered and inspected.
+ * The target systems must be running SSH.
+ * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain files, such as privilege escalation required for the ``systemctl`` command.
+ * The user account that quipucords uses for a machine requires an sh shell or a similar shell. For example, the shell *cannot* be a /sbin/nologin or /bin/false shell.
+
+The Python packages that are required for running quipucords on a system can be found in the ``requirements.txt`` file. The Python packages that are required to build and test quipucords from source can be found in the ``requirements.txt`` and ``dev-requirements.txt`` files.
 
 Installation
 ------------
-quipucords is delivered via a RPM command line tool and a server container image. Below you will find instructions for installing each of these items.
+quipucords is delivered with an RPM command line tool and a server container image. The following information contains instructions for installing each of these items.
 
 Command Line
 ^^^^^^^^^^^^
-qpc is available for `download <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_ from fedora COPR.
+qpc is available for `download <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_ from the Fedora COPR.
 
-1. First, make sure that the EPEL repo is enabled for the server.
-You can find the appropriate architecture and version on the `EPEL wiki <https://fedoraproject.org/wiki/EPEL>`_::
+1. Enable the EPEL repo for the server. You can find the appropriate architecture and version on the `EPEL wiki <https://fedoraproject.org/wiki/EPEL>`_::
 
- rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
-2. Next, add the COPR repo to your server.
-You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_::
+2. Add the COPR repo to your server. You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_::
 
- wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
+    wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo \
+    https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
 
-3. Then, install the qpc package:
+3. Install the qpc package::
 
-``yum -y install qpc``
+    yum -y install qpc
 
 Container Image
 ^^^^^^^^^^^^^^^
-The quipucords container image can be created from source. This repository contains a Dockerfile detailing the image creation of the server.
-You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ in order to create the image and run the container.
+The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
+You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.
 
-1. Begin by cloning the repository::
+1. Clone the repository::
 
     git clone git@github.com:quipucords/quipucords.git
 
-2. Build the docker image::
+2. Build the Docker image::
 
     docker -D build . -t quipucords:latest
 
-*Note: You may or may not need to use ``sudo`` depending on your install setup.*
+  **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-3. Run the docker image::
+3. Run the Docker image::
 
     docker run -d -p443:443 -i quipucords:latest
 
-Now the server should be running and you can launch the `login <https://127.0.0.1/>`_.
-You can work with the APIs directly or you can use the CLI. You can configure the CLI with the following command::
+After you complete these steps and the server is running, you can launch the `server login function <https://127.0.0.1/>`_. You can work with the APIs directly or you can use the command line interface. Use the following command to configure the command line interface::
 
     qpc server config --host 127.0.0.1
 
 
-Command Syntax & Usage
-----------------------
-The complete list of options for each command and subcommand are listed in the
-qpc manpage with other usage examples.
+Command Syntax and Usage
+------------------------
+The complete list of options for each qpc command and subcommand are listed in the qpc man page. The man page information also contains usage examples and some best practice recommendations.
 
-For expanded information on credential entries, sources, scanning, and output read
-the `syntax and usage document <docs/source/man.rst>`_.
+For expanded information on credential entries, sources, scanning, and output, see the `syntax and usage document <docs/source/man.rst>`_.
 
 Development
 -----------
-Begin by cloning the repository::
+To work with the quipucords code, begin by cloning the repository::
 
     git clone git@github.com:quipucords/quipucords.git
 
-quipucords currently supports Python 3.5, 3.6. If you don't have Python on your
-system follow these `instructions <https://www.python.org/downloads/>`_. Based
-on your system you may be using either `pip` or `pip3` to install modules, for
-simplicity the instructions below will specify `pip`.
+quipucords currently supports Python 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_. Based on the configuration of your system, you might be using either `pip` or `pip3` to install modules. The following instructions show the steps for a system with `pip`.
 
 
-Virtual Environment
-^^^^^^^^^^^^^^^^^^^
-You may wish to isolate your development using a virtual environment. Run the
-following command to setup an virtual environment::
+Setting Up a Virtual Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+You might want to isolate your development work by using a virtual environment. Run the following command to set up a virtual environment::
 
     virtualenv -p python3 venv
     source venv/bin/activate
@@ -129,52 +111,51 @@ following command to setup an virtual environment::
 
 Installing Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^
-From within the local clone root directory run the following command to install
-dependencies needed for development and testing purposes:
+Run the following commands from within the local clone root directory to install dependencies that are needed for development and testing purposes:
 
-First, you need to collect some packages available through either `yum` (RHEL)
-or `dnf` (fedora)::
+1. Collect some packages available through either `yum` (for RHEL) or `dnf` (for Fedora)::
 
     sudo yum install python-tools
 
-The rest of the packages can be installed locally in your virtual environment::
+2. Install the rest of the packages locally in your virtual environment::
 
     pip install -r requirements.txt
 
 
 Linting
 ^^^^^^^
-In order to lint changes made to the source code execute the following command::
+To lint changes that are made to the source code, run the following command::
 
     make lint
 
 
-Initialize Server
-^^^^^^^^^^^^^^^^^
-In order to setup the server execute the following command::
+Initializing the Server
+^^^^^^^^^^^^^^^^^^^^^^^
+To set up the server, run the following command::
 
     make server-init
 
-This command will create a super user with name *admin* and password of *pass*.
+This command creates a superuser with name *admin* and password of *pass*.
 
-Running Server
-^^^^^^^^^^^^^^
-In order to run the server execute the following command::
+Running the Server
+^^^^^^^^^^^^^^^^^^
+To run the server, run the following command::
 
     make serve
 
-In order to login to the server you must launch to http://127.0.0.1:8000/admin/ and provide the super user credentials.
-From here you can change the password and also go to some fo the browsable APIs like http://127.0.0.1:8000/api/v1/credentials/.
-Using the CLI you can configure access to the server using `qpc server config` and login using `qpc server login`.
+To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials.
 
-If you intend to run on Mac OS there are several more steps required.
+After logging in, you can change the password and also go to some of the browsable APIs such as http://127.0.0.1:8000/api/v1/credentials/.
+To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
 
-- You need to increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
+If you intend to run on Mac OS, there are several more steps that are required.
+
+- Increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
 - Install sshpass as described `here <https://github.com/ansible-tw/AMA/issues/21>`_.
-- Install coreutils to obtains the gtimeout command.  Run: `brew install coreutils`
-- If you are running macOS 10.13 or greater and you encounter unexpected crashes when running scans,
+- Install coreutils to obtains the gtimeout command. To do this step, run the `brew install coreutils` command.
+- If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
-  See explanation `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
+  See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
 
 
 Testing
@@ -183,21 +164,19 @@ Testing
 Unit Testing
 """"""""""""
 
-To run the unit tests with the interpreter available as ``python``, use::
+To run the unit tests with the interpreter available as ``python``, use the following command::
 
     make test
 
 
 Issues
 ------
-To report bugs for quipucords `open issues <https://github.com/quipucords/quipucords/issues>`_
-against this repository in Github. Please complete the issue template when
-opening a new bug to improve investigation and resolution time.
+To report bugs for quipucords `open issues <https://github.com/quipucords/quipucords/issues>`_ against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
 
 
 Changes
 -------
-Track & find changes to the tool in `CHANGES <CHANGES.rst>`_.
+Track and find changes to the tool in `CHANGES <CHANGES.rst>`_.
 
 
 Authors
@@ -207,11 +186,11 @@ Authorship and current maintainer information can be found in `AUTHORS <AUTHORS.
 
 Contributing
 ------------
-Reference the `CONTRIBUTING <CONTRIBUTING.rst>`_ guide for information to the project.
+See the `CONTRIBUTING <CONTRIBUTING.rst>`_ guide for information about contributing to the project.
 
 
-Copyright & License
--------------------
+Copyright and License
+---------------------
 Copyright 2017-2018, Red Hat, Inc.
 
 quipucords is released under the `GNU Public License version 3 <LICENSE>`_.
