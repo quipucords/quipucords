@@ -13,5 +13,7 @@
 
 SUBCOMMAND = 'report'
 SUMMARY = 'summary'
+DETAIL = 'detail'
 
 REPORT_URI = '/api/v1/reports/'
+FACT_URI = '/api/v1/facts/'

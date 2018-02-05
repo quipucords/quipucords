@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportSummaryCommand is used to show summary report information."""
+"""ReportDetailCommand is used to show detail report information."""
 
 from __future__ import print_function
 import sys
@@ -26,22 +26,22 @@ from qpc.utils import (validate_write_file,
 
 
 # pylint: disable=too-few-public-methods
-class ReportSummaryCommand(CliCommand):
-    """Defines the report summary command.
+class ReportDetailCommand(CliCommand):
+    """Defines the report details command.
 
-    This command is for showing the summary report.
+    This command is for showing the details report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.SUMMARY
-    SUMMARY_URI = report.REPORT_URI
+    ACTION = report.DETAIL
+    DETAIL_URI = report.FACT_URI
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            self.SUMMARY_URI, [codes.ok])
+                            self.DETAIL_URI, [codes.ok])
         self.parser.add_argument('--id', dest='scan_id', metavar='SCAN_ID',
                                  help=_(messages.REPORT_SCAN_ID_HELP),
                                  required=True)
@@ -78,7 +78,7 @@ class ReportSummaryCommand(CliCommand):
             json_data = response.json()
             self.fact_collection_id = json_data.get('fact_collection_id')
             if self.fact_collection_id:
-                self.req_path = '%s?fact_collection_id=%s' % (
+                self.req_path = '%s%s' % (
                     self.req_path, self.fact_collection_id)
             else:
                 print(_(messages.REPORT_NO_REPORT_FOR_SJ %
