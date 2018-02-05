@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,7 +12,7 @@
 
 from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
-from api.models import (Credential, Source, ScanTask,
+from api.models import (Credential, Source, SourceOptions, ScanTask,
                         ScanJob, ConnectionResults)
 from scanner.vcenter.utils import vcenter_connect
 
@@ -30,11 +30,14 @@ class VCenterUtilsTest(TestCase):
             ssh_keyfile=None)
         self.cred.save()
 
+        options = SourceOptions(disable_ssl=True)
+        options.save()
+
         self.source = Source(
             name='source1',
             port=22,
             hosts='["1.2.3.4"]')
-
+        self.source.options = options
         self.source.save()
         self.source.credentials.add(self.cred)
 

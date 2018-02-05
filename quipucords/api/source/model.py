@@ -14,6 +14,7 @@ These models are used in the REST definitions
 """
 
 import json
+import ssl
 from django.db import models
 from api.credential.model import Credential
 
@@ -28,19 +29,48 @@ class SourceOptions(models.Model):
                                  (SATELLITE_VERSION_63, SATELLITE_VERSION_63),
                                  (SATELLITE_VERSION_5, SATELLITE_VERSION_5))
 
+    SSL_PROTOCOL_SSLv23 = 'SSLv23'
+    SSL_PROTOCOL_TLSv1 = 'TLSv1'
+    SSL_PROTOCOL_TLSv1_1 = 'TLSv1_1'
+    SSL_PROTOCOL_TLSv1_2 = 'TLSv1_2'
+    SSL_PROTOCOL_CHOICES = ((SSL_PROTOCOL_SSLv23, SSL_PROTOCOL_SSLv23),
+                            (SSL_PROTOCOL_TLSv1, SSL_PROTOCOL_TLSv1),
+                            (SSL_PROTOCOL_TLSv1_1, SSL_PROTOCOL_TLSv1_1),
+                            (SSL_PROTOCOL_TLSv1_2, SSL_PROTOCOL_TLSv1_2))
+
+    SSL_PROTOCOL_MAPPING = {SSL_PROTOCOL_SSLv23: ssl.PROTOCOL_SSLv23,
+                            SSL_PROTOCOL_TLSv1: ssl.PROTOCOL_TLSv1,
+                            SSL_PROTOCOL_TLSv1_1: ssl.PROTOCOL_TLSv1_1,
+                            SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2}
+
     satellite_version = models.CharField(
         max_length=10,
         choices=SATELLITE_VERSION_CHOICES,
-        null=False,
-        default=SATELLITE_VERSION_62
+        null=True
+    )
+
+    ssl_protocol = models.CharField(
+        max_length=10,
+        choices=SSL_PROTOCOL_CHOICES,
+        null=True
     )
 
     ssl_cert_verify = models.NullBooleanField()
+    disable_ssl = models.NullBooleanField()
+
+    def get_ssl_protocol(self):
+        """Obtain the SSL protocol to be used."""
+        protocol = None
+        if self.ssl_protocol:
+            protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
+        return protocol
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, satellite_version:%s, ssl_cert_verify:%s}' %\
-            (self.id, self.satellite_version, self.ssl_cert_verify)
+        return '{ id:%s, satellite_version:%s, ssl_protocol:%s,'\
+            'ssl_cert_verify:%s, disable_ssl:%s}' %\
+            (self.id, self.satellite_version, self.ssl_protocol,
+             self.ssl_cert_verify, self.disable_ssl)
 
 
 class Source(models.Model):

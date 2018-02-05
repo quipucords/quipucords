@@ -70,6 +70,9 @@ SOURCE_SAT_VER_HELP = 'Specify the version of Satellite (for example, "6.2").'
 SOURCE_SSL_CERT_HELP = 'If true, the SSL certificate will'\
     ' be verified when making requests to the source, otherwise no '\
     'verification will occur.'
+SOURCE_SSL_PROTOCOL_HELP = 'The SSL protocol to be used during a secure'\
+    ' connection.'
+SOURCE_SSL_DISABLE_HELP = 'Disable SSL usage during a connection.'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the '\
     '"--cred" input values. References for the following credential '\
     'could not be found: %s. Failed to add source "%s". '\

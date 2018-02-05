@@ -56,15 +56,25 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP))
-        self.parser.add_argument('--satellite_version',
+        self.parser.add_argument('--satellite-version',
                                  dest='satellite_version',
-                                 metavar='SAT_VER',
+                                 choices=source.VALID_SAT_CHOICES,
                                  help=_(messages.SOURCE_SAT_VER_HELP),
                                  required=False)
         self.parser.add_argument('--ssl-cert-verify',
                                  dest='ssl_cert_verify',
                                  choices=['True', 'False'],
                                  help=_(messages.SOURCE_SSL_CERT_HELP),
+                                 required=False)
+        self.parser.add_argument('--ssl-protocol',
+                                 dest='ssl_protocol',
+                                 choices=source.VALID_SSL_PROTOCOLS,
+                                 help=_(messages.SOURCE_SSL_PROTOCOL_HELP),
+                                 required=False)
+        self.parser.add_argument('--disable-ssl',
+                                 dest='disable_ssl',
+                                 choices=source.BOOLEAN_CHOICES,
+                                 help=_(messages.SOURCE_SSL_DISABLE_HELP),
                                  required=False)
 
     # pylint: disable=too-many-branches

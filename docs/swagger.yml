@@ -824,7 +824,20 @@ definitions:
           - "6.3"
       ssl_cert_verify:
         type: "boolean"
-        description: "If true disable SSL certificate verification."
+        description: "If false disable SSL certificate verification."
+      ssl_protocol:
+        type: "string"
+        description: "The SSL protocol to be used."
+        enum:
+          - SSLv2
+          - SSLv23
+          - SSLv3
+          - TLSv1
+          - TLSv1_1
+          - TLSv1_2
+      disable_ssl:
+        type: "boolean"
+        description: "If true disable SSL communication."
   Source:
     type: "object"
     required:
