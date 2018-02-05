@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -68,6 +68,11 @@ class SourceAddCommand(CliCommand):
                                  dest='satellite_version',
                                  metavar='SAT_VER',
                                  help=_(messages.SOURCE_SAT_VER_HELP),
+                                 required=False)
+        self.parser.add_argument('--ssl-cert-verify',
+                                 dest='ssl_cert_verify',
+                                 choices=['True', 'False'],
+                                 help=_(messages.SOURCE_SSL_CERT_HELP),
                                  required=False)
 
     def _validate_args(self):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -66,10 +66,14 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param query_params: A dictionary to use for query_params in the url
     :returns: The response object
     """
+    source_options = scan_task.source.options
+    ssl_verify = True
+    if source_options:
+        ssl_verify = source_options.ssl_cert_verify
     host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
     response = requests.get(url, auth=(user, password),
-                            params=query_params, verify=False)
+                            params=query_params, verify=ssl_verify)
     return response, url
 
 
