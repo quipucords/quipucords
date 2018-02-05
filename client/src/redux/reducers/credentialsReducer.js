@@ -10,7 +10,13 @@ const initialState = {
   addLoading: false,
   addError: false,
   addErrorMessage: '',
-  newData: null
+  newData: null,
+  showEditDialog: false,
+  editCredential: null,
+  updateLoading: false,
+  updateError: false,
+  updateErrorMessage: '',
+  updateData: null
 };
 
 export default function credentialsReducer(state = initialState, action) {
@@ -45,6 +51,25 @@ export default function credentialsReducer(state = initialState, action) {
       return Object.assign({}, state, {
         addError: action.error,
         addErrorMessage: action.message
+      });
+    case credentialsTypes.EDIT_CREDENTIAL_SHOW:
+      return Object.assign({}, state, {
+        showEditDialog: true,
+        editCredential: action.credential
+      });
+    case credentialsTypes.EDIT_CREDENTIAL_HIDE:
+      return Object.assign({}, state, { showEditDialog: false });
+
+    case credentialsTypes.UPDATE_CREDENTIAL_LOADING:
+      return Object.assign({}, state, { editLoading: action.loading });
+
+    case credentialsTypes.UPDATE_CREDENTIAL_SUCCESS:
+      return Object.assign({}, state, { editData: action.data });
+
+    case credentialsTypes.UPDATE_CREDENTIAL_ERROR:
+      return Object.assign({}, state, {
+        editError: action.error,
+        editErrorMessage: action.message
       });
 
     default:
