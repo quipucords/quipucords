@@ -250,12 +250,12 @@ def host_subscriptions(scan_task, url, org_id, host_id):
         if content_type and APP_JSON in content_type:
             message = 'Invalid status code %s for url: %s. Response: %s' %\
                 (response.status_code, url, response.json())
-            scan_task.log_message(message, log_level=logging.WARNING)
+            scan_task.log_message(message, log_level=logging.WARN)
         else:
             message = 'Invalid status code %s for url: %s. '\
                 'Response not JSON' %\
                 (response.status_code, url)
-            scan_task.log_message(message, log_level=logging.WARNING)
+            scan_task.log_message(message, log_level=logging.WARN)
         subs_dict = {ENTITLEMENTS: []}
         return subs_dict
     elif response.status_code != requests.codes.ok:

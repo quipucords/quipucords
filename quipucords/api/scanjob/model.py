@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -319,7 +319,7 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_COMPLETED)
         self.save()
-        self._log_stats('FINAL STATS.')
+        self._log_stats('COMPLETION STATS.')
         self.log_current_status()
 
     @transaction.atomic
