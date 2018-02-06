@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -11,6 +11,7 @@
 """Test the vcenter inspect capabilities."""
 
 import json
+from datetime import datetime
 from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
@@ -49,15 +50,17 @@ class InspectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
+        self.conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                  source=self.source, sequence_number=1,
+                                  start_time=datetime.utcnow())
+        self.conn_task.update_stats('TEST_VC.', sys_count=5)
+        self.conn_task.complete()
+
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                  source=self.source, sequence_number=2)
+                                  source=self.source, sequence_number=2,
+                                  start_time=datetime.utcnow())
         self.scan_task.save()
 
-        self.conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1)
-        self.conn_task.systems_count = 5
-        self.conn_task.status = ScanTask.COMPLETED
-        self.conn_task.save()
         self.scan_task.prerequisites.add(self.conn_task)
         self.scan_task.save()
 
@@ -142,10 +145,8 @@ class InspectTaskRunnerTest(TestCase):
         summary.guest = sum_guest
 
         virtual_machine.summary = summary
-        self.scan_task.systems_count = 5
-        self.scan_task.systems_failed = 0
-        self.scan_task.systems_scanned = 0
-        self.scan_task.save()
+        self.scan_task.update_stats(
+            'TEST_VC.', sys_count=5, sys_failed=0, sys_scanned=0)
         getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
         inspect_result = InspectionResult(
             source=self.scan_task.source,

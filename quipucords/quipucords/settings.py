@@ -230,6 +230,10 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': LOGGING_LEVEL,
         },
+        'api.scantasks': {
+            'handlers': LOGGING_HANDLERS,
+            'level': LOGGING_LEVEL,
+        },
         'api.scanjob': {
             'handlers': LOGGING_HANDLERS,
             'level': LOGGING_LEVEL,

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -53,6 +53,8 @@ def process_fact_collection(sender, instance, **kwargs):
     :returns: None
     """
     # pylint: disable=unused-argument
+    logger.info('Fingerprint engine (FC=%d) - start processing',
+                instance.id)
 
     # Invoke ENGINE to create fingerprints from facts
     fingerprints_list = _process_sources(instance)
@@ -70,11 +72,11 @@ def process_fact_collection(sender, instance, **kwargs):
             logger.error('Invalid fingerprint: %s', fingerprint_dict)
             logger.error('Fingerprint errors: %s', serializer.errors)
 
-    logger.debug('FactCollection %d produced %d valid '
-                 'fingerprints and %d invalid fingerprints.',
-                 instance.id,
-                 number_valid,
-                 number_invalid)
+    logger.info('Fingerprint engine (FC=%d) - end processing '
+                '(valid fingerprints=%d, invalid fingerprints=%d)',
+                instance.id,
+                number_valid,
+                number_invalid)
 
     # Mark completed because engine has process raw facts
     instance.status = FactCollection.FC_STATUS_COMPLETE
