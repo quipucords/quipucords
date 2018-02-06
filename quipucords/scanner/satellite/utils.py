@@ -17,6 +17,9 @@ from api.vault import decrypt_data_as_unicode
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+# Disable warnings for satellite requests
+requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member
+
 
 def get_credential(scan_task):
     """Extract the credential from the scan task.

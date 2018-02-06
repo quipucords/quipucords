@@ -66,7 +66,6 @@ class InspectTaskRunner(ScanTaskRunner):
             return error_message, ScanTask.FAILED
 
         try:
-            logger.info('Inspect scan started for %s.', self.scan_task)
             status_code, api_version = utils.status(self.scan_task)
             if status_code == 200:
                 self.conn_result = ConnectionResult.objects.filter(
@@ -93,7 +92,6 @@ class InspectTaskRunner(ScanTaskRunner):
                         (self.scan_task)
                     return error_message, ScanTask.FAILED
                 api.hosts_facts()
-                logger.info('Inspect scan completed for %s.', self.scan_task)
             else:
                 error_message = 'Inspect scan failed for %s.' % self.scan_task
                 return error_message, ScanTask.FAILED

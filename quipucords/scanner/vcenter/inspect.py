@@ -161,8 +161,7 @@ class InspectTaskRunner(ScanTaskRunner):
         self.inspect_result.systems.add(sys_result)
         self.inspect_result.save()
 
-        self.scan_task.systems_scanned += 1
-        self.scan_task.save()
+        self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
     def recurse_datacenter(self, vcenter):
         """Walk datacenter to collect vm facts.
@@ -197,21 +196,15 @@ class InspectTaskRunner(ScanTaskRunner):
     def _init_stats(self):
         """Initialize the scan_task stats."""
         # Save counts
-        self.scan_task.systems_count = self.connect_scan_task.systems_count
-        if self.scan_task.systems_scanned is None:
-            self.scan_task.systems_scanned = 0
-        if self.scan_task.systems_failed is None:
-            self.scan_task.systems_failed = 0
-        self.scan_task.save()
+        self.scan_task.update_stats(
+            'INITIAL VCENTER CONNECT STATS.',
+            sys_count=self.connect_scan_task.systems_count)
 
     # pylint: disable=too-many-locals
     def inspect(self):
         """Execute the inspection scan with the initialized source."""
-        logger.info('Inspect scan started for %s.', self.scan_task)
-
         # Save counts
         self._init_stats()
 
         vcenter = vcenter_connect(self.scan_task)
         self.recurse_datacenter(vcenter)
-        logger.info('Inspect scan completed for %s.', self.scan_task)

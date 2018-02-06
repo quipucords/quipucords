@@ -16,7 +16,7 @@ from datetime import datetime
 import logging
 import json
 from django.utils.translation import ugettext as _
-from django.db import models
+from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
 from api.scantasks.model import ScanTask
@@ -99,6 +99,36 @@ class ScanJob(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
 
+    def _log_stats(self, prefix):
+        """Log stats for scan."""
+        if self.start_time is None:
+            elapsed_time = 0
+        else:
+            elapsed_time = (datetime.utcnow() -
+                            self.start_time).total_seconds()
+        logger.info('Job %s - %s Stats: elapsed_time=%ds',
+                    self.id,
+                    prefix,
+                    elapsed_time)
+
+    def log_current_status(self,
+                           show_status_message=False,
+                           log_level=logging.INFO):
+        """Log current status of task."""
+        if show_status_message:
+            logger.log(log_level, 'Job %s - STATE UPDATE (%s, %s).'
+                       '  Additional State information: %s',
+                       self.id,
+                       self.status,
+                       self.scan_type,
+                       self.status_message)
+        else:
+            logger.log(log_level, 'Job %s - STATE UPDATE (%s, %s)',
+                       self.id,
+                       self.status,
+                       self.scan_type)
+
+    @transaction.atomic
     def queue(self):
         """Queue the job to run.
 
@@ -163,7 +193,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def start(self):
         """Start a job.
 
@@ -179,7 +211,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def restart(self):
         """Restart a job.
 
@@ -204,7 +238,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def pause(self):
         """Pause a job.
 
@@ -228,7 +264,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PAUSED)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def cancel(self):
         """Cancel a job.
 
@@ -257,7 +295,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_CANCELED)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def complete(self):
         """Complete a job.
 
@@ -273,7 +313,10 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_COMPLETED)
         self.save()
+        self._log_stats('FINAL STATS.')
+        self.log_current_status()
 
+    @transaction.atomic
     def fail(self, message):
         """Fail a job.
 
@@ -291,6 +334,8 @@ class ScanJob(models.Model):
         self.status_message = message
         logger.error(self.status_message)
         self.save()
+        self._log_stats('FAILURE STATS.')
+        self.log_current_status(show_status_message=True)
 
     def validate_status_change(self, target_status, valid_current_status):
         """Validate and transition job status.

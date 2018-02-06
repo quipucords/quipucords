@@ -205,6 +205,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
+        scanjob_obj.log_current_status()
         start_scan.send(sender=self.__class__, instance=scanjob_obj)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED,

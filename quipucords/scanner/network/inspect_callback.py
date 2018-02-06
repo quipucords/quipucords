@@ -151,8 +151,7 @@ class InspectResultCallback(CallbackBase):
 
         # Update scan counts
         if self.scan_task is not None:
-            self.scan_task.systems_scanned += 1
-            self.scan_task.save()
+            self.scan_task.increment_stats(host, increment_sys_scanned=True)
 
         inspect_result = self._get_inspect_result()
         sys_result = SystemInspectionResult(
@@ -197,4 +196,5 @@ class InspectResultCallback(CallbackBase):
             status=SystemInspectionResult.UNREACHABLE)
         sys_result.save()
 
-        self.scan_task.systems_failed += 1
+        self.scan_task.increment_stats(
+            unreachable_host, increment_sys_failed=True)

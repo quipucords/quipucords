@@ -70,10 +70,9 @@ class ConnectResultStore(object):
         self._remaining_hosts = set(hosts)
 
         if scan_task.systems_count is None:
-            scan_task.systems_count = len(hosts)
-            scan_task.systems_scanned = 0
-            scan_task.systems_failed = 0
-            scan_task.save()
+            scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
+                                   sys_count=len(hosts), sys_scanned=0,
+                                   sys_failed=0)
 
     @transaction.atomic
     def record_result(self, name, credential, status):
@@ -88,10 +87,9 @@ class ConnectResultStore(object):
         self.conn_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
-            self.scan_task.systems_scanned += 1
+            self.scan_task.increment_stats(name, increment_sys_scanned=True)
         else:
-            self.scan_task.systems_failed += 1
-        self.scan_task.save()
+            self.scan_task.increment_stats(name, increment_sys_failed=True)
 
         self._remaining_hosts.remove(name)
 
@@ -102,12 +100,6 @@ class ConnectResultStore(object):
         # returned the actual list, then they would get a 'set changed
         # size during iteration' error.
         return list(self._remaining_hosts)
-
-    def get_stats(self):
-        """Get statistics about this connection scan."""
-        return (self.scan_task.systems_count,
-                self.scan_task.systems_scanned,
-                self.scan_task.systems_failed)
 
 
 class ConnectTaskRunner(ScanTaskRunner):
@@ -132,8 +124,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self):
         """Scan network range ang attempt connections."""
-        logger.info('Connect scan task started for %s.', self.scan_task)
-
         result_store = ConnectResultStore(self.scan_task, self.conn_results)
         return self.run_with_result_store(result_store)
 
@@ -166,10 +156,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
             remaining_hosts = result_store.remaining_hosts()
 
-            logger.info('Connect scan completed for %s.', self.scan_task)
-            total, succeeded, failed = result_store.get_stats()
-            logger.info('%s connected, %s failed out of %s total',
-                        succeeded, failed, total)
             logger.debug('Failed systems: %s', remaining_hosts)
 
         for host in remaining_hosts:

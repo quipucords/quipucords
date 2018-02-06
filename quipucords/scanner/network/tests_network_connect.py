@@ -12,6 +12,7 @@
 
 import unittest
 from unittest.mock import patch, Mock, ANY
+from datetime import datetime
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from api.connresults.model import SystemConnectionResult
@@ -67,14 +68,6 @@ class MockResultStore(object):
     def remaining_hosts(self):
         """Need this method because the task runner uses it."""
         return list(self._remaining_hosts)
-
-    def get_stats(self):
-        """Similarly, the task runner uses this too."""
-        return (len(self._remaining_hosts) +
-                len(self.succeeded) +
-                len(self.failed),
-                len(self.succeeded),
-                len(self.failed))
 
 
 def make_result(hostname, rc):  # pylint: disable=invalid-name
@@ -137,9 +130,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source.save()
 
         self.scan_task = ScanTask(
-            source=self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_task.systems_failed = 0
-        self.scan_task.save()
+            source=self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            start_time=datetime.utcnow())
+        self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
@@ -172,13 +165,17 @@ class NetworkConnectTaskRunnerTest(TestCase):
         result_store = ConnectResultStore(self.scan_task, self.conn_results)
 
         self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
-        self.assertEqual(result_store.get_stats(), (1, 0, 0))
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 0)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
 
         result_store.record_result('1.2.3.4', self.cred,
                                    SystemConnectionResult.SUCCESS)
 
         self.assertEqual(result_store.remaining_hosts(), [])
-        self.assertEqual(result_store.get_stats(), (1, 1, 0))
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 1)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
 
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""

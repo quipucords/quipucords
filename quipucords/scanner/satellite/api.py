@@ -42,10 +42,8 @@ class SatelliteInterface(object):
 
         :param systems_count: The system count
         """
-        self.scan_task.systems_count = systems_count
-        if self.scan_task.systems_scanned is None:
-            self.scan_task.systems_scanned = 0
-        self.scan_task.save()
+        self.scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
 
     @transaction.atomic
     def record_conn_result(self, name, credential):
@@ -63,8 +61,7 @@ class SatelliteInterface(object):
         self.conn_result.systems.add(sys_result)
         self.conn_result.save()
 
-        self.scan_task.systems_scanned += 1
-        self.scan_task.save()
+        self.scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @transaction.atomic
     def record_inspect_result(self, name, facts):
@@ -88,8 +85,7 @@ class SatelliteInterface(object):
         self.inspect_result.systems.add(sys_result)
         self.inspect_result.save()
 
-        self.scan_task.systems_scanned += 1
-        self.scan_task.save()
+        self.scan_task.increment_stats(name, increment_sys_scanned=True)
 
     def host_count(self):
         """Obtain the count of managed hosts."""

@@ -94,9 +94,6 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
-        logger.info('Inspect scan task started for task: %s.',
-                    self.scan_task.id)
-
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task with id %d failed.' %\
@@ -105,22 +102,14 @@ class InspectTaskRunner(ScanTaskRunner):
 
         try:
             # Execute scan
-            connected, failed, completed = self.obtain_discovery_data()
+            connected, _, completed = self.obtain_discovery_data()
             num_completed = len(completed)
             num_remaining = len(connected)
             num_total = num_remaining + num_completed
-            num_failed = len(failed)
 
             if num_total == 0:
                 msg = 'Inventory provided no reachable hosts.'
                 raise ScannerException(msg)
-
-            logger.info('Inspect scan task started for %s.',
-                        self.scan_task)
-            log_msg = '%d total connected, %d completed, %d'\
-                ' remaining, and make %d failed hosts'
-            logger.info(log_msg,
-                        num_total, num_completed, num_remaining, num_failed)
 
             self.inspect_scan(connected)
 
@@ -134,8 +123,6 @@ class InspectTaskRunner(ScanTaskRunner):
             # Clear cache as results changed
             self.result = None
 
-            logger.info('Inspect scan task %s completed.',
-                        self.scan_task.id)
         except AnsibleError as ansible_error:
             error_message = 'Scan task encountered error: %s' % \
                 ansible_error
@@ -181,10 +168,9 @@ class InspectTaskRunner(ScanTaskRunner):
         forks = self.scan_job.options.max_concurrency
 
         # Save counts
-        self.scan_task.systems_count = len(connected)
-        self.scan_task.systems_scanned = 0
-        self.scan_task.systems_failed = 0
-        self.scan_task.save()
+        self.scan_task.update_stats('INITIAL NETWORK INSPECT STATS',
+                                    sys_count=len(connected),
+                                    sys_scanned=0, sys_failed=0)
 
         ssh_executable = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
