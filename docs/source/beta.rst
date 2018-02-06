@@ -283,6 +283,9 @@ For example, for a vCenter source where the name is **myvcenter**, the vCenter s
 
   # qpc source add --type vcenter --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin
 
+By default sources are scanned with full SSL validation, but you may need to utilize various options to be able to properly connect to the vCenter server. The ``source add`` command supports options that may commonly be used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this will be the common case for any server with a self-signed certificate. The ``--disable-ssl`` option can take a value of ``True`` to connect to the server over standard ``HTTP``.
+
+
 
 Working with a Satellite Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -300,13 +303,15 @@ For example, for a Satellite credential where the name is **satellite_admin** an
 
   # qpc cred add --type satellite --name satellite_admin --username admin --password
 
-2. Create at least one Satellite source that specifies a network identifiers, such as a host name or an IP address of the Satellite server, and one Satellite credential to be used for the scan::
+2. Create at least one Satellite source that specifies a network identifiers, such as a host name or an IP address of the Satellite server, one Satellite credential to be used for the scan, and specifying the version of the Satellite server (supported version values are "5", "6.2", "6.3")::
 
-  # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name
+  # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name --satellite-version sat_ver
 
-For example, for a Satellite source where the name is **mysatellite6**, the Satellite server to be scanned is the **192.0.2.15**, and the Satellite credential used to run the scan is **satellite_admin**, you would enter the following command::
+For example, for a Satellite source where the name is **mysatellite6**, the Satellite server to be scanned is the **192.0.2.15**, the Satellite credential used to run the scan is **satellite_admin**, and the version of the Satellite servier is **6.2**, you would enter the following command::
 
-  # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin
+  # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin --satellite-version 6.2
+
+By default sources are scanned with full SSL validation, but you may need to utilize various options to be able to properly connect to the Satellite server. The ``source add`` command supports options that may commonly be used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this will be the common case for any server with a self-signed certificate. Satellite server does not support disabling SSL so the ``--disable-ssl`` option has no effect.
 
 
 Running a scan
