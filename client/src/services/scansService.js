@@ -4,10 +4,10 @@ class ScansService {
   static addScan(data = {}) {
     return fetch(process.env.REACT_APP_SCANS_SERVICE, {
       method: 'POST',
-      body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json'
-      })
+      }),
+      body: JSON.stringify(data)
     }).then(response => {
       if (response.ok) {
         return response.json();
@@ -33,6 +33,10 @@ class ScansService {
 
   static getScans(id = '', query = {}) {
     let queryStr = jquery.param(query);
+
+    if (queryStr.length) {
+      queryStr = `?${queryStr}`;
+    }
 
     return fetch(`${process.env.REACT_APP_SCANS_SERVICE}${id}${queryStr}`).then(
       response => {

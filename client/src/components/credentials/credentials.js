@@ -158,7 +158,7 @@ class Credentials extends React.Component {
   addCredential(credentialType) {
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: credentialType
+      newCredentialType: credentialType
     });
   }
 
@@ -290,10 +290,10 @@ class Credentials extends React.Component {
   }
 
   render() {
-    const { loading, loadError, errorMessage, credentials } = this.props;
+    const { getPending, getError, getErrorMessage, credentials } = this.props;
     const { filteredItems, selectedItems } = this.state;
 
-    if (loading) {
+    if (getPending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -303,11 +303,12 @@ class Credentials extends React.Component {
         </Modal>
       );
     }
-    if (loadError) {
+
+    if (getError) {
       return (
         <EmptyState>
           <Alert type="error">
-            <span>Error retrieving credentials: {errorMessage}</span>
+            <span>Error retrieving credentials: {getErrorMessage}</span>
           </Alert>
         </EmptyState>
       );
@@ -352,33 +353,26 @@ class Credentials extends React.Component {
 
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
-  loadError: PropTypes.bool,
-  errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  getPending: PropTypes.bool,
   credentials: PropTypes.array,
+  getError: PropTypes.bool,
+  getErrorMessage: PropTypes.string,
+
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
 };
 
 Credentials.defaultProps = {
-  loading: true
+  getPending: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getCredentials: () => dispatch(getCredentials())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.credentials.loading,
-    credentials: state.credentials.data,
-    loadError: state.credentials.error,
-    errorMessage: state.credentials.errorMessage,
-    activeFilters: state.credentialsToolbar.activeFilters,
-    sortType: state.credentialsToolbar.sortType,
-    sortAscending: state.credentialsToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign({}, state.credentials, state.credentialsToolbar);
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Credentials);
