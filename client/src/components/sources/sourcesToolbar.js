@@ -195,14 +195,14 @@ class SourcesToolbar extends React.Component {
   renderActions() {
     return (
       <div className="form-group">
+        <Button bsStyle="primary" onClick={this.props.onAddSource}>
+          Add
+        </Button>
         <Button
           disabled={this.props.scanAvailable === false}
           onClick={this.props.onScan}
         >
           Scan
-        </Button>
-        <Button bsStyle="primary" onClick={this.props.onAddSource}>
-          Add
         </Button>
         <Button onClick={this.props.onRefresh} bsStyle="success">
           <Icon type="fa" name="refresh" />

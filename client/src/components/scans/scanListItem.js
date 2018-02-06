@@ -20,37 +20,19 @@ class ScanListItem extends React.Component {
     super();
 
     helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
-
-    this.state = {
-      expanded: false,
-      expandType: 'credentials'
-    };
   }
 
   toggleExpand(expandType) {
-    if (expandType === this.state.expandType) {
-      this.setState({ expanded: !this.state.expanded });
-    } else {
-      this.setState({ expanded: true, expandType: expandType });
-    }
+    const { item } = this.props;
+    item.expanded = !item.expanded;
+    item.expandType = expandType;
+    this.forceUpdate();
   }
 
   closeExpand() {
-    this.setState({ expanded: false });
-  }
-
-  renderScanType() {
     const { item } = this.props;
-
-    let scanIcon = helpers.scanTypeIcon(item.scan_type);
-    return (
-      <SimpleTooltip
-        id="scanTypeTip"
-        tooltip={helpers.scanTypeString(item.scan_type)}
-      >
-        <ListView.Icon type={scanIcon.type} name={scanIcon.name} />
-      </SimpleTooltip>
-    );
+    item.expanded = false;
+    this.forceUpdate();
   }
 
   renderDescription() {
@@ -129,7 +111,6 @@ class ScanListItem extends React.Component {
 
   renderStatusItems() {
     const { item } = this.props;
-    const { expanded, expandType } = this.state;
 
     let sourcesCount = item.sources ? item.sources.length : 0;
 
@@ -151,7 +132,7 @@ class ScanListItem extends React.Component {
           }
         >
           <ListView.Expand
-            expanded={expanded && expandType === 'systemsScanned'}
+            expanded={item.expanded && item.expandType === 'systemsScanned'}
             toggleExpanded={() => {
               this.toggleExpand('systemsScanned');
             }}
@@ -180,7 +161,7 @@ class ScanListItem extends React.Component {
           }
         >
           <ListView.Expand
-            expanded={expanded && expandType === 'systemsFailed'}
+            expanded={item.expanded && item.expandType === 'systemsFailed'}
             toggleExpanded={() => {
               this.toggleExpand('systemsFailed');
             }}
@@ -196,10 +177,13 @@ class ScanListItem extends React.Component {
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="sources"
-        className="list-view-info-item-text-count"
+        className={
+          'list-view-info-item-text-count ' +
+          (sourcesCount === 0 ? 'invisible' : '')
+        }
       >
         <ListView.Expand
-          expanded={expanded && expandType === 'sources'}
+          expanded={item.expanded && item.expandType === 'sources'}
           toggleExpanded={() => {
             this.toggleExpand('sources');
           }}
@@ -216,13 +200,13 @@ class ScanListItem extends React.Component {
         }
       >
         <ListView.Expand
-          expanded={expanded && expandType === 'scans'}
+          expanded={item.expanded && item.expandType === 'scans'}
           toggleExpanded={() => {
             this.toggleExpand('scans');
           }}
         >
           <strong>{item.scans_count} </strong>
-          {item.scans_count === 1 ? ' Scan' : ' Scans'}
+          {item.scans_count === 1 ? ' Previous' : ' Previous'}
         </ListView.Expand>
       </ListView.InfoItem>
     ];
@@ -313,9 +297,8 @@ class ScanListItem extends React.Component {
 
   renderExpansionContents() {
     const { item } = this.props;
-    const { expandType } = this.state;
 
-    switch (expandType) {
+    switch (item.expandType) {
       case 'systemsScanned':
         return <ScanHostsList hosts={item.hosts} status="ok" />;
       case 'systemsFailed':
@@ -333,18 +316,17 @@ class ScanListItem extends React.Component {
 
   render() {
     const { item } = this.props;
-    const { expanded } = this.state;
 
     return (
       <ListView.Item
         key={item.id}
+        className="quipucords-scan-list-item"
         actions={this.renderActions()}
-        leftContent={this.renderScanType()}
-        heading={`ID: ${item.id}`}
+        leftContent={<strong>ID: {item.id}</strong>}
         description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
-        compoundExpanded={expanded}
+        compoundExpanded={item.expanded}
         onCloseCompoundExpand={this.closeExpand}
       >
         {this.renderExpansionContents()}

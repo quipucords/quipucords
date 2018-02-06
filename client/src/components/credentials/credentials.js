@@ -57,20 +57,15 @@ class Credentials extends React.Component {
         credential.selected = false;
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
           credential.auth_type = 'sshKey';
-        } else if (credential.become_user && credential.become_user !== '') {
-          credential.auth_type = 'becomeUser';
         } else {
           credential.auth_type = 'usernamePassword';
         }
-      });
 
-      // TODO: Remove once we get real failed host data
-      let failedCount = Math.floor(Math.random() * 10);
-      nextProps.credentials.forEach(credential => {
-        credential.selected = false;
-        credential.failed_hosts = [];
-        for (let i = 0; i < failedCount; i++) {
-          credential.failed_hosts.push('failedHost' + (i + 1));
+        // TODO: Remove once we get real source data
+        let sourceCount = Math.floor(Math.random() * 10);
+        credential.sources = [];
+        for (let i = 0; i < sourceCount; i++) {
+          credential.sources.push('Source ' + (i + 1));
         }
       });
 
@@ -139,9 +134,6 @@ class Credentials extends React.Component {
           break;
         case 'credentialType':
           compValue = item1.cred_type.localeCompare(item2.cred_type);
-          break;
-        case 'authenticationType':
-          compValue = item1.auth_type.localeCompare(item2.auth_type);
           break;
         default:
           compValue = 0;

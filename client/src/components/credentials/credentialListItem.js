@@ -1,10 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ListView, Button, Icon, Checkbox } from 'patternfly-react';
+import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class CredentialListItem extends React.Component {
+  constructor() {
+    super();
+
+    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
+  }
+
+  toggleExpand(expandType) {
+    const { item } = this.props;
+    item.expanded = !item.expanded;
+    item.expandType = expandType;
+    this.forceUpdate();
+  }
+
+  closeExpand() {
+    const { item } = this.props;
+    item.expanded = false;
+    this.forceUpdate();
+  }
+
   renderActions() {
     const { item, onEdit, onDelete } = this.props;
 
@@ -38,6 +57,57 @@ class CredentialListItem extends React.Component {
     ];
   }
 
+  renderStatusItems() {
+    const { item } = this.props;
+
+    let sourceCount = item.sources ? item.sources.length : 0;
+
+    return [
+      <ListView.InfoItem
+        key="sources"
+        className={
+          'list-view-info-item-icon-count ' +
+          (sourceCount === 0 ? 'invisible' : '')
+        }
+      >
+        <ListView.Expand
+          expanded={item.expanded && item.expandType === 'sources'}
+          toggleExpanded={() => {
+            this.toggleExpand('sources');
+          }}
+        >
+          <strong>{sourceCount}</strong>
+          {sourceCount === 1 ? ' Source' : ' Sources'}
+        </ListView.Expand>
+      </ListView.InfoItem>
+    ];
+  }
+
+  renderExpansionContents() {
+    const { item } = this.props;
+
+    switch (item.expandType) {
+      case 'sources':
+        return (
+          <Grid fluid>
+            {item.sources &&
+              item.sources.map((item, index) => (
+                <Grid.Row key={index}>
+                  <Grid.Col xs={12} sm={4}>
+                    <span>
+                      <Icon type="pf" name="server-group" />
+                      &nbsp; {item}
+                    </span>
+                  </Grid.Col>
+                </Grid.Row>
+              ))}
+          </Grid>
+        );
+      default:
+        return null;
+    }
+  }
+
   render() {
     const { item, onItemSelectChange } = this.props;
 
@@ -46,6 +116,7 @@ class CredentialListItem extends React.Component {
     return (
       <ListView.Item
         key={item.id}
+        className="quipucords-credential-list-item"
         checkboxInput={
           <Checkbox
             checked={item.selected}
@@ -71,32 +142,13 @@ class CredentialListItem extends React.Component {
             {helpers.authorizationTypeString(item.auth_type)}
           </SimpleTooltip>
         }
-        additionalInfo={[
-          <ListView.InfoItem
-            key="userName"
-            className="list-view-info-item-text-count"
-          >
-            <SimpleTooltip
-              id="userTip"
-              tooltip={
-                item.authType === 'becomeUser' ? 'Become User' : 'Username'
-              }
-            >
-              {item.authType === 'becomeUser'
-                ? item.become_user
-                : item.username}
-            </SimpleTooltip>
-          </ListView.InfoItem>,
-          <ListView.InfoItem
-            key="becomeMethod"
-            className="list-view-info-item-text-count"
-          >
-            <SimpleTooltip id="methodTip" tooltip="Become Method">
-              {item.authType === 'becomeUser' ? item.become_method : ''}
-            </SimpleTooltip>
-          </ListView.InfoItem>
-        ]}
-      />
+        additionalInfo={this.renderStatusItems()}
+        compoundExpand
+        compoundExpanded={item.expanded}
+        onCloseCompoundExpand={this.closeExpand}
+      >
+        {this.renderExpansionContents()}
+      </ListView.Item>
     );
   }
 }

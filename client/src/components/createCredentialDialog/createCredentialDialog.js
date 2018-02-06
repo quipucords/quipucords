@@ -20,7 +20,6 @@ import {
 } from '../../redux/constants';
 import {
   addCredential,
-  getCredential,
   getCredentials,
   updateCredential
 } from '../../redux/actions/credentialsActions';
@@ -516,7 +515,7 @@ class CreateCredentialDialog extends React.Component {
                   className="quipucords-form-control"
                   readOnly={editing}
                   placeholder="Enter the new credential name"
-                  autoFocus
+                  autoFocus={!editing}
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
                 />
@@ -573,6 +572,7 @@ class CreateCredentialDialog extends React.Component {
           <Button
             bsStyle="default"
             className="btn-cancel"
+            autoFocus={editing}
             onClick={this.cancel}
           >
             Cancel
@@ -594,7 +594,6 @@ CreateCredentialDialog.propTypes = {
   show: PropTypes.bool,
   editing: PropTypes.bool,
 
-  getCredential: PropTypes.func,
   getCredentials: PropTypes.func,
   credentials: PropTypes.array,
 
@@ -613,7 +612,6 @@ CreateCredentialDialog.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredential: id => dispatch(getCredential(id)),
   getCredentials: () => dispatch(getCredentials()),
   addCredential: data => dispatch(addCredential(data)),
   updateCredential: (id, data) => dispatch(updateCredential(id, data))
