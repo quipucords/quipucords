@@ -24,6 +24,35 @@ PROCESSOR_ERROR_KEY = 'processor_error_key'
 NOT_TASK_RESULT_KEY = 'not_task_result_key'
 
 
+class TestIsSudoErrorValue(unittest.TestCase):
+    """Test is_sudo_error_value."""
+
+    def test_string_not_error(self):
+        """A string that is not a sudo error."""
+        self.assertFalse(process.is_sudo_error_value('foo'))
+
+    def test_string_sudo_error(self):
+        """A string with the sudo error value."""
+        self.assertTrue(process.is_sudo_error_value(process.SUDO_ERROR))
+
+    def test_list_not_error(self):
+        """A list that is not a sudo error."""
+        self.assertFalse(process.is_sudo_error_value(['foo']))
+
+    def test_list_sudo_error(self):
+        """A list with the sudo error."""
+        self.assertTrue(process.is_sudo_error_value([process.SUDO_ERROR]))
+
+    def test_result_not_error(self):
+        """An Ansible result that is not a sudo error."""
+        self.assertFalse(process.is_sudo_error_value(ansible_result('foo')))
+
+    def test_result_sudo_error(self):
+        """An Ansible result that is a sudo error."""
+        self.assertTrue(process.is_sudo_error_value(
+            ansible_result(process.SUDO_ERROR)))
+
+
 class TestIsAnsibleTaskResult(unittest.TestCase):
     """Test IsAnsibleTaskResult."""
 
@@ -96,6 +125,12 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(
             process.process({NOT_TASK_RESULT_KEY: 'foo'}, HOST),
             {NOT_TASK_RESULT_KEY: 'foo'})
+
+    def test_not_result_sudo_error(self):
+        """Test a value that is not a task result, but is a sudo error."""
+        self.assertEqual(
+            process.process({NOT_TASK_RESULT_KEY: process.SUDO_ERROR}, HOST),
+            {NOT_TASK_RESULT_KEY: process.NO_DATA})
 
     def test_processing_bad_input(self):
         """Test a key that is not a task result, but needs processing."""
