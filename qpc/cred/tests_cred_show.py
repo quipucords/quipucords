@@ -86,7 +86,7 @@ class CredentialShowCliTests(unittest.TestCase):
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             asc = CredShowCommand(SUBPARSER)
             args = Namespace(name='cred1')
             with self.assertRaises(SystemExit):
@@ -101,7 +101,8 @@ class CredentialShowCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         credential_entry = {'id': 1, 'name': 'cred1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             asc = CredShowCommand(SUBPARSER)

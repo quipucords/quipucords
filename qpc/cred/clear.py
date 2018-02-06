@@ -67,22 +67,23 @@ class CredClearCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        response_len = len(json_data)
-        if self.args.name and response_len == 0:
+        count = json_data.get('count', 0)
+        if self.args.name and count == 0:
             print(_(messages.CRED_NOT_FOUND % self.args.name))
             sys.exit(1)
-        elif self.args.name and response_len == 1:
+        elif self.args.name and count == 1:
             # delete single credential
-            entry = json_data[0]
+            entry = json_data.get('results')[0]
             if self._delete_entry(entry) is False:
                 sys.exit(1)
-        elif response_len == 0:
+        elif count == 0:
             print(_(messages.CRED_NO_CREDS_TO_REMOVE))
             sys.exit(1)
         else:
             # remove all entries
             remove_error = []
-            for entry in json_data:
+            results = json_data.get('results')
+            for entry in results:
                 if self._delete_entry(entry, print_out=False) is False:
                     remove_error.append(entry['name'])
             if remove_error != []:

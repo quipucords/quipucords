@@ -91,8 +91,9 @@ class CredEditCommand(CliCommand):
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
-            if len(json_data) == 1:
-                cred_entry = json_data[0]
+            count = json_data.get('count', 0)
+            if count == 1:
+                cred_entry = json_data.get('results')[0]
                 self.cred_type = cred_entry['cred_type']
                 self.req_path = self.req_path + str(cred_entry['id']) + '/'
             else:

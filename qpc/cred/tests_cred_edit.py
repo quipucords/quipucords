@@ -88,7 +88,7 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred_none', username='root',
                              filename=TMP_KEY,
@@ -135,9 +135,10 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
-                 'username': 'root',
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
+                    'username': 'root',
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
@@ -155,8 +156,9 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
-                 'username': 'root'}]
+        results = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
+                    'username': 'root'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
@@ -174,9 +176,10 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1',
-                 'cred_type': VCENTER_CRED_TYPE, 'username': 'root',
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1',
+                    'cred_type': VCENTER_CRED_TYPE, 'username': 'root',
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
@@ -193,9 +196,10 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1',
-                 'cred_type': VCENTER_CRED_TYPE,
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1',
+                    'cred_type': VCENTER_CRED_TYPE,
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
@@ -211,8 +215,9 @@ class CredentialEditCliTests(unittest.TestCase):
         """Testing the edit credential command server error occurs."""
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
-        data = [{'id': 1, 'name': 'cred1', 'username': 'root',
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1', 'username': 'root',
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=500, json=data)
             aec = CredEditCommand(SUBPARSER)
@@ -229,9 +234,10 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1',
-                 'cred_type': SATELLITE_CRED_TYPE, 'username': 'root',
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1',
+                    'cred_type': SATELLITE_CRED_TYPE, 'username': 'root',
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
@@ -248,9 +254,10 @@ class CredentialEditCliTests(unittest.TestCase):
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
-        data = [{'id': 1, 'name': 'cred1',
-                 'cred_type': SATELLITE_CRED_TYPE,
-                 'password': '********'}]
+        results = [{'id': 1, 'name': 'cred1',
+                    'cred_type': SATELLITE_CRED_TYPE,
+                    'password': '********'}]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -74,6 +74,14 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for cred in serializer.data:
+                cred = mask_credential(cred)
+            return self.get_paginated_response(serializer.data)
+
         serializer = CredentialSerializer(queryset, many=True)
         for cred in serializer.data:
             cred = mask_credential(cred)
