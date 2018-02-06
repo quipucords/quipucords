@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -643,10 +643,7 @@ class ScanJobTest(TestCase):
         # Queue job to run
         scan_job.queue()
         task = scan_job.tasks.all()[1]
-        task.systems_count = 2
-        task.systems_failed = 1
-        task.systems_scanned = 1
-        task.save()
+        task.update_stats('TEST_VC.', sys_count=2, sys_failed=1, sys_scanned=1)
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
 

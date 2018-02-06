@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -10,6 +10,7 @@
 #
 """Test the inspect scanner capabilities."""
 
+from datetime import datetime
 import os.path
 from types import SimpleNamespace
 import unittest
@@ -154,14 +155,16 @@ class HostScannerTest(TestCase):
         self.host_list = [('1.2.3.4', self.cred_data)]
         self.connect_scan_task = ScanTask(source=self.source,
                                           scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                          status=ScanTask.COMPLETED)
-        self.connect_scan_task.systems_failed = 0
-        self.connect_scan_task.save()
+                                          status=ScanTask.COMPLETED,
+                                          start_time=datetime.utcnow())
+        self.connect_scan_task.update_stats(
+            'TEST NETWORK CONNECT.', sys_failed=0)
 
         self.inspect_scan_task = ScanTask(source=self.source,
-                                          scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        self.inspect_scan_task.systems_failed = 0
-        self.inspect_scan_task.save()
+                                          scan_type=ScanTask.SCAN_TYPE_INSPECT,
+                                          start_time=datetime.utcnow())
+        self.inspect_scan_task.update_stats(
+            'TEST NETWORK INSPECT.', sys_failed=0)
         self.inspect_scan_task.prerequisites.add(self.connect_scan_task)
         self.inspect_scan_task.save()
 
