@@ -54,6 +54,27 @@ export const scanTypeIcon = scanType => {
   }
 };
 
+export const scanStatusString = scanStatus => {
+  switch (scanStatus) {
+    case 'completed':
+      return 'Completed';
+    case 'failed':
+      return 'Failed';
+    case 'created':
+      return 'Created';
+    case 'running':
+      return 'Running';
+    case 'paused':
+      return 'Paused';
+    case 'pending':
+      return 'Pending';
+    case 'canceled':
+      return 'Canceled';
+    default:
+      return '';
+  }
+};
+
 export const authorizationTypeString = authorizationType => {
   switch (authorizationType) {
     case 'usernamePassword':
@@ -71,6 +92,7 @@ export const helpers = {
   sourceTypeString: sourceTypeString,
   sourceTypeIcon: sourceTypeIcon,
   scanTypeString: scanTypeString,
+  scanStatusString: scanStatusString,
   scanTypeIcon: scanTypeIcon,
   authorizationTypeString: authorizationTypeString
 };

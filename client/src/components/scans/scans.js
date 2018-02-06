@@ -30,6 +30,7 @@ class Scans extends React.Component {
       'pauseScan',
       'cancelScan',
       'startScan',
+      'resumeScan',
       'addSource',
       'importSources',
       'refresh'
@@ -40,7 +41,7 @@ class Scans extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getScans();
+    this.props.getScans({ scan_type: 'inspect' });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -82,10 +83,15 @@ class Scans extends React.Component {
     switch (filter.field.id) {
       case 'name':
         return (item.id + '').match(re) !== null; // Using ID for now until we get a name
+      case 'source':
+        return (
+          item.sources &&
+          item.sources.find(source => {
+            return source.name && source.name.match(re);
+          })
+        );
       case 'status':
         return item.status === filter.value.id;
-      case 'scanType':
-        return item.scan_type === filter.value.id;
       default:
         return true;
     }
@@ -122,27 +128,37 @@ class Scans extends React.Component {
           break;
         case 'status':
           compValue = item1.status.localeCompare(item2.status);
-          if (compValue === 0) {
-            compValue = item1.scan_type.localeCompare(item2.scan_type);
-          }
           break;
-        case 'scanType':
-          compValue = item1.scan_type.localeCompare(item2.scan_type);
-          if (compValue === 0) {
-            compValue = item1.status.localeCompare(item2.status);
-          }
+        case 'time':
+          compValue = item1.status.localeCompare(item2.status);
+          break;
+        case 'hostCount':
+          compValue = item1.systems_count - item2.systems_count;
+          break;
+        case 'successfulHosts':
+          compValue = item1.systems_scanned - item2.systems_scanned;
+          break;
+        case 'failedHosts':
+          compValue = item1.systems_failed - item2.systems_failed;
           break;
         case 'sourceCount':
           compValue = item1.sources.length - item2.sources.length;
-          if (compValue === 0) {
-            compValue = item1.status.localeCompare(item2.status);
-            if (compValue === 0) {
-              compValue = item1.scan_type.localeCompare(item2.scan_type);
-            }
-          }
+          break;
+        case 'scansCount':
+          compValue = item1.scans_count - item2.scans_count;
           break;
         default:
           compValue = 0;
+      }
+
+      // Secondary sort by time
+      if (compValue === 0) {
+        compValue = item2.last_run - item1.last_run;
+      }
+
+      // Tertiary sort by status
+      if (compValue === 0) {
+        compValue = item1.status.localeCompare(item2.status);
       }
 
       if (!sortAscending) {
@@ -198,6 +214,15 @@ class Scans extends React.Component {
     });
   }
 
+  resumeScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Resuming scans is not yet implemented'
+    });
+  }
+
   addSource() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -217,7 +242,7 @@ class Scans extends React.Component {
   }
 
   refresh() {
-    this.props.getScans();
+    this.props.getScans({ scan_type: 'inspect' });
   }
 
   renderList(items) {
@@ -233,6 +258,7 @@ class Scans extends React.Component {
               onPause={this.pauseScan}
               onCancel={this.cancelScan}
               onStart={this.startScan}
+              onResume={this.resumeScan}
             />
           ))}
         </ListView>

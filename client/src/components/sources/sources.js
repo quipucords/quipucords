@@ -96,6 +96,25 @@ class Sources extends React.Component {
         return item.name.match(re) !== null;
       case 'sourceType':
         return item.source_type === filter.value.id;
+      case 'hosts':
+        return (
+          item.hosts &&
+          item.hosts.find(host => {
+            return host.match(re);
+          })
+        );
+      case 'status':
+        return (
+          item.connection_scan &&
+          item.connection_scan.status === filter.value.id
+        );
+      case 'credentials':
+        return (
+          item.credentials &&
+          item.credentials.find(credential => {
+            return credential.name.match(re);
+          })
+        );
       default:
         return true;
     }
@@ -137,8 +156,23 @@ class Sources extends React.Component {
         case 'sourceType':
           compValue = item1.source_type.localeCompare(item2.source_type);
           break;
+        case 'status':
+          compValue = item1.source_type.localeCompare(item2.source_type);
+          break;
+        case 'credentialsCount':
+          compValue = item1.credentials.length - item2.credentials.length;
+          break;
         case 'hostCount':
+          compValue =
+            item1.hosts.length +
+            item1.failed_hosts.length -
+            (item2.hosts.length + item2.failed_hosts.length);
+          break;
+        case 'successHostCount':
           compValue = item1.hosts.length - item2.hosts.length;
+          break;
+        case 'failedHostCount':
+          compValue = item1.failed_hosts.length - item2.failed_hosts.length;
           break;
         default:
           compValue = 0;
