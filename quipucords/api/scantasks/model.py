@@ -141,6 +141,11 @@ class ScanTask(models.Model):
                     sys_scanned,
                     sys_failed)
 
+    def log_message(self, message, log_level=logging.INFO):
+        """Log a message for this task."""
+        actual_message = ('Task %s - ' % self.id) + message
+        logger.log(log_level, actual_message)
+
     @transaction.atomic
     def update_stats(self,
                      description,

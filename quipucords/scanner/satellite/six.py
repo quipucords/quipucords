@@ -248,12 +248,14 @@ def host_subscriptions(scan_task, url, org_id, host_id):
     if response.status_code == 400 or response.status_code == 404:
         content_type = response.headers.get(CONTENT_TYPE)
         if content_type and APP_JSON in content_type:
-            logger.warning('Invalid status code %s for url: %s. Response: %s',
-                           response.status_code, url, response.json())
+            message = 'Invalid status code %s for url: %s. Response: %s' %\
+                (response.status_code, url, response.json())
+            scan_task.log_message(logging.WARNING, message)
         else:
-            logger.warning('Invalid status code %s for url: %s. '
-                           'Response not JSON',
-                           response.status_code, url)
+            message = 'Invalid status code %s for url: %s. '\
+                'Response not JSON' %\
+                (response.status_code, url)
+            scan_task.log_message(logging.WARNING, message)
         subs_dict = {ENTITLEMENTS: []}
         return subs_dict
     elif response.status_code != requests.codes.ok:
