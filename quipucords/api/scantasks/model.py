@@ -100,21 +100,20 @@ class ScanTask(models.Model):
                            log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            logger.log(log_level, 'Task %s - STATE UPDATE (%s, %s, %s, %s).'
-                       '  Additional status information: %s',
-                       self.id,
-                       self.status,
-                       self.scan_type,
-                       self.source.source_type,
-                       self.source.name,
-                       self.status_message)
+            message = 'STATE UPDATE (%s, %s, %s, %s).  '\
+                'Additional status information: %s' %\
+                (self.status,
+                 self.scan_type,
+                 self.source.source_type,
+                 self.source.name,
+                 self.status_message)
         else:
-            logger.log(log_level, 'Task %s - STATE UPDATE (%s, %s, %s, %s)',
-                       self.id,
-                       self.status,
-                       self.scan_type,
-                       self.source.source_type,
-                       self.source.name)
+            message = 'STATE UPDATE (%s, %s, %s, %s)' %\
+                (self.status,
+                 self.scan_type,
+                 self.source.source_type,
+                 self.source.name)
+        self.log_message(message, log_level=log_level)
 
     def _log_stats(self, prefix):
         """Log stats for scan."""
@@ -132,18 +131,19 @@ class ScanTask(models.Model):
         else:
             elapsed_time = (datetime.utcnow() -
                             self.start_time).total_seconds()
-        logger.info('Task %s - %s Stats: elapsed_time=%ds, systems_count=%d, '
-                    'systems_scanned=%d, systems_failed=%d',
-                    self.id,
-                    prefix,
-                    elapsed_time,
-                    sys_count,
-                    sys_scanned,
-                    sys_failed)
+        message = '%s Stats: elapsed_time=%ds, systems_count=%d,'\
+            ' systems_scanned=%d, systems_failed=%d' %\
+            (prefix,
+             elapsed_time,
+             sys_count,
+             sys_scanned,
+             sys_failed)
+        self.log_message(message)
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this task."""
-        actual_message = ('Task %s - ' % self.id) + message
+        actual_message = ('Task %d - ' % self.id)
+        actual_message += message
         logger.log(log_level, actual_message)
 
     @transaction.atomic

@@ -106,27 +106,33 @@ class ScanJob(models.Model):
         else:
             elapsed_time = (datetime.utcnow() -
                             self.start_time).total_seconds()
-        logger.info('Job %s - %s Stats: elapsed_time=%ds',
-                    self.id,
-                    prefix,
-                    elapsed_time)
+        message = '%s Stats: elapsed_time=%ds' %\
+            (prefix,
+             elapsed_time)
+        self.log_message(message)
 
     def log_current_status(self,
                            show_status_message=False,
                            log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            logger.log(log_level, 'Job %s - STATE UPDATE (%s, %s).'
-                       '  Additional State information: %s',
-                       self.id,
-                       self.status,
-                       self.scan_type,
-                       self.status_message)
+            message = 'STATE UPDATE (%s, %s).'\
+                '  Additional State information: %s' %\
+                (self.status,
+                 self.scan_type,
+                 self.status_message)
         else:
-            logger.log(log_level, 'Job %s - STATE UPDATE (%s, %s)',
-                       self.id,
-                       self.status,
-                       self.scan_type)
+            message = 'STATE UPDATE (%s, %s)' %\
+                (self.status,
+                 self.scan_type)
+
+        self.log_message(message, log_level=log_level)
+
+    def log_message(self, message, log_level=logging.INFO):
+        """Log a message for this job."""
+        actual_message = ('Job %d - ' % self.id)
+        actual_message += message
+        logger.log(log_level, actual_message)
 
     @transaction.atomic
     def queue(self):
@@ -335,7 +341,8 @@ class ScanJob(models.Model):
         logger.error(self.status_message)
         self.save()
         self._log_stats('FAILURE STATS.')
-        self.log_current_status(show_status_message=True)
+        self.log_current_status(show_status_message=True,
+                                log_level=logging.ERROR)
 
     def validate_status_change(self, target_status, valid_current_status):
         """Validate and transition job status.
