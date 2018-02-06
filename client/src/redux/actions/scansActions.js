@@ -17,11 +17,12 @@ const getScansSuccess = data => ({
   data
 });
 
-const getScans = () => {
+const getScans = queryStr => {
   return function(dispatch) {
     dispatch(getScansLoading(true));
+
     return scansService
-      .getScans()
+      .getScans('', queryStr)
       .then(success => {
         dispatch(getScansSuccess(success));
         dispatch(getScansLoading(false));

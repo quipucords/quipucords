@@ -8,28 +8,24 @@ const ScanFilterFields = [
     filterType: 'text'
   },
   {
+    id: 'source',
+    title: 'Source',
+    placeholder: 'Filter by Source',
+    filterType: 'text'
+  },
+  {
     id: 'status',
     title: 'Status',
     placeholder: 'Filter by Status',
     filterType: 'select',
     filterValues: [
-      { title: 'Completed', id: 'completed' },
-      { title: 'Failed', id: 'failed' },
-      { title: 'Created', id: 'created' },
-      { title: 'Running', id: 'running' },
-      { title: 'Paused', id: 'paused' },
-      { title: 'Pending', id: 'pending' },
-      { title: 'Canceled', id: 'canceled' }
-    ]
-  },
-  {
-    id: 'scanType',
-    title: 'Scan Type',
-    placeholder: 'Filter by Scan Type',
-    filterType: 'select',
-    filterValues: [
-      { title: helpers.scanTypeString('connect'), id: 'connect' },
-      { title: helpers.scanTypeString('inspect'), id: 'inspect' }
+      { title: helpers.scanStatusString('completed'), id: 'completed' },
+      { title: helpers.scanStatusString('failed'), id: 'failed' },
+      { title: helpers.scanStatusString('created'), id: 'created' },
+      { title: helpers.scanStatusString('running'), id: 'running' },
+      { title: helpers.scanStatusString('paused'), id: 'paused' },
+      { title: helpers.scanStatusString('pending'), id: 'pending' },
+      { title: helpers.scanStatusString('canceled'), id: 'canceled' }
     ]
   }
 ];
@@ -46,13 +42,33 @@ const ScanSortFields = [
     isNumeric: false
   },
   {
-    id: 'scanType',
-    title: 'Scan Type',
-    isNumeric: false
+    id: 'time',
+    title: 'Time',
+    isNumeric: true
+  },
+  {
+    id: 'hostCount',
+    title: 'System Count',
+    isNumeric: true
+  },
+  {
+    id: 'successfulHosts',
+    title: 'Successful System Scans',
+    isNumeric: true
+  },
+  {
+    id: 'failedHosts',
+    title: 'Failed System Scans',
+    isNumeric: true
   },
   {
     id: 'sourceCount',
     title: 'Sources Count',
+    isNumeric: true
+  },
+  {
+    id: 'scansCount',
+    title: 'Scans Count',
     isNumeric: true
   }
 ];

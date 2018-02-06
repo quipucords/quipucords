@@ -15,17 +15,6 @@ const CredentialFilterFields = [
       { title: 'Satellite', id: 'satellite' },
       { title: 'VCenter', id: 'vcenter' }
     ]
-  },
-  {
-    id: 'authenticationType',
-    title: 'Authentication Type',
-    placeholder: 'Filter by Authentication Type',
-    filterType: 'select',
-    filterValues: [
-      { title: 'SSH Key', id: 'sshKey' },
-      { title: 'Username & Password', id: 'usernamePassword' },
-      { title: 'Become User', id: 'becomeUser' }
-    ]
   }
 ];
 
