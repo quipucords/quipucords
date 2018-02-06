@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -10,6 +10,7 @@
 #
 """Test the vcenter connect capabilities."""
 
+from datetime import datetime
 from unittest.mock import Mock, patch, ANY
 from socket import gaierror
 from django.test import TestCase
@@ -54,7 +55,8 @@ class ConnectTaskRunnerTest(TestCase):
         self.source.credentials.add(self.cred)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=2)
+                                  source=self.source, sequence_number=2,
+                                  start_time=datetime.utcnow())
         self.scan_task.save()
 
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)

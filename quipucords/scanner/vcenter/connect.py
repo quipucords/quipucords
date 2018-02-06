@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -85,11 +85,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.conn_results.save()
 
         # Update the scan counts
-        if self.scan_task.systems_count is None:
-            self.scan_task.systems_count = len(connected)
-            self.scan_task.systems_scanned = 0
-        self.scan_task.systems_scanned = len(connected)
-        self.scan_task.save()
+        self.scan_task.update_stats(
+            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
 
     def run(self):
         """Scan network range ang attempt connections."""
@@ -120,11 +117,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         :returns: list of connected vm credential tuples
         """
         vm_names = []
-        logger.info('Connect scan started for %s.', self.scan_task)
 
         vcenter = vcenter_connect(self.scan_task)
         container_view = get_vm_container(vcenter)
         vm_names = get_vm_names(container_view)
 
-        logger.info('Connect scan completed for %s.', self.scan_task)
         return set(vm_names)

@@ -10,6 +10,7 @@
 #
 """Test the satellite inspect task."""
 
+from datetime import datetime
 from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
@@ -58,9 +59,10 @@ class InspectTaskRunnerTest(TestCase):
         self.source.credentials.add(self.cred)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                  source=self.source, sequence_number=2)
-        self.scan_task.systems_scanned = 0
+                                  source=self.source, sequence_number=2,
+                                  start_time=datetime.utcnow())
         self.scan_task.save()
+        self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
 
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
@@ -72,9 +74,9 @@ class InspectTaskRunnerTest(TestCase):
         self.conn_result.save()
 
         conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                             source=self.source, sequence_number=1)
-        conn_task.status = ScanTask.COMPLETED
-        conn_task.save()
+                             source=self.source, sequence_number=1,
+                             start_time=datetime.utcnow())
+        conn_task.complete()
         self.scan_task.prerequisites.add(conn_task)
         self.inspect_results = InspectionResults(scan_job=self.scan_job)
         self.inspect_results.save()

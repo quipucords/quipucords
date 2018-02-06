@@ -57,8 +57,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self):
         """Scan network range ang attempt connections."""
-        logger.info('Connect scan started for %s.', self.scan_task)
-
         satellite_version = None
         options = self.source.options
         if options:
@@ -97,5 +95,4 @@ class ConnectTaskRunner(ScanTaskRunner):
             error_message += 'Connect scan failed for %s.' % self.scan_task
             return error_message, ScanTask.FAILED
 
-        logger.info('Connect scan completed for %s.', self.scan_task)
         return None, ScanTask.COMPLETED

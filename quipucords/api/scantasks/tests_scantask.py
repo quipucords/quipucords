@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -119,9 +119,9 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
         end_time = datetime.utcnow()
-        task.complete()
+        task.complete('great')
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_COMPLETED,
+        self.assertEqual('great',
                          task.status_message)
         self.assertEqual(task.status, ScanTask.COMPLETED)
         self.assertEqual(end_time.replace(microsecond=0),
@@ -143,3 +143,24 @@ class ScanTaskTest(TestCase):
         self.assertEqual(task.status, ScanTask.FAILED)
         self.assertEqual(end_time.replace(microsecond=0),
                          task.end_time.replace(microsecond=0))
+
+    def test_scantask_increment(self):
+        """Test scan task increment feature."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        # pylint: disable=invalid-name
+        task.save()
+        task.increment_stats('foo', increment_sys_count=True,
+                             increment_sys_scanned=True,
+                             increment_sys_failed=True)
+        self.assertEqual(1, task.systems_count)
+        self.assertEqual(1, task.systems_scanned)
+        self.assertEqual(1, task.systems_failed)
+        task.increment_stats('foo', increment_sys_count=True,
+                             increment_sys_scanned=True,
+                             increment_sys_failed=True)
+        self.assertEqual(2, task.systems_count)
+        self.assertEqual(2, task.systems_scanned)
+        self.assertEqual(2, task.systems_failed)
