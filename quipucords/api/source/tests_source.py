@@ -372,23 +372,33 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [
-            {
-                'id': 3, 'name':
-                'vsource3', 'source_type':
-                'vcenter', 'port': 443,
-                'credentials': [{'id': 2, 'name': 'vc_cred1'}],
-                'hosts': ['1.2.3.4'],
+        expected = [{
+            'id': 3,
+            'name': 'vsource3',
+            'source_type': 'vcenter',
+            'port': 443,
+            'hosts': ['1.2.3.4'],
+            'options': {
+                'ssl_cert_verify': True
             },
-            {
-                'id': 4,
-                'name': 'vsource4',
-                'source_type': 'vcenter', 'port': 443,
-                'credentials': [{'id': 2, 'name': 'vc_cred1'}],
-                'hosts': ['1.2.3.4'],
-            }
-        ]
-
+            'credentials': [{
+                'id': 2,
+                'name': 'vc_cred1'
+            }]
+        }, {
+            'id': 4,
+            'name': 'vsource4',
+            'source_type': 'vcenter',
+            'port': 443,
+            'hosts': ['1.2.3.4'],
+            'options': {
+                'ssl_cert_verify': True
+            },
+            'credentials': [{
+                'id': 2,
+                'name': 'vc_cred1'
+            }]
+        }]
         self.assertEqual(content, expected)
 
     def test_retrieve(self):

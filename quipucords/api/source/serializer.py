@@ -56,14 +56,19 @@ class SourceOptionsSerializer(NotEmptySerializer):
 
     satellite_version = ValidStringChoiceField(
         required=False, choices=SourceOptions.SATELLITE_VERSION_CHOICES)
-
+    ssl_protocol = ValidStringChoiceField(
+        required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES)
     ssl_cert_verify = NullBooleanField(required=False)
+    disable_ssl = NullBooleanField(required=False)
 
     class Meta:
         """Metadata for serializer."""
 
         model = SourceOptions
-        fields = ['satellite_version', 'ssl_cert_verify']
+        fields = ['satellite_version',
+                  'ssl_protocol',
+                  'ssl_cert_verify',
+                  'disable_ssl']
 
 
 class SourceSerializer(NotEmptySerializer):
@@ -163,6 +168,13 @@ class SourceSerializer(NotEmptySerializer):
             source.options = options
         elif not options and source_type == Source.SATELLITE_SOURCE_TYPE:
             options = SourceOptions()
+            options.satellite_version = SourceOptions.SATELLITE_VERSION_62
+            options.ssl_cert_verify = True
+            options.save()
+            source.options = options
+        elif not options and source_type == Source.VCENTER_SOURCE_TYPE:
+            options = SourceOptions()
+            options.satellite_version = None
             options.ssl_cert_verify = True
             options.save()
             source.options = options

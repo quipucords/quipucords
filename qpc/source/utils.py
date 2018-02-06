@@ -74,11 +74,24 @@ def build_source_payload(args, add_none=True):
             options['satellite_version'] = args.satellite_version
     if (hasattr(args, 'ssl_cert_verify') and
             args.ssl_cert_verify is not None):
-        ssl_cert_verify = args.ssl_cert_verify == 'True'
+        ssl_cert_verify = args.ssl_cert_verify.lower() == 'true'
         if options is None:
             options = {'ssl_cert_verify': ssl_cert_verify}
         else:
             options['ssl_cert_verify'] = ssl_cert_verify
+    if (hasattr(args, 'disable_ssl') and
+            args.disable_ssl is not None):
+        disable_ssl = args.disable_ssl.lower() == 'true'
+        if options is None:
+            options = {'disable_ssl': disable_ssl}
+        else:
+            options['disable_ssl'] = disable_ssl
+    if (hasattr(args, 'ssl_protocol') and
+            args.ssl_protocol is not None):
+        if options is None:
+            options = {'ssl_protocol': args.ssl_protocol}
+        else:
+            options['ssl_protocol'] = args.ssl_protocol
 
     if options is not None:
         req_payload['options'] = options

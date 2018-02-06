@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -23,3 +23,10 @@ VCENTER_SOURCE_TYPE = 'vcenter'
 SATELLITE_SOURCE_TYPE = 'satellite'
 
 SOURCE_URI = '/api/v1/sources/'
+
+BOOLEAN_CHOICES = ['True', 'False']
+VALID_SAT_CHOICES = ['5', '6.2', '6.3']
+VALID_SSL_PROTOCOLS = ['SSLv23',
+                       'TLSv1',
+                       'TLSv1_1',
+                       'TLSv1_2']
