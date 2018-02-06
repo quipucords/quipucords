@@ -43,7 +43,7 @@ test:
 
 test-case:
 	echo $(pattern)
-	$(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/ -p $(pattern)
+	QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/ -p $(pattern)
 
 test-coverage:
 	QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/
