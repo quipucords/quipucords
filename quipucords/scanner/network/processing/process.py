@@ -33,6 +33,22 @@ RC = 'rc'
 RESULTS = 'results'
 RETURN_CODE_ANY = 'RETURN_CODE_ANY'
 SKIPPED = 'skipped'
+STDOUT = 'stdout'
+
+SUDO_ERROR = 'sudo: a password is required'
+
+
+def is_sudo_error_value(value):
+    """Identify values coming from sudo errors.
+
+    The sudo error message can come through even if we use '2>
+    /dev/null' in a task. Presumably it's because Ansible wraps our
+    entire shell command in something when it runs on the remote
+    host. Whatever the reason, we need to handle it in the controller.
+    """
+    return isinstance(value, str) and value == SUDO_ERROR or \
+        isinstance(value, list) and value == [SUDO_ERROR] or \
+        isinstance(value, dict) and value.get(STDOUT, '') == SUDO_ERROR
 
 
 def is_ansible_task_result(value):
@@ -65,6 +81,11 @@ def process(facts, host):
     # Note: we do NOT support transitive dependencies. If those are
     # needed, this is the place to change.
     for key, value in facts.items():
+        if is_sudo_error_value(value):
+            logger.debug('%s: key %s had sudo error %s', host, key, value)
+            result[key] = NO_DATA
+            continue
+
         processor = PROCESSORS.get(key)
         if not processor:
             continue
