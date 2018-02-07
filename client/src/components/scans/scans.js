@@ -4,9 +4,7 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
-  Grid,
   EmptyState,
-  Row,
   ListView,
   Modal
 } from 'patternfly-react';
@@ -247,22 +245,20 @@ class Scans extends React.Component {
 
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <ScanListItem
-              item={item}
-              key={index}
-              onSummaryDownload={this.downloadSummaryReport}
-              onDetailedDownload={this.downloadDetailedReport}
-              onPause={this.pauseScan}
-              onCancel={this.cancelScan}
-              onStart={this.startScan}
-              onResume={this.resumeScan}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <ScanListItem
+            item={item}
+            key={index}
+            onSummaryDownload={this.downloadSummaryReport}
+            onDetailedDownload={this.downloadDetailedReport}
+            onPause={this.pauseScan}
+            onCancel={this.cancelScan}
+            onStart={this.startScan}
+            onResume={this.resumeScan}
+          />
+        ))}
+      </ListView>
     );
   }
 
@@ -299,9 +295,9 @@ class Scans extends React.Component {
             filteredCount={filteredItems.length}
             onRefresh={this.refresh}
           />
-          <Grid fluid className="quipucords-list-container">
+          <div className="quipucords-list-container">
             {this.renderList(filteredItems)}
-          </Grid>
+          </div>
         </div>
       );
     }
