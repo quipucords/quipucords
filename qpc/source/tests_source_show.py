@@ -90,7 +90,7 @@ class SourceShowCliTests(unittest.TestCase):
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             nsc = SourceShowCommand(SUBPARSER)
             args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
@@ -103,10 +103,11 @@ class SourceShowCliTests(unittest.TestCase):
         """Testing the show source command successfully with stubbed data."""
         source_out = StringIO()
         url = BASE_URL + SOURCE_URI + '?name=source1'
-        credential_entry = {'id': 1, 'name': 'source1',
-                            'hosts': ['1.2.3.4'],
-                            'credentials': [{'id': 1, 'name': 'cred1'}]}
-        data = [credential_entry]
+        source_entry = {'id': 1, 'name': 'source1',
+                        'hosts': ['1.2.3.4'],
+                        'credentials': [{'id': 1, 'name': 'cred1'}]}
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             nsc = SourceShowCommand(SUBPARSER)
