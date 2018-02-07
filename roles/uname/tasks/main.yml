@@ -7,7 +7,7 @@
 
 - name: add uname.os to dictionary
   set_fact:
-    uname_os: "{{ uname_os | json_query('stdout_lines[0]') | default('error') }}"
+    uname_os: "{{ uname_os | json_query('stdout_lines[0]') | default('') }}"
 
 - name: gather uname.hostname fact
   raw: uname -n
@@ -16,7 +16,7 @@
 
 - name: add uname.hostname to dictionary
   set_fact:
-    uname_hostname: "{{ uname_hostname | json_query('stdout_lines[0]') | default('error') }}"
+    uname_hostname: "{{ uname_hostname | json_query('stdout_lines[0]') | default('') }}"
 
 - name: gather uname.processor fact
   raw: uname -p
@@ -25,7 +25,7 @@
 
 - name: add uname.processor to dictionary
   set_fact:
-    uname_processor: "{{ uname_processor | json_query('stdout_lines[0]') | default('error') }}"
+    uname_processor: "{{ uname_processor | json_query('stdout_lines[0]') | default('') }}"
 
 - name: gather uname.kernel fact
   raw: uname -r
@@ -34,7 +34,7 @@
 
 - name: add uname.kernel to dictionary
   set_fact:
-    uname_kernel: "{{ uname_kernel | json_query('stdout_lines[0]') | default('error') }}"
+    uname_kernel: "{{ uname_kernel | json_query('stdout_lines[0]') | default('') }}"
 
 - name: gather uname.all fact
   raw: uname -a
@@ -43,7 +43,7 @@
 
 - name: add uname.all to dictionary
   set_fact:
-    uname_all: "{{ uname_all | json_query('stdout_lines[0]') | default('error') }}"
+    uname_all: "{{ uname_all | json_query('stdout_lines[0]') | default('') }}"
 
 - name: gather uname.hardware_platform fact
   raw: uname -i
@@ -52,4 +52,4 @@
 
 - name: add uname.hardware_platform to dictionary
   set_fact:
-    uname_hardware_platform: "{{ uname_hardware_platform | json_query('stdout_lines[0]') | default('error') }}"
+    uname_hardware_platform: "{{ uname_hardware_platform | json_query('stdout_lines[0]') | default('') }}"

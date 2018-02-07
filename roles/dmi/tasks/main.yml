@@ -8,12 +8,12 @@
 
 - name: extract result value for dmi.bios-vendor
   set_fact:
-    dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_dmi_bios_vendor_cmd'
 
 - name: handle failure value for dmi.bios-vendor
   set_fact:
-    dmi_bios_vendor: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_bios_vendor: ""
   when: '"stdout" not in internal_dmi_bios_vendor_cmd'
 
 - name: gather dmi.bios-version fact
@@ -24,12 +24,12 @@
 
 - name: extract result value for dmi.bios-version
   set_fact:
-    dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_dmi_bios_version_cmd'
 
 - name: handle failure value for dmi.bios-version
   set_fact:
-    dmi_bios_version: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_bios_version: ""
   when: '"stdout" not in internal_dmi_bios_version_cmd'
 
 - name: gather dmi.system-manufacturer fact
@@ -40,12 +40,12 @@
 
 - name: extract result value for dmi.system-manufacturer
   set_fact:
-    dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_dmi_system_manufacturer_cmd'
 
 - name: handle failure value for dmi.system-manufacturer
   set_fact:
-    dmi_system_manufacturer: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_system_manufacturer: ""
   when: '"stdout" not in internal_dmi_system_manufacturer_cmd'
 
 - name: gather dmi.processor-family fact
@@ -56,12 +56,12 @@
 
 - name: extract result value for dmi.processor-family
   set_fact:
-    dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_dmi_processor_family_cmd'
 
 - name: handle failure value for dmi.processor-family
   set_fact:
-    dmi_processor_family: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_processor_family: ""
   when: '"stdout" not in internal_dmi_processor_family_cmd'
 
 - name: gather dmi.system-uuid fact
@@ -72,10 +72,10 @@
 
 - name: extract result value for dmi.system-uuid
   set_fact:
-    dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_dmi_system_uuid_cmd'
 
 - name: handle failure value for dmi.system-uuid
   set_fact:
-    dmi_system_uuid: "{{ 'error' if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    dmi_system_uuid: ""
   when: '"stdout" not in internal_dmi_system_uuid_cmd'
