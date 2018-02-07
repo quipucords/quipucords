@@ -4,19 +4,26 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
+  Button,
   EmptyState,
+  Icon,
   ListView,
   Modal
 } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import {
+  toastNotificationTypes,
+  viewToolbarTypes
+} from '../../redux/constants';
 import { getScans } from '../../redux/actions/scansActions';
 
-import ScansToolbar from './scansToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
+
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import { ScanListItem } from './scanListItem';
+import { ScanFilterFields, ScanSortFields } from './scanConstants';
 
 class Scans extends React.Component {
   constructor() {
@@ -243,6 +250,16 @@ class Scans extends React.Component {
     this.props.getScans({ scan_type: 'inspect' });
   }
 
+  renderActions() {
+    return (
+      <div className="form-group">
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
+  }
+
   renderList(items) {
     return (
       <ListView className="quipicords-list-view">
@@ -263,7 +280,17 @@ class Scans extends React.Component {
   }
 
   render() {
-    const { loading, loadError, errorMessage, scans } = this.props;
+    const {
+      loading,
+      loadError,
+      errorMessage,
+      scans,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
     const { filteredItems } = this.state;
 
     if (loading) {
@@ -290,10 +317,20 @@ class Scans extends React.Component {
 
       return (
         <div className="quipucords-view-container">
-          <ScansToolbar
+          <ViewToolbar
+            viewType={viewToolbarTypes.SCANS_VIEW}
             totalCount={scans.length}
             filteredCount={filteredItems.length}
-            onRefresh={this.refresh}
+            filterFields={ScanFilterFields}
+            sortFields={ScanSortFields}
+            actions={this.renderActions()}
+            itemsType="Scan"
+            itemsTypePlural="Scans"
+            filterType={filterType}
+            filterValue={filterValue}
+            activeFilters={activeFilters}
+            sortType={sortType}
+            sortAscending={sortAscending}
           />
           <div className="quipucords-list-container">
             {this.renderList(filteredItems)}
@@ -316,6 +353,8 @@ Scans.propTypes = {
   errorMessage: PropTypes.string,
   loading: PropTypes.bool,
   scans: PropTypes.array,
+  filterType: PropTypes.object,
+  filterValue: PropTypes.string,
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
@@ -335,6 +374,8 @@ function mapStateToProps(state) {
     scans: state.scans.data,
     loadError: state.scans.error,
     errorMessage: state.scans.errorMessage,
+    filterType: state.scansToolbar.filterType,
+    filterValue: state.scansToolbar.filterValue,
     activeFilters: state.scansToolbar.activeFilters,
     sortType: state.scansToolbar.sortType,
     sortAscending: state.scansToolbar.sortAscending

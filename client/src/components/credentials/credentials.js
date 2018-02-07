@@ -4,10 +4,14 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
+  Button,
+  DropdownButton,
+  EmptyState,
   Form,
   Grid,
-  EmptyState,
+  Icon,
   ListView,
+  MenuItem,
   Modal
 } from 'patternfly-react';
 
@@ -16,14 +20,19 @@ import Store from '../../redux/store';
 import {
   confirmationModalTypes,
   credentialsTypes,
-  toastNotificationTypes
+  toastNotificationTypes,
+  viewToolbarTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
-import CredentialsToolbar from './credentialsToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
+import {
+  CredentialFilterFields,
+  CredentialSortFields
+} from './crendentialConstants';
 
 class Credentials extends React.Component {
   constructor() {
@@ -262,6 +271,43 @@ class Credentials extends React.Component {
     this.props.getCredentials();
   }
 
+  renderActions() {
+    const { selectedItems } = this.state;
+
+    return (
+      <div className="form-group">
+        <DropdownButton
+          bsStyle="primary"
+          title="Create"
+          pullRight
+          id="createCredentialButton"
+        >
+          <MenuItem eventKey="1" onClick={() => this.addCredential('network')}>
+            Network Credential
+          </MenuItem>
+          <MenuItem
+            eventKey="2"
+            onClick={() => this.addCredential('satellite')}
+          >
+            Satellite Credential
+          </MenuItem>
+          <MenuItem eventKey="2" onClick={() => this.addCredential('vcenter')}>
+            VCenter Credential
+          </MenuItem>
+        </DropdownButton>
+        <Button
+          disabled={!selectedItems || selectedItems.length === 0}
+          onClick={this.deleteCredentials}
+        >
+          Delete
+        </Button>
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
+  }
+
   renderList(items) {
     return (
       <ListView className="quipicords-list-view">
@@ -279,8 +325,18 @@ class Credentials extends React.Component {
   }
 
   render() {
-    const { getPending, getError, getErrorMessage, credentials } = this.props;
-    const { filteredItems, selectedItems } = this.state;
+    const {
+      getPending,
+      getError,
+      getErrorMessage,
+      credentials,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
+    const { filteredItems } = this.state;
 
     if (getPending) {
       return (
@@ -309,13 +365,20 @@ class Credentials extends React.Component {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
-            <CredentialsToolbar
+            <ViewToolbar
+              viewType={viewToolbarTypes.CREDENTIALS_VIEW}
               totalCount={credentials.length}
               filteredCount={filteredItems.length}
-              onAddCredential={this.addCredential}
-              deleteAvailable={selectedItems && selectedItems.length > 0}
-              onDelete={this.deleteCredentials}
-              onRefresh={this.refresh}
+              filterFields={CredentialFilterFields}
+              sortFields={CredentialSortFields}
+              actions={this.renderActions()}
+              itemsType="Credential"
+              itemsTypePlural="Credentials"
+              filterType={filterType}
+              filterValue={filterValue}
+              activeFilters={activeFilters}
+              sortType={sortType}
+              sortAscending={sortAscending}
             />
             <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
@@ -346,7 +409,8 @@ Credentials.propTypes = {
   credentials: PropTypes.array,
   getError: PropTypes.bool,
   getErrorMessage: PropTypes.string,
-
+  filterType: PropTypes.object,
+  filterValue: PropTypes.string,
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
