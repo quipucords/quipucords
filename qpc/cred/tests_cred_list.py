@@ -11,6 +11,7 @@
 """Test the CLI module."""
 
 import unittest
+from unittest.mock import patch, ANY
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
@@ -86,7 +87,7 @@ class CredentialListCliTests(unittest.TestCase):
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             alc = CredListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(cred_out):
@@ -94,15 +95,28 @@ class CredentialListCliTests(unittest.TestCase):
                 self.assertEqual(cred_out.getvalue(),
                                  'No credentials exist yet.\n')
 
-    def test_list_cred_data(self):
+    @patch('builtins.input', return_value='yes')
+    def test_list_cred_data(self, b_input):
         """Testing the list credential command with stubbed data."""
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI
         credential_entry = {'id': 1, 'name': 'cred1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        next_link = 'http://127.0.0.1:8000/api/v1/credentials/?page=2'
+        data = {
+            'count': 1,
+            'next': 'http://127.0.0.1:8000/api/v1/credentials/?page=2',
+            'results': results
+        }
+        data2 = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
+            mocker.get(next_link, status_code=200, json=data2)
             alc = CredListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(cred_out):
@@ -110,7 +124,9 @@ class CredentialListCliTests(unittest.TestCase):
                 expected = '[{"id":1,"name":"cred1","password":"********",' \
                     '"username":"root"}]'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
-                                 .replace(' ', '').strip(), expected)
+                                 .replace(' ', '').strip(),
+                                 expected + expected)
+                b_input.assert_called_with(ANY)
 
     def test_list_filtered_cred_data(self):
         """Testing the list credential with filter by cred type."""
@@ -119,7 +135,12 @@ class CredentialListCliTests(unittest.TestCase):
         credential_entry = {'id': 1, 'name': 'cred1', 'cred_type': 'network',
                             'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             alc = CredListCommand(SUBPARSER)

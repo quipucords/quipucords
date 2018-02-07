@@ -87,7 +87,7 @@ class CredentialClearCliTests(unittest.TestCase):
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             acc = CredClearCommand(SUBPARSER)
             args = Namespace(name='cred1')
             with self.assertRaises(SystemExit):
@@ -103,7 +103,8 @@ class CredentialClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
@@ -124,7 +125,8 @@ class CredentialClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {'count': 1, 'results': results}
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
@@ -145,7 +147,7 @@ class CredentialClearCliTests(unittest.TestCase):
         cred_out = StringIO()
         get_url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
-            mocker.get(get_url, status_code=200, json=[])
+            mocker.get(get_url, status_code=200, json={'count': 0})
             acc = CredClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
@@ -164,7 +166,8 @@ class CredentialClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {'count': 1, 'results': results}
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
@@ -189,7 +192,8 @@ class CredentialClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + CREDENTIAL_URI + '1/'
         credential_entry = {'id': 1, 'name': 'credential1', 'username': 'root',
                             'password': '********'}
-        data = [credential_entry]
+        results = [credential_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)

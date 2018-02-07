@@ -112,9 +112,13 @@ LOGIN_REDIRECT_URL = '/client/index.html'
 
 WSGI_APPLICATION = 'quipucords.wsgi.application'
 
+DEFAULT_PAGINATION_CLASS = 'rest_framework.pagination.PageNumberPagination'
+
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS':
         ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS,
+    'PAGE_SIZE': 10
 }
 
 # Database

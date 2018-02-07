@@ -95,13 +95,16 @@ paths:
             - network
             - vcenter
             - satellite
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
       responses:
         200:
           description: "Credential retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/CredentialOut"
+            $ref: "#/definitions/CredentialPagination"
   /credentials/{cred_id}:
     get:
       tags:
@@ -705,6 +708,29 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+  CredentialPagination:
+    type: "object"
+    required:
+      - count
+      - next
+      - previous
+      - results
+    properties:
+      count:
+        type: "integer"
+        format: "int64"
+        description: "Total number of credentials"
+      next:
+        type: "string"
+        description: "URL for next page of results"
+      previous:
+        type: "string"
+        description: "URL for previous page of results"
+      results:
+        type: "array"
+        items:
+          $ref: "#/definitions/CredentialOut"
+        description: "The paginated credentials"
   SystemReport:
     type: "object"
     properties:
