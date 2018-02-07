@@ -84,17 +84,17 @@
 
 # subman fact
 - name: gather subman.has_facts_file fact
-  raw: fact_count=$(ls /etc/rhsm/facts | grep .facts | wc -l); if [[ $fact_count > 0 ]]; then echo "Y"; else echo "N"; fi
-  register: internal_subman_has_facts_file
+  raw: ls /etc/rhsm/facts | grep .facts | wc -l
+  register: internal_subman_facts_file_lines
   ignore_errors: yes
   when: 'internal_have_subscription_manager'
 
 - name: add subman.has_facts_file to dictionary
   set_fact:
-    subman: "{{ subman|default({}) | combine({ item: internal_subman_has_facts_file['stdout'] | trim | default(None) }) }}"
+    subman: "{{ subman|default({}) | combine({ item: (internal_subman_facts_file_lines['stdout'] | int) > 0 }) }}"
   with_items:
   - 'subman.has_facts_file'
-  when: 'internal_have_subscription_manager and "stdout" in internal_subman_has_facts_file'
+  when: 'internal_have_subscription_manager and "stdout" in internal_subman_facts_file_lines'
 
 # subman_consumed fact
 - name: gather subman.consumed fact
