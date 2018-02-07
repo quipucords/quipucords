@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "date"
+
 - name: gather date.date fact
   raw: date
   register: date_date

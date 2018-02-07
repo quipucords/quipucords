@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "uname"
+
 - name: gather uname.os fact
   raw: uname -s
   register: uname_os

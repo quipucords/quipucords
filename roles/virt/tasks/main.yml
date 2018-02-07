@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "virt"
+
 - name: check if privcmd exists
   raw: if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
   register: internal_privcmd_found

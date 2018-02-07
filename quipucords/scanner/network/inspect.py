@@ -188,7 +188,14 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
+        group_index = 0
+        log_message = 'START PROCESSING GROUPS of size %d' % forks
+        self.scan_task.log_message(log_message)
         for group_name in group_names:
+            group_index += 1
+            log_message = 'START PROCESSING GROUP %d of %d' % (
+                group_index, len(group_names))
+            self.scan_task.log_message(log_message)
             callback =\
                 InspectResultCallback(scan_task=self.scan_task,
                                       inspect_results=self.inspect_results)
@@ -245,7 +252,8 @@ def construct_scan_inventory(hosts, connection_port, concurrency_count,
     :param concurrency_count: The number of concurrent scans
     :param ssh_executable: the ssh executable to use, or None for 'ssh'
     :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible inventory
+    :returns: A list of group names and a dict of the
+    ansible inventory
     """
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,

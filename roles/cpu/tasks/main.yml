@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "cpu"
+
 - name: gather cpu.vendor_id fact
   raw: cat /proc/cpuinfo | grep '^vendor_id\s*' | sed -n -e 's/^.*vendor_id\s*.\s*//p'
   register: cpu_vendor_id

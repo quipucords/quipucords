@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "redhat_release"
+
 - name: initialize redhat_release facts
   set_fact:
     redhat_release_name: 'N/A (rpm not found)'

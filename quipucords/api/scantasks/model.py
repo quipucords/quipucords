@@ -100,19 +100,13 @@ class ScanTask(models.Model):
                            log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            message = 'STATE UPDATE (%s, %s, %s, %s).  '\
+            message = 'STATE UPDATE (%s).  '\
                 'Additional status information: %s' %\
                 (self.status,
-                 self.scan_type,
-                 self.source.source_type,
-                 self.source.name,
                  self.status_message)
         else:
-            message = 'STATE UPDATE (%s, %s, %s, %s)' %\
-                (self.status,
-                 self.scan_type,
-                 self.source.source_type,
-                 self.source.name)
+            message = 'STATE UPDATE (%s)' %\
+                (self.status)
         self.log_message(message, log_level=log_level)
 
     def _log_stats(self, prefix):
@@ -142,7 +136,10 @@ class ScanTask(models.Model):
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this task."""
-        actual_message = ('Task %d - ' % self.id)
+        actual_message = 'Task %d (%s, %s, %s) - ' % (self.id,
+                                                      self.scan_type,
+                                                      self.source.source_type,
+                                                      self.source.name)
         actual_message += message.strip()
         logger.log(log_level, actual_message)
 
@@ -210,8 +207,7 @@ class ScanTask(models.Model):
                 sys_failed = self.systems_failed
             sys_failed += 1
 
-        stat_string = 'PROCESSING %s (%s, %s).' % (
-            name, self.source.source_type, self.scan_type)
+        stat_string = 'PROCESSING %s.' % name
         self.update_stats(stat_string, sys_count=sys_count,
                           sys_scanned=sys_scanned, sys_failed=sys_failed)
 
