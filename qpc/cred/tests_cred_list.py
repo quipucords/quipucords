@@ -106,7 +106,7 @@ class CredentialListCliTests(unittest.TestCase):
         next_link = 'http://127.0.0.1:8000/api/v1/credentials/?page=2'
         data = {
             'count': 1,
-            'next': 'http://127.0.0.1:8000/api/v1/credentials/?page=2',
+            'next': next_link,
             'results': results
         }
         data2 = {

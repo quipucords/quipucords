@@ -302,13 +302,25 @@ paths:
             - network
             - vcenter
             - satellite
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
       responses:
         200:
           description: "Sources retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceOut"
+            $ref: "#/definitions/SourcePagination"
   /sources/{source_id}:
     get:
       tags:
@@ -566,6 +578,24 @@ paths:
         404:
           description: "Scan job not found"
 definitions:
+  ListPagination:
+    type: "object"
+    required:
+      - count
+      - next
+      - previous
+      - results
+    properties:
+      count:
+        type: "integer"
+        format: "int64"
+        description: "Total number of credentials"
+      next:
+        type: "string"
+        description: "URL for next page of results"
+      previous:
+        type: "string"
+        description: "URL for previous page of results"
   SystemFact:
     type: "object"
     required:
@@ -601,7 +631,6 @@ definitions:
             $ref: "#/definitions/FactCollectionSource"
           description: "The facts obtained during a scan"
           minItems: 1
-
   FactCollectionOut:
     type: "object"
     required:
@@ -718,28 +747,17 @@ definitions:
             type: "integer"
             format: "int64"
   CredentialPagination:
-    type: "object"
-    required:
-      - count
-      - next
-      - previous
-      - results
-    properties:
-      count:
-        type: "integer"
-        format: "int64"
-        description: "Total number of credentials"
-      next:
-        type: "string"
-        description: "URL for next page of results"
-      previous:
-        type: "string"
-        description: "URL for previous page of results"
-      results:
-        type: "array"
-        items:
-          $ref: "#/definitions/CredentialOut"
-        description: "The paginated credentials"
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/CredentialOut"
+            description: "The paginated credentials"
   SystemReport:
     type: "object"
     properties:
@@ -953,6 +971,18 @@ definitions:
             description: "The credentials to try with these hosts."
           options:
             $ref: "#/definitions/SourceOptions"
+  SourcePagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceOut"
+            description: "The paginated source"
   ScanTask:
     type: "object"
     properties:
