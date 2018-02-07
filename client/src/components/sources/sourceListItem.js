@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
@@ -278,11 +279,16 @@ class SourceListItem extends React.Component {
   render() {
     const { item, onItemSelectChange } = this.props;
 
+    const classes = cx({
+      'list-view-pf-top-align': true,
+      active: item.selected
+    });
+
     return (
       <ListView.Item
         key={item.id}
         stacked
-        className="list-view-pf-top-align"
+        className={classes}
         checkboxInput={
           <Checkbox
             checked={item.selected}

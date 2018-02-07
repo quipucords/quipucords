@@ -17,6 +17,7 @@
 
 
 .quipucords-view-container {
+  background-color: $color-pf-white;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -29,14 +30,12 @@
 // List container should scroll
 .quipucords-list-container {
   flex: 1;
-  width: 100%;
+  padding: 0 20px;
   overflow-y: auto;
+  width: 100%;
 }
 
 .quipicords-list-view {
-  margin-top: 0;
-  margin-bottom: 0;
-
   .list-view-pf-actions {
     margin-left: 0;
     text-align: right;
