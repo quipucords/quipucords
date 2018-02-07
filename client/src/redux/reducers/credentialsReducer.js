@@ -122,8 +122,9 @@ function credentialsReducer(state = initialState, action) {
 
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+      console.dir(action.payload);
       return Object.assign({}, state, {
-        credentials: action.payload,
+        credentials: action.payload.results,
         getFulfilled: true,
         getPending: false
       });

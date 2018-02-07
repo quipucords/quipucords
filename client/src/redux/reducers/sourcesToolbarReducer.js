@@ -9,6 +9,10 @@ const initialState = {
 };
 
 export default function sourcesToolbarReducer(state = initialState, action) {
+  if (action.viewType !== viewToolbarTypes.SOURCES_VIEW) {
+    return state;
+  }
+
   switch (action.type) {
     case viewToolbarTypes.SET_FILTER_TYPE:
       if (state.filterType === action.filterType) {

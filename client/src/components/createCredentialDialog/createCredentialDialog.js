@@ -598,7 +598,7 @@ CreateCredentialDialog.propTypes = {
   credentials: PropTypes.array,
 
   newCredential: PropTypes.object,
-  newCredentialType: PropTypes.string,
+  newCredentialType: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
   addCredential: PropTypes.func,
   addFulfilled: PropTypes.bool,
   addError: PropTypes.bool,
