@@ -9,7 +9,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite connection task."""
-import logging
 from requests import exceptions
 from django.db import transaction
 from api.models import (ScanTask, ConnectionResult, SourceOptions)
@@ -17,9 +16,6 @@ from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.factory import create
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class ConnectTaskRunner(ScanTaskRunner):

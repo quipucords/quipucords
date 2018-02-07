@@ -144,7 +144,7 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def _finalize_host(self, host):
         facts = self._ansible_facts.get(host, {})
-        results = process.process(facts, host)
+        results = process.process(self.scan_task, facts, host)
 
         logger.debug('host scan complete for %s with facts %s',
                      host, results)
@@ -185,10 +185,15 @@ class InspectResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.warning('%s', result_obj)
 
-        unreachable_host = result_obj[HOST]
-        logger.error(
-            'Host %s is no longer reachable.  Moving host to failed results',
-            unreachable_host)
+        # pylint: disable=protected-access
+        unreachable_host = result._host.name
+        result_message = result._result.get(
+            'msg', 'No information given on unreachable warning.  '
+            'Missing msg attribute.')
+        message = '%s UNREACHABLE. %s' % (unreachable_host,
+                                          result_message)
+        self.scan_task.log_message(
+            message, log_level=logging.ERROR)
 
         self._get_inspect_result()
         sys_result = SystemInspectionResult(
