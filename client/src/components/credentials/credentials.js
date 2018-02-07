@@ -7,7 +7,6 @@ import {
   Form,
   Grid,
   EmptyState,
-  Row,
   ListView,
   Modal
 } from 'patternfly-react';
@@ -265,19 +264,17 @@ class Credentials extends React.Component {
 
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <CredentialListItem
-              item={item}
-              key={index}
-              onItemSelectChange={this.itemSelectChange}
-              onEdit={this.editCredential}
-              onDelete={this.deleteCredential}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <CredentialListItem
+            item={item}
+            key={index}
+            onItemSelectChange={this.itemSelectChange}
+            onEdit={this.editCredential}
+            onDelete={this.deleteCredential}
+          />
+        ))}
+      </ListView>
     );
   }
 
@@ -320,9 +317,9 @@ class Credentials extends React.Component {
               onDelete={this.deleteCredentials}
               onRefresh={this.refresh}
             />
-            <Grid fluid className="quipucords-list-container">
+            <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
-            </Grid>
+            </div>
           </div>
           <CreateCredentialDialog credentials={credentials} />
         </React.Fragment>

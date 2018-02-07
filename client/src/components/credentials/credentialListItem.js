@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
@@ -118,10 +119,15 @@ class CredentialListItem extends React.Component {
 
     let sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
 
+    const classes = cx({
+      'quipucords-credential-list-item': true,
+      active: item.selected
+    });
+
     return (
       <ListView.Item
         key={item.id}
-        className="quipucords-credential-list-item"
+        className={classes}
         checkboxInput={
           <Checkbox
             checked={item.selected}

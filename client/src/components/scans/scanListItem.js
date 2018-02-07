@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
 import {
@@ -322,10 +323,16 @@ class ScanListItem extends React.Component {
   render() {
     const { item } = this.props;
 
+    const classes = cx({
+      'quipucords-scan-list-item': true,
+      'list-view-pf-top-align': true,
+      active: item.selected
+    });
+
     return (
       <ListView.Item
         key={item.id}
-        className="quipucords-scan-list-item"
+        className={classes}
         actions={this.renderActions()}
         leftContent={<strong>ID: {item.id}</strong>}
         description={this.renderDescription()}
