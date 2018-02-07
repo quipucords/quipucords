@@ -11,6 +11,7 @@
 """Test the CLI module."""
 
 import unittest
+from unittest.mock import patch, ANY
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
@@ -87,7 +88,7 @@ class SourceListCliTests(unittest.TestCase):
         source_out = StringIO()
         url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(source_out):
@@ -95,16 +96,29 @@ class SourceListCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  'No sources exist yet.\n')
 
-    def test_list_source_data(self):
+    @patch('builtins.input', return_value='yes')
+    def test_list_source_data(self, b_input):
         """Testing the list source command successfully with stubbed data."""
         source_out = StringIO()
         url = get_server_location() + SOURCE_URI
-        credential_entry = {'id': 1, 'name': 'source1',
-                            'hosts': ['1.2.3.4'],
-                            'credentials': [{'id': 1, 'name': 'cred1'}]}
-        data = [credential_entry]
+        source_entry = {'id': 1, 'name': 'source1',
+                        'hosts': ['1.2.3.4'],
+                        'credentials': [{'id': 1, 'name': 'cred1'}]}
+        results = [source_entry]
+        next_link = 'http://127.0.0.1:8000/api/v1/sources/?page=2'
+        data = {
+            'count': 1,
+            'next': next_link,
+            'results': results
+        }
+        data2 = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
+            mocker.get(next_link, status_code=200, json=data2)
             nlc = SourceListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(source_out):
@@ -112,17 +126,20 @@ class SourceListCliTests(unittest.TestCase):
                 expected = '[{"credentials":[{"id":1,"name":"cred1"}],' \
                     '"hosts":["1.2.3.4"],"id":1,"name":"source1"}]'
                 self.assertEqual(source_out.getvalue().replace('\n', '')
-                                 .replace(' ', '').strip(), expected)
+                                 .replace(' ', '').strip(),
+                                 expected + expected)
+                b_input.assert_called_with(ANY)
 
     def test_list_filtered_source_data(self):
         """Testing the list source with filter by source_type."""
         source_out = StringIO()
         url = get_server_location() + SOURCE_URI
-        credential_entry = {'id': 1, 'name': 'source1',
-                            'source_type': 'network',
-                            'hosts': ['1.2.3.4'],
-                            'credentials': [{'id': 1, 'name': 'cred1'}]}
-        data = [credential_entry]
+        source_entry = {'id': 1, 'name': 'source1',
+                        'source_type': 'network',
+                        'hosts': ['1.2.3.4'],
+                        'credentials': [{'id': 1, 'name': 'cred1'}]}
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             nlc = SourceListCommand(SUBPARSER)

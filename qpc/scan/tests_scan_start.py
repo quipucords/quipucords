@@ -56,7 +56,7 @@ class ScanStartCliTests(unittest.TestCase):
         scan_out = StringIO()
         url = get_server_location() + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(sources=['source_none'])
             with self.assertRaises(SystemExit):
@@ -98,8 +98,9 @@ class ScanStartCliTests(unittest.TestCase):
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_post = get_server_location() + SCAN_URI
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=500, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
@@ -116,11 +117,12 @@ class ScanStartCliTests(unittest.TestCase):
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_post = get_server_location() + SCAN_URI
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}],
-                        'disable-optional-products': {'jboss-eap': False,
-                                                      'jboss-fuse': False,
-                                                      'jboss-brms': False}}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}],
+                    'disable-optional-products': {'jboss-eap': False,
+                                                  'jboss-fuse': False,
+                                                  'jboss-brms': False}}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
@@ -139,9 +141,10 @@ class ScanStartCliTests(unittest.TestCase):
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_post = get_server_location() + SCAN_URI
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}],
-                        'disable_optional_products': ['jboss-fuse']}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}],
+                    'disable_optional_products': ['jboss-fuse']}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.post(url_post, status_code=201, json={'id': 1})

@@ -86,7 +86,7 @@ class SourceEditCliTests(unittest.TestCase):
         source_out = StringIO()
         url = get_server_location() + SOURCE_URI + '?name=source_none'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source_none', hosts=['1.2.3.4'],
                              cred=['credential1'], port=22)
@@ -136,8 +136,9 @@ class SourceEditCliTests(unittest.TestCase):
         cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
                          'password': '********'}]
         cred_data = {'count': 1, 'results': cred_results}
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_cred, status_code=200, json=cred_data)
@@ -160,8 +161,9 @@ class SourceEditCliTests(unittest.TestCase):
         cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
                          'password': '********'}]
         cred_data = {'count': 1, 'results': cred_results}
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials': [{'id': 2, 'name': 'cred2'}]}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials': [{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_cred, status_code=200, json=cred_data)
@@ -179,7 +181,7 @@ class SourceEditCliTests(unittest.TestCase):
         source_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json=[])
+            mocker.get(url_get_source, status_code=500, json={'count': 0})
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
                              cred=['credential1'], port=22)
@@ -198,8 +200,9 @@ class SourceEditCliTests(unittest.TestCase):
         cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
                          'password': '********'}]
         cred_data = {'count': 1, 'results': cred_results}
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_cred, status_code=200, json=cred_data)
@@ -219,8 +222,9 @@ class SourceEditCliTests(unittest.TestCase):
         url_get_cred = get_server_location() + CREDENTIAL_URI + \
             '?name=credential1%2Ccred2'
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                        'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
             mocker.get(url_get_cred, status_code=500)
