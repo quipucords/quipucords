@@ -252,7 +252,7 @@ class ScanTask(models.Model):
         self.status = ScanTask.COMPLETED
         if message:
             self.status_message = message
-            logger.info(self.status_message)
+            self.log_message(self.status_message)
         else:
             self.status_message = _(messages.ST_STATUS_MSG_COMPLETED)
         if self.systems_count is None:
@@ -274,7 +274,7 @@ class ScanTask(models.Model):
         self.end_time = datetime.utcnow()
         self.status = ScanTask.FAILED
         self.status_message = message
-        logger.error(self.status_message)
+        self.log_message(self.status_message, log_level=logging.ERROR)
         self.save()
         self._log_stats('FAILURE STATS.')
         self.log_current_status(show_status_message=True,
