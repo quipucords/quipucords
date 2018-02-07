@@ -6,10 +6,8 @@ import Store from '../../redux/store';
 import {
   Alert,
   EmptyState,
-  Grid,
   ListView,
-  Modal,
-  Row
+  Modal
 } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
@@ -302,20 +300,18 @@ class Sources extends React.Component {
 
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <SourceListItem
-              item={item}
-              key={index}
-              onItemSelectChange={this.itemSelectChange}
-              onEdit={this.editSource}
-              onDelete={this.deleteSource}
-              onScan={this.scanSource}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <SourceListItem
+            item={item}
+            key={index}
+            onItemSelectChange={this.itemSelectChange}
+            onEdit={this.editSource}
+            onDelete={this.deleteSource}
+            onScan={this.scanSource}
+          />
+        ))}
+      </ListView>
     );
   }
 
@@ -365,9 +361,9 @@ class Sources extends React.Component {
               onScan={this.scanSources}
               onRefresh={this.refresh}
             />
-            <Grid fluid className="quipucords-list-container">
+            <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
-            </Grid>
+            </div>
             <AddSourceWizard
               show={addSourceWizardShown}
               onCancel={this.quitAddSourceWizard}

@@ -1,16 +1,4 @@
 /* _overrides.scss */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-}
-
-// TEMPORARY - This needs to be removed
-button.unavailable:hover, li.unavailable > a:hover {
-  cursor: default;
-  opacity: 0;
-}
-
 .about-modal-pf {
   background-color: #1a1a1a;
   background-image: url('../images/About-Modal-background.png');
@@ -26,6 +14,8 @@ button.unavailable:hover, li.unavailable > a:hover {
   margin-top: 13px;
 }
 
-.list-view-pf-top-align .list-view-pf-additional-info {
-  align-self: flex-start;
+.list-view-pf-top-align {
+  .list-view-pf-additional-info, .list-view-pf-description {
+    align-self: flex-start;
+  }
 }
