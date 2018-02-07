@@ -6,9 +6,9 @@
 
 - name: initialize redhat_release facts
   set_fact:
-    redhat_release_name: 'N/A (rpm not found)'
-    redhat_release_version: 'N/A (rpm not found)'
-    redhat_release_release: 'N/A (rpm not found)'
+    redhat_release_name: ''
+    redhat_release_version: ''
+    redhat_release_release: ''
 
 - name: gather internal_redhat_release fact
   raw: rpm -q --queryformat "%{NAME}\n%{VERSION}\n%{RELEASE}\n" --whatprovides redhat-release

@@ -139,11 +139,11 @@
   when: 'internal_have_dmidecode and internal_sys_manu_kvm == "Y"'
 
 - name: set virt.virt when dmidecode is not found
-  set_fact: virt_virt='N/A (dmidecode not found)'
+  set_fact: virt_virt=''
   when: not internal_have_dmidecode
 
 - name: set virt.type when dmidecode is not found
-  set_fact: virt_type='N/A (dmidecode not found)'
+  set_fact: virt_type=''
   when: not internal_have_dmidecode
 
 - name: set virt.virt fact due to internal_xen_guest

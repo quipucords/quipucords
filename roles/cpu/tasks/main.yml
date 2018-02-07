@@ -73,7 +73,7 @@
 
 - name: extract result value for cpu.socket_count
   set_fact:
-    cpu_socket_count: "{{ internal_cpu_socket_count_cmd.get('stdout') | trim | default('error') if internal_have_dmidecode else 'N/A (dmidecode not found)' }}"
+    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   when: '"stdout" in internal_cpu_socket_count_cmd'
 
 - name: gather cpu.socket_count fact with fallback
@@ -95,19 +95,19 @@
 - name: calculate cpu.core_count
   set_fact:
     cpu_core_count: "{{ (cpu_core_per_socket | int) *  (cpu_socket_count | int)}}"
-  when: 'cpu_core_per_socket is defined and cpu_core_per_socket != "Not Found"'
+  when: 'cpu_core_per_socket is defined and cpu_core_per_socket'
 
 - name: calculate cpu.core_count fallback no hyperthreading
   set_fact:
     cpu_core_count: "{{ cpu_count }}"
-  when: 'cpu_core_per_socket is defined and cpu_core_per_socket == "Not Found" and not cpu_hyperthreading'
+  when: 'cpu_core_per_socket is defined and not cpu_core_per_socket and not cpu_hyperthreading'
 
 - name: calculate cpu.core_count fallback with hyperthreading
   set_fact:
     cpu_core_count: "{{ (cpu_count | int) /  2 }}"
-  when: 'cpu_core_per_socket is defined and cpu_core_per_socket == "Not Found" and cpu_hyperthreading'
+  when: 'cpu_core_per_socket is defined and not cpu_core_per_socket and cpu_hyperthreading'
 
 - name: default cpu.core_count to error if it doesn't exists
   set_fact:
-    cpu_core_count: "error"
+    cpu_core_count: ""
   when: 'cpu_core_count is not defined'

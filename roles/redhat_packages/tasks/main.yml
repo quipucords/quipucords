@@ -71,5 +71,5 @@
 
 - name: extract result value for redhat-packages.certs
   set_fact:
-    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("error") }}'
+    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("") }}'
   when: '"stdout" in internal_redhat_packages_certs_cmd'
