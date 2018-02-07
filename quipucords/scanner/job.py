@@ -72,8 +72,8 @@ class ScanJobRunner(Process):
             task_runners.append(runner)
 
         task_info_message = task_info_message[:-2]
-        logger.info('Job %s - Includes the following incomplete tasks: %s',
-                    self.scan_job.id, task_info_message)
+        self.scan_job.log_message(
+            'Queuing the following incomplete tasks: %s' % task_info_message)
 
         for runner in task_runners:
             # Mark runner as running

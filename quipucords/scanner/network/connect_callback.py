@@ -61,7 +61,7 @@ class ConnectResultCallback(CallbackBase):
         result_message = result._result.get(
             'msg', 'No information given on unreachable warning.  '
             'Missing msg attribute.')
-        message = '%s UNREACHABLE. %s' % (host, result_message)
+        message = 'UNREACHABLE %s. %s' % (host, result_message)
         self.result_store.scan_task.log_message(
             message, log_level=logging.WARN)
         result_obj = _construct_result(result)
@@ -72,9 +72,9 @@ class ConnectResultCallback(CallbackBase):
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(
-            'msg', 'No information given on failure.  '
-            'Missing msg attribute.')
-        message = '%s FAILED. %s' % (host, result_message)
+            'stderr', 'No information given on failure.  '
+            'Missing stderr attribute.')
+        message = 'FAILED %s. %s' % (host, result_message)
         self.result_store.scan_task.log_message(
             message, log_level=logging.ERROR)
         result_obj = _construct_result(result)

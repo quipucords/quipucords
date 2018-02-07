@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "dmi"
+
 - name: gather dmi.bios-vendor fact
   raw: /usr/sbin/dmidecode -s bios-vendor
   register: internal_dmi_bios_vendor_cmd

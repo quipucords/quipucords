@@ -23,6 +23,7 @@ from scanner.network.processing import process
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 ANSIBLE_FACTS = 'ansible_facts'
+STARTED_PROCESSING_ROLE = 'internal_host_started_processing_role'
 FAILED = 'failed'
 HOST = 'host'
 HOST_DONE = 'host_done'
@@ -101,6 +102,7 @@ class InspectResultCallback(CallbackBase):
 
     def handle_result(self, result):
         """Handle an incoming result object."""
+        # pylint: disable=protected-access
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
@@ -113,6 +115,12 @@ class InspectResultCallback(CallbackBase):
         host = result_obj[HOST]
         results_to_store = normalize_result(result)
         host_facts = {}
+        if result._task_fields.get('action') == 'set_fact' and \
+                result.task_name == 'internal_host_started_processing_role':
+            role_name = result._result.get(
+                ANSIBLE_FACTS).get(STARTED_PROCESSING_ROLE)
+            log_message = 'PROCESSING %s.  ANSIBLE ROLE %s' % (host, role_name)
+            self.scan_task.log_message(log_message)
         for key, value in results_to_store:
             if key == HOST_DONE:
                 self._finalize_host(host)
@@ -190,7 +198,7 @@ class InspectResultCallback(CallbackBase):
         result_message = result._result.get(
             'msg', 'No information given on unreachable warning.  '
             'Missing msg attribute.')
-        message = '%s UNREACHABLE. %s' % (unreachable_host,
+        message = 'UNREACHABLE %s. %s' % (unreachable_host,
                                           result_message)
         self.scan_task.log_message(
             message, log_level=logging.ERROR)
