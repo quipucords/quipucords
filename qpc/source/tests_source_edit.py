@@ -133,8 +133,9 @@ class SourceEditCliTests(unittest.TestCase):
             '?name=credential1'
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_patch = get_server_location() + SOURCE_URI + '1/'
-        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
-                      'password': '********'}]
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
@@ -156,8 +157,9 @@ class SourceEditCliTests(unittest.TestCase):
             '?name=credential1'
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_patch = get_server_location() + SOURCE_URI + '1/'
-        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
-                      'password': '********'}]
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials': [{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
@@ -193,8 +195,9 @@ class SourceEditCliTests(unittest.TestCase):
         url_get_cred = get_server_location() + CREDENTIAL_URI + \
             '?name=credential1%2Ccred2'
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        cred_data = [{'id': 1, 'name': 'credential1', 'username': 'root',
-                      'password': '********'}]
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
         source_data = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credentials':[{'id': 2, 'name': 'cred2'}]}]
         with requests_mock.Mocker() as mocker:
