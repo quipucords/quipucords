@@ -121,7 +121,7 @@ class ScanJob(models.Model):
                 (self.status,
                  self.status_message)
         else:
-            message = 'STATE UPDATE (%s)' %\
+            message = 'STATE UPDATE (%sg)' %\
                 (self.status)
 
         self.log_message(message, log_level=log_level)

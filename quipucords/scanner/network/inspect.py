@@ -188,13 +188,11 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        group_index = 0
         log_message = 'START PROCESSING GROUPS of size %d' % forks
         self.scan_task.log_message(log_message)
-        for group_name in group_names:
-            group_index += 1
+        for idx, group_name in enumerate(group_names):
             log_message = 'START PROCESSING GROUP %d of %d' % (
-                group_index, len(group_names))
+                (idx + 1), len(group_names))
             self.scan_task.log_message(log_message)
             callback =\
                 InspectResultCallback(scan_task=self.scan_task,
