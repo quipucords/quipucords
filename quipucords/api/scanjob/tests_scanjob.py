@@ -250,7 +250,7 @@ class ScanJobTest(TestCase):
         data = {'sources': ['foo'],
                 'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         self.create_expect_400(
-            data, {'sources': ['Source identitiers must be integer values.']})
+            data, {'sources': ['Source identifiers must be integer values.']})
 
     def test_create_invalid_srcs_id(self):
         """A create request must have vaild ids."""
