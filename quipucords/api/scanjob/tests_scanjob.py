@@ -16,6 +16,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 import api.messages as messages
+from api.serializers import ScanJobSerializer
 from api.models import (Credential,
                         Source,
                         ScanTask,
@@ -336,7 +337,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1,
+        results1 = [{'id': 1,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
@@ -350,6 +351,10 @@ class ScanJobTest(TestCase):
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -367,13 +372,17 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 2,
+        results1 = [{'id': 2,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -381,7 +390,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = []
+        expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -389,7 +398,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1,
+        results1 = [{'id': 1,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
@@ -403,6 +412,10 @@ class ScanJobTest(TestCase):
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -646,9 +659,9 @@ class ScanJobTest(TestCase):
         task.update_stats('TEST_VC.', sys_count=2, sys_failed=1, sys_scanned=1)
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
-
-        json_scan = {'tasks': [{}]}
-        expand_scanjob(scan_job, json_scan)
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        expand_scanjob(json_scan)
 
         self.assertEqual(json_scan.get('systems_count'), 2)
         self.assertEqual(json_scan.get('systems_failed'), 1)
