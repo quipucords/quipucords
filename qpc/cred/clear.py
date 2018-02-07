@@ -82,6 +82,7 @@ class CredClearCommand(CliCommand):
         else:
             # remove all entries
             remove_error = []
+            next_link = json_data.get('next')
             results = json_data.get('results')
             for entry in results:
                 if self._delete_entry(entry, print_out=False) is False:
@@ -91,4 +92,7 @@ class CredClearCommand(CliCommand):
                 print(_(messages.CRED_PARTIAL_REMOVE % cred_err))
                 sys.exit(1)
             else:
-                print(_(messages.CRED_CLEAR_ALL_SUCCESS))
+                if not next_link:
+                    print(_(messages.CRED_CLEAR_ALL_SUCCESS))
+                else:
+                    self._do_command()
