@@ -116,21 +116,19 @@ class ScanJob(models.Model):
                            log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            message = 'STATE UPDATE (%s, %s).'\
+            message = 'STATE UPDATE (%s).'\
                 '  Additional State information: %s' %\
                 (self.status,
-                 self.scan_type,
                  self.status_message)
         else:
-            message = 'STATE UPDATE (%s, %s)' %\
-                (self.status,
-                 self.scan_type)
+            message = 'STATE UPDATE (%s)' %\
+                (self.status)
 
         self.log_message(message, log_level=log_level)
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this job."""
-        actual_message = ('Job %d - ' % self.id)
+        actual_message = 'Job %d (%s) - ' % (self.id, self.scan_type)
         actual_message += message
         logger.log(log_level, actual_message)
 

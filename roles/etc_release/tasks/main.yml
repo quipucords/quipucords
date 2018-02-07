@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "etc_release"
+
 - name: initialize etc_release data
   set_fact:
     etc_release_name: ""

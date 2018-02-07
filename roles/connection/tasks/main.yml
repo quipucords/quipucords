@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "connection"
+
 - name: add connection.host to dictionary
   set_fact:
     connection_host: "{{ ansible_host }}"

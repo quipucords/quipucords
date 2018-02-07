@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "ifconfig"
+
 - name: initialize ifconfig.mac-addresses
   set_fact:
     ifconfig_mac_addresses: "{{ None }}"

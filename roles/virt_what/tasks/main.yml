@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "virt_what"
+
 - name: set virt-what.type fact if virt-what not found
   set_fact: virt_what_type=''
   when: 'not internal_have_virt_what'

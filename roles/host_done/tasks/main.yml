@@ -1,5 +1,9 @@
 ---
 
-- name: extract virt-what error code
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "host_done"
+
+- name: internal_host_done
   set_fact:
     host_done: 'True'

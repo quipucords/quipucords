@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "check_dependencies"
+
 - name: gather internal_have_dmidecode_cmd
   raw: command -v /usr/sbin/dmidecode
   register: internal_have_dmidecode_cmd
