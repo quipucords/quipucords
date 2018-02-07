@@ -41,5 +41,5 @@
 
 - name: extract result value for date.yum_history
   set_fact:
-    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first | default('') if internal_have_yum else '' }}"
+    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first if internal_have_yum else '' }}"
   when: '"stdout_lines" in internal_date_yum_history_cmd'
