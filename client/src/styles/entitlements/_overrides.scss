@@ -21,15 +21,9 @@ button.unavailable:hover, li.unavailable > a:hover {
   }
 }
 
-// Override so that we get internal vertical scroll
-.layout-pf.layout-pf-fixed .container-pf-nav-pf-vertical {
-  bottom: 0;
-  top: $navbar-pf-vertical-height;
-  position: fixed;
-  width: unquote("calc(100% - #{$nav-pf-vertical-width})");
-  &.collapsed-nav {
-    width: unquote("calc(100% - #{$nav-pf-vertical-collapsed-width})");
-  }
+.navbar-pf-vertical .navbar-brand .navbar-brand-name {
+  height: 11px;
+  margin-top: 13px;
 }
 
 .list-view-pf-top-align .list-view-pf-additional-info {

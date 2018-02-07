@@ -12,6 +12,10 @@ export default function credentialsToolbarReducer(
   state = initialState,
   action
 ) {
+  if (action.viewType !== viewToolbarTypes.CREDENTIALS_VIEW) {
+    return state;
+  }
+
   switch (action.type) {
     case viewToolbarTypes.SET_FILTER_TYPE:
       if (state.filterType === action.filterType) {

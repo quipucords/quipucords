@@ -68,6 +68,7 @@ class CredentialsToolbar extends React.Component {
     let filter = { field: field, value: value, label: filterText };
     Store.dispatch({
       type: viewToolbarTypes.ADD_FILTER,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       filter
     });
   }
@@ -75,6 +76,7 @@ class CredentialsToolbar extends React.Component {
   selectFilterType(filterType) {
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_TYPE,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       filterType
     });
   }
@@ -85,6 +87,7 @@ class CredentialsToolbar extends React.Component {
     let filterValue = newFilterValue;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       filterValue
     });
     if (newFilterValue) {
@@ -96,6 +99,7 @@ class CredentialsToolbar extends React.Component {
     let filterValue = event.target.value;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       filterValue
     });
   }
@@ -113,26 +117,30 @@ class CredentialsToolbar extends React.Component {
   removeFilter(filter) {
     Store.dispatch({
       type: viewToolbarTypes.REMOVE_FILTER,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       filter
     });
   }
 
   clearFilters() {
     Store.dispatch({
-      type: viewToolbarTypes.CLEAR_FILTERS
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW
     });
   }
 
   updateCurrentSortType(sortType) {
     Store.dispatch({
       type: viewToolbarTypes.SET_SORT_TYPE,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
       sortType
     });
   }
 
   toggleCurrentSortDirection() {
     Store.dispatch({
-      type: viewToolbarTypes.TOGGLE_SORT_ASCENDING
+      type: viewToolbarTypes.TOGGLE_SORT_ASCENDING,
+      viewType: viewToolbarTypes.CREDENTIALS_VIEW
     });
   }
 
@@ -247,7 +255,7 @@ class CredentialsToolbar extends React.Component {
         {activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
-        {totalCount + (totalCount > 1 ? ' Results' : ' Result')}
+        {totalCount + (totalCount > 1 ? ' Credentials' : ' Credential')}
       </h5>
     );
   }
