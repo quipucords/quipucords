@@ -1,4 +1,21 @@
 /* _views.scss */
+
+// Setup for internal vertical scroll
+.quipucords-content {
+  bottom: 0;
+  top: $navbar-pf-vertical-height;
+  right: 0;
+  position: fixed;
+  left: $nav-pf-vertical-width;
+  .collapsed-nav & {
+    left: $nav-pf-vertical-collapsed-width;
+  }
+  .hidden-nav & {
+    left: 0;
+  }
+}
+
+
 .quipucords-view-container {
   display: flex;
   flex-direction: column;
