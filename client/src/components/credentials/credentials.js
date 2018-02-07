@@ -168,7 +168,7 @@ class Credentials extends React.Component {
   addCredential(credentialType) {
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      newCredentialType: credentialType
+      credentialType
     });
   }
 
@@ -336,9 +336,9 @@ class Credentials extends React.Component {
 
   render() {
     const {
-      getPending,
-      getError,
-      getErrorMessage,
+      pending,
+      error,
+      errorMessage,
       credentials,
       filterType,
       filterValue,
@@ -348,7 +348,7 @@ class Credentials extends React.Component {
     } = this.props;
     const { filteredItems } = this.state;
 
-    if (getPending) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -359,11 +359,11 @@ class Credentials extends React.Component {
       );
     }
 
-    if (getError) {
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
-            <span>Error retrieving credentials: {getErrorMessage}</span>
+            <span>Error retrieving credentials: {errorMessage}</span>
           </Alert>
         </EmptyState>
       );
@@ -415,10 +415,11 @@ class Credentials extends React.Component {
 
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
-  getPending: PropTypes.bool,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  pending: PropTypes.bool,
   credentials: PropTypes.array,
-  getError: PropTypes.bool,
-  getErrorMessage: PropTypes.string,
+
   filterType: PropTypes.object,
   filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
@@ -426,16 +427,17 @@ Credentials.propTypes = {
   sortAscending: PropTypes.bool
 };
 
-Credentials.defaultProps = {
-  getPending: true
-};
-
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getCredentials: () => dispatch(getCredentials())
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.credentials, state.credentialsToolbar);
+  return Object.assign(
+    {},
+    state.credentials.view,
+    state.credentials.persist,
+    state.credentialsToolbar
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Credentials);

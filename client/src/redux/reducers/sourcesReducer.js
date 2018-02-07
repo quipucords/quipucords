@@ -1,27 +1,81 @@
+import helpers from '../../common/helpers';
 import { sourcesTypes } from '../constants';
 
 const initialState = {
-  error: false,
-  errorMessage: '',
-  loading: true,
-  data: []
+  persist: {
+    selectedSources: []
+  },
+
+  view: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    sources: []
+  }
 };
 
-export default function sourcesReducer(state = initialState, action) {
+const sourcesReducer = function(state = initialState, action) {
   switch (action.type) {
-    case sourcesTypes.GET_SOURCES_ERROR:
-      return Object.assign({}, state, {
-        error: action.error,
-        errorMessage: action.message
-      });
+    // Persist
+    case sourcesTypes.SOURCES_SELECTED:
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedSources: action.selectedSources
+        },
+        {
+          state,
+          reset: false
+        }
+      );
 
-    case sourcesTypes.GET_SOURCES_LOADING:
-      return Object.assign({}, state, { loading: action.loading });
+    // Error/Rejected
+    case sourcesTypes.GET_SOURCES_REJECTED:
+      return helpers.setStateProp(
+        'view',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case sourcesTypes.GET_SOURCES_SUCCESS:
-      return Object.assign({}, state, { data: action.data.results });
+    // Loading/Pending
+    case sourcesTypes.GET_SOURCES_PENDING:
+      return helpers.setStateProp(
+        'view',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Success/Fulfilled
+    case sourcesTypes.GET_SOURCES_FULFILLED:
+      return helpers.setStateProp(
+        'view',
+        {
+          sources: action.payload.results,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     default:
       return state;
   }
-}
+};
+
+export { initialState, sourcesReducer };
+
+export default sourcesReducer;

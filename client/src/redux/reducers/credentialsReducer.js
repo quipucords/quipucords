@@ -1,144 +1,250 @@
+import helpers from '../../common/helpers';
 import { credentialsTypes } from '../constants';
 
-// ToDo: take a look at a redux form plugin, and/or nesting state to allow resetting parts of it and more concise property names, i.e. { view: {}, updateDialog: {} }
 const initialState = {
-  credentials: [],
+  persist: {
+    selectedCredentials: []
+  },
 
-  newCredential: null,
-  editCredential: null,
-  newCredentialType: '',
-  showCreateDialog: false,
-  showEditDialog: false,
+  view: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    credentials: []
+  },
 
-  addError: false,
-  addErrorMessage: '',
-  deleteError: false,
-  deleteErrorMessage: '',
-  getError: false,
-  getErrorMessage: '',
-  updateError: false,
-  updateErrorMessage: '',
-
-  addPending: false,
-  deletePending: false,
-  getPending: false,
-  updatePending: false,
-
-  addFulfilled: false,
-  deleteFulfilled: false,
-  getFulfilled: false,
-  updateFulfilled: false
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    credential: null,
+    credentialType: '',
+    show: false,
+    add: false,
+    edit: false,
+    delete: false
+  }
 };
 
-function credentialsReducer(state = initialState, action) {
+const credentialsReducer = function(state = initialState, action) {
   switch (action.type) {
     // Show/Hide
-    case credentialsTypes.EDIT_CREDENTIAL_SHOW:
-      return Object.assign({}, state, {
-        showEditDialog: true,
-        editCredential: action.credential
-      });
-
-    case credentialsTypes.EDIT_CREDENTIAL_HIDE:
-      return Object.assign({}, state, {
-        showEditDialog: false,
-        editCredential: null,
-        updateFulfilled: false
-      });
-
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
-      return Object.assign({}, state, {
-        showCreateDialog: true,
-        newCredentialType: action.newCredentialType
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          show: true,
+          add: true,
+          credentialType: action.credentialType
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case credentialsTypes.CREATE_CREDENTIAL_HIDE:
-      return Object.assign({}, state, {
-        showCreateDialog: false,
-        newCredentialType: '',
-        newCredential: null,
-        addFulfilled: false
-      });
+    case credentialsTypes.EDIT_CREDENTIAL_SHOW:
+      return helpers.setStateProp(
+        'update',
+        {
+          show: true,
+          edit: true,
+          credential: action.credential
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case credentialsTypes.UPDATE_CREDENTIAL_HIDE:
+      return helpers.setStateProp(
+        'update',
+        {
+          show: false
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     // Error/Rejected
     case credentialsTypes.ADD_CREDENTIAL_REJECTED:
-      return Object.assign({}, state, {
-        addError: action.payload.error,
-        addErrorMessage: action.payload.message,
-        addPending: false
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          add: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.DELETE_CREDENTIAL_REJECTED:
     case credentialsTypes.DELETE_CREDENTIALS_REJECTED:
-      return Object.assign({}, state, {
-        deleteError: action.payload.error,
-        deleteErrorMessage: action.payload.message,
-        deletePending: false
-      });
-
-    case credentialsTypes.GET_CREDENTIAL_REJECTED:
-      return Object.assign({}, state, {
-        getError: action.payload.error,
-        getErrorMessage: action.payload.message,
-        getPending: false
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.UPDATE_CREDENTIAL_REJECTED:
-      return Object.assign({}, state, {
-        updateError: action.payload.error,
-        updateErrorMessage: action.payload.message,
-        updatePending: false
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          edit: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case credentialsTypes.GET_CREDENTIAL_REJECTED:
+    case credentialsTypes.GET_CREDENTIALS_REJECTED:
+      return helpers.setStateProp(
+        'view',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     // Loading/Pending
     case credentialsTypes.ADD_CREDENTIAL_PENDING:
-      return Object.assign({}, state, { addPending: true });
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true,
+          add: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.DELETE_CREDENTIAL_PENDING:
     case credentialsTypes.DELETE_CREDENTIALS_PENDING:
-      return Object.assign({}, state, { deletePending: true });
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case credentialsTypes.UPDATE_CREDENTIAL_PENDING:
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true,
+          edit: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.GET_CREDENTIAL_PENDING:
     case credentialsTypes.GET_CREDENTIALS_PENDING:
-      return Object.assign({}, state, { getPending: true });
-
-    case credentialsTypes.UPDATE_CREDENTIAL_PENDING:
-      return Object.assign({}, state, { updatePending: true });
+      return helpers.setStateProp(
+        'view',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     // Success/Fulfilled
     case credentialsTypes.ADD_CREDENTIAL_FULFILLED:
-      return Object.assign({}, state, {
-        newCredential: action.payload,
-        addFulfilled: true,
-        addPending: false
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          credential: action.payload,
+          fulfilled: true,
+          add: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.DELETE_CREDENTIAL_FULFILLED:
     case credentialsTypes.DELETE_CREDENTIALS_FULFILLED:
-      return Object.assign({}, state, {
-        deleteFulfilled: true,
-        deletePending: false
-      });
+      return helpers.setStateProp(
+        'update',
+        {
+          credential: action.payload,
+          fulfilled: true,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case credentialsTypes.UPDATE_CREDENTIAL_FULFILLED:
+      return helpers.setStateProp(
+        'update',
+        {
+          credential: action.payload,
+          fulfilled: true,
+          edit: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
-      return Object.assign({}, state, {
-        credentials: action.payload.results,
-        getFulfilled: true,
-        getPending: false
-      });
-
-    case credentialsTypes.UPDATE_CREDENTIAL_FULFILLED:
-      return Object.assign({}, state, {
-        editCredential: action.payload,
-        updateFulfilled: true,
-        updatePending: false
-      });
+      return helpers.setStateProp(
+        'view',
+        {
+          credentials: action.payload.results,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     default:
       return state;
   }
-}
+};
 
 export { initialState, credentialsReducer };
 

@@ -50,7 +50,7 @@ class Scans extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scans !== this.props.scans) {
+    if (nextProps.scans && nextProps.scans !== this.props.scans) {
       nextProps.scans.forEach(scan => {
         scan.systems_scanned = Math.abs(scan.systems_scanned) % 100;
         scan.systems_failed = Math.abs(scan.systems_failed) % 100;
@@ -291,8 +291,8 @@ class Scans extends React.Component {
 
   render() {
     const {
-      loading,
-      loadError,
+      pending,
+      error,
       errorMessage,
       scans,
       filterType,
@@ -303,7 +303,7 @@ class Scans extends React.Component {
     } = this.props;
     const { filteredItems } = this.state;
 
-    if (loading) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -313,7 +313,7 @@ class Scans extends React.Component {
         </Modal>
       );
     }
-    if (loadError) {
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
@@ -359,10 +359,11 @@ class Scans extends React.Component {
 
 Scans.propTypes = {
   getScans: PropTypes.func,
-  loadError: PropTypes.bool,
+  error: PropTypes.bool,
   errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  pending: PropTypes.bool,
   scans: PropTypes.array,
+
   filterType: PropTypes.object,
   filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
@@ -370,26 +371,17 @@ Scans.propTypes = {
   sortAscending: PropTypes.bool
 };
 
-Scans.defaultProps = {
-  loading: true
-};
-
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getScans: () => dispatch(getScans())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.scans.loading,
-    scans: state.scans.data,
-    loadError: state.scans.error,
-    errorMessage: state.scans.errorMessage,
-    filterType: state.scansToolbar.filterType,
-    filterValue: state.scansToolbar.filterValue,
-    activeFilters: state.scansToolbar.activeFilters,
-    sortType: state.scansToolbar.sortType,
-    sortAscending: state.scansToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign(
+    {},
+    state.scans.view,
+    state.scans.persist,
+    state.scansToolbar
+  );
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Scans);

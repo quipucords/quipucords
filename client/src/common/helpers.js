@@ -86,6 +86,40 @@ export const authorizationTypeString = authorizationType => {
   }
 };
 
+export const setStateProp = (prop, data, options) => {
+  let { state = {}, initialState = {}, reset = true } = options;
+  let obj = { ...state };
+
+  if (!state[prop]) {
+    console.error(
+      `Error: Property ${prop} does not exist within the passed state.`,
+      state
+    );
+  }
+
+  if (reset && !initialState[prop]) {
+    console.warn(
+      `Warning: Property ${prop} does not exist within the passed initialState.`,
+      initialState
+    );
+  }
+
+  if (reset) {
+    obj[prop] = {
+      ...state[prop],
+      ...initialState[prop],
+      ...data
+    };
+  } else {
+    obj[prop] = {
+      ...state[prop],
+      ...data
+    };
+  }
+
+  return obj;
+};
+
 export const helpers = {
   bindMethods: bindMethods,
   noop: noop,
@@ -94,5 +128,8 @@ export const helpers = {
   scanTypeString: scanTypeString,
   scanStatusString: scanStatusString,
   scanTypeIcon: scanTypeIcon,
-  authorizationTypeString: authorizationTypeString
+  authorizationTypeString: authorizationTypeString,
+  setStateProp: setStateProp
 };
+
+export default helpers;

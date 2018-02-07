@@ -1,27 +1,66 @@
+import helpers from '../../common/helpers';
 import { factsTypes } from '../constants';
 
 const initialState = {
-  error: false,
-  errorMessage: '',
-  loading: true,
-  data: {}
+  persist: {},
+
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    facts: {}
+  }
 };
 
-export default function factsReducer(state = initialState, action) {
+const factsReducer = function(state = initialState, action) {
   switch (action.type) {
-    case factsTypes.ADD_FACTS_ERROR:
-      return Object.assign({}, state, {
-        error: action.error,
-        errorMessage: action.message
-      });
+    // Error/Rejected
+    case factsTypes.ADD_FACTS_REJECTED:
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case factsTypes.ADD_FACTS_LOADING:
-      return Object.assign({}, state, { loading: action.loading });
+    // Loading/Pending
+    case factsTypes.ADD_FACTS_PENDING:
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case factsTypes.ADD_FACTS_SUCCESS:
-      return Object.assign({}, state, { data: action.data });
+    // Success/Fulfilled
+    case factsTypes.ADD_FACTS_FULFILLED:
+      return helpers.setStateProp(
+        'update',
+        {
+          facts: action.payload,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     default:
       return state;
   }
-}
+};
+
+export { initialState, factsReducer };
+
+export default factsReducer;
