@@ -13,8 +13,13 @@ class CredentialListItem extends React.Component {
 
   toggleExpand(expandType) {
     const { item } = this.props;
-    item.expanded = !item.expanded;
-    item.expandType = expandType;
+
+    if (expandType === item.expandType) {
+      item.expanded = !item.expanded;
+    } else {
+      item.expanded = true;
+      item.expandType = expandType;
+    }
     this.forceUpdate();
   }
 

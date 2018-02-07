@@ -88,7 +88,7 @@ class SourceClearCliTests(unittest.TestCase):
         source_out = StringIO()
         url = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             ncc = SourceClearCommand(SUBPARSER)
             args = Namespace(name='source1')
             with self.assertRaises(SystemExit):
@@ -107,7 +107,8 @@ class SourceClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credential': ['credential1', 'cred2'], 'port': 22}
-        data = [source_entry]
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)
@@ -128,7 +129,8 @@ class SourceClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credential': ['credential1', 'cred2'], 'port': 22}
-        data = [source_entry]
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
@@ -149,7 +151,7 @@ class SourceClearCliTests(unittest.TestCase):
         source_out = StringIO()
         get_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
-            mocker.get(get_url, status_code=200, json=[])
+            mocker.get(get_url, status_code=200, json={'count': 0})
             ncc = SourceClearCommand(SUBPARSER)
             args = Namespace(name=None)
             with self.assertRaises(SystemExit):
@@ -168,7 +170,8 @@ class SourceClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credential': ['credential1', 'cred2'], 'port': 22}
-        data = [source_entry]
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         err_data = {'error': ['Server Error']}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
@@ -190,7 +193,8 @@ class SourceClearCliTests(unittest.TestCase):
         delete_url = get_server_location() + SOURCE_URI + '1/'
         source_entry = {'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
                         'credential': ['credential1', 'cred2'], 'port': 22}
-        data = [source_entry]
+        results = [source_entry]
+        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_url, status_code=200, json=data)
             mocker.delete(delete_url, status_code=204)

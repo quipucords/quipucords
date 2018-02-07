@@ -55,10 +55,11 @@ class CredListCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         count = json_data.get('count', 0)
+        results = json_data.get('results', [])
         if count == 0:
             print(_(messages.CRED_LIST_NO_CREDS))
         else:
-            data = pretty_print(json_data.get('results', []))
+            data = pretty_print(results)
             print(data)
 
         if json_data.get('next'):
@@ -69,5 +70,5 @@ class CredListCommand(CliCommand):
                 self.req_params['page'] = page
             else:
                 self.req_params = {'page': page}
-            input('Press enter to see the next set of results.')
+            input(_(messages.NEXT_RESULTS))
             self._do_command()

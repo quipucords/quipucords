@@ -1,10 +1,6 @@
-import ClassNames from 'classnames';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { routes } from '../../routes';
-import { withRouter } from 'react-router';
 
 class Content extends React.Component {
   renderRoutes() {
@@ -23,15 +19,10 @@ class Content extends React.Component {
   }
 
   render() {
-    let classes = ClassNames({
-      'container-pf-nav-pf-vertical': true,
-      'collapsed-nav': this.props.navigationBar.collapsed
-    });
-
     const { renderRoutes, redirectRoot } = this.renderRoutes();
 
     return (
-      <div className={classes}>
+      <div className="quipucords-content">
         <Switch>
           {renderRoutes}
           {redirectRoot}
@@ -40,12 +31,5 @@ class Content extends React.Component {
     );
   }
 }
-Content.propTypes = {
-  navigationBar: PropTypes.object
-};
 
-function mapStateToProps(state, ownProps) {
-  return state;
-}
-
-export default withRouter(connect(mapStateToProps)(Content));
+export default Content;

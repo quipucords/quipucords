@@ -177,3 +177,5 @@ LOGIN_USERNAME_PROMPT = 'User name:'
 LOGIN_SUCCESS = 'Login successful.'
 
 LOGOUT_SUCCESS = 'Logged out.'
+
+NEXT_RESULTS = 'Press enter to see the next set of results.'
