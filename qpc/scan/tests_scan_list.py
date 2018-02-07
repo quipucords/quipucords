@@ -11,6 +11,7 @@
 """Test the CLI module."""
 
 import unittest
+from unittest.mock import patch, ANY
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
@@ -88,7 +89,7 @@ class ScanListCliTests(unittest.TestCase):
         scan_out = StringIO()
         url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=[])
+            mocker.get(url, status_code=200, json={'count': 0})
             slc = ScanListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(scan_out):
@@ -96,7 +97,8 @@ class ScanListCliTests(unittest.TestCase):
                 self.assertEqual(scan_out.getvalue(),
                                  messages.SCAN_LIST_NO_SCANS + '\n')
 
-    def test_list_scan_data(self):
+    @patch('builtins.input', return_value='yes')
+    def test_list_scan_data(self, b_input):
         """Testing the list scan command successfully with stubbed data."""
         scan_out = StringIO()
         url = get_server_location() + SCAN_URI
@@ -106,9 +108,21 @@ class ScanListCliTests(unittest.TestCase):
                           'id': 1,
                           'name': 'scan1'},
                       'status': 'completed'}
-        data = [scan_entry]
+        results = [scan_entry]
+        next_link = 'http://127.0.0.1:8000/api/v1/scans/?page=2'
+        data = {
+            'count': 1,
+            'next': next_link,
+            'results': results
+        }
+        data2 = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
+            mocker.get(next_link, status_code=200, json=data2)
             slc = ScanListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(scan_out):
@@ -117,7 +131,9 @@ class ScanListCliTests(unittest.TestCase):
                            ',"source":{"id":1,"name":"scan1"},'\
                            '"status":"completed"}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
-                                 .replace(' ', '').strip(), expected)
+                                 .replace(' ', '').strip(),
+                                 expected + expected)
+                b_input.assert_called_with(ANY)
 
     def test_list_filter_type(self):
         """Testing the list scan with filter by type."""
@@ -129,7 +145,12 @@ class ScanListCliTests(unittest.TestCase):
                           'id': 1,
                           'name': 'scan1'},
                       'status': 'completed'}
-        data = [scan_entry]
+        results = [scan_entry]
+        data = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             slc = ScanListCommand(SUBPARSER)
@@ -152,7 +173,12 @@ class ScanListCliTests(unittest.TestCase):
                           'id': 1,
                           'name': 'scan1'},
                       'status': 'completed'}
-        data = [scan_entry]
+        results = [scan_entry]
+        data = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             slc = ScanListCommand(SUBPARSER)
