@@ -48,8 +48,10 @@ class SourceShowCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        if len(json_data) == 1:
-            cred_entry = json_data[0]
+        count = json_data.get('count', 0)
+        results = json_data.get('results', [])
+        if count == 1:
+            cred_entry = results[0]
             data = pretty_print(cred_entry)
             print(data)
         else:

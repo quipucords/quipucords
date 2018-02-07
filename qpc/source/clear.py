@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -67,22 +67,24 @@ class SourceClearCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        response_len = len(json_data)
-        if self.args.name and response_len == 0:
+        count = json_data.get('count', 0)
+        results = json_data.get('results', [])
+        if self.args.name and count == 0:
             print(_(messages.SOURCE_NOT_FOUND % self.args.name))
             sys.exit(1)
-        elif self.args.name and response_len == 1:
+        elif self.args.name and count == 1:
             # delete single credential
-            entry = json_data[0]
+            entry = results[0]
             if self._delete_entry(entry) is False:
                 sys.exit(1)
-        elif response_len == 0:
+        elif count == 0:
             print(_(messages.SOURCE_NO_SOURCES_TO_REMOVE))
             sys.exit(1)
         else:
             # remove all entries
             remove_error = []
-            for entry in json_data:
+            next_link = json_data.get('next')
+            for entry in results:
                 if self._delete_entry(entry, print_out=False) is False:
                     remove_error.append(entry['name'])
             if remove_error != []:
@@ -90,4 +92,7 @@ class SourceClearCommand(CliCommand):
                 print(_(messages.SOURCE_PARTIAL_REMOVE % cred_err))
                 sys.exit(1)
             else:
-                print(messages.SOURCE_CLEAR_ALL_SUCCESS)
+                if not next_link:
+                    print(messages.SOURCE_CLEAR_ALL_SUCCESS)
+                else:
+                    self._do_command()
