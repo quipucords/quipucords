@@ -31,3 +31,7 @@ button.unavailable:hover, li.unavailable > a:hover {
     width: unquote("calc(100% - #{$nav-pf-vertical-collapsed-width})");
   }
 }
+
+.list-view-pf-top-align .list-view-pf-additional-info {
+  align-self: flex-start;
+}

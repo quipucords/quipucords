@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,7 +18,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import (DjangoFilterBackend,
+                                           FilterSet)
 from filters import mixins
 from api.filters import ListFilter
 from api.serializers import CredentialSerializer
@@ -68,12 +70,22 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CredentialFilter
+    ordering_fields = ('name', 'cred_type')
+    ordering = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for cred in serializer.data:
+                cred = mask_credential(cred)
+            return self.get_paginated_response(serializer.data)
+
         serializer = CredentialSerializer(queryset, many=True)
         for cred in serializer.data:
             cred = mask_credential(cred)

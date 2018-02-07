@@ -57,20 +57,15 @@ class Credentials extends React.Component {
         credential.selected = false;
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
           credential.auth_type = 'sshKey';
-        } else if (credential.become_user && credential.become_user !== '') {
-          credential.auth_type = 'becomeUser';
         } else {
           credential.auth_type = 'usernamePassword';
         }
-      });
 
-      // TODO: Remove once we get real failed host data
-      let failedCount = Math.floor(Math.random() * 10);
-      nextProps.credentials.forEach(credential => {
-        credential.selected = false;
-        credential.failed_hosts = [];
-        for (let i = 0; i < failedCount; i++) {
-          credential.failed_hosts.push('failedHost' + (i + 1));
+        // TODO: Remove once we get real source data
+        let sourceCount = Math.floor(Math.random() * 10);
+        credential.sources = [];
+        for (let i = 0; i < sourceCount; i++) {
+          credential.sources.push('Source ' + (i + 1));
         }
       });
 
@@ -140,9 +135,6 @@ class Credentials extends React.Component {
         case 'credentialType':
           compValue = item1.cred_type.localeCompare(item2.cred_type);
           break;
-        case 'authenticationType':
-          compValue = item1.auth_type.localeCompare(item2.auth_type);
-          break;
         default:
           compValue = 0;
       }
@@ -158,7 +150,7 @@ class Credentials extends React.Component {
   addCredential(credentialType) {
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: credentialType
+      newCredentialType: credentialType
     });
   }
 
@@ -290,10 +282,10 @@ class Credentials extends React.Component {
   }
 
   render() {
-    const { loading, loadError, errorMessage, credentials } = this.props;
+    const { getPending, getError, getErrorMessage, credentials } = this.props;
     const { filteredItems, selectedItems } = this.state;
 
-    if (loading) {
+    if (getPending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -303,11 +295,12 @@ class Credentials extends React.Component {
         </Modal>
       );
     }
-    if (loadError) {
+
+    if (getError) {
       return (
         <EmptyState>
           <Alert type="error">
-            <span>Error retrieving credentials: {errorMessage}</span>
+            <span>Error retrieving credentials: {getErrorMessage}</span>
           </Alert>
         </EmptyState>
       );
@@ -352,33 +345,26 @@ class Credentials extends React.Component {
 
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
-  loadError: PropTypes.bool,
-  errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  getPending: PropTypes.bool,
   credentials: PropTypes.array,
+  getError: PropTypes.bool,
+  getErrorMessage: PropTypes.string,
+
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
 };
 
 Credentials.defaultProps = {
-  loading: true
+  getPending: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getCredentials: () => dispatch(getCredentials())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.credentials.loading,
-    credentials: state.credentials.data,
-    loadError: state.credentials.error,
-    errorMessage: state.credentials.errorMessage,
-    activeFilters: state.credentialsToolbar.activeFilters,
-    sortType: state.credentialsToolbar.sortType,
-    sortAscending: state.credentialsToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign({}, state.credentials, state.credentialsToolbar);
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Credentials);

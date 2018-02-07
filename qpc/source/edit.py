@@ -121,12 +121,14 @@ class SourceEditCommand(CliCommand):
                                payload=None)
             if response.status_code == codes.ok:  # pylint: disable=no-member
                 json_data = response.json()
-                if len(json_data) == len(self.args.cred):
+                count = json_data.get('count', 0)
+                results = json_data.get('results', [])
+                if count == len(self.args.cred):
                     self.args.credentials = []
-                    for cred_entry in json_data:
+                    for cred_entry in results:
                         self.args.credentials.append(cred_entry['id'])
                 else:
-                    for cred_entry in json_data:
+                    for cred_entry in results:
                         cred_name = cred_entry['name']
                         self.args.cred.remove(cred_name)
                     not_found_str = ','.join(self.args.cred)

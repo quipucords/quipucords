@@ -19,8 +19,8 @@ import {
   toastNotificationTypes
 } from '../../redux/constants';
 import {
-  getCredentials,
   addCredential,
+  getCredentials,
   updateCredential
 } from '../../redux/actions/credentialsActions';
 
@@ -69,12 +69,32 @@ class CreateCredentialDialog extends React.Component {
     if (!this.props.show && nextProps.show) {
       this.resetIntialState(nextProps);
     }
+
+    if (nextProps.show) {
+      if (
+        nextProps.editing &&
+        nextProps.updateFulfilled &&
+        nextProps.editCredential
+      ) {
+        this.updateResultsCallback(false, nextProps.editCredential);
+      } else if (nextProps.editing && nextProps.updateError) {
+        this.updateResultsCallback(
+          nextProps.updateError,
+          nextProps.updateErrorMessage
+        );
+      } else if (nextProps.addFulfilled && nextProps.newCredential) {
+        this.addResultsCallback(false, nextProps.newCredential);
+      } else if (nextProps.addError) {
+        this.addResultsCallback(nextProps.addError, nextProps.addErrorMessage);
+      }
+    }
   }
 
   resetIntialState(nextProps) {
     if (nextProps && nextProps.editing && nextProps.editCredential) {
       this.setState({
         credentialName: nextProps.editCredential.name,
+        credType: nextProps.editCredential.cred_type,
         authorizationType:
           nextProps.editCredential.ssh_keyfile &&
           nextProps.editCredential.ssh_keyfile.length
@@ -95,6 +115,7 @@ class CreateCredentialDialog extends React.Component {
     } else {
       this.setState({
         credentialName: '',
+        credType: nextProps.newCredentialType,
         authorizationType: 'usernamePassword',
         sshKeyFile: '',
         passphrase: '',
@@ -108,7 +129,6 @@ class CreateCredentialDialog extends React.Component {
         sskKeyFileError: '',
         becomeUserError: ''
       });
-      this.props.getCredentials();
     }
   }
 
@@ -177,14 +197,12 @@ class CreateCredentialDialog extends React.Component {
   save() {
     let credential = {
       name: this.state.credentialName,
-      username: this.state.username
+      username: this.state.username,
+      cred_type: this.state.credType
     };
 
     if (this.props.editing) {
       credential.id = this.props.editCredential.id;
-      credential.cred_type = this.props.editCredential.cred_type;
-    } else {
-      credential.cred_type = this.state.credentialType;
     }
 
     if (this.state.authorizationType === 'sshKey') {
@@ -193,16 +211,16 @@ class CreateCredentialDialog extends React.Component {
       credential.password = this.state.password;
     }
 
-    if (this.props.credentialType === 'network') {
+    if (credential.cred_type === 'network') {
       credential.become_method = this.state.becomeMethod;
       credential.become_user = this.state.becomeUser;
       credential.become_password = this.state.becomePassword;
     }
 
     if (this.props.editing) {
-      this.props.updateCredential(credential, this.updateResultsCallback);
+      this.props.updateCredential(credential.id, credential);
     } else {
-      this.props.addCredential(credential, this.addResultsCallback);
+      this.props.addCredential(credential);
     }
   }
 
@@ -382,15 +400,15 @@ class CreateCredentialDialog extends React.Component {
   }
 
   renderNetworkForm() {
-    const { credentialType } = this.props;
     const {
+      credType,
       becomeMethod,
       becomeUser,
       becomePassword,
       becomeUserError
     } = this.state;
 
-    if (credentialType !== 'network') {
+    if (credType !== 'network') {
       return null;
     }
 
@@ -446,16 +464,15 @@ class CreateCredentialDialog extends React.Component {
   }
 
   render() {
-    const { show, editing, editCredential, credentialType } = this.props;
+    const { show, editing } = this.props;
     const {
+      credType,
       credentialName,
       authorizationType,
       username,
       credentialNameError,
       usernameError
     } = this.state;
-
-    let credType = editing ? editCredential.cred_type : credentialType;
 
     return (
       <Modal show={show} onHide={this.cancel}>
@@ -498,7 +515,7 @@ class CreateCredentialDialog extends React.Component {
                   className="quipucords-form-control"
                   readOnly={editing}
                   placeholder="Enter the new credential name"
-                  autoFocus
+                  autoFocus={!editing}
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
                 />
@@ -555,6 +572,7 @@ class CreateCredentialDialog extends React.Component {
           <Button
             bsStyle="default"
             className="btn-cancel"
+            autoFocus={editing}
             onClick={this.cancel}
           >
             Cancel
@@ -572,35 +590,40 @@ class CreateCredentialDialog extends React.Component {
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredentials: () => dispatch(getCredentials()),
-  addCredential: (data, addCallback) =>
-    dispatch(addCredential(data, addCallback)),
-  updateCredential: (data, addCallback) =>
-    dispatch(updateCredential(data, addCallback))
-});
-
 CreateCredentialDialog.propTypes = {
   show: PropTypes.bool,
   editing: PropTypes.bool,
-  credentialType: PropTypes.string,
-  editCredential: PropTypes.object,
-  credentials: PropTypes.array,
+
   getCredentials: PropTypes.func,
+  credentials: PropTypes.array,
+
+  newCredential: PropTypes.object,
+  newCredentialType: PropTypes.string,
   addCredential: PropTypes.func,
-  updateCredential: PropTypes.func
+  addFulfilled: PropTypes.bool,
+  addError: PropTypes.bool,
+  addErrorMessage: PropTypes.string,
+
+  editCredential: PropTypes.object,
+  updateCredential: PropTypes.func,
+  updateFulfilled: PropTypes.bool,
+  updateError: PropTypes.bool,
+  updateErrorMessage: PropTypes.string
 };
 
-function mapStateToProps(state, ownProps) {
-  return {
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  getCredentials: () => dispatch(getCredentials()),
+  addCredential: data => dispatch(addCredential(data)),
+  updateCredential: (id, data) => dispatch(updateCredential(id, data))
+});
+
+const mapStateToProps = function(state) {
+  return Object.assign({}, state.credentials, {
     show:
       state.credentials.showCreateDialog || state.credentials.showEditDialog,
-    credentialType: state.credentials.createCredentialType,
-    editing: state.credentials.showEditDialog,
-    editCredential: state.credentials.editCredential,
-    credentials: state.credentials.data
-  };
-}
+    editing: state.credentials.showEditDialog
+  });
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   CreateCredentialDialog

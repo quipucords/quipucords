@@ -4,10 +4,10 @@ class CredentialsService {
   static addCredential(data = {}) {
     return fetch(process.env.REACT_APP_CREDENTIALS_SERVICE, {
       method: 'POST',
-      body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json'
-      })
+      }),
+      body: JSON.stringify(data)
     }).then(response => {
       if (response.ok) {
         return response.json();
@@ -29,12 +29,20 @@ class CredentialsService {
     });
   }
 
+  static deleteCredentials(data = []) {
+    return Promise.all.apply(this, data.map(id => this.deleteCredential(id)));
+  }
+
   static getCredential(id) {
     return this.getCredentials(id);
   }
 
   static getCredentials(id = '', query = {}) {
     let queryStr = jquery.param(query);
+
+    if (queryStr.length) {
+      queryStr = `?${queryStr}`;
+    }
 
     return fetch(
       `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}${queryStr}`
@@ -50,10 +58,10 @@ class CredentialsService {
   static updateCredential(id, data = {}) {
     return fetch(`${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
       headers: new Headers({
         'Content-Type': 'application/json'
-      })
+      }),
+      body: JSON.stringify(data)
     }).then(response => {
       if (response.ok) {
         return response.json();
