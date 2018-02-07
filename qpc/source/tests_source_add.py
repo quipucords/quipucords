@@ -105,7 +105,8 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add source command duplicate name."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         post_source_url = get_server_location() + SOURCE_URI
         error = {'name': ['source with this name already exists.']}
         with requests_mock.Mocker() as mocker:
@@ -126,7 +127,8 @@ class SourceAddCliTests(unittest.TestCase):
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + \
             '?name=cred1%2Ccred2'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
             nac = SourceAddCommand(SUBPARSER)
@@ -193,7 +195,8 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add network source command successfully."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
@@ -211,7 +214,8 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add vcenter source command successfully."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
@@ -228,7 +232,8 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add satellite source command successfully."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
@@ -246,7 +251,8 @@ class SourceAddCliTests(unittest.TestCase):
         """Testing the add satellite source command successfully."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
-        get_cred_data = [{'id': 1, 'name': 'cred1'}]
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
         post_source_url = get_server_location() + SOURCE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_cred_url, status_code=200, json=get_cred_data)
