@@ -8,7 +8,7 @@ import { bindMethods } from '../../common/helpers';
 
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import Store from '../../redux/store';
-import { viewToolbarTypes as dispatchTypes } from '../../redux/constants/';
+import { viewToolbarTypes } from '../../redux/constants';
 
 class ScansToolbar extends React.Component {
   constructor() {
@@ -56,14 +56,16 @@ class ScansToolbar extends React.Component {
 
     let filter = { field: field, value: value, label: filterText };
     Store.dispatch({
-      type: dispatchTypes.ADD_FILTER,
+      type: viewToolbarTypes.ADD_FILTER,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       filter
     });
   }
 
   selectFilterType(filterType) {
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_TYPE,
+      type: viewToolbarTypes.SET_FILTER_TYPE,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       filterType
     });
   }
@@ -73,7 +75,8 @@ class ScansToolbar extends React.Component {
 
     let filterValue = newFilterValue;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       filterValue
     });
     if (newFilterValue) {
@@ -84,7 +87,8 @@ class ScansToolbar extends React.Component {
   updateCurrentValue(event) {
     let filterValue = event.target.value;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       filterValue
     });
   }
@@ -101,27 +105,31 @@ class ScansToolbar extends React.Component {
 
   removeFilter(filter) {
     Store.dispatch({
-      type: dispatchTypes.REMOVE_FILTER,
+      type: viewToolbarTypes.REMOVE_FILTER,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       filter
     });
   }
 
   clearFilters() {
     Store.dispatch({
-      type: dispatchTypes.CLEAR_FILTERS
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewToolbarTypes.SCANS_VIEW
     });
   }
 
   updateCurrentSortType(sortType) {
     Store.dispatch({
-      type: dispatchTypes.SET_SORT_TYPE,
+      type: viewToolbarTypes.SET_SORT_TYPE,
+      viewType: viewToolbarTypes.SCANS_VIEW,
       sortType
     });
   }
 
   toggleCurrentSortDirection() {
     Store.dispatch({
-      type: dispatchTypes.TOGGLE_SORT_ASCENDING
+      type: viewToolbarTypes.TOGGLE_SORT_ASCENDING,
+      viewType: viewToolbarTypes.SCANS_VIEW
     });
   }
 
@@ -210,7 +218,7 @@ class ScansToolbar extends React.Component {
         {activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
-        {totalCount + (totalCount > 1 ? ' Results' : ' Result')}
+        {totalCount + (totalCount > 1 ? ' Scans' : ' Scan')}
       </h5>
     );
   }
