@@ -76,7 +76,7 @@ class ScanJobSerializer(NotEmptySerializer):
                                        choices=ScanTask.SCAN_TYPE_CHOICES)
     status = ValidStringChoiceField(required=False, read_only=True,
                                     choices=ScanTask.STATUS_CHOICES)
-    status_message = CharField(required=False, max_length=256)
+    status_message = CharField(required=False, read_only=True, max_length=256)
     tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(required=False, many=False)
     fact_collection_id = IntegerField(read_only=True)

@@ -143,7 +143,7 @@ class ScanTask(models.Model):
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this task."""
         actual_message = ('Task %d - ' % self.id)
-        actual_message += message
+        actual_message += message.strip()
         logger.log(log_level, actual_message)
 
     @transaction.atomic

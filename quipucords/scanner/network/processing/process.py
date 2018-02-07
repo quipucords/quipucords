@@ -11,10 +11,8 @@
 
 import abc
 import json
-import logging
+from logging import (ERROR, DEBUG)
 import traceback
-
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # ### Conventions ####
 #
@@ -65,9 +63,10 @@ def is_ansible_task_result(value):
              RESULTS in value))
 
 
-def process(facts, host):
+def process(scan_task, facts, host):
     """Do initial processing of the given facts.
 
+    :param scan_task: scan_task for context and logging
     :param facts: a dictionary of key, value pairs, where values are
       Ansible result dictionaries.
     :param host: the host the facts are from. Used for error messages.
@@ -82,7 +81,9 @@ def process(facts, host):
     # needed, this is the place to change.
     for key, value in facts.items():
         if is_sudo_error_value(value):
-            logger.debug('%s: key %s had sudo error %s', host, key, value)
+            log_message = '%s: key %s had sudo error %s' %\
+                (host, key, value)
+            scan_task.log_message(log_message, log_level=DEBUG)
             result[key] = NO_DATA
             continue
 
@@ -97,8 +98,9 @@ def process(facts, host):
                 if dep not in facts or \
                    not facts[dep] or \
                    isinstance(facts[dep], Exception):
-                    logger.debug('%s: fact %s missing dependency %s',
-                                 host, key, dep)
+                    log_message = '%s: fact %s missing dependency %s' %\
+                        (host, key, dep)
+                    scan_task.log_message(log_message, log_level=DEBUG)
                     result[key] = NO_DATA
                     raise StopIteration()
         except StopIteration:
@@ -107,8 +109,9 @@ def process(facts, host):
         # Don't touch things that are not standard Ansible results,
         # because we don't know what format they will have.
         if not is_ansible_task_result(value):
-            logger.error('%s: value %s:%s needs postprocessing but is not an '
-                         'Ansible result', host, key, value)
+            log_message = '%s: value %s:%s needs postprocessing but'\
+                ' is not an Ansible result' % (host, key, value)
+            scan_task.log_message(log_message, log_level=ERROR)
             # We don't know what data is supposed to go here, because
             # we can't run the postprocessor. Leaving the existing
             # data would cause database corruption and maybe trigger
@@ -117,22 +120,25 @@ def process(facts, host):
             continue
 
         if value.get(SKIPPED, False):
-            logger.debug('%s: fact %s skipped, no results', host, key)
+            log_message = '%s: fact %s skipped, no results' % (host, key)
+            scan_task.log_message(log_message, log_level=DEBUG)
             result[key] = NO_DATA
             continue
 
         return_code = value.get(RC, 0)
         if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-            logger.error('%s: remote command for %s exited with %s: %s',
-                         host, key, return_code, value['stdout'])
+            log_message = '%s: remote command for %s exited with %s: %s' % (
+                host, key, return_code, value['stdout'])
+            scan_task.log_message(log_message, log_level=ERROR)
             result[key] = NO_DATA
             continue
 
         try:
             processor_out = processor.process(value)
         except Exception:  # pylint: disable=broad-except
-            logger.error('%s: processor for %s got value %s, returned %s',
-                         host, key, value, traceback.format_exc())
+            log_message = '%s: processor for %s got value %s, returned %s' % (
+                host, key, value, traceback.format_exc())
+            scan_task.log_message(log_message, log_level=ERROR)
             result[key] = NO_DATA
             continue
 
