@@ -42,6 +42,11 @@ VOLUME /sshkeys
 RUN mkdir -p /var/data
 VOLUME /var/data
 
+# Create /etc/ansible/roles/
+RUN mkdir -p /etc/ansible/roles/
+COPY roles/ /etc/ansible/roles/
+VOLUME /etc/ansible/roles/
+
 # Copy server code
 COPY . /app/
 WORKDIR /app
@@ -55,6 +60,8 @@ ENV DJANGO_LOG_LEVEL=INFO
 ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
 ENV DJANGO_LOG_FILE=/var/log/app.log
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Initialize database & Collect static files
 RUN . ~/venv/bin/activate;make server-init server-static
