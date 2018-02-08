@@ -125,7 +125,9 @@ class InspectResultCallback(CallbackBase):
             if key == HOST_DONE:
                 self._finalize_host(host)
             else:
-                host_facts[key] = value
+                processed_value = process.process(
+                    self.scan_task, host_facts, key, value, host)
+                host_facts[key] = processed_value
 
         if host in self._ansible_facts:
             self._ansible_facts[host].update(host_facts)
@@ -151,8 +153,7 @@ class InspectResultCallback(CallbackBase):
     # as complete unless we actually save its results.
     @transaction.atomic
     def _finalize_host(self, host):
-        facts = self._ansible_facts.get(host, {})
-        results = process.process(self.scan_task, facts, host)
+        results = self._ansible_facts.get(host, {})
 
         logger.debug('host scan complete for %s with facts %s',
                      host, results)

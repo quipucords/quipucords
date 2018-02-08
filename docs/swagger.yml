@@ -717,6 +717,10 @@ definitions:
         become_password:
           type: "string"
           description: "The privilege escalation password to be used when running a network scan."
+        sources:
+          type: "array"
+          items:
+            $ref: "#/definitions/SourceMin"
   CredentialMin:
     type: "object"
     required:
