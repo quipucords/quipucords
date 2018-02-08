@@ -17,7 +17,7 @@ import {
   sourcesTypes,
   toastNotificationTypes,
   confirmationModalTypes,
-  viewToolbarTypes
+  viewTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
@@ -405,7 +405,7 @@ class Sources extends React.Component {
         <React.Fragment>
           <div className="quipucords-view-container">
             <ViewToolbar
-              viewType={viewToolbarTypes.SOURCES_VIEW}
+              viewType={viewTypes.SOURCES_VIEW}
               totalCount={sources.length}
               filteredCount={filteredItems.length}
               filterFields={SourceFilterFields}
@@ -475,7 +475,7 @@ const mapStateToProps = function(state) {
     {},
     state.sources.view,
     state.sources.persist,
-    state.sourcesToolbar
+    state.toolbars[viewTypes.SOURCES_VIEW]
   );
 };
 

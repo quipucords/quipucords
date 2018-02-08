@@ -13,10 +13,7 @@ import {
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
-import {
-  toastNotificationTypes,
-  viewToolbarTypes
-} from '../../redux/constants';
+import { toastNotificationTypes, viewTypes } from '../../redux/constants';
 import { getScans } from '../../redux/actions/scansActions';
 
 import ViewToolbar from '../viewToolbar/viewToolbar';
@@ -97,7 +94,7 @@ class Scans extends React.Component {
   matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return this.matchString(item.id, filter.value); // Using ID for now until we get a name
+        return this.matchString('' + item.id, filter.value); // Using ID for now until we get a name
       case 'source':
         return (
           item.sources &&
@@ -328,7 +325,7 @@ class Scans extends React.Component {
       return (
         <div className="quipucords-view-container">
           <ViewToolbar
-            viewType={viewToolbarTypes.SCANS_VIEW}
+            viewType={viewTypes.SCANS_VIEW}
             totalCount={scans.length}
             filteredCount={filteredItems.length}
             filterFields={ScanFilterFields}
@@ -380,7 +377,7 @@ const mapStateToProps = function(state) {
     {},
     state.scans.view,
     state.scans.persist,
-    state.scansToolbar
+    state.toolbars[viewTypes.SCANS_VIEW]
   );
 };
 

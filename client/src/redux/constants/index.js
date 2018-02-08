@@ -6,6 +6,7 @@ import * as reportsTypes from './reportsConstants';
 import * as scansTypes from './scansConstants';
 import * as sourcesTypes from './sourcesConstants';
 import * as toastNotificationTypes from './toasNotificationConstants';
+import * as viewTypes from './viewConstants';
 import * as viewToolbarTypes from './viewToolbarConstants';
 import * as confirmationModalTypes from './confirmationModalConstants';
 
@@ -18,6 +19,7 @@ const reduxTypes = {
   scans: scansTypes,
   sources: sourcesTypes,
   toastNotifications: toastNotificationTypes,
+  view: viewTypes,
   viewToolbar: viewToolbarTypes,
   confirmationModal: confirmationModalTypes
 };
@@ -32,6 +34,7 @@ export {
   scansTypes,
   sourcesTypes,
   toastNotificationTypes,
+  viewTypes,
   viewToolbarTypes,
   confirmationModalTypes
 };
