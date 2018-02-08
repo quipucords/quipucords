@@ -169,7 +169,7 @@ class ScanTask(models.Model):
 
         if stats_changed:
             self.save()
-            self._log_stats(description)
+        self._log_stats(description)
 
     @transaction.atomic
     def increment_stats(self, name,
