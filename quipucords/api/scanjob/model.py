@@ -336,7 +336,7 @@ class ScanJob(models.Model):
 
         self.status = target_status
         self.status_message = message
-        logger.error(self.status_message)
+        self.log_message(self.status_message, log_level=logging.ERROR)
         self.save()
         self._log_stats('FAILURE STATS.')
         self.log_current_status(show_status_message=True,
@@ -351,12 +351,14 @@ class ScanJob(models.Model):
         :returns bool indicating if it was successful:
         """
         if target_status == self.status:
-            logger.debug('ScanJob status is already %s', target_status)
+            self.log_message('ScanJob status is already %s' %
+                             target_status, log_level=logging.DEBUG)
             return False
 
         if self.status not in valid_current_status:
-            logger.error('Cannot change job state to %s when it is %s',
-                         target_status, self.status)
+            self.log_message('Cannot change job state to %s when it is %s' %
+                             (target_status, self.status),
+                             log_level=logging.ERROR)
             return True
         return False
 

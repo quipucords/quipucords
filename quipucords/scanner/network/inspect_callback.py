@@ -123,16 +123,17 @@ class InspectResultCallback(CallbackBase):
             self.scan_task.log_message(log_message)
         for key, value in results_to_store:
             if key == HOST_DONE:
-                self._finalize_host(host)
+                self._finalize_host(host, SystemInspectionResult.SUCCESS)
             else:
                 processed_value = process.process(
                     self.scan_task, host_facts, key, value, host)
                 host_facts[key] = processed_value
 
-        if host in self._ansible_facts:
-            self._ansible_facts[host].update(host_facts)
-        else:
-            self._ansible_facts[host] = host_facts
+        if bool(host_facts):
+            if host in self._ansible_facts:
+                self._ansible_facts[host].update(host_facts)
+            else:
+                self._ansible_facts[host] = host_facts
 
     def _get_inspect_result(self):
         # Have to save inspect_result (if creating it) because
@@ -152,19 +153,34 @@ class InspectResultCallback(CallbackBase):
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
     @transaction.atomic
-    def _finalize_host(self, host):
-        results = self._ansible_facts.get(host, {})
+    def finalize_failed_hosts(self):
+        """Finalize failed host."""
+        host_list = list(self._ansible_facts.keys())
+        for host in host_list:
+            self._finalize_host(host, SystemInspectionResult.FAILED)
 
-        logger.debug('host scan complete for %s with facts %s',
-                     host, results)
+    # Called after all fact collection is complete for host. Writing
+    # results needs to be atomic so that the host won't be marked
+    # as complete unless we actually save its results.
+    @transaction.atomic
+    def _finalize_host(self, host, host_status):
+        results = self._ansible_facts.pop(host, {})
+        self.scan_task.log_message('host scan complete for %s.  '
+                                   'Status: %s. Facts %s' %
+                                   (host, host_status, results),
+                                   log_level=logging.DEBUG)
 
         # Update scan counts
         if self.scan_task is not None:
-            self.scan_task.increment_stats(host, increment_sys_scanned=True)
+            if host_status == SystemInspectionResult.SUCCESS:
+                self.scan_task.increment_stats(
+                    host, increment_sys_scanned=True)
+            else:
+                self.scan_task.increment_stats(host, increment_sys_failed=True)
 
         inspect_result = self._get_inspect_result()
         sys_result = SystemInspectionResult(
-            name=host, status=SystemInspectionResult.SUCCESS)
+            name=host, status=host_status)
         sys_result.save()
 
         inspect_result.systems.add(sys_result)

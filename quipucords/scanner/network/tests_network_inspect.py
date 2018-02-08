@@ -29,7 +29,7 @@ from api.models import (Credential,
                         SystemConnectionResult,
                         InspectionResults)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.network.inspect import (construct_scan_inventory)
+from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback, \
     normalize_result, ANSIBLE_FACTS
@@ -126,10 +126,10 @@ class TestNormalizeResult(unittest.TestCase):
             [])
 
 
-class HostScannerTest(TestCase):
-    """Tests against the HostScanner class and functions."""
+class NetworkInspectScannerTest(TestCase):
+    """Tests network inspect scan task class."""
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, protected-access
     def setUp(self):
         """Create test case setup."""
         self.cred = Credential(
@@ -211,9 +211,9 @@ class HostScannerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         connection_port = source['port']
-        inventory_dict = construct_scan_inventory(self.host_list,
-                                                  connection_port,
-                                                  50)
+        inventory_dict = _construct_scan_inventory(self.host_list,
+                                                   connection_port,
+                                                   50)
         expected = {
             'all': {
                 'children': {
@@ -240,7 +240,7 @@ class HostScannerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        inventory_dict = construct_scan_inventory(
+        inventory_dict = _construct_scan_inventory(
             [
                 ('1.2.3.1', cred),
                 ('1.2.3.2', cred),
@@ -302,10 +302,10 @@ class HostScannerTest(TestCase):
         # Init for unit test as run is not called
         scanner.connect_scan_task = self.connect_scan_task
         with self.assertRaises(AnsibleError):
-            scanner.inspect_scan(self.host_list)
+            scanner._inspect_scan(self.host_list)
             mock_run.assert_called()
 
-    @patch('scanner.network.inspect.InspectTaskRunner.inspect_scan',
+    @patch('scanner.network.inspect.InspectTaskRunner._inspect_scan',
            side_effect=mock_scan_error)
     def test_inspect_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure."""
@@ -347,10 +347,10 @@ class HostScannerTest(TestCase):
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
-        with self.assertRaises(AnsibleError):
-            scanner.inspect_scan(
-                self.host_list,
-                base_ssh_executable=path)
+        _, result = scanner._inspect_scan(
+            self.host_list,
+            base_ssh_executable=path)
+        self.assertEqual(result, ScanTask.FAILED)
 
     def test_ssh_hang(self):
         """Simulate an ssh hang."""
@@ -359,7 +359,7 @@ class HostScannerTest(TestCase):
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))
-        scanner.inspect_scan(
+        scanner._inspect_scan(
             self.host_list,
             roles=['redhat_release'],
             base_ssh_executable=path,
