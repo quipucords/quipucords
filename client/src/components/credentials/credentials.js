@@ -21,7 +21,7 @@ import {
   confirmationModalTypes,
   credentialsTypes,
   toastNotificationTypes,
-  viewToolbarTypes
+  viewTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
@@ -376,7 +376,7 @@ class Credentials extends React.Component {
         <React.Fragment>
           <div className="quipucords-view-container">
             <ViewToolbar
-              viewType={viewToolbarTypes.CREDENTIALS_VIEW}
+              viewType={viewTypes.CREDENTIALS_VIEW}
               totalCount={credentials.length}
               filteredCount={filteredItems.length}
               filterFields={CredentialFilterFields}
@@ -436,7 +436,7 @@ const mapStateToProps = function(state) {
     {},
     state.credentials.view,
     state.credentials.persist,
-    state.credentialsToolbar
+    state.toolbars[viewTypes.CREDENTIALS_VIEW]
   );
 };
 
