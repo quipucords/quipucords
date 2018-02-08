@@ -197,7 +197,9 @@ For the next three configuration options we will take a simple setup strategy fo
 3. Create directories to house the SSH keys (``~/quipucords/sshkeys``), database (``~/quipucords/data``), and log output (``~/quipucords/log``)::
 
   # mkdir sshkeys
+
   # mkdir data
+
   # mkdir log
 
 Following these steps we can now launch the Quipucords server with the following docker command, if your system does not have **SELinux** enabled::
