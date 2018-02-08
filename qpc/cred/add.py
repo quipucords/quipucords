@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ from requests import codes
 from qpc.request import POST
 from qpc.clicommand import CliCommand
 import qpc.cred as credential
-from qpc.cred.utils import validate_sshkeyfile, build_credential_payload
+from qpc.cred.utils import build_credential_payload
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -73,14 +73,6 @@ class CredAddCommand(CliCommand):
         self.parser.add_argument('--become-password', dest='become_password',
                                  action='store_true',
                                  help=_(messages.CRED_BECOME_PASSWORD_HELP))
-
-    def _validate_args(self):
-        CliCommand._validate_args(self)
-
-        if 'filename' in self.args and self.args.filename:
-            # check for file existence on system
-            self.args.filename = validate_sshkeyfile(self.args.filename,
-                                                     self.parser)
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.

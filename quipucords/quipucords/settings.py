@@ -56,7 +56,8 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOST_LIST = os.environ.get('DJANGO_ALLOWED_HOST_LIST', '*').split(',')
+ALLOWED_HOSTS = ALLOWED_HOST_LIST
 
 # Application definition
 
@@ -73,8 +74,11 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_generators',
     'api',
-    'coverage'
 ]
+
+if not PRODUCTION:
+    INSTALLED_APPS.append('coverage')
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -190,7 +194,8 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGGING_FORMATTER = os.getenv('DJANGO_LOG_FORMATTER', 'simple')
-LOGGING_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+DJANGO_LOGGING_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+QUIPUCORDS_LOGGING_LEVEL = os.getenv('QUIPUCORDS_LOG_LEVEL', 'INFO')
 LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
 VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
     '%(process)d %(thread)d %(message)s'
@@ -214,7 +219,7 @@ LOGGING = {
             'formatter': LOGGING_FORMATTER
         },
         'file': {
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
             'class': 'logging.FileHandler',
             'filename': LOGGING_FILE,
             'formatter': LOGGING_FORMATTER
@@ -223,59 +228,59 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': DJANGO_LOGGING_LEVEL,
         },
         'api.fact': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.scantasks': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.scanjob': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'fingerprinter': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.signals.es_receiver': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.signals.scanjob_signal': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.callback': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.manager': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.job': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.task': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.network': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.vcenter': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.satellite': {
             'handlers': LOGGING_HANDLERS,
-            'level': LOGGING_LEVEL,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
     },
 }
