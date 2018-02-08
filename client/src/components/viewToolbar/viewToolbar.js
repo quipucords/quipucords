@@ -99,11 +99,7 @@ class ViewToolbar extends React.Component {
   onValueKeyPress(keyEvent) {
     const { filterType, filterValue } = this.props;
 
-    if (
-      keyEvent.key === 'Enter' &&
-      filterValue &&
-      filterValue.length
-    ) {
+    if (keyEvent.key === 'Enter' && filterValue && filterValue.length) {
       this.filterAdded(filterType, filterValue);
       keyEvent.stopPropagation();
       keyEvent.preventDefault();
@@ -287,7 +283,7 @@ ViewToolbar.propTypes = {
   itemsType: PropTypes.string,
   itemsTypePlural: PropTypes.string,
   filterType: PropTypes.object,
-  filterValue: PropTypes.string,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool

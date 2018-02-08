@@ -90,19 +90,29 @@ class Sources extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return item.name.match(re) !== null;
+        return this.matchString(item.name, filter.value);
       case 'sourceType':
         return item.source_type === filter.value.id;
       case 'hosts':
         return (
           item.hosts &&
           item.hosts.find(host => {
-            return host.match(re);
+            return this.matchString(host, filter.value);
           })
         );
       case 'status':
@@ -114,7 +124,7 @@ class Sources extends React.Component {
         return (
           item.credentials &&
           item.credentials.find(credential => {
-            return credential.name.match(re);
+            return this.matchString(credential.name, filter.value);
           })
         );
       default:
@@ -443,7 +453,7 @@ Sources.propTypes = {
   loading: PropTypes.bool,
   sources: PropTypes.array,
   filterType: PropTypes.object,
-  filterValue: PropTypes.string,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool

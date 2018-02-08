@@ -82,17 +82,27 @@ class Scans extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return (item.id + '').match(re) !== null; // Using ID for now until we get a name
+        return this.matchString(item.id, filter.value); // Using ID for now until we get a name
       case 'source':
         return (
           item.sources &&
           item.sources.find(source => {
-            return source.name && source.name.match(re);
+            return this.matchString(source.name, filter.value);
           })
         );
       case 'status':
@@ -354,7 +364,7 @@ Scans.propTypes = {
   loading: PropTypes.bool,
   scans: PropTypes.array,
   filterType: PropTypes.object,
-  filterValue: PropTypes.string,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool

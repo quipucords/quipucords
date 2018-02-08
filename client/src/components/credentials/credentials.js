@@ -92,12 +92,22 @@ class Credentials extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return item.name.match(re) !== null;
+        return this.matchString(item.name, filter.value);
       case 'credentialType':
         return item.cred_type === filter.value.id;
       case 'authenticationType':
@@ -410,7 +420,7 @@ Credentials.propTypes = {
   getError: PropTypes.bool,
   getErrorMessage: PropTypes.string,
   filterType: PropTypes.object,
-  filterValue: PropTypes.string,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
