@@ -449,13 +449,25 @@ paths:
           enum:
             - connect
             - inspect
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
       responses:
         200:
           description: "Scan jobs retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanJobOut"
+            $ref: "#/definitions/ScanJobPagination"
   /scans/{scan_job_id}:
     get:
       tags:
@@ -1116,6 +1128,18 @@ definitions:
             type: "integer"
             format: "int64"
             description: "The identifier of the sent fact collection."
+  ScanJobPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanJobOut"
+            description: "The paginated scan jobs"
   SysConnResultOut:
     type: "object"
     required:
