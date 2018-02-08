@@ -14,6 +14,7 @@ import {
 
 import { getSources } from '../../redux/actions/sourcesActions';
 import {
+  sourcesTypes,
   toastNotificationTypes,
   confirmationModalTypes,
   viewToolbarTypes
@@ -60,7 +61,7 @@ class Sources extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.sources !== this.props.sources) {
+    if (nextProps.sources && nextProps.sources !== this.props.sources) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.sources.forEach(source => {
         source.selected = false;
@@ -256,6 +257,11 @@ class Sources extends React.Component {
     });
 
     this.setState({ selectedItems: selectedItems });
+
+    Store.dispatch({
+      type: sourcesTypes.SOURCES_SELECTED,
+      selectedSources: selectedItems
+    });
   }
 
   editSource(item) {
@@ -352,8 +358,8 @@ class Sources extends React.Component {
 
   render() {
     const {
-      loading,
-      loadError,
+      pending,
+      error,
       errorMessage,
       sources,
       filterType,
@@ -371,7 +377,7 @@ class Sources extends React.Component {
       addSourceWizardShown
     } = this.state;
 
-    if (loading) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -382,7 +388,7 @@ class Sources extends React.Component {
       );
     }
 
-    if (loadError) {
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
@@ -448,10 +454,11 @@ class Sources extends React.Component {
 
 Sources.propTypes = {
   getSources: PropTypes.func,
-  loadError: PropTypes.bool,
+  error: PropTypes.bool,
   errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  pending: PropTypes.bool,
   sources: PropTypes.array,
+
   filterType: PropTypes.object,
   filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
@@ -459,26 +466,17 @@ Sources.propTypes = {
   sortAscending: PropTypes.bool
 };
 
-Sources.defaultProps = {
-  loading: true
-};
-
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getSources: () => dispatch(getSources())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.sources.loading,
-    sources: state.sources.data,
-    loadError: state.sources.error,
-    errorMessage: state.sources.errorMessage,
-    filterType: state.sourcesToolbar.filterType,
-    filterValue: state.sourcesToolbar.filterValue,
-    activeFilters: state.sourcesToolbar.activeFilters,
-    sortType: state.sourcesToolbar.sortType,
-    sortAscending: state.sourcesToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign(
+    {},
+    state.sources.view,
+    state.sources.persist,
+    state.sourcesToolbar
+  );
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sources);

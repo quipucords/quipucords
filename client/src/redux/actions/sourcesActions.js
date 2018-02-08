@@ -1,36 +1,39 @@
 import { sourcesTypes } from '../constants';
 import sourcesService from '../../services/sourcesService';
 
-const getSourcesError = (bool, message) => ({
-  type: sourcesTypes.GET_SOURCES_ERROR,
-  error: bool,
-  message: message
-});
-
-const getSourcesLoading = bool => ({
-  type: sourcesTypes.GET_SOURCES_LOADING,
-  loading: bool
-});
-
-const getSourcesSuccess = data => ({
-  type: sourcesTypes.GET_SOURCES_SUCCESS,
-  data
-});
-
-const getSources = () => {
-  return function(dispatch) {
-    dispatch(getSourcesLoading(true));
-    return sourcesService
-      .getSources()
-      .then(success => {
-        dispatch(getSourcesSuccess(success));
-        dispatch(getSourcesLoading(false));
-      })
-      .catch(error => {
-        dispatch(getSourcesError(true, error.message));
-        dispatch(getSourcesLoading(false));
-      });
-  };
+const addSource = data => dispatch => {
+  return dispatch({
+    type: sourcesTypes.ADD_SOURCE,
+    payload: sourcesService.addSource(data)
+  });
 };
 
-export { getSourcesError, getSourcesLoading, getSourcesSuccess, getSources };
+const deleteSource = id => dispatch => {
+  return dispatch({
+    type: sourcesTypes.DELETE_SOURCE,
+    payload: sourcesService.deleteSource(id)
+  });
+};
+
+const getSource = id => dispatch => {
+  return dispatch({
+    type: sourcesTypes.GET_SOURCE,
+    payload: sourcesService.getSource(id)
+  });
+};
+
+const getSources = (query = {}) => dispatch => {
+  return dispatch({
+    type: sourcesTypes.GET_SOURCES,
+    payload: sourcesService.getSources('', query)
+  });
+};
+
+const updateSource = (id, data) => dispatch => {
+  return dispatch({
+    type: sourcesTypes.UPDATE_SOURCE,
+    payload: sourcesService.updateSource(id, data)
+  });
+};
+
+export { addSource, deleteSource, getSource, getSources, updateSource };

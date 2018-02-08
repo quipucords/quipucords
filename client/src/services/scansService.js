@@ -31,6 +31,10 @@ class ScansService {
     });
   }
 
+  static getScan(id) {
+    return this.getScans(id);
+  }
+
   static getScans(id = '', query = {}) {
     let queryStr = jquery.param(query);
 

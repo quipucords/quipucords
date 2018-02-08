@@ -1,27 +1,66 @@
+import helpers from '../../common/helpers';
 import { reportsTypes } from '../constants';
 
 const initialState = {
-  error: false,
-  errorMessage: '',
-  loading: true,
-  data: []
+  persist: {},
+
+  search: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    reports: []
+  }
 };
 
-export default function reportsReducer(state = initialState, action) {
+const reportsReducer = function(state = initialState, action) {
   switch (action.type) {
-    case reportsTypes.GET_REPORTS_ERROR:
-      return Object.assign({}, state, {
-        error: action.error,
-        errorMessage: action.message
-      });
+    // Error/Rejected
+    case reportsTypes.GET_REPORTS_REJECTED:
+      return helpers.setStateProp(
+        'search',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case reportsTypes.GET_REPORTS_LOADING:
-      return Object.assign({}, state, { loading: action.loading });
+    // Loading/Pending
+    case reportsTypes.GET_REPORTS_PENDING:
+      return helpers.setStateProp(
+        'search',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case reportsTypes.GET_REPORTS_SUCCESS:
-      return Object.assign({}, state, { data: action.data });
+    // Success/Fulfilled
+    case reportsTypes.GET_REPORTS_FULFILLED:
+      return helpers.setStateProp(
+        'search',
+        {
+          reports: action.payload,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     default:
       return state;
   }
-}
+};
+
+export { initialState, reportsReducer };
+
+export default reportsReducer;
