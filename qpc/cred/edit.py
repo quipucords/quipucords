@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -17,7 +17,7 @@ from requests import codes
 from qpc.request import PATCH, GET, request
 from qpc.clicommand import CliCommand
 import qpc.cred as credential
-from qpc.cred.utils import validate_sshkeyfile, build_credential_payload
+from qpc.cred.utils import build_credential_payload
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -78,11 +78,6 @@ class CredEditCommand(CliCommand):
             print(_(messages.CRED_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
-
-        if 'filename' in self.args and self.args.filename:
-            # check for file existence on system
-            self.args.filename = validate_sshkeyfile(self.args.filename,
-                                                     self.parser)
 
         # check for existence of credential
         response = request(parser=self.parser, method=GET,

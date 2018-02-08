@@ -13,27 +13,33 @@ qpc, the command line tool installed by RPM, is available for `download <https:/
 You can find the appropriate architecture and version on the `EPEL wiki <https://fedoraproject.org/wiki/EPEL>`_.
 
 Red Hat Enterprise Linux 7::
- rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+ # rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 Red Hat Enterprise Linux 6::
- rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+ # rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
 2. Next, add the COPR repo to your server.
 You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_.
 
 Red Hat Enterprise Linux 7::
- wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
+
+ # wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
 
 Red Hat Enterprise Linux 6::
- wget -O /etc/yum.repos.d/chambridge-qpc-epel-6.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-6/chambridge-qpc-epel-6.repo
+
+ # wget -O /etc/yum.repos.d/chambridge-qpc-epel-6.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-6/chambridge-qpc-epel-6.repo
 
 3. Then, install the qpc beta package (Note the package version below is a placeholder until the beta build is ready).
 
 Red Hat Enterprise Linux 7::
-  yum -y install qpc-0.0.1-1.git.227.d622e53.el7.centos
+
+  # yum -y install qpc-0.0.1-1.git.227.d622e53.el7.centos
 
 Red Hat Enterprise Linux 6::
-  yum -y install qpc-0.0.1-1.git.227.d622e53.el6
+
+  # yum -y install qpc-0.0.1-1.git.227.d622e53.el6
 
 
 Preparing for Server Setup
@@ -45,7 +51,8 @@ Installing Docker on Red Hat Enterprise Linux 6.6+
 To run Docker on Red Hat-6.6 or later, you need kernel 2.6.32-431 or higher.
 
 To check your current kernel version, open a terminal and use uname -r to display your kernel version::
-  $ uname -r
+
+  # uname -r
   3.10.0-229.el7.x86_64
 
 Finally, is it recommended that you fully update your system. Please keep in mind that your system should be fully patched to fix any potential kernel bugs. Any reported kernel bugs may have already been fixed on the latest kernel packages
@@ -57,19 +64,19 @@ If your system meets the minimum required kernel version you can proceed with th
 
 2. Download the Docker RPM to the current directory::
 
-  $ curl -O -sSL https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
+  # curl -O -sSL https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
 
 3. Use yum to install the package::
 
-  $ sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm
+  # sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm
 
 4. Start the Docker daemon::
 
-  $ sudo service docker start
+  # sudo service docker start
 
 5. Verify that docker is installed correctly by running the hello-world image.::
 
-  $ sudo docker run hello-world
+  # sudo docker run hello-world
   Unable to find image 'hello-world:latest' locally
   latest: Pulling from hello-world
   a8219747be10: Pull complete
@@ -100,7 +107,7 @@ If your system meets the minimum required kernel version you can proceed with th
 
 6. To ensure Docker starts when you boot your system, do the following::
 
-  $ sudo chkconfig docker on
+  # sudo chkconfig docker on
 
 
 Installing Docker on Red Hat Enterprise Linux 7
@@ -117,15 +124,15 @@ You can install Docker in different ways, depending on your needs:
 
 2. Install required packages::
 
-  $ sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+  # sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 
 3. Add repository::
 
-  $ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  # sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 4. Install docker from repository::
 
-  $ sudo yum install docker-ce
+  # sudo yum install docker-ce
 
 **Install from a package**
 
@@ -135,7 +142,7 @@ You can install Docker in different ways, depending on your needs:
 
 3. Install Docker, changing the path below to the path where you downloaded the Docker package::
 
-  $ sudo yum install /path/to/package.rpm
+  # sudo yum install /path/to/package.rpm
 
 **Start Docker**
 
@@ -143,11 +150,11 @@ Now that Docker has been installed on the system perform the following steps to 
 
 1. Start Docker::
 
-  $ sudo systemctl start docker
+  # sudo systemctl start docker
 
 2. Verify that docker is installed correctly by running the hello-world image::
 
-  $ sudo docker run hello-world
+  # sudo docker run hello-world
 
 
 Obtaining the Server Image
@@ -174,29 +181,32 @@ There are several configurable options that must be considered:
 
 The server exposes port 443, which is the standard HTTPS port. You may choose to utilize that port or re-map the port on your server.
 
-If you selected to expose port 443 then you would use the following option when running the image ``-p443:443``. If you wish to re-map the port on your system Docker's mapping is -p<host_port>:<container_port>. If you choose for example to re-map the port to 8443 the option to supply would be ``-p8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``docker ps`` command.
+If you selected to expose port 443 then you would use the following option when running the image ``-p443:443``. If you wish to re-map the port on your system Docker's mapping is -p<host_port>:<container_port>. If you choose for example to re-map the port to 8443 the option to supply would be ``-p8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
 
 For the next three configuration options we will take a simple setup strategy for the Quipucords server and create a "home directory" for the server.
 
-1. Create the home directory ``/opt/quipucords``::
+1. Create the home directory ``~/quipucords``::
 
-  mkdir -p /opt/quipucords
+  # mkdir -p ~/quipucords
 
 2. Change to that directory::
 
-  cd /opt/quipucords
+  # cd ~/quipucords
 
-3. Create directories to house the SSH keys (``/opt/quipucords/sshkeys``), database (``/opt/quipucords/data``), and log output (``/opt/quipucords/log``)::
+3. Create directories to house the SSH keys (``~/quipucords/sshkeys``), database (``~/quipucords/data``), and log output (``~/quipucords/log``)::
 
-  mkdir sshkeys
-  mkdir data
-  mkdir log
+  # mkdir sshkeys
+  # mkdir data
+  # mkdir log
 
+Following these steps we can now launch the Quipucords server with the following docker command, if your system does not have **SELinux** enabled::
 
-Following these steps we can now launch the Quipucords server with the following docker command::
+  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:latest
 
-  docker run --name quipucords -d -p443:443 -v /opt/quipucords/sshkeys:/sshkeys -v /opt/quipucords/data:/var/data -v /opt/quipucords/log:/var/log -i quipucords:latest
+If your system does have **SELinux** enabled you will need to append ":z" to each volume mapping as follows::
+
+  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:latest
 
 The above command starts the server running on port ``443`` mapping the server's directories to the home directory we just created. You can view the status of the running server with ``docker ps``.
 
@@ -205,9 +215,13 @@ Verify the server is responding correctly by launching a browser to **https://<i
 
 Configuring the Command Line
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-With the server up and running you can now configure **qpc** to work with the server. You can do this with the ``qpc server config`` command. The ``qpc server config`` command takes a ``--host <host>`` flag and an optional ``--port <port>`` flag; defaults to ``443``. If you are using qpc on the same system where the server is running you can supply ``--host 127.0.0.1`` otherwise supply the correct IP address. If you decided to remap the port to another port you must supply that to the port option (i.e. ``--port 8443``).
+With the server up and running you can now configure **qpc** to work with the server. You can do this with the ``qpc server config`` command. The ``qpc server config`` command takes a ``--host <host>`` flag and an optional ``--port <port>`` flag; defaults to ``443``. If you are using qpc on the same system where the server is running you can supply ``--host 127.0.0.1`` otherwise supply the correct IP address. If you decided to remap the port to another port you must supply that to the port option (i.e. ``--port 8443``). If you used the example command above and were running the qpc on the server system you would enter the following command::
 
-Now the command line has been configured you can log in with the ``qpc server login`` command. Verify your ability to log into the server.
+  # qpc server config --host 127.0.0.1
+
+Now the command line has been configured you can log in by entering the following command to verify your ability to log into the server::
+
+  # qpc server login
 
 
 Getting Started
@@ -234,9 +248,13 @@ Complete the following steps, repeating them as necessary to access all parts of
 
 If you did not use the ``sshkeyfile`` option to provide an SSH key for the username value, enter the password of the user with root-level access at the connection password prompt.
 
-For example, for a Network credential where the name is **roothost1**, the user with root-level access is ``root``, and the SSH key for the user is in the ``~/.ssh/id_rsa`` file, you would enter the following command::
+If you want to use SSH keyfiles with your credential you must copy the keys into the directory you mapped to `/sshkeys`, which was `~/quipucords/sshkeys` in the example above. The server will look at these files locally so you should refer to the keys as if they are in the `/sshkeys` directory from the qpc command.
 
-  # qpc cred add --type network --name roothost1 --username root --sshkeyfile ~/.ssh/id_rsa
+For example, for a Network credential where the name is **roothost1**, the user with root-level access is ``root``, and the SSH key for the user is in the ``~/.ssh/id_rsa`` file and had mapped the server's `/sshkeys` dircetory to `~/quipucords/sshkeys`, you would enter the following commands::
+
+  # cp ~/.ssh/id_rsa ~/quipucords/sshkeys
+
+  # qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa
 
 qpc also supports privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options to create a Network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
 
