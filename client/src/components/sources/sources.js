@@ -27,7 +27,7 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
-import { AddSourceWizard } from './addSourceWizard';
+import AddSourceWizard from '../addSourceWizard/addSourceWizard';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
@@ -44,8 +44,7 @@ class Sources extends React.Component {
       'hideScanDialog',
       'createScan',
       'refresh',
-      'showAddSourceWizard',
-      'quitAddSourceWizard'
+      'showAddSourceWizard'
     ]);
 
     this.state = {
@@ -93,26 +92,8 @@ class Sources extends React.Component {
   }
 
   showAddSourceWizard() {
-    this.setState({ addSourceWizardShown: true });
-  }
-
-  quitAddSourceWizard() {
-    let onConfirm = () => {
-      Store.dispatch({
-        type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-      });
-
-      this.setState({ addSourceWizardShown: false });
-    };
-
     Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Cancel Add Source',
-      heading: 'Are you sure you want to exit this wizard?',
-      body: 'Exiting this wizard will cancel adding the source.',
-      cancelButtonText: 'No',
-      confirmButtonText: 'Yes',
-      onConfirm: onConfirm
+      type: sourcesTypes.EDIT_SOURCE_SHOW
     });
   }
 
@@ -301,10 +282,7 @@ class Sources extends React.Component {
               {...viewOptions}
             />
           </div>
-          <AddSourceWizard
-            show={addSourceWizardShown}
-            onCancel={this.quitAddSourceWizard}
-          />
+          <AddSourceWizard show={addSourceWizardShown} />
           <CreateScanDialog
             show={scanDialogShown}
             sources={multiSourceScan ? selectedItems : [currentScanSource]}
@@ -321,10 +299,7 @@ class Sources extends React.Component {
           onAddSource={this.showAddSourceWizard}
           onImportSources={this.importSources}
         />
-        <AddSourceWizard
-          show={addSourceWizardShown}
-          onCancel={this.quitAddSourceWizard}
-        />
+        <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
     );
   }
