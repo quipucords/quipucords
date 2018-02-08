@@ -1,27 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { connect } from 'react-redux';
 
-import {
-  Button,
-  DropdownButton,
-  Filter,
-  Icon,
-  MenuItem,
-  Sort,
-  Toolbar
-} from 'patternfly-react';
+import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
 
-import {
-  CredentialFilterFields,
-  CredentialSortFields
-} from './crendentialConstants';
 import { viewToolbarTypes } from '../../redux/constants';
 
-class CredentialsToolbar extends React.Component {
+class ViewToolbar extends React.Component {
   constructor() {
     super();
 
@@ -39,18 +26,20 @@ class CredentialsToolbar extends React.Component {
   }
 
   componentDidMount() {
-    const { filterType, sortType } = this.props;
+    const { filterType, sortType, filterFields, sortFields } = this.props;
 
     if (!filterType) {
-      this.selectFilterType(CredentialFilterFields[0]);
+      this.selectFilterType(filterFields[0]);
     }
 
     if (!sortType) {
-      this.updateCurrentSortType(CredentialSortFields[0]);
+      this.updateCurrentSortType(sortFields[0]);
     }
   }
 
   filterAdded(field, value) {
+    const { viewType } = this.props;
+
     let filterText = '';
     if (field.title) {
       filterText = field.title;
@@ -68,26 +57,27 @@ class CredentialsToolbar extends React.Component {
     let filter = { field: field, value: value, label: filterText };
     Store.dispatch({
       type: viewToolbarTypes.ADD_FILTER,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       filter
     });
   }
 
   selectFilterType(filterType) {
+    const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_TYPE,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       filterType
     });
   }
 
   filterValueSelected(newFilterValue) {
-    const { filterType } = this.props;
+    const { filterType, viewType } = this.props;
 
     let filterValue = newFilterValue;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       filterValue
     });
     if (newFilterValue) {
@@ -96,16 +86,18 @@ class CredentialsToolbar extends React.Component {
   }
 
   updateCurrentValue(event) {
+    const { viewType } = this.props;
+
     let filterValue = event.target.value;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       filterValue
     });
   }
 
   onValueKeyPress(keyEvent) {
-    const { filterValue, filterType } = this.props;
+    const { filterType, filterValue } = this.props;
 
     if (keyEvent.key === 'Enter' && filterValue && filterValue.length) {
       this.filterAdded(filterType, filterValue);
@@ -115,32 +107,36 @@ class CredentialsToolbar extends React.Component {
   }
 
   removeFilter(filter) {
+    const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.REMOVE_FILTER,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       filter
     });
   }
 
   clearFilters() {
+    const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.CLEAR_FILTERS,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW
+      viewType: viewType
     });
   }
 
   updateCurrentSortType(sortType) {
+    const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.SET_SORT_TYPE,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW,
+      viewType: viewType,
       sortType
     });
   }
 
   toggleCurrentSortDirection() {
+    const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.TOGGLE_SORT_ASCENDING,
-      viewType: viewToolbarTypes.CREDENTIALS_VIEW
+      viewType: viewType
     });
   }
 
@@ -174,12 +170,12 @@ class CredentialsToolbar extends React.Component {
   }
 
   renderFilter() {
-    const { filterType } = this.props;
+    const { filterType, filterFields } = this.props;
 
     return (
       <Filter>
         <Filter.TypeSelector
-          filterTypes={CredentialFilterFields}
+          filterTypes={filterFields}
           currentFilterType={filterType}
           onFilterTypeSelected={this.selectFilterType}
         />
@@ -189,13 +185,13 @@ class CredentialsToolbar extends React.Component {
   }
 
   renderSort() {
-    const { sortType, sortAscending } = this.props;
+    const { sortType, sortAscending, sortFields } = this.props;
 
     if (sortType) {
       return (
         <Sort>
           <Sort.TypeSelector
-            sortTypes={CredentialSortFields}
+            sortTypes={sortFields}
             currentSortType={sortType}
             onSortTypeSelected={this.updateCurrentSortType}
           />
@@ -211,51 +207,21 @@ class CredentialsToolbar extends React.Component {
     return null;
   }
 
-  renderActions() {
-    const {
-      onAddCredential,
-      deleteAvailable,
-      onDelete,
-      onRefresh
-    } = this.props;
-
-    return (
-      <div className="form-group">
-        <DropdownButton
-          bsStyle="primary"
-          title="Create"
-          pullRight
-          id="createCredentialButton"
-        >
-          <MenuItem eventKey="1" onClick={() => onAddCredential('network')}>
-            Network Credential
-          </MenuItem>
-          <MenuItem eventKey="2" onClick={() => onAddCredential('satellite')}>
-            Satellite Credential
-          </MenuItem>
-          <MenuItem eventKey="2" onClick={() => onAddCredential('vcenter')}>
-            VCenter Credential
-          </MenuItem>
-        </DropdownButton>
-        <Button disabled={deleteAvailable === false} onClick={onDelete}>
-          Delete
-        </Button>
-        <Button onClick={onRefresh} bsStyle="success">
-          <Icon type="fa" name="refresh" />
-        </Button>
-      </div>
-    );
-  }
-
   renderCounts() {
-    const { activeFilters, totalCount, filteredCount } = this.props;
+    const {
+      activeFilters,
+      totalCount,
+      filteredCount,
+      itemsType,
+      itemsTypePlural
+    } = this.props;
 
     return (
       <h5>
         {activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
-        {totalCount + (totalCount > 1 ? ' Credentials' : ' Credential')}
+        {totalCount + ' ' + (totalCount === 1 ? itemsType : itemsTypePlural)}
       </h5>
     );
   }
@@ -291,11 +257,13 @@ class CredentialsToolbar extends React.Component {
   }
 
   render() {
+    const { actions } = this.props;
+
     return (
       <Toolbar>
         {this.renderFilter()}
         {this.renderSort()}
-        <Toolbar.RightContent>{this.renderActions()}</Toolbar.RightContent>
+        <Toolbar.RightContent>{actions}</Toolbar.RightContent>
         <Toolbar.Results>
           {this.renderCounts()}
           {this.renderActiveFilters()}
@@ -305,24 +273,20 @@ class CredentialsToolbar extends React.Component {
   }
 }
 
-CredentialsToolbar.propTypes = {
+ViewToolbar.propTypes = {
+  viewType: PropTypes.string,
   totalCount: PropTypes.number,
   filteredCount: PropTypes.number,
+  filterFields: PropTypes.array,
+  sortFields: PropTypes.array,
+  actions: PropTypes.node,
+  itemsType: PropTypes.string,
+  itemsTypePlural: PropTypes.string,
   filterType: PropTypes.object,
-  filterValue: PropTypes.any,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
-  sortAscending: PropTypes.bool,
-  onAddCredential: PropTypes.func,
-  deleteAvailable: PropTypes.bool,
-  onDelete: PropTypes.func,
-  onRefresh: PropTypes.func
+  sortAscending: PropTypes.bool
 };
 
-function mapStateToProps(state, ownProps) {
-  return {
-    ...state.credentialsToolbar
-  };
-}
-
-export default connect(mapStateToProps)(CredentialsToolbar);
+export default ViewToolbar;

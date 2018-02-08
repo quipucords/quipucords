@@ -5,7 +5,9 @@ import Store from '../../redux/store';
 
 import {
   Alert,
+  Button,
   EmptyState,
+  Icon,
   ListView,
   Modal
 } from 'patternfly-react';
@@ -13,15 +15,17 @@ import {
 import { getSources } from '../../redux/actions/sourcesActions';
 import {
   toastNotificationTypes,
-  confirmationModalTypes
+  confirmationModalTypes,
+  viewToolbarTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
-import SourcesToolbar from './sourcesToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
 import { AddSourceWizard } from './addSourceWizard';
+import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
   constructor() {
@@ -86,19 +90,29 @@ class Sources extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return item.name.match(re) !== null;
+        return this.matchString(item.name, filter.value);
       case 'sourceType':
         return item.source_type === filter.value.id;
       case 'hosts':
         return (
           item.hosts &&
           item.hosts.find(host => {
-            return host.match(re);
+            return this.matchString(host, filter.value);
           })
         );
       case 'status':
@@ -110,7 +124,7 @@ class Sources extends React.Component {
         return (
           item.credentials &&
           item.credentials.find(credential => {
-            return credential.name.match(re);
+            return this.matchString(credential.name, filter.value);
           })
         );
       default:
@@ -298,6 +312,27 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
+  renderActions() {
+    const { selectedItems } = this.state;
+
+    return (
+      <div className="form-group">
+        <Button bsStyle="primary" onClick={this.showAddSourceWizard}>
+          Add
+        </Button>
+        <Button
+          disabled={!selectedItems || selectedItems.length === 0}
+          onClick={this.scanSources}
+        >
+          Scan
+        </Button>
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
+  }
+
   renderList(items) {
     return (
       <ListView className="quipicords-list-view">
@@ -316,7 +351,17 @@ class Sources extends React.Component {
   }
 
   render() {
-    const { loading, loadError, errorMessage, sources } = this.props;
+    const {
+      loading,
+      loadError,
+      errorMessage,
+      sources,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
     const {
       filteredItems,
       selectedItems,
@@ -353,13 +398,20 @@ class Sources extends React.Component {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
-            <SourcesToolbar
+            <ViewToolbar
+              viewType={viewToolbarTypes.SOURCES_VIEW}
               totalCount={sources.length}
               filteredCount={filteredItems.length}
-              onAddSource={this.showAddSourceWizard}
-              scanAvailable={selectedItems && selectedItems.length > 0}
-              onScan={this.scanSources}
-              onRefresh={this.refresh}
+              filterFields={SourceFilterFields}
+              sortFields={SourceSortFields}
+              actions={this.renderActions()}
+              itemsType="Source"
+              itemsTypePlural="Sources"
+              filterType={filterType}
+              filterValue={filterValue}
+              activeFilters={activeFilters}
+              sortType={sortType}
+              sortAscending={sortAscending}
             />
             <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
@@ -400,6 +452,8 @@ Sources.propTypes = {
   errorMessage: PropTypes.string,
   loading: PropTypes.bool,
   sources: PropTypes.array,
+  filterType: PropTypes.object,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
@@ -419,6 +473,8 @@ function mapStateToProps(state) {
     sources: state.sources.data,
     loadError: state.sources.error,
     errorMessage: state.sources.errorMessage,
+    filterType: state.sourcesToolbar.filterType,
+    filterValue: state.sourcesToolbar.filterValue,
     activeFilters: state.sourcesToolbar.activeFilters,
     sortType: state.sourcesToolbar.sortType,
     sortAscending: state.sourcesToolbar.sortAscending
