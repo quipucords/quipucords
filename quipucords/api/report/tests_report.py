@@ -178,6 +178,15 @@ class SystemReportTest(TestCase):
         response = self.client.get(url, {'fact_collection_id': 2})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_fact_collection_bad_id(self):
+        """Fail to get a report for missing collection."""
+        url = '/api/v1/reports/'
+
+        # Query API
+        response = self.client.get(url, {'fact_collection_id': 'string'})
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     def test_group_count_400_invalid_field(self):
         """Fail to get report with invalid field for group_count."""
         url = '/api/v1/reports/'

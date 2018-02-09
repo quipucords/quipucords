@@ -316,6 +316,12 @@ class CredentialTest(TestCase):
                                format='json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_hostcred_get_bad_id(self):
+        """Tests the get view set of the Credential API with a bad id."""
+        url = reverse('cred-detail', args=('string',))
+        resp = self.client.get(url, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_hostcred_delete_view(self):
         """Tests the delete view set of the Credential API."""
         cred = Credential(name='cred2', username='user2',

@@ -12,16 +12,20 @@
 
 import os
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
+from rest_framework.serializers import ValidationError
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
 from api.models import Source, Credential
+import api.messages as messages
+from api.common.util import is_int
 
 
 CREDENTIALS_KEY = 'credentials'
@@ -101,7 +105,14 @@ class SourceViewSet(ModelViewSet):
 
         # Modify json for response
         json_source = response.data
-        get_object_or_404(self.queryset, pk=json_source['id'])
+        source_id = json_source.get('id')
+        if not source_id or (source_id and not isinstance(source_id, int)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
+
+        get_object_or_404(self.queryset, pk=source_id)
 
         # Create expanded host cred JSON
         expand_credential(json_source)
@@ -109,6 +120,12 @@ class SourceViewSet(ModelViewSet):
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         """Get a source."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
+
         source = get_object_or_404(self.queryset, pk=pk)
         serializer = SourceSerializer(source)
         json_source = serializer.data

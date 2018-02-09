@@ -18,11 +18,13 @@ from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
+from rest_framework.serializers import ValidationError
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
+from api.common.util import is_int
 from api.models import (ScanTask, ScanJob, Source,
                         ConnectionResults, InspectionResults)
 from api.serializers import (ScanJobSerializer,
@@ -236,6 +238,12 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         """Get a scan job."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
+
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
@@ -272,6 +280,11 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['put'])
     def pause(self, request, pk=None):
         """Pause the running scan."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanTask.RUNNING:
             scan.pause()
@@ -290,6 +303,11 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['put'])
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
         if (scan.status == ScanTask.COMPLETED or
                 scan.status == ScanTask.FAILED or
@@ -307,6 +325,11 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['put'])
     def restart(self, request, pk=None):
         """Restart a paused scan."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
         if scan.status == ScanTask.PAUSED:
             scan.restart()
