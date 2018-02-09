@@ -14,7 +14,6 @@ COPY requirements.txt /app/reqs.txt
 # Remove last 2 lines
 RUN sed -e :a -e '$d;N;2,3ba' -e 'P;D' /app/reqs.txt > /app/requirements.txt
 RUN . ~/venv/bin/activate;pip install -r /app/requirements.txt
-RUN . ~/venv/bin/activate;pip install coverage==3.6
 RUN . ~/venv/bin/activate;pip install gunicorn==19.7.1
 
 # Create /etc/ssl
@@ -42,6 +41,11 @@ VOLUME /sshkeys
 RUN mkdir -p /var/data
 VOLUME /var/data
 
+# Create /etc/ansible/roles/
+RUN mkdir -p /etc/ansible/roles/
+COPY roles/ /etc/ansible/roles/
+VOLUME /etc/ansible/roles/
+
 # Copy server code
 COPY . /app/
 WORKDIR /app
@@ -55,6 +59,9 @@ ENV DJANGO_LOG_LEVEL=INFO
 ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
 ENV DJANGO_LOG_FILE=/var/log/app.log
+ENV QUIPUCORDS_LOGGING_LEVEL=INFO
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Initialize database & Collect static files
 RUN . ~/venv/bin/activate;make server-init server-static

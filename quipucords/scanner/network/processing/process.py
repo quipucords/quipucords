@@ -11,10 +11,8 @@
 
 import abc
 import json
-import logging
+from logging import (ERROR, DEBUG)
 import traceback
-
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # ### Conventions ####
 #
@@ -33,6 +31,22 @@ RC = 'rc'
 RESULTS = 'results'
 RETURN_CODE_ANY = 'RETURN_CODE_ANY'
 SKIPPED = 'skipped'
+STDOUT = 'stdout'
+
+SUDO_ERROR = 'sudo: a password is required'
+
+
+def is_sudo_error_value(value):
+    """Identify values coming from sudo errors.
+
+    The sudo error message can come through even if we use '2>
+    /dev/null' in a task. Presumably it's because Ansible wraps our
+    entire shell command in something when it runs on the remote
+    host. Whatever the reason, we need to handle it in the controller.
+    """
+    return isinstance(value, str) and value == SUDO_ERROR or \
+        isinstance(value, list) and value == [SUDO_ERROR] or \
+        isinstance(value, dict) and value.get(STDOUT, '') == SUDO_ERROR
 
 
 def is_ansible_task_result(value):
@@ -49,77 +63,86 @@ def is_ansible_task_result(value):
              RESULTS in value))
 
 
-def process(facts, host):
+def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     """Do initial processing of the given facts.
 
-    :param facts: a dictionary of key, value pairs, where values are
-      Ansible result dictionaries.
+    :param scan_task: scan_task for context and logging
+    :param previous_host_facts: a dictionary of key, value pairs,
+    where values are Ansible result dictionaries.
+    :param fact_key: fact key to process
+    :param fact_value: unprocessed fact value
     :param host: the host the facts are from. Used for error messages.
 
-    :returns: a dictionary of key, value pairs, where the values are
-      strings. They will either be JSON-encoded data, or the empty
-      string on errors.
+    :returns: processed fact value
     """
-    result = facts.copy()
-
+    # pylint: disable=too-many-return-statements
     # Note: we do NOT support transitive dependencies. If those are
     # needed, this is the place to change.
-    for key, value in facts.items():
-        processor = PROCESSORS.get(key)
-        if not processor:
-            continue
+    if is_sudo_error_value(fact_value):
+        log_message = 'POST PROCESSING SUDO ERROR %s. '\
+            'fact_key %s had sudo error %s' %\
+            (host, fact_key, fact_value)
+        scan_task.log_message(log_message, log_level=DEBUG)
+        return NO_DATA
 
-        # Use StopIteration to let the inner for loop continue the
-        # outer for loop.
-        try:
-            for dep in getattr(processor, DEPS, []):
-                if dep not in facts or \
-                   not facts[dep] or \
-                   isinstance(facts[dep], Exception):
-                    logger.debug('%s: fact %s missing dependency %s',
-                                 host, key, dep)
-                    result[key] = NO_DATA
-                    raise StopIteration()
-        except StopIteration:
-            continue
+    processor = PROCESSORS.get(fact_key)
+    if not processor:
+        return fact_value
 
-        # Don't touch things that are not standard Ansible results,
-        # because we don't know what format they will have.
-        if not is_ansible_task_result(value):
-            logger.error('%s: value %s:%s needs postprocessing but is not an '
-                         'Ansible result', host, key, value)
-            # We don't know what data is supposed to go here, because
-            # we can't run the postprocessor. Leaving the existing
-            # data would cause database corruption and maybe trigger
-            # other bugs later on. So treat this like any other error.
-            result[key] = NO_DATA
-            continue
+    # Use StopIteration to let the inner for loop continue the
+    # outer for loop.
+    try:
+        for dep in getattr(processor, DEPS, []):
+            if dep not in previous_host_facts or \
+                    not previous_host_facts[dep] or \
+                    isinstance(previous_host_facts[dep], Exception):
+                log_message = 'POST PROCESSING MISSING REQ DEP %s. '\
+                    'Fact %s missing dependency %s' %\
+                    (host, fact_key, dep)
+                scan_task.log_message(log_message, log_level=DEBUG)
+                raise StopIteration()
+    except StopIteration:
+        return NO_DATA
 
-        if value.get(SKIPPED, False):
-            logger.debug('%s: fact %s skipped, no results', host, key)
-            result[key] = NO_DATA
-            continue
+    # Don't touch things that are not standard Ansible results,
+    # because we don't know what format they will have.
+    if not is_ansible_task_result(fact_value):
+        log_message = 'FAILED POST PROCESSING %s. '\
+            'fact_value %s:%s needs postprocessing but'\
+            ' is not an Ansible result' % (host, fact_key, fact_value)
+        scan_task.log_message(log_message, log_level=ERROR)
+        # We don't know what data is supposed to go here, because
+        # we can't run the postprocessor. Leaving the existing
+        # data would cause database corruption and maybe trigger
+        # other bugs later on. So treat this like any other error.
+        return NO_DATA
 
-        return_code = value.get(RC, 0)
-        if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-            logger.error('%s: remote command for %s exited with %s: %s',
-                         host, key, return_code, value['stdout'])
-            result[key] = NO_DATA
-            continue
+    if fact_value.get(SKIPPED, False):
+        log_message = 'SKIPPED POST PROCESSSING %s. '\
+            'fact %s skipped, no results' % (
+                host, fact_key)
+        scan_task.log_message(log_message, log_level=DEBUG)
+        return NO_DATA
 
-        try:
-            processor_out = processor.process(value)
-        except Exception:  # pylint: disable=broad-except
-            logger.error('%s: processor for %s got value %s, returned %s',
-                         host, key, value, traceback.format_exc())
-            result[key] = NO_DATA
-            continue
+    return_code = fact_value.get(RC, 0)
+    if return_code and not getattr(processor, RETURN_CODE_ANY, False):
+        log_message = 'FAILED REMOTE COMMAND %s. %s exited with %s: %s' % (
+            host, fact_key, return_code, fact_value['stdout'])
+        scan_task.log_message(log_message, log_level=ERROR)
+        return NO_DATA
 
-        # https://docs.python.org/3/library/json.html suggests that
-        # these separators will give the most compact representation.
-        result[key] = json.dumps(processor_out, separators=(',', ':'))
+    try:
+        processor_out = processor.process(fact_value)
+    except Exception:  # pylint: disable=broad-except
+        log_message = 'FAILED POST PROCESSING %s. '\
+            'Processor for %s got value %s, returned %s' % (
+                host, fact_key, fact_value, traceback.format_exc())
+        scan_task.log_message(log_message, log_level=ERROR)
+        return NO_DATA
 
-    return result
+    # https://docs.python.org/3/library/json.html suggests that
+    # these separators will give the most compact representation.
+    return json.dumps(processor_out, separators=(',', ':'))
 
 
 class ProcessorMeta(abc.ABCMeta):

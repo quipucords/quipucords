@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -15,7 +15,8 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.credential.serializer import CredentialSerializer
 from api.models import (ScanTask, ConnectionResult,
-                        SystemConnectionResult)
+                        SystemConnectionResult,
+                        SystemInspectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
@@ -33,6 +34,7 @@ DEFAULT_TIMEOUT = '120s'
 DEFAULT_ROLES = [
     'check_dependencies',
     'connection',
+    'virt',
     'cpu',
     'date',
     'dmi',
@@ -46,7 +48,6 @@ DEFAULT_ROLES = [
     'redhat_release',
     'subman',
     'uname',
-    'virt',
     'virt_what',
     'host_done',
 ]
@@ -94,9 +95,6 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
-        logger.info('Inspect scan task started for task: %s.',
-                    self.scan_task.id)
-
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task with id %d failed.' %\
@@ -105,24 +103,24 @@ class InspectTaskRunner(ScanTaskRunner):
 
         try:
             # Execute scan
-            connected, failed, completed = self.obtain_discovery_data()
-            num_completed = len(completed)
-            num_remaining = len(connected)
-            num_total = num_remaining + num_completed
-            num_failed = len(failed)
+            connected, failed, completed = self._obtain_discovery_data()
+            processed_hosts = failed + completed
+            num_total = len(connected) + len(processed_hosts)
 
             if num_total == 0:
                 msg = 'Inventory provided no reachable hosts.'
                 raise ScannerException(msg)
 
-            logger.info('Inspect scan task started for %s.',
-                        self.scan_task)
-            log_msg = '%d total connected, %d completed, %d'\
-                ' remaining, and make %d failed hosts'
-            logger.info(log_msg,
-                        num_total, num_completed, num_remaining, num_failed)
+            self.scan_task.update_stats('INITIAL NETWORK INSPECT STATS',
+                                        sys_count=len(connected),
+                                        sys_scanned=len(completed),
+                                        sys_failed=len(failed))
 
-            self.inspect_scan(connected)
+            # remove completed hosts
+            remaining = [
+                unprocessed for unprocessed in connected
+                if unprocessed[0] not in processed_hosts]
+            scan_message, scan_result = self._inspect_scan(remaining)
 
             temp_facts = self.get_facts()
             fact_size = len(temp_facts)
@@ -134,8 +132,6 @@ class InspectTaskRunner(ScanTaskRunner):
             # Clear cache as results changed
             self.result = None
 
-            logger.info('Inspect scan task %s completed.',
-                        self.scan_task.id)
         except AnsibleError as ansible_error:
             error_message = 'Scan task encountered error: %s' % \
                 ansible_error
@@ -152,12 +148,12 @@ class InspectTaskRunner(ScanTaskRunner):
         if self.scan_task.systems_failed > 0:
             return '%d systems could not be scanned.' % \
                 self.scan_task.systems_failed, ScanTask.FAILED
-        return None, ScanTask.COMPLETED
+        return scan_message, scan_result
 
     # pylint: disable=too-many-locals,W0102
-    def inspect_scan(self, connected, roles=DEFAULT_ROLES,
-                     base_ssh_executable=None,
-                     ssh_timeout=None):
+    def _inspect_scan(self, connected, roles=DEFAULT_ROLES,
+                      base_ssh_executable=None,
+                      ssh_timeout=None):
         """Execute the host scan with the initialized source.
 
         :param connected: list of (host, credential) pairs to inspect
@@ -180,12 +176,6 @@ class InspectTaskRunner(ScanTaskRunner):
         extra_vars = self.scan_job.get_extra_vars()
         forks = self.scan_job.options.max_concurrency
 
-        # Save counts
-        self.scan_task.systems_count = len(connected)
-        self.scan_task.systems_scanned = 0
-        self.scan_task.systems_failed = 0
-        self.scan_task.save()
-
         ssh_executable = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../bin/timeout_ssh'))
@@ -195,14 +185,21 @@ class InspectTaskRunner(ScanTaskRunner):
         ssh_args = ['--executable=' + base_ssh_executable,
                     '--timeout=' + ssh_timeout]
 
-        group_names, inventory = construct_scan_inventory(
+        group_names, inventory = _construct_scan_inventory(
             connected, connection_port, forks,
             ssh_executable=ssh_executable,
             ssh_args=ssh_args)
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        for group_name in group_names:
+        log_message = 'START PROCESSING GROUPS of size %d' % forks
+        self.scan_task.log_message(log_message)
+        scan_result = ScanTask.COMPLETED
+        scan_message = 'success'
+        for idx, group_name in enumerate(group_names):
+            log_message = 'START PROCESSING GROUP %d of %d' % (
+                (idx + 1), len(group_names))
+            self.scan_task.log_message(log_message)
             callback =\
                 InspectResultCallback(scan_task=self.scan_task,
                                       inspect_results=self.inspect_results)
@@ -216,19 +213,25 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
-                logger.error(new_error_msg)
-                error_msg += '{}\n'.format(new_error_msg)
+                scan_message = new_error_msg
+                scan_result = ScanTask.FAILED
+                callback.finalize_failed_hosts()
+                if result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and \
+                        result != TaskQueueManager.RUN_FAILED_HOSTS:
+                    error_msg += '{}\n'.format(new_error_msg)
 
         if error_msg != '':
             raise AnsibleError(error_msg)
 
         # Clear this cache since new results are available
         self.facts = None
+        return scan_message, scan_result
 
-    def obtain_discovery_data(self):
+    def _obtain_discovery_data(self):
         """Obtain discover scan data.  Either via new scan or paused scan.
 
-        :returns: List of connected, failed, and completed.
+        :returns: List of connected, inspection failed, and
+        inspection completed.
         """
         connected = []
         failed = []
@@ -240,18 +243,19 @@ class InspectTaskRunner(ScanTaskRunner):
                 host_cred = result.credential
                 serializer = CredentialSerializer(host_cred)
                 connected.append((result.name, serializer.data))
-            elif result.status == SystemConnectionResult.FAILED:
-                failed.append(result.name)
 
         for inspect in self.inspect_results.results.all():
             for result in inspect.systems.all():
-                completed.append(result.name)
+                if result.status == SystemInspectionResult.SUCCESS:
+                    completed.append(result.name)
+                else:
+                    failed.append(result.name)
         return connected, failed, completed
 
 
 # pylint: disable=too-many-locals
-def construct_scan_inventory(hosts, connection_port, concurrency_count,
-                             ssh_executable=None, ssh_args=None):
+def _construct_scan_inventory(hosts, connection_port, concurrency_count,
+                              ssh_executable=None, ssh_args=None):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts/credential tuples
@@ -259,7 +263,8 @@ def construct_scan_inventory(hosts, connection_port, concurrency_count,
     :param concurrency_count: The number of concurrent scans
     :param ssh_executable: the ssh executable to use, or None for 'ssh'
     :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible inventory
+    :returns: A list of group names and a dict of the
+    ansible inventory
     """
     concurreny_groups = list(
         [hosts[i:i + concurrency_count] for i in range(0,

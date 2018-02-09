@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -57,7 +57,9 @@ class ScanJobRunner(Process):
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
+        task_info_message = ''
         for scan_task in incomplete_scan_tasks:
+            task_info_message += str(scan_task.id) + ', '
             runner = self._create_task_runner(scan_task)
             if not runner:
                 error_message = 'Scan task does not  have recognized '\
@@ -69,13 +71,14 @@ class ScanJobRunner(Process):
 
             task_runners.append(runner)
 
-        logger.info('ScanJob %s started', self.scan_job.id)
+        task_info_message = task_info_message[:-2]
+        self.scan_job.log_message(
+            'Queuing the following incomplete tasks: %s' % task_info_message)
 
         for runner in task_runners:
             # Mark runner as running
             runner.scan_task.start()
 
-            logger.info('Running task: %s', runner)
             # run runner
             status_message, task_status = runner.run()
 
@@ -104,7 +107,6 @@ class ScanJobRunner(Process):
         if self.scan_job.status != ScanTask.FAILED:
             self.scan_job.complete()
 
-        logger.info('ScanJob %s ended', self.scan_job.id)
         return self.scan_job.status
 
     def _create_task_runner(self, scan_task):

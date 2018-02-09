@@ -103,7 +103,7 @@ def create_ansible_objects(inventory_file, extra_vars, forks=50):
                                            'become_user', 'check'])
     options = named_options(connection='ssh',
                             module_path=C.DEFAULT_MODULE_PATH,
-                            forks=forks, become=True,
+                            forks=forks, become=False,
                             become_method='sudo', become_user='root',
                             check=False)
 

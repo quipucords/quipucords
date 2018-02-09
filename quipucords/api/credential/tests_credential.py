@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -256,13 +256,17 @@ class CredentialTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         json_resp = resp.json()
-        self.assertEqual(len(json_resp), 2)
+        self.assertTrue(json_resp.get('results') is not None)
+        results = json_resp.get('results')
+        self.assertEqual(len(results), 2)
 
         resp = self.client.get(
             url, {'cred_type': Credential.VCENTER_CRED_TYPE})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         json_resp = resp.json()
-        self.assertEqual(len(json_resp), 1)
+        self.assertTrue(json_resp.get('results') is not None)
+        results = json_resp.get('results')
+        self.assertEqual(len(results), 1)
 
     def test_hostcred_update_view(self):
         """Tests the update view set of the Credential API."""
@@ -310,6 +314,12 @@ class CredentialTest(TestCase):
         resp = self.client.put(url, json.dumps(data),
                                content_type='application/json',
                                format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_hostcred_get_bad_id(self):
+        """Tests the get view set of the Credential API with a bad id."""
+        url = reverse('cred-detail', args=('string',))
+        resp = self.client.get(url, format='json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_hostcred_delete_view(self):

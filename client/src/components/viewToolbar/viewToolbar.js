@@ -1,16 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { connect } from 'react-redux';
 
-import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
+import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
-
-import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import Store from '../../redux/store';
-import { viewToolbarTypes as dispatchTypes } from '../../redux/constants/';
 
-class ScansToolbar extends React.Component {
+import { viewToolbarTypes } from '../../redux/constants';
+
+class ViewToolbar extends React.Component {
   constructor() {
     super();
 
@@ -28,18 +26,20 @@ class ScansToolbar extends React.Component {
   }
 
   componentDidMount() {
-    const { filterType, sortType } = this.props;
+    const { filterType, sortType, filterFields, sortFields } = this.props;
 
     if (!filterType) {
-      this.selectFilterType(ScanFilterFields[0]);
+      this.selectFilterType(filterFields[0]);
     }
 
     if (!sortType) {
-      this.updateCurrentSortType(ScanSortFields[0]);
+      this.updateCurrentSortType(sortFields[0]);
     }
   }
 
   filterAdded(field, value) {
+    const { viewType } = this.props;
+
     let filterText = '';
     if (field.title) {
       filterText = field.title;
@@ -56,24 +56,28 @@ class ScansToolbar extends React.Component {
 
     let filter = { field: field, value: value, label: filterText };
     Store.dispatch({
-      type: dispatchTypes.ADD_FILTER,
+      type: viewToolbarTypes.ADD_FILTER,
+      viewType: viewType,
       filter
     });
   }
 
   selectFilterType(filterType) {
+    const { viewType } = this.props;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_TYPE,
+      type: viewToolbarTypes.SET_FILTER_TYPE,
+      viewType: viewType,
       filterType
     });
   }
 
   filterValueSelected(newFilterValue) {
-    const { filterType } = this.props;
+    const { filterType, viewType } = this.props;
 
     let filterValue = newFilterValue;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewType,
       filterValue
     });
     if (newFilterValue) {
@@ -82,15 +86,18 @@ class ScansToolbar extends React.Component {
   }
 
   updateCurrentValue(event) {
+    const { viewType } = this.props;
+
     let filterValue = event.target.value;
     Store.dispatch({
-      type: dispatchTypes.SET_FILTER_VALUE,
+      type: viewToolbarTypes.SET_FILTER_VALUE,
+      viewType: viewType,
       filterValue
     });
   }
 
   onValueKeyPress(keyEvent) {
-    const { filterValue, filterType } = this.props;
+    const { filterType, filterValue } = this.props;
 
     if (keyEvent.key === 'Enter' && filterValue && filterValue.length) {
       this.filterAdded(filterType, filterValue);
@@ -100,28 +107,36 @@ class ScansToolbar extends React.Component {
   }
 
   removeFilter(filter) {
+    const { viewType } = this.props;
     Store.dispatch({
-      type: dispatchTypes.REMOVE_FILTER,
+      type: viewToolbarTypes.REMOVE_FILTER,
+      viewType: viewType,
       filter
     });
   }
 
   clearFilters() {
+    const { viewType } = this.props;
     Store.dispatch({
-      type: dispatchTypes.CLEAR_FILTERS
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewType
     });
   }
 
   updateCurrentSortType(sortType) {
+    const { viewType } = this.props;
     Store.dispatch({
-      type: dispatchTypes.SET_SORT_TYPE,
+      type: viewToolbarTypes.SET_SORT_TYPE,
+      viewType: viewType,
       sortType
     });
   }
 
   toggleCurrentSortDirection() {
+    const { viewType } = this.props;
     Store.dispatch({
-      type: dispatchTypes.TOGGLE_SORT_ASCENDING
+      type: viewToolbarTypes.TOGGLE_SORT_ASCENDING,
+      viewType: viewType
     });
   }
 
@@ -155,12 +170,12 @@ class ScansToolbar extends React.Component {
   }
 
   renderFilter() {
-    const { filterType } = this.props;
+    const { filterType, filterFields } = this.props;
 
     return (
       <Filter>
         <Filter.TypeSelector
-          filterTypes={ScanFilterFields}
+          filterTypes={filterFields}
           currentFilterType={filterType}
           onFilterTypeSelected={this.selectFilterType}
         />
@@ -170,13 +185,13 @@ class ScansToolbar extends React.Component {
   }
 
   renderSort() {
-    const { sortType, sortAscending } = this.props;
+    const { sortType, sortAscending, sortFields } = this.props;
 
     if (sortType) {
       return (
         <Sort>
           <Sort.TypeSelector
-            sortTypes={ScanSortFields}
+            sortTypes={sortFields}
             currentSortType={sortType}
             onSortTypeSelected={this.updateCurrentSortType}
           />
@@ -192,25 +207,21 @@ class ScansToolbar extends React.Component {
     return null;
   }
 
-  renderActions() {
-    return (
-      <div className="form-group">
-        <Button onClick={this.props.onRefresh} bsStyle="success">
-          <Icon type="fa" name="refresh" />
-        </Button>
-      </div>
-    );
-  }
-
   renderCounts() {
-    const { activeFilters, totalCount, filteredCount } = this.props;
+    const {
+      activeFilters,
+      totalCount,
+      filteredCount,
+      itemsType,
+      itemsTypePlural
+    } = this.props;
 
     return (
       <h5>
         {activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
-        {totalCount + (totalCount > 1 ? ' Results' : ' Result')}
+        {totalCount + ' ' + (totalCount === 1 ? itemsType : itemsTypePlural)}
       </h5>
     );
   }
@@ -246,11 +257,13 @@ class ScansToolbar extends React.Component {
   }
 
   render() {
+    const { actions } = this.props;
+
     return (
       <Toolbar>
         {this.renderFilter()}
         {this.renderSort()}
-        <Toolbar.RightContent>{this.renderActions()}</Toolbar.RightContent>
+        <Toolbar.RightContent>{actions}</Toolbar.RightContent>
         <Toolbar.Results>
           {this.renderCounts()}
           {this.renderActiveFilters()}
@@ -260,21 +273,20 @@ class ScansToolbar extends React.Component {
   }
 }
 
-ScansToolbar.propTypes = {
+ViewToolbar.propTypes = {
+  viewType: PropTypes.string,
   totalCount: PropTypes.number,
   filteredCount: PropTypes.number,
+  filterFields: PropTypes.array,
+  sortFields: PropTypes.array,
+  actions: PropTypes.node,
+  itemsType: PropTypes.string,
+  itemsTypePlural: PropTypes.string,
   filterType: PropTypes.object,
-  filterValue: PropTypes.any,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
-  sortAscending: PropTypes.bool,
-  onRefresh: PropTypes.func
+  sortAscending: PropTypes.bool
 };
 
-function mapStateToProps(state, ownProps) {
-  return {
-    ...state.scansToolbar
-  };
-}
-
-export default connect(mapStateToProps)(ScansToolbar);
+export default ViewToolbar;

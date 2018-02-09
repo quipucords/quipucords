@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ from datetime import datetime
 import logging
 import json
 from django.utils.translation import ugettext as _
-from django.db import models
+from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
 from api.scantasks.model import ScanTask
@@ -99,6 +99,40 @@ class ScanJob(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
 
+    def _log_stats(self, prefix):
+        """Log stats for scan."""
+        if self.start_time is None:
+            elapsed_time = 0
+        else:
+            elapsed_time = (datetime.utcnow() -
+                            self.start_time).total_seconds()
+        message = '%s Stats: elapsed_time=%ds' %\
+            (prefix,
+             elapsed_time)
+        self.log_message(message)
+
+    def log_current_status(self,
+                           show_status_message=False,
+                           log_level=logging.INFO):
+        """Log current status of task."""
+        if show_status_message:
+            message = 'STATE UPDATE (%s).'\
+                '  Additional State information: %s' %\
+                (self.status,
+                 self.status_message)
+        else:
+            message = 'STATE UPDATE (%s)' %\
+                (self.status)
+
+        self.log_message(message, log_level=log_level)
+
+    def log_message(self, message, log_level=logging.INFO):
+        """Log a message for this job."""
+        actual_message = 'Job %d (%s) - ' % (self.id, self.scan_type)
+        actual_message += message
+        logger.log(log_level, actual_message)
+
+    @transaction.atomic
     def queue(self):
         """Queue the job to run.
 
@@ -163,7 +197,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def start(self):
         """Start a job.
 
@@ -179,7 +215,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def restart(self):
         """Restart a job.
 
@@ -204,7 +242,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def pause(self):
         """Pause a job.
 
@@ -228,7 +268,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PAUSED)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def cancel(self):
         """Cancel a job.
 
@@ -257,7 +299,9 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_CANCELED)
         self.save()
+        self.log_current_status()
 
+    @transaction.atomic
     def complete(self):
         """Complete a job.
 
@@ -273,7 +317,10 @@ class ScanJob(models.Model):
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_COMPLETED)
         self.save()
+        self._log_stats('COMPLETION STATS.')
+        self.log_current_status()
 
+    @transaction.atomic
     def fail(self, message):
         """Fail a job.
 
@@ -289,8 +336,11 @@ class ScanJob(models.Model):
 
         self.status = target_status
         self.status_message = message
-        logger.error(self.status_message)
+        self.log_message(self.status_message, log_level=logging.ERROR)
         self.save()
+        self._log_stats('FAILURE STATS.')
+        self.log_current_status(show_status_message=True,
+                                log_level=logging.ERROR)
 
     def validate_status_change(self, target_status, valid_current_status):
         """Validate and transition job status.
@@ -301,12 +351,14 @@ class ScanJob(models.Model):
         :returns bool indicating if it was successful:
         """
         if target_status == self.status:
-            logger.debug('ScanJob status is already %s', target_status)
+            self.log_message('ScanJob status is already %s' %
+                             target_status, log_level=logging.DEBUG)
             return False
 
         if self.status not in valid_current_status:
-            logger.error('Cannot change job state to %s when it is %s',
-                         target_status, self.status)
+            self.log_message('Cannot change job state to %s when it is %s' %
+                             (target_status, self.status),
+                             log_level=logging.ERROR)
             return True
         return False
 

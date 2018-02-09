@@ -4,21 +4,23 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
-  Grid,
+  Button,
   EmptyState,
-  Row,
+  Icon,
   ListView,
   Modal
 } from 'patternfly-react';
 
 import { bindMethods } from '../../common/helpers';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import { toastNotificationTypes, viewTypes } from '../../redux/constants';
 import { getScans } from '../../redux/actions/scansActions';
 
-import ScansToolbar from './scansToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
+
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import { ScanListItem } from './scanListItem';
+import { ScanFilterFields, ScanSortFields } from './scanConstants';
 
 class Scans extends React.Component {
   constructor() {
@@ -30,6 +32,7 @@ class Scans extends React.Component {
       'pauseScan',
       'cancelScan',
       'startScan',
+      'resumeScan',
       'addSource',
       'importSources',
       'refresh'
@@ -40,11 +43,11 @@ class Scans extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getScans();
+    this.props.getScans({ scan_type: 'inspect' });
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scans !== this.props.scans) {
+    if (nextProps.scans && nextProps.scans !== this.props.scans) {
       nextProps.scans.forEach(scan => {
         scan.systems_scanned = Math.abs(scan.systems_scanned) % 100;
         scan.systems_failed = Math.abs(scan.systems_failed) % 100;
@@ -76,16 +79,31 @@ class Scans extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return (item.id + '').match(re) !== null; // Using ID for now until we get a name
+        return this.matchString('' + item.id, filter.value); // Using ID for now until we get a name
+      case 'source':
+        return (
+          item.sources &&
+          item.sources.find(source => {
+            return this.matchString(source.name, filter.value);
+          })
+        );
       case 'status':
         return item.status === filter.value.id;
-      case 'scanType':
-        return item.scan_type === filter.value.id;
       default:
         return true;
     }
@@ -122,27 +140,37 @@ class Scans extends React.Component {
           break;
         case 'status':
           compValue = item1.status.localeCompare(item2.status);
-          if (compValue === 0) {
-            compValue = item1.scan_type.localeCompare(item2.scan_type);
-          }
           break;
-        case 'scanType':
-          compValue = item1.scan_type.localeCompare(item2.scan_type);
-          if (compValue === 0) {
-            compValue = item1.status.localeCompare(item2.status);
-          }
+        case 'time':
+          compValue = item1.status.localeCompare(item2.status);
+          break;
+        case 'hostCount':
+          compValue = item1.systems_count - item2.systems_count;
+          break;
+        case 'successfulHosts':
+          compValue = item1.systems_scanned - item2.systems_scanned;
+          break;
+        case 'failedHosts':
+          compValue = item1.systems_failed - item2.systems_failed;
           break;
         case 'sourceCount':
           compValue = item1.sources.length - item2.sources.length;
-          if (compValue === 0) {
-            compValue = item1.status.localeCompare(item2.status);
-            if (compValue === 0) {
-              compValue = item1.scan_type.localeCompare(item2.scan_type);
-            }
-          }
+          break;
+        case 'scansCount':
+          compValue = item1.scans_count - item2.scans_count;
           break;
         default:
           compValue = 0;
+      }
+
+      // Secondary sort by time
+      if (compValue === 0) {
+        compValue = item2.last_run - item1.last_run;
+      }
+
+      // Tertiary sort by status
+      if (compValue === 0) {
+        compValue = item1.status.localeCompare(item2.status);
       }
 
       if (!sortAscending) {
@@ -198,6 +226,15 @@ class Scans extends React.Component {
     });
   }
 
+  resumeScan(item) {
+    Store.dispatch({
+      type: toastNotificationTypes.TOAST_ADD,
+      alertType: 'error',
+      header: item.id,
+      message: 'Resuming scans is not yet implemented'
+    });
+  }
+
   addSource() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -217,34 +254,53 @@ class Scans extends React.Component {
   }
 
   refresh() {
-    this.props.getScans();
+    this.props.getScans({ scan_type: 'inspect' });
+  }
+
+  renderActions() {
+    return (
+      <div className="form-group">
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
   }
 
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <ScanListItem
-              item={item}
-              key={index}
-              onSummaryDownload={this.downloadSummaryReport}
-              onDetailedDownload={this.downloadDetailedReport}
-              onPause={this.pauseScan}
-              onCancel={this.cancelScan}
-              onStart={this.startScan}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <ScanListItem
+            item={item}
+            key={index}
+            onSummaryDownload={this.downloadSummaryReport}
+            onDetailedDownload={this.downloadDetailedReport}
+            onPause={this.pauseScan}
+            onCancel={this.cancelScan}
+            onStart={this.startScan}
+            onResume={this.resumeScan}
+          />
+        ))}
+      </ListView>
     );
   }
 
   render() {
-    const { loading, loadError, errorMessage, scans } = this.props;
+    const {
+      pending,
+      error,
+      errorMessage,
+      scans,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
     const { filteredItems } = this.state;
 
-    if (loading) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -254,7 +310,7 @@ class Scans extends React.Component {
         </Modal>
       );
     }
-    if (loadError) {
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
@@ -268,14 +324,24 @@ class Scans extends React.Component {
 
       return (
         <div className="quipucords-view-container">
-          <ScansToolbar
+          <ViewToolbar
+            viewType={viewTypes.SCANS_VIEW}
             totalCount={scans.length}
             filteredCount={filteredItems.length}
-            onRefresh={this.refresh}
+            filterFields={ScanFilterFields}
+            sortFields={ScanSortFields}
+            actions={this.renderActions()}
+            itemsType="Scan"
+            itemsTypePlural="Scans"
+            filterType={filterType}
+            filterValue={filterValue}
+            activeFilters={activeFilters}
+            sortType={sortType}
+            sortAscending={sortAscending}
           />
-          <Grid fluid className="quipucords-list-container">
+          <div className="quipucords-list-container">
             {this.renderList(filteredItems)}
-          </Grid>
+          </div>
         </div>
       );
     }
@@ -290,33 +356,29 @@ class Scans extends React.Component {
 
 Scans.propTypes = {
   getScans: PropTypes.func,
-  loadError: PropTypes.bool,
+  error: PropTypes.bool,
   errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  pending: PropTypes.bool,
   scans: PropTypes.array,
+
+  filterType: PropTypes.object,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
-};
-
-Scans.defaultProps = {
-  loading: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getScans: () => dispatch(getScans())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.scans.loading,
-    scans: state.scans.data,
-    loadError: state.scans.error,
-    errorMessage: state.scans.errorMessage,
-    activeFilters: state.scansToolbar.activeFilters,
-    sortType: state.scansToolbar.sortType,
-    sortAscending: state.scansToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign(
+    {},
+    state.scans.view,
+    state.scans.persist,
+    state.toolbars[viewTypes.SCANS_VIEW]
+  );
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Scans);

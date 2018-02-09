@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -23,6 +23,7 @@ from scanner.network.processing import process
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 ANSIBLE_FACTS = 'ansible_facts'
+STARTED_PROCESSING_ROLE = 'internal_host_started_processing_role'
 FAILED = 'failed'
 HOST = 'host'
 HOST_DONE = 'host_done'
@@ -101,6 +102,7 @@ class InspectResultCallback(CallbackBase):
 
     def handle_result(self, result):
         """Handle an incoming result object."""
+        # pylint: disable=protected-access
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.debug('%s', result_obj)
@@ -113,16 +115,25 @@ class InspectResultCallback(CallbackBase):
         host = result_obj[HOST]
         results_to_store = normalize_result(result)
         host_facts = {}
+        if result._task_fields.get('action') == 'set_fact' and \
+                result.task_name == 'internal_host_started_processing_role':
+            role_name = result._result.get(
+                ANSIBLE_FACTS).get(STARTED_PROCESSING_ROLE)
+            log_message = 'PROCESSING %s.  ANSIBLE ROLE %s' % (host, role_name)
+            self.scan_task.log_message(log_message)
         for key, value in results_to_store:
             if key == HOST_DONE:
-                self._finalize_host(host)
+                self._finalize_host(host, SystemInspectionResult.SUCCESS)
             else:
-                host_facts[key] = value
+                processed_value = process.process(
+                    self.scan_task, host_facts, key, value, host)
+                host_facts[key] = processed_value
 
-        if host in self._ansible_facts:
-            self._ansible_facts[host].update(host_facts)
-        else:
-            self._ansible_facts[host] = host_facts
+        if bool(host_facts):
+            if host in self._ansible_facts:
+                self._ansible_facts[host].update(host_facts)
+            else:
+                self._ansible_facts[host] = host_facts
 
     def _get_inspect_result(self):
         # Have to save inspect_result (if creating it) because
@@ -142,21 +153,34 @@ class InspectResultCallback(CallbackBase):
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
     @transaction.atomic
-    def _finalize_host(self, host):
-        facts = self._ansible_facts.get(host, {})
-        results = process.process(facts, host)
+    def finalize_failed_hosts(self):
+        """Finalize failed host."""
+        host_list = list(self._ansible_facts.keys())
+        for host in host_list:
+            self._finalize_host(host, SystemInspectionResult.FAILED)
 
-        logger.debug('host scan complete for %s with facts %s',
-                     host, results)
+    # Called after all fact collection is complete for host. Writing
+    # results needs to be atomic so that the host won't be marked
+    # as complete unless we actually save its results.
+    @transaction.atomic
+    def _finalize_host(self, host, host_status):
+        results = self._ansible_facts.pop(host, {})
+        self.scan_task.log_message('host scan complete for %s.  '
+                                   'Status: %s. Facts %s' %
+                                   (host, host_status, results),
+                                   log_level=logging.DEBUG)
 
         # Update scan counts
         if self.scan_task is not None:
-            self.scan_task.systems_scanned += 1
-            self.scan_task.save()
+            if host_status == SystemInspectionResult.SUCCESS:
+                self.scan_task.increment_stats(
+                    host, increment_sys_scanned=True)
+            else:
+                self.scan_task.increment_stats(host, increment_sys_failed=True)
 
         inspect_result = self._get_inspect_result()
         sys_result = SystemInspectionResult(
-            name=host, status=SystemInspectionResult.SUCCESS)
+            name=host, status=host_status)
         sys_result.save()
 
         inspect_result.systems.add(sys_result)
@@ -186,10 +210,15 @@ class InspectResultCallback(CallbackBase):
         self.results.append(result_obj)
         logger.warning('%s', result_obj)
 
-        unreachable_host = result_obj[HOST]
-        logger.error(
-            'Host %s is no longer reachable.  Moving host to failed results',
-            unreachable_host)
+        # pylint: disable=protected-access
+        unreachable_host = result._host.name
+        result_message = result._result.get(
+            'msg', 'No information given on unreachable warning.  '
+            'Missing msg attribute.')
+        message = 'UNREACHABLE %s. %s' % (unreachable_host,
+                                          result_message)
+        self.scan_task.log_message(
+            message, log_level=logging.ERROR)
 
         self._get_inspect_result()
         sys_result = SystemInspectionResult(
@@ -197,4 +226,5 @@ class InspectResultCallback(CallbackBase):
             status=SystemInspectionResult.UNREACHABLE)
         sys_result.save()
 
-        self.scan_task.systems_failed += 1
+        self.scan_task.increment_stats(
+            unreachable_host, increment_sys_failed=True)

@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "redhat_packages"
+
 - name: check to see if any red hat rpms are installed
   raw: if [ $(rpm -qa --qf "%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l) -gt 0 ]; then echo "Y"; else echo "N"; fi
   register: redhat_packages_gpg_is_redhat
@@ -67,5 +71,5 @@
 
 - name: extract result value for redhat-packages.certs
   set_fact:
-    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("error") }}'
+    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("") }}'
   when: '"stdout" in internal_redhat_packages_certs_cmd'

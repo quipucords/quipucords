@@ -163,6 +163,16 @@ class SourceSerializer(NotEmptySerializer):
         source = Source.objects.create(**validated_data)
 
         if options:
+            if source_type == Source.SATELLITE_SOURCE_TYPE:
+                if not options.get('satellite_version'):
+                    options['satellite_version'] = \
+                        SourceOptions.SATELLITE_VERSION_62
+                if options.get('ssl_cert_verify') is None:
+                    options['ssl_cert_verify'] = True
+            if (source_type == Source.VCENTER_SOURCE_TYPE and
+                    options.get('ssl_cert_verify') is None):
+                options['ssl_cert_verify'] = True
+
             options = SourceOptions.objects.create(**options)
             options.save()
             source.options = options

@@ -9,7 +9,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite connection task."""
-import logging
 from requests import exceptions
 from django.db import transaction
 from api.models import (ScanTask, ConnectionResult, SourceOptions)
@@ -17,9 +16,6 @@ from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.factory import create
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class ConnectTaskRunner(ScanTaskRunner):
@@ -57,8 +53,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self):
         """Scan network range ang attempt connections."""
-        logger.info('Connect scan started for %s.', self.scan_task)
-
         satellite_version = None
         options = self.source.options
         if options:
@@ -97,5 +91,4 @@ class ConnectTaskRunner(ScanTaskRunner):
             error_message += 'Connect scan failed for %s.' % self.scan_task
             return error_message, ScanTask.FAILED
 
-        logger.info('Connect scan completed for %s.', self.scan_task)
         return None, ScanTask.COMPLETED

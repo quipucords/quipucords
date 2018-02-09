@@ -49,7 +49,7 @@ SOURCE_CRED_WRONG_TYPE = 'Credentials must have the same type as source.'
 SOURCE_TYPE_REQ = 'A value for source_type must be provided to ' \
                   'create a source.'
 SOURCE_TYPE_INV = 'A source_type must not be provided when updating a source.'
-SOURCE_CRED_IDS_INV = 'Credential identitiers must be integer values.'
+SOURCE_CRED_IDS_INV = 'Credential identifiers must be integer values.'
 SOURCE_MIN_CREDS = 'Source must have at least one set of credentials.'
 
 NET_HOST_AS_STRING = 'A host range must be a string.'
@@ -80,7 +80,7 @@ SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
-SJ_SOURCE_IDS_INV = 'Source identitiers must be integer values.'
+SJ_SOURCE_IDS_INV = 'Source identifiers must be integer values.'
 SJ_SOURCE_DO_NOT_EXIST = 'Source with id=%d could not be'\
     ' found in database.'
 SJ_STATUS_MSG_CREATED = 'Job is created.'
@@ -131,6 +131,7 @@ ALREADY_RUNNING = 'Scan cannot be restarted. ' \
 COMMON_CHOICE_STR = 'Must be a string. Valid values are %s.'
 COMMON_CHOICE_BLANK = 'This field may not be blank. Valid values are %s.'
 COMMON_CHOICE_INV = '%s, is an invalid choice. Valid values are %s.'
+COMMON_ID_INV = 'The id must be an integer.'
 
 # report messages
 REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \

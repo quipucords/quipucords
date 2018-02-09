@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,6 +16,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 import api.messages as messages
+from api.serializers import ScanJobSerializer
 from api.models import (Credential,
                         Source,
                         ScanTask,
@@ -250,7 +251,7 @@ class ScanJobTest(TestCase):
         data = {'sources': ['foo'],
                 'scan_type': ScanTask.SCAN_TYPE_CONNECT}
         self.create_expect_400(
-            data, {'sources': ['Source identitiers must be integer values.']})
+            data, {'sources': ['Source identifiers must be integer values.']})
 
     def test_create_invalid_srcs_id(self):
         """A create request must have vaild ids."""
@@ -336,7 +337,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1,
+        results1 = [{'id': 1,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
@@ -350,6 +351,10 @@ class ScanJobTest(TestCase):
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -367,13 +372,17 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 2,
+        results1 = [{'id': 2,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -381,7 +390,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = []
+        expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
         self.assertEqual(content, expected)
 
         response = self.client.get(
@@ -389,7 +398,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1,
+        results1 = [{'id': 1,
                      'options': {'max_concurrency': 50},
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
@@ -403,6 +412,10 @@ class ScanJobTest(TestCase):
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
@@ -420,6 +433,12 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(
             sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
+
+    def test_retrieve_bad_id(self):
+        """Get ScanJob details by bad primary key."""
+        url = reverse('scanjob-detail', args=('string',))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_details(self, start_scan):
@@ -595,6 +614,14 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
+    def test_pause_bad_id(self):
+        """Pause a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
+        pause_url = '{}pause/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
@@ -612,6 +639,14 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
 
+    def test_cancel_bad_id(self):
+        """Cancel a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
+        pause_url = '{}cancel/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
@@ -624,6 +659,14 @@ class ScanJobTest(TestCase):
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
+        pause_url = '{}restart/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
+    def test_restart_bad_id(self):
+        """Restart a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
         pause_url = '{}restart/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -643,15 +686,12 @@ class ScanJobTest(TestCase):
         # Queue job to run
         scan_job.queue()
         task = scan_job.tasks.all()[1]
-        task.systems_count = 2
-        task.systems_failed = 1
-        task.systems_scanned = 1
-        task.save()
+        task.update_stats('TEST_VC.', sys_count=2, sys_failed=1, sys_scanned=1)
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
-
-        json_scan = {'tasks': [{}]}
-        expand_scanjob(scan_job, json_scan)
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        expand_scanjob(json_scan)
 
         self.assertEqual(json_scan.get('systems_count'), 2)
         self.assertEqual(json_scan.get('systems_failed'), 1)

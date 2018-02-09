@@ -5,25 +5,28 @@ import Store from '../../redux/store';
 
 import {
   Alert,
+  Button,
   EmptyState,
-  Grid,
+  Icon,
   ListView,
-  Modal,
-  Row
+  Modal
 } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
 import {
+  sourcesTypes,
   toastNotificationTypes,
-  confirmationModalTypes
+  confirmationModalTypes,
+  viewTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
-import SourcesToolbar from './sourcesToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
 import { AddSourceWizard } from './addSourceWizard';
+import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
   constructor() {
@@ -58,7 +61,7 @@ class Sources extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.sources !== this.props.sources) {
+    if (nextProps.sources && nextProps.sources !== this.props.sources) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.sources.forEach(source => {
         source.selected = false;
@@ -88,14 +91,43 @@ class Sources extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return item.name.match(re) !== null;
+        return this.matchString(item.name, filter.value);
       case 'sourceType':
         return item.source_type === filter.value.id;
+      case 'hosts':
+        return (
+          item.hosts &&
+          item.hosts.find(host => {
+            return this.matchString(host, filter.value);
+          })
+        );
+      case 'status':
+        return (
+          item.connection_scan &&
+          item.connection_scan.status === filter.value.id
+        );
+      case 'credentials':
+        return (
+          item.credentials &&
+          item.credentials.find(credential => {
+            return this.matchString(credential.name, filter.value);
+          })
+        );
       default:
         return true;
     }
@@ -137,8 +169,23 @@ class Sources extends React.Component {
         case 'sourceType':
           compValue = item1.source_type.localeCompare(item2.source_type);
           break;
+        case 'status':
+          compValue = item1.source_type.localeCompare(item2.source_type);
+          break;
+        case 'credentialsCount':
+          compValue = item1.credentials.length - item2.credentials.length;
+          break;
         case 'hostCount':
+          compValue =
+            item1.hosts.length +
+            item1.failed_hosts.length -
+            (item2.hosts.length + item2.failed_hosts.length);
+          break;
+        case 'successHostCount':
           compValue = item1.hosts.length - item2.hosts.length;
+          break;
+        case 'failedHostCount':
+          compValue = item1.failed_hosts.length - item2.failed_hosts.length;
           break;
         default:
           compValue = 0;
@@ -210,6 +257,11 @@ class Sources extends React.Component {
     });
 
     this.setState({ selectedItems: selectedItems });
+
+    Store.dispatch({
+      type: sourcesTypes.SOURCES_SELECTED,
+      selectedSources: selectedItems
+    });
   }
 
   editSource(item) {
@@ -266,27 +318,56 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
+  renderActions() {
+    const { selectedItems } = this.state;
+
+    return (
+      <div className="form-group">
+        <Button bsStyle="primary" onClick={this.showAddSourceWizard}>
+          Add
+        </Button>
+        <Button
+          disabled={!selectedItems || selectedItems.length === 0}
+          onClick={this.scanSources}
+        >
+          Scan
+        </Button>
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
+  }
+
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <SourceListItem
-              item={item}
-              key={index}
-              onItemSelectChange={this.itemSelectChange}
-              onEdit={this.editSource}
-              onDelete={this.deleteSource}
-              onScan={this.scanSource}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <SourceListItem
+            item={item}
+            key={index}
+            onItemSelectChange={this.itemSelectChange}
+            onEdit={this.editSource}
+            onDelete={this.deleteSource}
+            onScan={this.scanSource}
+          />
+        ))}
+      </ListView>
     );
   }
 
   render() {
-    const { loading, loadError, errorMessage, sources } = this.props;
+    const {
+      pending,
+      error,
+      errorMessage,
+      sources,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
     const {
       filteredItems,
       selectedItems,
@@ -296,7 +377,7 @@ class Sources extends React.Component {
       addSourceWizardShown
     } = this.state;
 
-    if (loading) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -307,7 +388,7 @@ class Sources extends React.Component {
       );
     }
 
-    if (loadError) {
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
@@ -323,17 +404,24 @@ class Sources extends React.Component {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
-            <SourcesToolbar
+            <ViewToolbar
+              viewType={viewTypes.SOURCES_VIEW}
               totalCount={sources.length}
               filteredCount={filteredItems.length}
-              onAddSource={this.showAddSourceWizard}
-              scanAvailable={selectedItems && selectedItems.length > 0}
-              onScan={this.scanSources}
-              onRefresh={this.refresh}
+              filterFields={SourceFilterFields}
+              sortFields={SourceSortFields}
+              actions={this.renderActions()}
+              itemsType="Source"
+              itemsTypePlural="Sources"
+              filterType={filterType}
+              filterValue={filterValue}
+              activeFilters={activeFilters}
+              sortType={sortType}
+              sortAscending={sortAscending}
             />
-            <Grid fluid className="quipucords-list-container">
+            <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
-            </Grid>
+            </div>
             <AddSourceWizard
               show={addSourceWizardShown}
               onCancel={this.quitAddSourceWizard}
@@ -366,33 +454,29 @@ class Sources extends React.Component {
 
 Sources.propTypes = {
   getSources: PropTypes.func,
-  loadError: PropTypes.bool,
+  error: PropTypes.bool,
   errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  pending: PropTypes.bool,
   sources: PropTypes.array,
+
+  filterType: PropTypes.object,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
-};
-
-Sources.defaultProps = {
-  loading: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getSources: () => dispatch(getSources())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.sources.loading,
-    sources: state.sources.data,
-    loadError: state.sources.error,
-    errorMessage: state.sources.errorMessage,
-    activeFilters: state.sourcesToolbar.activeFilters,
-    sortType: state.sourcesToolbar.sortType,
-    sortAscending: state.sourcesToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign(
+    {},
+    state.sources.view,
+    state.sources.persist,
+    state.toolbars[viewTypes.SOURCES_VIEW]
+  );
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sources);

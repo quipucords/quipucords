@@ -4,11 +4,14 @@ import { connect } from 'react-redux';
 
 import {
   Alert,
+  Button,
+  DropdownButton,
+  EmptyState,
   Form,
   Grid,
-  EmptyState,
-  Row,
+  Icon,
   ListView,
+  MenuItem,
   Modal
 } from 'patternfly-react';
 
@@ -17,14 +20,19 @@ import Store from '../../redux/store';
 import {
   confirmationModalTypes,
   credentialsTypes,
-  toastNotificationTypes
+  toastNotificationTypes,
+  viewTypes
 } from '../../redux/constants';
 import { bindMethods } from '../../common/helpers';
 
-import CredentialsToolbar from './credentialsToolbar';
+import ViewToolbar from '../viewToolbar/viewToolbar';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
+import {
+  CredentialFilterFields,
+  CredentialSortFields
+} from './crendentialConstants';
 
 class Credentials extends React.Component {
   constructor() {
@@ -57,20 +65,15 @@ class Credentials extends React.Component {
         credential.selected = false;
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
           credential.auth_type = 'sshKey';
-        } else if (credential.become_user && credential.become_user !== '') {
-          credential.auth_type = 'becomeUser';
         } else {
           credential.auth_type = 'usernamePassword';
         }
-      });
 
-      // TODO: Remove once we get real failed host data
-      let failedCount = Math.floor(Math.random() * 10);
-      nextProps.credentials.forEach(credential => {
-        credential.selected = false;
-        credential.failed_hosts = [];
-        for (let i = 0; i < failedCount; i++) {
-          credential.failed_hosts.push('failedHost' + (i + 1));
+        // TODO: Remove once we get real source data
+        let sourceCount = Math.floor(Math.random() * 10);
+        credential.sources = [];
+        for (let i = 0; i < sourceCount; i++) {
+          credential.sources.push('Source ' + (i + 1));
         }
       });
 
@@ -89,12 +92,22 @@ class Credentials extends React.Component {
     }
   }
 
-  matchesFilter(item, filter) {
-    let re = new RegExp(filter.value, 'i');
+  matchString(value, match) {
+    if (!value) {
+      return false;
+    }
 
+    if (!match) {
+      return true;
+    }
+
+    return value.toLowerCase().includes(match.toLowerCase());
+  }
+
+  matchesFilter(item, filter) {
     switch (filter.field.id) {
       case 'name':
-        return item.name.match(re) !== null;
+        return this.matchString(item.name, filter.value);
       case 'credentialType':
         return item.cred_type === filter.value.id;
       case 'authenticationType':
@@ -140,9 +153,6 @@ class Credentials extends React.Component {
         case 'credentialType':
           compValue = item1.cred_type.localeCompare(item2.cred_type);
           break;
-        case 'authenticationType':
-          compValue = item1.auth_type.localeCompare(item2.auth_type);
-          break;
         default:
           compValue = 0;
       }
@@ -158,7 +168,7 @@ class Credentials extends React.Component {
   addCredential(credentialType) {
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: credentialType
+      credentialType
     });
   }
 
@@ -271,29 +281,74 @@ class Credentials extends React.Component {
     this.props.getCredentials();
   }
 
+  renderActions() {
+    const { selectedItems } = this.state;
+
+    return (
+      <div className="form-group">
+        <DropdownButton
+          bsStyle="primary"
+          title="Create"
+          pullRight
+          id="createCredentialButton"
+        >
+          <MenuItem eventKey="1" onClick={() => this.addCredential('network')}>
+            Network Credential
+          </MenuItem>
+          <MenuItem
+            eventKey="2"
+            onClick={() => this.addCredential('satellite')}
+          >
+            Satellite Credential
+          </MenuItem>
+          <MenuItem eventKey="2" onClick={() => this.addCredential('vcenter')}>
+            VCenter Credential
+          </MenuItem>
+        </DropdownButton>
+        <Button
+          disabled={!selectedItems || selectedItems.length === 0}
+          onClick={this.deleteCredentials}
+        >
+          Delete
+        </Button>
+        <Button onClick={this.refresh} bsStyle="success">
+          <Icon type="fa" name="refresh" />
+        </Button>
+      </div>
+    );
+  }
+
   renderList(items) {
     return (
-      <Row>
-        <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
-            <CredentialListItem
-              item={item}
-              key={index}
-              onItemSelectChange={this.itemSelectChange}
-              onEdit={this.editCredential}
-              onDelete={this.deleteCredential}
-            />
-          ))}
-        </ListView>
-      </Row>
+      <ListView className="quipicords-list-view">
+        {items.map((item, index) => (
+          <CredentialListItem
+            item={item}
+            key={index}
+            onItemSelectChange={this.itemSelectChange}
+            onEdit={this.editCredential}
+            onDelete={this.deleteCredential}
+          />
+        ))}
+      </ListView>
     );
   }
 
   render() {
-    const { loading, loadError, errorMessage, credentials } = this.props;
-    const { filteredItems, selectedItems } = this.state;
+    const {
+      pending,
+      error,
+      errorMessage,
+      credentials,
+      filterType,
+      filterValue,
+      activeFilters,
+      sortType,
+      sortAscending
+    } = this.props;
+    const { filteredItems } = this.state;
 
-    if (loading) {
+    if (pending) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -303,7 +358,8 @@ class Credentials extends React.Component {
         </Modal>
       );
     }
-    if (loadError) {
+
+    if (error) {
       return (
         <EmptyState>
           <Alert type="error">
@@ -319,17 +375,24 @@ class Credentials extends React.Component {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
-            <CredentialsToolbar
+            <ViewToolbar
+              viewType={viewTypes.CREDENTIALS_VIEW}
               totalCount={credentials.length}
               filteredCount={filteredItems.length}
-              onAddCredential={this.addCredential}
-              deleteAvailable={selectedItems && selectedItems.length > 0}
-              onDelete={this.deleteCredentials}
-              onRefresh={this.refresh}
+              filterFields={CredentialFilterFields}
+              sortFields={CredentialSortFields}
+              actions={this.renderActions()}
+              itemsType="Credential"
+              itemsTypePlural="Credentials"
+              filterType={filterType}
+              filterValue={filterValue}
+              activeFilters={activeFilters}
+              sortType={sortType}
+              sortAscending={sortAscending}
             />
-            <Grid fluid className="quipucords-list-container">
+            <div className="quipucords-list-container">
               {this.renderList(filteredItems)}
-            </Grid>
+            </div>
           </div>
           <CreateCredentialDialog credentials={credentials} />
         </React.Fragment>
@@ -352,33 +415,29 @@ class Credentials extends React.Component {
 
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
-  loadError: PropTypes.bool,
+  error: PropTypes.bool,
   errorMessage: PropTypes.string,
-  loading: PropTypes.bool,
+  pending: PropTypes.bool,
   credentials: PropTypes.array,
+
+  filterType: PropTypes.object,
+  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
-};
-
-Credentials.defaultProps = {
-  loading: true
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getCredentials: () => dispatch(getCredentials())
 });
 
-function mapStateToProps(state) {
-  return {
-    loading: state.credentials.loading,
-    credentials: state.credentials.data,
-    loadError: state.credentials.error,
-    errorMessage: state.credentials.errorMessage,
-    activeFilters: state.credentialsToolbar.activeFilters,
-    sortType: state.credentialsToolbar.sortType,
-    sortAscending: state.credentialsToolbar.sortAscending
-  };
-}
+const mapStateToProps = function(state) {
+  return Object.assign(
+    {},
+    state.credentials.view,
+    state.credentials.persist,
+    state.toolbars[viewTypes.CREDENTIALS_VIEW]
+  );
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Credentials);

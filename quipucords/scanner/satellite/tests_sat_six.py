@@ -10,6 +10,7 @@
 #
 """Test the satellite six interface."""
 
+from datetime import datetime
 from unittest.mock import patch, ANY
 import requests_mock
 from django.test import TestCase
@@ -48,7 +49,8 @@ class SatelliteSixV1Test(TestCase):
         self.source.credentials.add(self.cred)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1)
+                                  source=self.source, sequence_number=1,
+                                  start_time=datetime.utcnow())
         self.scan_task.save()
 
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
@@ -322,8 +324,8 @@ class SatelliteSixV1Test(TestCase):
                  'start_date': '2016-03-24 04:00:00 UTC',
                  'end_date': '2022-01-01 04:59:59 UTC'}]}
 
-        self.scan_task.systems_scanned = 0
         self.scan_task.save()
+        self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
         with patch('scanner.satellite.six.host_fields',
                    return_value=fields_return_value) as mock_fields:
             with patch('scanner.satellite.six.host_subscriptions',
@@ -396,9 +398,10 @@ class SatelliteSixV2Test(TestCase):
         self.source.credentials.add(self.cred)
 
         self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1)
-        self.scan_task.systems_scanned = 0
+                                  source=self.source, sequence_number=1,
+                                  start_time=datetime.utcnow())
         self.scan_task.save()
+        self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
 
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()

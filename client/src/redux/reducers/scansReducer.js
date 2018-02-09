@@ -1,27 +1,66 @@
+import helpers from '../../common/helpers';
 import { scansTypes } from '../constants';
 
 const initialState = {
-  error: false,
-  errorMessage: '',
-  loading: true,
-  data: []
+  persist: {},
+
+  view: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    scans: []
+  }
 };
 
-export default function scansReducer(state = initialState, action) {
+const scansReducer = function(state = initialState, action) {
   switch (action.type) {
-    case scansTypes.GET_SCANS_ERROR:
-      return Object.assign({}, state, {
-        error: action.error,
-        errorMessage: action.message
-      });
+    // Error/Rejected
+    case scansTypes.GET_SCANS_REJECTED:
+      return helpers.setStateProp(
+        'view',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case scansTypes.GET_SCANS_LOADING:
-      return Object.assign({}, state, { loading: action.loading });
+    // Loading/Pending
+    case scansTypes.GET_SCANS_PENDING:
+      return helpers.setStateProp(
+        'view',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
-    case scansTypes.GET_SCANS_SUCCESS:
-      return Object.assign({}, state, { data: action.data });
+    // Success/Fulfilled
+    case scansTypes.GET_SCANS_FULFILLED:
+      return helpers.setStateProp(
+        'view',
+        {
+          scans: action.payload,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
 
     default:
       return state;
   }
-}
+};
+
+export { initialState, scansReducer };
+
+export default scansReducer;

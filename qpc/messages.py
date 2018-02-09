@@ -173,7 +173,9 @@ SERVER_CONFIG_SSL_CERT_HELP = 'File path to the SSL certificate '\
     'to use for verification.'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
-LOGIN_USERNAME_PROMPT = 'User name:'
+LOGIN_USERNAME_PROMPT = 'User name: '
 LOGIN_SUCCESS = 'Login successful.'
 
 LOGOUT_SUCCESS = 'Logged out.'
+
+NEXT_RESULTS = 'Press enter to see the next set of results.'

@@ -327,7 +327,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{'id': 1, 'name': 'source0',
+        results1 = [{'id': 1, 'name': 'source0',
                      'source_type': Source.NETWORK_SOURCE_TYPE,
                      'port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
@@ -342,6 +342,10 @@ class SourceTest(TestCase):
                      'port': 22,
                      'hosts': ['1.2.3.4'], 'credentials':
                      [self.net_cred_for_response]}]
+        expected = {'count': 3,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     def test_filter_by_type_list(self):
@@ -372,7 +376,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        expected = [{
+        results1 = [{
             'id': 3,
             'name': 'vsource3',
             'source_type': 'vcenter',
@@ -399,6 +403,10 @@ class SourceTest(TestCase):
                 'name': 'vc_cred1'
             }]
         }]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
         self.assertEqual(content, expected)
 
     def test_retrieve(self):
@@ -420,6 +428,13 @@ class SourceTest(TestCase):
         self.assertEqual(creds, [self.net_cred_for_response])
         self.assertIn('hosts', response_json)
         self.assertEqual(response_json['hosts'][0], '1.2.3.4')
+
+    def test_retrieve_bad_id(self):
+        """Get details on a specific Source by bad primary key."""
+        url = reverse('source-detail', args=('string',))
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
 
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.

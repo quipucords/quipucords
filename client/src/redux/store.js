@@ -1,5 +1,7 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
+import { createLogger } from 'redux-logger';
+import promiseMiddleware from 'redux-promise-middleware';
 import reduxReducers from './reducers';
 
 const hydrateStore = () => {
@@ -7,10 +9,16 @@ const hydrateStore = () => {
   return {};
 };
 
+let middleware = [thunkMiddleware, promiseMiddleware()];
+
+if (process.env.NODE_ENV !== 'production') {
+  middleware.push(createLogger());
+}
+
 const store = createStore(
   reduxReducers,
   hydrateStore(),
-  applyMiddleware(thunkMiddleware)
+  applyMiddleware(...middleware)
 );
 
 export default store;

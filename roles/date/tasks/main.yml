@@ -1,5 +1,9 @@
 ---
 
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "date"
+
 - name: gather date.date fact
   raw: date
   register: date_date
@@ -13,12 +17,12 @@
 
 - name: extract result value for date.anaconda_log
   set_fact:
-    date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout'] | trim | default('error') }}"
+    date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout'] | trim | default('') }}"
   when: '"stdout" in internal_date_anaconda_log_cmd'
 
 - name: handle failure value for date.anaconda_log
   set_fact:
-    date_anaconda_log: "error"
+    date_anaconda_log: ""
   when: '"stdout" not in internal_date_anaconda_log_cmd'
 
 - name: gather date.machine_id fact
@@ -41,5 +45,5 @@
 
 - name: extract result value for date.yum_history
   set_fact:
-    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first | default(None) if internal_have_yum else 'N/A (yum not found)' }}"
+    date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first if internal_have_yum else '' }}"
   when: '"stdout_lines" in internal_date_yum_history_cmd'

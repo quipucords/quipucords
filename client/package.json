@@ -39,8 +39,9 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "jquery": "^3.3.1",
+    "js-cookie": "^2.2.0",
     "patternfly": "^3.37.8",
-    "patternfly-react": "^1.6.0",
+    "patternfly-react": "^1.7.0",
     "rcue": "^3.38.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.0",
@@ -50,6 +51,8 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.0",
     "redux": "^3.7.2",
+    "redux-logger": "^3.0.6",
+    "redux-promise-middleware": "^5.0.0",
     "redux-thunk": "^2.2.0"
   },
   "devDependencies": {

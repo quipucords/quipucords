@@ -56,10 +56,26 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
+        # pylint: disable=protected-access
+        host = result._host.name
+        result_message = result._result.get(
+            'msg', 'No information given on unreachable warning.  '
+            'Missing msg attribute.')
+        message = 'UNREACHABLE %s. %s' % (host, result_message)
+        self.result_store.scan_task.log_message(
+            message, log_level=logging.WARN)
         result_obj = _construct_result(result)
-        logger.warning('%s', result_obj)
+        logger.debug('%s', result_obj)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
+        # pylint: disable=protected-access
+        host = result._host.name
+        result_message = result._result.get(
+            'stderr', 'No information given on failure.  '
+            'Missing stderr attribute.')
+        message = 'FAILED %s. %s' % (host, result_message)
+        self.result_store.scan_task.log_message(
+            message, log_level=logging.ERROR)
         result_obj = _construct_result(result)
-        logger.error('%s', result_obj)
+        logger.debug('%s', result_obj)

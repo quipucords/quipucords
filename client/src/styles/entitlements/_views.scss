@@ -1,5 +1,23 @@
 /* _views.scss */
+
+// Setup for internal vertical scroll
+.quipucords-content {
+  bottom: 0;
+  top: $navbar-pf-vertical-height;
+  right: 0;
+  position: fixed;
+  left: $nav-pf-vertical-width;
+  .collapsed-nav & {
+    left: $nav-pf-vertical-collapsed-width;
+  }
+  .hidden-nav & {
+    left: 0;
+  }
+}
+
+
 .quipucords-view-container {
+  background-color: $color-pf-white;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -12,17 +30,16 @@
 // List container should scroll
 .quipucords-list-container {
   flex: 1;
-  width: 100%;
+  padding: 0 20px;
   overflow-y: auto;
+  width: 100%;
 }
 
 .quipicords-list-view {
-  margin-top: 0;
-  margin-bottom: 0;
-
   .list-view-pf-actions {
-    min-width: 200px;
+    margin-left: 0;
     text-align: right;
+    width: 150px;
 
     .btn-link {
       color: $color-pf-black-700;
@@ -42,6 +59,29 @@
     border: 0;
     padding-top: 2px;
   }
+}
+
+.quipucords-split-description {
+  display: flex;
+  flex-direction: row;
+}
+
+.quipucords-description-left {
+  width: 50%;
+  margin-right: 10px;
+  .list-group-item-heading {
+    margin-right: 0px;
+  }
+  .list-group-item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 0px;
+  }
+}
+
+.quipucords-description-right {
+  width: 50%;
 }
 
 .blank-slate-pf.full-page-blank-slate {
@@ -67,6 +107,25 @@
   font-weight: 700;
   &[type=textarea] {
     resize: none;
+  }
+}
+
+.quipucords-scan-list-item .list-view-pf-left {
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 150px;
+}
+
+.quipucords-credential-list-item {
+  @media (min-width: 992px) {
+    .list-group-item-heading {
+      width: calc(60% - 20px);
+    }
+    .list-group-item-text {
+      width: calc(40% - 20px);
+    }
   }
 }
 

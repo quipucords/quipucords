@@ -37,11 +37,12 @@ class SystemFingerprint(models.Model):
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)
     os_name = models.CharField(max_length=64, unique=False)
-    os_release = models.CharField(max_length=128, unique=False)
+    os_release = models.CharField(
+        max_length=128, unique=False, default='unknown')
     os_version = models.CharField(max_length=64, unique=False, null=True)
 
     infrastructure_type = models.CharField(
-        max_length=10, choices=INFRASTRUCTURE_TYPE)
+        max_length=10, choices=INFRASTRUCTURE_TYPE, default='unknown')
     virtualized_is_guest = models.NullBooleanField()
 
     mac_addresses = models.TextField(unique=False, null=True)

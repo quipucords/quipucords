@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -9,7 +9,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite inspection task."""
-import logging
 from requests import exceptions
 from api.models import (ScanTask, SourceOptions,
                         ConnectionResult, InspectionResult)
@@ -17,9 +16,6 @@ from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.factory import create
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class InspectTaskRunner(ScanTaskRunner):
@@ -66,7 +62,6 @@ class InspectTaskRunner(ScanTaskRunner):
             return error_message, ScanTask.FAILED
 
         try:
-            logger.info('Inspect scan started for %s.', self.scan_task)
             status_code, api_version = utils.status(self.scan_task)
             if status_code == 200:
                 self.conn_result = ConnectionResult.objects.filter(
@@ -93,7 +88,6 @@ class InspectTaskRunner(ScanTaskRunner):
                         (self.scan_task)
                     return error_message, ScanTask.FAILED
                 api.hosts_facts()
-                logger.info('Inspect scan completed for %s.', self.scan_task)
             else:
                 error_message = 'Inspect scan failed for %s.' % self.scan_task
                 return error_message, ScanTask.FAILED

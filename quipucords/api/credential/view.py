@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,18 +12,27 @@
 
 import os
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
+from rest_framework.filters import OrderingFilter
+from rest_framework.serializers import ValidationError
+from django_filters.rest_framework import (DjangoFilterBackend,
+                                           FilterSet)
 from filters import mixins
 from api.filters import ListFilter
 from api.serializers import CredentialSerializer
-from api.models import Credential
+from api.models import Credential, Source
+import api.messages as messages
+from api.common.util import is_int
 
+IDENTIFIER_KEY = 'id'
+NAME_KEY = 'name'
+SOURCES_KEY = 'sources'
 PASSWORD_KEY = 'password'
 BECOME_PASSWORD_KEY = 'become_password'
 SSH_PASSPHRASE_KEY = 'ssh_passphrase'
@@ -43,6 +52,23 @@ def mask_credential(cred):
     if cred.get(SSH_PASSPHRASE_KEY):
         cred[SSH_PASSPHRASE_KEY] = PASSWORD_MASK
     return cred
+
+
+def format_credential(cred):
+    """Update the credential with sources information and mask sensitive data.
+
+    :param cred: a dictionary of values that may be masked
+    :returns: the masked dictionary if it contains sensitive data
+    and added sources if present
+    """
+    identifier = cred.get(IDENTIFIER_KEY)
+    if identifier:
+        slim_sources = Source.objects.filter(
+            credentials__pk=identifier).values(IDENTIFIER_KEY, NAME_KEY)
+        if slim_sources:
+            cred[SOURCES_KEY] = slim_sources
+
+    return mask_credential(cred)
 
 
 class CredentialFilter(FilterSet):
@@ -68,15 +94,25 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CredentialFilter
+    ordering_fields = ('name', 'cred_type')
+    ordering = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for cred in serializer.data:
+                cred = format_credential(cred)
+            return self.get_paginated_response(serializer.data)
+
         serializer = CredentialSerializer(queryset, many=True)
         for cred in serializer.data:
-            cred = mask_credential(cred)
+            cred = format_credential(cred)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -85,15 +121,21 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        cred = mask_credential(serializer.data)
+        cred = format_credential(serializer.data)
         return Response(cred, status=status.HTTP_201_CREATED,
                         headers=headers)
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         """Get a host credential."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
+
         host_cred = get_object_or_404(self.queryset, pk=pk)
         serializer = CredentialSerializer(host_cred)
-        cred = mask_credential(serializer.data)
+        cred = format_credential(serializer.data)
         return Response(cred)
 
     # pylint: disable=unused-argument
@@ -105,7 +147,7 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
                                          partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        cred = mask_credential(serializer.data)
+        cred = format_credential(serializer.data)
         return Response(cred)
 
     def partial_update(self, request, *args, **kwargs):
@@ -116,5 +158,5 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
                                          partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        cred = mask_credential(serializer.data)
+        cred = format_credential(serializer.data)
         return Response(cred)

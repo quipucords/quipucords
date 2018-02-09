@@ -49,6 +49,29 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Invalid input"
+  /facts/{fact_collection_id}:
+    get:
+      tags:
+        - "Fact"
+      summary: "Get an fact collection"
+      description: "Get raw facts in fact collection."
+      operationId: "getFacts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fact_collection_id"
+        in: "path"
+        description: "ID of fact collection."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Fact collection retrieved"
+          schema:
+            $ref: "#/definitions/FactCollectionSource"
+        404:
+          description: "Fact collection not found"
   /credentials/:
     post:
       tags:
@@ -95,13 +118,25 @@ paths:
             - network
             - vcenter
             - satellite
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
       responses:
         200:
           description: "Credential retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/CredentialOut"
+            $ref: "#/definitions/CredentialPagination"
   /credentials/{cred_id}:
     get:
       tags:
@@ -290,13 +325,25 @@ paths:
             - network
             - vcenter
             - satellite
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
       responses:
         200:
           description: "Sources retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceOut"
+            $ref: "#/definitions/SourcePagination"
   /sources/{source_id}:
     get:
       tags:
@@ -425,13 +472,25 @@ paths:
           enum:
             - connect
             - inspect
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
       responses:
         200:
           description: "Scan jobs retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanJobOut"
+            $ref: "#/definitions/ScanJobPagination"
   /scans/{scan_job_id}:
     get:
       tags:
@@ -554,6 +613,24 @@ paths:
         404:
           description: "Scan job not found"
 definitions:
+  ListPagination:
+    type: "object"
+    required:
+      - count
+      - next
+      - previous
+      - results
+    properties:
+      count:
+        type: "integer"
+        format: "int64"
+        description: "Total number of credentials"
+      next:
+        type: "string"
+        description: "URL for next page of results"
+      previous:
+        type: "string"
+        description: "URL for previous page of results"
   SystemFact:
     type: "object"
     required:
@@ -589,7 +666,6 @@ definitions:
             $ref: "#/definitions/FactCollectionSource"
           description: "The facts obtained during a scan"
           minItems: 1
-
   FactCollectionOut:
     type: "object"
     required:
@@ -676,6 +752,10 @@ definitions:
         become_password:
           type: "string"
           description: "The privilege escalation password to be used when running a network scan."
+        sources:
+          type: "array"
+          items:
+            $ref: "#/definitions/SourceMin"
   CredentialMin:
     type: "object"
     required:
@@ -705,6 +785,18 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+  CredentialPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/CredentialOut"
+            description: "The paginated credentials"
   SystemReport:
     type: "object"
     properties:
@@ -918,6 +1010,18 @@ definitions:
             description: "The credentials to try with these hosts."
           options:
             $ref: "#/definitions/SourceOptions"
+  SourcePagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceOut"
+            description: "The paginated source"
   ScanTask:
     type: "object"
     properties:
@@ -1047,6 +1151,18 @@ definitions:
             type: "integer"
             format: "int64"
             description: "The identifier of the sent fact collection."
+  ScanJobPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanJobOut"
+            description: "The paginated scan jobs"
   SysConnResultOut:
     type: "object"
     required:

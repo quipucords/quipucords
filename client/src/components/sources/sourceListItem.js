@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
 import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
@@ -12,23 +13,24 @@ class SourceListItem extends React.Component {
     super();
 
     helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
-
-    this.state = {
-      expanded: false,
-      expandType: 'credentials'
-    };
   }
 
   toggleExpand(expandType) {
-    if (expandType === this.state.expandType) {
-      this.setState({ expanded: !this.state.expanded });
+    const { item } = this.props;
+
+    if (expandType === item.expandType) {
+      item.expanded = !item.expanded;
     } else {
-      this.setState({ expanded: true, expandType: expandType });
+      item.expanded = true;
+      item.expandType = expandType;
     }
+    this.forceUpdate();
   }
 
   closeExpand() {
-    this.setState({ expanded: false });
+    const { item } = this.props;
+    item.expanded = false;
+    this.forceUpdate();
   }
 
   renderSourceType() {
@@ -74,7 +76,6 @@ class SourceListItem extends React.Component {
 
   renderStatusItems() {
     const { item } = this.props;
-    const { expanded, expandType } = this.state;
 
     let credentialCount = item.credentials ? item.credentials.length : 0;
     let okHostCount = item.hosts ? item.hosts.length : 0;
@@ -96,7 +97,7 @@ class SourceListItem extends React.Component {
           }
         >
           <ListView.Expand
-            expanded={expanded && expandType === 'credentials'}
+            expanded={item.expanded && item.expandType === 'credentials'}
             toggleExpanded={() => {
               this.toggleExpand('credentials');
             }}
@@ -121,11 +122,13 @@ class SourceListItem extends React.Component {
           id="okHostsTip"
           tooltip={
             okHostCount +
-            (okHostCount === 1 ? ' Successful System' : ' Successful Systems')
+            (okHostCount === 1
+              ? ' Successful Authentication'
+              : ' Successful Authentications')
           }
         >
           <ListView.Expand
-            expanded={expanded && expandType === 'okHosts'}
+            expanded={item.expanded && item.expandType === 'okHosts'}
             toggleExpanded={() => {
               this.toggleExpand('okHosts');
             }}
@@ -150,11 +153,13 @@ class SourceListItem extends React.Component {
           id="failedHostsTip"
           tooltip={
             failedHostCount +
-            (failedHostCount === 1 ? ' Failed System' : ' Failed Systems')
+            (failedHostCount === 1
+              ? ' Failed Authentication'
+              : ' Failed Authentications')
           }
         >
           <ListView.Expand
-            expanded={expanded && expandType === 'failedHosts'}
+            expanded={item.expanded && item.expandType === 'failedHosts'}
             toggleExpanded={() => {
               this.toggleExpand('failedHosts');
             }}
@@ -173,9 +178,8 @@ class SourceListItem extends React.Component {
 
   renderExpansionContents() {
     const { item } = this.props;
-    const { expandType } = this.state;
 
-    switch (expandType) {
+    switch (item.expandType) {
       case 'okHosts':
         return <SourceHostsList hosts={item.hosts} status="ok" />;
       case 'failedHosts':
@@ -189,13 +193,102 @@ class SourceListItem extends React.Component {
     }
   }
 
+  renderDescription() {
+    const { item } = this.props;
+    return (
+      <div className="quipucords-split-description">
+        <span className="quipucords-description-left">
+          <ListView.DescriptionHeading>{item.name}</ListView.DescriptionHeading>
+          {item.hosts &&
+            item.hosts.map((host, index) => {
+              return (
+                <ListView.DescriptionText key={index}>
+                  {host}
+                </ListView.DescriptionText>
+              );
+            })}
+        </span>
+        <span className="quipucords-description-right">
+          {this.renderScanStatus()}
+        </span>
+      </div>
+    );
+  }
+
+  renderScanStatus() {
+    const { item } = this.props;
+
+    let scanDescription = '';
+    let scan = item.connection_scan;
+    if (!scan) {
+      scan = {
+        status: 'running'
+      };
+    }
+
+    let icon = null;
+    switch (scan.status) {
+      case 'completed':
+        scanDescription = 'Last Connected';
+        icon = <Icon className="scan-status-icon" type="pf" name="ok" />;
+        break;
+      case 'failed':
+        scanDescription = 'Connection Failed';
+        icon = (
+          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
+        );
+        break;
+      case 'canceled':
+        scanDescription = 'Connection Canceled';
+        icon = (
+          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
+        );
+        break;
+      case 'created':
+      case 'pending':
+      case 'running':
+        scanDescription = 'Connection in Progress';
+        icon = (
+          <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />
+        );
+        break;
+      case 'paused':
+        scanDescription = 'Connection Paused';
+        icon = (
+          <Icon
+            className="scan-status-icon"
+            type="pf"
+            name="warning-triangle-o"
+          />
+        );
+        break;
+      default:
+        return null;
+    }
+
+    return (
+      <div className="scan-description">
+        {icon}
+        <div className="scan-status-text">
+          <div>{scanDescription}</div>
+          <div>Started 5 min ago</div>
+        </div>
+      </div>
+    );
+  }
   render() {
     const { item, onItemSelectChange } = this.props;
-    const { expanded } = this.state;
+
+    const classes = cx({
+      'list-view-pf-top-align': true,
+      active: item.selected
+    });
 
     return (
       <ListView.Item
         key={item.id}
+        stacked
+        className={classes}
         checkboxInput={
           <Checkbox
             checked={item.selected}
@@ -205,10 +298,10 @@ class SourceListItem extends React.Component {
         }
         actions={this.renderActions()}
         leftContent={this.renderSourceType()}
-        heading={item.name}
+        description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
-        compoundExpanded={expanded}
+        compoundExpanded={item.expanded}
         onCloseCompoundExpand={this.closeExpand}
       >
         {this.renderExpansionContents()}

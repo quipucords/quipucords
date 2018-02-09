@@ -67,8 +67,10 @@ class ScanStartCommand(CliCommand):
                                payload=None)
             if response.status_code == codes.ok:  # pylint: disable=no-member
                 json_data = response.json()
-                if len(json_data) == 1:
-                    source_entry = json_data[0]
+                count = json_data.get('count', 0)
+                results = json_data.get('results', [])
+                if count == 1:
+                    source_entry = results[0]
                     source_ids.append(source_entry['id'])
                 else:
                     print(_(messages.SOURCE_DOES_NOT_EXIST % source_name))
