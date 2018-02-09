@@ -12,6 +12,7 @@
 
 import os
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -19,12 +20,15 @@ from rest_framework.authentication import (TokenAuthentication,
                                            SessionAuthentication)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
+from rest_framework.serializers import ValidationError
 from django_filters.rest_framework import (DjangoFilterBackend,
                                            FilterSet)
 from filters import mixins
 from api.filters import ListFilter
 from api.serializers import CredentialSerializer
 from api.models import Credential, Source
+import api.messages as messages
+from api.common.util import is_int
 
 IDENTIFIER_KEY = 'id'
 NAME_KEY = 'name'
@@ -123,6 +127,12 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
         """Get a host credential."""
+        if not pk or (pk and not is_int(pk)):
+            error = {
+                'id': [_(messages.COMMON_ID_INV)]
+            }
+            raise ValidationError(error)
+
         host_cred = get_object_or_404(self.queryset, pk=pk)
         serializer = CredentialSerializer(host_cred)
         cred = format_credential(serializer.data)

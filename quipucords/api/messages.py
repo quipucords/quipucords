@@ -131,6 +131,7 @@ ALREADY_RUNNING = 'Scan cannot be restarted. ' \
 COMMON_CHOICE_STR = 'Must be a string. Valid values are %s.'
 COMMON_CHOICE_BLANK = 'This field may not be blank. Valid values are %s.'
 COMMON_CHOICE_INV = '%s, is an invalid choice. Valid values are %s.'
+COMMON_ID_INV = 'The id must be an integer.'
 
 # report messages
 REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \
