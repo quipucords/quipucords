@@ -401,7 +401,7 @@ The ``qpc report detail`` command provides unprocessed facts gathered during a s
 **qpc report detail --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
 
 ``--id=scan_identifier``
-  Required. Contains the scan identifier to display.
+  Required. Contains the report's scan identifier to display.
 
 ``--json``
   Optional. Displays the results of the report as JSON.
@@ -414,11 +414,11 @@ The ``qpc report detail`` command provides unprocessed facts gathered during a s
 
 View Summary Report
 ~~~~~~~~~~~~~~~~~~~
-The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with identical Mac Address could be seen during a network scan and vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and vcenter data.
+The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with an identical mac address could be seen during a network scan and a Vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and Vcenter data.
 
 **qpc report summary --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
 ``--id=scan_identifier``
-  Required. Contains the scan identifier to display.
+  Required. Contains the report's scan identifier to display.
 
 ``--json``
   Optional. Displays the results of the report as JSON.
