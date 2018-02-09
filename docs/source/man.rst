@@ -396,7 +396,7 @@ Use the ``qpc report`` command to view the reports from a scan.  Reports can be 
 
 View Detail Report
 ~~~~~~~~~~~~~~~~~~~
-The ``qpc report detail`` command provides unprocessed facts gathered during a scan.  These are the raw output from network, VCenter, and Satellite scans.
+The ``qpc report detail`` command provides unprocessed facts gathered during a scan.  These are the raw output from network, vcenter, and satellite scans.
 
 **qpc report detail --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
 
@@ -404,27 +404,27 @@ The ``qpc report detail`` command provides unprocessed facts gathered during a s
   Required. Contains the report's scan identifier to display.
 
 ``--json``
-  Optional. Displays the results of the report as JSON.
+  Displays the results of the report as JSON.  Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
-  Optional. Displays the results of the report as CSV.
+  Displays the results of the report as CSV.  Mutually exclusive with the ``--json`` option.
 
 ``--output-file=PATH``
   Required. Path to a file location where the report data will be saved.
 
 View Summary Report
 ~~~~~~~~~~~~~~~~~~~
-The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with an identical mac address could be seen during a network scan and a Vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and Vcenter data.
+The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with an identical mac address could be seen during a network scan and a vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and vcenter data.
 
 **qpc report summary --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
 ``--id=scan_identifier``
   Required. Contains the report's scan identifier to display.
 
 ``--json``
-  Optional. Displays the results of the report as JSON.
+  Displays the results of the report as JSON.  Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
-  Optional. Displays the results of the report as CSV.
+  Displays the results of the report as CSV.  Mutually exclusive with the ``--json`` option.
 
 ``--output-file=PATH``
   Required. Path to a file location where the report data will be saved.
