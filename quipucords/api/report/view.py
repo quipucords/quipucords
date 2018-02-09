@@ -28,6 +28,7 @@ from api.report.renderer import ReportCSVRenderer
 from api.models import SystemFingerprint
 from api.serializers import FingerprintSerializer
 import api.messages as messages
+from api.common.util import is_int
 
 
 # Get an instance of a logger
@@ -73,6 +74,12 @@ class ReportListView(APIView):
                         fact_collection_id)
             return Response(collection_report_list)
         else:
+            if not is_int(fact_collection_id):
+                error = {
+                    'fact_collection_id': [_(messages.COMMON_ID_INV)]
+                }
+                raise ValidationError(error)
+
             report = self.build_report(fact_collection_id,
                                        request.query_params)
             if report is not None:

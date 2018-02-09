@@ -429,6 +429,13 @@ class SourceTest(TestCase):
         self.assertIn('hosts', response_json)
         self.assertEqual(response_json['hosts'][0], '1.2.3.4')
 
+    def test_retrieve_bad_id(self):
+        """Get details on a specific Source by bad primary key."""
+        url = reverse('source-detail', args=('string',))
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
     def test_update(self):

@@ -434,6 +434,12 @@ class ScanJobTest(TestCase):
         self.assertEqual(
             sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
 
+    def test_retrieve_bad_id(self):
+        """Get ScanJob details by bad primary key."""
+        url = reverse('scanjob-detail', args=('string',))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_details(self, start_scan):
         """Get ScanJob result details by primary key."""
@@ -608,6 +614,14 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
+    def test_pause_bad_id(self):
+        """Pause a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
+        pause_url = '{}pause/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
@@ -625,6 +639,14 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
 
+    def test_cancel_bad_id(self):
+        """Cancel a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
+        pause_url = '{}cancel/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
@@ -637,6 +659,14 @@ class ScanJobTest(TestCase):
         response = self.create_expect_201(data_host)
 
         url = reverse('scanjob-detail', args=(response['id'],))
+        pause_url = '{}restart/'.format(url)
+        response = self.client.put(pause_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
+    def test_restart_bad_id(self):
+        """Restart a scanjob with bad id."""
+        url = reverse('scanjob-detail', args=('string',))
         pause_url = '{}restart/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
