@@ -388,6 +388,48 @@ The ``qpc scan cancel`` command cancels the execution of a scan. A canceled scan
   Required. Contains the identifier of the scan to cancel.
 
 
+Reports
+--------
+
+Use the ``qpc report`` command to view the reports from a scan.  Reports can be viewed as JSON or a CSV.  There are two different types of report: detail and summary.
+
+
+View Details Report
+~~~~~~~~~~~~~~~~~~~
+The ``qpc report detail`` command provides unprocessed facts gathered during a scan.  These are the raw output from network, VCenter, and Satellite scans.
+
+**qpc report detail --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
+
+``--id=scan_identifier``
+  Required. Contains the scan identifier to display.
+
+``--json``
+  Optional. Displays the results of the report as JSON.
+
+``--csv``
+  Optional. Displays the results of the report as CSV.
+
+``--output-file=PATH``
+  Required. Path to a file location where the report data will be saved.
+
+View Summary Report
+~~~~~~~~~~~~~~~~~~~
+The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with identical Mac Address could be seen during a network scan and vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and vcenter data.
+
+**qpc report summary --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
+``--id=scan_identifier``
+  Required. Contains the scan identifier to display.
+
+``--json``
+  Optional. Displays the results of the report as JSON.
+
+``--csv``
+  Optional. Displays the results of the report as CSV.
+
+``--output-file=PATH``
+  Required. Path to a file location where the report data will be saved.
+
+
 Options for All Commands
 ------------------------
 
