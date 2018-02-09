@@ -34,6 +34,7 @@ DEFAULT_TIMEOUT = '120s'
 DEFAULT_ROLES = [
     'check_dependencies',
     'connection',
+    'virt',
     'cpu',
     'date',
     'dmi',
@@ -47,7 +48,6 @@ DEFAULT_ROLES = [
     'redhat_release',
     'subman',
     'uname',
-    'virt',
     'virt_what',
     'host_done',
 ]
