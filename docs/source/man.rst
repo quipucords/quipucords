@@ -394,7 +394,7 @@ Reports
 Use the ``qpc report`` command to view the reports from a scan.  Reports can be viewed as JSON or a CSV.  There are two different types of report: detail and summary.
 
 
-View Details Report
+View Detail Report
 ~~~~~~~~~~~~~~~~~~~
 The ``qpc report detail`` command provides unprocessed facts gathered during a scan.  These are the raw output from network, VCenter, and Satellite scans.
 
