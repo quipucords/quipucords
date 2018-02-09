@@ -49,6 +49,29 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Invalid input"
+  /facts/{fact_collection_id}:
+    get:
+      tags:
+        - "Fact"
+      summary: "Get an fact collection"
+      description: "Get raw facts in fact collection."
+      operationId: "getFacts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fact_collection_id"
+        in: "path"
+        description: "ID of fact collection."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Fact collection retrieved"
+          schema:
+            $ref: "#/definitions/FactCollectionSource"
+        404:
+          description: "Fact collection not found"
   /credentials/:
     post:
       tags:
