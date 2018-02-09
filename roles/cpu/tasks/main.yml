@@ -110,7 +110,7 @@
 - name: set cpu.core_count to cpu_count if vmware
   set_fact:
     cpu_core_count: "{{ (cpu_count | int) }}"
-  when: '"cpu_count is defined and virt_type is defined and virt_type == "vmware"'
+  when: 'cpu_count is defined and virt_type is defined and virt_type == "vmware"'
 
 - name: default cpu.core_count to error if it doesn't exists
   set_fact:
