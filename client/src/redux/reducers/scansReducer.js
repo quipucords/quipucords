@@ -48,7 +48,6 @@ const scansReducer = function(state = initialState, action) {
         'view',
         {
           scans: action.payload.results,
-
           fulfilled: true
         },
         {
