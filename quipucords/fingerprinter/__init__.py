@@ -68,7 +68,6 @@ def process_fact_collection(sender, instance, **kwargs):
             serializer.save()
         else:
             number_invalid += 1
-            logger.error('Fingerprint engine could not persist fingerprint.')
             logger.error('Invalid fingerprint: %s', fingerprint_dict)
             logger.error('Fingerprint errors: %s', serializer.errors)
 
