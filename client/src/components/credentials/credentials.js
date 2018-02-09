@@ -16,16 +16,18 @@ import {
 } from 'patternfly-react';
 
 import { getCredentials } from '../../redux/actions/credentialsActions';
-import Store from '../../redux/store';
 import {
   confirmationModalTypes,
   credentialsTypes,
   toastNotificationTypes,
   viewTypes
 } from '../../redux/constants';
-import { bindMethods } from '../../common/helpers';
+import Store from '../../redux/store';
+import helpers from '../../common/helpers';
 
 import ViewToolbar from '../viewToolbar/viewToolbar';
+import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
+
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
@@ -38,7 +40,7 @@ class Credentials extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'addCredential',
       'deleteCredentials',
       'itemSelectChange',
@@ -49,16 +51,15 @@ class Credentials extends React.Component {
       'refresh'
     ]);
     this.state = {
-      filteredItems: [],
       selectedItems: []
     };
   }
 
   componentDidMount() {
-    this.props.getCredentials();
+    this.props.getCredentials(helpers.viewQueryObject(this.props.viewOptions));
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextState) {
     if (nextProps.credentials !== this.props.credentials) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
@@ -68,101 +69,17 @@ class Credentials extends React.Component {
         } else {
           credential.auth_type = 'usernamePassword';
         }
-
-        // TODO: Remove once we get real source data
-        let sourceCount = Math.floor(Math.random() * 10);
-        credential.sources = [];
-        for (let i = 0; i < sourceCount; i++) {
-          credential.sources.push('Source ' + (i + 1));
-        }
       });
 
-      let filteredItems = this.filterCredentials(
-        nextProps.credentials,
-        nextProps.activeFilters
-      );
-
-      this.setState({ filteredItems: filteredItems, selectedItems: [] });
-    } else if (nextProps.activeFilters !== this.props.activeFilters) {
-      let filteredItems = this.filterCredentials(
-        nextProps.credentials,
-        nextProps.activeFilters
-      );
-      this.setState({ filteredItems: filteredItems });
-    }
-  }
-
-  matchString(value, match) {
-    if (!value) {
-      return false;
+      this.setState({ selectedItems: [] });
     }
 
-    if (!match) {
-      return true;
+    // Check for changes resulting in a fetch
+    if (
+      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
+    ) {
+      this.props.getCredentials(helpers.viewQueryObject(nextProps.viewOptions));
     }
-
-    return value.toLowerCase().includes(match.toLowerCase());
-  }
-
-  matchesFilter(item, filter) {
-    switch (filter.field.id) {
-      case 'name':
-        return this.matchString(item.name, filter.value);
-      case 'credentialType':
-        return item.cred_type === filter.value.id;
-      case 'authenticationType':
-        return item.auth_type === filter.value.id;
-      default:
-        return true;
-    }
-  }
-
-  matchesFilters(item, filters) {
-    let matches = true;
-
-    filters.forEach(filter => {
-      if (!this.matchesFilter(item, filter)) {
-        matches = false;
-        return false;
-      }
-    });
-    return matches;
-  }
-
-  filterCredentials(credentials, filters) {
-    if (!filters || filters.length === 0) {
-      return credentials;
-    }
-
-    return credentials.filter(item => {
-      return this.matchesFilters(item, filters);
-    });
-  }
-
-  sortCredentials(items) {
-    const { sortType, sortAscending } = this.props;
-
-    let sortId = sortType ? sortType.id : 'name';
-
-    items.sort((item1, item2) => {
-      let compValue;
-      switch (sortId) {
-        case 'name':
-          compValue = item1.name.localeCompare(item2.name);
-          break;
-        case 'credentialType':
-          compValue = item1.cred_type.localeCompare(item2.cred_type);
-          break;
-        default:
-          compValue = 0;
-      }
-
-      if (!sortAscending) {
-        compValue = compValue * -1;
-      }
-
-      return compValue;
-    });
   }
 
   addCredential(credentialType) {
@@ -210,10 +127,10 @@ class Credentials extends React.Component {
   }
 
   itemSelectChange(item) {
-    const { filteredItems } = this.state;
+    const { credentials } = this.props;
 
     item.selected = !item.selected;
-    let selectedItems = filteredItems.filter(item => {
+    let selectedItems = credentials.filter(item => {
       return item.selected === true;
     });
 
@@ -340,13 +257,8 @@ class Credentials extends React.Component {
       error,
       errorMessage,
       credentials,
-      filterType,
-      filterValue,
-      activeFilters,
-      sortType,
-      sortAscending
+      viewOptions
     } = this.props;
-    const { filteredItems } = this.state;
 
     if (pending) {
       return (
@@ -370,29 +282,25 @@ class Credentials extends React.Component {
     }
 
     if (credentials && credentials.length) {
-      this.sortCredentials(filteredItems);
-
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
             <ViewToolbar
               viewType={viewTypes.CREDENTIALS_VIEW}
-              totalCount={credentials.length}
-              filteredCount={filteredItems.length}
               filterFields={CredentialFilterFields}
               sortFields={CredentialSortFields}
               actions={this.renderActions()}
               itemsType="Credential"
               itemsTypePlural="Credentials"
-              filterType={filterType}
-              filterValue={filterValue}
-              activeFilters={activeFilters}
-              sortType={sortType}
-              sortAscending={sortAscending}
+              {...viewOptions}
             />
             <div className="quipucords-list-container">
-              {this.renderList(filteredItems)}
+              {this.renderList(credentials)}
             </div>
+            <ViewPaginationRow
+              viewType={viewTypes.CREDENTIALS_VIEW}
+              {...viewOptions}
+            />
           </div>
           <CreateCredentialDialog credentials={credentials} />
         </React.Fragment>
@@ -419,12 +327,7 @@ Credentials.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   credentials: PropTypes.array,
-
-  filterType: PropTypes.object,
-  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-  activeFilters: PropTypes.array,
-  sortType: PropTypes.object,
-  sortAscending: PropTypes.bool
+  viewOptions: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -432,12 +335,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign(
-    {},
-    state.credentials.view,
-    state.credentials.persist,
-    state.toolbars[viewTypes.CREDENTIALS_VIEW]
-  );
+  return Object.assign({}, state.credentials.view, state.credentials.persist, {
+    viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW]
+  });
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Credentials);

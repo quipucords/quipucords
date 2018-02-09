@@ -120,6 +120,45 @@ export const setStateProp = (prop, data, options) => {
   return obj;
 };
 
+export const viewPropsChanged = (nextViewOptions, currentViewOptions) => {
+  return (
+    nextViewOptions.currentPage !== currentViewOptions.currentPage ||
+    nextViewOptions.pageSize !== currentViewOptions.pageSize ||
+    nextViewOptions.sortField !== currentViewOptions.sortField ||
+    nextViewOptions.sortAscending !== currentViewOptions.sortAscending ||
+    nextViewOptions.activeFilters !== currentViewOptions.activeFilters
+  );
+};
+
+export const viewQueryObject = (viewOptions, queryObj) => {
+
+  let queryObject = {
+    ...queryObj
+  };
+
+  if (viewOptions) {
+    if (viewOptions.sortField) {
+      queryObject.ordering = viewOptions.sortAscending
+        ? viewOptions.sortField
+        : `-${viewOptions.sortField}`;
+    }
+
+    if (viewOptions.activeFilters) {
+      viewOptions.activeFilters.forEach(filter => {
+        queryObject[filter.id] =
+          filter.filterType === 'select'
+            ? filter.filterValue.id
+            : filter.filterValue;
+      });
+    }
+
+    queryObject.page = viewOptions.currentPage;
+    queryObject.page_size = viewOptions.pageSize;
+  }
+
+  return queryObject;
+};
+
 export const helpers = {
   bindMethods: bindMethods,
   noop: noop,
@@ -129,7 +168,9 @@ export const helpers = {
   scanStatusString: scanStatusString,
   scanTypeIcon: scanTypeIcon,
   authorizationTypeString: authorizationTypeString,
-  setStateProp: setStateProp
+  setStateProp: setStateProp,
+  viewPropsChanged: viewPropsChanged,
+  viewQueryObject: viewQueryObject
 };
 
 export default helpers;

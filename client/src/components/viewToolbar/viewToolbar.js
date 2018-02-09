@@ -218,7 +218,7 @@ class ViewToolbar extends React.Component {
 
     return (
       <h5>
-        {activeFilters && activeFilters.length > 0
+        {filteredCount >= 0 && activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
         {totalCount + ' ' + (totalCount === 1 ? itemsType : itemsTypePlural)}
@@ -287,6 +287,10 @@ ViewToolbar.propTypes = {
   activeFilters: PropTypes.array,
   sortType: PropTypes.object,
   sortAscending: PropTypes.bool
+};
+
+ViewToolbar.defaultProps = {
+  filteredCount: -1
 };
 
 export default ViewToolbar;
