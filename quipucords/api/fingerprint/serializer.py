@@ -36,8 +36,9 @@ class FingerprintSerializer(ModelSerializer):
     os_release = CharField(required=False, max_length=128)
     os_version = CharField(required=False, max_length=64)
 
-    infrastructure_type = ChoiceField(required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
-    virtualized_is_guest = NullBooleanField()
+    infrastructure_type = ChoiceField(
+        required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
+    virtualized_is_guest = NullBooleanField(default=None)
 
     mac_addresses = CustomJSONField(required=False)
     ip_addresses = CustomJSONField(required=False)
