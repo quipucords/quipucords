@@ -12,6 +12,19 @@ const initialState = {
     pending: false,
     fulfilled: false,
     sources: []
+  },
+
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    source: null,
+    sourceType: '',
+    show: false,
+    add: false,
+    edit: false,
+    delete: false
   }
 };
 
@@ -30,7 +43,90 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
+    // Show/Hide
+    case sourcesTypes.CREATE_SOURCE_SHOW:
+      return helpers.setStateProp(
+        'update',
+        {
+          show: true,
+          add: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.EDIT_SOURCE_SHOW:
+      return helpers.setStateProp(
+        'update',
+        {
+          show: true,
+          edit: true,
+          source: action.source
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.UPDATE_SOURCE_HIDE:
+      return helpers.setStateProp(
+        'update',
+        {
+          show: false
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
     // Error/Rejected
+    case sourcesTypes.ADD_SOURCE_REJECTED:
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          add: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.DELETE_SOURCE_REJECTED:
+    case sourcesTypes.DELETE_SOURCES_REJECTED:
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.UPDATE_SOURCE_REJECTED:
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.payload.error,
+          errorMessage: action.payload.message,
+          edit: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
     case sourcesTypes.GET_SOURCES_REJECTED:
       return helpers.setStateProp(
         'view',

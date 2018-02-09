@@ -29,6 +29,10 @@ class SourcesService {
     });
   }
 
+  static deleteSources(data = []) {
+    return Promise.all.apply(this, data.map(id => this.deleteSource(id)));
+  }
+
   static getSource(id) {
     return this.getSources(id);
   }

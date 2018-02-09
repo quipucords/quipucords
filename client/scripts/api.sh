@@ -60,7 +60,9 @@ mockApi()
     docker run -d --rm -p $PORT:8000 -v "$FILE:/data/swagger.yaml" --name quipucords-mock $CONTAINER >/dev/null
   fi
 
-  checkContainerRunning $CONTAINER $FILE
+  if [ "$UPDATE" = false ]; then
+    checkContainerRunning $CONTAINER $FILE
+  fi
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"

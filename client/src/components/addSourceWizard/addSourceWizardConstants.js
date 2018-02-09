@@ -1,4 +1,4 @@
-const AddSourceWizardSteps = [
+const addSourceWizardSteps = [
   {
     step: '1',
     label: '1',
@@ -19,4 +19,4 @@ const AddSourceWizardSteps = [
   }
 ];
 
-export { AddSourceWizardSteps };
+export { addSourceWizardSteps };

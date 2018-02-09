@@ -159,17 +159,17 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 };
 
 export const helpers = {
-  bindMethods: bindMethods,
-  noop: noop,
-  sourceTypeString: sourceTypeString,
-  sourceTypeIcon: sourceTypeIcon,
-  scanTypeString: scanTypeString,
-  scanStatusString: scanStatusString,
-  scanTypeIcon: scanTypeIcon,
-  authorizationTypeString: authorizationTypeString,
-  setStateProp: setStateProp,
-  viewPropsChanged: viewPropsChanged,
-  createViewQueryObject: createViewQueryObject
+  bindMethods,
+  noop,
+  sourceTypeString,
+  sourceTypeIcon,
+  scanTypeString,
+  scanStatusString,
+  scanTypeIcon,
+  authorizationTypeString,
+  setStateProp,
+  viewPropsChanged,
+  createViewQueryObject
 };
 
 export default helpers;
