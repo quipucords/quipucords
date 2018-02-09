@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 
 import { Modal, Button, Form, Grid, Icon } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 
 class CreateScanDialog extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, ['updateScanName', 'confirm']);
+    helpers.bindMethods(this, ['updateScanName', 'confirm']);
     this.state = {
       scanName: '',
       validScanName: false

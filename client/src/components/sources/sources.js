@@ -58,7 +58,9 @@ class Sources extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getSources(helpers.viewQueryObject(this.props.viewOptions));
+    this.props.getSources(
+      helpers.createViewQueryObject(this.props.viewOptions)
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -84,7 +86,9 @@ class Sources extends React.Component {
     if (
       helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
     ) {
-      this.props.getSources(helpers.viewQueryObject(nextProps.viewOptions));
+      this.props.getSources(
+        helpers.createViewQueryObject(nextProps.viewOptions)
+      );
     }
   }
 
@@ -207,7 +211,7 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
-  renderActions() {
+  renderSourceActions() {
     const { selectedItems } = this.state;
 
     return (
@@ -228,7 +232,7 @@ class Sources extends React.Component {
     );
   }
 
-  renderList(items) {
+  renderSourcesList(items) {
     return (
       <ListView className="quipicords-list-view">
         {items.map((item, index) => (
@@ -284,13 +288,13 @@ class Sources extends React.Component {
               viewType={viewTypes.SOURCES_VIEW}
               filterFields={SourceFilterFields}
               sortFields={SourceSortFields}
-              actions={this.renderActions()}
+              actions={this.renderSourceActions()}
               itemsType="Source"
               itemsTypePlural="Sources"
               {...viewOptions}
             />
             <div className="quipucords-list-container">
-              {this.renderList(sources)}
+              {this.renderSourcesList(sources)}
             </div>
             <ViewPaginationRow
               viewType={viewTypes.SOURCES_VIEW}
@@ -336,7 +340,7 @@ Sources.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getSources: () => dispatch(getSources())
+  getSources: queryObj => dispatch(getSources(queryObj))
 });
 
 const mapStateToProps = function(state) {

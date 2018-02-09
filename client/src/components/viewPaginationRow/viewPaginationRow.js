@@ -3,7 +3,7 @@ import React from 'react';
 
 import { PaginationRow, PAGINATION_VIEW } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 
 import { viewPaginationTypes } from '../../redux/constants';
@@ -12,7 +12,7 @@ class ViewPaginationRow extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'onFirstPage',
       'onLastPage',
       'onPreviousPage',

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 
 import { viewToolbarTypes } from '../../redux/constants';
@@ -12,7 +12,7 @@ class ViewToolbar extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'updateCurrentValue',
       'onValueKeyPress',
       'selectFilterType',
@@ -221,7 +221,7 @@ class ViewToolbar extends React.Component {
         {filteredCount >= 0 && activeFilters && activeFilters.length > 0
           ? `${filteredCount} of `
           : null}
-        {totalCount + ' ' + (totalCount === 1 ? itemsType : itemsTypePlural)}
+        {`${totalCount} ${totalCount === 1 ? itemsType : itemsTypePlural}`}
       </h5>
     );
   }

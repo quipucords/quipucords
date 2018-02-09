@@ -45,7 +45,9 @@ class Scans extends React.Component {
 
   componentDidMount() {
     this.props.getScans(
-      helpers.viewQueryObject(this.props.viewOptions, { scan_type: 'inspect' })
+      helpers.createViewQueryObject(this.props.viewOptions, {
+        scan_type: 'inspect'
+      })
     );
   }
 
@@ -75,7 +77,7 @@ class Scans extends React.Component {
       helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
     ) {
       this.props.getScans(
-        helpers.viewQueryObject(this.props.viewOptions, {
+        helpers.createViewQueryObject(this.props.viewOptions, {
           scan_type: 'inspect'
         })
       );
@@ -158,7 +160,7 @@ class Scans extends React.Component {
     this.props.getScans({ scan_type: 'inspect' });
   }
 
-  renderActions() {
+  renderScanActions() {
     return (
       <div className="form-group">
         <Button onClick={this.refresh} bsStyle="success">
@@ -168,7 +170,7 @@ class Scans extends React.Component {
     );
   }
 
-  renderList(items) {
+  renderScansList(items) {
     return (
       <ListView className="quipicords-list-view">
         {items.map((item, index) => (
@@ -216,13 +218,13 @@ class Scans extends React.Component {
             viewType={viewTypes.SCANS_VIEW}
             filterFields={ScanFilterFields}
             sortFields={ScanSortFields}
-            actions={this.renderActions()}
+            actions={this.renderScanActions()}
             itemsType="Scan"
             itemsTypePlural="Scans"
             {...viewOptions}
           />
           <div className="quipucords-list-container">
-            {this.renderList(scans)}
+            {this.renderScansList(scans)}
           </div>
           <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
         </div>
@@ -247,7 +249,7 @@ Scans.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScans: () => dispatch(getScans())
+  getScans: queryObj => dispatch(getScans(queryObj))
 });
 
 const mapStateToProps = function(state) {

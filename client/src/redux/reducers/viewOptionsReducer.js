@@ -50,8 +50,14 @@ export default function toolbarsReducer(state = initialState, action) {
   let updateState = {};
 
   let updatePageCounts = (viewType, itemsCount) => {
-    let totalCount = Math.abs(itemsCount) % 1000;
-    let totalPages = Math.round(totalCount / state[viewType].pageSize + 0.5);
+    let totalCount = itemsCount;
+
+    // TODO: Remove this when we get decent data back in development mode
+    if (process.env.NODE_ENV === 'development') {
+      totalCount = Math.abs(itemsCount) % 1000;
+    }
+
+    let totalPages = Math.ceil(totalCount / state[viewType].pageSize);
 
     updateState[viewType] = Object.assign({}, state[viewType], {
       totalCount: totalCount,

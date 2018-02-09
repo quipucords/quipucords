@@ -56,7 +56,9 @@ class Credentials extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getCredentials(helpers.viewQueryObject(this.props.viewOptions));
+    this.props.getCredentials(
+      helpers.createViewQueryObject(this.props.viewOptions)
+    );
   }
 
   componentWillReceiveProps(nextProps, nextState) {
@@ -78,7 +80,9 @@ class Credentials extends React.Component {
     if (
       helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
     ) {
-      this.props.getCredentials(helpers.viewQueryObject(nextProps.viewOptions));
+      this.props.getCredentials(
+        helpers.createViewQueryObject(nextProps.viewOptions)
+      );
     }
   }
 
@@ -198,7 +202,7 @@ class Credentials extends React.Component {
     this.props.getCredentials();
   }
 
-  renderActions() {
+  renderCredentialActions() {
     const { selectedItems } = this.state;
 
     return (
@@ -235,7 +239,7 @@ class Credentials extends React.Component {
     );
   }
 
-  renderList(items) {
+  renderCredentialsList(items) {
     return (
       <ListView className="quipicords-list-view">
         {items.map((item, index) => (
@@ -289,13 +293,13 @@ class Credentials extends React.Component {
               viewType={viewTypes.CREDENTIALS_VIEW}
               filterFields={CredentialFilterFields}
               sortFields={CredentialSortFields}
-              actions={this.renderActions()}
+              actions={this.renderCredentialActions()}
               itemsType="Credential"
               itemsTypePlural="Credentials"
               {...viewOptions}
             />
             <div className="quipucords-list-container">
-              {this.renderList(credentials)}
+              {this.renderCredentialsList(credentials)}
             </div>
             <ViewPaginationRow
               viewType={viewTypes.CREDENTIALS_VIEW}
@@ -331,7 +335,7 @@ Credentials.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredentials: () => dispatch(getCredentials())
+  getCredentials: queryObj => dispatch(getCredentials(queryObj))
 });
 
 const mapStateToProps = function(state) {

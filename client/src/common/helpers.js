@@ -1,12 +1,12 @@
-export const bindMethods = (context, methods) => {
+const bindMethods = (context, methods) => {
   methods.forEach(method => {
     context[method] = context[method].bind(context);
   });
 };
 
-export const noop = Function.prototype;
+const noop = Function.prototype;
 
-export const sourceTypeString = sourceType => {
+const sourceTypeString = sourceType => {
   switch (sourceType) {
     case 'vcenter':
       return 'VCenter';
@@ -19,7 +19,7 @@ export const sourceTypeString = sourceType => {
   }
 };
 
-export const sourceTypeIcon = sourceType => {
+const sourceTypeIcon = sourceType => {
   switch (sourceType) {
     case 'vcenter':
       return { type: 'pf', name: 'virtual-machine' };
@@ -32,7 +32,7 @@ export const sourceTypeIcon = sourceType => {
   }
 };
 
-export const scanTypeString = scanType => {
+const scanTypeString = scanType => {
   switch (scanType) {
     case 'connect':
       return 'Connection Scan';
@@ -43,7 +43,7 @@ export const scanTypeString = scanType => {
   }
 };
 
-export const scanTypeIcon = scanType => {
+const scanTypeIcon = scanType => {
   switch (scanType) {
     case 'connect':
       return { type: 'pf', name: 'connected' };
@@ -54,7 +54,7 @@ export const scanTypeIcon = scanType => {
   }
 };
 
-export const scanStatusString = scanStatus => {
+const scanStatusString = scanStatus => {
   switch (scanStatus) {
     case 'completed':
       return 'Completed';
@@ -75,7 +75,7 @@ export const scanStatusString = scanStatus => {
   }
 };
 
-export const authorizationTypeString = authorizationType => {
+const authorizationTypeString = authorizationType => {
   switch (authorizationType) {
     case 'usernamePassword':
       return 'Username & Password';
@@ -86,7 +86,7 @@ export const authorizationTypeString = authorizationType => {
   }
 };
 
-export const setStateProp = (prop, data, options) => {
+const setStateProp = (prop, data, options) => {
   let { state = {}, initialState = {}, reset = true } = options;
   let obj = { ...state };
 
@@ -120,7 +120,7 @@ export const setStateProp = (prop, data, options) => {
   return obj;
 };
 
-export const viewPropsChanged = (nextViewOptions, currentViewOptions) => {
+const viewPropsChanged = (nextViewOptions, currentViewOptions) => {
   return (
     nextViewOptions.currentPage !== currentViewOptions.currentPage ||
     nextViewOptions.pageSize !== currentViewOptions.pageSize ||
@@ -130,8 +130,7 @@ export const viewPropsChanged = (nextViewOptions, currentViewOptions) => {
   );
 };
 
-export const viewQueryObject = (viewOptions, queryObj) => {
-
+const createViewQueryObject = (viewOptions, queryObj) => {
   let queryObject = {
     ...queryObj
   };
@@ -170,7 +169,7 @@ export const helpers = {
   authorizationTypeString: authorizationTypeString,
   setStateProp: setStateProp,
   viewPropsChanged: viewPropsChanged,
-  viewQueryObject: viewQueryObject
+  createViewQueryObject: createViewQueryObject
 };
 
 export default helpers;

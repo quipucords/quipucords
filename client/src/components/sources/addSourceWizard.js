@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button, Icon, Wizard } from 'patternfly-react';
-import { noop, bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 import { AddSourceWizardSteps } from './addSourceWizardConstants';
 
 class AddSourceWizard extends React.Component {
@@ -12,7 +12,7 @@ class AddSourceWizard extends React.Component {
       activeStepIndex: props.initialStepIndex || 0
     };
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'confirm',
       'onStepClick',
       'onNextButtonClick',
@@ -50,7 +50,7 @@ class AddSourceWizard extends React.Component {
           label={step.label}
           title={step.title}
           activeStep={activeStep && activeStep.step}
-          onClick={onStepClick || noop}
+          onClick={onStepClick || helpers.noop}
         />
       );
     });

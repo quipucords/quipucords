@@ -7,7 +7,7 @@ import {
   TimedToastNotification
 } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
 
@@ -15,7 +15,7 @@ class ToastNotificationsList extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, ['onHover', 'onLeave', 'onDismiss']);
+    helpers.bindMethods(this, ['onHover', 'onLeave', 'onDismiss']);
   }
 
   onHover() {
