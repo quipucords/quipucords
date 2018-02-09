@@ -94,19 +94,35 @@ class CredentialListItem extends React.Component {
 
     switch (item.expandType) {
       case 'sources':
+        item.sources &&
+          item.sources.sort((item1, item2) => {
+            let cmpVal = item1.source_type.localeCompare(item2.source_type);
+            if (cmpVal === 0) {
+              cmpVal = item1.name.localeCompare(item2.name);
+            }
+            return cmpVal;
+          });
         return (
           <Grid fluid>
             {item.sources &&
-              item.sources.map((item, index) => (
-                <Grid.Row key={index}>
-                  <Grid.Col xs={12} sm={4}>
-                    <span>
-                      <Icon type="pf" name="server-group" />
-                      &nbsp; {item}
-                    </span>
-                  </Grid.Col>
-                </Grid.Row>
-              ))}
+              item.sources.map((source, index) => {
+                let typeIcon = helpers.sourceTypeIcon(source.source_type);
+                return (
+                  <Grid.Row key={index}>
+                    <Grid.Col xs={12} sm={4}>
+                      <span>
+                        <SimpleTooltip
+                          id="sourceTypeTip"
+                          tooltip={helpers.sourceTypeString(source.source_type)}
+                        >
+                          <Icon type={typeIcon.type} name={typeIcon.name} />
+                        </SimpleTooltip>
+                        &nbsp; {source.name}
+                      </span>
+                    </Grid.Col>
+                  </Grid.Row>
+                );
+              })}
           </Grid>
         );
       default:

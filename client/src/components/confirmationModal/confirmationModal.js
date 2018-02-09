@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import { Modal, Button, Icon } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
+import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { confirmationModalTypes } from '../../redux/constants';
 
@@ -12,7 +12,7 @@ class ConfirmationModal extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, ['cancel']);
+    helpers.bindMethods(this, ['cancel']);
   }
 
   cancel() {
