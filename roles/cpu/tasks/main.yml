@@ -107,6 +107,11 @@
     cpu_core_count: "{{ (cpu_count | int) /  2 }}"
   when: 'cpu_core_per_socket is defined and not cpu_core_per_socket and cpu_hyperthreading'
 
+- name: set cpu.core_count to cpu_count if vmware
+  set_fact:
+    cpu_core_count: "{{ (cpu_count | int) }}"
+  when: '"cpu_count is defined and virt_type is defined and virt_type == "vmware"'
+
 - name: default cpu.core_count to error if it doesn't exists
   set_fact:
     cpu_core_count: ""
