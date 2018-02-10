@@ -10,6 +10,7 @@ import * as viewTypes from './viewConstants';
 import * as viewPaginationTypes from './viewPaginationConstants';
 import * as viewToolbarTypes from './viewToolbarConstants';
 import * as confirmationModalTypes from './confirmationModalConstants';
+import * as userTypes from './userConstants';
 
 const reduxTypes = {
   about: aboutTypes,
@@ -23,7 +24,8 @@ const reduxTypes = {
   view: viewTypes,
   viewPagination: viewPaginationTypes,
   viewToolbar: viewToolbarTypes,
-  confirmationModal: confirmationModalTypes
+  confirmationModal: confirmationModalTypes,
+  user: userTypes
 };
 
 export {
@@ -39,7 +41,8 @@ export {
   viewTypes,
   viewPaginationTypes,
   viewToolbarTypes,
-  confirmationModalTypes
+  confirmationModalTypes,
+  userTypes
 };
 
 export default reduxTypes;

@@ -36,7 +36,7 @@ class UserService {
           const token = cookies.get('csrftoken');
 
           if (token) {
-            cookies.delete('csrftoken');
+            cookies.remove('csrftoken');
 
             return resolve({
               userName: response.userName
