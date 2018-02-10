@@ -82,17 +82,18 @@ api()
 
   if [ -z "$(docker images | grep ^$CONTAINER' ')" ] || [ "$UPDATE" = true ]; then
     echo "Setting up Docker API container"
+    (cd ../. && make clean)
     docker build -t $CONTAINER ../.
   fi
 
   if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "Starting API..."
-    docker run -d --rm -p $PORT:8000 --name $CONTAINER $CONTAINER >/dev/null
+    docker run -d --rm -p $PORT:443 --name $CONTAINER $CONTAINER >/dev/null
   fi
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
-    echo "  API running: http://localhost:$PORT/"
+    echo "  API running: https://localhost:$PORT/"
     echo "  To stop: $ docker stop $CONTAINER"
   fi
 }
