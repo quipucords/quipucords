@@ -19,12 +19,7 @@ const initialState = {
     error: false,
     errorMessage: '',
     pending: false,
-    fulfilled: false,
-    source: null,
-    sourceType: '',
-    show: false,
-    add: false,
-    edit: false,
+    sourceId: '',
     delete: false
   }
 };
@@ -77,61 +72,7 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    // Show/Hide
-    case sourcesTypes.CREATE_SOURCE_SHOW:
-      return helpers.setStateProp(
-        'update',
-        {
-          show: true,
-          add: true
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    case sourcesTypes.EDIT_SOURCE_SHOW:
-      return helpers.setStateProp(
-        'update',
-        {
-          show: true,
-          edit: true,
-          source: action.source
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    case sourcesTypes.UPDATE_SOURCE_HIDE:
-      return helpers.setStateProp(
-        'update',
-        {
-          show: false
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
     // Error/Rejected
-    case sourcesTypes.ADD_SOURCE_REJECTED:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          add: true
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
     case sourcesTypes.DELETE_SOURCE_REJECTED:
     case sourcesTypes.DELETE_SOURCES_REJECTED:
       return helpers.setStateProp(
@@ -140,20 +81,6 @@ const sourcesReducer = function(state = initialState, action) {
           error: action.error,
           errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
           delete: true
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    case sourcesTypes.UPDATE_SOURCE_REJECTED:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          edit: true
         },
         {
           state,

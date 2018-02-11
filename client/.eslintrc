@@ -8,7 +8,8 @@
         "printWidth": 120
       }
     ],
-    "max-len": ["error", {"code": 240, "ignoreUrls": true}]
+    "max-len": ["error", {"code": 240, "ignoreUrls": true}],
+    "react/no-unused-prop-types": 1
   },
   "extends": [
     "standard",

@@ -83,16 +83,20 @@ class Sources extends React.Component {
 
   showAddSourceWizard() {
     Store.dispatch({
-      type: sourcesTypes.EDIT_SOURCE_SHOW
+      type: sourcesTypes.CREATE_SOURCE_SHOW
+    });
+  }
+
+  editSource(item) {
+    Store.dispatch({
+      type: sourcesTypes.EDIT_SOURCE_SHOW,
+      source: item
     });
   }
 
   importSources() {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Importing sources is not yet implemented'
+      type: sourcesTypes.IMPORT_SOURCE_SHOW
     });
   }
 
@@ -116,15 +120,6 @@ class Sources extends React.Component {
     Store.dispatch({
       type: this.itemSelected(item) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
       source: item
-    });
-  }
-
-  editSource(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.name,
-      message: 'Editing sources is not yet implemented'
     });
   }
 

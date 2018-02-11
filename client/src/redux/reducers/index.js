@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 
 import aboutReducer from './aboutReducer';
+import addSourceWizardReducer from './addSourceWizardReducer';
 import credentialsReducer from './credentialsReducer';
 import factsReducer from './factsReducer';
 import navigationBarReducer from './navigationBarReducer';
@@ -14,6 +15,7 @@ import userReducer from './userReducer';
 
 const reducers = {
   about: aboutReducer,
+  addSourceWizard: addSourceWizardReducer,
   credentials: credentialsReducer,
   facts: factsReducer,
   navigationBar: navigationBarReducer,
