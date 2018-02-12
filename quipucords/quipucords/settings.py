@@ -246,10 +246,6 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.signals.es_receiver': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
-        },
         'api.signals.scanjob_signal': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
@@ -285,15 +281,5 @@ LOGGING = {
     },
 }
 
-# Elasticsearch env configuration
-USE_ELASTICSEARCH = os.environ.get('USE_ELASTICSEARCH', False)
-ES_HOSTS = os.environ.get('ES_HOSTS', 'http://localhost:9200')
-
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
-
-# Elasticsearch configuration
-ES_CONFIGURATION = {
-    'fingerprint_index_name': 'fingerprints_index',
-    'doc_type': 'fingerprint'
-}
