@@ -8,6 +8,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="../client/favicon.ico">
+    {% block includes %}
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/css/patternfly.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/css/patternfly-additions.min.css">
 
@@ -15,10 +16,13 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/js/patternfly.min.js"></script>
+    {% endblock %}
   </head>
   <body>
     <span id="badge">
+      {% block logo %}
       <img src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/img/logo.svg" alt="PatternFly logo"/>
+      {% endblock %}
     </span>
 
     <div class="container">

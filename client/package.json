@@ -34,7 +34,8 @@
     "start:quipucords": "open http://127.0.0.1:8000/index.html; source ../venv/bin/activate; cd ../; make serve",
     "test": "run-s test:**",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "react-scripts test --env=jsdom"
+    "test:unit": "react-scripts test --env=jsdom",
+    "postinstall": "sh ./scripts/postinstall.sh"
   },
   "dependencies": {
     "axios": "^0.17.1",

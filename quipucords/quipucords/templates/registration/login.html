@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 
+{% block includes %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static '/assets/rcue/css/rcue.css' %}">
+  <link rel="stylesheet" href="{% static '/assets/rcue/css/rcue-additions.css' %}">
+
+  <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.37.9/js/patternfly.min.js"></script>
+{% endblock %}
+
 {% block page-title %}
 Red Hat Entitlements Reporting
+{% endblock %}
+
+{% block page-logo %}
+<img src="{% static '/assets/images/Red_Hat_logo.svg' %}" alt="Red Hat logo" style="height: 40px;"/>
+{% endblock %}
+
+{% block title %}
+<img src="{% static '/assets/images/title.svg' %}" alt="Red Hat Entitlements Reporting">
 {% endblock %}
 
 {% block content %}
@@ -37,3 +56,14 @@ Red Hat Entitlements Reporting
 </form>
 {% endblock %}
 
+{% block description %}
+<p>
+  <strong>Welcome to Red Hat Entitlements Reporting!</strong>
+  Entitlements Reporting is an inspection and reporting tool to identify environment data, or facts, such as the number
+  of physical and virtual systems on a network, their operating systems and other configuration data, and versions of
+  some key packages and products for almost any Linux or UNIX version. The ability to inspect the software and systems
+  that are running on your network improves your ability to understand and report on your entitlement usage. Ultimately,
+  this inspection and reporting process is part of the larger system administration task of managing your inventories.
+</p>
+
+{% endblock %}
