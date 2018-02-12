@@ -15,6 +15,7 @@
 - name: set jboss_brms_business_central_candidates
   set_fact:
     jboss_brms_business_central_candidates: "{{ internal_jboss_brms_business_central_candidates.get('stdout_lines', []) }}"
+  ignore_errors: yes
   when: 'jboss_brms'
 
 - name: find kie-server candidates
@@ -26,6 +27,7 @@
 - name: set jboss_brms_kie_server_candidates
   set_fact:
     jboss_brms_kie_server_candidates: "{{ internal_jboss_brms_kie_server_candidates.get('stdout_lines', []) }}"
+  ignore_errors: yes
   when: 'jboss_brms'
 
 # Combine the above with any EAP_HOME directories we've found
@@ -33,6 +35,7 @@
   set_fact:
     business_central_candidates_eap: "{{ [] }}"
     kie_server_candidates_eap: "{{ [] }}"
+  ignore_errors: yes
   when: 'jboss_brms'
 
 - name: add eap_home_candidates to lists
@@ -40,12 +43,14 @@
     business_central_candidates_eap: "{{ business_central_candidates_eap + [item + '/standalone/deployments/business-central.war'] }}"
     kie_server_candidates_eap: "{{ kie_server_candidates_eap + [item + '/standalone/deployments/kie-server.war'] }}"
   with_items: "{{ eap_home_candidates }}"
+  ignore_errors: yes
   when: 'eap_home_candidates is defined and jboss_brms'
 
 - name: combine special directory candidates into single list
   set_fact:
     business_central_candidates: "{{ (jboss_brms_business_central_candidates + business_central_candidates_eap) | unique }}"
     kie_server_candidates: "{{ (jboss_brms_kie_server_candidates + kie_server_candidates_eap) | unique }}"
+  ignore_errors: yes
   when: 'jboss_brms'
 
 - name: cat MANIFEST.MF files
@@ -71,4 +76,5 @@
 - name: set jboss_brms_locate_kie_api
   set_fact:
     jboss_brms_locate_kie_api: "{{ internal_jboss_brms_locate_kie_api.get('stdout_lines', []) }}"
+  ignore_errors: yes
   when: 'jboss_brms'

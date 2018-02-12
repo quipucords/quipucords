@@ -13,11 +13,13 @@
 - name: extract result value for dmi.bios-vendor
   set_fact:
     dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+  ignore_errors: yes
   when: '"stdout" in internal_dmi_bios_vendor_cmd'
 
 - name: handle failure value for dmi.bios-vendor
   set_fact:
     dmi_bios_vendor: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_dmi_bios_vendor_cmd'
 
 - name: gather dmi.bios-version fact
@@ -29,11 +31,13 @@
 - name: extract result value for dmi.bios-version
   set_fact:
     dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+  ignore_errors: yes
   when: '"stdout" in internal_dmi_bios_version_cmd'
 
 - name: handle failure value for dmi.bios-version
   set_fact:
     dmi_bios_version: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_dmi_bios_version_cmd'
 
 - name: gather dmi.system-manufacturer fact
@@ -45,11 +49,13 @@
 - name: extract result value for dmi.system-manufacturer
   set_fact:
     dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+  ignore_errors: yes
   when: '"stdout" in internal_dmi_system_manufacturer_cmd'
 
 - name: handle failure value for dmi.system-manufacturer
   set_fact:
     dmi_system_manufacturer: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_dmi_system_manufacturer_cmd'
 
 - name: gather dmi.processor-family fact
@@ -61,11 +67,13 @@
 - name: extract result value for dmi.processor-family
   set_fact:
     dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+  ignore_errors: yes
   when: '"stdout" in internal_dmi_processor_family_cmd'
 
 - name: handle failure value for dmi.processor-family
   set_fact:
     dmi_processor_family: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_dmi_processor_family_cmd'
 
 - name: gather dmi.system-uuid fact
@@ -77,9 +85,11 @@
 - name: extract result value for dmi.system-uuid
   set_fact:
     dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+  ignore_errors: yes
   when: '"stdout" in internal_dmi_system_uuid_cmd'
 
 - name: handle failure value for dmi.system-uuid
   set_fact:
     dmi_system_uuid: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_dmi_system_uuid_cmd'

@@ -9,6 +9,7 @@
     redhat_release_name: ''
     redhat_release_version: ''
     redhat_release_release: ''
+  ignore_errors: yes
 
 - name: gather internal_redhat_release fact
   raw: rpm -q --queryformat "%{NAME}\n%{VERSION}\n%{RELEASE}\n" --whatprovides redhat-release

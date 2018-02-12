@@ -7,11 +7,14 @@
 - name: add connection.host to dictionary
   set_fact:
     connection_host: "{{ ansible_host }}"
+  ignore_errors: yes
 
 - name: add connection.port to dictionary
   set_fact:
     connection_port: "{{ ansible_ssh_port }}"
+  ignore_errors: yes
 
 - name: add connection.uuid to dictionary
   set_fact:
     connection_uuid: "{{ ansible_host | to_uuid }}"
+  ignore_errors: yes

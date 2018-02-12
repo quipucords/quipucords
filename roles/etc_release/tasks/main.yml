@@ -9,6 +9,7 @@
     etc_release_name: ""
     etc_release_version: ""
     etc_release_release: ""
+  ignore_errors: yes
 
 - name: set internal variable with list of known standard /etc/*release files
   set_fact:
@@ -22,6 +23,7 @@
       - "/etc/ovs-release"  # OVS
       - "/etc/arch-release"  # Arch Linux
       - "/etc/release"  # generic
+  ignore_errors: yes
 
 - name: check which /etc/*release file exists
   raw: |
@@ -37,6 +39,7 @@
 
 - name: set internal_release_file when a release file is found
   set_fact: internal_release_file={{ internal_release_found["stdout_lines"][0] }}
+  ignore_errors: yes
   when:
     - '"stdout_lines" in internal_release_found'
     - 'internal_release_found["stdout_lines"]|length > 0'
@@ -57,6 +60,7 @@
     etc_release_name: "Debian"
     etc_release_version: "{{ internal_release_file_content['stdout_lines'][0] }}"
     etc_release_release: "{{ 'Debian ' + internal_release_file_content['stdout_lines'][0] }}"
+  ignore_errors: yes
   when:
     - internal_release_file is defined
     - 'internal_release_file == "/etc/debian_version"'
@@ -70,6 +74,7 @@
     etc_release_name: "{{ internal_release_file_content['stdout_lines'][0].split('release')[0].strip() }}"
     etc_release_version: "{{ internal_release_file_content['stdout_lines'][0].split('release')[1].strip() }}"
     etc_release_release: "{{ internal_release_file_content['stdout_lines'][0].strip() }}"
+  ignore_errors: yes
   when:
     - internal_release_file is defined
     - 'internal_release_file in internal_distro_standard_release'
@@ -100,6 +105,7 @@
     etc_release_name: '{{ internal_lsb_release["stdout_lines"][0] }}'
     etc_release_version: '{{ internal_lsb_release["stdout_lines"][1] }}'
     etc_release_release: '{{ internal_lsb_release["stdout_lines"][0] + " " + internal_lsb_release["stdout_lines"][1] }}'
+  ignore_errors: yes
   when:
     - internal_lsb_release is defined
     - '"stdout_lines" in internal_lsb_release'
@@ -118,6 +124,7 @@
     etc_release_name: "{{ internal_uname_version['stdout_lines'][0].split(' ')[:-1]|join(' ') }}"
     etc_release_version: "{{ internal_uname_version['stdout_lines'][0].split(' ')[-1] }}"
     etc_release_release: "{{ internal_uname_version['stdout_lines'][0] }}"
+  ignore_errors: yes
   when:
     - internal_uname_version is defined
     - '"stdout_lines" in internal_uname_version'
