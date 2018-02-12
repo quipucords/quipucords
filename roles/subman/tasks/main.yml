@@ -15,6 +15,7 @@
 - name: extract result value for subman.cpu.cpu(s)
   set_fact:
     subman_cpu_cpu: "{{ internal_subman_cpu_cpu_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_cpu_cpu_cmd'
 
 # subman_cpu_core_per_socket fact
@@ -28,6 +29,7 @@
 - name: extract result value for subman.cpu.core(s)_per_socket
   set_fact:
     subman_cpu_core_per_socket: "{{  internal_subman_cpu_core_per_socket_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_cpu_core_per_socket_cmd'
 
 # subman_cpu_cpu_socket fact
@@ -41,6 +43,7 @@
 - name: extract result value for subman.cpu.cpu_socket(s)
   set_fact:
     subman_cpu_cpu_socket: "{{  internal_subman_cpu_cpu_socket_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_cpu_cpu_socket_cmd'
 
 # subman_virt_host_type fact
@@ -67,6 +70,7 @@
 - name: extract result value for subman.virt.is_guest
   set_fact:
     subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout'] | string() | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_virt_is_guest_cmd'
 
 # subman_virt_uuid fact
@@ -80,6 +84,7 @@
 - name: extract result value for subman.virt.uuid
   set_fact:
     subman_virt_uuid: "{{  internal_subman_virt_uuid_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_virt_uuid_cmd'
 
 # subman fact
@@ -94,6 +99,7 @@
     subman: "{{ subman|default({}) | combine({ item: (internal_subman_facts_file_lines['stdout'] | int) > 0 }) }}"
   with_items:
   - 'subman.has_facts_file'
+  ignore_errors: yes
   when: 'internal_have_subscription_manager and "stdout" in internal_subman_facts_file_lines'
 
 # subman_consumed fact
@@ -107,4 +113,5 @@
 - name: extract result value for subman.consumed
   set_fact:
     subman_consumed: "{{  internal_subman_consumed_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
   when: '"stdout" in internal_subman_consumed_cmd'

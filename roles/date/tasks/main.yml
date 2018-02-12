@@ -18,11 +18,13 @@
 - name: extract result value for date.anaconda_log
   set_fact:
     date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout'] | trim | default('') }}"
+  ignore_errors: yes
   when: '"stdout" in internal_date_anaconda_log_cmd'
 
 - name: handle failure value for date.anaconda_log
   set_fact:
     date_anaconda_log: ""
+  ignore_errors: yes
   when: '"stdout" not in internal_date_anaconda_log_cmd'
 
 - name: gather date.machine_id fact
@@ -46,6 +48,7 @@
 - name: extract result value for date.yum_history
   set_fact:
     date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first if internal_have_yum else '' }}"
+  ignore_errors: yes
   when:
     - '"stdout_lines" in internal_date_yum_history_cmd'
     - 'internal_date_yum_history_cmd["stdout_lines"]|length > 0'
