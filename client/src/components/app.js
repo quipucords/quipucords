@@ -6,9 +6,9 @@ import { withRouter } from 'react-router';
 
 import {
   AboutModal,
-  Dropdown,
-  Icon,
-  MenuItem,
+  Alert,
+  EmptyState,
+  Modal,
   VerticalNav
 } from 'patternfly-react';
 
@@ -18,16 +18,22 @@ import Store from '../redux/store';
 import Content from './content/content';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
+import MastheadOptions from './mastheadOptions/mastheadOptions';
 
 import logo from '../styles/images/Red_Hat_logo.svg';
 import productTitle from '../styles/images/title.svg';
 import _ from 'lodash';
 import { aboutTypes } from '../redux/constants';
+import { authorizeUser } from '../redux/actions/userActions';
 
 class App extends React.Component {
   constructor() {
     super();
     this.menu = routes();
+  }
+
+  componentDidMount() {
+    this.props.authorizeUser();
   }
 
   navigateTo(path) {
@@ -56,28 +62,50 @@ class App extends React.Component {
   }
 
   render() {
-    const { showAbout } = this.props;
+    const { showAbout, session } = this.props;
 
-    let closeAbout = () => Store.dispatch({ type: 'ABOUT_DIALOG_CLOSE' });
+    let closeAbout = () =>
+      Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_CLOSE });
+
+    if (session.error) {
+      return (
+        <EmptyState>
+          <Alert type="error">
+            <span>Login error: {session.errorMessage}</span>
+          </Alert>
+        </EmptyState>
+      );
+    }
+
+    if (session.pending || !session.fulfilled) {
+      return (
+        <Modal bsSize="lg" backdrop={false} show animation={false}>
+          <Modal.Body>
+            <div className="spinner spinner-xl" />
+            <div className="text-center">Logging in...</div>
+          </Modal.Body>
+        </Modal>
+      );
+    }
+
+    if (!session.loggedIn) {
+      return (
+        <EmptyState>
+          <Alert type="error">
+            <span>
+              You have been logged out: redirecting to the login page.
+            </span>
+          </Alert>
+        </EmptyState>
+      );
+    }
 
     return (
       <div className="layout-pf layout-pf-fixed">
         <VerticalNav>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={productTitle} />
-            <nav className="collapse navbar-collapse">
-              <ul className="navbar-iconic nav navbar-nav navbar-right">
-                <Dropdown componentClass="li" id="help">
-                  <Dropdown.Toggle useAnchor className="nav-item-iconic">
-                    <Icon type="pf" name="help" />
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <MenuItem>Help</MenuItem>
-                    <MenuItem onClick={this.showAboutModal}>About</MenuItem>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </ul>
-            </nav>
+            <MastheadOptions />
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
         </VerticalNav>
@@ -113,6 +141,8 @@ class App extends React.Component {
 }
 
 App.propTypes = {
+  authorizeUser: PropTypes.func,
+  session: PropTypes.object,
   showAbout: PropTypes.bool,
   location: PropTypes.object,
   history: PropTypes.shape({
@@ -120,10 +150,15 @@ App.propTypes = {
   }).isRequired
 };
 
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  authorizeUser: () => dispatch(authorizeUser())
+});
+
 function mapStateToProps(state, ownProps) {
   return {
+    session: state.user.session,
     showAbout: state.about.show
   };
 }
 
-export default withRouter(connect(mapStateToProps)(App));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

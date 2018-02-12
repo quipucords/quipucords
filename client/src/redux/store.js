@@ -11,7 +11,10 @@ const hydrateStore = () => {
 
 let middleware = [thunkMiddleware, promiseMiddleware()];
 
-if (process.env.NODE_ENV !== 'production') {
+if (
+  process.env.NODE_ENV !== 'production' &&
+  process.env.REACT_APP_DEBUG_MIDDLEWARE === 'true'
+) {
   middleware.push(createLogger());
 }
 

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import Store from '../../redux/store';
 
 import {
   Alert,
@@ -19,20 +18,23 @@ import {
   confirmationModalTypes,
   viewTypes
 } from '../../redux/constants';
-import { bindMethods } from '../../common/helpers';
+import Store from '../../redux/store';
+import helpers from '../../common/helpers';
 
 import ViewToolbar from '../viewToolbar/viewToolbar';
+import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
+
 import SourcesEmptyState from './sourcesEmptyState';
 import { SourceListItem } from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
-import { AddSourceWizard } from './addSourceWizard';
+import AddSourceWizard from '../addSourceWizard/addSourceWizard';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'importSources',
       'scanSource',
       'scanSources',
@@ -42,12 +44,10 @@ class Sources extends React.Component {
       'hideScanDialog',
       'createScan',
       'refresh',
-      'showAddSourceWizard',
-      'quitAddSourceWizard'
+      'showAddSourceWizard'
     ]);
 
     this.state = {
-      filteredItems: [],
       selectedItems: [],
       scanDialogShown: false,
       multiSourceScan: false,
@@ -57,7 +57,9 @@ class Sources extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getSources();
+    this.props.getSources(
+      helpers.createViewQueryObject(this.props.viewOptions)
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -76,150 +78,22 @@ class Sources extends React.Component {
         }
       });
 
-      let filteredItems = this.filterSources(
-        nextProps.sources,
-        nextProps.activeFilters
+      this.setState({ selectedItems: [] });
+    }
+
+    // Check for changes resulting in a fetch
+    if (
+      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
+    ) {
+      this.props.getSources(
+        helpers.createViewQueryObject(nextProps.viewOptions)
       );
-
-      this.setState({ filteredItems: filteredItems, selectedItems: [] });
-    } else if (nextProps.activeFilters !== this.props.activeFilters) {
-      let filteredItems = this.filterSources(
-        nextProps.sources,
-        nextProps.activeFilters
-      );
-      this.setState({ filteredItems: filteredItems });
     }
-  }
-
-  matchString(value, match) {
-    if (!value) {
-      return false;
-    }
-
-    if (!match) {
-      return true;
-    }
-
-    return value.toLowerCase().includes(match.toLowerCase());
-  }
-
-  matchesFilter(item, filter) {
-    switch (filter.field.id) {
-      case 'name':
-        return this.matchString(item.name, filter.value);
-      case 'sourceType':
-        return item.source_type === filter.value.id;
-      case 'hosts':
-        return (
-          item.hosts &&
-          item.hosts.find(host => {
-            return this.matchString(host, filter.value);
-          })
-        );
-      case 'status':
-        return (
-          item.connection_scan &&
-          item.connection_scan.status === filter.value.id
-        );
-      case 'credentials':
-        return (
-          item.credentials &&
-          item.credentials.find(credential => {
-            return this.matchString(credential.name, filter.value);
-          })
-        );
-      default:
-        return true;
-    }
-  }
-
-  matchesFilters(item, filters) {
-    let matches = true;
-
-    filters.forEach(filter => {
-      if (!this.matchesFilter(item, filter)) {
-        matches = false;
-        return false;
-      }
-    });
-    return matches;
-  }
-
-  filterSources(sources, filters) {
-    if (!filters || filters.length === 0) {
-      return sources;
-    }
-
-    return sources.filter(item => {
-      return this.matchesFilters(item, filters);
-    });
-  }
-
-  sortSources(items) {
-    const { sortType, sortAscending } = this.props;
-
-    let sortId = sortType ? sortType.id : 'name';
-
-    items.sort((item1, item2) => {
-      let compValue;
-      switch (sortId) {
-        case 'name':
-          compValue = item1.name.localeCompare(item2.name);
-          break;
-        case 'sourceType':
-          compValue = item1.source_type.localeCompare(item2.source_type);
-          break;
-        case 'status':
-          compValue = item1.source_type.localeCompare(item2.source_type);
-          break;
-        case 'credentialsCount':
-          compValue = item1.credentials.length - item2.credentials.length;
-          break;
-        case 'hostCount':
-          compValue =
-            item1.hosts.length +
-            item1.failed_hosts.length -
-            (item2.hosts.length + item2.failed_hosts.length);
-          break;
-        case 'successHostCount':
-          compValue = item1.hosts.length - item2.hosts.length;
-          break;
-        case 'failedHostCount':
-          compValue = item1.failed_hosts.length - item2.failed_hosts.length;
-          break;
-        default:
-          compValue = 0;
-      }
-
-      if (!sortAscending) {
-        compValue = compValue * -1;
-      }
-
-      return compValue;
-    });
   }
 
   showAddSourceWizard() {
-    this.setState({ addSourceWizardShown: true });
-  }
-
-  quitAddSourceWizard() {
-    let onConfirm = () => {
-      Store.dispatch({
-        type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-      });
-
-      this.setState({ addSourceWizardShown: false });
-    };
-
     Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Cancel Add Source',
-      heading: 'Are you sure you want to exit this wizard?',
-      body: 'Exiting this wizard will cancel adding the source.',
-      cancelButtonText: 'No',
-      confirmButtonText: 'Yes',
-      onConfirm: onConfirm
+      type: sourcesTypes.EDIT_SOURCE_SHOW
     });
   }
 
@@ -318,7 +192,7 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
-  renderActions() {
+  renderSourceActions() {
     const { selectedItems } = this.state;
 
     return (
@@ -339,7 +213,7 @@ class Sources extends React.Component {
     );
   }
 
-  renderList(items) {
+  renderSourcesList(items) {
     return (
       <ListView className="quipicords-list-view">
         {items.map((item, index) => (
@@ -357,19 +231,8 @@ class Sources extends React.Component {
   }
 
   render() {
+    const { pending, error, errorMessage, sources, viewOptions } = this.props;
     const {
-      pending,
-      error,
-      errorMessage,
-      sources,
-      filterType,
-      filterValue,
-      activeFilters,
-      sortType,
-      sortAscending
-    } = this.props;
-    const {
-      filteredItems,
       selectedItems,
       scanDialogShown,
       multiSourceScan,
@@ -399,40 +262,33 @@ class Sources extends React.Component {
     }
 
     if (sources && sources.length) {
-      this.sortSources(filteredItems);
-
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
             <ViewToolbar
               viewType={viewTypes.SOURCES_VIEW}
-              totalCount={sources.length}
-              filteredCount={filteredItems.length}
               filterFields={SourceFilterFields}
               sortFields={SourceSortFields}
-              actions={this.renderActions()}
+              actions={this.renderSourceActions()}
               itemsType="Source"
               itemsTypePlural="Sources"
-              filterType={filterType}
-              filterValue={filterValue}
-              activeFilters={activeFilters}
-              sortType={sortType}
-              sortAscending={sortAscending}
+              {...viewOptions}
             />
             <div className="quipucords-list-container">
-              {this.renderList(filteredItems)}
+              {this.renderSourcesList(sources)}
             </div>
-            <AddSourceWizard
-              show={addSourceWizardShown}
-              onCancel={this.quitAddSourceWizard}
-            />
-            <CreateScanDialog
-              show={scanDialogShown}
-              sources={multiSourceScan ? selectedItems : [currentScanSource]}
-              onCancel={this.hideScanDialog}
-              onScan={this.createScan}
+            <ViewPaginationRow
+              viewType={viewTypes.SOURCES_VIEW}
+              {...viewOptions}
             />
           </div>
+          <AddSourceWizard show={addSourceWizardShown} />
+          <CreateScanDialog
+            show={scanDialogShown}
+            sources={multiSourceScan ? selectedItems : [currentScanSource]}
+            onCancel={this.hideScanDialog}
+            onScan={this.createScan}
+          />
         </React.Fragment>
       );
     }
@@ -443,10 +299,7 @@ class Sources extends React.Component {
           onAddSource={this.showAddSourceWizard}
           onImportSources={this.importSources}
         />
-        <AddSourceWizard
-          show={addSourceWizardShown}
-          onCancel={this.quitAddSourceWizard}
-        />
+        <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
     );
   }
@@ -458,25 +311,17 @@ Sources.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   sources: PropTypes.array,
-
-  filterType: PropTypes.object,
-  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-  activeFilters: PropTypes.array,
-  sortType: PropTypes.object,
-  sortAscending: PropTypes.bool
+  viewOptions: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getSources: () => dispatch(getSources())
+  getSources: queryObj => dispatch(getSources(queryObj))
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign(
-    {},
-    state.sources.view,
-    state.sources.persist,
-    state.toolbars[viewTypes.SOURCES_VIEW]
-  );
+  return Object.assign({}, state.sources.view, state.sources.persist, {
+    viewOptions: state.viewOptions[viewTypes.SOURCES_VIEW]
+  });
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sources);

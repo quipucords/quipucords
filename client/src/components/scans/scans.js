@@ -11,12 +11,13 @@ import {
   Modal
 } from 'patternfly-react';
 
-import { bindMethods } from '../../common/helpers';
-import Store from '../../redux/store';
-import { toastNotificationTypes, viewTypes } from '../../redux/constants';
 import { getScans } from '../../redux/actions/scansActions';
+import { toastNotificationTypes, viewTypes } from '../../redux/constants';
+import Store from '../../redux/store';
+import helpers from '../../common/helpers';
 
 import ViewToolbar from '../viewToolbar/viewToolbar';
+import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import { ScanListItem } from './scanListItem';
@@ -26,7 +27,7 @@ class Scans extends React.Component {
   constructor() {
     super();
 
-    bindMethods(this, [
+    helpers.bindMethods(this, [
       'downloadSummaryReport',
       'downloadDetailedReport',
       'pauseScan',
@@ -38,12 +39,16 @@ class Scans extends React.Component {
       'refresh'
     ]);
     this.state = {
-      filteredItems: []
+      selectedItems: []
     };
   }
 
   componentDidMount() {
-    this.props.getScans({ scan_type: 'inspect' });
+    this.props.getScans(
+      helpers.createViewQueryObject(this.props.viewOptions, {
+        scan_type: 'inspect'
+      })
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -64,121 +69,19 @@ class Scans extends React.Component {
         }
       });
 
-      let filteredItems = this.filterScans(
-        nextProps.scans,
-        nextProps.activeFilters
+      this.setState({ selectedItems: [] });
+    }
+
+    // Check for changes resulting in a fetch
+    if (
+      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
+    ) {
+      this.props.getScans(
+        helpers.createViewQueryObject(this.props.viewOptions, {
+          scan_type: 'inspect'
+        })
       );
-
-      this.setState({ filteredItems: filteredItems, selectedItems: [] });
-    } else if (nextProps.activeFilters !== this.props.activeFilters) {
-      let filteredItems = this.filterScans(
-        nextProps.scans,
-        nextProps.activeFilters
-      );
-      this.setState({ filteredItems: filteredItems });
     }
-  }
-
-  matchString(value, match) {
-    if (!value) {
-      return false;
-    }
-
-    if (!match) {
-      return true;
-    }
-
-    return value.toLowerCase().includes(match.toLowerCase());
-  }
-
-  matchesFilter(item, filter) {
-    switch (filter.field.id) {
-      case 'name':
-        return this.matchString('' + item.id, filter.value); // Using ID for now until we get a name
-      case 'source':
-        return (
-          item.sources &&
-          item.sources.find(source => {
-            return this.matchString(source.name, filter.value);
-          })
-        );
-      case 'status':
-        return item.status === filter.value.id;
-      default:
-        return true;
-    }
-  }
-
-  matchesFilters(item, filters) {
-    let matches = true;
-
-    filters.forEach(filter => {
-      if (!this.matchesFilter(item, filter)) {
-        matches = false;
-        return false;
-      }
-    });
-    return matches;
-  }
-
-  filterScans(scans, filters) {
-    return scans.filter(item => {
-      return this.matchesFilters(item, filters);
-    });
-  }
-
-  sortScans(items) {
-    const { sortType, sortAscending } = this.props;
-
-    let sortId = sortType ? sortType.id : 'name';
-
-    items.sort((item1, item2) => {
-      let compValue;
-      switch (sortId) {
-        case 'name':
-          compValue = item1.id - item2.id; // Using ID for now until we get a name
-          break;
-        case 'status':
-          compValue = item1.status.localeCompare(item2.status);
-          break;
-        case 'time':
-          compValue = item1.status.localeCompare(item2.status);
-          break;
-        case 'hostCount':
-          compValue = item1.systems_count - item2.systems_count;
-          break;
-        case 'successfulHosts':
-          compValue = item1.systems_scanned - item2.systems_scanned;
-          break;
-        case 'failedHosts':
-          compValue = item1.systems_failed - item2.systems_failed;
-          break;
-        case 'sourceCount':
-          compValue = item1.sources.length - item2.sources.length;
-          break;
-        case 'scansCount':
-          compValue = item1.scans_count - item2.scans_count;
-          break;
-        default:
-          compValue = 0;
-      }
-
-      // Secondary sort by time
-      if (compValue === 0) {
-        compValue = item2.last_run - item1.last_run;
-      }
-
-      // Tertiary sort by status
-      if (compValue === 0) {
-        compValue = item1.status.localeCompare(item2.status);
-      }
-
-      if (!sortAscending) {
-        compValue = compValue * -1;
-      }
-
-      return compValue;
-    });
   }
 
   downloadSummaryReport() {
@@ -257,7 +160,7 @@ class Scans extends React.Component {
     this.props.getScans({ scan_type: 'inspect' });
   }
 
-  renderActions() {
+  renderScanActions() {
     return (
       <div className="form-group">
         <Button onClick={this.refresh} bsStyle="success">
@@ -267,7 +170,7 @@ class Scans extends React.Component {
     );
   }
 
-  renderList(items) {
+  renderScansList(items) {
     return (
       <ListView className="quipicords-list-view">
         {items.map((item, index) => (
@@ -287,18 +190,7 @@ class Scans extends React.Component {
   }
 
   render() {
-    const {
-      pending,
-      error,
-      errorMessage,
-      scans,
-      filterType,
-      filterValue,
-      activeFilters,
-      sortType,
-      sortAscending
-    } = this.props;
-    const { filteredItems } = this.state;
+    const { pending, error, errorMessage, scans, viewOptions } = this.props;
 
     if (pending) {
       return (
@@ -320,28 +212,21 @@ class Scans extends React.Component {
       );
     }
     if (scans && scans.length) {
-      this.sortScans(filteredItems);
-
       return (
         <div className="quipucords-view-container">
           <ViewToolbar
             viewType={viewTypes.SCANS_VIEW}
-            totalCount={scans.length}
-            filteredCount={filteredItems.length}
             filterFields={ScanFilterFields}
             sortFields={ScanSortFields}
-            actions={this.renderActions()}
+            actions={this.renderScanActions()}
             itemsType="Scan"
             itemsTypePlural="Scans"
-            filterType={filterType}
-            filterValue={filterValue}
-            activeFilters={activeFilters}
-            sortType={sortType}
-            sortAscending={sortAscending}
+            {...viewOptions}
           />
           <div className="quipucords-list-container">
-            {this.renderList(filteredItems)}
+            {this.renderScansList(scans)}
           </div>
+          <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
         </div>
       );
     }
@@ -360,25 +245,17 @@ Scans.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   scans: PropTypes.array,
-
-  filterType: PropTypes.object,
-  filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-  activeFilters: PropTypes.array,
-  sortType: PropTypes.object,
-  sortAscending: PropTypes.bool
+  viewOptions: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScans: () => dispatch(getScans())
+  getScans: queryObj => dispatch(getScans(queryObj))
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign(
-    {},
-    state.scans.view,
-    state.scans.persist,
-    state.toolbars[viewTypes.SCANS_VIEW]
-  );
+  return Object.assign({}, state.scans.view, state.scans.persist, {
+    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW]
+  });
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Scans);

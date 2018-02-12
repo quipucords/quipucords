@@ -8,8 +8,9 @@ import reportsReducer from './reportsReducer';
 import sourcesReducer from './sourcesReducer';
 import scansReducer from './scansReducer';
 import toastNotificationsReducer from './toastNotificationsReducer';
-import toolbarsReducer from './toolbarsReducer';
 import confirmationModalReducer from './confirmationModalReducer';
+import viewOptionsReducer from './viewOptionsReducer';
+import userReducer from './userReducer';
 
 const reducers = {
   about: aboutReducer,
@@ -20,8 +21,9 @@ const reducers = {
   sources: sourcesReducer,
   scans: scansReducer,
   toastNotifications: toastNotificationsReducer,
-  toolbars: toolbarsReducer,
-  confirmationModal: confirmationModalReducer
+  confirmationModal: confirmationModalReducer,
+  viewOptions: viewOptionsReducer,
+  user: userReducer
 };
 
 const reduxReducers = combineReducers(reducers);

@@ -6,7 +6,7 @@ const CredentialFilterFields = [
     filterType: 'text'
   },
   {
-    id: 'credentialType',
+    id: 'source_type',
     title: 'Credential Type',
     placeholder: 'Filter by Credential Type',
     filterType: 'select',

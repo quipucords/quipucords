@@ -15,6 +15,13 @@ const deleteSource = id => dispatch => {
   });
 };
 
+const deleteSources = (ids = []) => dispatch => {
+  return dispatch({
+    type: sourcesTypes.DELETE_SOURCES,
+    payload: sourcesService.deleteSources(ids)
+  });
+};
+
 const getSource = id => dispatch => {
   return dispatch({
     type: sourcesTypes.GET_SOURCE,
@@ -36,4 +43,11 @@ const updateSource = (id, data) => dispatch => {
   });
 };
 
-export { addSource, deleteSource, getSource, getSources, updateSource };
+export {
+  addSource,
+  deleteSource,
+  deleteSources,
+  getSource,
+  getSources,
+  updateSource
+};

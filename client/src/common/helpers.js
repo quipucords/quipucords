@@ -1,12 +1,12 @@
-export const bindMethods = (context, methods) => {
+const bindMethods = (context, methods) => {
   methods.forEach(method => {
     context[method] = context[method].bind(context);
   });
 };
 
-export const noop = Function.prototype;
+const noop = Function.prototype;
 
-export const sourceTypeString = sourceType => {
+const sourceTypeString = sourceType => {
   switch (sourceType) {
     case 'vcenter':
       return 'VCenter';
@@ -19,7 +19,7 @@ export const sourceTypeString = sourceType => {
   }
 };
 
-export const sourceTypeIcon = sourceType => {
+const sourceTypeIcon = sourceType => {
   switch (sourceType) {
     case 'vcenter':
       return { type: 'pf', name: 'virtual-machine' };
@@ -32,7 +32,7 @@ export const sourceTypeIcon = sourceType => {
   }
 };
 
-export const scanTypeString = scanType => {
+const scanTypeString = scanType => {
   switch (scanType) {
     case 'connect':
       return 'Connection Scan';
@@ -43,7 +43,7 @@ export const scanTypeString = scanType => {
   }
 };
 
-export const scanTypeIcon = scanType => {
+const scanTypeIcon = scanType => {
   switch (scanType) {
     case 'connect':
       return { type: 'pf', name: 'connected' };
@@ -54,7 +54,7 @@ export const scanTypeIcon = scanType => {
   }
 };
 
-export const scanStatusString = scanStatus => {
+const scanStatusString = scanStatus => {
   switch (scanStatus) {
     case 'completed':
       return 'Completed';
@@ -75,7 +75,7 @@ export const scanStatusString = scanStatus => {
   }
 };
 
-export const authorizationTypeString = authorizationType => {
+const authorizationTypeString = authorizationType => {
   switch (authorizationType) {
     case 'usernamePassword':
       return 'Username & Password';
@@ -86,7 +86,7 @@ export const authorizationTypeString = authorizationType => {
   }
 };
 
-export const setStateProp = (prop, data, options) => {
+const setStateProp = (prop, data, options) => {
   let { state = {}, initialState = {}, reset = true } = options;
   let obj = { ...state };
 
@@ -120,16 +120,56 @@ export const setStateProp = (prop, data, options) => {
   return obj;
 };
 
+const viewPropsChanged = (nextViewOptions, currentViewOptions) => {
+  return (
+    nextViewOptions.currentPage !== currentViewOptions.currentPage ||
+    nextViewOptions.pageSize !== currentViewOptions.pageSize ||
+    nextViewOptions.sortField !== currentViewOptions.sortField ||
+    nextViewOptions.sortAscending !== currentViewOptions.sortAscending ||
+    nextViewOptions.activeFilters !== currentViewOptions.activeFilters
+  );
+};
+
+const createViewQueryObject = (viewOptions, queryObj) => {
+  let queryObject = {
+    ...queryObj
+  };
+
+  if (viewOptions) {
+    if (viewOptions.sortField) {
+      queryObject.ordering = viewOptions.sortAscending
+        ? viewOptions.sortField
+        : `-${viewOptions.sortField}`;
+    }
+
+    if (viewOptions.activeFilters) {
+      viewOptions.activeFilters.forEach(filter => {
+        queryObject[filter.id] =
+          filter.filterType === 'select'
+            ? filter.filterValue.id
+            : filter.filterValue;
+      });
+    }
+
+    queryObject.page = viewOptions.currentPage;
+    queryObject.page_size = viewOptions.pageSize;
+  }
+
+  return queryObject;
+};
+
 export const helpers = {
-  bindMethods: bindMethods,
-  noop: noop,
-  sourceTypeString: sourceTypeString,
-  sourceTypeIcon: sourceTypeIcon,
-  scanTypeString: scanTypeString,
-  scanStatusString: scanStatusString,
-  scanTypeIcon: scanTypeIcon,
-  authorizationTypeString: authorizationTypeString,
-  setStateProp: setStateProp
+  bindMethods,
+  noop,
+  sourceTypeString,
+  sourceTypeIcon,
+  scanTypeString,
+  scanStatusString,
+  scanTypeIcon,
+  authorizationTypeString,
+  setStateProp,
+  viewPropsChanged,
+  createViewQueryObject
 };
 
 export default helpers;

@@ -2,7 +2,14 @@ import cookies from 'js-cookie';
 
 class UserService {
   static authorizeUser() {
-    const token = cookies.get('csrftoken');
+    // ToDo: ReEvaluate placement of this spoof for auth. Also consider using a helper function.
+    if (process.env.NODE_ENV !== 'production') {
+      cookies.set(process.env.REACT_APP_AUTH_TOKEN, 'spoof');
+
+      console.warn('Warning: Loading spoof auth token.');
+    }
+
+    const token = cookies.get(process.env.REACT_APP_AUTH_TOKEN);
 
     return new Promise((resolve, reject) => {
       if (token) {
@@ -33,10 +40,8 @@ class UserService {
     return this.whoami().then(
       response =>
         new Promise((resolve, reject) => {
-          const token = cookies.get('csrftoken');
-
-          if (token) {
-            cookies.delete('csrftoken');
+          if (response && response.userName) {
+            cookies.remove(process.env.REACT_APP_AUTH_TOKEN);
 
             return resolve({
               userName: response.userName

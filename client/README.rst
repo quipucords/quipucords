@@ -37,6 +37,17 @@ To setup the mock API separately you can run::
 
     $ npm run api:mock
 
+Debugging Redux
+***************
+This project makes use of React & Redux. To enable Redux console logging, within the `client` directory, add a `.env.local` (dotenv) file with the follow line::
+
+  REACT_APP_DEBUG_MIDDLEWARE=true
+
+Once you've made the change, restart the project and console browser logging should appear.
+
+
+*Any changes you make to the `.env.local` file should be ignored with `.gitignore`.*
+
 Unit Tests
 ^^^^^^^^^^
 To run the unit tests, use this command::
