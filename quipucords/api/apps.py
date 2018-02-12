@@ -21,6 +21,3 @@ class ApiConfig(AppConfig):
 
     def ready(self):
         """Mark server ready."""
-        # pylint: disable=W0612
-        if settings.USE_ELASTICSEARCH == 'True':
-            import api.signals.es_receiver  # noqa: F401
