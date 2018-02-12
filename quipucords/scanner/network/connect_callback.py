@@ -13,6 +13,7 @@
 import logging
 from ansible.plugins.callback import CallbackBase
 from api.connresults.model import SystemConnectionResult
+from scanner import input_log
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -40,6 +41,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
+        input_log.log_ansible_result(result)
         host = result._host.name      # pylint: disable=protected-access
         task_result = result._result  # pylint: disable=protected-access
         if 'rc' in task_result and task_result['rc'] == 0:
@@ -52,6 +54,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
+        input_log.log_ansible_result(result)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(
@@ -65,6 +68,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
+        input_log.log_ansible_result(result)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(

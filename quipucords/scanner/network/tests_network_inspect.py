@@ -24,6 +24,7 @@ from api.models import (Credential,
                         ScanOptions,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
+from scanner import input_log
 from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback, \
@@ -189,6 +190,8 @@ class NetworkInspectScannerTest(TestCase):
 
         self.scan_job.save()
 
+        input_log.disable_log_for_test()
+
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
         serializer = SourceSerializer(self.source)
@@ -318,7 +321,8 @@ class NetworkInspectScannerTest(TestCase):
             scan_task=self.scan_task)
         host = Mock()
         host.name = '1.2.3.4'
-        result = Mock(_host=host, _results={'rc': 3})
+        task = Mock(args={'_raw_params': 'command line'})
+        result = Mock(_host=host, _result={'rc': 3}, _task=task)
 
         callback.v2_runner_on_unreachable(result)
 

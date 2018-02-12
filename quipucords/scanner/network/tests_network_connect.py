@@ -19,6 +19,7 @@ from api.models import (Credential,
                         Source,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
+from scanner import input_log
 from scanner.network.connect import construct_connect_inventory, connect, \
     ConnectResultStore
 from scanner.network import ConnectTaskRunner
@@ -77,13 +78,19 @@ def make_result(hostname, rc):  # pylint: disable=invalid-name
     host = Mock()
     host.name = hostname
 
+    task = Mock(args={'_raw_params': 'echo "Hello"'})
+
     return Mock(
         _host=host,
-        _result=result)
+        _result=result,
+        _task=task)
 
 
 class TestConnectResultCallback(unittest.TestCase):
     """Test ConnectResultCallback."""
+
+    def setUp(self):
+        input_log.disable_log_for_test()
 
     def test_callback(self):
         """Test the callback."""
@@ -128,6 +135,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
+
+        input_log.disable_log_for_test()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""

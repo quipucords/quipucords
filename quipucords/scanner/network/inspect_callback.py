@@ -16,6 +16,7 @@ from django.db import transaction
 from ansible.plugins.callback import CallbackBase
 from api.models import (SystemInspectionResult,
                         RawFact)
+from scanner import input_log
 from scanner.network.processing import process
 
 # Get an instance of a logger
@@ -105,6 +106,7 @@ class InspectResultCallback(CallbackBase):
 
     def handle_result(self, result):
         """Handle an incoming result object."""
+        input_log.log_ansible_result(result)
         # pylint: disable=protected-access
         result_obj = _construct_result(result)
         self.results.append(result_obj)
@@ -191,6 +193,7 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
+        input_log.log_ansible_result(result)
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.warning('%s', result_obj)
