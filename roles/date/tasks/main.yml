@@ -26,12 +26,12 @@
   when: '"stdout" not in internal_date_anaconda_log_cmd'
 
 - name: gather date.machine_id fact
-  raw: ls --full-time /etc/machine-id | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+  raw: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi
   register: date_machine_id
   ignore_errors: yes
 
 - name: gather date.filesystem_create fact
-  raw: fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d \"$fs_date\"; else echo "" ; fi
+  raw: fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d "$fs_date"; else echo "" ; fi
   register: date_filesystem_create
   ignore_errors: yes
   when: 'internal_have_tune2fs'
@@ -46,4 +46,6 @@
 - name: extract result value for date.yum_history
   set_fact:
     date_yum_history: "{{  internal_date_yum_history_cmd['stdout_lines'] | select | first if internal_have_yum else '' }}"
-  when: '"stdout_lines" in internal_date_yum_history_cmd'
+  when:
+    - '"stdout_lines" in internal_date_yum_history_cmd'
+    - 'internal_date_yum_history_cmd["stdout_lines"]|length > 0'

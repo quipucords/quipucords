@@ -63,7 +63,6 @@ def normalize_result(result):
             return [(key, value)
                     for key, value in result._result[ANSIBLE_FACTS].items()
                     if not key.startswith(INTERNAL_)]
-            # return list(result._result[ANSIBLE_FACTS].items())
         elif (isinstance(result._task.register, str) and
               not result._task.register.startswith(INTERNAL_)):
             return [(result._task.register, result._result)]
@@ -98,6 +97,12 @@ class InspectResultCallback(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
+        # pylint: disable=protected-access
+        with_items = result._result.get('results') is not None
+        if not with_items and result._result.get('msg') is not None:
+            self.scan_task.log_message(
+                'Unexpected ansible error:  %s' % result._result,
+                log_level=logging.ERROR)
         self.handle_result(result)
 
     def handle_result(self, result):
