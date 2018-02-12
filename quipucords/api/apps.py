@@ -11,7 +11,6 @@
 """Apps module for Django server application."""
 
 from django.apps import AppConfig
-from django.conf import settings
 
 
 class ApiConfig(AppConfig):
@@ -21,6 +20,3 @@ class ApiConfig(AppConfig):
 
     def ready(self):
         """Mark server ready."""
-        # pylint: disable=W0612
-        if settings.USE_ELASTICSEARCH == 'True':
-            import api.signals.es_receiver  # noqa: F401
