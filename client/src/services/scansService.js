@@ -1,33 +1,24 @@
-import jquery from 'jquery';
+import axios from 'axios';
 
 class ScansService {
   static addScan(data = {}) {
-    return fetch(process.env.REACT_APP_SCANS_SERVICE, {
-      method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify(data)
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_SCANS_SERVICE}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      data: data
     });
   }
 
   static cancelScan(id) {
     let apiPath = process.env.REACT_APP_SCANS_SERVICE_CANCEL.replace('{0}', id);
 
-    return fetch(apiPath, {
-      method: 'PUT'
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'put',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
@@ -36,21 +27,10 @@ class ScansService {
   }
 
   static getScans(id = '', query = {}) {
-    let queryStr = jquery.param(query);
-
-    if (queryStr.length) {
-      queryStr = `?${queryStr}`;
-    }
-
-    return fetch(`${process.env.REACT_APP_SCANS_SERVICE}${id}${queryStr}`).then(
-      response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(response.statusText);
-        }
-      }
-    );
+    return axios({
+      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+      params: query
+    });
   }
 
   static getScanResults(id) {
@@ -59,26 +39,19 @@ class ScansService {
       id
     );
 
-    return fetch(apiPath).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      url: apiPath
     });
   }
 
   static pauseScan(id) {
     let apiPath = process.env.REACT_APP_SCANS_SERVICE_PAUSE.replace('{0}', id);
 
-    return fetch(apiPath, {
-      method: 'PUT'
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'put',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
@@ -88,14 +61,11 @@ class ScansService {
       id
     );
 
-    return fetch(apiPath, {
-      method: 'PUT'
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'put',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 }

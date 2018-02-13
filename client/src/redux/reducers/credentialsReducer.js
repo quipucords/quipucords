@@ -76,7 +76,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           add: true
         },
@@ -91,7 +91,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           delete: true
         },
@@ -105,7 +105,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           edit: true
         },
@@ -120,7 +120,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message
         },
         {
@@ -232,7 +232,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          credentials: action.payload.results,
+          credentials: action.payload.data.results,
           fulfilled: true
         },
         {

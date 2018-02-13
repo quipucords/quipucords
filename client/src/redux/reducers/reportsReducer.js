@@ -20,7 +20,7 @@ const reportsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'search',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message
         },
         {
@@ -47,7 +47,7 @@ const reportsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'search',
         {
-          reports: action.payload,
+          reports: action.payload.data,
           fulfilled: true
         },
         {
