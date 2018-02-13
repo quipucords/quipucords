@@ -46,10 +46,6 @@ class ConnectResultCallback(CallbackBase):
             self.result_store.record_result(host,
                                             self.credential,
                                             SystemConnectionResult.SUCCESS)
-        else:
-            self.result_store.record_result(host,
-                                            self.credential,
-                                            SystemConnectionResult.FAILED)
 
         result_obj = _construct_result(result)
         logger.debug('%s', result_obj)
