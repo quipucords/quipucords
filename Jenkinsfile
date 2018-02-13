@@ -33,7 +33,7 @@ node('f25-os') {
         def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:beta"
-        sh "gzip --best $tarfile"
+        sh "sudo gzip --best $tarfile"
 
         archiveArtifacts artifacts: targzfile
     }
