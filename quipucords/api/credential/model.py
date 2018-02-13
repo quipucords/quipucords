@@ -67,7 +67,6 @@ class Credential(models.Model):
         return '{ id:%s, name:%s, type:%s}' %\
             (self.id, self.name, self.cred_type)
 
-
     @staticmethod
     def is_encrypted(field):
         """Check to see if the password is already encrypted."""

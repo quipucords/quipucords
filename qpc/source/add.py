@@ -110,8 +110,8 @@ class SourceAddCommand(CliCommand):
                 self.args.credentials = []
                 results_by_name_dict = {cred['name']: cred for cred in results}
                 for cred_name in self.args.cred:
-                    self.args.credentials.append(results_by_name_dict[cred_name]['id'])
-                print('self.args.credentials: %s' % self.args.credentials)
+                    self.args.credentials.append(
+                        results_by_name_dict[cred_name]['id'])
             else:
                 for cred_entry in results:
                     cred_name = cred_entry['name']

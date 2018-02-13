@@ -148,7 +148,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         for cred_id in credentials:
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
-                message = 'Skipping credential %s.  No remaining hosts.' % credential.name
+                message = 'Skipping credential %s.  No remaining hosts.' % \
+                    credential.name
                 self.scan_task.log_message(message)
                 break
 
