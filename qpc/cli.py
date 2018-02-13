@@ -110,17 +110,16 @@ class CLI(object):
         setup_logging(self.args.verbosity)
         if self.args.subcommand != server.SUBCOMMAND or \
             (self.args.subcommand == server.SUBCOMMAND and
-                self.args.action != server.CONFIG):
+             self.args.action != server.CONFIG):
             # Before attempting to run command, check server location
             server_location = get_server_location()
             if server_location is None or server_location == '':
-                log.error(
-                    'Please configure server location using command below:')
+                log.error(_(messages.SERVER_CONFIG_REQUIRED))
                 log.error('$ qpc server config --host HOST --port PORT')
                 sys.exit(1)
             # ...and sure we are logged in
             if not read_client_token():
-                log.error('Please log in using the command below:')
+                log.error(_(messages.SERVER_LOGIN_REQUIRED))
                 log.error('$ qpc server login')
                 sys.exit(1)
 
