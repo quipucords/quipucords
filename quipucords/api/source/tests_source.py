@@ -126,7 +126,7 @@ class SourceTest(TestCase):
         data = {'name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
-                'port': '8000',
+                'port': '22',
                 'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
