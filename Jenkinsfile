@@ -34,7 +34,7 @@ node('f25-os') {
         def targzfile = tarfile + ".gz"
         env.DOCKER_IMAGE = targzfile
         sh "sudo docker save -o $tarfile quipucords:beta"
-        sh "sudo gzip $tarfile"
+        sh "sudo gzip -f $tarfile"
     }
     post {
         always {
