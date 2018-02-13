@@ -32,13 +32,8 @@ node('f25-os') {
 
         def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
-        env.DOCKER_IMAGE = targzfile
         sh "sudo docker save -o $tarfile quipucords:beta"
         sh "sudo gzip -f $tarfile"
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: '${env.DOCKER_IMAGE}'
-        }
+        archive targzfile
     }
 }
