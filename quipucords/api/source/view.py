@@ -23,7 +23,7 @@ from rest_framework.serializers import ValidationError
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
-from api.models import Source, Credential
+from api.models import Source, Credential, ScanJob, ScanTask, ScanOptions
 import api.messages as messages
 from api.common.util import is_int
 
@@ -116,6 +116,27 @@ class SourceViewSet(ModelViewSet):
 
         # Create expanded host cred JSON
         expand_credential(json_source)
+
+        # check to see if a connection scan was requested
+        # through query parameter
+        scan = request.query_params.get('scan', False)
+        # If the scan was requested, create a connection scan
+        if scan:
+            # Grab the last source that was created
+            scan_source = self.queryset.latest('id')
+            # Define the scan options object
+            scan_options = ScanOptions()
+            scan_options.save()
+            # Create the scan job
+            scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                               options=scan_options)
+            scan_job.save()
+            # Add the source
+            scan_job.sources.add(scan_source)
+            scan_job.save()
+            # Queue & start the job
+            scan_job.queue()
+            scan_job.start()
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument

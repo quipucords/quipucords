@@ -64,6 +64,27 @@ class SourceTest(TestCase):
                                 json.dumps(data),
                                 'application/json')
 
+    def create_query_param(self, data):
+        """Call the connection scan for source."""
+        url = 'http://127.0.0.1:8000/api/v1/sources/?scan=True'
+        return self.client.post(url,
+                                json.dumps(data),
+                                'application/json')
+
+    def create_expect_400_with_query(self, data, expected_response=None):
+        """We will do a lot of create tests that expect HTTP 400s."""
+        response = self.create_query_param(data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        if expected_response:
+            response_json = response.json()
+            self.assertEqual(response_json, expected_response)
+
+    def create_expect_201_with_query(self, data):
+        """Evaluate if the status code is equal to sucess code."""
+        response = self.create_query_param(data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
     def create_expect_400(self, data, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
@@ -81,12 +102,31 @@ class SourceTest(TestCase):
     #################################################
     # Network Tests
     #################################################
+    def test_successful_create_with_query(self):
+        """A valid create request with query param."""
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.net_cred_for_upload]}
+        response = self.create_expect_201_with_query(data)
+        self.assertIn('id', response)
+
+    def test_create_fail_with_query(self):
+        """A create request must have a string name."""
+        self.create_expect_400_with_query(
+            {'name': 1,
+             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
     def test_successful_net_create(self):
         """A valid create request should succeed."""
         data = {'name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
-                'port': '22',
+                'port': '8000',
                 'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
