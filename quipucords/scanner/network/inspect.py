@@ -15,6 +15,7 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.credential.serializer import CredentialSerializer
 from api.models import (ScanTask, ConnectionResult,
+                        InspectionResult,
                         SystemConnectionResult,
                         SystemInspectionResult)
 from scanner.task import ScanTaskRunner
@@ -244,8 +245,10 @@ class InspectTaskRunner(ScanTaskRunner):
                 serializer = CredentialSerializer(host_cred)
                 connected.append((result.name, serializer.data))
 
-        for inspect in self.inspect_results.results.all():
-            for result in inspect.systems.all():
+        inspect_task_results = InspectionResult.objects.filter(
+            scan_task=self.scan_task.id).first()
+        if inspect_task_results is not None:
+            for result in inspect_task_results.systems.all():
                 if result.status == SystemInspectionResult.SUCCESS:
                     completed.append(result.name)
                 else:
