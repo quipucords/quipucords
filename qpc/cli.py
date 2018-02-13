@@ -108,9 +108,9 @@ class CLI(object):
         """
         self.args = self.parser.parse_args()
         setup_logging(self.args.verbosity)
-
-        if self.args.subcommand is not None \
-                and self.args.subcommand != server.SUBCOMMAND:
+        if self.args.subcommand != server.SUBCOMMAND or \
+            (self.args.subcommand == server.SUBCOMMAND and
+                self.args.action != server.CONFIG):
             # Before attempting to run command, check server location
             server_location = get_server_location()
             if server_location is None or server_location == '':
