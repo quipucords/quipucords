@@ -11,11 +11,15 @@
 
 import io
 import json
+import logging
 import multiprocessing as mp
+import os
 import uuid
 from django.db import transaction
 from api import log_state
 from quipucords import settings
+
+logger = logging.logger(__name__)
 
 UUID_CACHE = None
 
@@ -54,6 +58,67 @@ def next_sequence_number():
     seq.save()
 
     return number
+
+
+class RotatingLogFile(object):
+    """A log file that automatically rotates itself when full."""
+
+    # This class maintains a set of log files with names 'basename-0',
+    # 'basename-1', .... It automatically switches to a new one when
+    # the last log file is either too big or too old, and removes
+    # earlier ones when they exceed the size or age limits. A few
+    # flaws:
+    #   - It only re-evaluates its log file list on writes. If you
+    #     never write anything, it will never rotate the logs.
+    #   - It is not safe to use more than one instance of this class
+    #     with the same basename. It makes no attempt at locking, and
+    #     it doesn't look for notifications of new log files after
+    #     it's gathered its initial set.
+
+    def __init__(self, basename, max_size, max_age,
+                 step_size=None, step_age=None):
+        # Log files will be named 'basename-0', 'basename-1', etc.
+        self.basename = basename
+        self.max_size = max_size
+        self.max_age = max_age
+
+        # The size and age limits where we start a new log file.
+        self.step_size = step_size or max_size // 10
+        self.step_age = step_age or max_age // 10
+
+        # self.log_files will be a list of dicts with entries 'name',
+        # 'created', and 'size'. The list will be sorted with the
+        # newest entries in the front.
+        self.log_files = []
+        self.file_counter = 0
+
+        for name in os.listdir(settings.INPUT_LOG_DIRECTORY):
+            if name.startswith(basename):
+                base, sep, counter = name.partition('-')
+                if base != basename:
+                    logger.error('Bad log file name: %s', name)
+                    continue
+
+                self.file_counter = max(self.file_counter, int(counter))
+
+                stat_result = os.stat(name)
+                self.log_files.append({'name': name,
+                                       'created': stat_result.st_mtime,
+                                       'size': stat_result.st_size})
+
+        self.log_files = sorted(self.log_files,
+                                key=lambda x: x['created'], reverse=True)
+        self.fp = open(log_files[0]['name'], 'ab')
+
+    def ensure_log_file_ready(self):
+        if not self.log_files:
+            name = '{0}-{1}'.format(self.basename, self.file_counter)
+            # We handle the encoding ourselves and write to fp in
+            # binary mode so that a) we can guarantee consistent
+            # encoding of the log files and b) we can count the number
+            # of bytes we're writing.
+            self.fp = open(name, 'ab')
+            stat_resul
 
 
 INPUT_LOG = None
