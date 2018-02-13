@@ -87,9 +87,15 @@ class ConnectResultStore(object):
         self.conn_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
-            self.scan_task.increment_stats(name, increment_sys_scanned=True)
+            message = '%s with %s' % (name, credential.name)
+            self.scan_task.increment_stats(message, increment_sys_scanned=True)
         else:
-            self.scan_task.increment_stats(name, increment_sys_failed=True)
+            if credential is not None:
+                message = '%s with %s' % (name, credential.name)
+            else:
+                message = '%s has no valid credentials' % name
+
+            self.scan_task.increment_stats(message, increment_sys_failed=True)
 
         self._remaining_hosts.remove(name)
 
@@ -140,10 +146,15 @@ class ConnectTaskRunner(ScanTaskRunner):
         remaining_hosts = result_store.remaining_hosts()
 
         for cred_id in credentials:
+            credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
+                message = 'Skipping credential %s.  No remaining hosts.' % credential.name
+                self.scan_task.log_message(message)
                 break
 
-            credential = Credential.objects.get(pk=cred_id)
+            message = 'Attempting credential %s.' % credential.name
+            self.scan_task.log_message(message)
+
             cred_data = CredentialSerializer(credential).data
             callback = ConnectResultCallback(result_store, credential)
             try:

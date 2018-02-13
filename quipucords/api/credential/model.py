@@ -62,6 +62,12 @@ class Credential(models.Model):
     become_user = models.CharField(max_length=64, null=True)
     become_password = models.CharField(max_length=1024, null=True)
 
+    def __str__(self):
+        """Convert to string."""
+        return '{ id:%s, name:%s, type:%s}' %\
+            (self.id, self.name, self.cred_type)
+
+
     @staticmethod
     def is_encrypted(field):
         """Check to see if the password is already encrypted."""
