@@ -1,31 +1,22 @@
-import jquery from 'jquery';
+import axios from 'axios';
 
 class CredentialsService {
   static addCredential(data = {}) {
-    return fetch(process.env.REACT_APP_CREDENTIALS_SERVICE, {
-      method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify(data)
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      data: data
     });
   }
 
   static deleteCredential(id) {
-    return fetch(`${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`, {
-      method: 'DELETE'
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'delete',
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
@@ -38,36 +29,19 @@ class CredentialsService {
   }
 
   static getCredentials(id = '', query = {}) {
-    let queryStr = jquery.param(query);
-
-    if (queryStr.length) {
-      queryStr = `?${queryStr}`;
-    }
-
-    return fetch(
-      `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}${queryStr}`
-    ).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+      params: query
     });
   }
 
   static updateCredential(id, data = {}) {
-    return fetch(`${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`, {
-      method: 'PUT',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify(data)
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'put',
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      data: data
     });
   }
 }

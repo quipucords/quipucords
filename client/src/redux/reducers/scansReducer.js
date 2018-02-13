@@ -20,7 +20,7 @@ const scansReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message
         },
         {
@@ -47,7 +47,7 @@ const scansReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          scans: action.payload.results,
+          scans: action.payload.data.results,
           fulfilled: true
         },
         {

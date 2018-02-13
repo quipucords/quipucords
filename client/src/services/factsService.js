@@ -1,17 +1,13 @@
+import axios from 'axios';
+
 class FactsService {
   static addFacts(data = {}) {
-    return fetch(process.env.REACT_APP_FACTS_SERVICE, {
-      method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify(data)
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error(response.statusText);
-      }
+    return axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_FACTS_SERVICE}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      data: data
     });
   }
 }
