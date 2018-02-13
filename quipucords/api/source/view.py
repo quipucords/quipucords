@@ -25,7 +25,7 @@ from api.filters import ListFilter
 from api.serializers import SourceSerializer
 from api.models import Source, Credential, ScanJob, ScanTask, ScanOptions
 import api.messages as messages
-from api.common.util import is_int
+from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
 
 
@@ -123,20 +123,27 @@ class SourceViewSet(ModelViewSet):
         scan = request.query_params.get('scan', False)
         # If the scan was requested, create a connection scan
         if scan:
-            # Grab the last source that was created
-            scan_source = self.queryset.latest('id')
-            # Define the scan options object
-            scan_options = ScanOptions()
-            scan_options.save()
-            # Create the scan job
-            scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                               options=scan_options)
-            scan_job.save()
-            # Add the source
-            scan_job.sources.add(scan_source)
-            scan_job.save()
-            # Start the scan
-            start_scan.send(sender=self.__class__, instance=scan_job)
+            if is_boolean(scan):
+                if convert_to_boolean(scan):
+                    # Grab the source id
+                    source_id = response.data['id']
+                    # Define the scan options object
+                    scan_options = ScanOptions()
+                    scan_options.save()
+                    # Create the scan job
+                    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                       options=scan_options)
+                    scan_job.save()
+                    # Add the source
+                    scan_job.sources.add(source_id)
+                    scan_job.save()
+                    # Start the scan
+                    start_scan.send(sender=self.__class__, instance=scan_job)
+            else:
+                error = {
+                    'scan': [_(messages.SOURCE_CONNECTION_SCAN)]
+                }
+                raise ValidationError(error)
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument

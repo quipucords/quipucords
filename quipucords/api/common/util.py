@@ -45,6 +45,28 @@ def convert_to_int(value):
     return int(value)
 
 
+def is_boolean(value):
+    """Check if a value is a bool cast as string.
+
+    :param value: The value to check
+    :returns True if it is a bool, False if not
+    """
+    if value == 'True' or value == 'False':
+        return True
+    return False
+
+
+def convert_to_boolean(value):
+    """Convert a string 'True' or 'False' to boolean.
+
+    :param value: The value to convert
+    :return The value as a bool
+    """
+    if value == 'True':
+        return True
+    return False
+
+
 class CSVHelper:
     """Helper for CSV serialization of list/dict values."""
 
