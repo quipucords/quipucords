@@ -1,7 +1,5 @@
 node('f25-os') {
     stage('Install') {
-        echo sh(script: 'env|sort', returnStdout: true)
-
         sh "sudo dnf -y install origin-clients"
         sh "which oc"
         sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPHENSHIFT_LOGIN_URL"
@@ -20,6 +18,11 @@ node('f25-os') {
         sh "sudo setenforce 0"
     }
     stage('Build Docker Image') {
+        checkout scm
+        sh "git rev-parse HEAD > GIT_COMMIT"
+        sh 'cat GIT_COMMIT'
+        def commitHash = readFile('GIT_COMMIT').trim()
+
         sh "ls -lta"
         sh "cat Dockerfile"
         sh "sudo docker -D build . -t quipucords:beta"
@@ -28,10 +31,12 @@ node('f25-os') {
         //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
 
-        def tarfile = "quipucords.beta." + env.BUILD_NUMBER + ".tar"
+
+        def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:beta"
         sh "sudo gzip -f $tarfile"
+
         archive targzfile
     }
 }
