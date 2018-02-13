@@ -13,6 +13,7 @@ node('f25-os') {
         sh "cat /etc/sysconfig/docker"
         sh "sudo systemctl start docker"
         def scmVars = checkout scm
+        env.GIT_COMMIT = scmVars.GIT_COMMIT
         sh "sleep 35s"
         sh "ps aux | grep docker"
         sh "sudo docker -v"
@@ -27,7 +28,7 @@ node('f25-os') {
         //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
 
-        def commitHash = scmVars.GIT_COMMIT
+        def commitHash = env.GIT_COMMIT
         def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:beta"
