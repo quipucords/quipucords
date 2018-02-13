@@ -100,9 +100,7 @@ class TestConnectResultCallback(unittest.TestCase):
 
         self.assertEqual(result_store.succeeded,
                          [('host1', credential, 'success')])
-        self.assertEqual(result_store.failed,
-                         [('host2', credential, 'failed'),
-                          ('host3', credential, 'failed')])
+        self.assertEqual(result_store.failed, [])
 
 
 class NetworkConnectTaskRunnerTest(TestCase):
