@@ -12,18 +12,33 @@ node('f25-os') {
         sh "sudo cp /tmp/docker.conf /etc/sysconfig/docker"
         sh "cat /etc/sysconfig/docker"
         sh "sudo systemctl start docker"
-        checkout scm
         sh "sleep 35s"
         sh "ps aux | grep docker"
         sh "sudo docker -v"
         sh "sudo setenforce 0"
     }
     stage('Build Docker Image') {
+        checkout scm
+        sh "git rev-parse HEAD > GIT_COMMIT"
+        sh 'cat GIT_COMMIT'
+        def commitHash = readFile('GIT_COMMIT').trim()
+
         sh "ls -lta"
         sh "cat Dockerfile"
-        sh "sudo docker -D build . -t quipucords:latest"
-        sh "sudo docker tag quipucords:latest $DOCKER_REGISTRY/quipucords/quipucords:latest"
-        sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
+        sh "sudo docker -D build . -t quipucords:beta"
+
+        //sh "sudo docker tag quipucords:beta $DOCKER_REGISTRY/quipucords/quipucords:beta"
+        //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
+        //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
+
+
+        def tarfile = "quipucords.beta." + commitHash + ".tar"
+        def targzfile = tarfile + ".gz"
+        sh "sudo docker save -o $tarfile quipucords:beta"
+        sh "sudo chmod 755 $tarfile"
+        sh "sudo gzip -f --best $tarfile"
+        sh "sudo chmod 755 $targzfile"
+
+        archive targzfile
     }
 }
