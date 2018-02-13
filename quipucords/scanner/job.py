@@ -80,7 +80,11 @@ class ScanJobRunner(Process):
             runner.scan_task.start()
 
             # run runner
-            status_message, task_status = runner.run()
+            try:
+                status_message, task_status = runner.run()
+            except Exception as error:
+                self.scan_job.fail(str(error))
+                raise error
 
             # Save Task status
             if task_status == ScanTask.FAILED:
