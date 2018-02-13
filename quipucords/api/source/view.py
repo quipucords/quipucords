@@ -26,6 +26,7 @@ from api.serializers import SourceSerializer
 from api.models import Source, Credential, ScanJob, ScanTask, ScanOptions
 import api.messages as messages
 from api.common.util import is_int
+from api.signals.scanjob_signal import start_scan
 
 
 CREDENTIALS_KEY = 'credentials'
@@ -134,9 +135,8 @@ class SourceViewSet(ModelViewSet):
             # Add the source
             scan_job.sources.add(scan_source)
             scan_job.save()
-            # Queue & start the job
-            scan_job.queue()
-            scan_job.start()
+            # Start the scan
+            start_scan.send(sender=self.__class__, instance=scan_job)
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
