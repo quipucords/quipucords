@@ -11,9 +11,7 @@ import App from './components/app';
 import { baseName } from './routes';
 import store from './redux/store';
 
-import registerServiceWorker from './common/registerServiceWorker';
-
-registerServiceWorker();
+// ToDo: Evaluate the need for being offline, causes authentication errors
 
 ReactDOM.render(
   <Provider store={store}>

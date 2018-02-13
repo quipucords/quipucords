@@ -20,7 +20,7 @@ const factsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message
         },
         {
@@ -47,7 +47,7 @@ const factsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          facts: action.payload,
+          facts: action.payload.data,
           fulfilled: true
         },
         {

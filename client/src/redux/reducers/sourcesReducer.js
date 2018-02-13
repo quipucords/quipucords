@@ -88,7 +88,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           add: true
         },
@@ -103,7 +103,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           delete: true
         },
@@ -117,7 +117,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message,
           edit: true
         },
@@ -131,7 +131,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          error: action.payload.error,
+          error: action.error,
           errorMessage: action.payload.message
         },
         {
@@ -158,7 +158,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          sources: action.payload.results,
+          sources: action.payload.data.results,
           fulfilled: true
         },
         {

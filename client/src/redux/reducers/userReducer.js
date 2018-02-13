@@ -7,7 +7,8 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false,
-    loggedIn: false
+    loggedIn: false,
+    authToken: null
   },
   user: {
     error: false,
@@ -94,7 +95,8 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           loggedIn: true,
-          fulfilled: true
+          fulfilled: true,
+          authToken: action.payload.authToken
         },
         {
           state,

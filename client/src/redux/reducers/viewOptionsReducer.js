@@ -62,7 +62,7 @@ export default function toolbarsReducer(state = initialState, action) {
     updateState[viewType] = Object.assign({}, state[viewType], {
       totalCount: totalCount,
       totalPages: totalPages,
-      currentPage: Math.min(state[viewType].currentPage, totalPages)
+      currentPage: Math.min(state[viewType].currentPage, totalPages || 1)
     });
   };
 
@@ -198,17 +198,17 @@ export default function toolbarsReducer(state = initialState, action) {
 
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
-      updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.count);
+      updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
     case sourcesTypes.GET_SOURCE_FULFILLED:
     case sourcesTypes.GET_SOURCES_FULFILLED:
-      updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.count);
+      updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
     case scansTypes.GET_SCAN_FULFILLED:
     case scansTypes.GET_SCANS_FULFILLED:
-      updatePageCounts(viewTypes.SCANS_VIEW, action.payload.count);
+      updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
     default:
