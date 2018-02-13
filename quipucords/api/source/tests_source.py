@@ -72,7 +72,7 @@ class SourceTest(TestCase):
                                 'application/json')
 
     def create_expect_400_with_query(self, data, expected_response=None):
-        """We will do a lot of create tests that expect HTTP 400s."""
+        """Expect an error if invalid data, even with query param."""
         response = self.create_query_param(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         if expected_response:
@@ -80,7 +80,7 @@ class SourceTest(TestCase):
             self.assertEqual(response_json, expected_response)
 
     def create_expect_201_with_query(self, data):
-        """Evaluate if the status code is equal to sucess code."""
+        """Expect success if valid even with query param."""
         response = self.create_query_param(data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
