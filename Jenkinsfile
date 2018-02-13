@@ -12,14 +12,16 @@ node('f25-os') {
         sh "sudo cp /tmp/docker.conf /etc/sysconfig/docker"
         sh "cat /etc/sysconfig/docker"
         sh "sudo systemctl start docker"
-        def scmVars = checkout scm
-        env.GIT_COMMIT = scmVars.GIT_COMMIT
         sh "sleep 35s"
         sh "ps aux | grep docker"
         sh "sudo docker -v"
         sh "sudo setenforce 0"
     }
     stage('Build Docker Image') {
+        sh "git rev-parse HEAD > GIT_COMMIT"
+        sh 'cat GIT_COMMIT'
+        def commitHash = readFile('GIT_COMMIT').trim()
+
         sh "ls -lta"
         sh "cat Dockerfile"
         sh "sudo docker -D build . -t quipucords:beta"
@@ -28,7 +30,6 @@ node('f25-os') {
         //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
 
-        def commitHash = env.GIT_COMMIT
         def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:beta"
