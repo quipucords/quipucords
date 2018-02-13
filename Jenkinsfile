@@ -35,8 +35,8 @@ node('f25-os') {
         def tarfile = "quipucords.beta." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:beta"
-        sh "sudo gzip -f $tarfile"
+        sh "sudo chmod 755 $tarfile"
 
-        archive targzfile
+        archive tarfile
     }
 }
