@@ -108,8 +108,10 @@ class SourceAddCommand(CliCommand):
             results = json_data.get('results', [])
             if count == len(self.args.cred):
                 self.args.credentials = []
-                for cred_entry in results:
-                    self.args.credentials.append(cred_entry['id'])
+                results_by_name_dict = {cred['name']: cred for cred in results}
+                for cred_name in self.args.cred:
+                    self.args.credentials.append(
+                        results_by_name_dict[cred_name]['id'])
             else:
                 for cred_entry in results:
                     cred_name = cred_entry['name']
