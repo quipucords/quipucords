@@ -86,7 +86,7 @@ def log_fact(host, fact, value):
 
 def disable_log_for_test():
     """Disable the input log for testing purposes."""
-    global INPUT_LOG
+    global INPUT_LOG  # pylint: disable=global-statement
     INPUT_LOG = io.StringIO()
 
 
@@ -102,7 +102,5 @@ def log_ansible_result(result):
         log_fact(result._host.name,
                  {'type': 'shell', 'command': args[RAW_PARAMS]},
                  result._result)
-    else:
-        print('*** Ansible result:', result)
     # If _raw_params isn't in args, then args is not a raw command and
     # we don't need to record it. This occurs for set_facts tasks.

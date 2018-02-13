@@ -90,6 +90,7 @@ class TestConnectResultCallback(unittest.TestCase):
     """Test ConnectResultCallback."""
 
     def setUp(self):
+        """Disable the input logs for testing."""
         input_log.disable_log_for_test()
 
     def test_callback(self):
