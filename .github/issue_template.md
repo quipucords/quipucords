@@ -14,6 +14,14 @@ ___
 
 ## Description:
 Provide a description of the issue being raised.
+
+## Acceptance Criteria: 
+_(for enhancements)_
+
+- [ ] Verify that CLI users can start a network scan
+- [ ] Verify that CLI users can pause a network scan
+- [ ] Verify that CLI users can restart a paused network scan
+
 ___
 
 ## Bug Report
