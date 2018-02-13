@@ -18,7 +18,7 @@ from api.models import Credential, Source
 import api.messages as messages
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name
+# pylint: disable=too-many-instance-attributes,invalid-name,too-many-lines
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
