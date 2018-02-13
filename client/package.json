@@ -25,7 +25,10 @@
     "watch:css": "npm run build:css && node-sass --include-path ./src/styles $npm_package_sassDepIncludes src/styles/entitlements.scss -o src/styles/css --watch --recursive",
     "build:js": "react-scripts build",
     "build": "run-s build:css build:js",
-    "build:prod": "npm run build && mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client",
+    "build:asset-deps": "mkdir -p public/assets/rcue && cp -R node_modules/rcue/dist/* public/assets/rcue",
+    "build:asset-images": "mkdir -p public/assets/images && cp -R src/styles/images/* public/assets/images",
+    "build:assets": "npm-run-all build:asset-*",
+    "build:prod": "run-s build:assets build && mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client",
     "create-react-app": "create-react-app",
     "start:js": "run-p -l api:mock api:doc start:client",
     "start": "npm-run-all -p watch:css start:js",
@@ -34,8 +37,7 @@
     "start:quipucords": "open http://127.0.0.1:8000/index.html; source ../venv/bin/activate; cd ../; make serve",
     "test": "run-s test:**",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "react-scripts test --env=jsdom",
-    "postinstall": "sh ./scripts/postinstall.sh"
+    "test:unit": "react-scripts test --env=jsdom"
   },
   "dependencies": {
     "axios": "^0.17.1",
