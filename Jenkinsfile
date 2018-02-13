@@ -12,7 +12,7 @@ node('f25-os') {
         sh "sudo cp /tmp/docker.conf /etc/sysconfig/docker"
         sh "cat /etc/sysconfig/docker"
         sh "sudo systemctl start docker"
-        checkout scm
+        def scmVars = checkout scm
         sh "sleep 35s"
         sh "ps aux | grep docker"
         sh "sudo docker -v"
@@ -21,9 +21,18 @@ node('f25-os') {
     stage('Build Docker Image') {
         sh "ls -lta"
         sh "cat Dockerfile"
-        sh "sudo docker -D build . -t quipucords:latest"
-        sh "sudo docker tag quipucords:latest $DOCKER_REGISTRY/quipucords/quipucords:latest"
-        sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
+        sh "sudo docker -D build . -t quipucords:beta"
+
+        //sh "sudo docker tag quipucords:beta $DOCKER_REGISTRY/quipucords/quipucords:beta"
+        //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
+        //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
+
+        def commitHash = scmVars.GIT_COMMIT
+        def tarfile = "quipucords.beta." + commitHash + ".tar"
+        def targzfile = tarfile + ".gz"
+        sh "sudo docker save -o $tarfile quipucords:beta"
+        sh "gzip --best $tarfile"
+
+        archiveArtifacts artifacts: targzfile
     }
 }
