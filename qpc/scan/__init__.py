@@ -20,6 +20,7 @@ SHOW = 'show'
 PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
+CLEAR = 'clear'
 
 # Status values
 SCAN_STATUS_CREATED = 'created'

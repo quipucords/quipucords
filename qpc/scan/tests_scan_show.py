@@ -76,7 +76,7 @@ class ScanShowCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             nsc = ScanShowCommand(SUBPARSER)
-            args = Namespace(id='1', results=False)
+            args = Namespace(id='1', results=False, name='scan1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     nsc.main(args)

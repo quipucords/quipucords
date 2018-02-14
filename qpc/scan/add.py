@@ -127,5 +127,5 @@ class ScanAddCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        ##### Change id to name whenever name is added to scan model
+        # Change id to name whenever name is added to scan model
         print(_(messages.SCAN_ADDED % json_data['id']))
