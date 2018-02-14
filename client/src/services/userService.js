@@ -3,7 +3,7 @@ import cookies from 'js-cookie';
 class UserService {
   static authorizeUser() {
     // ToDo: ReEvaluate placement of this spoof for auth. Also consider using a helper function.
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.REACT_APP_ENV === 'development') {
       cookies.set(process.env.REACT_APP_AUTH_TOKEN, 'spoof');
 
       console.warn('Warning: Loading spoof auth token.');
