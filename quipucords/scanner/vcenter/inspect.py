@@ -48,7 +48,7 @@ class InspectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
-    def __init__(self, scan_job, scan_task, inspect_results):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
@@ -57,7 +57,6 @@ class InspectTaskRunner(ScanTaskRunner):
         that were execute prior to running this task.
         """
         super().__init__(scan_job, scan_task)
-        self.inspect_results = inspect_results
         self.connect_scan_task = None
         self.source = scan_task.source
         self.inspect_result = None
@@ -66,15 +65,15 @@ class InspectTaskRunner(ScanTaskRunner):
     def _init_inspect_result(self):
         """Initialize the inspect result."""
         # Prep inspect result
-        inspect_result = self.inspect_results.results.filter(
+        inspect_result = self.scan_job.inspection_results.results.filter(
             source__id=self.source.id).first()
         if inspect_result is None:
             inspect_result = InspectionResult(
                 source=self.scan_task.source,
                 scan_task=self.scan_task)
             inspect_result.save()
-            self.inspect_results.results.add(inspect_result)
-            self.inspect_results.save()
+            self.scan_job.inspection_results.results.add(inspect_result)
+            self.scan_job.inspection_results.save()
         self.inspect_result = inspect_result
 
     def run(self):

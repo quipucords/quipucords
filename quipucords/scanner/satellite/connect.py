@@ -25,7 +25,7 @@ class ConnectTaskRunner(ScanTaskRunner):
     and gathers the set of available systems.
     """
 
-    def __init__(self, scan_job, scan_task, conn_results):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
@@ -34,8 +34,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         that were execute prior to running this task.
         """
         super().__init__(scan_job, scan_task)
-        self.conn_results = conn_results
         self.source = scan_task.source
+        conn_results = self.scan_job.connection_results
         with transaction.atomic():
             conn_result = conn_results.results.filter(
                 source__id=self.source.id).first()

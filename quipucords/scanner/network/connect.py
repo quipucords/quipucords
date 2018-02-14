@@ -116,21 +116,20 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task, conn_results):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param conn_results: ConnectionResults object used
         to store results
         """
         super().__init__(scan_job, scan_task)
-        self.conn_results = conn_results
         self.scan_task = scan_task
 
     def run(self):
         """Scan network range ang attempt connections."""
-        result_store = ConnectResultStore(self.scan_task, self.conn_results)
+        result_store = ConnectResultStore(self.scan_task,
+                                          self.scan_job.connection_results)
         return self.run_with_result_store(result_store)
 
     # pylint: disable=too-many-locals

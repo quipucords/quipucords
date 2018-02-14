@@ -17,9 +17,7 @@ from api.fact.util import (validate_fact_collection_json,
                            get_or_create_fact_collection)
 from api.models import (FactCollection,
                         ScanTask,
-                        Source,
-                        ConnectionResults,
-                        InspectionResults)
+                        Source)
 from scanner import network, vcenter, satellite
 
 
@@ -35,19 +33,12 @@ class ScanJobRunner(Process):
         Process.__init__(self)
         self.scan_job = scan_job
         self.identifier = scan_job.id
-        self.conn_results = None
-        self.inspect_results = None
 
     def run(self):
         """Trigger thread execution."""
         if self.scan_job.status == ScanTask.CREATED:
             # Job is not ready to run
             self.scan_job.queue()
-
-        self.conn_results = ConnectionResults.objects.filter(
-            scan_job=self.scan_job.id).first()
-        self.inspect_results = InspectionResults.objects.filter(
-            scan_job=self.scan_job.id).first()
 
         # Job is not running so start
         self.scan_job.start()
@@ -121,27 +112,27 @@ class ScanJobRunner(Process):
         if (scan_type == ScanTask.SCAN_TYPE_CONNECT and
                 source_type == Source.NETWORK_SOURCE_TYPE):
             runner = network.ConnectTaskRunner(
-                self.scan_job, scan_task, self.conn_results)
+                self.scan_job, scan_task)
         elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
               source_type == Source.VCENTER_SOURCE_TYPE):
             runner = vcenter.ConnectTaskRunner(
-                self.scan_job, scan_task, self.conn_results)
+                self.scan_job, scan_task)
         elif (scan_type == ScanTask.SCAN_TYPE_CONNECT and
               source_type == Source.SATELLITE_SOURCE_TYPE):
             runner = satellite.ConnectTaskRunner(
-                self.scan_job, scan_task, self.conn_results)
+                self.scan_job, scan_task)
         elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
               source_type == Source.NETWORK_SOURCE_TYPE):
             runner = network.InspectTaskRunner(
-                self.scan_job, scan_task, self.inspect_results)
+                self.scan_job, scan_task)
         elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
               source_type == Source.VCENTER_SOURCE_TYPE):
             runner = vcenter.InspectTaskRunner(
-                self.scan_job, scan_task, self.inspect_results)
+                self.scan_job, scan_task)
         elif (scan_type == ScanTask.SCAN_TYPE_INSPECT and
               source_type == Source.SATELLITE_SOURCE_TYPE):
             runner = satellite.InspectTaskRunner(
-                self.scan_job, scan_task, self.inspect_results)
+                self.scan_job, scan_task)
         return runner
 
     def _send_facts_to_engine(self):

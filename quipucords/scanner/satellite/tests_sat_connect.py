@@ -60,8 +60,10 @@ class ConnectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = ConnectionResults()
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
+        self.scan_job.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -69,8 +71,7 @@ class ConnectTaskRunnerTest(TestCase):
 
     def test_run_no_source_options(self):
         """Test the running connect task with no source options."""
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
@@ -82,8 +83,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
@@ -95,8 +95,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(401, None)) as mock_sat_status:
@@ -111,8 +110,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 3)) as mock_sat_status:
@@ -127,8 +125,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_conn_exception) as mock_sat_status:
@@ -143,8 +140,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_sat_exception) as mock_sat_status:
@@ -159,8 +155,7 @@ class ConnectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = ConnectTaskRunner(self.scan_job, self.scan_task,
-                                 self.conn_results)
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 2)) as mock_sat_status:
