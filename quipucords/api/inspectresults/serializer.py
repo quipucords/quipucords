@@ -46,7 +46,7 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
         qpc_allow_empty_fields = ['facts']
 
 
-class InspectionResultSerializer(NotEmptySerializer):
+class TaskInspectionResultSerializer(NotEmptySerializer):
     """Serializer for the TaskInspectionResult model."""
 
     class Meta:

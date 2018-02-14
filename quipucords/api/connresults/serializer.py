@@ -31,7 +31,7 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
         qpc_allow_empty_fields = ['value']
 
 
-class ConnectionResultSerializer(NotEmptySerializer):
+class TaskConnectionResultSerializer(NotEmptySerializer):
     """Serializer for the TaskConnectionResult model."""
 
     class Meta:
