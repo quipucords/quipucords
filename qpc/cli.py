@@ -117,11 +117,12 @@ class CLI(object):
                 log.error(_(messages.SERVER_CONFIG_REQUIRED))
                 log.error('$ qpc server config --host HOST --port PORT')
                 sys.exit(1)
-            # ...and sure we are logged in
-            if not read_client_token():
-                log.error(_(messages.SERVER_LOGIN_REQUIRED))
-                log.error('$ qpc server login')
-                sys.exit(1)
+
+        if (self.args.subcommand != server.SUBCOMMAND and
+                not read_client_token()):
+            log.error(_(messages.SERVER_LOGIN_REQUIRED))
+            log.error('$ qpc server login')
+            sys.exit(1)
 
         if self.args.subcommand in self.subcommands:
             subcommand = self.subcommands[self.args.subcommand]
