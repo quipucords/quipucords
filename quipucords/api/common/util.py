@@ -60,7 +60,7 @@ def convert_to_boolean(value):
     :param value: The value to convert
     :return The value as a bool
     """
-    if is_boolean(value.lower()):
+    if is_boolean(value):
         return value.lower() == 'true'
 
 
