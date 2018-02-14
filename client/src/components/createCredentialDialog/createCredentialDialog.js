@@ -120,7 +120,7 @@ class CreateCredentialDialog extends React.Component {
         message: (
           <span>
             Credential <strong>{results.name}</strong> successfully
-            {type === 'edit' ? 'updated' : 'created'}.
+            {type === 'edit' ? ' updated' : ' created'}.
           </span>
         )
       });
