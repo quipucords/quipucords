@@ -51,9 +51,7 @@ def is_boolean(value):
     :param value: The value to check
     :returns True if it is a bool, False if not
     """
-    if value == 'True' or value == 'False':
-        return True
-    return False
+    return value.lower() in ('true', 'false')
 
 
 def convert_to_boolean(value):
@@ -62,9 +60,8 @@ def convert_to_boolean(value):
     :param value: The value to convert
     :return The value as a bool
     """
-    if value == 'True':
-        return True
-    return False
+    if is_boolean(value.lower()):
+        return value.lower() == 'true'
 
 
 class CSVHelper:
