@@ -18,7 +18,7 @@ from api.models import Credential, Source
 import api.messages as messages
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name
+# pylint: disable=too-many-instance-attributes,invalid-name,too-many-lines
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -64,6 +64,27 @@ class SourceTest(TestCase):
                                 json.dumps(data),
                                 'application/json')
 
+    def create_query_param(self, url, data):
+        """Call the connection scan for source."""
+        return self.client.post(url,
+                                json.dumps(data),
+                                'application/json')
+
+    def create_expect_400_with_query(self, url, data, expected_response=None):
+        """Expect an error if invalid data, even with query param."""
+        response = self.create_query_param(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        if expected_response:
+            response_json = response.json()
+            self.assertEqual(response_json, expected_response)
+        return response
+
+    def create_expect_201_with_query(self, url, data):
+        """Expect success if valid even with query param."""
+        response = self.create_query_param(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
     def create_expect_400(self, data, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
@@ -81,6 +102,27 @@ class SourceTest(TestCase):
     #################################################
     # Network Tests
     #################################################
+    def test_successful_create_with_query(self):
+        """A valid create request with True query param."""
+        url = 'http://127.0.0.1:8000/api/v1/sources/?scan=True'
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.net_cred_for_upload]}
+        self.create_expect_201_with_query(url, data)
+
+    def test_create_fail_with__bad_query_param(self):
+        """A create with a bad scan query param should fail."""
+        url = 'http://127.0.0.1:8000/api/v1/sources/?scan=Foo'
+        self.create_expect_400_with_query(
+            url,
+            {'name': 'source1',
+             'hosts': '1.2.3.4',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
     def test_successful_net_create(self):
         """A valid create request should succeed."""
         data = {'name': 'source1',
