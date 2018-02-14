@@ -11,7 +11,7 @@
 """Module for serializing all model object for database storage."""
 
 from rest_framework.serializers import CharField, ChoiceField
-from api.models import (ConnectionResults, ConnectionResult,
+from api.models import (JobConnectionResult, TaskConnectionResult,
                         SystemConnectionResult)
 from api.common.serializer import NotEmptySerializer
 
@@ -32,22 +32,22 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
 
 
 class ConnectionResultSerializer(NotEmptySerializer):
-    """Serializer for the ConnectionResult model."""
+    """Serializer for the TaskConnectionResult model."""
 
     class Meta:
         """Metadata for serialzer."""
 
-        model = ConnectionResult
+        model = TaskConnectionResult
         fields = ['source', 'systems']
         qpc_allow_empty_fields = ['source', 'systems']
 
 
-class ConnectionResultsSerializer(NotEmptySerializer):
-    """Serializer for the ConnectionResults model."""
+class JobConnectionResultSerializer(NotEmptySerializer):
+    """Serializer for the JobConnectionResult model."""
 
     class Meta:
         """Metadata for serialzer."""
 
-        model = ConnectionResults
+        model = JobConnectionResult
         fields = ['results']
         qpc_allow_empty_fields = ['results']

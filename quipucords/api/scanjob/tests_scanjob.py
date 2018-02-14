@@ -22,11 +22,11 @@ from api.models import (Credential,
                         ScanTask,
                         ScanOptions,
                         ScanJob,
-                        ConnectionResults,
-                        ConnectionResult,
+                        JobConnectionResult,
+                        TaskConnectionResult,
                         SystemConnectionResult,
-                        InspectionResults,
-                        InspectionResult,
+                        JobInspectionResult,
+                        TaskInspectionResult,
                         SystemInspectionResult,
                         RawFact)
 from api.scanjob.view import (expand_scanjob,
@@ -457,11 +457,11 @@ class ScanJobTest(TestCase):
 
         conn_task = scan_job.tasks.first()
 
-        conn_results = ConnectionResults()
+        conn_results = JobConnectionResult()
         conn_results.save()
         scan_job.connection_results = conn_results
 
-        conn_result = ConnectionResult(
+        conn_result = TaskConnectionResult(
             source=conn_task.source, scan_task=conn_task)
         conn_result.save()
 
@@ -478,11 +478,11 @@ class ScanJobTest(TestCase):
 
         inspect_task = scan_job.tasks.all()[1]
 
-        inspect_results = InspectionResults()
+        inspect_results = JobInspectionResult()
         inspect_results.save()
         scan_job.inspection_results = inspect_results
 
-        inspect_result = InspectionResult(
+        inspect_result = TaskInspectionResult(
             source=inspect_task.source, scan_task=inspect_task)
         inspect_result.save()
 
@@ -727,7 +727,7 @@ class ScanJobTest(TestCase):
 
         conn_task = scan_job.tasks.first()
 
-        conn_result = ConnectionResult(
+        conn_result = TaskConnectionResult(
             source=conn_task.source, scan_task=conn_task)
         conn_result.save()
 
@@ -758,12 +758,12 @@ class ScanJobTest(TestCase):
 
         conn_task = scan_job.tasks.first()
 
-        conn_results = ConnectionResults()
+        conn_results = JobConnectionResult()
         conn_results.save()
         scan_job.connection_results = conn_results
         scan_job.save()
 
-        conn_result = ConnectionResult(
+        conn_result = TaskConnectionResult(
             source=conn_task.source, scan_task=conn_task)
         conn_result.save()
 
@@ -799,13 +799,13 @@ class ScanJobTest(TestCase):
 
         inspect_task = scan_job.tasks.all()[1]
 
-        inspect_results = InspectionResults()
+        inspect_results = JobInspectionResult()
         inspect_results.save()
 
         scan_job.inspection_results = inspect_results
         scan_job.save()
 
-        inspect_result = InspectionResult(
+        inspect_result = TaskInspectionResult(
             source=inspect_task.source, scan_task=inspect_task)
         inspect_result.save()
 

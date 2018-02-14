@@ -11,7 +11,7 @@
 """ScanTask used for satellite connection task."""
 from requests import exceptions
 from django.db import transaction
-from api.models import (ScanTask, ConnectionResult, SourceOptions)
+from api.models import (ScanTask, TaskConnectionResult, SourceOptions)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
@@ -40,7 +40,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             conn_result = conn_results.results.filter(
                 source__id=self.source.id).first()
             if conn_result is None:
-                conn_result = ConnectionResult(
+                conn_result = TaskConnectionResult(
                     scan_task=scan_task, source=self.source)
                 conn_result.save()
                 conn_results.results.add(conn_result)

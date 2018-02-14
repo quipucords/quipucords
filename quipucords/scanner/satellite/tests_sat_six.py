@@ -15,8 +15,8 @@ from unittest.mock import patch, ANY
 import requests_mock
 from django.test import TestCase
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult,
-                        InspectionResult, SystemInspectionResult)
+                        ScanJob, JobConnectionResult, TaskConnectionResult,
+                        TaskInspectionResult, SystemInspectionResult)
 from scanner.satellite.utils import construct_url
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
@@ -56,16 +56,16 @@ class SatelliteSixV1Test(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()
-        self.conn_result = ConnectionResult(
+        self.conn_result = TaskConnectionResult(
             scan_task=self.scan_task, source=self.source)
         self.conn_result.save()
 
-        self.inspect_result = InspectionResult(scan_task=self.scan_task,
-                                               source=self.source)
+        self.inspect_result = TaskInspectionResult(scan_task=self.scan_task,
+                                                   source=self.source)
         self.inspect_result.save()
 
         self.api = SatelliteSixV1(self.scan_task, self.conn_result,
@@ -408,15 +408,15 @@ class SatelliteSixV2Test(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()
-        self.conn_result = ConnectionResult(
+        self.conn_result = TaskConnectionResult(
             scan_task=self.scan_task, source=self.source)
         self.conn_result.save()
-        self.inspect_result = InspectionResult(scan_task=self.scan_task,
-                                               source=self.source)
+        self.inspect_result = TaskInspectionResult(scan_task=self.scan_task,
+                                                   source=self.source)
         self.inspect_result.save()
         self.api = SatelliteSixV2(self.scan_task,
                                   self.conn_result,

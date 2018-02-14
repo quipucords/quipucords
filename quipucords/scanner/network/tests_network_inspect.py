@@ -24,10 +24,10 @@ from api.models import (Credential,
                         ScanJob,
                         ScanTask,
                         ScanOptions,
-                        ConnectionResults,
-                        ConnectionResult,
+                        JobConnectionResult,
+                        TaskConnectionResult,
                         SystemConnectionResult,
-                        InspectionResults)
+                        JobInspectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
@@ -183,11 +183,11 @@ class NetworkInspectScannerTest(TestCase):
 
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
 
-        self.conn_result = ConnectionResult(
+        self.conn_result = TaskConnectionResult(
             scan_task=self.connect_scan_task, source=self.source)
         self.conn_result.save()
 
@@ -205,7 +205,7 @@ class NetworkInspectScannerTest(TestCase):
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
 
-        self.inspect_results = InspectionResults()
+        self.inspect_results = JobInspectionResult()
         self.inspect_results.save()
         self.scan_job.inspection_results = self.inspect_results
 

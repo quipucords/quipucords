@@ -13,7 +13,7 @@
 import requests_mock
 from django.test import TestCase
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults)
+                        ScanJob, JobConnectionResult)
 from scanner.satellite.utils import (get_credential, get_connect_data,
                                      construct_url, execute_request,
                                      status, data_map)
@@ -49,7 +49,7 @@ class SatelliteUtilsTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()

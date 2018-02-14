@@ -14,7 +14,7 @@ from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, SourceOptions)
+                        ScanJob, JobConnectionResult, SourceOptions)
 from scanner.satellite.connect import ConnectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
 from scanner.satellite.api import SatelliteException
@@ -60,7 +60,7 @@ class ConnectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()

@@ -11,7 +11,7 @@
 """ScanTask used for satellite inspection task."""
 from requests import exceptions
 from api.models import (ScanTask, SourceOptions,
-                        InspectionResult)
+                        TaskInspectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
@@ -71,7 +71,7 @@ class InspectTaskRunner(ScanTaskRunner):
                         filter(source__id=self.source.id).first()
 
                 if inspect_result is None:
-                    inspect_result = InspectionResult(
+                    inspect_result = TaskInspectionResult(
                         source=self.scan_task.source,
                         scan_task=self.scan_task)
                     inspect_result.save()

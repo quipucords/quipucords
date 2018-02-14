@@ -11,7 +11,7 @@
 """ScanTaskRunner is a logical breakdown of work."""
 
 import json
-from api.models import ScanTask, ConnectionResult, InspectionResult
+from api.models import ScanTask, TaskConnectionResult, TaskInspectionResult
 
 
 class ScanTaskRunner(object):
@@ -73,15 +73,15 @@ class ScanTaskRunner(object):
         understand how to read persisted results into a dictionary
         using a ScanTask object so others can retrieve them if needed.
 
-        :returns: Scan result object for task (either ConnectionResult
-        or InspectionResult)
+        :returns: Scan result object for task (either TaskConnectionResult
+        or TaskInspectionResult)
         """
         if not self.result:
             if self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                self.result = InspectionResult.objects.filter(
+                self.result = TaskInspectionResult.objects.filter(
                     scan_task=self.scan_task.id).first()
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-                self.result = ConnectionResult.objects.filter(
+                self.result = TaskConnectionResult.objects.filter(
                     scan_task=self.scan_task.id).first()
         return self.result
 

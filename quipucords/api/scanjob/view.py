@@ -28,9 +28,9 @@ from api.common.util import is_int
 from api.models import (ScanTask, ScanJob, Source)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
-                             ConnectionResultsSerializer,
+                             JobConnectionResultSerializer,
                              SystemConnectionResultSerializer,
-                             InspectionResultsSerializer,
+                             JobInspectionResultSerializer,
                              SystemInspectionResultSerializer,
                              RawFactSerializer)
 from api.signals.scanjob_signal import (start_scan, pause_scan,
@@ -258,14 +258,14 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         job_conn_result = scan_job.connection_results
         job_scan_result = scan_job.inspection_results
         if job_conn_result:
-            serializer = ConnectionResultsSerializer(job_conn_result)
+            serializer = JobConnectionResultSerializer(job_conn_result)
             json_job_conn_result = serializer.data
             expand_conn_results(job_conn_result, json_job_conn_result)
             if result is None:
                 result = {}
             result['connection_results'] = json_job_conn_result
         if job_scan_result:
-            serializer = InspectionResultsSerializer(job_scan_result)
+            serializer = JobInspectionResultSerializer(job_scan_result)
             json_job_scan_result = serializer.data
             expand_inspect_results(job_scan_result, json_job_scan_result)
             if result is None:
