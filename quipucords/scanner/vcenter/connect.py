@@ -56,18 +56,11 @@ class ConnectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
-    def __init__(self, scan_job, scan_task, conn_results):
-        """Set context for task execution.
-
-        :param scan_job: the scan job that contains this task
-        :param scan_task: the scan task model for this task
-        :param prerequisite_tasks: An array of scan task model objects
-        that were execute prior to running this task.
-        """
-        super().__init__(scan_job, scan_task)
-        self.conn_results = conn_results
-
     def _store_connect_data(self, connected, credential):
+        # Update the scan counts
+        self.scan_task.update_stats(
+            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
+
         conn_result = ConnectionResult(source=self.scan_task.source,
                                        scan_task=self.scan_task)
         conn_result.save()
@@ -78,15 +71,12 @@ class ConnectTaskRunner(ScanTaskRunner):
                 credential=credential)
             sys_result.save()
             conn_result.systems.add(sys_result)
+            self.scan_task.increment_stats(
+                sys_result.name, increment_sys_scanned=True)
 
         conn_result.save()
-        self.conn_results.save()
-        self.conn_results.results.add(conn_result)
-        self.conn_results.save()
-
-        # Update the scan counts
-        self.scan_task.update_stats(
-            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
+        self.scan_job.connection_results.results.add(conn_result)
+        self.scan_job.connection_results.save()
 
     def run(self):
         """Scan network range ang attempt connections."""

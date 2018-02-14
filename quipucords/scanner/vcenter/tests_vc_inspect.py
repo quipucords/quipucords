@@ -67,11 +67,12 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.inspect_results = InspectionResults(scan_job=self.scan_job)
+        self.inspect_results = InspectionResults()
         self.inspect_results.save()
+        self.scan_job.inspection_results = self.inspect_results
+        self.scan_job.save()
         self.runner = InspectTaskRunner(scan_job=self.scan_job,
-                                        scan_task=self.scan_task,
-                                        inspect_results=self.inspect_results)
+                                        scan_task=self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""

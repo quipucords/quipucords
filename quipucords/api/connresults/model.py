@@ -74,13 +74,11 @@ class ConnectionResult(models.Model):
 class ConnectionResults(models.Model):
     """The results of a connection scan."""
 
-    scan_job = models.ForeignKey('ScanJob', on_delete=models.CASCADE)
     results = models.ManyToManyField(ConnectionResult)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, scan_job:%s, ' \
-            'results:%s }' % (self.id, self.scan_job, self.results)
+        return '{ id:%s, results:%s }' % (self.id, self.results)
 
     class Meta:
         """Metadata for model."""

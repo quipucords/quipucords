@@ -73,6 +73,10 @@ class ScanJob(models.Model):
     fact_collection_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
+    connection_results = models.ForeignKey(
+        ConnectionResults, null=True, on_delete=models.CASCADE)
+    inspection_results = models.ForeignKey(
+        InspectionResults, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         """Convert to string."""
@@ -84,15 +88,19 @@ class ScanJob(models.Model):
             'options: {}, '\
             'fact_collection_id: {}, '\
             'start_time: {}, '\
-            'end_time: {} '.format(self.id,
-                                   self.sources,
-                                   self.scan_type,
-                                   self.status,
-                                   self.tasks,
-                                   self.options,
-                                   self.fact_collection_id,
-                                   self.start_time,
-                                   self.end_time) + '}'
+            'end_time: {}, '\
+            'connection_results: {}, '\
+            'inspection_results: {}'.format(self.id,
+                                            self.sources,
+                                            self.scan_type,
+                                            self.status,
+                                            self.tasks,
+                                            self.options,
+                                            self.fact_collection_id,
+                                            self.start_time,
+                                            self.end_time,
+                                            self.connection_results,
+                                            self.inspection_results) + '}'
 
     class Meta:
         """Metadata for model."""
@@ -145,16 +153,27 @@ class ScanJob(models.Model):
         if has_error:
             return
 
+        if self.connection_results is None:
+            temp_conn_results = ConnectionResults()
+            temp_conn_results.save()
+            self.connection_results = temp_conn_results
+            self.save()
+        if self.inspection_results is None and \
+                self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            temp_inspect_results = InspectionResults()
+            temp_inspect_results.save()
+            self.inspection_results = temp_inspect_results
+            self.save()
+
         if self.tasks:
             # It appears the initialization didn't complete
             # so remove partial results
             self.tasks.all().delete()
-            ConnectionResults.objects.filter(
-                scan_job=self.id).delete()
-            InspectionResults.objects.filter(
-                scan_job=self.id).delete()
+            if self.connection_results is not None:
+                self.connection_results.results.all().delete()
+            if self.inspection_results is not None:
+                self.inspection_results.results.all().delete()
 
-        job_scan_type = self.scan_type
         count = 0
         conn_tasks = []
         for source in self.sources.all():
@@ -170,7 +189,7 @@ class ScanJob(models.Model):
 
             count += 1
 
-        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
+        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             for conn_task in conn_tasks:
                 inspect_task = ScanTask(source=conn_task.source,
                                         scan_type=ScanTask.SCAN_TYPE_INSPECT,
@@ -185,14 +204,6 @@ class ScanJob(models.Model):
                 self.tasks.add(inspect_task)
 
                 count += 1
-
-        # Setup results objects
-        temp_conn_results = ConnectionResults(scan_job=self)
-        temp_conn_results.save()
-
-        if job_scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            temp_inspect_results = InspectionResults(scan_job=self)
-            temp_inspect_results.save()
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)

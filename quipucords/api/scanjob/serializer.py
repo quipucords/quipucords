@@ -87,7 +87,9 @@ class ScanJobSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanJob
-        fields = '__all__'
+        fields = ['id', 'sources', 'scan_type', 'status', 'status_message',
+                  'tasks', 'options', 'fact_collection_id', 'start_time',
+                  'end_time']
 
     @transaction.atomic
     def create(self, validated_data):

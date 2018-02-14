@@ -14,8 +14,7 @@ import os.path
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.credential.serializer import CredentialSerializer
-from api.models import (ScanTask, ConnectionResult,
-                        InspectionResult,
+from api.models import (ScanTask,
                         SystemConnectionResult,
                         SystemInspectionResult)
 from scanner.task import ScanTaskRunner
@@ -75,16 +74,14 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task, inspect_results):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param inspect_results: InspectionResults object used
         to store results
         """
         super().__init__(scan_job, scan_task)
-        self.inspect_results = inspect_results
         self.connect_scan_task = None
 
     def run(self):
@@ -193,7 +190,7 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS of size %d' % forks
+        log_message = 'START PROCESSING GROUPS with concurrent of %d' % forks
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
@@ -202,8 +199,9 @@ class InspectTaskRunner(ScanTaskRunner):
                 (idx + 1), len(group_names))
             self.scan_task.log_message(log_message)
             callback =\
-                InspectResultCallback(scan_task=self.scan_task,
-                                      inspect_results=self.inspect_results)
+                InspectResultCallback(
+                    scan_task=self.scan_task,
+                    inspect_results=self.scan_job.inspection_results)
             playbook = {'name': 'scan systems for product fingerprint facts',
                         'hosts': group_name,
                         'gather_facts': False,
@@ -237,7 +235,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connected = []
         failed = []
         completed = []
-        conn_task_results = ConnectionResult.objects.filter(
+        conn_task_results = self.scan_job.connection_results.results.filter(
             scan_task=self.connect_scan_task.id).first()
         for result in conn_task_results.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
@@ -245,8 +243,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 serializer = CredentialSerializer(host_cred)
                 connected.append((result.name, serializer.data))
 
-        inspect_task_results = InspectionResult.objects.filter(
-            scan_task=self.scan_task.id).first()
+        inspect_task_results = self.scan_job.inspection_results.results.filter(
+            scan_task=self.connect_scan_task.id).first()
         if inspect_task_results is not None:
             for result in inspect_task_results.systems.all():
                 if result.status == SystemInspectionResult.SUCCESS:

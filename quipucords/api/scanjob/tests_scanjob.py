@@ -457,8 +457,9 @@ class ScanJobTest(TestCase):
 
         conn_task = scan_job.tasks.first()
 
-        conn_results = ConnectionResults(scan_job=scan_job)
+        conn_results = ConnectionResults()
         conn_results.save()
+        scan_job.connection_results = conn_results
 
         conn_result = ConnectionResult(
             source=conn_task.source, scan_task=conn_task)
@@ -477,8 +478,9 @@ class ScanJobTest(TestCase):
 
         inspect_task = scan_job.tasks.all()[1]
 
-        inspect_results = InspectionResults(scan_job=scan_job)
+        inspect_results = InspectionResults()
         inspect_results.save()
+        scan_job.inspection_results = inspect_results
 
         inspect_result = InspectionResult(
             source=inspect_task.source, scan_task=inspect_task)
@@ -492,13 +494,14 @@ class ScanJobTest(TestCase):
                                             .SUCCESS)
         sys_result.save()
 
-        fact = RawFact(name='foo', value='value')
+        fact = RawFact(name='fact_key', value='"fact_value"')
         fact.save()
         sys_result.facts.add(fact)
         sys_result.save()
 
         inspect_result.systems.add(sys_result)
         inspect_result.save()
+        scan_job.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'results/'
         response = self.client.get(url)
@@ -508,10 +511,21 @@ class ScanJobTest(TestCase):
         self.assertIn('inspection_results', json_response)
 
         self.assertEqual(
-            json_response, {'connection_results':
-                            {'scan_job': 1, 'results': []},
-                            'inspection_results': {'scan_job': 1,
-                                                   'results': []}})
+            json_response, {
+                'connection_results': {'results': [
+                    {'source':
+                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     'systems':
+                     [{'name': 'Foo', 'credential':
+                       {'id': 1, 'name': 'cred1'},
+                       'status': 'success'}]}]},
+                'inspection_results': {'results': [
+                    {'source':
+                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     'systems':
+                     [{'name': 'Foo', 'status': 'success',
+                       'facts': [
+                           {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
@@ -744,8 +758,10 @@ class ScanJobTest(TestCase):
 
         conn_task = scan_job.tasks.first()
 
-        conn_results = ConnectionResults(scan_job=scan_job)
+        conn_results = ConnectionResults()
         conn_results.save()
+        scan_job.connection_results = conn_results
+        scan_job.save()
 
         conn_result = ConnectionResult(
             source=conn_task.source, scan_task=conn_task)
@@ -783,8 +799,11 @@ class ScanJobTest(TestCase):
 
         inspect_task = scan_job.tasks.all()[1]
 
-        inspect_results = InspectionResults(scan_job=scan_job)
+        inspect_results = InspectionResults()
         inspect_results.save()
+
+        scan_job.inspection_results = inspect_results
+        scan_job.save()
 
         inspect_result = InspectionResult(
             source=inspect_task.source, scan_task=inspect_task)

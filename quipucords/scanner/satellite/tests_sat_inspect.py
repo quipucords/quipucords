@@ -67,8 +67,10 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = ConnectionResults()
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
+
         self.conn_result = ConnectionResult(
             scan_task=self.scan_task, source=self.source)
         self.conn_result.save()
@@ -78,8 +80,11 @@ class InspectTaskRunnerTest(TestCase):
                              start_time=datetime.utcnow())
         conn_task.complete()
         self.scan_task.prerequisites.add(conn_task)
-        self.inspect_results = InspectionResults(scan_job=self.scan_job)
+        self.inspect_results = InspectionResults()
         self.inspect_results.save()
+        self.scan_job.inspection_results = self.inspect_results
+
+        self.scan_job.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -93,16 +98,14 @@ class InspectTaskRunnerTest(TestCase):
         conn_task.status = ScanTask.FAILED
         conn_task.save()
         self.scan_task.prerequisites.add(conn_task)
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_no_source_options(self):
         """Test the running connect task with no source options."""
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
@@ -114,8 +117,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
@@ -127,8 +129,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(401, None)) as mock_sat_status:
@@ -143,8 +144,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 3)) as mock_sat_status:
@@ -159,8 +159,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_conn_exception) as mock_sat_status:
@@ -175,8 +174,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_sat_exception) as mock_sat_status:
@@ -191,8 +189,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_exception) as mock_sat_status:
@@ -207,8 +204,7 @@ class InspectTaskRunnerTest(TestCase):
         options.save()
         self.source.options = options
         self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task,
-                                 self.inspect_results)
+        task = InspectTaskRunner(self.scan_job, self.scan_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 2)) as mock_sat_status:
