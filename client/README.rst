@@ -5,9 +5,9 @@ User interface for Quipucords. This project was bootstrapped with `Create React 
 
 Requirements
 ------------
-Before developing for Quipucords UI, here are some basic guidelines:
- * Your system needs to be running `NodeJS version 6+ <https://nodejs.org/>`_
- * To run the mock API, your system needs to be running `Docker <https://docs.docker.com/engine/installation/>`_
+Before developing for Quipucords UI, the requirements:
+ * Your system needs to be running `NodeJS version 8+ <https://nodejs.org/>`_
+ * And `Docker <https://docs.docker.com/engine/installation/>`_
 
 Development
 -----------
@@ -23,23 +23,25 @@ Installing
     $ cd client
     $ npm install
 
-Development Server & Mock API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To run the development server and mock API, use this command::
+Development Serve
+^^^^^^^^^^^^^^^^^
+To run the development server and API, use this command::
 
     $ npm start
 
-If you have Docker running, this will automatically setup the mock API.
+If you have Docker running, this will automatically setup and start the development API.
 
-Mock API
-********
-To setup the mock API separately you can run::
+Development API
+***************
+To setup the development API separately you can run::
 
-    $ npm run api:mock
+    $ npm run api:dev
+
+The development API produces randomized data against a Swagger spec.
 
 Debugging Redux
 ***************
-This project makes use of React & Redux. To enable Redux console logging, within the `client` directory, add a `.env.local` (dotenv) file with the follow line::
+This project makes use of React & Redux. To enable Redux console logging, within the ``[REPO]/client`` directory, add a ``.env.local`` (dotenv) file with the follow line::
 
   REACT_APP_DEBUG_MIDDLEWARE=true
 
@@ -56,22 +58,34 @@ To run the unit tests, use this command::
 
 Building the Production UI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-The UI is compiled for production within a `client` directory underneath `./quipucords/client`. To build the UI, use this command::
+The UI is compiled for production within a ``client`` directory underneath ``[REPO]/quipucords/client``. To build the UI, use this command::
 
-    $ npm run build:prod
-
-Serving the Production UI & API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you've gone through the Python quipucords installation you can serve the UI and API with this command::
-
-    $ npm run start:quipucords
+    $ npm run build
 
 Using Docker
-************
-If you'd rather run quipucords through Docker you can serve the UI and API with this set of commands::
+^^^^^^^^^^^^
+The UI/UX team currently uses Docker to aid development.
 
-    $ docker stop quipucords || docker ps && npm run api:update && npm run api:quipucords
+Development Serve
+*****************
+This is the default context for running the UI::
+
+    $ npm start
+
+Staging Serve
+*************
+To run the build under a staging context against a production level quipucords API, use this command::
+
+    $ npm run start:stage
+
+The staging context allows development to continue by pointing Docker at the ``[REPO]/client/build`` directory.
+
+Production Serve
+****************
+To run the existing build under a production context, use this command::
+
+    $ npm run start:prod
 
 
-*This set of NPM scripts are not intended as a replacement for serving the application, but as a shortcut during development.*
+*This set of NPM scripts are not intended as a replacement for serving the application, but as shortcuts during development.*
 
