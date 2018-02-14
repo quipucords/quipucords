@@ -12,6 +12,8 @@
 """Constants for the Scan commands."""
 
 SUBCOMMAND = 'scan'
+ADD = 'add'
+EDIT = 'edit'
 START = 'start'
 LIST = 'list'
 SHOW = 'show'

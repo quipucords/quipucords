@@ -36,9 +36,10 @@ from qpc.cred.commands import (CredAddCommand,
 from qpc.source.commands import (SourceAddCommand, SourceListCommand,
                                  SourceShowCommand, SourceClearCommand,
                                  SourceEditCommand)
-from qpc.scan.commands import (ScanStartCommand, ScanListCommand,
-                               ScanShowCommand, ScanPauseCommand,
-                               ScanCancelCommand, ScanRestartCommand)
+from qpc.scan.commands import (ScanAddCommand, ScanStartCommand,
+                               ScanListCommand, ScanShowCommand,
+                               ScanPauseCommand, ScanCancelCommand,
+                               ScanRestartCommand)
 from qpc.report.commands import (ReportSummaryCommand,
                                  ReportDetailCommand)
 from qpc.translation import _
@@ -82,9 +83,10 @@ class CLI(object):
                               SourceEditCommand])
 
         self._add_subcommand(scan.SUBCOMMAND,
-                             [ScanStartCommand, ScanListCommand,
-                              ScanShowCommand, ScanPauseCommand,
-                              ScanCancelCommand, ScanRestartCommand])
+                             [ScanAddCommand, ScanStartCommand,
+                              ScanListCommand, ScanShowCommand,
+                              ScanPauseCommand, ScanCancelCommand,
+                              ScanRestartCommand])
         self._add_subcommand(report.SUBCOMMAND,
                              [ReportSummaryCommand, ReportDetailCommand])
         ensure_data_dir_exists()

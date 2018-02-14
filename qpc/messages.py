@@ -107,6 +107,8 @@ SOURCE_TYPE_FILTER_HELP = 'Filter for listing sources by type. Valid '\
     'values: vcenter, network.'
 
 
+SCAN_NAME_HELP = 'Scan name.'
+SCAN_ADDED = 'Scan "%s" was added.'
 SCAN_ID_HELP = 'Scan identifier.'
 SCAN_TYPE_FILTER_HELP = 'Filter for listing scan jobs by type. Valid '\
     'values: connect, inspect.'
