@@ -141,8 +141,10 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.scan_job.options = scan_options
         self.scan_job.save()
 
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = ConnectionResults()
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
+        self.scan_job.save()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -229,8 +231,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('scanner.network.connect.connect')
     def test_connect_runner(self, mock_connect):
         """Test running a connect scan with mocked connection."""
-        scanner = ConnectTaskRunner(
-            self.scan_job, self.scan_task, self.conn_results)
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)

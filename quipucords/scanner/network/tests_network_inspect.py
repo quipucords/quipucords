@@ -183,8 +183,9 @@ class NetworkInspectScannerTest(TestCase):
 
         self.fact_endpoint = 'http://testserver' + reverse('facts-list')
 
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = ConnectionResults()
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
 
         self.conn_result = ConnectionResult(
             scan_task=self.connect_scan_task, source=self.source)
@@ -202,9 +203,13 @@ class NetworkInspectScannerTest(TestCase):
         self.conn_result.save()
         self.conn_results.results.add(self.conn_result)
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
 
-        self.inspect_results = InspectionResults(scan_job=self.scan_job)
+        self.inspect_results = InspectionResults()
         self.inspect_results.save()
+        self.scan_job.inspection_results = self.inspect_results
+
+        self.scan_job.save()
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -297,7 +302,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_inspect_scan_failure(self, mock_run):
         """Test scan flow with mocked manager and failure."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.inspect_scan_task)
 
         # Init for unit test as run is not called
         scanner.connect_scan_task = self.connect_scan_task
@@ -310,7 +315,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_inspect_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.inspect_scan_task)
         scan_task_status = scanner.run()
         mock_scan.assert_called_with(self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
@@ -324,7 +329,7 @@ class NetworkInspectScannerTest(TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
             scanner = InspectTaskRunner(
-                self.scan_job, self.inspect_scan_task, self.inspect_results)
+                self.scan_job, self.inspect_scan_task)
             scan_task_status = scanner.run()
             mock_run.assert_called_with(ANY)
             self.assertEqual(scan_task_status[1], ScanTask.FAILED)
@@ -343,7 +348,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_ssh_crash(self):
         """Simulate an ssh crash."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.inspect_scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
@@ -355,7 +360,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_ssh_hang(self):
         """Simulate an ssh hang."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.inspect_scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))

@@ -25,8 +25,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob, Source,
-                        ConnectionResults, InspectionResults)
+from api.models import (ScanTask, ScanJob, Source)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              ConnectionResultsSerializer,
@@ -209,6 +208,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        print(serializer.data)
         scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
         scanjob_obj.log_current_status()
         start_scan.send(sender=self.__class__, instance=scanjob_obj)
@@ -255,10 +255,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def results(self, request, pk=None):
         """Get the results of a scan job."""
         result = None
-        job_conn_result = ConnectionResults.objects.all() \
-            .filter(scan_job__id=pk).first()
-        job_scan_result = InspectionResults.objects.all() \
-            .filter(scan_job__id=pk).first()
+        scan_job = get_object_or_404(self.queryset, pk=pk)
+        job_conn_result = scan_job.connection_results
+        job_scan_result = scan_job.inspection_results
         if job_conn_result:
             serializer = ConnectionResultsSerializer(job_conn_result)
             json_job_conn_result = serializer.data

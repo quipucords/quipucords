@@ -49,8 +49,10 @@ class SatelliteUtilsTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = ConnectionResults()
         self.conn_results.save()
+        self.scan_job.connection_results = self.conn_results
+        self.scan_job.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
