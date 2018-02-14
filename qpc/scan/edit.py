@@ -26,11 +26,11 @@ import qpc.messages as messages
 class ScanEditCommand(CliCommand):
     """Defines the edit command.
 
-    This command is for editing existing host scans that can.
+    This command is for editing existing host scans.
     """
 
     SUBCOMMAND = scan.SUBCOMMAND
-    ACTION = scan.ADD
+    ACTION = scan.EDIT
 
     def __init__(self, subparsers):
         """Create command."""
@@ -44,7 +44,7 @@ class ScanEditCommand(CliCommand):
         self.parser.add_argument('--sources', dest='sources', nargs='+',
                                  metavar='SOURCES', default=[],
                                  help=_(messages.SOURCES_NAME_HELP),
-                                 required=True)
+                                 required=False)
         self.parser.add_argument('--max-concurrency', dest='max_concurrency',
                                  metavar='MAX_CONCURRENCY',
                                  type=int, default=50,
@@ -127,4 +127,4 @@ class ScanEditCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         ##### Change id to name whenever name is added to scan model
-        print(_(messages.SCAN_ADDED % json_data['id']))
+        print(_(messages.SCAN_UPDATED % json_data['id']))
