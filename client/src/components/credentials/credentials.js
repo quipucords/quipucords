@@ -50,9 +50,6 @@ class Credentials extends React.Component {
       'importSources',
       'refresh'
     ]);
-    this.state = {
-      selectedItems: []
-    };
   }
 
   componentDidMount() {
@@ -65,15 +62,12 @@ class Credentials extends React.Component {
     if (nextProps.credentials !== this.props.credentials) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
-        credential.selected = false;
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
           credential.auth_type = 'sshKey';
         } else {
           credential.auth_type = 'usernamePassword';
         }
       });
-
-      this.setState({ selectedItems: [] });
     }
 
     // Check for changes resulting in a fetch
@@ -94,14 +88,14 @@ class Credentials extends React.Component {
   }
 
   deleteCredentials() {
-    const { selectedItems } = this.state;
+    const { selectedCredentials } = this.props;
 
     let heading = (
       <span>Are you sure you want to delete the following credentials?</span>
     );
 
     let credentialsList = '';
-    selectedItems.forEach((item, index) => {
+    selectedCredentials.forEach((item, index) => {
       return (credentialsList += (index > 0 ? '\n' : '') + item.name);
     });
 
@@ -112,13 +106,13 @@ class Credentials extends React.Component {
           componentClass="textarea"
           type="textarea"
           readOnly
-          rows={selectedItems.length}
+          rows={selectedCredentials.length}
           value={credentialsList}
         />
       </Grid.Col>
     );
 
-    let onConfirm = () => this.doDeleteCredentials(selectedItems);
+    let onConfirm = () => this.doDeleteCredentials(selectedCredentials);
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
@@ -131,14 +125,12 @@ class Credentials extends React.Component {
   }
 
   itemSelectChange(item) {
-    const { credentials } = this.props;
-
-    item.selected = !item.selected;
-    let selectedItems = credentials.filter(item => {
-      return item.selected === true;
+    Store.dispatch({
+      type: item.selected
+        ? credentialsTypes.DESELECT_CREDENTIAL
+        : credentialsTypes.SELECT_CREDENTIAL,
+      credential: item
     });
-
-    this.setState({ selectedItems: selectedItems });
   }
 
   editCredential(item) {
@@ -199,11 +191,13 @@ class Credentials extends React.Component {
   }
 
   refresh() {
-    this.props.getCredentials();
+    this.props.getCredentials(
+      helpers.createViewQueryObject(this.props.viewOptions)
+    );
   }
 
   renderCredentialActions() {
-    const { selectedItems } = this.state;
+    const { selectedCredentials } = this.props;
 
     return (
       <div className="form-group">
@@ -227,7 +221,7 @@ class Credentials extends React.Component {
           </MenuItem>
         </DropdownButton>
         <Button
-          disabled={!selectedItems || selectedItems.length === 0}
+          disabled={!selectedCredentials || selectedCredentials.length === 0}
           onClick={this.deleteCredentials}
         >
           Delete
@@ -261,6 +255,7 @@ class Credentials extends React.Component {
       error,
       errorMessage,
       credentials,
+      selectedCredentials,
       viewOptions
     } = this.props;
 
@@ -296,6 +291,7 @@ class Credentials extends React.Component {
               actions={this.renderCredentialActions()}
               itemsType="Credential"
               itemsTypePlural="Credentials"
+              selectedCount={selectedCredentials.length}
               {...viewOptions}
             />
             <div className="quipucords-list-container">
@@ -331,6 +327,7 @@ Credentials.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   credentials: PropTypes.array,
+  selectedCredentials: PropTypes.array,
   viewOptions: PropTypes.object
 };
 

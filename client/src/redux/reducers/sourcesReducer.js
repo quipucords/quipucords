@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { sourcesTypes } from '../constants';
 
@@ -28,20 +29,45 @@ const initialState = {
   }
 };
 
+const selectedIndex = function(state, source) {
+  return _.findIndex(state.persist.selectedSources, nextSelected => {
+    return nextSelected.id === _.get(source, 'id');
+  });
+};
+
 const sourcesReducer = function(state = initialState, action) {
   switch (action.type) {
     // Persist
-    case sourcesTypes.SOURCES_SELECTED:
-      return helpers.setStateProp(
-        'persist',
-        {
-          selectedSources: action.selectedSources
-        },
-        {
-          state,
-          reset: false
-        }
-      );
+    case sourcesTypes.SELECT_SOURCE:
+      // Do nothing if it is already selected
+      if (selectedIndex(state, action.source) !== -1) {
+        return state;
+      }
+
+      action.source.selected = true;
+
+      const addedSelections = Object.assign({}, state.persist, {
+        selectedSources: [...state.persist.selectedSources, action.source]
+      });
+      return Object.assign({}, state, { persist: addedSelections });
+
+    case sourcesTypes.DESELECT_SOURCE:
+      const index = selectedIndex(state, action.source);
+
+      // Do nothing if it is not already selected
+      if (index === -1) {
+        return state;
+      }
+
+      action.source.selected = false;
+
+      const removedSelections = Object.assign({}, state.persist, {
+        selectedCredentials: [
+          ...state.persist.selectedSources.slice(0, index),
+          ...state.persist.selectedSources.slice(index + 1)
+        ]
+      });
+      return Object.assign({}, state, { persist: removedSelections });
 
     // Show/Hide
     case sourcesTypes.CREATE_SOURCE_SHOW:
@@ -155,10 +181,19 @@ const sourcesReducer = function(state = initialState, action) {
 
     // Success/Fulfilled
     case sourcesTypes.GET_SOURCES_FULFILLED:
+      // Get resulting credentials and update the selected state of each
+      const sources = _.get(action, 'payload.data.results', []).map(
+        nextSource => {
+          return {
+            ...nextSource,
+            selected: selectedIndex(state, nextSource) !== -1
+          };
+        }
+      );
       return helpers.setStateProp(
         'view',
         {
-          sources: action.payload.data.results,
+          sources: sources,
           fulfilled: true
         },
         {

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { credentialsTypes } from '../constants';
 
@@ -28,8 +29,49 @@ const initialState = {
   }
 };
 
+const selectedIndex = function(state, credential) {
+  return _.findIndex(state.persist.selectedCredentials, nextSelected => {
+    return nextSelected.id === _.get(credential, 'id');
+  });
+};
+
 const credentialsReducer = function(state = initialState, action) {
   switch (action.type) {
+    // Persist
+    case credentialsTypes.SELECT_CREDENTIAL:
+      // Do nothing if it is already selected
+      if (selectedIndex(state, action.credential) !== -1) {
+        return state;
+      }
+
+      action.credential.selected = true;
+
+      const addedSelections = Object.assign({}, state.persist, {
+        selectedCredentials: [
+          ...state.persist.selectedCredentials,
+          action.credential
+        ]
+      });
+      return Object.assign({}, state, { persist: addedSelections });
+
+    case credentialsTypes.DESELECT_CREDENTIAL:
+      const index = selectedIndex(state, action.credential);
+
+      // Do nothing if it is not already selected
+      if (index === -1) {
+        return state;
+      }
+
+      action.credential.selected = false;
+
+      const removedSelections = Object.assign({}, state.persist, {
+        selectedCredentials: [
+          ...state.persist.selectedCredentials.slice(0, index),
+          ...state.persist.selectedCredentials.slice(index + 1)
+        ]
+      });
+      return Object.assign({}, state, { persist: removedSelections });
+
     // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
       return helpers.setStateProp(
@@ -77,8 +119,13 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
-          add: true
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
+          add: true,
+          show: state.update.show
         },
         {
           state,
@@ -92,7 +139,11 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
           delete: true
         },
         {
@@ -107,7 +158,8 @@ const credentialsReducer = function(state = initialState, action) {
         {
           error: action.error,
           errorMessage: action.payload.message,
-          edit: true
+          edit: true,
+          show: state.update.show
         },
         {
           state,
@@ -135,7 +187,8 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           pending: true,
-          add: true
+          add: true,
+          show: state.update.show
         },
         {
           state,
@@ -162,7 +215,8 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           pending: true,
-          edit: true
+          edit: true,
+          show: state.update.show
         },
         {
           state,
@@ -229,15 +283,36 @@ const credentialsReducer = function(state = initialState, action) {
 
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+      // Get resulting credentials and update the selected state of each
+      const credentials = _.get(action, 'payload.data.results', []).map(
+        nextCredential => {
+          return {
+            ...nextCredential,
+            selected: selectedIndex(state, nextCredential) !== -1
+          };
+        }
+      );
       return helpers.setStateProp(
         'view',
         {
-          credentials: action.payload.data.results,
+          credentials: credentials,
           fulfilled: true
         },
         {
           state,
           initialState
+        }
+      );
+
+    case credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS:
+      return helpers.setStateProp(
+        'update',
+        {
+          error: false,
+          errorMessage: ''
+        },
+        {
+          state
         }
       );
 
