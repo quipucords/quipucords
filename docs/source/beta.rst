@@ -29,10 +29,10 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 3. Install the qpc beta package:
 
   - For Red Hat Enterprise Linux 7, enter the following command:
-    ``# yum -y install qpc-0.0.1-1.git.227.d622e53.el7.centos``
+    ``# yum -y install qpc-0.0.1-1.git.339.9de7534.el7.centos``
 
   - For Red Hat Enterprise Linux 6, enter the following command:
-    ``# yum -y install qpc-0.0.1-1.git.227.d622e53.el6``
+    ``# yum -y install qpc-0.0.1-1.git.339.9de7534.el6``
 
 Installing the Server Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
