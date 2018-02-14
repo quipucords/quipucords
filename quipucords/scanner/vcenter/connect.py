@@ -57,6 +57,10 @@ class ConnectTaskRunner(ScanTaskRunner):
     """
 
     def _store_connect_data(self, connected, credential):
+        # Update the scan counts
+        self.scan_task.update_stats(
+            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
+
         conn_result = ConnectionResult(source=self.scan_task.source,
                                        scan_task=self.scan_task)
         conn_result.save()
@@ -67,14 +71,12 @@ class ConnectTaskRunner(ScanTaskRunner):
                 credential=credential)
             sys_result.save()
             conn_result.systems.add(sys_result)
+            self.scan_task.increment_stats(
+                sys_result.name, increment_sys_scanned=True)
 
         conn_result.save()
         self.scan_job.connection_results.results.add(conn_result)
         self.scan_job.connection_results.save()
-
-        # Update the scan counts
-        self.scan_task.update_stats(
-            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
 
     def run(self):
         """Scan network range ang attempt connections."""
