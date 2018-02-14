@@ -15,8 +15,8 @@ from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult,
-                        InspectionResults, SourceOptions)
+                        ScanJob, JobConnectionResult, TaskConnectionResult,
+                        JobInspectionResult, SourceOptions)
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
 from scanner.satellite.api import SatelliteException
@@ -67,11 +67,11 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
 
-        self.conn_result = ConnectionResult(
+        self.conn_result = TaskConnectionResult(
             scan_task=self.scan_task, source=self.source)
         self.conn_result.save()
 
@@ -80,7 +80,7 @@ class InspectTaskRunnerTest(TestCase):
                              start_time=datetime.utcnow())
         conn_task.complete()
         self.scan_task.prerequisites.add(conn_task)
-        self.inspect_results = InspectionResults()
+        self.inspect_results = JobInspectionResult()
         self.inspect_results.save()
         self.scan_job.inspection_results = self.inspect_results
 

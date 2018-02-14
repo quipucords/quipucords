@@ -61,7 +61,7 @@ class SystemInspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
-class InspectionResult(models.Model):
+class TaskInspectionResult(models.Model):
     """The captured connection results from a scan."""
 
     source = models.ForeignKey(Source, on_delete=models.CASCADE)
@@ -85,10 +85,10 @@ class InspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
-class InspectionResults(models.Model):
+class JobInspectionResult(models.Model):
     """The results of a connection scan."""
 
-    results = models.ManyToManyField(InspectionResult)
+    results = models.ManyToManyField(TaskInspectionResult)
 
     def __str__(self):
         """Convert to string."""

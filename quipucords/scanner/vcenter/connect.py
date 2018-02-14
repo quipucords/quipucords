@@ -12,7 +12,7 @@
 import logging
 from socket import gaierror
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask, ConnectionResult, SystemConnectionResult)
+from api.models import (ScanTask, TaskConnectionResult, SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
 
@@ -61,8 +61,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.scan_task.update_stats(
             'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
 
-        conn_result = ConnectionResult(source=self.scan_task.source,
-                                       scan_task=self.scan_task)
+        conn_result = TaskConnectionResult(source=self.scan_task.source,
+                                           scan_task=self.scan_task)
         conn_result.save()
 
         for system in connected:

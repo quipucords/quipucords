@@ -12,7 +12,7 @@
 
 from django.test import TestCase
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult,
+                        ScanJob, JobConnectionResult, TaskConnectionResult,
                         SourceOptions)
 from scanner.satellite.factory import create
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
@@ -48,11 +48,11 @@ class SatelliteFactoryTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()
-        self.conn_result = ConnectionResult(
+        self.conn_result = TaskConnectionResult(
             scan_task=self.scan_task, source=self.source)
         self.conn_result.save()
 

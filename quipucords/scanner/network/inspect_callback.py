@@ -14,7 +14,7 @@ import logging
 import json
 from django.db import transaction
 from ansible.plugins.callback import CallbackBase
-from api.models import (InspectionResult,
+from api.models import (TaskInspectionResult,
                         SystemInspectionResult,
                         RawFact)
 from scanner.network.processing import process
@@ -148,7 +148,7 @@ class InspectResultCallback(CallbackBase):
         inspect_result = self.inspect_results.results.filter(
             source__id=self.source.id).first()
         if inspect_result is None:
-            inspect_result = InspectionResult(
+            inspect_result = TaskInspectionResult(
                 scan_task=self.scan_task, source=self.source)
             inspect_result.save()
 

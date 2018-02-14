@@ -19,10 +19,10 @@ from api.source.serializer import (CredentialsField,
                                    SourceSerializer)
 from api.scanjob.serializer import SourceField, ScanJobSerializer
 from api.scantasks.serializer import ScanTaskSerializer
-from api.connresults.serializer import (ConnectionResultsSerializer,
-                                        ConnectionResultSerializer,
+from api.connresults.serializer import (JobConnectionResultSerializer,
+                                        TaskConnectionResultSerializer,
                                         SystemConnectionResultSerializer)
-from api.inspectresults.serializer import(InspectionResultsSerializer,
-                                          InspectionResultSerializer,
+from api.inspectresults.serializer import(JobInspectionResultSerializer,
+                                          TaskInspectionResultSerializer,
                                           SystemInspectionResultSerializer,
                                           RawFactSerializer)

@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, InspectionResults, InspectionResult,
+                        ScanJob, JobInspectionResult, TaskInspectionResult,
                         SystemInspectionResult)
 from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
 
@@ -67,7 +67,7 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.inspect_results = InspectionResults()
+        self.inspect_results = JobInspectionResult()
         self.inspect_results.save()
         self.scan_job.inspection_results = self.inspect_results
         self.scan_job.save()
@@ -106,8 +106,8 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_get_result(self):
         """Test get results method when results exist."""
-        inspect_result = InspectionResult(source=self.source,
-                                          scan_task=self.scan_task)
+        inspect_result = TaskInspectionResult(source=self.source,
+                                              scan_task=self.scan_task)
         inspect_result.save()
         self.inspect_results.results.add(inspect_result)
         self.inspect_results.save()
@@ -149,7 +149,7 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_task.update_stats(
             'TEST_VC.', sys_count=5, sys_failed=0, sys_scanned=0)
         getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
-        inspect_result = InspectionResult(
+        inspect_result = TaskInspectionResult(
             source=self.scan_task.source,
             scan_task=self.scan_task)
         inspect_result.save()
@@ -161,7 +161,7 @@ class InspectTaskRunnerTest(TestCase):
             self.runner.get_vm_info(data_center, cluster,
                                     host, virtual_machine)
 
-            inspect_result = InspectionResult.objects.filter(
+            inspect_result = TaskInspectionResult.objects.filter(
                 scan_task=self.scan_task.id).first()
             sys_results = inspect_result.systems.all()
             expected_facts = {'vm.cluster': 'cluster1',
@@ -191,7 +191,7 @@ class InspectTaskRunnerTest(TestCase):
     # pylint: disable=too-many-locals
     def test_recurse_datacenter(self):
         """Test the recurse_datacenter method."""
-        inspect_result = InspectionResult(
+        inspect_result = TaskInspectionResult(
             source=self.scan_task.source,
             scan_task=self.scan_task)
         inspect_result.save()

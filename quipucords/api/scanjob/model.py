@@ -20,8 +20,8 @@ from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
 from api.scantasks.model import ScanTask
-from api.connresults.model import ConnectionResults
-from api.inspectresults.model import InspectionResults
+from api.connresults.model import JobConnectionResult
+from api.inspectresults.model import JobInspectionResult
 import api.messages as messages
 
 # Get an instance of a logger
@@ -74,9 +74,9 @@ class ScanJob(models.Model):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
     connection_results = models.ForeignKey(
-        ConnectionResults, null=True, on_delete=models.CASCADE)
+        JobConnectionResult, null=True, on_delete=models.CASCADE)
     inspection_results = models.ForeignKey(
-        InspectionResults, null=True, on_delete=models.CASCADE)
+        JobInspectionResult, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         """Convert to string."""
@@ -154,13 +154,13 @@ class ScanJob(models.Model):
             return
 
         if self.connection_results is None:
-            temp_conn_results = ConnectionResults()
+            temp_conn_results = JobConnectionResult()
             temp_conn_results.save()
             self.connection_results = temp_conn_results
             self.save()
         if self.inspection_results is None and \
                 self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            temp_inspect_results = InspectionResults()
+            temp_inspect_results = JobInspectionResult()
             temp_inspect_results.save()
             self.inspection_results = temp_inspect_results
             self.save()

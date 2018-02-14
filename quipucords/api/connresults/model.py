@@ -47,7 +47,7 @@ class SystemConnectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
-class ConnectionResult(models.Model):
+class TaskConnectionResult(models.Model):
     """The captured connection results from a scan."""
 
     source = models.ForeignKey(Source, on_delete=models.CASCADE)
@@ -71,10 +71,10 @@ class ConnectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
-class ConnectionResults(models.Model):
+class JobConnectionResult(models.Model):
     """The results of a connection scan."""
 
-    results = models.ManyToManyField(ConnectionResult)
+    results = models.ManyToManyField(TaskConnectionResult)
 
     def __str__(self):
         """Convert to string."""

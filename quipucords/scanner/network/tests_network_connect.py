@@ -18,7 +18,7 @@ from ansible.errors import AnsibleError
 from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
                         Source,
-                        ConnectionResults,
+                        JobConnectionResult,
                         ScanJob,
                         ScanOptions,
                         ScanTask)
@@ -141,7 +141,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.scan_job.options = scan_options
         self.scan_job.save()
 
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()

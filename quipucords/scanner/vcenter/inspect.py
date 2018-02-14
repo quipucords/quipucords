@@ -13,7 +13,7 @@ import logging
 import json
 from django.db import transaction
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask, InspectionResult,
+from api.models import (ScanTask, TaskInspectionResult,
                         SystemInspectionResult, RawFact)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
@@ -68,7 +68,7 @@ class InspectTaskRunner(ScanTaskRunner):
         inspect_result = self.scan_job.inspection_results.results.filter(
             source__id=self.source.id).first()
         if inspect_result is None:
-            inspect_result = InspectionResult(
+            inspect_result = TaskInspectionResult(
                 source=self.scan_task.source,
                 scan_task=self.scan_task)
             inspect_result.save()

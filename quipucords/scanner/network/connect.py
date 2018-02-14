@@ -16,7 +16,7 @@ from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 from api.serializers import SourceSerializer, CredentialSerializer
 from api.models import (Credential, ScanTask,
-                        ConnectionResult,
+                        TaskConnectionResult,
                         SystemConnectionResult)
 from django.db import transaction
 from scanner.task import ScanTaskRunner
@@ -39,7 +39,7 @@ class ConnectResultStore(object):
     """This object knows how to record and retrieve connection results."""
 
     def __init__(self, scan_task, conn_results):
-        """Get the unique ConnectionResult object for this scan."""
+        """Get the unique TaskConnectionResult object for this scan."""
         self.scan_task = scan_task
         self.conn_results = conn_results
 
@@ -49,7 +49,7 @@ class ConnectResultStore(object):
             conn_result = conn_results.results.filter(
                 source__id=source.id).first()
             if conn_result is None:
-                conn_result = ConnectionResult(
+                conn_result = TaskConnectionResult(
                     scan_task=scan_task, source=source)
                 conn_result.save()
                 conn_results.results.add(conn_result)

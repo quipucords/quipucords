@@ -16,7 +16,7 @@ from socket import gaierror
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult)
+                        ScanJob, JobConnectionResult, TaskConnectionResult)
 from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
                                      get_vm_container)
 
@@ -62,7 +62,7 @@ class ConnectTaskRunnerTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults()
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()
@@ -135,8 +135,8 @@ class ConnectTaskRunnerTest(TestCase):
 
     def test_get_result(self):
         """Test get result method when results exist."""
-        conn_result = ConnectionResult(source=self.source,
-                                       scan_task=self.scan_task)
+        conn_result = TaskConnectionResult(source=self.source,
+                                           scan_task=self.scan_task)
         conn_result.save()
         self.conn_results.results.add(conn_result)
         self.conn_results.save()
