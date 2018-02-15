@@ -480,14 +480,14 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(
             json_response, {
-                'connection_results': {'results': [
+                'connection_results': {'task_results': [
                     {'source':
                      {'id': 1, 'name': 'source1', 'source_type': 'network'},
                      'systems':
                      [{'name': 'Foo', 'credential':
                        {'id': 1, 'name': 'cred1'},
                        'status': 'success'}]}]},
-                'inspection_results': {'results': [
+                'inspection_results': {'task_results': [
                     {'source':
                      {'id': 1, 'name': 'source1', 'source_type': 'network'},
                      'systems':
@@ -712,10 +712,10 @@ class ScanJobTest(TestCase):
         conn_result.systems.add(sys_result)
         conn_result.save()
 
-        conn_results_json = {'results': [{}]}
+        conn_results_json = {'task_results': [{}]}
         expand_conn_results(scan_job.connection_results, conn_results_json)
         self.assertEqual(
-            conn_results_json['results'][0]['systems'][0]['name'], 'Foo')
+            conn_results_json['task_results'][0]['systems'][0]['name'], 'Foo')
 
     def test_expand_inspect_results(self):
         """Test view expand_inspect_results."""
@@ -738,11 +738,11 @@ class ScanJobTest(TestCase):
         inspect_result.systems.add(sys_result)
         inspect_result.save()
 
-        inspect_results_json = {'results': [{}]}
+        inspect_results_json = {'task_results': [{}]}
         expand_inspect_results(
             scan_job.inspection_results, inspect_results_json)
         self.assertEqual(
-            inspect_results_json['results'][0]['systems'][0]
+            inspect_results_json['task_results'][0]['systems'][0]
             ['facts'][0]['name'],
             'foo')
 

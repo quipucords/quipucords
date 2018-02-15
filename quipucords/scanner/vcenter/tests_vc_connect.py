@@ -72,7 +72,7 @@ class ConnectTaskRunnerTest(TestCase):
         # pylint: disable=protected-access
         self.runner._store_connect_data(vm_names, self.cred)
         self.assertEqual(
-            len(self.scan_job.connection_results.results.all()), 1)
+            len(self.scan_job.connection_results.task_results.all()), 1)
 
     def test_get_vm_names(self):
         """Test the get vm names method."""

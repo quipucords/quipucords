@@ -65,11 +65,11 @@ class TaskConnectionResult(models.Model):
 class JobConnectionResult(models.Model):
     """The results of a connection scan."""
 
-    results = models.ManyToManyField(TaskConnectionResult)
+    task_results = models.ManyToManyField(TaskConnectionResult)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, results:%s }' % (self.id, self.results)
+        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""

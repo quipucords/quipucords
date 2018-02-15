@@ -39,7 +39,7 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
 
 
 SOURCES_KEY = 'sources'
-RESULTS_KEY = 'results'
+RESULTS_KEY = 'task_results'
 TASKS_KEY = 'tasks'
 SYSTEMS_COUNT_KEY = 'systems_count'
 SYSTEMS_SCANNED_KEY = 'systems_scanned'
@@ -138,7 +138,7 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
     if json_job_conn_result is not None and\
             json_job_conn_result.get(RESULTS_KEY):
         json_job_conn_result_list = []
-        for result in job_conn_result.results.all():
+        for result in job_conn_result.task_results.all():
             conn_task = ScanTask.objects.filter(
                 connection_result=result).first()
             source_serializer = SourceSerializer(conn_task.source)
@@ -162,7 +162,7 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
     if json_job_inspect_result is not None and\
             json_job_inspect_result.get(RESULTS_KEY):
         json_job_inspect_result_list = []
-        for result in job_inspect_result.results.all():
+        for result in job_inspect_result.task_results.all():
             inspect_task = ScanTask.objects.filter(
                 inspection_result=result).first()
             source_serializer = SourceSerializer(inspect_task.source)

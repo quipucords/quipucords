@@ -52,7 +52,7 @@ def create_scan_job(source,
     scan_job.options = options_to_use
 
     # Add Task results to job results
-    scan_job.connection_results.results.add(task_conn_result)
+    scan_job.connection_results.task_results.add(task_conn_result)
 
     # Create Connection Task
     conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
@@ -79,7 +79,7 @@ def create_scan_job(source,
         scan_job.inspection_results = job_inspect_results
 
         # Add Task results to job results
-        scan_job.inspection_results.results.add(task_inspect_result)
+        scan_job.inspection_results.task_results.add(task_inspect_result)
 
         # Create Inspection Task
         scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,

@@ -80,11 +80,11 @@ class TaskInspectionResult(models.Model):
 class JobInspectionResult(models.Model):
     """The results of a connection scan."""
 
-    results = models.ManyToManyField(TaskInspectionResult)
+    task_results = models.ManyToManyField(TaskInspectionResult)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, results:%s }' % (self.id, self.results)
+        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""

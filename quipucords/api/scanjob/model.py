@@ -189,9 +189,9 @@ class ScanJob(models.Model):
             # so remove partial results
             self.tasks.all().delete()
             if self.connection_results is not None:
-                self.connection_results.results.all().delete()
+                self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
-                self.inspection_results.results.all().delete()
+                self.inspection_results.task_results.all().delete()
 
         count = 0
         conn_tasks = []
@@ -212,7 +212,7 @@ class ScanJob(models.Model):
             conn_task_result.save()
 
             # Add the task result to job results
-            self.connection_results.results.add(conn_task_result)
+            self.connection_results.task_results.add(conn_task_result)
             self.connection_results.save()
 
             # Add the task result to task
@@ -240,7 +240,7 @@ class ScanJob(models.Model):
                 inspect_task_result.save()
 
                 # Add the task result to job results
-                self.inspection_results.results.add(inspect_task_result)
+                self.inspection_results.task_results.add(inspect_task_result)
                 self.inspection_results.save()
 
                 # Add the inspect task result to task

@@ -49,5 +49,5 @@ class JobConnectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = JobConnectionResult
-        fields = ['results']
-        qpc_allow_empty_fields = ['results']
+        fields = ['task_results']
+        qpc_allow_empty_fields = ['task_results']

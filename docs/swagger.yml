@@ -1200,6 +1200,17 @@ definitions:
         items:
           $ref: "#/definitions/SysConnResultOut"
         description: "The connection result for each system."
+  TaskConnResultsOut:
+    type: "object"
+    required:
+      - source
+      - systems
+    properties:
+      task_results:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConnResultsOut"
+        description: "The connection result for tasks."
   RawFactsOut:
     type: "object"
     required:
@@ -1229,7 +1240,7 @@ definitions:
         description: "The raw facts collected from the system."
       status:
         type: "string"
-        description: "The status of the system connection."
+        description: "The status of the system inspection."
         enum:
           - success
           - unreachable
@@ -1246,7 +1257,17 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/SysInpectResultOut"
-        description: "The connection result for each system."
+        description: "The inspection result for each system."
+  TaskInspectResultsOut:
+    type: "object"
+    required:
+      - task_results
+    properties:
+      task_results:
+        type: "array"
+        items:
+          $ref: "#/definitions/InspectResultsOut"
+        description: "The inspection results for tasks."
   ScanJobResultsOut:
     type: "object"
     required:
@@ -1256,10 +1277,10 @@ definitions:
         connection_results:
           type: "array"
           items:
-            $ref: "#/definitions/ConnResultsOut"
-          description: "The connection results"
+            $ref: "#/definitions/TaskConnResultsOut"
+          description: "The task onnection results"
         inspection_results:
           type: "array"
           items:
-            $ref: "#/definitions/InspectResultsOut"
-          description: "The connection results"
+            $ref: "#/definitions/TaskInspectResultsOut"
+          description: "The task inspection results"
