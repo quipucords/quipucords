@@ -391,6 +391,9 @@ class SatelliteSixV1(SatelliteInterface):
         :param host_name: The name of the host
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
@@ -416,6 +419,9 @@ class SatelliteSixV1(SatelliteInterface):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(
             self.connect_scan_task.connection_result.systems.all())
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
 
@@ -495,6 +501,9 @@ class SatelliteSixV2(SatelliteInterface):
         :param host_name: The name of the host
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
@@ -520,6 +529,9 @@ class SatelliteSixV2(SatelliteInterface):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(
             self.connect_scan_task.connection_result.systems.all())
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
 

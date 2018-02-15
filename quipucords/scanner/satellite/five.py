@@ -104,6 +104,9 @@ class SatelliteFive(SatelliteInterface):
         :param virtual_guests: A dictionary of guest to host data
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
@@ -254,6 +257,9 @@ class SatelliteFive(SatelliteInterface):
 
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
         systems_count = len(
             self.connect_scan_task.connection_result.systems.all())
         self.inspect_scan_task.update_stats(
