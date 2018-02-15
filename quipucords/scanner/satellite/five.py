@@ -93,6 +93,7 @@ class SatelliteFive(SatelliteInterface):
         return hosts
 
     # pylint: disable=too-many-arguments, too-many-locals, too-many-statements
+    # pylint: disable=too-many-branches
     def host_details(self, host_id, host_name, last_checkin,
                      virtual_hosts, virtual_guests):
         """Obtain the details for a given host id and name.
