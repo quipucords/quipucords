@@ -208,7 +208,7 @@ class RotatingLogFile(object):
             self.new_log_file(now)
 
         # Maybe open the log file
-        if not self.open_log_file:
+        if not self.open_log_file and not self.dry_run:
             self.open_log_file = open(self.log_files[0]['name'], 'ab')
 
     def write_record(self, record, now=None):
