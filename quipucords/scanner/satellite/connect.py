@@ -10,7 +10,7 @@
 #
 """ScanTask used for satellite connection task."""
 from requests import exceptions
-from api.models import (ScanTask, SourceOptions)
+from api.models import (ScanTask)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
@@ -36,6 +36,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.source = scan_task.source
 
+    # pylint: disable=too-many-return-statements
     def run(self):
         """Scan network range ang attempt connections."""
         satellite_version = None
@@ -43,15 +44,14 @@ class ConnectTaskRunner(ScanTaskRunner):
         if options:
             satellite_version = options.satellite_version
 
-        if (satellite_version is None or
-                satellite_version == SourceOptions.SATELLITE_VERSION_5):
-            error_message = 'Satellite version %s is not yet supported.\n' %\
-                SourceOptions.SATELLITE_VERSION_5
+        if satellite_version is None:
+            error_message = 'Satellite version is unknown. '
             error_message += 'Connect scan failed for %s.' % self.scan_task
             return error_message, ScanTask.FAILED
 
         try:
-            status_code, api_version = utils.status(self.scan_task)
+            status_code, api_version = utils.status(self.scan_task,
+                                                    satellite_version)
             if status_code == 200:
                 api = create(satellite_version, api_version,
                              self.scan_task)
@@ -74,6 +74,14 @@ class ConnectTaskRunner(ScanTaskRunner):
         except exceptions.ConnectionError as conn_error:
             error_message = 'Satellite error encountered: %s\n' % conn_error
             error_message += 'Connect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
+        except TimeoutError as timeout_error:
+            error_message = 'Satellite error encountered: %s\n' % timeout_error
+            error_message += 'Connect scan failed for %s.' % self.scan_task
+            return error_message, ScanTask.FAILED
+        except Exception as unknown_error:  # pylint: disable=broad-except
+            error_message = 'Satellite error encountered: %s\n' % unknown_error
+            error_message += 'Inspect scan failed for %s.' % self.scan_task
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

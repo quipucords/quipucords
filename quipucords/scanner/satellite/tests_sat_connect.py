@@ -23,14 +23,24 @@ from scanner.satellite.api import SatelliteException
 from scanner.test_util import create_scan_job
 
 
-def mock_conn_exception(param1):  # pylint: disable=unused-argument
+def mock_conn_exception(param1, param2):  # pylint: disable=unused-argument
     """Mock method to throw connection error."""
     raise exceptions.ConnectionError()
 
 
-def mock_sat_exception(param1):  # pylint: disable=unused-argument
+def mock_sat_exception(param1, param2):  # pylint: disable=unused-argument
     """Mock method to throw satellite error."""
     raise SatelliteException()
+
+
+def mock_timeout_error(param1, param2):  # pylint: disable=unused-argument
+    """Mock method to throw timeout error."""
+    raise TimeoutError()
+
+
+def mock_exception(param1, param2):  # pylint: disable=unused-argument
+    """Mock method to throw exception."""
+    raise Exception()
 
 
 class ConnectTaskRunnerTest(TestCase):
@@ -70,7 +80,7 @@ class ConnectTaskRunnerTest(TestCase):
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
-    def test_run_sat5(self):
+    def test_run_sat5_bad_status(self):
         """Test the running connect task for Satellite 5."""
         options = SourceOptions(
             satellite_version=SourceOptions.SATELLITE_VERSION_5)
@@ -78,9 +88,11 @@ class ConnectTaskRunnerTest(TestCase):
         self.source.options = options
         self.source.save()
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
-        status = task.run()
-
-        self.assertEqual(status[1], ScanTask.FAILED)
+        with patch('scanner.satellite.connect.utils.status',
+                   return_value=(401, None)) as mock_sat_status:
+            status = task.run()
+            mock_sat_status.assert_called_once_with(ANY, ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_status(self):
         """Test the running connect task for Sat 6 with bad status."""
@@ -94,7 +106,7 @@ class ConnectTaskRunnerTest(TestCase):
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(401, None)) as mock_sat_status:
             status = task.run()
-            mock_sat_status.assert_called_once_with(ANY)
+            mock_sat_status.assert_called_once_with(ANY, ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_api_version(self):
@@ -109,7 +121,7 @@ class ConnectTaskRunnerTest(TestCase):
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 3)) as mock_sat_status:
             status = task.run()
-            mock_sat_status.assert_called_once_with(ANY)
+            mock_sat_status.assert_called_once_with(ANY, ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_conn_err(self):
@@ -124,7 +136,7 @@ class ConnectTaskRunnerTest(TestCase):
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_conn_exception) as mock_sat_status:
             status = task.run()
-            mock_sat_status.assert_called_once_with(ANY)
+            mock_sat_status.assert_called_once_with(ANY, ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_sat_err(self):
@@ -139,7 +151,37 @@ class ConnectTaskRunnerTest(TestCase):
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_sat_exception) as mock_sat_status:
             status = task.run()
-            mock_sat_status.assert_called_once_with(ANY)
+            mock_sat_status.assert_called_once_with(ANY, ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
+
+    def test_run_with_timeout_err(self):
+        """Test the running connect task with timeout error."""
+        options = SourceOptions(
+            satellite_version=SourceOptions.SATELLITE_VERSION_62)
+        options.save()
+        self.source.options = options
+        self.source.save()
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
+
+        with patch('scanner.satellite.connect.utils.status',
+                   side_effect=mock_timeout_error) as mock_sat_status:
+            status = task.run()
+            mock_sat_status.assert_called_once_with(ANY, ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
+
+    def test_run_with_except(self):
+        """Test the running connect task with general exception."""
+        options = SourceOptions(
+            satellite_version=SourceOptions.SATELLITE_VERSION_62)
+        options.save()
+        self.source.options = options
+        self.source.save()
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
+
+        with patch('scanner.satellite.connect.utils.status',
+                   side_effect=mock_exception) as mock_sat_status:
+            status = task.run()
+            mock_sat_status.assert_called_once_with(ANY, ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_v2(self):
@@ -158,7 +200,7 @@ class ConnectTaskRunnerTest(TestCase):
                 with patch.object(SatelliteSixV2, 'hosts',
                                   return_value=['sys1']) as mock_hosts:
                     status = task.run()
-                    mock_sat_status.assert_called_once_with(ANY)
+                    mock_sat_status.assert_called_once_with(ANY, ANY)
                     mock_host_count.assert_called_once_with()
                     mock_hosts.assert_called_once_with()
                     self.assertEqual(status[1], ScanTask.COMPLETED)
