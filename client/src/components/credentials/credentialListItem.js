@@ -131,13 +131,13 @@ class CredentialListItem extends React.Component {
   }
 
   render() {
-    const { item, onItemSelectChange } = this.props;
+    const { item, selected, onItemSelectChange } = this.props;
 
     let sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
 
     const classes = cx({
       'quipucords-credential-list-item': true,
-      active: item.selected
+      active: selected
     });
 
     return (
@@ -146,7 +146,7 @@ class CredentialListItem extends React.Component {
         className={classes}
         checkboxInput={
           <Checkbox
-            checked={item.selected}
+            checked={selected}
             bsClass=""
             onClick={e => onItemSelectChange(item)}
           />
@@ -182,6 +182,7 @@ class CredentialListItem extends React.Component {
 
 CredentialListItem.propTypes = {
   item: PropTypes.object,
+  selected: PropTypes.bool,
   onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func

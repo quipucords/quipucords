@@ -11,8 +11,17 @@ import {
   Modal
 } from 'patternfly-react';
 
-import { getScans } from '../../redux/actions/scansActions';
-import { toastNotificationTypes, viewTypes } from '../../redux/constants';
+import {
+  getScans,
+  pauseScan,
+  cancelScan,
+  restartScan
+} from '../../redux/actions/scansActions';
+import {
+  sourcesTypes,
+  toastNotificationTypes,
+  viewTypes
+} from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
 
@@ -30,13 +39,14 @@ class Scans extends React.Component {
     helpers.bindMethods(this, [
       'downloadSummaryReport',
       'downloadDetailedReport',
-      'pauseScan',
-      'cancelScan',
-      'startScan',
-      'resumeScan',
+      'doPauseScan',
+      'doCancelScan',
+      'doStartScan',
+      'doResumeScan',
       'addSource',
       'importSources',
-      'refresh'
+      'refresh',
+      'notifyActionStatus'
     ]);
     this.state = {
       selectedItems: []
@@ -84,6 +94,33 @@ class Scans extends React.Component {
     }
   }
 
+  notifyActionStatus(actionText, error, results) {
+    const { getScans, viewOptions } = this.props;
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Scan <strong>${results.id}</strong> {actionText}.
+          </span>
+        )
+      });
+      getScans(
+        helpers.createViewQueryObject(viewOptions, {
+          scan_type: 'inspect'
+        })
+      );
+    }
+  }
+
   downloadSummaryReport() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -102,48 +139,45 @@ class Scans extends React.Component {
     });
   }
 
-  pauseScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Pausing scans is not yet implemented'
-    });
-  }
-
-  cancelScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Cancelling scans is not yet implemented'
-    });
-  }
-
-  startScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Starting scans is not yet implemented'
-    });
-  }
-
-  resumeScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Resuming scans is not yet implemented'
-    });
-  }
-
-  addSource() {
+  doStartScan(item) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Adding sources is not yet implemented'
+      message: 'Start scan is not yet implemented'
+    });
+  }
+
+  doPauseScan(item) {
+    this.props
+      .pauseScan(item.id)
+      .then(
+        response => this.notifyActionStatus('paused', false, response.value),
+        error => this.notifyActionStatus('paused', true, error.message)
+      );
+  }
+
+  doResumeScan(item) {
+    this.props
+      .restartScan(item.id)
+      .then(
+        response => this.notifyActionStatus('resumed', false, response.value),
+        error => this.notifyActionStatus('resumed', true, error.message)
+      );
+  }
+
+  doCancelScan(item) {
+    this.props
+      .cancelScan(item.id)
+      .then(
+        response => this.notifyActionStatus('canceled', false, response.value),
+        error => this.notifyActionStatus('canceled', true, error.message)
+      );
+  }
+
+  addSource() {
+    Store.dispatch({
+      type: sourcesTypes.EDIT_SOURCE_SHOW
     });
   }
 
@@ -179,10 +213,10 @@ class Scans extends React.Component {
             key={index}
             onSummaryDownload={this.downloadSummaryReport}
             onDetailedDownload={this.downloadDetailedReport}
-            onPause={this.pauseScan}
-            onCancel={this.cancelScan}
-            onStart={this.startScan}
-            onResume={this.resumeScan}
+            onStart={this.doStartScan}
+            onPause={this.doPauseScan}
+            onResume={this.doResumeScan}
+            onCancel={this.doCancelScan}
           />
         ))}
       </ListView>
@@ -241,6 +275,9 @@ class Scans extends React.Component {
 
 Scans.propTypes = {
   getScans: PropTypes.func,
+  pauseScan: PropTypes.func,
+  cancelScan: PropTypes.func,
+  restartScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -249,7 +286,10 @@ Scans.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScans: queryObj => dispatch(getScans(queryObj))
+  getScans: queryObj => dispatch(getScans(queryObj)),
+  pauseScan: id => dispatch(pauseScan(id)),
+  restartScan: id => dispatch(restartScan(id)),
+  cancelScan: id => dispatch(cancelScan(id))
 });
 
 const mapStateToProps = function(state) {
