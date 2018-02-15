@@ -10,16 +10,16 @@
 #
 """Test the satellite inspect task."""
 
-from datetime import datetime
 from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, JobConnectionResult, TaskConnectionResult,
-                        JobInspectionResult, SourceOptions)
+from api.models import (Credential,
+                        Source, ScanTask,
+                        SourceOptions)
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
 from scanner.satellite.api import SatelliteException
+from scanner.test_util import create_scan_job
 
 
 def mock_conn_exception(param1):  # pylint: disable=unused-argument
@@ -58,32 +58,13 @@ class InspectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                  source=self.source, sequence_number=2,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
         self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
 
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-
-        self.conn_result = TaskConnectionResult(
-            scan_task=self.scan_task, source=self.source)
-        self.conn_result.save()
-
-        conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                             source=self.source, sequence_number=1,
-                             start_time=datetime.utcnow())
+        conn_task = self.scan_task.prerequisites.first()
         conn_task.complete()
-        self.scan_task.prerequisites.add(conn_task)
-        self.inspect_results = JobInspectionResult()
-        self.inspect_results.save()
-        self.scan_job.inspection_results = self.inspect_results
-
         self.scan_job.save()
 
     def tearDown(self):
@@ -193,9 +174,10 @@ class InspectTaskRunnerTest(TestCase):
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_exception) as mock_sat_status:
-            status = task.run()
-            mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            with self.assertRaises(Exception):
+                status = task.run()
+                mock_sat_status.assert_called_once_with(ANY)
+                self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_sat(self):
         """Test the running connect task with satellite."""

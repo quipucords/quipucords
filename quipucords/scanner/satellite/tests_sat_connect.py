@@ -13,11 +13,14 @@
 from unittest.mock import patch, ANY
 from django.test import TestCase
 from requests import exceptions
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, JobConnectionResult, SourceOptions)
+from api.models import (Credential,
+                        Source,
+                        ScanTask,
+                        SourceOptions)
 from scanner.satellite.connect import ConnectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
 from scanner.satellite.api import SatelliteException
+from scanner.test_util import create_scan_job
 
 
 def mock_conn_exception(param1):  # pylint: disable=unused-argument
@@ -53,17 +56,8 @@ class ConnectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1)
-        self.scan_task.save()
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-        self.scan_job.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_CONNECT)
 
     def tearDown(self):
         """Cleanup test case setup."""

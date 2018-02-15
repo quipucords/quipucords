@@ -10,15 +10,16 @@
 #
 """Test the vcenter connect capabilities."""
 
-from datetime import datetime
 from unittest.mock import Mock, patch, ANY
 from socket import gaierror
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, JobConnectionResult, TaskConnectionResult)
+from api.models import (Credential,
+                        Source,
+                        ScanTask)
 from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
                                      get_vm_container)
+from scanner.test_util import create_scan_job
 
 
 def invalid_login():
@@ -46,27 +47,18 @@ class ConnectTaskRunnerTest(TestCase):
             ssh_keyfile=None)
         self.cred.save()
 
-        self.source = Source(
+        source = Source(
             name='source1',
             port=22,
             hosts='["1.2.3.4"]')
 
-        self.source.save()
-        self.source.credentials.add(self.cred)
+        source.save()
+        source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=2,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            source, ScanTask.SCAN_TYPE_CONNECT)
 
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-        self.scan_job.save()
-
+        # Create runner
         self.runner = ConnectTaskRunner(scan_job=self.scan_job,
                                         scan_task=self.scan_task)
 
@@ -79,10 +71,8 @@ class ConnectTaskRunnerTest(TestCase):
         vm_names = ['vm1', 'vm2']
         # pylint: disable=protected-access
         self.runner._store_connect_data(vm_names, self.cred)
-        self.assertEqual(len(self.conn_results.results.all()), 1)
-        result = self.conn_results.results.all().first()
-        self.assertEqual(result.scan_task, self.scan_task)
-        self.assertEqual(result.source, self.source)
+        self.assertEqual(
+            len(self.scan_job.connection_results.results.all()), 1)
 
     def test_get_vm_names(self):
         """Test the get vm names method."""
@@ -130,17 +120,13 @@ class ConnectTaskRunnerTest(TestCase):
 
     def test_get_result_none(self):
         """Test get result method when no results exist."""
-        results = self.runner.get_result()
+        results = self.scan_task.get_result().systems.first()
         self.assertEqual(results, None)
 
     def test_get_result(self):
         """Test get result method when results exist."""
-        conn_result = TaskConnectionResult(source=self.source,
-                                           scan_task=self.scan_task)
-        conn_result.save()
-        self.conn_results.results.add(conn_result)
-        self.conn_results.save()
-        results = self.runner.get_result()
+        conn_result = self.scan_task.connection_result
+        results = self.scan_task.get_result()
         self.assertEqual(results, conn_result)
 
     def test_failed_run(self):

@@ -13,7 +13,8 @@
 import logging
 import json
 from django.db import transaction
-from api.models import (SystemConnectionResult,
+from api.models import (ScanTask,
+                        SystemConnectionResult,
                         SystemInspectionResult,
                         RawFact)
 
@@ -30,20 +31,14 @@ class SatelliteException(Exception):
 class SatelliteInterface(object):
     """Generic interface for dealing with Satellite."""
 
-    def __init__(self, scan_task, conn_result, inspect_result=None):
+    def __init__(self, scan_task):
         """Set context for interface."""
-        self.scan_task = scan_task
-        self.conn_result = conn_result
-        self.inspect_result = inspect_result
-
-    @transaction.atomic
-    def initialize_stats(self, systems_count):
-        """Set initial status based on system counts.
-
-        :param systems_count: The system count
-        """
-        self.scan_task.update_stats(
-            'INITIAL STATELLITE STATS', sys_count=systems_count)
+        if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+            self.connect_scan_task = scan_task
+            self.inspect_scan_task = None
+        else:
+            self.connect_scan_task = scan_task.prerequisites.first()
+            self.inspect_scan_task = scan_task
 
     @transaction.atomic
     def record_conn_result(self, name, credential):
@@ -58,10 +53,11 @@ class SatelliteInterface(object):
             status=SystemConnectionResult.SUCCESS)
         sys_result.save()
 
-        self.conn_result.systems.add(sys_result)
-        self.conn_result.save()
+        self.connect_scan_task.connection_result.systems.add(sys_result)
+        self.connect_scan_task.connection_result.save()
 
-        self.scan_task.increment_stats(name, increment_sys_scanned=True)
+        self.connect_scan_task.increment_stats(
+            name, increment_sys_scanned=True)
 
     @transaction.atomic
     def record_inspect_result(self, name, facts):
@@ -82,10 +78,11 @@ class SatelliteInterface(object):
                 stored_fact.save()
                 sys_result.facts.add(stored_fact)
 
-        self.inspect_result.systems.add(sys_result)
-        self.inspect_result.save()
+        self.inspect_scan_task.inspection_result.systems.add(sys_result)
+        self.inspect_scan_task.inspection_result.save()
 
-        self.scan_task.increment_stats(name, increment_sys_scanned=True)
+        self.inspect_scan_task.increment_stats(
+            name, increment_sys_scanned=True)
 
     def host_count(self):
         """Obtain the count of managed hosts."""

@@ -138,7 +138,9 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
             json_job_conn_result.get(RESULTS_KEY):
         json_job_conn_result_list = []
         for result in job_conn_result.results.all():
-            source_serializer = SourceSerializer(result.source)
+            conn_task = ScanTask.objects.filter(
+                connection_result=result).first()
+            source_serializer = SourceSerializer(conn_task.source)
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
@@ -160,7 +162,9 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
             json_job_inspect_result.get(RESULTS_KEY):
         json_job_inspect_result_list = []
         for result in job_inspect_result.results.all():
-            source_serializer = SourceSerializer(result.source)
+            inspect_task = ScanTask.objects.filter(
+                inspection_result=result).first()
+            source_serializer = SourceSerializer(inspect_task.source)
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)

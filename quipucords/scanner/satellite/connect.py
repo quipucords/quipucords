@@ -10,8 +10,7 @@
 #
 """ScanTask used for satellite connection task."""
 from requests import exceptions
-from django.db import transaction
-from api.models import (ScanTask, TaskConnectionResult, SourceOptions)
+from api.models import (ScanTask, SourceOptions)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException
@@ -25,6 +24,7 @@ class ConnectTaskRunner(ScanTaskRunner):
     and gathers the set of available systems.
     """
 
+    # pylint: disable=too-few-public-methods
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
@@ -35,21 +35,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         """
         super().__init__(scan_job, scan_task)
         self.source = scan_task.source
-        conn_results = self.scan_job.connection_results
-        with transaction.atomic():
-            conn_result = conn_results.results.filter(
-                source__id=self.source.id).first()
-            if conn_result is None:
-                conn_result = TaskConnectionResult(
-                    scan_task=scan_task, source=self.source)
-                conn_result.save()
-                conn_results.results.add(conn_result)
-                conn_results.save()
-        self.conn_result = conn_result
-        # If we're restarting the scan after a pause, systems that
-        # were previously up might be down. So we throw out any
-        # partial results and start over.
-        conn_result.systems.all().delete()
 
     def run(self):
         """Scan network range ang attempt connections."""
@@ -69,7 +54,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             status_code, api_version = utils.status(self.scan_task)
             if status_code == 200:
                 api = create(satellite_version, api_version,
-                             self.scan_task, self.conn_result)
+                             self.scan_task)
                 if not api:
                     error_message = 'Satellite version %s with '\
                         'api version %s is not supported.\n' %\
