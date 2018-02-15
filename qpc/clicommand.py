@@ -13,8 +13,17 @@
 
 from __future__ import print_function
 import sys
-from qpc.utils import handle_error_response
+import json
+from qpc.utils import handle_error_response, log
 from qpc.request import request
+from qpc.translation import _
+import qpc.messages as messages
+
+# pylint: disable=invalid-name
+try:
+    exception_class = json.decoder.JSONDecodeError
+except AttributeError:
+    exception_class = ValueError
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
@@ -51,8 +60,24 @@ class CliCommand(object):
 
     def _handle_response_error(self):
         """Sub-commands can override this method to perform error handling."""
-        handle_error_response(self.response)
-        self.parser.print_help()
+        token_expired = {'detail': 'Token has expired'}
+        response_data = None
+        try:
+            response_data = self.response.json()
+        except exception_class:
+            pass
+
+        if self.response.status_code == 401:
+            handle_error_response(self.response)
+            log.error(_(messages.SERVER_LOGIN_REQUIRED))
+            log.error('$ qpc server login')
+        elif (self.response.status_code == 400 and
+              response_data == token_expired):
+            handle_error_response(self.response)
+            log.error(_(messages.SERVER_LOGIN_REQUIRED))
+            log.error('$ qpc server login')
+        else:
+            handle_error_response(self.response)
         sys.exit(1)
 
     def _handle_response_success(self):

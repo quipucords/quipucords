@@ -21,6 +21,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -70,6 +71,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_expiring_authtoken',
     'filters',
     'django_filters',
     'drf_generators',
@@ -283,3 +285,7 @@ LOGGING = {
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
+
+
+# Token lifespan
+EXPIRING_TOKEN_LIFESPAN = datetime.timedelta(days=1)

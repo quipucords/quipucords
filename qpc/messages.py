@@ -167,8 +167,8 @@ BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
     'running a network scan.'
 
 
-SERVER_CONFIG_REQUIRED = 'Please configure server using command below:'
-SERVER_LOGIN_REQUIRED = 'Please log in using the command below:'
+SERVER_CONFIG_REQUIRED = 'Configure server using command below:'
+SERVER_LOGIN_REQUIRED = 'Log in using the command below:'
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
 SERVER_CONFIG_PORT_HELP = 'Port number for the server; the default is 443.'
 SERVER_CONFIG_SSL_CERT_HELP = 'File path to the SSL certificate '\
