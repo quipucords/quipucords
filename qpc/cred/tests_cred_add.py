@@ -215,7 +215,7 @@ class CredentialAddCliTests(unittest.TestCase):
 
     @patch('getpass._raw_input')
     def test_add_cred_401(self, do_mock_raw_input):
-        """Testing the add sat cred command successfully."""
+        """Testing the 401 error flow."""
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
@@ -232,7 +232,7 @@ class CredentialAddCliTests(unittest.TestCase):
 
     @patch('getpass._raw_input')
     def test_add_cred_expired(self, do_mock_raw_input):
-        """Testing the add sat cred command successfully."""
+        """Testing the token expired flow."""
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
