@@ -16,6 +16,7 @@ from api.models import (Credential, Source, ScanTask,
                         SourceOptions)
 from scanner.satellite.factory import create
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
+from scanner.satellite.five import SatelliteFive
 
 
 class SatelliteFactoryTest(TestCase):
@@ -60,13 +61,21 @@ class SatelliteFactoryTest(TestCase):
         """Cleanup test case setup."""
         pass
 
+    def test_create_sat_none(self):
+        """Test the method to fail to create a Sat interface."""
+        satellite_version = None
+        api_version = 1
+        api = create(satellite_version, api_version,
+                     self.scan_task, self.conn_result)
+        self.assertEqual(api, None)
+
     def test_create_sat5(self):
         """Test the method to create a Sat 5 interface."""
         satellite_version = SourceOptions.SATELLITE_VERSION_5
         api_version = 1
         api = create(satellite_version, api_version,
                      self.scan_task, self.conn_result)
-        self.assertEqual(api, None)
+        self.assertEqual(api.__class__, SatelliteFive)
 
     def test_create_sat6_v1(self):
         """Test the method to create a Sat 6 interface."""

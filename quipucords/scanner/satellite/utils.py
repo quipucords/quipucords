@@ -11,8 +11,12 @@
 """Utilities used for Satellite operations."""
 
 import logging
+import ssl
+import xmlrpc.client
 import requests
 from api.vault import decrypt_data_as_unicode
+from api.models import SourceOptions
+from scanner.satellite.api import SatelliteException
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -42,6 +46,32 @@ def get_connect_data(scan_task):
     host = scan_task.source.get_hosts()[0]
     port = scan_task.source.port
     return (host, port, user, password)
+
+
+def get_sat5_client(scan_task):
+    """Create xmlrpc client and credential for Satellite 5.
+
+    :param scan_task: The scan tasks
+    :returns: A tuple of (client, user, password)
+    """
+    source_options = scan_task.source.options
+    ssl_verify = True
+    if source_options:
+        ssl_verify = source_options.ssl_cert_verify
+    host, port, user, password = get_connect_data(scan_task)
+
+    ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
+    if ssl_verify is False:
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+    rpc_url_template = 'https://{sat_host}:{port}/rpc/api'
+    rpc_url = construct_url(rpc_url_template, sat_host=host, port=port)
+    client = xmlrpc.client.ServerProxy(uri=rpc_url,
+                                       context=ssl_context,
+                                       use_builtin_types=True,
+                                       allow_none=True,
+                                       use_datetime=True)
+    return (client, user, password)
 
 
 def construct_url(url, sat_host, port='443', org_id=None, host_id=None):
@@ -80,7 +110,38 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     return response, url
 
 
-def status(scan_task):
+def status(scan_task, satellite_version):
+    """Check Satellite status to get api_version and connectivity.
+
+    :param scan_task: The scan task
+    :param satellite_version: The version of satellite
+    :returns: tuple (status_code, api_version or None)
+    """
+    if satellite_version == SourceOptions.SATELLITE_VERSION_5:
+        return _status5(scan_task)
+
+    return _status6(scan_task)
+
+
+def _status5(scan_task):
+    """Check Satellite status to get api_version and connectivity.
+
+    :param scan_task: The scan task
+    :returns: tuple (status_code, api_version or None)
+    """
+    client, user, password = get_sat5_client(scan_task)
+    try:
+        key = client.auth.login(user, password)
+        client.auth.logout(key)
+    except xmlrpc.client.Fault as xml_error:
+        raise SatelliteException(str(xml_error))
+
+    api_version = SourceOptions.SATELLITE_VERSION_5
+    status_code = requests.codes.ok  # pylint: disable=no-member
+    return (status_code, api_version)
+
+
+def _status6(scan_task):
     """Check Satellite status to get api_version and connectivity.
 
     :param scan_task: The scan task
