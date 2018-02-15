@@ -283,7 +283,7 @@ LOGGING = {
     },
 }
 
-INPUT_LOG_FILE = os.path.join(BASE_DIR, 'input_log')
+INPUT_LOG_BASENAME = os.path.join(BASE_DIR, 'input_log')
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
