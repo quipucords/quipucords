@@ -8,6 +8,7 @@ Django==1.11.5
 django-factory-boy==1.0.0
 django-filter==1.0.4
 djangorestframework==3.6.4
+djangorestframework-expiring-authtoken==0.1.4
 dnspython==1.15.0
 drf-generators==0.3.0
 drf-url-filters==0.5.1

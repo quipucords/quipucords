@@ -14,11 +14,12 @@ import os
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
-from rest_framework.authentication import (TokenAuthentication,
-                                           SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from rest_framework.serializers import ValidationError
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -195,7 +196,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        authentication_classes = (ExpiringTokenAuthentication,
+                                  SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
