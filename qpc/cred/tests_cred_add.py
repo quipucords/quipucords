@@ -212,3 +212,38 @@ class CredentialAddCliTests(unittest.TestCase):
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CONN_PASSWORD + '\n' +
                                  messages.CRED_ADDED % 'credential1' + '\n')
+
+    @patch('getpass._raw_input')
+    def test_add_cred_401(self, do_mock_raw_input):
+        """Testing the 401 error flow."""
+        cred_out = StringIO()
+        url = get_server_location() + CREDENTIAL_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.post(url, status_code=401)
+            aac = CredAddCommand(SUBPARSER)
+            args = Namespace(name='credential1',
+                             type=SATELLITE_CRED_TYPE,
+                             username='root',
+                             password='sdf')
+            do_mock_raw_input.return_value = 'abc'
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(cred_out):
+                    aac.main(args)
+
+    @patch('getpass._raw_input')
+    def test_add_cred_expired(self, do_mock_raw_input):
+        """Testing the token expired flow."""
+        cred_out = StringIO()
+        url = get_server_location() + CREDENTIAL_URI
+        with requests_mock.Mocker() as mocker:
+            expired = {'detail': 'Token has expired'}
+            mocker.post(url, status_code=400, json=expired)
+            aac = CredAddCommand(SUBPARSER)
+            args = Namespace(name='credential1',
+                             type=SATELLITE_CRED_TYPE,
+                             username='root',
+                             password='sdf')
+            do_mock_raw_input.return_value = 'abc'
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(cred_out):
+                    aac.main(args)
