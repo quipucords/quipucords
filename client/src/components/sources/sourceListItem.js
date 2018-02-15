@@ -277,11 +277,11 @@ class SourceListItem extends React.Component {
     );
   }
   render() {
-    const { item, onItemSelectChange } = this.props;
+    const { item, selected, onItemSelectChange } = this.props;
 
     const classes = cx({
       'list-view-pf-top-align': true,
-      active: item.selected
+      active: selected
     });
 
     return (
@@ -291,7 +291,7 @@ class SourceListItem extends React.Component {
         className={classes}
         checkboxInput={
           <Checkbox
-            checked={item.selected}
+            checked={selected}
             bsClass=""
             onClick={e => onItemSelectChange(item)}
           />
@@ -312,6 +312,7 @@ class SourceListItem extends React.Component {
 
 SourceListItem.propTypes = {
   item: PropTypes.object,
+  selected: PropTypes.bool,
   onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,

@@ -44,12 +44,16 @@ const sourcesReducer = function(state = initialState, action) {
         return state;
       }
 
-      action.source.selected = true;
-
-      const addedSelections = Object.assign({}, state.persist, {
-        selectedSources: [...state.persist.selectedSources, action.source]
-      });
-      return Object.assign({}, state, { persist: addedSelections });
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedSources: [...state.persist.selectedSources, action.source]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
 
     case sourcesTypes.DESELECT_SOURCE:
       const index = selectedIndex(state, action.source);
@@ -59,15 +63,19 @@ const sourcesReducer = function(state = initialState, action) {
         return state;
       }
 
-      action.source.selected = false;
-
-      const removedSelections = Object.assign({}, state.persist, {
-        selectedCredentials: [
-          ...state.persist.selectedSources.slice(0, index),
-          ...state.persist.selectedSources.slice(index + 1)
-        ]
-      });
-      return Object.assign({}, state, { persist: removedSelections });
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedSources: [
+            ...state.persist.selectedSources.slice(0, index),
+            ...state.persist.selectedSources.slice(index + 1)
+          ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
 
     // Show/Hide
     case sourcesTypes.CREATE_SOURCE_SHOW:

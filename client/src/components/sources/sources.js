@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -16,7 +17,7 @@ import {
   sourcesTypes,
   toastNotificationTypes,
   confirmationModalTypes,
-  viewTypes, credentialsTypes
+  viewTypes
 } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
@@ -83,6 +84,15 @@ class Sources extends React.Component {
     }
   }
 
+  itemSelected(item) {
+    const { selectedSources } = this.props;
+    return (
+      selectedSources.find(nextSelected => {
+        return nextSelected.id === _.get(item, 'id');
+      }) !== undefined
+    );
+  }
+
   showAddSourceWizard() {
     Store.dispatch({
       type: sourcesTypes.EDIT_SOURCE_SHOW
@@ -116,9 +126,9 @@ class Sources extends React.Component {
 
   itemSelectChange(item) {
     Store.dispatch({
-      type: item.selected
+      type: this.itemSelected(item)
         ? sourcesTypes.DESELECT_SOURCE
-        : credentialsTypes.SELECT_SOURCE,
+        : sourcesTypes.SELECT_SOURCE,
       source: item
     });
   }
@@ -204,6 +214,7 @@ class Sources extends React.Component {
         {items.map((item, index) => (
           <SourceListItem
             item={item}
+            selected={this.itemSelected(item)}
             key={index}
             onItemSelectChange={this.itemSelectChange}
             onEdit={this.editSource}
@@ -216,7 +227,14 @@ class Sources extends React.Component {
   }
 
   render() {
-    const { pending, error, errorMessage, sources, selectedSources, viewOptions } = this.props;
+    const {
+      pending,
+      error,
+      errorMessage,
+      sources,
+      selectedSources,
+      viewOptions
+    } = this.props;
     const {
       scanDialogShown,
       multiSourceScan,

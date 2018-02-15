@@ -70,15 +70,15 @@ class CreateCredentialDialog extends React.Component {
       this.resetInitialState(nextProps);
     }
 
-    if (nextProps.fulfilled && !this.props.fulfulled) {
+    if (nextProps.fulfilled && !this.props.fulfilled) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'success',
         message: (
           <span>
-          Credential <strong>{nextProps.credential.name}</strong> successfully
+            Credential <strong>{nextProps.credential.name}</strong> successfully
             {this.props.edit ? ' updated' : ' created'}.
-        </span>
+          </span>
         )
       });
 
@@ -387,11 +387,10 @@ class CreateCredentialDialog extends React.Component {
     Store.dispatch({
       type: credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS
     });
-
   }
 
-  renderErrorMessage () {
-    const {error, errorMessage } = this.props;
+  renderErrorMessage() {
+    const { error, errorMessage } = this.props;
 
     if (error) {
       return (
@@ -537,7 +536,11 @@ CreateCredentialDialog.propTypes = {
   credential: PropTypes.object,
   credentialType: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
   show: PropTypes.bool,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  fulfilled: PropTypes.bool,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  viewOptions: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

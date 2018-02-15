@@ -44,15 +44,19 @@ const credentialsReducer = function(state = initialState, action) {
         return state;
       }
 
-      action.credential.selected = true;
-
-      const addedSelections = Object.assign({}, state.persist, {
-        selectedCredentials: [
-          ...state.persist.selectedCredentials,
-          action.credential
-        ]
-      });
-      return Object.assign({}, state, { persist: addedSelections });
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedCredentials: [
+            ...state.persist.selectedCredentials,
+            action.credential
+          ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
 
     case credentialsTypes.DESELECT_CREDENTIAL:
       const index = selectedIndex(state, action.credential);
@@ -62,15 +66,19 @@ const credentialsReducer = function(state = initialState, action) {
         return state;
       }
 
-      action.credential.selected = false;
-
-      const removedSelections = Object.assign({}, state.persist, {
-        selectedCredentials: [
-          ...state.persist.selectedCredentials.slice(0, index),
-          ...state.persist.selectedCredentials.slice(index + 1)
-        ]
-      });
-      return Object.assign({}, state, { persist: removedSelections });
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedSources: [
+            ...state.persist.selectedCredentials.slice(0, index),
+            ...state.persist.selectedCredentials.slice(index + 1)
+          ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
 
     // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:

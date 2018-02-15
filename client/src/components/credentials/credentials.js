@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -80,6 +81,15 @@ class Credentials extends React.Component {
     }
   }
 
+  itemSelected(item) {
+    const { selectedCredentials } = this.props;
+    return (
+      selectedCredentials.find(nextSelected => {
+        return nextSelected.id === _.get(item, 'id');
+      }) !== undefined
+    );
+  }
+
   addCredential(credentialType) {
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
@@ -126,7 +136,7 @@ class Credentials extends React.Component {
 
   itemSelectChange(item) {
     Store.dispatch({
-      type: item.selected
+      type: this.itemSelected(item)
         ? credentialsTypes.DESELECT_CREDENTIAL
         : credentialsTypes.SELECT_CREDENTIAL,
       credential: item
@@ -239,6 +249,7 @@ class Credentials extends React.Component {
         {items.map((item, index) => (
           <CredentialListItem
             item={item}
+            selected={this.itemSelected(item)}
             key={index}
             onItemSelectChange={this.itemSelectChange}
             onEdit={this.editCredential}
