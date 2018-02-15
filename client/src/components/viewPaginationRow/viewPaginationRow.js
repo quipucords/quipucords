@@ -87,9 +87,11 @@ class ViewPaginationRow extends React.Component {
 
     return (
       <PaginationRow
+        className="list-view-pagination-top"
         viewType={PAGINATION_VIEW.LIST}
         pagination={rowPagination}
         amountOfPages={totalPages}
+        pageSizeDropUp={false}
         itemCount={totalCount}
         itemsStart={itemsStart}
         itemsEnd={itemsEnd}
