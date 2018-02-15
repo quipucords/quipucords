@@ -53,8 +53,7 @@ class SatelliteFactoryTest(TestCase):
         self.conn_results.save()
         self.scan_job.connection_results = self.conn_results
         self.scan_job.save()
-        self.conn_result = TaskConnectionResult(
-            scan_task=self.scan_task, source=self.source)
+        self.conn_result = TaskConnectionResult()
         self.conn_result.save()
 
     def tearDown(self):
@@ -66,7 +65,7 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = None
         api_version = 1
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api, None)
 
     def test_create_sat5(self):
@@ -74,7 +73,7 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_5
         api_version = 1
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api.__class__, SatelliteFive)
 
     def test_create_sat6_v1(self):
@@ -82,7 +81,7 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 1
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api.__class__, SatelliteSixV1)
 
     def test_create_sat6_v2(self):
@@ -90,7 +89,7 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 2
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api.__class__, SatelliteSixV2)
 
     def test_create_sat6_unknown(self):
@@ -98,5 +97,5 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 9
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api, None)

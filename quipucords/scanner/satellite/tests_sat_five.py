@@ -10,15 +10,16 @@
 #
 """Test the satellite five interface."""
 
-from datetime import datetime
 from unittest.mock import patch, ANY
 import xmlrpc.client
 from django.test import TestCase
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, JobConnectionResult, TaskConnectionResult,
-                        TaskInspectionResult, SystemInspectionResult)
+from api.models import (Credential,
+                        Source,
+                        ScanTask,
+                        SystemInspectionResult)
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import (SatelliteFive)
+from scanner.test_util import create_scan_job
 
 
 def mock_xml_fault(param1, param2):  # pylint: disable=unused-argument
@@ -51,28 +52,10 @@ class SatelliteFiveTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
-        self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-        self.scan_job.save()
-        self.conn_result = TaskConnectionResult(
-            scan_task=self.scan_task, source=self.source)
-        self.conn_result.save()
-        self.inspect_result = TaskInspectionResult(scan_task=self.scan_task,
-                                                   source=self.source)
-        self.inspect_result.save()
-        self.api = SatelliteFive(self.scan_task,
-                                 self.conn_result,
-                                 self.inspect_result)
+        self.api = SatelliteFive(self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -185,17 +168,19 @@ class SatelliteFiveTest(TestCase):
 
     def test_host_details_skip(self):
         """Test host_details method for already captured data."""
+        # pylint: disable=no-member
         sys_result = SystemInspectionResult(
             name='sys1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        self.inspect_result.systems.add(sys_result)
-        self.inspect_result.save()
+        inspect_result = self.scan_task.inspection_result
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
         virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
         detail = self.api.host_details(host_id=1, host_name='sys1',
                                        last_checkin='', virtual_hosts=virt,
                                        virtual_guests={1: 2})
-        self.assertEqual(len(self.inspect_result.systems.all()), 1)
+        self.assertEqual(len(inspect_result.systems.all()), 1)
         self.assertEqual(detail, {})
 
     @patch('xmlrpc.client.ServerProxy')

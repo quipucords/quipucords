@@ -20,8 +20,10 @@ from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
 from api.scantasks.model import ScanTask
-from api.connresults.model import JobConnectionResult
-from api.inspectresults.model import JobInspectionResult
+from api.connresults.model import (JobConnectionResult,
+                                   TaskConnectionResult)
+from api.inspectresults.model import (JobInspectionResult,
+                                      TaskInspectionResult)
 import api.messages as messages
 
 # Get an instance of a logger
@@ -107,18 +109,6 @@ class ScanJob(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
 
-    def _log_stats(self, prefix):
-        """Log stats for scan."""
-        if self.start_time is None:
-            elapsed_time = 0
-        else:
-            elapsed_time = (datetime.utcnow() -
-                            self.start_time).total_seconds()
-        message = '%s Stats: elapsed_time=%ds' %\
-            (prefix,
-             elapsed_time)
-        self.log_message(message)
-
     def log_current_status(self,
                            show_status_message=False,
                            log_level=logging.INFO):
@@ -140,6 +130,35 @@ class ScanJob(models.Model):
         actual_message += message
         logger.log(log_level, actual_message)
 
+    def _log_stats(self, prefix):
+        """Log stats for scan."""
+        sys_count = 0
+        sys_failed = 0
+        sys_scanned = 0
+
+        # Only count stats for type of scan you are running
+        for task in self.tasks.filter(scan_type=self.scan_type):
+            if task.systems_count is not None:
+                sys_count += task.systems_count
+            if task.systems_failed is not None:
+                sys_failed += task.systems_failed
+            if task.systems_scanned is not None:
+                sys_scanned += task.systems_scanned
+
+        if self.start_time is None:
+            elapsed_time = 0
+        else:
+            elapsed_time = (datetime.utcnow() -
+                            self.start_time).total_seconds()
+        message = '%s Stats: elapsed_time=%ds, systems_count=%d,'\
+            ' systems_scanned=%d, systems_failed=%d' %\
+            (prefix,
+             elapsed_time,
+             sys_count,
+             sys_scanned,
+             sys_failed)
+        self.log_message(message)
+
     @transaction.atomic
     def queue(self):
         """Queue the job to run.
@@ -154,15 +173,15 @@ class ScanJob(models.Model):
             return
 
         if self.connection_results is None:
-            temp_conn_results = JobConnectionResult()
-            temp_conn_results.save()
-            self.connection_results = temp_conn_results
+            job_conn_result = JobConnectionResult()
+            job_conn_result.save()
+            self.connection_results = job_conn_result
             self.save()
         if self.inspection_results is None and \
                 self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            temp_inspect_results = JobInspectionResult()
-            temp_inspect_results.save()
-            self.inspection_results = temp_inspect_results
+            job_inspect_result = JobInspectionResult()
+            job_inspect_result.save()
+            self.inspection_results = job_inspect_result
             self.save()
 
         if self.tasks:
@@ -170,13 +189,14 @@ class ScanJob(models.Model):
             # so remove partial results
             self.tasks.all().delete()
             if self.connection_results is not None:
-                self.connection_results.results.all().delete()
+                self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
-                self.inspection_results.results.all().delete()
+                self.inspection_results.task_results.all().delete()
 
         count = 0
         conn_tasks = []
         for source in self.sources.all():
+            # Create connect tasks
             conn_task = ScanTask(source=source,
                                  scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                  status=ScanTask.PENDING,
@@ -187,10 +207,23 @@ class ScanJob(models.Model):
             self.tasks.add(conn_task)
             conn_tasks.append(conn_task)
 
+            # Create task result
+            conn_task_result = TaskConnectionResult()
+            conn_task_result.save()
+
+            # Add the task result to job results
+            self.connection_results.task_results.add(conn_task_result)
+            self.connection_results.save()
+
+            # Add the task result to task
+            conn_task.connection_result = conn_task_result
+            conn_task.save()
+
             count += 1
 
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             for conn_task in conn_tasks:
+                # Create inspect tasks
                 inspect_task = ScanTask(source=conn_task.source,
                                         scan_type=ScanTask.SCAN_TYPE_INSPECT,
                                         status=ScanTask.PENDING,
@@ -200,8 +233,19 @@ class ScanJob(models.Model):
                 inspect_task.save()
                 inspect_task.prerequisites.add(conn_task)
                 inspect_task.save()
-
                 self.tasks.add(inspect_task)
+
+                # Create task result
+                inspect_task_result = TaskInspectionResult()
+                inspect_task_result.save()
+
+                # Add the task result to job results
+                self.inspection_results.task_results.add(inspect_task_result)
+                self.inspection_results.save()
+
+                # Add the inspect task result to task
+                inspect_task.inspection_result = inspect_task_result
+                inspect_task.save()
 
                 count += 1
 

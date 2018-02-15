@@ -13,8 +13,9 @@ import logging
 import json
 from django.db import transaction
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask, TaskInspectionResult,
-                        SystemInspectionResult, RawFact)
+from api.models import (ScanTask,
+                        SystemInspectionResult,
+                        RawFact)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
 
@@ -59,22 +60,6 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.connect_scan_task = None
         self.source = scan_task.source
-        self.inspect_result = None
-
-    @transaction.atomic
-    def _init_inspect_result(self):
-        """Initialize the inspect result."""
-        # Prep inspect result
-        inspect_result = self.scan_job.inspection_results.results.filter(
-            source__id=self.source.id).first()
-        if inspect_result is None:
-            inspect_result = TaskInspectionResult(
-                source=self.scan_task.source,
-                scan_task=self.scan_task)
-            inspect_result.save()
-            self.scan_job.inspection_results.results.add(inspect_result)
-            self.scan_job.inspection_results.save()
-        self.inspect_result = inspect_result
 
     def run(self):
         """Scan network range ang attempt connections."""
@@ -86,8 +71,6 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = 'Prerequisites scan task with id %d failed.' %\
                 self.connect_scan_task.id
             return error_message, ScanTask.FAILED
-
-        self._init_inspect_result()
 
         try:
             self.inspect()
@@ -157,8 +140,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 sys_result.facts.add(stored_fact)
         sys_result.save()
 
-        self.inspect_result.systems.add(sys_result)
-        self.inspect_result.save()
+        self.scan_task.inspection_result.systems.add(sys_result)
+        self.scan_task.inspection_result.save()
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
@@ -181,8 +164,8 @@ class InspectTaskRunner(ScanTaskRunner):
                         vms = host.vm
                         for virtual_machine in vms:
                             vm_name = virtual_machine.summary.config.name
-                            sys_result = self.inspect_result.systems.filter(
-                                name=vm_name).first()
+                            sys_result = self.scan_task.inspection_result.\
+                                systems.filter(name=vm_name).first()
                             if sys_result:
                                 logger.debug('Results already captured'
                                              ' for vm_name=%s', vm_name)

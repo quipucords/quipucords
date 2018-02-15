@@ -59,7 +59,7 @@ class SatelliteFive(SatelliteInterface):
     def host_count(self):
         """Obtain the count of managed hosts."""
         systems_count = 0
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
             systems = client.system.list_user_systems(key)
@@ -67,14 +67,15 @@ class SatelliteFive(SatelliteInterface):
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
             raise SatelliteException(str(xml_error))
-        self.initialize_stats(systems_count)
+        self.connect_scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
         return systems_count
 
     def hosts(self):
         """Obtain the managed hosts."""
         hosts = []
-        credential = utils.get_credential(self.scan_task)
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        credential = utils.get_credential(self.connect_scan_task)
+        client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
             systems = client.system.list_user_systems(key)
@@ -92,6 +93,7 @@ class SatelliteFive(SatelliteInterface):
         return hosts
 
     # pylint: disable=too-many-arguments, too-many-locals, too-many-statements
+    # pylint: disable=too-many-branches
     def host_details(self, host_id, host_name, last_checkin,
                      virtual_hosts, virtual_guests):
         """Obtain the details for a given host id and name.
@@ -103,15 +105,18 @@ class SatelliteFive(SatelliteInterface):
         :param virtual_guests: A dictionary of guest to host data
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
-        sys_result = self.inspect_result.systems.filter(
+        sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
                          host_name)
             return details
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         try:
             key = client.auth.login(user, password)
             uuid = client.system.get_uuid(key, host_id)
@@ -199,7 +204,7 @@ class SatelliteFive(SatelliteInterface):
         """
         virtual_guests = {}
         virt_guests = []
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
             virt_guests = client.system.list_virtual_guests(key,
@@ -224,7 +229,7 @@ class SatelliteFive(SatelliteInterface):
         virt_hosts = []
         virtual_hosts = {}
         virtual_guests = {}
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
             virt_hosts = client.system.list_virtual_hosts(key)
@@ -253,11 +258,16 @@ class SatelliteFive(SatelliteInterface):
 
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.conn_result.systems.all())
-        self.initialize_stats(systems_count)
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
+        systems_count = len(
+            self.connect_scan_task.connection_result.systems.all())
+        self.inspect_scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
 
         hosts = []
-        client, user, password = utils.get_sat5_client(self.scan_task)
+        client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         try:
             key = client.auth.login(user, password)
             hosts = client.system.list_user_systems(key)

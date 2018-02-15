@@ -12,7 +12,7 @@
 import logging
 from socket import gaierror
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask, TaskConnectionResult, SystemConnectionResult)
+from api.models import (ScanTask, SystemConnectionResult)
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
 
@@ -61,22 +61,16 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.scan_task.update_stats(
             'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
 
-        conn_result = TaskConnectionResult(source=self.scan_task.source,
-                                           scan_task=self.scan_task)
-        conn_result.save()
-
         for system in connected:
             sys_result = SystemConnectionResult(
                 name=system, status=SystemConnectionResult.SUCCESS,
                 credential=credential)
             sys_result.save()
-            conn_result.systems.add(sys_result)
+            self.scan_task.connection_result.systems.add(sys_result)
             self.scan_task.increment_stats(
                 sys_result.name, increment_sys_scanned=True)
 
-        conn_result.save()
-        self.scan_job.connection_results.results.add(conn_result)
-        self.scan_job.connection_results.save()
+        self.scan_task.connection_result.save()
 
     def run(self):
         """Scan network range ang attempt connections."""

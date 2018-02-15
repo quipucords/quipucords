@@ -10,13 +10,13 @@
 #
 """ScanTaskRunner is a logical breakdown of work."""
 
-import json
-from api.models import ScanTask, TaskConnectionResult, TaskInspectionResult
+from api.models import ScanTask
 
 
 class ScanTaskRunner(object):
     """ScanTaskRunner is a logical breakdown of work."""
 
+    # pylint: disable=too-few-public-methods
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
@@ -27,8 +27,12 @@ class ScanTaskRunner(object):
         """
         self.scan_job = scan_job
         self.scan_task = scan_task
-        self.facts = None
-        self.result = None
+
+        if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+            # If we're restarting the scan after a pause, systems that
+            # were previously up might be down. So we throw out any
+            # partial results and start over.
+            self.scan_task.connection_result.systems.all().delete()
 
     def run(self):
         """Block that will be executed.
@@ -42,48 +46,6 @@ class ScanTaskRunner(object):
         """
         # pylint: disable=no-self-use
         return 'Task ran successfully', ScanTask.COMPLETED
-
-    def get_facts(self):
-        """Access inspection facts."""
-        # pylint: disable=too-many-nested-blocks
-        if not self.facts:
-            self.facts = []
-            if self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                temp_facts = []
-                system_results = self.get_result()
-                if system_results:
-                    # Process all results that were save to db
-                    for system_result in system_results.systems.all():
-                        fact = {}
-                        for raw_fact in system_result.facts.all():
-                            if not raw_fact.value or raw_fact.value == '':
-                                continue
-                            # Load values as JSON
-                            value_to_use = json.loads(raw_fact.value)
-                            fact[raw_fact.name] = value_to_use
-                        temp_facts.append(fact)
-
-                self.facts = temp_facts
-        return self.facts
-
-    def get_result(self):
-        """Access results from ScanTask.
-
-        Results are expected to be persisted. This method should
-        understand how to read persisted results into a dictionary
-        using a ScanTask object so others can retrieve them if needed.
-
-        :returns: Scan result object for task (either TaskConnectionResult
-        or TaskInspectionResult)
-        """
-        if not self.result:
-            if self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                self.result = TaskInspectionResult.objects.filter(
-                    scan_task=self.scan_task.id).first()
-            elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-                self.result = TaskConnectionResult.objects.filter(
-                    scan_task=self.scan_task.id).first()
-        return self.result
 
     def __str__(self):
         """Convert to string."""

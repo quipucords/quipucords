@@ -145,15 +145,13 @@ class ScanJobRunner(Process):
             scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
         sources = []
         for inspect_task in inspect_tasks.all():
-            runner = self._create_task_runner(inspect_task)
-            if runner:
-                task_facts = runner.get_facts()
-                if task_facts:
-                    source = inspect_task.source
-                    source_dict = {'source_id': source.id,
-                                   'source_type': source.source_type,
-                                   'facts': task_facts}
-                    sources.append(source_dict)
+            task_facts = inspect_task.get_facts()
+            if task_facts:
+                source = inspect_task.source
+                source_dict = {'source_id': source.id,
+                               'source_type': source.source_type,
+                               'facts': task_facts}
+                sources.append(source_dict)
 
         if bool(sources):
             fact_collection_json = {'sources': sources}

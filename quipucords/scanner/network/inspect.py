@@ -74,6 +74,7 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
+    # pylint: disable=too-few-public-methods
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
@@ -120,15 +121,12 @@ class InspectTaskRunner(ScanTaskRunner):
                 if unprocessed[0] not in processed_hosts]
             scan_message, scan_result = self._inspect_scan(remaining)
 
-            temp_facts = self.get_facts()
+            temp_facts = self.scan_task.get_facts()
             fact_size = len(temp_facts)
             if temp_facts is None or fact_size == 0:
                 msg = 'SystemFacts set is empty.  '\
                     'No results will be reported to fact endpoint.'
                 return msg, ScanTask.FAILED
-
-            # Clear cache as results changed
-            self.result = None
 
         except AnsibleError as ansible_error:
             error_message = 'Scan task encountered error: %s' % \
@@ -200,8 +198,7 @@ class InspectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(log_message)
             callback =\
                 InspectResultCallback(
-                    scan_task=self.scan_task,
-                    inspect_results=self.scan_job.inspection_results)
+                    scan_task=self.scan_task)
             playbook = {'name': 'scan systems for product fingerprint facts',
                         'hosts': group_name,
                         'gather_facts': False,
@@ -222,8 +219,6 @@ class InspectTaskRunner(ScanTaskRunner):
         if error_msg != '':
             raise AnsibleError(error_msg)
 
-        # Clear this cache since new results are available
-        self.facts = None
         return scan_message, scan_result
 
     def _obtain_discovery_data(self):
@@ -235,22 +230,17 @@ class InspectTaskRunner(ScanTaskRunner):
         connected = []
         failed = []
         completed = []
-        conn_task_results = self.scan_job.connection_results.results.filter(
-            scan_task=self.connect_scan_task.id).first()
-        for result in conn_task_results.systems.all():
+        for result in self.connect_scan_task.connection_result.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
                 host_cred = result.credential
                 serializer = CredentialSerializer(host_cred)
                 connected.append((result.name, serializer.data))
 
-        inspect_task_results = self.scan_job.inspection_results.results.filter(
-            scan_task=self.connect_scan_task.id).first()
-        if inspect_task_results is not None:
-            for result in inspect_task_results.systems.all():
-                if result.status == SystemInspectionResult.SUCCESS:
-                    completed.append(result.name)
-                else:
-                    failed.append(result.name)
+        for result in self.scan_task.inspection_result.systems.all():
+            if result.status == SystemInspectionResult.SUCCESS:
+                completed.append(result.name)
+            else:
+                failed.append(result.name)
         return connected, failed, completed
 
 
