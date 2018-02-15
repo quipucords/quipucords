@@ -44,13 +44,17 @@ class App extends React.Component {
   renderMenuItems() {
     const { location } = this.props;
 
+    let activeItem = this.menu.find(item =>
+      _.startsWith(location.pathname, item.to)
+    );
+
     return this.menu.map(item => {
       return (
         <VerticalNav.Item
           key={item.to}
           title={item.title}
           iconClass={item.iconClass}
-          active={_.startsWith(location.pathname, item.to)}
+          active={item === activeItem || (!activeItem && item.redirect)}
           onClick={() => this.navigateTo(item.to)}
         />
       );
@@ -102,7 +106,7 @@ class App extends React.Component {
 
     return (
       <div className="layout-pf layout-pf-fixed">
-        <VerticalNav>
+        <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={productTitle} />
             <MastheadOptions />

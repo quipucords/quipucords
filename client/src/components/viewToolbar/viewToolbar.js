@@ -209,19 +209,17 @@ class ViewToolbar extends React.Component {
 
   renderCounts() {
     const {
-      activeFilters,
       totalCount,
-      filteredCount,
+      selectedCount,
       itemsType,
       itemsTypePlural
     } = this.props;
 
     return (
       <h5>
-        {filteredCount >= 0 && activeFilters && activeFilters.length > 0
-          ? `${filteredCount} of `
-          : null}
+        {selectedCount > 0 ? `${selectedCount} of ` : null}
         {`${totalCount} ${totalCount === 1 ? itemsType : itemsTypePlural}`}
+        {selectedCount > 0 ? ' selected' : ''}
       </h5>
     );
   }
@@ -276,7 +274,7 @@ class ViewToolbar extends React.Component {
 ViewToolbar.propTypes = {
   viewType: PropTypes.string,
   totalCount: PropTypes.number,
-  filteredCount: PropTypes.number,
+  selectedCount: PropTypes.number,
   filterFields: PropTypes.array,
   sortFields: PropTypes.array,
   actions: PropTypes.node,
