@@ -11,11 +11,12 @@
 """Describes the urls and patterns for the API application."""
 
 from django.conf.urls import url
-from rest_framework.authtoken import views
+from rest_framework_expiring_authtoken import views
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 from api.views import (CredentialViewSet, FactViewSet,
-                       SourceViewSet, ScanJobViewSet, ReportListView)
+                       SourceViewSet, ScanJobViewSet, ReportListView,
+                       UserViewSet)
 
 
 ROUTER = SimpleRouter()
@@ -32,6 +33,9 @@ ROUTER.register(r'sources',
 ROUTER.register(r'scans',
                 ScanJobViewSet,
                 base_name='scanjob')
+ROUTER.register(r'users',
+                UserViewSet,
+                base_name='users')
 
 # pylint: disable=invalid-name
 urlpatterns = [
@@ -41,7 +45,7 @@ urlpatterns = [
 urlpatterns = format_suffix_patterns(urlpatterns)
 
 urlpatterns += [
-    url(r'^token/', views.obtain_auth_token)
+    url(r'^token/', views.obtain_expiring_auth_token)
 ]
 
 urlpatterns += ROUTER.urls

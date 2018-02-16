@@ -291,14 +291,14 @@ def host_subscriptions(scan_task, url, org_id, host_id):
 class SatelliteSixV1(SatelliteInterface):
     """Interact with Satellite 6, API version 1."""
 
-    def __init__(self, scan_task, conn_result, inspect_result=None):
+    def __init__(self, scan_task):
         """Set context for Satellite Interface.
 
         :param scan_task: the scan task model for this task
         :param conn_result: The connection result
         :param inspect_result: The inspection result
         """
-        super().__init__(scan_task, conn_result, inspect_result)
+        super().__init__(scan_task)
         self.orgs = None
 
     def get_orgs(self):
@@ -317,7 +317,7 @@ class SatelliteSixV1(SatelliteInterface):
                len(jsonresult.get(RESULTS, []))):
             page += 1
             params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-            response, url = utils.execute_request(self.scan_task,
+            response, url = utils.execute_request(self.connect_scan_task,
                                                   ORGS_V1_URL, params)
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
@@ -338,7 +338,7 @@ class SatelliteSixV1(SatelliteInterface):
         orgs = self.get_orgs()
         for org_id in orgs:
             params = {PAGE: 1, PER_PAGE: 100, THIN: 1}
-            response, url = utils.execute_request(self.scan_task,
+            response, url = utils.execute_request(self.connect_scan_task,
                                                   url=HOSTS_V1_URL,
                                                   org_id=org_id,
                                                   query_params=params)
@@ -348,8 +348,9 @@ class SatelliteSixV1(SatelliteInterface):
                                          ' for url: %s' %
                                          (response.status_code, url))
             systems_count += response.json().get('total', 0)
-        self.initialize_stats(systems_count)
-        return systems_count
+            self.connect_scan_task.update_stats(
+                'INITIAL STATELLITE STATS', sys_count=systems_count)
+            return systems_count
 
     def hosts(self):
         """Obtain the managed hosts."""
@@ -359,12 +360,12 @@ class SatelliteSixV1(SatelliteInterface):
             jsonresult = {}
             page = 0
             per_page = 100
-            credential = utils.get_credential(self.scan_task)
+            credential = utils.get_credential(self.connect_scan_task)
             while (page == 0 or int(jsonresult.get(PER_PAGE, 0)) ==
                    len(jsonresult.get(RESULTS, []))):
                 page += 1
                 params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                response, url = utils.execute_request(self.scan_task,
+                response, url = utils.execute_request(self.connect_scan_task,
                                                       url=HOSTS_V1_URL,
                                                       org_id=org_id,
                                                       query_params=params)
@@ -390,8 +391,11 @@ class SatelliteSixV1(SatelliteInterface):
         :param host_name: The name of the host
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
-        sys_result = self.inspect_result.systems.filter(
+        sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
 
         if sys_result:
@@ -399,9 +403,10 @@ class SatelliteSixV1(SatelliteInterface):
                          host_name)
             return details
 
-        details.update(host_fields(self.scan_task, 1, HOSTS_FIELDS_V1_URL,
+        details.update(host_fields(self.inspect_scan_task, 1,
+                                   HOSTS_FIELDS_V1_URL,
                                    org_id, host_id))
-        details.update(host_subscriptions(self.scan_task,
+        details.update(host_subscriptions(self.inspect_scan_task,
                                           HOSTS_SUBS_V1_URL,
                                           org_id, host_id))
 
@@ -412,8 +417,13 @@ class SatelliteSixV1(SatelliteInterface):
 
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.conn_result.systems.all())
-        self.initialize_stats(systems_count)
+        systems_count = len(
+            self.connect_scan_task.connection_result.systems.all())
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
+        self.inspect_scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
 
         orgs = self.get_orgs()
         for org_id in orgs:
@@ -424,7 +434,7 @@ class SatelliteSixV1(SatelliteInterface):
                    len(jsonresult.get(RESULTS, []))):
                 page += 1
                 params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                response, url = utils.execute_request(self.scan_task,
+                response, url = utils.execute_request(self.inspect_scan_task,
                                                       url=HOSTS_V1_URL,
                                                       org_id=org_id,
                                                       query_params=params)
@@ -444,7 +454,7 @@ class SatelliteSixV2(SatelliteInterface):
     def host_count(self):
         """Obtain the count of managed hosts."""
         params = {PAGE: 1, PER_PAGE: 10, THIN: 1}
-        response, url = utils.execute_request(self.scan_task,
+        response, url = utils.execute_request(self.connect_scan_task,
                                               url=HOSTS_V2_URL,
                                               query_params=params)
         # pylint: disable=no-member
@@ -452,7 +462,8 @@ class SatelliteSixV2(SatelliteInterface):
             raise SatelliteException('Invalid response code %s for url: %s' %
                                      (response.status_code, url))
         systems_count = response.json().get('total', 0)
-        self.initialize_stats(systems_count)
+        self.connect_scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
         return systems_count
 
     def hosts(self):
@@ -461,12 +472,12 @@ class SatelliteSixV2(SatelliteInterface):
         jsonresult = {}
         page = 0
         per_page = 100
-        credential = utils.get_credential(self.scan_task)
+        credential = utils.get_credential(self.connect_scan_task)
         while (page == 0 or int(jsonresult.get(PER_PAGE, 0)) ==
                len(jsonresult.get(RESULTS, []))):
             page += 1
             params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-            response, url = utils.execute_request(self.scan_task,
+            response, url = utils.execute_request(self.connect_scan_task,
                                                   url=HOSTS_V2_URL,
                                                   query_params=params)
             # pylint: disable=no-member
@@ -490,8 +501,11 @@ class SatelliteSixV2(SatelliteInterface):
         :param host_name: The name of the host
         :returns: dictionary of host details
         """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'host_details cannot be called for a connection scan')
         details = {}
-        sys_result = self.inspect_result.systems.filter(
+        sys_result = self.inspect_scan_task.inspection_result.systems.filter(
             name=host_name).first()
 
         if sys_result:
@@ -499,9 +513,11 @@ class SatelliteSixV2(SatelliteInterface):
                          host_name)
             return details
 
-        details.update(host_fields(self.scan_task, 2, HOSTS_FIELDS_V2_URL,
+        details.update(host_fields(self.inspect_scan_task, 2,
+                                   HOSTS_FIELDS_V2_URL,
                                    None, host_id))
-        details.update(host_subscriptions(self.scan_task, HOSTS_SUBS_V2_URL,
+        details.update(host_subscriptions(self.inspect_scan_task,
+                                          HOSTS_SUBS_V2_URL,
                                           None, host_id))
 
         self.record_inspect_result(host_name, details)
@@ -511,8 +527,13 @@ class SatelliteSixV2(SatelliteInterface):
 
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.conn_result.systems.all())
-        self.initialize_stats(systems_count)
+        systems_count = len(
+            self.connect_scan_task.connection_result.systems.all())
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                'hosts_facts cannot be called for a connection scan')
+        self.inspect_scan_task.update_stats(
+            'INITIAL STATELLITE STATS', sys_count=systems_count)
 
         jsonresult = {}
         page = 0
@@ -521,7 +542,7 @@ class SatelliteSixV2(SatelliteInterface):
                len(jsonresult.get(RESULTS, []))):
             page += 1
             params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-            response, url = utils.execute_request(self.scan_task,
+            response, url = utils.execute_request(self.inspect_scan_task,
                                                   url=HOSTS_V2_URL,
                                                   query_params=params)
             # pylint: disable=no-member

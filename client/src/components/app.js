@@ -44,13 +44,17 @@ class App extends React.Component {
   renderMenuItems() {
     const { location } = this.props;
 
+    let activeItem = this.menu.find(item =>
+      _.startsWith(location.pathname, item.to)
+    );
+
     return this.menu.map(item => {
       return (
         <VerticalNav.Item
           key={item.to}
           title={item.title}
           iconClass={item.iconClass}
-          active={_.startsWith(location.pathname, item.to)}
+          active={item === activeItem || (!activeItem && item.redirect)}
           onClick={() => this.navigateTo(item.to)}
         />
       );
@@ -89,20 +93,33 @@ class App extends React.Component {
     }
 
     if (!session.loggedIn) {
+      setTimeout(() => {
+        window.location = '/login';
+      }, 5000);
+
       return (
-        <EmptyState>
-          <Alert type="error">
-            <span>
-              You have been logged out: redirecting to the login page.
-            </span>
-          </Alert>
-        </EmptyState>
+        <div className="layout-pf layout-pf-fixed hidden-nav-menu">
+          <VerticalNav persistentSecondary={false}>
+            <VerticalNav.Masthead>
+              <VerticalNav.Brand titleImg={productTitle} />
+            </VerticalNav.Masthead>
+          </VerticalNav>
+          <div className="container-pf-nav-pf-vertical">
+            <EmptyState className="full-page-blank-slate">
+              <Alert type="error">
+                <span>
+                  You have been logged out: redirecting to the login page.
+                </span>
+              </Alert>
+            </EmptyState>
+          </div>
+        </div>
       );
     }
 
     return (
       <div className="layout-pf layout-pf-fixed">
-        <VerticalNav>
+        <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={productTitle} />
             <MastheadOptions />

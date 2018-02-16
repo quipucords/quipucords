@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -11,8 +12,18 @@ import {
   Modal
 } from 'patternfly-react';
 
-import { getScans } from '../../redux/actions/scansActions';
-import { toastNotificationTypes, viewTypes } from '../../redux/constants';
+import {
+  getScans,
+  pauseScan,
+  cancelScan,
+  restartScan
+} from '../../redux/actions/scansActions';
+import {
+  sourcesTypes,
+  toastNotificationTypes,
+  viewToolbarTypes,
+  viewTypes
+} from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
 
@@ -30,13 +41,14 @@ class Scans extends React.Component {
     helpers.bindMethods(this, [
       'downloadSummaryReport',
       'downloadDetailedReport',
-      'pauseScan',
-      'cancelScan',
-      'startScan',
-      'resumeScan',
+      'doPauseScan',
+      'doCancelScan',
+      'doStartScan',
+      'doResumeScan',
       'addSource',
       'importSources',
-      'refresh'
+      'refresh',
+      'notifyActionStatus'
     ]);
     this.state = {
       selectedItems: []
@@ -84,6 +96,33 @@ class Scans extends React.Component {
     }
   }
 
+  notifyActionStatus(actionText, error, results) {
+    const { getScans, viewOptions } = this.props;
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Scan <strong>${results.id}</strong> {actionText}.
+          </span>
+        )
+      });
+      getScans(
+        helpers.createViewQueryObject(viewOptions, {
+          scan_type: 'inspect'
+        })
+      );
+    }
+  }
+
   downloadSummaryReport() {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
@@ -102,48 +141,45 @@ class Scans extends React.Component {
     });
   }
 
-  pauseScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Pausing scans is not yet implemented'
-    });
-  }
-
-  cancelScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Cancelling scans is not yet implemented'
-    });
-  }
-
-  startScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Starting scans is not yet implemented'
-    });
-  }
-
-  resumeScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.id,
-      message: 'Resuming scans is not yet implemented'
-    });
-  }
-
-  addSource() {
+  doStartScan(item) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Adding sources is not yet implemented'
+      message: 'Start scan is not yet implemented'
+    });
+  }
+
+  doPauseScan(item) {
+    this.props
+      .pauseScan(item.id)
+      .then(
+        response => this.notifyActionStatus('paused', false, response.value),
+        error => this.notifyActionStatus('paused', true, error.message)
+      );
+  }
+
+  doResumeScan(item) {
+    this.props
+      .restartScan(item.id)
+      .then(
+        response => this.notifyActionStatus('resumed', false, response.value),
+        error => this.notifyActionStatus('resumed', true, error.message)
+      );
+  }
+
+  doCancelScan(item) {
+    this.props
+      .cancelScan(item.id)
+      .then(
+        response => this.notifyActionStatus('canceled', false, response.value),
+        error => this.notifyActionStatus('canceled', true, error.message)
+      );
+  }
+
+  addSource() {
+    Store.dispatch({
+      type: sourcesTypes.EDIT_SOURCE_SHOW
     });
   }
 
@@ -160,6 +196,13 @@ class Scans extends React.Component {
     this.props.getScans({ scan_type: 'inspect' });
   }
 
+  clearFilters() {
+    Store.dispatch({
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewTypes.SCANS_VIEW
+    });
+  }
+
   renderScanActions() {
     return (
       <div className="form-group">
@@ -170,27 +213,8 @@ class Scans extends React.Component {
     );
   }
 
-  renderScansList(items) {
-    return (
-      <ListView className="quipicords-list-view">
-        {items.map((item, index) => (
-          <ScanListItem
-            item={item}
-            key={index}
-            onSummaryDownload={this.downloadSummaryReport}
-            onDetailedDownload={this.downloadDetailedReport}
-            onPause={this.pauseScan}
-            onCancel={this.cancelScan}
-            onStart={this.startScan}
-            onResume={this.resumeScan}
-          />
-        ))}
-      </ListView>
-    );
-  }
-
-  render() {
-    const { pending, error, errorMessage, scans, viewOptions } = this.props;
+  renderPendingMessage() {
+    const { pending } = this.props;
 
     if (pending) {
       return (
@@ -202,45 +226,104 @@ class Scans extends React.Component {
         </Modal>
       );
     }
+
+    return null;
+  }
+
+  renderScansList(items) {
+    if (_.size(items)) {
+      return (
+        <ListView className="quipicords-list-view">
+          {items.map((item, index) => (
+            <ScanListItem
+              item={item}
+              key={index}
+              onSummaryDownload={this.downloadSummaryReport}
+              onDetailedDownload={this.downloadDetailedReport}
+              onStart={this.doStartScan}
+              onPause={this.doPauseScan}
+              onResume={this.doResumeScan}
+              onCancel={this.doCancelScan}
+            />
+          ))}
+        </ListView>
+      );
+    }
+
+    return (
+      <EmptyState className="list-view-blank-slate">
+        <EmptyState.Title>
+          No Results Match the Filter Criteria
+        </EmptyState.Title>
+        <EmptyState.Info>
+          The active filters are hiding all items.
+        </EmptyState.Info>
+        <EmptyState.Action>
+          <Button bsStyle="link" onClick={this.clearFilters}>
+            Clear Filters
+          </Button>
+        </EmptyState.Action>
+      </EmptyState>
+    );
+  }
+
+  render() {
+    const { error, errorMessage, scans, viewOptions } = this.props;
+
     if (error) {
       return (
         <EmptyState>
           <Alert type="error">
             <span>Error retrieving scans: {errorMessage}</span>
           </Alert>
+          {this.renderPendingMessage()}
         </EmptyState>
       );
     }
-    if (scans && scans.length) {
+
+    if (_.size(scans) || _.size(viewOptions.activeFilters)) {
       return (
-        <div className="quipucords-view-container">
-          <ViewToolbar
-            viewType={viewTypes.SCANS_VIEW}
-            filterFields={ScanFilterFields}
-            sortFields={ScanSortFields}
-            actions={this.renderScanActions()}
-            itemsType="Scan"
-            itemsTypePlural="Scans"
-            {...viewOptions}
-          />
-          <div className="quipucords-list-container">
-            {this.renderScansList(scans)}
+        <React.Fragment>
+          <div className="quipucords-view-container">
+            <ViewToolbar
+              viewType={viewTypes.SCANS_VIEW}
+              filterFields={ScanFilterFields}
+              sortFields={ScanSortFields}
+              actions={this.renderScanActions()}
+              itemsType="Scan"
+              itemsTypePlural="Scans"
+              {...viewOptions}
+            />
+            <ViewPaginationRow
+              viewType={viewTypes.SCANS_VIEW}
+              {...viewOptions}
+            />
+            <div className="quipucords-list-container">
+              {this.renderScansList(scans)}
+            </div>
           </div>
-          <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
-        </div>
+          {this.renderPendingMessage()}
+        </React.Fragment>
       );
     }
+
     return (
-      <SourcesEmptyState
-        onAddSource={this.addSource}
-        onImportSources={this.importSources}
-      />
+      <React.Fragment>
+        <SourcesEmptyState
+          onAddSource={this.addSource}
+          onImportSources={this.importSources}
+        />
+        {this.renderPendingMessage()}
+      </React.Fragment>
     );
   }
 }
 
 Scans.propTypes = {
   getScans: PropTypes.func,
+  pauseScan: PropTypes.func,
+  cancelScan: PropTypes.func,
+  restartScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -249,7 +332,10 @@ Scans.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScans: queryObj => dispatch(getScans(queryObj))
+  getScans: queryObj => dispatch(getScans(queryObj)),
+  pauseScan: id => dispatch(pauseScan(id)),
+  restartScan: id => dispatch(restartScan(id)),
+  cancelScan: id => dispatch(cancelScan(id))
 });
 
 const mapStateToProps = function(state) {

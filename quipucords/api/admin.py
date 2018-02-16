@@ -11,13 +11,18 @@
 """Admin module for Django server application."""
 
 from django.contrib import admin
-from api.models import (FactCollection, SystemFingerprint, Credential,
-                        Source, ScanJob, ConnectionResults, InspectionResults)
+from api.models import (FactCollection,
+                        SystemFingerprint,
+                        Credential,
+                        Source,
+                        ScanJob,
+                        JobConnectionResult,
+                        JobInspectionResult)
 
 admin.site.register(FactCollection)
 admin.site.register(Credential)
 admin.site.register(Source)
 admin.site.register(SystemFingerprint)
 admin.site.register(ScanJob)
-admin.site.register(ConnectionResults)
-admin.site.register(InspectionResults)
+admin.site.register(JobConnectionResult)
+admin.site.register(JobInspectionResult)

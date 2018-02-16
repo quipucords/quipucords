@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import {
   Modal,
+  Alert,
   Button,
   Icon,
   Form,
@@ -16,7 +17,8 @@ import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import {
   credentialsTypes,
-  toastNotificationTypes
+  toastNotificationTypes,
+  viewTypes
 } from '../../redux/constants';
 import {
   addCredential,
@@ -60,12 +62,30 @@ class CreateCredentialDialog extends React.Component {
       'runas'
     ];
 
-    helpers.bindMethods(this, ['cancel', 'save', 'updateResults']);
+    helpers.bindMethods(this, ['cancel', 'save']);
   }
 
   componentWillReceiveProps(nextProps) {
     if (!this.props.show && nextProps.show) {
       this.resetInitialState(nextProps);
+    }
+
+    if (this.props.show && nextProps.fulfilled && !this.props.fulfilled) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Credential <strong>{nextProps.credential.name}</strong> successfully
+            {this.props.edit ? ' updated' : ' created'}.
+          </span>
+        )
+      });
+
+      this.cancel();
+      this.props.getCredentials(
+        helpers.createViewQueryObject(this.props.viewOptions)
+      );
     }
   }
 
@@ -74,11 +94,9 @@ class CreateCredentialDialog extends React.Component {
       this.setState({
         credentialName: nextProps.credential.name,
         credentialType: nextProps.credential.cred_type,
-        authorizationType:
-          nextProps.credential.ssh_keyfile &&
-          nextProps.credential.ssh_keyfile.length
-            ? 'usernamePassword'
-            : 'sshKey',
+        authorizationType: nextProps.credential.ssh_keyfile
+          ? 'sshKey'
+          : 'usernamePassword',
         sshKeyFile: nextProps.credential.ssh_keyfile,
         passphrase: nextProps.credential.passphrase,
         username: nextProps.credential.username,
@@ -105,69 +123,39 @@ class CreateCredentialDialog extends React.Component {
     });
   }
 
-  updateResults(type, error, results) {
-    if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'error',
-        header: 'Error',
-        message: results
-      });
-    } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'success',
-        message: (
-          <span>
-            Credential <strong>{results.name}</strong> successfully
-            {type === 'edit' ? 'updated' : 'created'}.
-          </span>
-        )
-      });
-
-      this.cancel();
-      this.props.getCredentials();
-    }
-  }
-
   save() {
     let credential = {
-      name: this.state.credentialName,
       username: this.state.username,
-      cred_type: this.state.credentialType
+      name: this.state.credentialName
     };
 
     if (this.props.edit) {
       credential.id = this.props.credential.id;
+    } else {
+      credential.cred_type = this.state.credentialType;
     }
 
     if (this.state.authorizationType === 'sshKey') {
       credential.ssh_keyfile = this.state.sshKeyFile;
+      credential.sshpassphrase = this.state.passphrase;
     } else {
       credential.password = this.state.password;
     }
 
-    if (credential.cred_type === 'network') {
+    if (this.state.credentialType === 'network') {
       credential.become_method = this.state.becomeMethod;
-      credential.become_user = this.state.becomeUser;
-      credential.become_password = this.state.becomePassword;
+      if (this.state.becomeUser) {
+        credential.become_user = this.state.becomeUser;
+      }
+      if (this.state.becomePassword) {
+        credential.become_password = this.state.becomePassword;
+      }
     }
 
-    // ToDo: temporarily reverted this to chained promises. review chaining actions within actions Redux, i.e update or add, then toast notifications
     if (this.props.edit) {
-      this.props
-        .updateCredential(credential.id, credential)
-        .then(
-          response => this.updateResults('edit', false, response.value),
-          error => this.updateResults('edit', true, error.message)
-        );
+      this.props.updateCredential(credential.id, credential);
     } else {
-      this.props
-        .addCredential(credential)
-        .then(
-          response => this.updateResults('add', false, response.value),
-          error => this.updateResults('add', true, error.message)
-        );
+      this.props.addCredential(credential);
     }
   }
 
@@ -177,12 +165,13 @@ class CreateCredentialDialog extends React.Component {
 
   validateForm() {
     return (
-      this.state.credentialName !== '' &&
-      this.state.credentialNameError === '' &&
-      this.state.username !== '' &&
-      this.state.usernameError === '' &&
-      (this.state.authorizationType === 'usernamePassword' ||
-        (this.state.sshKeyFile !== '' && this.state.sskKeyFileError === ''))
+      this.state.credentialName &&
+      !this.state.credentialNameError &&
+      this.state.username &&
+      !this.state.usernameError &&
+      (this.state.authorizationType === 'usernamePassword'
+        ? this.state.password && !this.state.passwordError
+        : this.state.sshKeyFile && !this.state.sskKeyFileError)
     );
   }
 
@@ -220,9 +209,18 @@ class CreateCredentialDialog extends React.Component {
     });
   }
 
+  validatePassword(password) {
+    if (!password || !password.length) {
+      return 'You must enter a password';
+    }
+
+    return '';
+  }
+
   updatePassword(event) {
     this.setState({
-      password: event.target.value
+      password: event.target.value,
+      passwordError: this.validatePassword(event.target.value)
     });
   }
 
@@ -279,21 +277,25 @@ class CreateCredentialDialog extends React.Component {
       password,
       sshKeyFile,
       passphrase,
+      passwordError,
       sskKeyFileError
     } = this.state;
 
     switch (authorizationType) {
       case 'usernamePassword':
         return (
-          <Form.FormGroup>
+          <Form.FormGroup validationState={passwordError ? 'error' : null}>
             {this.renderFormLabel('Password')}
             <Grid.Col sm={7}>
               <Form.FormControl
                 type="password"
                 value={password}
-                placeholder="optional"
+                placeholder="Enter the password"
                 onChange={e => this.updatePassword(e)}
               />
+              {passwordError && (
+                <Form.HelpBlock>{passwordError}</Form.HelpBlock>
+              )}
             </Grid.Col>
           </Form.FormGroup>
         );
@@ -396,6 +398,26 @@ class CreateCredentialDialog extends React.Component {
     );
   }
 
+  errorDismissed() {
+    Store.dispatch({
+      type: credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS
+    });
+  }
+
+  renderErrorMessage() {
+    const { error, errorMessage } = this.props;
+
+    if (error) {
+      return (
+        <Alert type="error" onDismiss={this.errorDismissed}>
+          <strong>Error</strong> {errorMessage}
+        </Alert>
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const { show, edit } = this.props;
     const {
@@ -424,6 +446,7 @@ class CreateCredentialDialog extends React.Component {
         </Modal.Header>
         <Modal.Body />
         <Grid fluid>
+          {this.renderErrorMessage()}
           <Form horizontal>
             <Form.FormGroup>
               {this.renderFormLabel('Source Type')}
@@ -528,17 +551,23 @@ CreateCredentialDialog.propTypes = {
   credential: PropTypes.object,
   credentialType: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
   show: PropTypes.bool,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  fulfilled: PropTypes.bool,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  viewOptions: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredentials: () => dispatch(getCredentials()),
+  getCredentials: queryObj => dispatch(getCredentials(queryObj)),
   addCredential: data => dispatch(addCredential(data)),
   updateCredential: (id, data) => dispatch(updateCredential(id, data))
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.credentials.update);
+  return Object.assign({}, state.credentials.update, {
+    viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW]
+  });
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(

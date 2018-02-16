@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { factsTypes } from '../constants';
 
@@ -21,7 +22,11 @@ const factsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,

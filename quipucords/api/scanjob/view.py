@@ -14,24 +14,24 @@ import os
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
-from rest_framework.authentication import (TokenAuthentication,
-                                           SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from rest_framework.serializers import ValidationError
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob, Source,
-                        ConnectionResults, InspectionResults)
+from api.models import (ScanTask, ScanJob, Source)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
-                             ConnectionResultsSerializer,
+                             JobConnectionResultSerializer,
                              SystemConnectionResultSerializer,
-                             InspectionResultsSerializer,
+                             JobInspectionResultSerializer,
                              SystemInspectionResultSerializer,
                              RawFactSerializer)
 from api.signals.scanjob_signal import (start_scan, pause_scan,
@@ -39,7 +39,7 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
 
 
 SOURCES_KEY = 'sources'
-RESULTS_KEY = 'results'
+RESULTS_KEY = 'task_results'
 TASKS_KEY = 'tasks'
 SYSTEMS_COUNT_KEY = 'systems_count'
 SYSTEMS_SCANNED_KEY = 'systems_scanned'
@@ -138,8 +138,10 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
     if json_job_conn_result is not None and\
             json_job_conn_result.get(RESULTS_KEY):
         json_job_conn_result_list = []
-        for result in job_conn_result.results.all():
-            source_serializer = SourceSerializer(result.source)
+        for result in job_conn_result.task_results.all():
+            conn_task = ScanTask.objects.filter(
+                connection_result=result).first()
+            source_serializer = SourceSerializer(conn_task.source)
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
@@ -160,8 +162,10 @@ def expand_inspect_results(job_inspect_result, json_job_inspect_result):
     if json_job_inspect_result is not None and\
             json_job_inspect_result.get(RESULTS_KEY):
         json_job_inspect_result_list = []
-        for result in job_inspect_result.results.all():
-            source_serializer = SourceSerializer(result.source)
+        for result in job_inspect_result.task_results.all():
+            inspect_task = ScanTask.objects.filter(
+                inspection_result=result).first()
+            source_serializer = SourceSerializer(inspect_task.source)
             json_source = source_serializer.data
             json_source.pop('credentials', None)
             json_source.pop('hosts', None)
@@ -192,7 +196,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        authentication_classes = (ExpiringTokenAuthentication,
+                                  SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
@@ -255,19 +260,18 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     def results(self, request, pk=None):
         """Get the results of a scan job."""
         result = None
-        job_conn_result = ConnectionResults.objects.all() \
-            .filter(scan_job__id=pk).first()
-        job_scan_result = InspectionResults.objects.all() \
-            .filter(scan_job__id=pk).first()
+        scan_job = get_object_or_404(self.queryset, pk=pk)
+        job_conn_result = scan_job.connection_results
+        job_scan_result = scan_job.inspection_results
         if job_conn_result:
-            serializer = ConnectionResultsSerializer(job_conn_result)
+            serializer = JobConnectionResultSerializer(job_conn_result)
             json_job_conn_result = serializer.data
             expand_conn_results(job_conn_result, json_job_conn_result)
             if result is None:
                 result = {}
             result['connection_results'] = json_job_conn_result
         if job_scan_result:
-            serializer = InspectionResultsSerializer(job_scan_result)
+            serializer = JobInspectionResultSerializer(job_scan_result)
             json_job_scan_result = serializer.data
             expand_inspect_results(job_scan_result, json_job_scan_result)
             if result is None:

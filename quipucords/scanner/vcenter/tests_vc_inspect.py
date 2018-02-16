@@ -11,14 +11,15 @@
 """Test the vcenter inspect capabilities."""
 
 import json
-from datetime import datetime
 from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, InspectionResults, InspectionResult,
+from api.models import (Credential,
+                        Source,
+                        ScanTask,
                         SystemInspectionResult)
 from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
+from scanner.test_util import create_scan_job
 
 
 def invalid_login():
@@ -34,44 +35,32 @@ class InspectTaskRunnerTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.cred = Credential(
+        cred = Credential(
             name='cred1',
             username='username',
             password='password',
             become_password=None,
             ssh_keyfile=None)
-        self.cred.save()
+        cred.save()
 
-        self.source = Source(
+        source = Source(
             name='source1',
             port=22,
             hosts='["1.2.3.4"]')
 
-        self.source.save()
-        self.source.credentials.add(self.cred)
+        source.save()
+        source.credentials.add(cred)
 
-        self.conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1,
-                                  start_time=datetime.utcnow())
-        self.conn_task.update_stats('TEST_VC.', sys_count=5)
-        self.conn_task.complete()
+        self.scan_job, self.scan_task = create_scan_job(
+            source, ScanTask.SCAN_TYPE_INSPECT)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                  source=self.source, sequence_number=2,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
+        self.connect_scan_task = self.scan_task.prerequisites.first()
+        self.connect_scan_task.update_stats('TEST_VC.', sys_count=5)
+        self.connect_scan_task.complete()
 
-        self.scan_task.prerequisites.add(self.conn_task)
-        self.scan_task.save()
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.inspect_results = InspectionResults(scan_job=self.scan_job)
-        self.inspect_results.save()
+        # Create task runner
         self.runner = InspectTaskRunner(scan_job=self.scan_job,
-                                        scan_task=self.scan_task,
-                                        inspect_results=self.inspect_results)
+                                        scan_task=self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -100,18 +89,13 @@ class InspectTaskRunnerTest(TestCase):
 
     def test__none(self):
         """Test get result method when no results exist."""
-        results = self.runner.get_result()
+        results = self.scan_task.get_result().systems.first()
         self.assertEqual(results, None)
 
     def test_get_result(self):
         """Test get results method when results exist."""
-        inspect_result = InspectionResult(source=self.source,
-                                          scan_task=self.scan_task)
-        inspect_result.save()
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
-        results = self.runner.get_result()
-        self.assertEqual(results, inspect_result)
+        results = self.scan_task.get_result()
+        self.assertEqual(results, self.scan_task.inspection_result)
 
     # pylint: disable=too-many-locals
     def test_get_vm_info(self):
@@ -148,20 +132,12 @@ class InspectTaskRunnerTest(TestCase):
         self.scan_task.update_stats(
             'TEST_VC.', sys_count=5, sys_failed=0, sys_scanned=0)
         getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
-        inspect_result = InspectionResult(
-            source=self.scan_task.source,
-            scan_task=self.scan_task)
-        inspect_result.save()
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
         with patch('scanner.vcenter.inspect.get_nics',
                    return_value=getnics):
-            self.runner.inspect_result = inspect_result
             self.runner.get_vm_info(data_center, cluster,
                                     host, virtual_machine)
 
-            inspect_result = InspectionResult.objects.filter(
-                scan_task=self.scan_task.id).first()
+            inspect_result = self.scan_task.inspection_result
             sys_results = inspect_result.systems.all()
             expected_facts = {'vm.cluster': 'cluster1',
                               'vm.cpu_count': 2,
@@ -190,17 +166,9 @@ class InspectTaskRunnerTest(TestCase):
     # pylint: disable=too-many-locals
     def test_recurse_datacenter(self):
         """Test the recurse_datacenter method."""
-        inspect_result = InspectionResult(
-            source=self.scan_task.source,
-            scan_task=self.scan_task)
-        inspect_result.save()
         sys_result = SystemInspectionResult(
             name='vm1', status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
         vcenter = Mock()
         content = Mock()
         root_folder = Mock()
@@ -233,7 +201,6 @@ class InspectTaskRunnerTest(TestCase):
         vcenter.RetrieveContent = Mock(return_value=content)
         with patch.object(InspectTaskRunner,
                           'get_vm_info') as mock_get_vm_info:
-            self.runner.inspect_result = inspect_result
             self.runner.recurse_datacenter(vcenter)
             mock_get_vm_info.assert_called_with(ANY, ANY, ANY, ANY)
 
@@ -243,7 +210,7 @@ class InspectTaskRunnerTest(TestCase):
                    return_value=Mock()) as mock_vcenter_connect:
             with patch.object(InspectTaskRunner,
                               'recurse_datacenter') as mock_recurse:
-                self.runner.connect_scan_task = self.conn_task
+                self.runner.connect_scan_task = self.connect_scan_task
                 self.runner.inspect()
                 mock_vcenter_connect.assert_called_once_with(ANY)
                 mock_recurse.assert_called_once_with(ANY)
@@ -258,8 +225,8 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_prereq_failed(self):
         """Test the run method."""
-        self.conn_task.status = ScanTask.FAILED
-        self.conn_task.save()
+        self.connect_scan_task.status = ScanTask.FAILED
+        self.connect_scan_task.save()
         status = self.runner.run()
         self.assertEqual(ScanTask.FAILED, status[1])
 

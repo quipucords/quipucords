@@ -15,17 +15,19 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.authentication import (TokenAuthentication,
-                                           SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from rest_framework.serializers import ValidationError
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
-from api.models import Source, Credential
+from api.models import Source, Credential, ScanJob, ScanTask, ScanOptions
 import api.messages as messages
-from api.common.util import is_int
+from api.common.util import is_int, is_boolean, convert_to_boolean
+from api.signals.scanjob_signal import start_scan
 
 
 CREDENTIALS_KEY = 'credentials'
@@ -63,7 +65,8 @@ class SourceViewSet(ModelViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication, SessionAuthentication)
+        authentication_classes = (ExpiringTokenAuthentication,
+                                  SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()
@@ -116,6 +119,33 @@ class SourceViewSet(ModelViewSet):
 
         # Create expanded host cred JSON
         expand_credential(json_source)
+
+        # check to see if a connection scan was requested
+        # through query parameter
+        scan = request.query_params.get('scan', False)
+        # If the scan was requested, create a connection scan
+        if scan:
+            if is_boolean(scan):
+                if convert_to_boolean(scan):
+                    # Grab the source id
+                    source_id = response.data['id']
+                    # Define the scan options object
+                    scan_options = ScanOptions()
+                    scan_options.save()
+                    # Create the scan job
+                    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                       options=scan_options)
+                    scan_job.save()
+                    # Add the source
+                    scan_job.sources.add(source_id)
+                    scan_job.save()
+                    # Start the scan
+                    start_scan.send(sender=self.__class__, instance=scan_job)
+            else:
+                error = {
+                    'scan': [_(messages.SOURCE_CONNECTION_SCAN)]
+                }
+                raise ValidationError(error)
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -16,7 +17,8 @@ import {
   sourcesTypes,
   toastNotificationTypes,
   confirmationModalTypes,
-  viewTypes
+  viewTypes,
+  viewToolbarTypes
 } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
@@ -48,7 +50,6 @@ class Sources extends React.Component {
     ]);
 
     this.state = {
-      selectedItems: [],
       scanDialogShown: false,
       multiSourceScan: false,
       currentScanSource: null,
@@ -64,11 +65,6 @@ class Sources extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.sources && nextProps.sources !== this.props.sources) {
-      // Reset selection state though we may want to keep selections over refreshes...
-      nextProps.sources.forEach(source => {
-        source.selected = false;
-      });
-
       // TODO: Remove once we get real failed host data
       nextProps.sources.forEach(source => {
         let failedCount = Math.floor(Math.random() * 10);
@@ -77,8 +73,6 @@ class Sources extends React.Component {
           source.failed_hosts.push('failedHost' + (i + 1));
         }
       });
-
-      this.setState({ selectedItems: [] });
     }
 
     // Check for changes resulting in a fetch
@@ -89,6 +83,15 @@ class Sources extends React.Component {
         helpers.createViewQueryObject(nextProps.viewOptions)
       );
     }
+  }
+
+  itemSelected(item) {
+    const { selectedSources } = this.props;
+    return (
+      selectedSources.find(nextSelected => {
+        return nextSelected.id === _.get(item, 'id');
+      }) !== undefined
+    );
   }
 
   showAddSourceWizard() {
@@ -123,18 +126,11 @@ class Sources extends React.Component {
   }
 
   itemSelectChange(item) {
-    const { filteredItems } = this.state;
-
-    item.selected = !item.selected;
-    let selectedItems = filteredItems.filter(item => {
-      return item.selected === true;
-    });
-
-    this.setState({ selectedItems: selectedItems });
-
     Store.dispatch({
-      type: sourcesTypes.SOURCES_SELECTED,
-      selectedSources: selectedItems
+      type: this.itemSelected(item)
+        ? sourcesTypes.DESELECT_SOURCE
+        : sourcesTypes.SELECT_SOURCE,
+      source: item
     });
   }
 
@@ -192,8 +188,15 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
+  clearFilters() {
+    Store.dispatch({
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewTypes.SOURCES_VIEW
+    });
+  }
+
   renderSourceActions() {
-    const { selectedItems } = this.state;
+    const { selectedSources } = this.props;
 
     return (
       <div className="form-group">
@@ -201,7 +204,7 @@ class Sources extends React.Component {
           Add
         </Button>
         <Button
-          disabled={!selectedItems || selectedItems.length === 0}
+          disabled={!selectedSources || selectedSources.length === 0}
           onClick={this.scanSources}
         >
           Scan
@@ -213,32 +216,8 @@ class Sources extends React.Component {
     );
   }
 
-  renderSourcesList(items) {
-    return (
-      <ListView className="quipicords-list-view">
-        {items.map((item, index) => (
-          <SourceListItem
-            item={item}
-            key={index}
-            onItemSelectChange={this.itemSelectChange}
-            onEdit={this.editSource}
-            onDelete={this.deleteSource}
-            onScan={this.scanSource}
-          />
-        ))}
-      </ListView>
-    );
-  }
-
-  render() {
-    const { pending, error, errorMessage, sources, viewOptions } = this.props;
-    const {
-      selectedItems,
-      scanDialogShown,
-      multiSourceScan,
-      currentScanSource,
-      addSourceWizardShown
-    } = this.state;
+  renderPendingMessage() {
+    const { pending } = this.props;
 
     if (pending) {
       return (
@@ -251,17 +230,72 @@ class Sources extends React.Component {
       );
     }
 
+    return null;
+  }
+
+  renderSourcesList(items) {
+    if (_.size(items)) {
+      return (
+        <ListView className="quipicords-list-view">
+          {items.map((item, index) => (
+            <SourceListItem
+              item={item}
+              selected={this.itemSelected(item)}
+              key={index}
+              onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editSource}
+              onDelete={this.deleteSource}
+              onScan={this.scanSource}
+            />
+          ))}
+        </ListView>
+      );
+    }
+
+    return (
+      <EmptyState className="list-view-blank-slate">
+        <EmptyState.Title>
+          No Results Match the Filter Criteria
+        </EmptyState.Title>
+        <EmptyState.Info>
+          The active filters are hiding all items.
+        </EmptyState.Info>
+        <EmptyState.Action>
+          <Button bsStyle="link" onClick={this.clearFilters}>
+            Clear Filters
+          </Button>
+        </EmptyState.Action>
+      </EmptyState>
+    );
+  }
+
+  render() {
+    const {
+      error,
+      errorMessage,
+      sources,
+      selectedSources,
+      viewOptions
+    } = this.props;
+    const {
+      scanDialogShown,
+      multiSourceScan,
+      currentScanSource,
+      addSourceWizardShown
+    } = this.state;
+
     if (error) {
       return (
         <EmptyState>
           <Alert type="error">
             <span>Error retrieving sources: {errorMessage}</span>
           </Alert>
+          {this.renderPendingMessage()}
         </EmptyState>
       );
     }
 
-    if (sources && sources.length) {
+    if (_.size(sources) || _.size(viewOptions.activeFilters)) {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
@@ -272,20 +306,22 @@ class Sources extends React.Component {
               actions={this.renderSourceActions()}
               itemsType="Source"
               itemsTypePlural="Sources"
+              selectedCount={selectedSources.length}
+              {...viewOptions}
+            />
+            <ViewPaginationRow
+              viewType={viewTypes.SOURCES_VIEW}
               {...viewOptions}
             />
             <div className="quipucords-list-container">
               {this.renderSourcesList(sources)}
             </div>
-            <ViewPaginationRow
-              viewType={viewTypes.SOURCES_VIEW}
-              {...viewOptions}
-            />
           </div>
+          {this.renderPendingMessage()}
           <AddSourceWizard show={addSourceWizardShown} />
           <CreateScanDialog
             show={scanDialogShown}
-            sources={multiSourceScan ? selectedItems : [currentScanSource]}
+            sources={multiSourceScan ? selectedSources : [currentScanSource]}
             onCancel={this.hideScanDialog}
             onScan={this.createScan}
           />
@@ -299,6 +335,7 @@ class Sources extends React.Component {
           onAddSource={this.showAddSourceWizard}
           onImportSources={this.importSources}
         />
+        {this.renderPendingMessage()}
         <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
     );
@@ -311,6 +348,7 @@ Sources.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   sources: PropTypes.array,
+  selectedSources: PropTypes.array,
   viewOptions: PropTypes.object
 };
 

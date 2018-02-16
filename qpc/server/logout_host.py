@@ -12,8 +12,10 @@
 """LogoutHostCommand is used to remove any existing login token."""
 
 from __future__ import print_function
+from requests import codes
 from qpc.clicommand import CliCommand
 import qpc.server as server
+from qpc.request import PUT
 from qpc.utils import delete_client_token
 from qpc.translation import _
 import qpc.messages as messages
@@ -33,10 +35,10 @@ class LogoutHostCommand(CliCommand):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
-                            subparsers.add_parser(self.ACTION), None,
-                            None, [])
+                            subparsers.add_parser(self.ACTION), PUT,
+                            server.LOGOUT_URI, [codes.ok])
 
-    def _do_command(self):
+    def _handle_response_success(self):
         """Remove the client token."""
         delete_client_token()
         print(_(messages.LOGOUT_SUCCESS))

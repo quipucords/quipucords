@@ -10,7 +10,6 @@
 #
 """Test the inspect scanner capabilities."""
 
-from datetime import datetime
 import os.path
 from types import SimpleNamespace
 import unittest
@@ -21,18 +20,15 @@ import requests_mock
 from ansible.errors import AnsibleError
 from api.models import (Credential,
                         Source,
-                        ScanJob,
                         ScanTask,
                         ScanOptions,
-                        ConnectionResults,
-                        ConnectionResult,
-                        SystemConnectionResult,
-                        InspectionResults)
+                        SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback, \
     normalize_result, ANSIBLE_FACTS
+from scanner.test_util import create_scan_job
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -153,42 +149,22 @@ class NetworkInspectScannerTest(TestCase):
         self.source.credentials.add(self.cred)
 
         self.host_list = [('1.2.3.4', self.cred_data)]
-        self.connect_scan_task = ScanTask(source=self.source,
-                                          scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                          status=ScanTask.COMPLETED,
-                                          start_time=datetime.utcnow())
-        self.connect_scan_task.update_stats(
-            'TEST NETWORK CONNECT.', sys_failed=0)
 
-        self.inspect_scan_task = ScanTask(source=self.source,
-                                          scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                          start_time=datetime.utcnow())
-        self.inspect_scan_task.update_stats(
-            'TEST NETWORK INSPECT.', sys_failed=0)
-        self.inspect_scan_task.prerequisites.add(self.connect_scan_task)
-        self.inspect_scan_task.save()
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        self.scan_job.save()
-
-        self.scan_job.tasks.add(self.connect_scan_task)
-        self.scan_job.tasks.add(self.inspect_scan_task)
+        # setup scan options
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}
         scan_options.save()
-        self.scan_job.options = scan_options
-        self.scan_job.save()
 
-        self.fact_endpoint = 'http://testserver' + reverse('facts-list')
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source,
+            ScanTask.SCAN_TYPE_INSPECT,
+            scan_options=scan_options)
 
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
-        self.conn_results.save()
-
-        self.conn_result = ConnectionResult(
-            scan_task=self.connect_scan_task, source=self.source)
-        self.conn_result.save()
+        self.connect_scan_task = self.scan_task.prerequisites.first()
+        self.connect_scan_task.update_stats(
+            'TEST NETWORK CONNECT.', sys_failed=0)
 
         success_sys = SystemConnectionResult(
             name='1.2.3.4', credential=self.cred,
@@ -197,14 +173,21 @@ class NetworkInspectScannerTest(TestCase):
         failed_sys = SystemConnectionResult(
             name='1.1.1.2', status=SystemConnectionResult.FAILED)
         failed_sys.save()
-        self.conn_result.systems.add(success_sys)
-        self.conn_result.systems.add(failed_sys)
-        self.conn_result.save()
-        self.conn_results.results.add(self.conn_result)
-        self.conn_results.save()
+        conn_result = self.connect_scan_task.connection_result
+        conn_result.systems.add(success_sys)
+        conn_result.systems.add(failed_sys)
+        conn_result.save()
 
-        self.inspect_results = InspectionResults(scan_job=self.scan_job)
-        self.inspect_results.save()
+        self.connect_scan_task.update_stats(
+            'TEST_VC.', sys_count=2, sys_failed=1, sys_scanned=1)
+        self.connect_scan_task.complete()
+
+        self.scan_task.update_stats(
+            'TEST NETWORK INSPECT.', sys_failed=0)
+
+        self.fact_endpoint = 'http://testserver' + reverse('facts-list')
+
+        self.scan_job.save()
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -297,7 +280,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_inspect_scan_failure(self, mock_run):
         """Test scan flow with mocked manager and failure."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.scan_task)
 
         # Init for unit test as run is not called
         scanner.connect_scan_task = self.connect_scan_task
@@ -310,7 +293,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_inspect_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.scan_task)
         scan_task_status = scanner.run()
         mock_scan.assert_called_with(self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
@@ -324,7 +307,7 @@ class NetworkInspectScannerTest(TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
             scanner = InspectTaskRunner(
-                self.scan_job, self.inspect_scan_task, self.inspect_results)
+                self.scan_job, self.scan_task)
             scan_task_status = scanner.run()
             mock_run.assert_called_with(ANY)
             self.assertEqual(scan_task_status[1], ScanTask.FAILED)
@@ -332,8 +315,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
         callback = InspectResultCallback(
-            scan_task=self.inspect_scan_task,
-            inspect_results=self.inspect_results)
+            scan_task=self.scan_task)
         host = Mock()
         host.name = '1.2.3.4'
         result = Mock(_host=host, _results={'rc': 3})
@@ -343,7 +325,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_ssh_crash(self):
         """Simulate an ssh crash."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
@@ -355,7 +337,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_ssh_hang(self):
         """Simulate an ssh hang."""
         scanner = InspectTaskRunner(
-            self.scan_job, self.inspect_scan_task, self.inspect_results)
+            self.scan_job, self.scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))

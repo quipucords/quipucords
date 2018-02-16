@@ -12,16 +12,17 @@
 """Factory for Satellite Interface."""
 from api.models import SourceOptions
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2)
+from scanner.satellite.five import SatelliteFive
 
 
-def create(satellite_version, api_version, scan_task,
-           conn_result, inspect_result=None):
+def create(satellite_version, api_version, scan_task):
     """Create the appropriate SatelliteInterface."""
-    if (satellite_version is None or
-            satellite_version == SourceOptions.SATELLITE_VERSION_5):
+    if satellite_version is None:
         return None
+    if satellite_version == SourceOptions.SATELLITE_VERSION_5:
+        return SatelliteFive(scan_task)
     if api_version == 1:
-        return SatelliteSixV1(scan_task, conn_result, inspect_result)
+        return SatelliteSixV1(scan_task)
     if api_version == 2:
-        return SatelliteSixV2(scan_task, conn_result, inspect_result)
+        return SatelliteSixV2(scan_task)
     return None

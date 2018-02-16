@@ -10,17 +10,18 @@
 #
 """Test the satellite six interface."""
 
-from datetime import datetime
 from unittest.mock import patch, ANY
 import requests_mock
 from django.test import TestCase
-from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult,
-                        InspectionResult, SystemInspectionResult)
+from api.models import (Credential,
+                        Source,
+                        ScanTask,
+                        SystemInspectionResult)
 from scanner.satellite.utils import construct_url
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
                                    host_fields, host_subscriptions)
+from scanner.test_util import create_scan_job
 
 
 # pylint: disable=too-many-instance-attributes
@@ -48,26 +49,10 @@ class SatelliteSixV1Test(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
-        self.conn_results.save()
-        self.conn_result = ConnectionResult(
-            scan_task=self.scan_task, source=self.source)
-        self.conn_result.save()
-
-        self.inspect_result = InspectionResult(scan_task=self.scan_task,
-                                               source=self.source)
-        self.inspect_result.save()
-
-        self.api = SatelliteSixV1(self.scan_task, self.conn_result,
-                                  self.inspect_result)
+        self.api = SatelliteSixV1(self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -236,14 +221,16 @@ class SatelliteSixV1Test(TestCase):
 
     def test_host_details_skip(self):
         """Test host_details method for already captured data."""
+        # pylint: disable=no-member
         sys_result = SystemInspectionResult(
             name='sys1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        self.inspect_result.systems.add(sys_result)
-        self.inspect_result.save()
+        inspect_result = self.scan_task.inspection_result
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
         detail = self.api.host_details(1, 1, 'sys1')
-        self.assertEqual(len(self.inspect_result.systems.all()), 1)
+        self.assertEqual(len(inspect_result.systems.all()), 1)
         self.assertEqual(detail, {})
 
     def test_host_details(self):
@@ -397,26 +384,10 @@ class SatelliteSixV2Test(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1,
-                                  start_time=datetime.utcnow())
-        self.scan_task.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
         self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
-        self.conn_results.save()
-        self.conn_result = ConnectionResult(
-            scan_task=self.scan_task, source=self.source)
-        self.conn_result.save()
-        self.inspect_result = InspectionResult(scan_task=self.scan_task,
-                                               source=self.source)
-        self.inspect_result.save()
-        self.api = SatelliteSixV2(self.scan_task,
-                                  self.conn_result,
-                                  self.inspect_result)
+        self.api = SatelliteSixV2(self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -731,14 +702,16 @@ class SatelliteSixV2Test(TestCase):
 
     def test_host_details_skip(self):
         """Test host_details method for already captured data."""
+        # pylint: disable=no-member
         sys_result = SystemInspectionResult(
             name='sys1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        self.inspect_result.systems.add(sys_result)
-        self.inspect_result.save()
+        inspect_result = self.scan_task.inspection_result
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
         detail = self.api.host_details(1, 'sys1')
-        self.assertEqual(len(self.inspect_result.systems.all()), 1)
+        self.assertEqual(len(inspect_result.systems.all()), 1)
         self.assertEqual(detail, {})
 
     def test_hosts_facts_with_err(self):

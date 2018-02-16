@@ -15,8 +15,8 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 from api.serializers import SourceSerializer, CredentialSerializer
-from api.models import (Credential, ScanTask,
-                        ConnectionResult,
+from api.models import (Credential,
+                        ScanTask,
                         SystemConnectionResult)
 from django.db import transaction
 from scanner.task import ScanTaskRunner
@@ -38,27 +38,11 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ConnectResultStore(object):
     """This object knows how to record and retrieve connection results."""
 
-    def __init__(self, scan_task, conn_results):
-        """Get the unique ConnectionResult object for this scan."""
+    def __init__(self, scan_task):
+        """Initialize ConnectResultStore object."""
         self.scan_task = scan_task
-        self.conn_results = conn_results
 
         source = scan_task.source
-
-        with transaction.atomic():
-            conn_result = conn_results.results.filter(
-                source__id=source.id).first()
-            if conn_result is None:
-                conn_result = ConnectionResult(
-                    scan_task=scan_task, source=source)
-                conn_result.save()
-                conn_results.results.add(conn_result)
-                conn_results.save()
-        self.conn_result = conn_result
-        # If we're restarting the scan after a pause, systems that
-        # were previously up might be down. So we throw out any
-        # partial results and start over.
-        conn_result.systems.all().delete()
 
         # Sources can contain patterns that describe multiple hosts,
         # like '1.2.3.[4:6]'. Expand the patterns so hosts is a list
@@ -83,8 +67,8 @@ class ConnectResultStore(object):
             status=status)
         sys_result.save()
 
-        self.conn_result.systems.add(sys_result)
-        self.conn_result.save()
+        self.scan_task.connection_result.systems.add(sys_result)
+        self.scan_task.connection_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
             message = '%s with %s' % (name, credential.name)
@@ -116,21 +100,19 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task, conn_results):
+    def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param conn_results: ConnectionResults object used
         to store results
         """
         super().__init__(scan_job, scan_task)
-        self.conn_results = conn_results
         self.scan_task = scan_task
 
     def run(self):
         """Scan network range ang attempt connections."""
-        result_store = ConnectResultStore(self.scan_task, self.conn_results)
+        result_store = ConnectResultStore(self.scan_task)
         return self.run_with_result_store(result_store)
 
     # pylint: disable=too-many-locals
@@ -175,9 +157,6 @@ class ConnectTaskRunner(ScanTaskRunner):
             # credentials, so they have failed.
             result_store.record_result(host, None,
                                        SystemConnectionResult.FAILED)
-
-        # Clear cache as results changed
-        self.result = None
 
         return None, ScanTask.COMPLETED
 

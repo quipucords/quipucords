@@ -14,11 +14,14 @@ These models are used in the REST definitions.
 """
 from datetime import datetime
 import logging
+import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from django.db import models
 from api.source.model import Source
 import api.messages as messages
+from api.connresults.model import TaskConnectionResult
+from api.inspectresults.model import TaskInspectionResult
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -27,6 +30,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ScanTask(models.Model):
     """The scan task captures a single source for a scan."""
 
+    # pylint: disable=too-many-instance-attributes
     SCAN_TYPE_CONNECT = 'connect'
     SCAN_TYPE_INSPECT = 'inspect'
     SCAN_TYPE_CHOICES = ((SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),
@@ -67,6 +71,10 @@ class ScanTask(models.Model):
     sequence_number = models.PositiveIntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
+    connection_result = models.ForeignKey(
+        TaskConnectionResult, null=True, on_delete=models.CASCADE)
+    inspection_result = models.ForeignKey(
+        TaskInspectionResult, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         """Convert to string."""
@@ -79,16 +87,20 @@ class ScanTask(models.Model):
             'systems_scanned: {}, '\
             'systems_failed: {}, '\
             'start_time: {} '\
-            'end_time: {} '.format(self.id,
-                                   self.scan_type,
-                                   self.status,
-                                   self.source,
-                                   self.sequence_number,
-                                   self.systems_count,
-                                   self.systems_scanned,
-                                   self.systems_failed,
-                                   self.start_time,
-                                   self.end_time) + '}'
+            'end_time: {}, '\
+            'connection_result: {}, '\
+            'inspection_result: {}'.format(self.id,
+                                           self.scan_type,
+                                           self.status,
+                                           self.source,
+                                           self.sequence_number,
+                                           self.systems_count,
+                                           self.systems_scanned,
+                                           self.systems_failed,
+                                           self.start_time,
+                                           self.end_time,
+                                           self.connection_result,
+                                           self.inspection_result) + '}'
 
     class Meta:
         """Metadata for model."""
@@ -279,3 +291,38 @@ class ScanTask(models.Model):
         self._log_stats('FAILURE STATS.')
         self.log_current_status(show_status_message=True,
                                 log_level=logging.ERROR)
+
+    def get_facts(self):
+        """Access inspection facts."""
+        # pylint: disable=too-many-nested-blocks
+        facts = []
+        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            system_results = self.get_result()
+            if system_results:
+                # Process all results that were save to db
+                for system_result in system_results.systems.all():
+                    fact = {}
+                    for raw_fact in system_result.facts.all():
+                        if not raw_fact.value or raw_fact.value == '':
+                            continue
+                        # Load values as JSON
+                        value_to_use = json.loads(raw_fact.value)
+                        fact[raw_fact.name] = value_to_use
+                    facts.append(fact)
+
+        return facts
+
+    def get_result(self):
+        """Access results from ScanTask.
+
+        Results are expected to be persisted. This method should
+        understand how to read persisted results into a dictionary
+        using a ScanTask object so others can retrieve them if needed.
+
+        :returns: Scan result object for task (either TaskConnectionResult
+        or TaskInspectionResult)
+        """
+        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            return self.inspection_result
+        elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+            return self.connection_result

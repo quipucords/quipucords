@@ -12,10 +12,11 @@
 
 from django.test import TestCase
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, ConnectionResults, ConnectionResult,
+                        ScanJob, JobConnectionResult, TaskConnectionResult,
                         SourceOptions)
 from scanner.satellite.factory import create
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
+from scanner.satellite.five import SatelliteFive
 
 
 class SatelliteFactoryTest(TestCase):
@@ -48,30 +49,39 @@ class SatelliteFactoryTest(TestCase):
         self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
         self.scan_job.save()
         self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
+        self.conn_results = JobConnectionResult()
         self.conn_results.save()
-        self.conn_result = ConnectionResult(
-            scan_task=self.scan_task, source=self.source)
+        self.scan_job.connection_results = self.conn_results
+        self.scan_job.save()
+        self.conn_result = TaskConnectionResult()
         self.conn_result.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
         pass
 
+    def test_create_sat_none(self):
+        """Test the method to fail to create a Sat interface."""
+        satellite_version = None
+        api_version = 1
+        api = create(satellite_version, api_version,
+                     self.scan_task)
+        self.assertEqual(api, None)
+
     def test_create_sat5(self):
         """Test the method to create a Sat 5 interface."""
         satellite_version = SourceOptions.SATELLITE_VERSION_5
         api_version = 1
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
-        self.assertEqual(api, None)
+                     self.scan_task)
+        self.assertEqual(api.__class__, SatelliteFive)
 
     def test_create_sat6_v1(self):
         """Test the method to create a Sat 6 interface."""
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 1
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api.__class__, SatelliteSixV1)
 
     def test_create_sat6_v2(self):
@@ -79,7 +89,7 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 2
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api.__class__, SatelliteSixV2)
 
     def test_create_sat6_unknown(self):
@@ -87,5 +97,5 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = SourceOptions.SATELLITE_VERSION_62
         api_version = 9
         api = create(satellite_version, api_version,
-                     self.scan_task, self.conn_result)
+                     self.scan_task)
         self.assertEqual(api, None)

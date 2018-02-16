@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { credentialsTypes } from '../constants';
 
@@ -28,8 +29,56 @@ const initialState = {
   }
 };
 
+const selectedIndex = function(state, credential) {
+  return _.findIndex(state.persist.selectedCredentials, nextSelected => {
+    return nextSelected.id === _.get(credential, 'id');
+  });
+};
+
 const credentialsReducer = function(state = initialState, action) {
   switch (action.type) {
+    // Persist
+    case credentialsTypes.SELECT_CREDENTIAL:
+      // Do nothing if it is already selected
+      if (selectedIndex(state, action.credential) !== -1) {
+        return state;
+      }
+
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedCredentials: [
+            ...state.persist.selectedCredentials,
+            action.credential
+          ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
+    case credentialsTypes.DESELECT_CREDENTIAL:
+      const index = selectedIndex(state, action.credential);
+      // Do nothing if it is not already selected
+      if (index === -1) {
+        return state;
+      }
+
+      return helpers.setStateProp(
+        'persist',
+        {
+          selectedCredentials: [
+            ...state.persist.selectedCredentials.slice(0, index),
+            ...state.persist.selectedCredentials.slice(index + 1)
+          ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
     // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
       return helpers.setStateProp(
@@ -77,12 +126,17 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
-          add: true
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -92,12 +146,18 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
-          delete: true
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
+          delete: true,
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -106,12 +166,17 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
-          edit: true
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -121,7 +186,11 @@ const credentialsReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -134,12 +203,12 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true,
-          add: true
+          pending: true
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -149,11 +218,13 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           pending: true,
-          delete: true
+          delete: true,
+          fulfilled: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -161,12 +232,12 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true,
-          edit: true
+          pending: true
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -175,7 +246,8 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          pending: true
+          pending: true,
+          credentials: state.view.credentials
         },
         {
           state,
@@ -190,11 +262,14 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          add: true
+          pending: false,
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -205,11 +280,15 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          delete: true
+          pending: false,
+          delete: true,
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -219,7 +298,33 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          edit: true
+          pending: false,
+          error: false,
+          errorMessage: ''
+        },
+        {
+          state,
+          initialState,
+          reset: false
+        }
+      );
+
+    case credentialsTypes.GET_CREDENTIAL_FULFILLED:
+    case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+      // Get resulting credentials and update the selected state of each
+      const credentials = _.get(action, 'payload.data.results', []).map(
+        nextCredential => {
+          return {
+            ...nextCredential,
+            selected: selectedIndex(state, nextCredential) !== -1
+          };
+        }
+      );
+      return helpers.setStateProp(
+        'view',
+        {
+          credentials: credentials,
+          fulfilled: true
         },
         {
           state,
@@ -227,17 +332,17 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.GET_CREDENTIAL_FULFILLED:
-    case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+    case credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS:
       return helpers.setStateProp(
-        'view',
+        'update',
         {
-          credentials: action.payload.data.results,
-          fulfilled: true
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 

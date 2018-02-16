@@ -22,17 +22,14 @@ from api.models import (Credential,
                         ScanTask,
                         ScanOptions,
                         ScanJob,
-                        ConnectionResults,
-                        ConnectionResult,
                         SystemConnectionResult,
-                        InspectionResults,
-                        InspectionResult,
                         SystemInspectionResult,
                         RawFact)
 from api.scanjob.view import (expand_scanjob,
                               expand_sys_conn_result,
                               expand_conn_results,
                               expand_inspect_results)
+from scanner.test_util import create_scan_job
 
 
 def dummy_start():
@@ -184,6 +181,7 @@ class ScanJobTest(TestCase):
 
         # Job in created state
         tasks = scan_job.tasks.all()
+        self.assertEqual(0, len(tasks))
 
         # Queue job to run
         scan_job.queue()
@@ -443,62 +441,35 @@ class ScanJobTest(TestCase):
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_details(self, start_scan):
         """Get ScanJob result details by primary key."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
-        tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
-
-        # Queue job to run
-        scan_job.queue()
-
-        conn_task = scan_job.tasks.first()
-
-        conn_results = ConnectionResults(scan_job=scan_job)
-        conn_results.save()
-
-        conn_result = ConnectionResult(
-            source=conn_task.source, scan_task=conn_task)
-        conn_result.save()
-
-        conn_results.results.add(conn_result)
-        conn_results.save()
-
+        # Create a connection system result
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result.save()
+        conn_result = scan_task.prerequisites.first().connection_result
         conn_result.systems.add(sys_result)
         conn_result.save()
 
-        inspect_task = scan_job.tasks.all()[1]
-
-        inspect_results = InspectionResults(scan_job=scan_job)
-        inspect_results.save()
-
-        inspect_result = InspectionResult(
-            source=inspect_task.source, scan_task=inspect_task)
-        inspect_result.save()
-
-        inspect_results.results.add(inspect_result)
-        inspect_results.save()
-
+        # Create an inspection system result
         sys_result = SystemInspectionResult(name='Foo',
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result.save()
 
-        fact = RawFact(name='foo', value='value')
+        fact = RawFact(name='fact_key', value='"fact_value"')
         fact.save()
         sys_result.facts.add(fact)
         sys_result.save()
 
+        inspect_result = scan_task.inspection_result
         inspect_result.systems.add(sys_result)
         inspect_result.save()
+        scan_job.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'results/'
         response = self.client.get(url)
@@ -508,10 +479,21 @@ class ScanJobTest(TestCase):
         self.assertIn('inspection_results', json_response)
 
         self.assertEqual(
-            json_response, {'connection_results':
-                            {'scan_job': 1, 'results': []},
-                            'inspection_results': {'scan_job': 1,
-                                                   'results': []}})
+            json_response, {
+                'connection_results': {'task_results': [
+                    {'source':
+                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     'systems':
+                     [{'name': 'Foo', 'credential':
+                       {'id': 1, 'name': 'cred1'},
+                       'status': 'success'}]}]},
+                'inspection_results': {'task_results': [
+                    {'source':
+                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     'systems':
+                     [{'name': 'Foo', 'status': 'success',
+                       'facts': [
+                           {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
@@ -699,29 +681,16 @@ class ScanJobTest(TestCase):
 
     def test_expand_sys_conn_result(self):
         """Test view expand_sys_conn_result."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
-
-        # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
-        tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
-
-        # Queue job to run
-        scan_job.queue()
-
-        conn_task = scan_job.tasks.first()
-
-        conn_result = ConnectionResult(
-            source=conn_task.source, scan_task=conn_task)
-        conn_result.save()
+        # pylint: disable=no-member
+        _, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result.save()
+        conn_result = scan_task.connection_result
         conn_result.systems.add(sys_result)
         conn_result.save()
 
@@ -730,68 +699,29 @@ class ScanJobTest(TestCase):
 
     def test_expand_conn_results(self):
         """Test view expand_conn_results."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
-
-        # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
-        tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
-
-        # Queue job to run
-        scan_job.queue()
-
-        conn_task = scan_job.tasks.first()
-
-        conn_results = ConnectionResults(scan_job=scan_job)
-        conn_results.save()
-
-        conn_result = ConnectionResult(
-            source=conn_task.source, scan_task=conn_task)
-        conn_result.save()
-
-        conn_results.results.add(conn_result)
-        conn_results.save()
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result.save()
+        conn_result = scan_task.connection_result
         conn_result.systems.add(sys_result)
         conn_result.save()
 
-        conn_results_json = {'results': [{}]}
-        expand_conn_results(conn_results, conn_results_json)
+        conn_results_json = {'task_results': [{}]}
+        expand_conn_results(scan_job.connection_results, conn_results_json)
         self.assertEqual(
-            conn_results_json['results'][0]['systems'][0]['name'], 'Foo')
+            conn_results_json['task_results'][0]['systems'][0]['name'], 'Foo')
 
     def test_expand_inspect_results(self):
         """Test view expand_inspect_results."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
-
-        # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
-        tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
-
-        # Queue job to run
-        scan_job.queue()
-
-        inspect_task = scan_job.tasks.all()[1]
-
-        inspect_results = InspectionResults(scan_job=scan_job)
-        inspect_results.save()
-
-        inspect_result = InspectionResult(
-            source=inspect_task.source, scan_task=inspect_task)
-        inspect_result.save()
-
-        inspect_results.results.add(inspect_result)
-        inspect_results.save()
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(self.source,
+                                              ScanTask.SCAN_TYPE_INSPECT)
 
         sys_result = SystemInspectionResult(name='Foo',
                                             status=SystemConnectionResult
@@ -800,16 +730,19 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(name='foo', value='"value"')
         fact.save()
+
         sys_result.facts.add(fact)
         sys_result.save()
 
+        inspect_result = scan_task.inspection_result
         inspect_result.systems.add(sys_result)
         inspect_result.save()
 
-        inspect_results_json = {'results': [{}]}
-        expand_inspect_results(inspect_results, inspect_results_json)
+        inspect_results_json = {'task_results': [{}]}
+        expand_inspect_results(
+            scan_job.inspection_results, inspect_results_json)
         self.assertEqual(
-            inspect_results_json['results'][0]['systems'][0]
+            inspect_results_json['task_results'][0]['systems'][0]
             ['facts'][0]['name'],
             'foo')
 

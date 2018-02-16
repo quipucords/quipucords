@@ -11,6 +11,7 @@
 """Test the API application."""
 
 import json
+from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
@@ -18,7 +19,12 @@ from api.models import Credential, Source
 import api.messages as messages
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name
+def dummy_start():
+    """Create a dummy method for testing."""
+    pass
+
+
+# pylint: disable=too-many-instance-attributes,invalid-name,too-many-lines
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -78,9 +84,75 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
+    # pylint: disable=unused-argument
+    @patch('api.source.view.start_scan', side_effect=dummy_start)
+    def create_with_query(self, query, data, start_scan):
+        """Create a source with query param.
+
+        :param query: The value of scan
+        :param data: The payload of the source
+        :return a dict containing the response
+        """
+        url = reverse('source-list')
+        url += query
+        return self.client.post(url,
+                                json.dumps(data),
+                                'application/json')
+
+    # pylint: disable=no-value-for-parameter
+    def create_expect_201_with_query(self, query, data):
+        """Create a valid source with a scan parameter."""
+        response = self.create_with_query(query, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
+    # pylint: disable=no-value-for-parameter
+    def create_expect_400_with_query(self,
+                                     query,
+                                     data,
+                                     expected_response=None):
+        """Create an expect HTTP 400."""
+        response = self.create_with_query(query, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        if expected_response:
+            response_json = response.json()
+            self.assertEqual(response_json, expected_response)
+
     #################################################
     # Network Tests
     #################################################
+
+    def test_source_create_with_false_scan(self):
+        """Test creating a source with a valid scan query param of False."""
+        query = '?scan=False'
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.net_cred_for_upload]}
+        response = self.create_expect_201_with_query(query, data)
+        self.assertIn('id', response)
+
+    def test_source_create_with_true_scan(self):
+        """Test creating source with valid scan query param of True."""
+        query = '?scan=True'
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.net_cred_for_upload]}
+        self.create_expect_201_with_query(query, data)
+
+    def test_source_create_with_invalid_scan(self):
+        """Test the source create method with invalid query param."""
+        query = '?scan=Foo'
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.net_cred_for_upload]}
+        self.create_expect_400_with_query(query, data)
+
     def test_successful_net_create(self):
         """A valid create request should succeed."""
         data = {'name': 'source1',
@@ -918,14 +990,19 @@ class SourceTest(TestCase):
                 'hosts': ['1.2.3.4'],
                 'port': 22,
                 'credentials': [self.sat_cred_for_upload],
-                'options': {'satellite_version': '6.2',
-                            'ssl_cert_verify': False}}
+                'options': {'ssl_cert_verify': False}}
         url = reverse('source-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
                                    content_type='application/json',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = {'id': 1, 'name': 'source', 'source_type': 'satellite',
+                    'port': 22, 'hosts': ['1.2.3.4'],
+                    'options': {'satellite_version': '6.2',
+                                'ssl_cert_verify': False},
+                    'credentials': [{'id': 3, 'name': 'sat_cred1'}]}
+        self.assertEqual(response.json(), expected)
 
     def test_update_sat_more_than_one_hosts(self):
         """Sat- Fail update due to multiple hosts."""

@@ -11,7 +11,7 @@
 """Module for serializing all model object for database storage."""
 
 from rest_framework.serializers import CharField, ChoiceField
-from api.models import (InspectionResults, InspectionResult,
+from api.models import (JobInspectionResult, TaskInspectionResult,
                         SystemInspectionResult, RawFact)
 from api.common.serializer import (NotEmptySerializer,
                                    CustomJSONField)
@@ -46,23 +46,23 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
         qpc_allow_empty_fields = ['facts']
 
 
-class InspectionResultSerializer(NotEmptySerializer):
-    """Serializer for the InspectionResult model."""
+class TaskInspectionResultSerializer(NotEmptySerializer):
+    """Serializer for the TaskInspectionResult model."""
 
     class Meta:
         """Metadata for serialzer."""
 
-        model = InspectionResult
+        model = TaskInspectionResult
         fields = ['source', 'systems']
         qpc_allow_empty_fields = ['source', 'systems']
 
 
-class InspectionResultsSerializer(NotEmptySerializer):
-    """Serializer for the InspectionResults model."""
+class JobInspectionResultSerializer(NotEmptySerializer):
+    """Serializer for the JobInspectionResult model."""
 
     class Meta:
         """Metadata for serialzer."""
 
-        model = InspectionResults
-        fields = ['scan_job', 'results']
-        qpc_allow_empty_fields = ['results']
+        model = JobInspectionResult
+        fields = ['task_results']
+        qpc_allow_empty_fields = ['task_results']

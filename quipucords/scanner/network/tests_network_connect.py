@@ -12,15 +12,11 @@
 
 import unittest
 from unittest.mock import patch, Mock, ANY
-from datetime import datetime
 from django.test import TestCase
 from ansible.errors import AnsibleError
 from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
                         Source,
-                        ConnectionResults,
-                        ScanJob,
-                        ScanOptions,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network.connect import construct_connect_inventory, connect, \
@@ -28,6 +24,7 @@ from scanner.network.connect import construct_connect_inventory, connect, \
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import _construct_vars
+from scanner.test_util import create_scan_job
 
 
 def mock_run_success(play):  # pylint: disable=unused-argument
@@ -127,22 +124,10 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source.hosts = '["1.2.3.4"]'
         self.source.save()
 
-        self.scan_task = ScanTask(
-            source=self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            start_time=datetime.utcnow())
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_CONNECT)
+
         self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.sources.add(self.source)
-        self.scan_job.tasks.add(self.scan_task)
-        scan_options = ScanOptions()
-        scan_options.save()
-        self.scan_job.options = scan_options
-        self.scan_job.save()
-
-        self.conn_results = ConnectionResults(scan_job=self.scan_job)
-        self.conn_results.save()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -160,7 +145,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
     def test_result_store(self):
         """Test ConnectResultStore."""
-        result_store = ConnectResultStore(self.scan_task, self.conn_results)
+        result_store = ConnectResultStore(self.scan_task)
 
         self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
         self.assertEqual(result_store.scan_task.systems_count, 1)
@@ -229,8 +214,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('scanner.network.connect.connect')
     def test_connect_runner(self, mock_connect):
         """Test running a connect scan with mocked connection."""
-        scanner = ConnectTaskRunner(
-            self.scan_job, self.scan_task, self.conn_results)
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)

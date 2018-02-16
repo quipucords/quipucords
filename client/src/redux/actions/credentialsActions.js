@@ -39,7 +39,7 @@ const deleteCredential = id => dispatch => {
 const deleteCredentials = (ids = []) => dispatch => {
   return dispatch({
     type: credentialsTypes.DELETE_CREDENTIALS,
-    payload: credentialsService.deleteCredential(ids)
+    payload: credentialsService.deleteCredentials(ids)
   });
 };
 

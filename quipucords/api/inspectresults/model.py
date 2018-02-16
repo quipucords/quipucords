@@ -15,8 +15,6 @@ These models are used in the REST definitions
 
 from django.utils.translation import ugettext as _
 from django.db import models
-from api.scantasks.model import ScanTask
-from api.source.model import Source
 import api.messages as messages
 
 
@@ -61,22 +59,16 @@ class SystemInspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
 
 
-class InspectionResult(models.Model):
+class TaskInspectionResult(models.Model):
     """The captured connection results from a scan."""
 
-    source = models.ForeignKey(Source, on_delete=models.CASCADE)
-    scan_task = models.ForeignKey(ScanTask, on_delete=models.CASCADE)
     systems = models.ManyToManyField(SystemInspectionResult)
 
     def __str__(self):
         """Convert to string."""
         return '{ ' + 'id:{}, '\
             'source:{}, '\
-            'scan_job:{}, '\
-            'systems:{}'\
             .format(self.id,
-                    self.source,
-                    self.scan_task,
                     self.systems) + ' }'
 
     class Meta:
@@ -85,15 +77,14 @@ class InspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
 
 
-class InspectionResults(models.Model):
+class JobInspectionResult(models.Model):
     """The results of a connection scan."""
 
-    scan_job = models.ForeignKey('ScanJob', on_delete=models.CASCADE)
-    results = models.ManyToManyField(InspectionResult)
+    task_results = models.ManyToManyField(TaskInspectionResult)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s }' % (self.id)
+        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""

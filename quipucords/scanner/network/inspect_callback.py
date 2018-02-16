@@ -14,8 +14,7 @@ import logging
 import json
 from django.db import transaction
 from ansible.plugins.callback import CallbackBase
-from api.models import (InspectionResult,
-                        SystemInspectionResult,
+from api.models import (SystemInspectionResult,
                         RawFact)
 from scanner.network.processing import process
 
@@ -78,12 +77,11 @@ class InspectResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
-    def __init__(self, scan_task, inspect_results, display=None):
+    def __init__(self, scan_task, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.scan_task = scan_task
         self.source = scan_task.source
-        self.inspect_results = inspect_results
         self.results = []
         self._ansible_facts = {}
 
@@ -140,20 +138,6 @@ class InspectResultCallback(CallbackBase):
             else:
                 self._ansible_facts[host] = host_facts
 
-    def _get_inspect_result(self):
-        # Have to save inspect_result (if creating it) because
-        # inspect_result.systems.add wants it to have a primary key
-        # first. This means that _inspect_result has to be part of any
-        # larger transaction that is updating the database.
-        inspect_result = self.inspect_results.results.filter(
-            source__id=self.source.id).first()
-        if inspect_result is None:
-            inspect_result = InspectionResult(
-                scan_task=self.scan_task, source=self.source)
-            inspect_result.save()
-
-        return inspect_result
-
     # Called after all fact collection is complete for host. Writing
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
@@ -183,13 +167,12 @@ class InspectResultCallback(CallbackBase):
             else:
                 self.scan_task.increment_stats(host, increment_sys_failed=True)
 
-        inspect_result = self._get_inspect_result()
         sys_result = SystemInspectionResult(
             name=host, status=host_status)
         sys_result.save()
 
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
+        self.scan_task.inspection_result.systems.add(sys_result)
+        self.scan_task.inspection_result.save()
 
         # Generate facts for host
         for result_key, result_value in results.items():
@@ -203,9 +186,6 @@ class InspectResultCallback(CallbackBase):
             stored_fact.save()
             sys_result.facts.add(stored_fact)
         sys_result.save()
-
-        self.inspect_results.results.add(inspect_result)
-        self.inspect_results.save()
 
     # Make this atomic for the same reason as _finalize_host.
     @transaction.atomic
@@ -225,11 +205,12 @@ class InspectResultCallback(CallbackBase):
         self.scan_task.log_message(
             message, log_level=logging.ERROR)
 
-        self._get_inspect_result()
         sys_result = SystemInspectionResult(
             name=unreachable_host,
             status=SystemInspectionResult.UNREACHABLE)
         sys_result.save()
+        self.scan_task.inspection_result.systems.add(sys_result)
+        self.scan_task.inspection_result.save()
 
         self.scan_task.increment_stats(
             unreachable_host, increment_sys_failed=True)
