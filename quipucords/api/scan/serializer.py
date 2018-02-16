@@ -13,24 +13,18 @@
 import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (PrimaryKeyRelatedField,
-                                        ValidationError,
+from rest_framework.serializers import (ValidationError,
                                         IntegerField,
-                                        CharField,
-                                        DateTimeField)
-from api.models import (Source,
-                        ScanTask,
-                        ScanJob,
-                        ScanJobOptions)
+                                        CharField)
+from api.models import Source, ScanTask, Scan, ScanOptions
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
                                    CustomJSONField)
-from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 
 
-class ScanJobOptionsSerializer(NotEmptySerializer):
+class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanJobOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
@@ -39,7 +33,7 @@ class ScanJobOptionsSerializer(NotEmptySerializer):
     class Meta:
         """Metadata for serializer."""
 
-        model = ScanJobOptions
+        model = ScanOptions
         fields = ['max_concurrency',
                   'disable_optional_products']
 
@@ -47,7 +41,7 @@ class ScanJobOptionsSerializer(NotEmptySerializer):
     @staticmethod
     def validate_disable_optional_products(disable_optional_products):
         """Make sure that extra vars are a dictionary with boolean values."""
-        disable_optional_products = ScanJob.get_optional_products(
+        disable_optional_products = ScanOptions.get_optional_products(
             disable_optional_products)
 
         if not isinstance(disable_optional_products, dict):
@@ -55,59 +49,42 @@ class ScanJobOptionsSerializer(NotEmptySerializer):
         for key in disable_optional_products:
             if not isinstance(disable_optional_products[key], bool):
                 raise ValidationError(_(messages.SJ_EXTRA_VARS_BOOL))
-            elif key not in [ScanJob.JBOSS_EAP,
-                             ScanJob.JBOSS_BRMS,
-                             ScanJob.JBOSS_FUSE]:
+            elif key not in [ScanOptions.JBOSS_EAP,
+                             ScanOptions.JBOSS_BRMS,
+                             ScanOptions.JBOSS_FUSE]:
                 raise ValidationError(_(messages.SJ_EXTRA_VARS_KEY))
         return json.dumps(disable_optional_products)
 
 
-class TaskField(PrimaryKeyRelatedField):
-    """Representation of the source associated with a scan job."""
-
-    def to_representation(self, value):
-        """Create output representation."""
-        serializer = ScanTaskSerializer(value)
-        return serializer.data
-
-
-class ScanJobSerializer(NotEmptySerializer):
+class ScanSerializer(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
+    name = CharField(required=True, read_only=False, max_length=64)
     sources = SourceField(many=True, queryset=Source.objects.all())
     scan_type = ValidStringChoiceField(required=False,
                                        choices=ScanTask.SCAN_TYPE_CHOICES)
-    status = ValidStringChoiceField(required=False, read_only=True,
-                                    choices=ScanTask.STATUS_CHOICES)
-    status_message = CharField(required=False, read_only=True, max_length=256)
-    tasks = TaskField(many=True, read_only=True)
-    options = ScanJobOptionsSerializer(required=False, many=False)
-    fact_collection_id = IntegerField(read_only=True)
-    start_time = DateTimeField(required=False, read_only=True)
-    end_time = DateTimeField(required=False, read_only=True)
+    options = ScanOptionsSerializer(required=False, many=False)
 
     class Meta:
         """Metadata for serializer."""
 
-        model = ScanJob
-        fields = ['id', 'sources', 'scan_type', 'status', 'status_message',
-                  'tasks', 'options', 'fact_collection_id', 'start_time',
-                  'end_time']
+        model = Scan
+        fields = ['id', 'name', 'sources', 'scan_type', 'options']
 
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan job."""
         options = validated_data.pop('options', None)
-        scanjob = super().create(validated_data)
+        scan = super().create(validated_data)
         if options:
-            options = ScanJobOptions.objects.create(**options)
+            options = ScanOptions.objects.create(**options)
         else:
-            options = ScanJobOptions()
+            options = ScanOptions()
         options.save()
-        scanjob.options = options
-        scanjob.save()
+        scan.options = options
+        scan.save()
 
-        return scanjob
+        return scan
 
     @staticmethod
     def validate_sources(sources):

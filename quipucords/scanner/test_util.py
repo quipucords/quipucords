@@ -11,7 +11,7 @@
 """Test util for the scan features."""
 
 from datetime import datetime
-from api.models import (ScanOptions,
+from api.models import (ScanJobOptions,
                         ScanTask,
                         ScanJob,
                         JobConnectionResult,
@@ -46,7 +46,7 @@ def create_scan_job(source,
 
     options_to_use = scan_options
     if options_to_use is None:
-        options_to_use = ScanOptions()
+        options_to_use = ScanJobOptions()
         options_to_use.save()
 
     scan_job.options = options_to_use

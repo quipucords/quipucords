@@ -14,8 +14,12 @@ from django.conf.urls import url
 from rest_framework_expiring_authtoken import views
 from rest_framework.routers import SimpleRouter
 from rest_framework.urlpatterns import format_suffix_patterns
-from api.views import (CredentialViewSet, FactViewSet,
-                       SourceViewSet, ScanJobViewSet, ReportListView,
+from api.views import (CredentialViewSet,
+                       FactViewSet,
+                       SourceViewSet,
+                       ScanViewSet,
+                       ScanJobViewSet,
+                       ReportListView,
                        UserViewSet)
 
 
@@ -30,6 +34,9 @@ ROUTER.register(r'facts',
 ROUTER.register(r'sources',
                 SourceViewSet,
                 base_name='source')
+ROUTER.register(r'scanconfigs',
+                ScanViewSet,
+                base_name='scan')
 ROUTER.register(r'scans',
                 ScanJobViewSet,
                 base_name='scanjob')

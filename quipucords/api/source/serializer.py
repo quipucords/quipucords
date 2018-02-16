@@ -52,7 +52,7 @@ class CredentialsField(PrimaryKeyRelatedField):
 
 
 class SourceOptionsSerializer(NotEmptySerializer):
-    """Serializer for the ScanOptions model."""
+    """Serializer for the SourceOptionsSerializer model."""
 
     satellite_version = ValidStringChoiceField(
         required=False, choices=SourceOptions.SATELLITE_VERSION_CHOICES)

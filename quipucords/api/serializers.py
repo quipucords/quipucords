@@ -17,6 +17,7 @@ from api.fingerprint.serializer import FingerprintSerializer
 from api.credential.serializer import CredentialSerializer
 from api.source.serializer import (CredentialsField,
                                    SourceSerializer)
+from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import SourceField, ScanJobSerializer
 from api.scantasks.serializer import ScanTaskSerializer
 from api.connresults.serializer import (JobConnectionResultSerializer,
