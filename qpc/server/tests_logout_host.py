@@ -13,9 +13,17 @@
 import unittest
 import sys
 import os
-from qpc.cli import CLI
+from argparse import ArgumentParser, Namespace
+import requests_mock
 from qpc.tests_utilities import HushUpStderr
+from qpc.utils import get_server_location
 from qpc.utils import QPC_CLIENT_TOKEN
+from qpc.server.logout_host import LogoutHostCommand
+from qpc.server import LOGOUT_URI
+
+
+PARSER = ArgumentParser()
+SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class LogoutTests(unittest.TestCase):
@@ -33,9 +41,12 @@ class LogoutTests(unittest.TestCase):
         # Restore stderr
         sys.stderr = self.orig_stderr
 
-    def test_success_config_server(self):
+    def test_success_logout(self):
         """Testing the logout server green path."""
-        sys.argv = ['/bin/qpc', 'server', 'logout']
-        CLI().main()
-
-        self.assertFalse(os.path.exists(QPC_CLIENT_TOKEN))
+        url = get_server_location() + LOGOUT_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.put(url, status_code=200)
+            lhc = LogoutHostCommand(SUBPARSER)
+            args = Namespace()
+            lhc.main(args)
+            self.assertFalse(os.path.exists(QPC_CLIENT_TOKEN))
