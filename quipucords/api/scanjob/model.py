@@ -30,7 +30,7 @@ import api.messages as messages
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class ScanOptions(models.Model):
+class ScanJobOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
     max_concurrency = models.PositiveIntegerField(default=50)
@@ -71,7 +71,7 @@ class ScanJob(models.Model):
         default=_(messages.SJ_STATUS_MSG_CREATED))
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
-        ScanOptions, null=True, on_delete=models.CASCADE)
+        ScanJobOptions, null=True, on_delete=models.CASCADE)
     fact_collection_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)

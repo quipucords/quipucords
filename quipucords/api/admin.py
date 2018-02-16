@@ -15,6 +15,7 @@ from api.models import (FactCollection,
                         SystemFingerprint,
                         Credential,
                         Source,
+                        Scan,
                         ScanJob,
                         JobConnectionResult,
                         JobInspectionResult)
@@ -23,6 +24,7 @@ admin.site.register(FactCollection)
 admin.site.register(Credential)
 admin.site.register(Source)
 admin.site.register(SystemFingerprint)
+admin.site.register(Scan)
 admin.site.register(ScanJob)
 admin.site.register(JobConnectionResult)
 admin.site.register(JobInspectionResult)
