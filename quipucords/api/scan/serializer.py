@@ -25,7 +25,7 @@ from api.scantasks.serializer import SourceField
 
 
 class ScanOptionsSerializer(NotEmptySerializer):
-    """Serializer for the ScanJobOptions model."""
+    """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
     disable_optional_products = CustomJSONField(required=False)
@@ -57,7 +57,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
 
 
 class ScanSerializer(NotEmptySerializer):
-    """Serializer for the ScanJob model."""
+    """Serializer for the Scan model."""
 
     name = CharField(required=True, read_only=False, max_length=64)
     sources = SourceField(many=True, queryset=Source.objects.all())
