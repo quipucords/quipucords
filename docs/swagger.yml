@@ -963,6 +963,41 @@ definitions:
       disable_ssl:
         type: "boolean"
         description: "If true disable SSL communication."
+  ScanDetails:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+        description: "The status of the scan job."
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the source."
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that have been scanned in the source."
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that failed during the scan of the source."
   Source:
     type: "object"
     required:
@@ -1043,6 +1078,8 @@ definitions:
             description: "The credentials to try with these hosts."
           options:
             $ref: "#/definitions/SourceOptions"
+          connection:
+            $ref: "#/definitions/ScanDetails"
   SourcePagination:
     allOf:
       - $ref: "#/definitions/ListPagination"
@@ -1079,6 +1116,12 @@ definitions:
           - canceled
           - failed
           - completed
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
       systems_count:
         type: "integer"
         format: "int64"
@@ -1168,6 +1211,12 @@ definitions:
             items:
               $ref: "#/definitions/ScanTask"
             description: "The scan tasks being processed."
+          start_time:
+            type: "string"
+            format: "date-time"
+          end_time:
+            type: "string"
+            format: "date-time"
           systems_count:
             type: "integer"
             format: "int64"
