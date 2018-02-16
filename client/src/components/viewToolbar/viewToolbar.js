@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -227,7 +228,7 @@ class ViewToolbar extends React.Component {
   renderActiveFilters() {
     const { activeFilters } = this.props;
 
-    if (activeFilters && activeFilters.length) {
+    if (_.size(activeFilters)) {
       return [
         <Filter.ActiveLabel key="label">Active Filters:</Filter.ActiveLabel>,
         <Filter.List key="list">

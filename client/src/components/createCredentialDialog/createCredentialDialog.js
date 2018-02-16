@@ -170,7 +170,7 @@ class CreateCredentialDialog extends React.Component {
       this.state.username &&
       !this.state.usernameError &&
       (this.state.authorizationType === 'usernamePassword'
-        ? this.state.password
+        ? this.state.password && !this.state.passwordError
         : this.state.sshKeyFile && !this.state.sskKeyFileError)
     );
   }
