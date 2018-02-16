@@ -20,7 +20,7 @@ from api.serializers import ScanJobSerializer
 from api.models import (Credential,
                         Source,
                         ScanTask,
-                        ScanOptions,
+                        ScanJobOptions,
                         ScanJob,
                         SystemConnectionResult,
                         SystemInspectionResult,
@@ -750,7 +750,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with empty dict."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_job.save()
-        scan_options = ScanOptions()
+        scan_options = ScanJobOptions()
         scan_options.disable_optional_products = {}
         scan_options.save()
         scan_job.options = scan_options
@@ -764,7 +764,7 @@ class ScanJobTest(TestCase):
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_options = ScanOptions()
+        scan_options = ScanJobOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': True}
@@ -780,7 +780,7 @@ class ScanJobTest(TestCase):
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_options = ScanOptions()
+        scan_options = ScanJobOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}

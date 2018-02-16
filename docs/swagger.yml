@@ -1103,7 +1103,7 @@ definitions:
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
-  ScanOptions:
+  ScanJobOptions:
     type: "object"
     properties:
       max_concurrency:
@@ -1122,7 +1122,7 @@ definitions:
             - inspect
             - connect
         options:
-          $ref: "#/definitions/ScanOptions"
+          $ref: "#/definitions/ScanJobOptions"
   ScanJobIn:
     allOf:
       - $ref: "#/definitions/ScanJob"
