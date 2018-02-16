@@ -28,23 +28,14 @@ from api.common.util import is_int
 from api.models import (Scan, Source)
 from api.serializers import (ScanSerializer)
 
-SOURCES_KEY = 'sources'
-RESULTS_KEY = 'task_results'
-TASKS_KEY = 'tasks'
-SYSTEMS_COUNT_KEY = 'systems_count'
-SYSTEMS_SCANNED_KEY = 'systems_scanned'
-SYSTEMS_FAILED_KEY = 'systems_failed'
-
 
 # pylint: disable=too-many-branches
-def expand_scan(json_scan):
-    """Expand the source and calculate values.
 
-    Take scan object with source ids and pull objects from db.
-    create slim dictionary version of sources with name an value
-    to return to user. Calculate systems_count, systems_scanned,
-    systems_failed values from tasks.
-    """
+SOURCES_KEY = 'sources'
+
+
+def expand_scan(json_scan):
+    """Expand the scan object's sources."""
     source_ids = json_scan.get(SOURCES_KEY, [])
     slim_sources = Source.objects.filter(
         pk__in=source_ids).values('id', 'name', 'source_type')
@@ -76,12 +67,12 @@ class ScanViewSet(ModelViewSet):
     serializer_class = ScanSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = ScanFilter
-    ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
-    ordering = ('id',)
+    ordering_fields = ('id', 'name', 'scan_type')
+    ordering = ('name',)
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
-        """Create a scanjob."""
+        """Create a scan."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -90,7 +81,7 @@ class ScanViewSet(ModelViewSet):
                         headers=headers)
 
     def list(self, request):  # pylint: disable=unused-argument
-        """List the collection of scan jobs."""
+        """List the collection of scan."""
         result = []
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -110,7 +101,7 @@ class ScanViewSet(ModelViewSet):
 
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
-        """Get a scan job."""
+        """Get a scan."""
         if not pk or (pk and not is_int(pk)):
             error = {
                 'id': [_(messages.COMMON_ID_INV)]

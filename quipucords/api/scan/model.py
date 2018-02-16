@@ -90,7 +90,7 @@ class ScanOptions(models.Model):
 
 
 class Scan(models.Model):
-    """The scan job captures all sources and scan tasks for a scan."""
+    """Configuration for the scan jobs that will run."""
 
     name = models.CharField(max_length=64, unique=True)
     sources = models.ManyToManyField(Source)

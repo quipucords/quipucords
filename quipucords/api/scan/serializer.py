@@ -73,7 +73,7 @@ class ScanSerializer(NotEmptySerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """Create a scan job."""
+        """Create a scan."""
         options = validated_data.pop('options', None)
         scan = super().create(validated_data)
         if options:
