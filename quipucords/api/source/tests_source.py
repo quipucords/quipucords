@@ -11,12 +11,16 @@
 """Test the API application."""
 
 import json
+from datetime import datetime
 from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import Credential, Source
+from api.models import (Credential, Source, ScanTask)
 import api.messages as messages
+from api.source.view import format_source
+from api.serializers import SourceSerializer
+from scanner.test_util import create_scan_job
 
 
 def dummy_start():
@@ -24,7 +28,7 @@ def dummy_start():
     pass
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name,too-many-lines
+# pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -117,6 +121,48 @@ class SourceTest(TestCase):
         if expected_response:
             response_json = response.json()
             self.assertEqual(response_json, expected_response)
+
+    #################################################
+    # Function Tests
+    #################################################
+    def test_format_source(self):
+        """Test the format source method."""
+        start = datetime.now()
+        source = Source(
+            name='source1',
+            source_type='network',
+            port=22)
+        source.save()
+        end = datetime.now()
+        scan_job, scan_task = create_scan_job(source)
+
+        scan_task.status = ScanTask.COMPLETED
+        scan_task.systems_count = 10
+        scan_task.systems_scanned = 9
+        scan_task.systems_failed = 1
+        scan_task.start_time = start
+        scan_task.end_time = end
+        scan_task.save()
+
+        scan_job.status = ScanTask.COMPLETED
+        scan_job.start_time = start
+        scan_job.end_time = end
+        scan_job.save()
+
+        serializer = SourceSerializer(source)
+        json_source = serializer.data
+        out = format_source(json_source)
+        expected = {'id': 1,
+                    'name': 'source1',
+                    'source_type': 'network',
+                    'port': 22,
+                    'connection': {'id': 1, 'start_time': start,
+                                   'end_time': end, 'status': 'completed',
+                                   'systems_count': 10,
+                                   'systems_scanned': 9,
+                                   'systems_failed': 1}}
+
+        self.assertEqual(out, expected)
 
     #################################################
     # Network Tests
