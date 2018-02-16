@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { scansTypes } from '../constants';
 
@@ -21,7 +22,11 @@ const scansReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -34,7 +39,8 @@ const scansReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          pending: true
+          pending: true,
+          scans: state.view.scans
         },
         {
           state,

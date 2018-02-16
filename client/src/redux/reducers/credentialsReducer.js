@@ -60,7 +60,6 @@ const credentialsReducer = function(state = initialState, action) {
 
     case credentialsTypes.DESELECT_CREDENTIAL:
       const index = selectedIndex(state, action.credential);
-
       // Do nothing if it is not already selected
       if (index === -1) {
         return state;
@@ -69,7 +68,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'persist',
         {
-          selectedSources: [
+          selectedCredentials: [
             ...state.persist.selectedCredentials.slice(0, index),
             ...state.persist.selectedCredentials.slice(index + 1)
           ]
@@ -132,12 +131,12 @@ const credentialsReducer = function(state = initialState, action) {
             'response.request.responseText',
             action.payload.message
           ),
-          add: true,
-          show: state.update.show
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -152,11 +151,13 @@ const credentialsReducer = function(state = initialState, action) {
             'response.request.responseText',
             action.payload.message
           ),
-          delete: true
+          delete: true,
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -165,13 +166,17 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
-          edit: true,
-          show: state.update.show
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
+          pending: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -181,7 +186,11 @@ const credentialsReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -194,13 +203,12 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true,
-          add: true,
-          show: state.update.show
+          pending: true
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -210,11 +218,13 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           pending: true,
-          delete: true
+          delete: true,
+          fulfilled: false
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -222,13 +232,12 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true,
-          edit: true,
-          show: state.update.show
+          pending: true
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -237,7 +246,8 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          pending: true
+          pending: true,
+          credentials: state.view.credentials
         },
         {
           state,
@@ -252,11 +262,14 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          add: true
+          pending: false,
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -267,11 +280,15 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          delete: true
+          pending: false,
+          delete: true,
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -281,11 +298,14 @@ const credentialsReducer = function(state = initialState, action) {
         {
           credential: action.payload,
           fulfilled: true,
-          edit: true
+          pending: false,
+          error: false,
+          errorMessage: ''
         },
         {
           state,
-          initialState
+          initialState,
+          reset: false
         }
       );
 
@@ -320,7 +340,9 @@ const credentialsReducer = function(state = initialState, action) {
           errorMessage: ''
         },
         {
-          state
+          state,
+          initialState,
+          reset: false
         }
       );
 

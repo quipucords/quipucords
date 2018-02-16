@@ -46,7 +46,7 @@
     "bootstrap": "^3.3.7",
     "js-cookie": "^2.2.0",
     "patternfly": "^3.37.8",
-    "patternfly-react": "^1.8.0",
+    "patternfly-react": "^1.8.1",
     "rcue": "^3.38.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",

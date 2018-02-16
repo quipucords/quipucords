@@ -97,7 +97,8 @@ export default function toolbarsReducer(state = initialState, action) {
       }
 
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
-        activeFilters: [...state[action.viewType].activeFilters, action.filter]
+        activeFilters: [...state[action.viewType].activeFilters, action.filter],
+        currentPage: 1
       });
       return Object.assign({}, state, updateState);
 
@@ -111,7 +112,8 @@ export default function toolbarsReducer(state = initialState, action) {
             activeFilters: [
               ...state[action.viewType].activeFilters.slice(0, index),
               ...state[action.viewType].activeFilters.slice(index + 1)
-            ]
+            ],
+            currentPage: 1
           }
         );
         return Object.assign({}, state, updateState);
@@ -121,7 +123,8 @@ export default function toolbarsReducer(state = initialState, action) {
 
     case viewToolbarTypes.CLEAR_FILTERS:
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
-        activeFilters: []
+        activeFilters: [],
+        currentPage: 1
       });
       return Object.assign({}, state, updateState);
 
@@ -133,13 +136,15 @@ export default function toolbarsReducer(state = initialState, action) {
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
         sortType: action.sortType,
         sortField: action.sortType.id,
-        sortAscending: true
+        sortAscending: true,
+        currentPage: 1
       });
       return Object.assign({}, state, updateState);
 
     case viewToolbarTypes.TOGGLE_SORT_ASCENDING:
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
-        sortAscending: !state[action.viewType].sortAscending
+        sortAscending: !state[action.viewType].sortAscending,
+        currentPage: 1
       });
       return Object.assign({}, state, updateState);
 
