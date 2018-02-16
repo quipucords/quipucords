@@ -278,12 +278,36 @@ class SourceSerializer(NotEmptySerializer):
             instance.credentials.set(credentials)
 
         if options:
-            options = SourceOptions.objects.create(**options)
-            options.save()
-            instance.options = options
+            if instance.options is None:
+                options = SourceOptions.objects.create(**options)
+                options.save()
+                instance.options = options
+            else:
+                self.update_options(options, instance.options)
 
         instance.save()
         return instance
+
+    @staticmethod
+    def update_options(options, instance_options):
+        """Update the incoming options overlapping the existing options.
+
+        :param options: the passed in options
+        :param instance_options: the existing options
+        """
+        satellite_version = options.pop('satellite_version', None)
+        ssl_protocol = options.pop('ssl_protocol', None)
+        ssl_cert_verify = options.pop('ssl_cert_verify', None)
+        disable_ssl = options.pop('disable_ssl', None)
+        if satellite_version is not None:
+            instance_options.satellite_version = satellite_version
+        if ssl_protocol is not None:
+            instance_options.ssl_protocol = ssl_protocol
+        if ssl_cert_verify is not None:
+            instance_options.ssl_cert_verify = ssl_cert_verify
+        if disable_ssl is not None:
+            instance_options.disable_ssl = disable_ssl
+        instance_options.save()
 
     @staticmethod
     def check_for_existing_name(name, source_id=None):
