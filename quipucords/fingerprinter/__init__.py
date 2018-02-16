@@ -48,7 +48,6 @@ def process_fact_collection(sender, instance, **kwargs):
 
     :param sender: Class that was saved
     :param instance: FactCollection that was saved
-    :param facts: dict of raw facts
     :param kwargs: Other args
     :returns: None
     """
@@ -448,6 +447,11 @@ def add_fact_to_fingerprint(source,
     raw facts instead of direct access.
     """
     # pylint: disable=too-many-arguments
+    source_object = Source.objects.filter(id=source.get('source_id')).first()
+    if source_object:
+        source_name = source_object.name
+    else:
+        source_name = None
     actual_fact_value = None
     if fact_value is not None:
         actual_fact_value = fact_value
@@ -458,6 +462,7 @@ def add_fact_to_fingerprint(source,
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
             'source_id': source['source_id'],
+            'source_name': source_name,
             'source_type': source['source_type'],
             'raw_fact_key': raw_fact_key
         }
