@@ -20,7 +20,8 @@ from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            _merge_fingerprint,
                            _create_index_for_fingerprints,
                            _merge_matching_fingerprints,
-                           _merge_fingerprints_from_source_types)
+                           _merge_fingerprints_from_source_types,
+                           _process_network_fact)
 from api.models import Source
 
 
@@ -670,3 +671,15 @@ class EngineTest(TestCase):
 
         self.assertEqual(new_fingerprint.get(
             'os_release'), nfingerprint['os_release'])
+
+    def test_source_name_in_metadata(self):
+        """Test that processing facts add source_name to fingerprint metadata."""
+        source = Source(
+            name='source1',
+            source_type='network',
+            port=22)
+        source.save()
+        sourcetopass = {'source_id': 1, 'source_type': 'network'}
+        fingerprint = {'metadata': {}}
+        result = _process_network_fact(sourcetopass, fingerprint)
+        self.assertEqual(result['metadata']['infrastructure_type']['source_name'], 'source1')
