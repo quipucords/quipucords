@@ -63,6 +63,26 @@ def next_sequence_number():
     return number
 
 
+def find_prefix_scan_stat(prefix, dirname):
+    """Find files in a directory matching a prefix, and stat them.
+
+    This function exists because os.scandir isn't in Python 3.4, which
+    we support.
+
+    :param prefix: the name prefix to search for.
+    :param dirname: the directory to scan.
+
+    :returns: a list of (name, stat) pairs for matching files.
+    """
+    result = []
+
+    for name in os.listdir(dirname):
+        if name.startswith(prefix):
+            result.append((name, os.stat(os.path.join(dirname, name))))
+
+    return result
+
+
 # pylint: disable=too-many-instance-attributes
 class RotatingLogFile(object):
     """A log file that automatically rotates itself when full."""
@@ -116,32 +136,32 @@ class RotatingLogFile(object):
         if self.dry_run:
             self.log_files = []
         else:
-            self.read_files_from_direntries(os.scandir(self.dirname))
+            self.read_files_from_stats(
+                find_prefix_scan_stat(self.basename, self.dirname))
 
-    def read_files_from_direntries(self, direntries):
-        """Initialize log_files and file_counter from os.DirEntrys.
+    def read_files_from_stats(self, names_and_stats):
+        """Initialize log_files and file_counter from (name, stat) pairs.
 
         This method is separate to simplify testing.
         """
-        for entry in direntries:
-            if entry.name.startswith(self.basename):
-                logger.debug('Found log file %s', entry.name)
-                base, _, counter = entry.name.partition('-')
+        for name, stat in names_and_stats:
+            if name.startswith(self.basename):
+                logger.debug('Found log file %s', name)
+                base, _, counter = name.partition('-')
                 if base != self.basename:
-                    logger.error('Bad log file name: %s', entry.name)
+                    logger.error('Bad log file name: %s', name)
                     continue
                 if not counter.isdigit():
-                    logger.error('Bad log file name: %s', entry.name)
+                    logger.error('Bad log file name: %s', name)
                     continue
 
                 self.file_counter = max(self.file_counter, int(counter))
 
-                stat_result = entry.stat()
                 self.log_files.append(
-                    {'name': os.path.join(self.dirname, entry.name),
-                     'created': stat_result.st_ctime,
-                     'size': stat_result.st_size})
-                self.total_bytes += stat_result.st_size
+                    {'name': os.path.join(self.dirname, name),
+                     'created': stat.st_ctime,
+                     'size': stat.st_size})
+                self.total_bytes += stat.st_size
         logger.debug('Presorted log file set is %s', self.log_files)
 
         self.log_files = sorted(self.log_files,

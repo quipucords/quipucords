@@ -55,22 +55,13 @@ class TestRotatingLogFile(unittest.TestCase):
         self.assertEqual(rlf.step_size, 10)
         self.assertEqual(rlf.step_age, 10)
 
-        base_2 = mock.Mock(stat=mock.Mock(
-            return_value=mock.Mock(st_ctime=1, st_size=1)))
-        base_3 = mock.Mock(stat=mock.Mock(
-            return_value=mock.Mock(st_ctime=2, st_size=1)))
-        base_4 = mock.Mock(stat=mock.Mock(
-            return_value=mock.Mock(st_ctime=3, st_size=1)))
-        # Can't set name attribute via Mock constructor.
-        base_2.name = 'base-2'
-        base_3.name = 'base-3'
-        base_4.name = 'base-4'
-
-        direntries = [base_2, base_3, base_4]
+        base_2 = ('base-2', mock.Mock(st_ctime=1, st_size=1))
+        base_3 = ('base-3', mock.Mock(st_ctime=2, st_size=1))
+        base_4 = ('base-4', mock.Mock(st_ctime=3, st_size=1))
 
         rlf.basename = 'base'
         rlf.dirname = ''
-        rlf.read_files_from_direntries(direntries)
+        rlf.read_files_from_stats([base_2, base_3, base_4])
 
         self.assertEqual(rlf.log_files,
                          [{'name': 'base-4', 'created': 3, 'size': 1},
