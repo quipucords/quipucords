@@ -144,10 +144,8 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 
     if (viewOptions.activeFilters) {
       viewOptions.activeFilters.forEach(filter => {
-        queryObject[filter.id] =
-          filter.filterType === 'select'
-            ? filter.filterValue.id
-            : filter.filterValue;
+        queryObject[filter.field.id] =
+          filter.field.filterType === 'select' ? filter.value.id : filter.value;
       });
     }
 

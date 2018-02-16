@@ -30,7 +30,6 @@ class ScanSourceList extends React.Component {
       const { scan } = this.nextProps;
       let sources = [...scan.sources];
 
-      console.dir(scan);
       sources.sort((item1, item2) => {
         let cmp = item1.source_type.localeCompare(item2.source_type);
         if (cmp === 0) {

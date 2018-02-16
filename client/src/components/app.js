@@ -93,14 +93,27 @@ class App extends React.Component {
     }
 
     if (!session.loggedIn) {
+      setTimeout(() => {
+        window.location = '/login';
+      }, 5000);
+
       return (
-        <EmptyState>
-          <Alert type="error">
-            <span>
-              You have been logged out: redirecting to the login page.
-            </span>
-          </Alert>
-        </EmptyState>
+        <div className="layout-pf layout-pf-fixed hidden-nav-menu">
+          <VerticalNav persistentSecondary={false}>
+            <VerticalNav.Masthead>
+              <VerticalNav.Brand titleImg={productTitle} />
+            </VerticalNav.Masthead>
+          </VerticalNav>
+          <div className="container-pf-nav-pf-vertical">
+            <EmptyState className="full-page-blank-slate">
+              <Alert type="error">
+                <span>
+                  You have been logged out: redirecting to the login page.
+                </span>
+              </Alert>
+            </EmptyState>
+          </div>
+        </div>
       );
     }
 

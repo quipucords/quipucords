@@ -15,6 +15,18 @@
   }
 }
 
+.layout-pf.hidden-nav-menu {
+  .nav-pf-vertical {
+    border: 0;
+    width: 0;
+  }
+  .container-pf-nav-pf-vertical {
+    margin-left: 0;
+  }
+  .navbar-toggle {
+    visibility: hidden;
+  }
+}
 
 .quipucords-view-container {
   background-color: $color-pf-white;
@@ -33,6 +45,7 @@
   padding: 0 20px;
   overflow-y: auto;
   width: 100%;
+
 }
 
 .quipicords-list-view {
@@ -61,6 +74,15 @@
   }
 }
 
+.list-view-pagination-top {
+  padding: 0 14px;
+}
+
+.toolbar-pf-results .quipucords-view-count {
+  float: right;
+  margin-right: 0;
+}
+
 .quipucords-split-description {
   display: flex;
   flex-direction: row;
@@ -86,6 +108,13 @@
 
 .blank-slate-pf.full-page-blank-slate {
   border: none;
+}
+
+.blank-slate-pf.list-view-blank-slate {
+  background-color: transparent;
+  border: none;
+  height: 100%;
+  margin: 0 20px;
 }
 
 .list-view-info-item-text-count {

@@ -6,7 +6,7 @@ const CredentialFilterFields = [
     filterType: 'text'
   },
   {
-    id: 'source_type',
+    id: 'cred_type',
     title: 'Credential Type',
     placeholder: 'Filter by Credential Type',
     filterType: 'select',
@@ -25,13 +25,8 @@ const CredentialSortFields = [
     isNumeric: false
   },
   {
-    id: 'credentialType',
+    id: 'cred_type',
     title: 'Credential Type',
-    isNumeric: false
-  },
-  {
-    id: 'authenticationType',
-    title: 'Authentication Type',
     isNumeric: false
   }
 ];

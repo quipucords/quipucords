@@ -70,7 +70,7 @@ class CreateCredentialDialog extends React.Component {
       this.resetInitialState(nextProps);
     }
 
-    if (nextProps.fulfilled && !this.props.fulfilled) {
+    if (this.props.show && nextProps.fulfilled && !this.props.fulfilled) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'success',
@@ -94,11 +94,9 @@ class CreateCredentialDialog extends React.Component {
       this.setState({
         credentialName: nextProps.credential.name,
         credentialType: nextProps.credential.cred_type,
-        authorizationType:
-          nextProps.credential.ssh_keyfile &&
-          nextProps.credential.ssh_keyfile.length
-            ? 'usernamePassword'
-            : 'sshKey',
+        authorizationType: nextProps.credential.ssh_keyfile
+          ? 'sshKey'
+          : 'usernamePassword',
         sshKeyFile: nextProps.credential.ssh_keyfile,
         passphrase: nextProps.credential.passphrase,
         username: nextProps.credential.username,
@@ -127,13 +125,14 @@ class CreateCredentialDialog extends React.Component {
 
   save() {
     let credential = {
-      name: this.state.credentialName,
       username: this.state.username,
-      cred_type: this.state.credentialType
+      name: this.state.credentialName
     };
 
     if (this.props.edit) {
       credential.id = this.props.credential.id;
+    } else {
+      credential.cred_type = this.state.credentialType;
     }
 
     if (this.state.authorizationType === 'sshKey') {
@@ -143,9 +142,11 @@ class CreateCredentialDialog extends React.Component {
       credential.password = this.state.password;
     }
 
-    if (credential.cred_type === 'network' && this.state.becomeUser) {
+    if (this.state.credentialType === 'network') {
       credential.become_method = this.state.becomeMethod;
-      credential.become_user = this.state.becomeUser;
+      if (this.state.becomeUser) {
+        credential.become_user = this.state.becomeUser;
+      }
       if (this.state.becomePassword) {
         credential.become_password = this.state.becomePassword;
       }
@@ -164,12 +165,13 @@ class CreateCredentialDialog extends React.Component {
 
   validateForm() {
     return (
-      this.state.credentialName !== '' &&
-      this.state.credentialNameError === '' &&
-      this.state.username !== '' &&
-      this.state.usernameError === '' &&
-      (this.state.authorizationType === 'usernamePassword' ||
-        (this.state.sshKeyFile !== '' && this.state.sskKeyFileError === ''))
+      this.state.credentialName &&
+      !this.state.credentialNameError &&
+      this.state.username &&
+      !this.state.usernameError &&
+      (this.state.authorizationType === 'usernamePassword'
+        ? this.state.password && !this.state.passwordError
+        : this.state.sshKeyFile && !this.state.sskKeyFileError)
     );
   }
 
@@ -207,9 +209,18 @@ class CreateCredentialDialog extends React.Component {
     });
   }
 
+  validatePassword(password) {
+    if (!password || !password.length) {
+      return 'You must enter a password';
+    }
+
+    return '';
+  }
+
   updatePassword(event) {
     this.setState({
-      password: event.target.value
+      password: event.target.value,
+      passwordError: this.validatePassword(event.target.value)
     });
   }
 
@@ -266,21 +277,25 @@ class CreateCredentialDialog extends React.Component {
       password,
       sshKeyFile,
       passphrase,
+      passwordError,
       sskKeyFileError
     } = this.state;
 
     switch (authorizationType) {
       case 'usernamePassword':
         return (
-          <Form.FormGroup>
+          <Form.FormGroup validationState={passwordError ? 'error' : null}>
             {this.renderFormLabel('Password')}
             <Grid.Col sm={7}>
               <Form.FormControl
                 type="password"
                 value={password}
-                placeholder="optional"
+                placeholder="Enter the password"
                 onChange={e => this.updatePassword(e)}
               />
+              {passwordError && (
+                <Form.HelpBlock>{passwordError}</Form.HelpBlock>
+              )}
             </Grid.Col>
           </Form.FormGroup>
         );

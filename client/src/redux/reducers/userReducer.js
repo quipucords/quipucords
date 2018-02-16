@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { userTypes } from '../constants';
 import helpers from '../../common/helpers';
 
@@ -27,7 +28,11 @@ export default function userReducer(state = initialState, action) {
         'user',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -68,7 +73,11 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -110,7 +119,11 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,

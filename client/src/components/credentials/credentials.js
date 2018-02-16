@@ -16,11 +16,15 @@ import {
   Modal
 } from 'patternfly-react';
 
-import { getCredentials } from '../../redux/actions/credentialsActions';
+import {
+  getCredentials,
+  deleteCredential
+} from '../../redux/actions/credentialsActions';
 import {
   confirmationModalTypes,
   credentialsTypes,
   toastNotificationTypes,
+  viewToolbarTypes,
   viewTypes
 } from '../../redux/constants';
 import Store from '../../redux/store';
@@ -51,6 +55,9 @@ class Credentials extends React.Component {
       'importSources',
       'refresh'
     ]);
+
+    this.credentialsToDelete = [];
+    this.deletingCredential = null;
   }
 
   componentDidMount() {
@@ -79,6 +86,48 @@ class Credentials extends React.Component {
         helpers.createViewQueryObject(nextProps.viewOptions)
       );
     }
+
+    if (this.props.update.delete) {
+      if (nextProps.update.fulfilled && !this.props.update.fulfilled) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'success',
+          message: (
+            <span>
+              Credential <strong>{this.deletingCredential.name}</strong>{' '}
+              successfully deleted.
+            </span>
+          )
+        });
+        this.props.getCredentials(
+          helpers.createViewQueryObject(nextProps.viewOptions)
+        );
+
+        Store.dispatch({
+          type: credentialsTypes.DESELECT_CREDENTIAL,
+          credential: this.deletingCredential
+        });
+
+        this.deleteNextCredential();
+      }
+
+      if (nextProps.update.error && !this.props.update.error) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'error',
+          header: 'Error',
+          message: (
+            <span>
+              Error removing credential{' '}
+              <strong>{this.deletingCredential}</strong>
+              <p>{nextProps.update.errorMessage}</p>
+            </span>
+          )
+        });
+
+        this.deleteNextCredential();
+      }
+    }
   }
 
   itemSelected(item) {
@@ -97,8 +146,32 @@ class Credentials extends React.Component {
     });
   }
 
+  deleteNextCredential() {
+    if (this.credentialsToDelete.length > 0) {
+      this.deletingCredential = this.credentialsToDelete.pop();
+      if (this.deletingCredential) {
+        this.props.deleteCredential(this.deletingCredential.id);
+      }
+    }
+  }
+
+  doDeleteCredentials(items) {
+    this.credentialsToDelete = [...items];
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    this.deleteNextCredential();
+  }
+
   deleteCredentials() {
     const { selectedCredentials } = this.props;
+
+    if (selectedCredentials.length === 1) {
+      this.deleteCredential(selectedCredentials[0]);
+      return;
+    }
 
     let heading = (
       <span>Are you sure you want to delete the following credentials?</span>
@@ -112,7 +185,7 @@ class Credentials extends React.Component {
     let body = (
       <Grid.Col sm={12}>
         <Form.FormControl
-          className="quipucords-text-area-output"
+          className="quipucords-form-control"
           componentClass="textarea"
           type="textarea"
           readOnly
@@ -150,19 +223,6 @@ class Credentials extends React.Component {
     });
   }
 
-  doDeleteCredentials(items) {
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-    });
-
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: items[0].name,
-      message: 'Deleting credentials is not yet implemented'
-    });
-  }
-
   deleteCredential(item) {
     let heading = (
       <span>
@@ -175,7 +235,7 @@ class Credentials extends React.Component {
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Delete Source',
+      title: 'Delete Credential',
       heading: heading,
       confirmButtonText: 'Delete',
       onConfirm: onConfirm
@@ -204,6 +264,13 @@ class Credentials extends React.Component {
     this.props.getCredentials(
       helpers.createViewQueryObject(this.props.viewOptions)
     );
+  }
+
+  clearFilters() {
+    Store.dispatch({
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewTypes.CREDENTIALS_VIEW
+    });
   }
 
   renderCredentialActions() {
@@ -243,32 +310,8 @@ class Credentials extends React.Component {
     );
   }
 
-  renderCredentialsList(items) {
-    return (
-      <ListView className="quipicords-list-view">
-        {items.map((item, index) => (
-          <CredentialListItem
-            item={item}
-            selected={this.itemSelected(item)}
-            key={index}
-            onItemSelectChange={this.itemSelectChange}
-            onEdit={this.editCredential}
-            onDelete={this.deleteCredential}
-          />
-        ))}
-      </ListView>
-    );
-  }
-
-  render() {
-    const {
-      pending,
-      error,
-      errorMessage,
-      credentials,
-      selectedCredentials,
-      viewOptions
-    } = this.props;
+  renderPendingMessage() {
+    const { pending } = this.props;
 
     if (pending) {
       return (
@@ -281,17 +324,65 @@ class Credentials extends React.Component {
       );
     }
 
+    return null;
+  }
+
+  renderCredentialsList(items) {
+    if (_.size(items)) {
+      return (
+        <ListView className="quipicords-list-view">
+          {items.map((item, index) => (
+            <CredentialListItem
+              item={item}
+              selected={this.itemSelected(item)}
+              key={index}
+              onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editCredential}
+              onDelete={this.deleteCredential}
+            />
+          ))}
+        </ListView>
+      );
+    }
+
+    return (
+      <EmptyState className="list-view-blank-slate">
+        <EmptyState.Title>
+          No Results Match the Filter Criteria
+        </EmptyState.Title>
+        <EmptyState.Info>
+          The active filters are hiding all items.
+        </EmptyState.Info>
+        <EmptyState.Action>
+          <Button bsStyle="link" onClick={this.clearFilters}>
+            Clear Filters
+          </Button>
+        </EmptyState.Action>
+      </EmptyState>
+    );
+  }
+
+  render() {
+    const {
+      error,
+      errorMessage,
+      credentials,
+      selectedCredentials,
+      viewOptions
+    } = this.props;
+
     if (error) {
       return (
         <EmptyState>
           <Alert type="error">
             <span>Error retrieving credentials: {errorMessage}</span>
           </Alert>
+          {this.renderPendingMessage()}
         </EmptyState>
       );
     }
 
-    if (credentials && credentials.length) {
+    if (_.size(credentials) || _.size(viewOptions.activeFilters)) {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
@@ -305,50 +396,59 @@ class Credentials extends React.Component {
               selectedCount={selectedCredentials.length}
               {...viewOptions}
             />
-            <div className="quipucords-list-container">
-              {this.renderCredentialsList(credentials)}
-            </div>
             <ViewPaginationRow
               viewType={viewTypes.CREDENTIALS_VIEW}
               {...viewOptions}
             />
+            <div className="quipucords-list-container">
+              {this.renderCredentialsList(credentials)}
+            </div>
           </div>
+          {this.renderPendingMessage()}
           <CreateCredentialDialog credentials={credentials} />
         </React.Fragment>
       );
     }
-    return [
-      <CredentialsEmptyState
-        key="emptyState"
-        onAddCredential={this.addCredential}
-        onAddSource={this.addSource}
-        onImportSources={this.importSources}
-      />,
-      <CreateCredentialDialog
-        key="createCredentialDialog"
-        credentials={credentials}
-      />
-    ];
+
+    return (
+      <React.Fragment>
+        {this.renderPendingMessage()}
+        <CredentialsEmptyState
+          key="emptyState"
+          onAddCredential={this.addCredential}
+          onAddSource={this.addSource}
+          onImportSources={this.importSources}
+        />,
+        <CreateCredentialDialog
+          key="createCredentialDialog"
+          credentials={credentials}
+        />
+      </React.Fragment>
+    );
   }
 }
 
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
+  deleteCredential: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   credentials: PropTypes.array,
   selectedCredentials: PropTypes.array,
-  viewOptions: PropTypes.object
+  viewOptions: PropTypes.object,
+  update: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredentials: queryObj => dispatch(getCredentials(queryObj))
+  getCredentials: queryObj => dispatch(getCredentials(queryObj)),
+  deleteCredential: id => dispatch(deleteCredential(id))
 });
 
 const mapStateToProps = function(state) {
   return Object.assign({}, state.credentials.view, state.credentials.persist, {
-    viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW]
+    viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW],
+    update: state.credentials.update
   });
 };
 
