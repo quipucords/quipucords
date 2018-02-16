@@ -64,7 +64,7 @@ def format_source(json_source):
     scan_task_qs = ScanTask.objects.filter(
         source__id=source_id,
         scan_type=ScanTask.SCAN_TYPE_CONNECT)
-    if scan_task_qs:
+    if scan_task_qs.count() > 0:
         scan_task = scan_task_qs.latest('start_time')
         scan_job = ScanJob.objects.filter(
             tasks__id=scan_task.id).latest('start_time')

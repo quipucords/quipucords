@@ -16,10 +16,11 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import (Credential, Source, ScanTask, ScanJob)
+from api.models import (Credential, Source, ScanTask)
 import api.messages as messages
 from api.source.view import format_source
 from api.serializers import SourceSerializer
+from scanner.test_util import create_scan_job
 
 
 def dummy_start():
@@ -27,7 +28,7 @@ def dummy_start():
     pass
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name,too-many-lines
+# pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302
 class SourceTest(TestCase):
     """Test the basic Source infrastructure."""
 
@@ -133,22 +134,19 @@ class SourceTest(TestCase):
             port=22)
         source.save()
         end = datetime.now()
-        scan_task = ScanTask(source=source,
-                             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                             status=ScanTask.COMPLETED,
-                             systems_count=10,
-                             systems_scanned=9,
-                             systems_failed=1,
-                             start_time=start,
-                             end_time=end)
+        scan_job, scan_task = create_scan_job(source)
+
+        scan_task.status = ScanTask.COMPLETED
+        scan_task.systems_count = 10
+        scan_task.systems_scanned = 9
+        scan_task.systems_failed = 1
+        scan_task.start_time = start
+        scan_task.end_time = end
         scan_task.save()
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                           status=ScanTask.COMPLETED,
-                           start_time=start,
-                           end_time=end)
-        scan_job.save()
-        scan_job.sources.add(source)
-        scan_job.tasks.add(scan_task)
+
+        scan_job.status = ScanTask.COMPLETED
+        scan_job.start_time = start
+        scan_job.end_time = end
         scan_job.save()
 
         serializer = SourceSerializer(source)
@@ -163,6 +161,7 @@ class SourceTest(TestCase):
                                    'systems_count': 10,
                                    'systems_scanned': 9,
                                    'systems_failed': 1}}
+
         self.assertEqual(out, expected)
 
     #################################################
