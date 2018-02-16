@@ -11,9 +11,17 @@
 #
 """Script for running qpc command line tool"""
 
+from __future__ import print_function
 import gettext
 import os
 import sys
+
+if sys.version_info[0] < 3 or \
+   (sys.version_info[0] == 3 and sys.version_info[1] < 4):
+    print(('Error: qpc must be run with Python 3.4 or greater '
+           '(current version is {0}.{1}, from {2}).').format(
+               sys.version_info[0], sys.version_info[1], sys.executable))
+    sys.exit(1)
 
 BASE_QPC_DIR = os.path.abspath(
     os.path.normpath(

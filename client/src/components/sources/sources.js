@@ -17,7 +17,8 @@ import {
   sourcesTypes,
   toastNotificationTypes,
   confirmationModalTypes,
-  viewTypes
+  viewTypes,
+  viewToolbarTypes
 } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
@@ -187,6 +188,13 @@ class Sources extends React.Component {
     this.props.getSources();
   }
 
+  clearFilters() {
+    Store.dispatch({
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewTypes.SOURCES_VIEW
+    });
+  }
+
   renderSourceActions() {
     const { selectedSources } = this.props;
 
@@ -208,27 +216,61 @@ class Sources extends React.Component {
     );
   }
 
+  renderPendingMessage() {
+    const { pending } = this.props;
+
+    if (pending) {
+      return (
+        <Modal bsSize="lg" backdrop={false} show animation={false}>
+          <Modal.Body>
+            <div className="spinner spinner-xl" />
+            <div className="text-center">Loading sources...</div>
+          </Modal.Body>
+        </Modal>
+      );
+    }
+
+    return null;
+  }
+
   renderSourcesList(items) {
+    if (_.size(items)) {
+      return (
+        <ListView className="quipicords-list-view">
+          {items.map((item, index) => (
+            <SourceListItem
+              item={item}
+              selected={this.itemSelected(item)}
+              key={index}
+              onItemSelectChange={this.itemSelectChange}
+              onEdit={this.editSource}
+              onDelete={this.deleteSource}
+              onScan={this.scanSource}
+            />
+          ))}
+        </ListView>
+      );
+    }
+
     return (
-      <ListView className="quipicords-list-view">
-        {items.map((item, index) => (
-          <SourceListItem
-            item={item}
-            selected={this.itemSelected(item)}
-            key={index}
-            onItemSelectChange={this.itemSelectChange}
-            onEdit={this.editSource}
-            onDelete={this.deleteSource}
-            onScan={this.scanSource}
-          />
-        ))}
-      </ListView>
+      <EmptyState className="list-view-blank-slate">
+        <EmptyState.Title>
+          No Results Match the Filter Criteria
+        </EmptyState.Title>
+        <EmptyState.Info>
+          The active filters are hiding all items.
+        </EmptyState.Info>
+        <EmptyState.Action>
+          <Button bsStyle="link" onClick={this.clearFilters}>
+            Clear Filters
+          </Button>
+        </EmptyState.Action>
+      </EmptyState>
     );
   }
 
   render() {
     const {
-      pending,
       error,
       errorMessage,
       sources,
@@ -242,28 +284,18 @@ class Sources extends React.Component {
       addSourceWizardShown
     } = this.state;
 
-    if (pending) {
-      return (
-        <Modal bsSize="lg" backdrop={false} show animation={false}>
-          <Modal.Body>
-            <div className="spinner spinner-xl" />
-            <div className="text-center">Loading sources...</div>
-          </Modal.Body>
-        </Modal>
-      );
-    }
-
     if (error) {
       return (
         <EmptyState>
           <Alert type="error">
             <span>Error retrieving sources: {errorMessage}</span>
           </Alert>
+          {this.renderPendingMessage()}
         </EmptyState>
       );
     }
 
-    if (sources && sources.length) {
+    if (_.size(sources) || _.size(viewOptions.activeFilters)) {
       return (
         <React.Fragment>
           <div className="quipucords-view-container">
@@ -277,14 +309,15 @@ class Sources extends React.Component {
               selectedCount={selectedSources.length}
               {...viewOptions}
             />
-            <div className="quipucords-list-container">
-              {this.renderSourcesList(sources)}
-            </div>
             <ViewPaginationRow
               viewType={viewTypes.SOURCES_VIEW}
               {...viewOptions}
             />
+            <div className="quipucords-list-container">
+              {this.renderSourcesList(sources)}
+            </div>
           </div>
+          {this.renderPendingMessage()}
           <AddSourceWizard show={addSourceWizardShown} />
           <CreateScanDialog
             show={scanDialogShown}
@@ -302,6 +335,7 @@ class Sources extends React.Component {
           onAddSource={this.showAddSourceWizard}
           onImportSources={this.importSources}
         />
+        {this.renderPendingMessage()}
         <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
     );

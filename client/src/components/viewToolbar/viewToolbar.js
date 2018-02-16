@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -216,7 +217,7 @@ class ViewToolbar extends React.Component {
     } = this.props;
 
     return (
-      <h5>
+      <h5 className="quipucords-view-count">
         {selectedCount > 0 ? `${selectedCount} of ` : null}
         {`${totalCount} ${totalCount === 1 ? itemsType : itemsTypePlural}`}
         {selectedCount > 0 ? ' selected' : ''}
@@ -227,11 +228,9 @@ class ViewToolbar extends React.Component {
   renderActiveFilters() {
     const { activeFilters } = this.props;
 
-    if (activeFilters && activeFilters.length) {
+    if (_.size(activeFilters)) {
       return [
-        <Filter.ActiveLabel key="label">
-          {'Active Filters:'}
-        </Filter.ActiveLabel>,
+        <Filter.ActiveLabel key="label">Active Filters:</Filter.ActiveLabel>,
         <Filter.List key="list">
           {activeFilters.map((item, index) => {
             return (
@@ -251,7 +250,7 @@ class ViewToolbar extends React.Component {
       ];
     }
 
-    return null;
+    return <Filter.ActiveLabel>No Filters</Filter.ActiveLabel>;
   }
 
   render() {
@@ -263,8 +262,8 @@ class ViewToolbar extends React.Component {
         {this.renderSort()}
         <Toolbar.RightContent>{actions}</Toolbar.RightContent>
         <Toolbar.Results>
-          {this.renderCounts()}
           {this.renderActiveFilters()}
+          {this.renderCounts()}
         </Toolbar.Results>
       </Toolbar>
     );

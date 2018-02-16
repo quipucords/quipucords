@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -20,6 +21,7 @@ import {
 import {
   sourcesTypes,
   toastNotificationTypes,
+  viewToolbarTypes,
   viewTypes
 } from '../../redux/constants';
 import Store from '../../redux/store';
@@ -194,6 +196,13 @@ class Scans extends React.Component {
     this.props.getScans({ scan_type: 'inspect' });
   }
 
+  clearFilters() {
+    Store.dispatch({
+      type: viewToolbarTypes.CLEAR_FILTERS,
+      viewType: viewTypes.SCANS_VIEW
+    });
+  }
+
   renderScanActions() {
     return (
       <div className="form-group">
@@ -204,27 +213,8 @@ class Scans extends React.Component {
     );
   }
 
-  renderScansList(items) {
-    return (
-      <ListView className="quipicords-list-view">
-        {items.map((item, index) => (
-          <ScanListItem
-            item={item}
-            key={index}
-            onSummaryDownload={this.downloadSummaryReport}
-            onDetailedDownload={this.downloadDetailedReport}
-            onStart={this.doStartScan}
-            onPause={this.doPauseScan}
-            onResume={this.doResumeScan}
-            onCancel={this.doCancelScan}
-          />
-        ))}
-      </ListView>
-    );
-  }
-
-  render() {
-    const { pending, error, errorMessage, scans, viewOptions } = this.props;
+  renderPendingMessage() {
+    const { pending } = this.props;
 
     if (pending) {
       return (
@@ -236,39 +226,95 @@ class Scans extends React.Component {
         </Modal>
       );
     }
+
+    return null;
+  }
+
+  renderScansList(items) {
+    if (_.size(items)) {
+      return (
+        <ListView className="quipicords-list-view">
+          {items.map((item, index) => (
+            <ScanListItem
+              item={item}
+              key={index}
+              onSummaryDownload={this.downloadSummaryReport}
+              onDetailedDownload={this.downloadDetailedReport}
+              onStart={this.doStartScan}
+              onPause={this.doPauseScan}
+              onResume={this.doResumeScan}
+              onCancel={this.doCancelScan}
+            />
+          ))}
+        </ListView>
+      );
+    }
+
+    return (
+      <EmptyState className="list-view-blank-slate">
+        <EmptyState.Title>
+          No Results Match the Filter Criteria
+        </EmptyState.Title>
+        <EmptyState.Info>
+          The active filters are hiding all items.
+        </EmptyState.Info>
+        <EmptyState.Action>
+          <Button bsStyle="link" onClick={this.clearFilters}>
+            Clear Filters
+          </Button>
+        </EmptyState.Action>
+      </EmptyState>
+    );
+  }
+
+  render() {
+    const { error, errorMessage, scans, viewOptions } = this.props;
+
     if (error) {
       return (
         <EmptyState>
           <Alert type="error">
             <span>Error retrieving scans: {errorMessage}</span>
           </Alert>
+          {this.renderPendingMessage()}
         </EmptyState>
       );
     }
-    if (scans && scans.length) {
+
+    if (_.size(scans) || _.size(viewOptions.activeFilters)) {
       return (
-        <div className="quipucords-view-container">
-          <ViewToolbar
-            viewType={viewTypes.SCANS_VIEW}
-            filterFields={ScanFilterFields}
-            sortFields={ScanSortFields}
-            actions={this.renderScanActions()}
-            itemsType="Scan"
-            itemsTypePlural="Scans"
-            {...viewOptions}
-          />
-          <div className="quipucords-list-container">
-            {this.renderScansList(scans)}
+        <React.Fragment>
+          <div className="quipucords-view-container">
+            <ViewToolbar
+              viewType={viewTypes.SCANS_VIEW}
+              filterFields={ScanFilterFields}
+              sortFields={ScanSortFields}
+              actions={this.renderScanActions()}
+              itemsType="Scan"
+              itemsTypePlural="Scans"
+              {...viewOptions}
+            />
+            <ViewPaginationRow
+              viewType={viewTypes.SCANS_VIEW}
+              {...viewOptions}
+            />
+            <div className="quipucords-list-container">
+              {this.renderScansList(scans)}
+            </div>
           </div>
-          <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
-        </div>
+          {this.renderPendingMessage()}
+        </React.Fragment>
       );
     }
+
     return (
-      <SourcesEmptyState
-        onAddSource={this.addSource}
-        onImportSources={this.importSources}
-      />
+      <React.Fragment>
+        <SourcesEmptyState
+          onAddSource={this.addSource}
+          onImportSources={this.importSources}
+        />
+        {this.renderPendingMessage()}
+      </React.Fragment>
     );
   }
 }

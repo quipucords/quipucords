@@ -123,7 +123,11 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
           add: true
         },
         {
@@ -138,7 +142,11 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
           delete: true
         },
         {
@@ -152,7 +160,11 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: action.payload.message,
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          ),
           edit: true
         },
         {
@@ -166,7 +178,11 @@ const sourcesReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: action.payload.message
+          errorMessage: _.get(
+            action.payload,
+            'response.request.responseText',
+            action.payload.message
+          )
         },
         {
           state,
@@ -179,7 +195,8 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          pending: true
+          pending: true,
+          sources: state.view.sources
         },
         {
           state,
