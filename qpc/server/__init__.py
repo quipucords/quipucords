@@ -17,3 +17,4 @@ LOGIN = 'login'
 LOGOUT = 'logout'
 
 LOGIN_URI = '/api/v1/token/'
+LOGOUT_URI = '/api/v1/users/logout/'

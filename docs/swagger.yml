@@ -617,6 +617,34 @@ paths:
           description: "Scan job was not in paused state"
         404:
           description: "Scan job not found"
+  /users/current/:
+    get:
+      tags:
+        - "User"
+      summary: "Gets the username of the current user"
+      description: "Gets the username of the currently authenticated user."
+      operationId: "currentUser"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Current username"
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: "Unauthorized"
+  /users/logout/:
+    put:
+      tags:
+        - "User"
+      summary: "Logs out the current user"
+      description: "Logs out the currently authenticated user."
+      operationId: "logoutUser"
+      responses:
+        200:
+          description: "logged out"
+        401:
+          description: "Unauthorized"
 definitions:
   ListPagination:
     type: "object"
@@ -1284,3 +1312,11 @@ definitions:
           items:
             $ref: "#/definitions/TaskInspectResultsOut"
           description: "The task inspection results"
+  User:
+    type: "object"
+    required:
+      - username
+    properties:
+      username:
+        type: "string"
+        description: "The username"
