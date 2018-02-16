@@ -673,7 +673,7 @@ class EngineTest(TestCase):
             'os_release'), nfingerprint['os_release'])
 
     def test_source_name_in_metadata(self):
-        """Test that processing facts add source_name to fingerprint metadata."""
+        """Test that adding facts includes source_name in metadata."""
         source = Source(
             name='source1',
             source_type='network',
@@ -682,4 +682,6 @@ class EngineTest(TestCase):
         sourcetopass = {'source_id': 1, 'source_type': 'network'}
         fingerprint = {'metadata': {}}
         result = _process_network_fact(sourcetopass, fingerprint)
-        self.assertEqual(result['metadata']['infrastructure_type']['source_name'], 'source1')
+        self.assertEqual(
+            result['metadata']['infrastructure_type']['source_name'],
+            'source1')
