@@ -1,0 +1,9 @@
+.login .alert.alert-login-message {
+  background: transparent;
+  color: $color-pf-red;
+  border-color: $color-pf-red;
+
+  .pficon-info {
+    color: $color-pf-red;
+  }
+}

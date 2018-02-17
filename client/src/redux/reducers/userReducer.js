@@ -58,7 +58,7 @@ export default function userReducer(state = initialState, action) {
       return helpers.setStateProp(
         'user',
         {
-          currentUser: action.payload,
+          currentUser: action.payload.data,
           fulfilled: true
         },
         {
@@ -105,6 +105,7 @@ export default function userReducer(state = initialState, action) {
         {
           loggedIn: true,
           fulfilled: true,
+          wasLoggedIn: true,
           authToken: action.payload.authToken
         },
         {

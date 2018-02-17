@@ -5,6 +5,7 @@
 {% block includes %}
   <link rel="stylesheet" href="{% static '/assets/rcue/css/rcue.css' %}">
   <link rel="stylesheet" href="{% static '/assets/rcue/css/rcue-additions.css' %}">
+  <link rel="stylesheet" href="{% static '/assets/css/entitlements.css' %}">
 {% endblock %}
 
 {% block pagetitle %}
@@ -20,6 +21,14 @@ Red Hat Entitlements Reporting
 {% endblock %}
 
 {% block content %}
+
+{% if form.errors %}
+<div class="alert alert-login-message">
+  <span class="pficon pficon-info"></span>
+  Your username and password didn't match. Please try again.
+</div>
+{% endif %}
+
 <form class="form-horizontal" role="form" method="post">
   <div class="form-group">
     {% csrf_token %}
