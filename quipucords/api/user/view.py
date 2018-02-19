@@ -47,7 +47,8 @@ class UserViewSet(viewsets.GenericViewSet):
         instance = request.user
         logout(request)
         token = Token.objects.filter(user=instance).first()
-        token.delete()
+        if token:
+            token.delete()
         token = Token.objects.create(user=instance)
 
         return Response()
