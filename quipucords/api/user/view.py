@@ -49,6 +49,7 @@ class UserViewSet(viewsets.GenericViewSet):
         token = Token.objects.filter(user=instance).first()
         if token:
             token.delete()
-        token = Token.objects.create(user=instance)
+        if instance:
+            token = Token.objects.create(user=instance)
 
         return Response()
