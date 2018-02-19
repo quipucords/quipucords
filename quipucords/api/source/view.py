@@ -11,6 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from rest_framework.response import Response
@@ -24,7 +25,13 @@ from rest_framework_expiring_authtoken.authentication import \
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
-from api.models import Source, Credential, ScanJob, ScanTask, ScanJobOptions
+from api.models import (Source,
+                        Credential,
+                        Scan,
+                        ScanOptions,
+                        ScanJob,
+                        ScanTask)
+from api.scanjob.serializer import copy_scan_info_into_job
 import api.messages as messages
 from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
@@ -134,6 +141,7 @@ class SourceViewSet(ModelViewSet):
         return Response(result)
 
     # pylint: disable=unused-argument
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Create a source."""
         response = super().create(request, args, kwargs)
@@ -152,15 +160,23 @@ class SourceViewSet(ModelViewSet):
                     # Grab the source id
                     source_id = response.data['id']
                     # Define the scan options object
-                    scan_options = ScanJobOptions()
+                    scan_options = ScanOptions()
                     scan_options.save()
                     # Create the scan job
-                    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                       options=scan_options)
-                    scan_job.save()
+                    scan = Scan(name='Scan_%s' % json_source['name'],
+                                scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                options=scan_options)
+                    scan.save()
+
                     # Add the source
-                    scan_job.sources.add(source_id)
+                    scan.sources.add(source_id)
+                    scan.save()
+
+                    scan_job = ScanJob(scan=scan)
                     scan_job.save()
+
+                    copy_scan_info_into_job(scan_job)
+
                     # Start the scan
                     start_scan.send(sender=self.__class__, instance=scan_job)
             else:

@@ -44,35 +44,38 @@ class ScanOptions(models.Model):
                                   self.disable_optional_products)\
             + '}'
 
-    def get_extra_vars(self):
+    @staticmethod
+    def get_extra_vars(disable_optional_products):
         """Construct a dictionary based on the disabled products.
 
+        :param disable_optional_products: option products config
+        for scan.
         :returns: a dictionary representing the updated collection
         status of the optional products to be assigned as the extra
         vars for the ansibile task runner
         """
         # Grab the optional products status dict and create
         # a default dict (all products default to True)
-        product_status = self.get_optional_products(
-            self.disable_optional_products)
-        product_default = {self.JBOSS_EAP: True,
-                           self.JBOSS_FUSE: True,
-                           self.JBOSS_BRMS: True}
+        product_status = ScanOptions.get_optional_products(
+            disable_optional_products)
+        product_default = {ScanOptions.JBOSS_EAP: True,
+                           ScanOptions.JBOSS_FUSE: True,
+                           ScanOptions.JBOSS_BRMS: True}
 
         if product_status == {}:
             return product_default
         # If specified, turn off fact collection for fuse
-        if product_status.get(self.JBOSS_FUSE) is False:
-            product_default[self.JBOSS_FUSE] = False
+        if product_status.get(ScanOptions.JBOSS_FUSE) is False:
+            product_default[ScanOptions.JBOSS_FUSE] = False
         # If specified, turn off fact collection for brms
-        if product_status.get(self.JBOSS_BRMS) is False:
-            product_default[self.JBOSS_BRMS] = False
+        if product_status.get(ScanOptions.JBOSS_BRMS) is False:
+            product_default[ScanOptions.JBOSS_BRMS] = False
         # If specified and both brms & fuse are false
         # turn off fact collection for eap
-        if product_status.get(self.JBOSS_EAP) is False and \
-                (not product_default.get(self.JBOSS_FUSE)) and \
-                (not product_default.get(self.JBOSS_BRMS)):
-            product_default[self.JBOSS_EAP] = False
+        if product_status.get(ScanOptions.JBOSS_EAP) is False and \
+                (not product_default.get(ScanOptions.JBOSS_FUSE)) and \
+                (not product_default.get(ScanOptions.JBOSS_BRMS)):
+            product_default[ScanOptions.JBOSS_EAP] = False
 
         return product_default
 

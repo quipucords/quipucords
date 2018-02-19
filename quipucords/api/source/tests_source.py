@@ -135,32 +135,26 @@ class SourceTest(TestCase):
         source.save()
         end = datetime.now()
         scan_job, scan_task = create_scan_job(source)
-
-        scan_task.status = ScanTask.COMPLETED
-        scan_task.systems_count = 10
-        scan_task.systems_scanned = 9
-        scan_task.systems_failed = 1
-        scan_task.start_time = start
-        scan_task.end_time = end
-        scan_task.save()
-
-        scan_job.status = ScanTask.COMPLETED
+        scan_task.update_stats('', sys_count=10, sys_scanned=9, sys_failed=1)
         scan_job.start_time = start
         scan_job.end_time = end
+        scan_job.status = ScanTask.COMPLETED
         scan_job.save()
 
         serializer = SourceSerializer(source)
         json_source = serializer.data
         out = format_source(json_source)
+        connect_result = {'id': 1,
+                          'start_time': start,
+                          'end_time': end, 'status': 'completed',
+                          'systems_count': scan_task.systems_count,
+                          'systems_scanned': scan_task.systems_scanned,
+                          'systems_failed': scan_task.systems_failed}
         expected = {'id': 1,
                     'name': 'source1',
                     'source_type': 'network',
                     'port': 22,
-                    'connection': {'id': 1, 'start_time': start,
-                                   'end_time': end, 'status': 'completed',
-                                   'systems_count': 10,
-                                   'systems_scanned': 9,
-                                   'systems_failed': 1}}
+                    'connection': connect_result}
 
         self.assertEqual(out, expected)
 

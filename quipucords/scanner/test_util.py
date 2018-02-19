@@ -11,17 +11,20 @@
 """Test util for the scan features."""
 
 from datetime import datetime
-from api.models import (ScanJobOptions,
+from api.models import (Scan,
+                        ScanOptions,
                         ScanTask,
                         ScanJob,
                         JobConnectionResult,
                         JobInspectionResult,
                         TaskConnectionResult,
                         TaskInspectionResult)
+from api.scanjob.serializer import copy_scan_info_into_job
 
 
 def create_scan_job(source,
                     scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                    scan_name='test',
                     scan_options=None):
     """Create a new scan job.
 
@@ -30,6 +33,24 @@ def create_scan_job(source,
     :param scan_options: Job scan options
     :return: the scan job and task
     """
+    # Create scan configuration
+    scan = Scan(name=scan_name,
+                scan_type=scan_type)
+    scan.save()
+
+    # Add source to scan
+    if source is not None:
+        scan.sources.add(source)
+
+    # Add options to scan
+    options_to_use = scan_options
+    if options_to_use is None:
+        options_to_use = ScanOptions()
+        options_to_use.save()
+
+    scan.options = options_to_use
+    scan.save()
+
     # Create job results
     job_conn_results = JobConnectionResult()
     job_conn_results.save()
@@ -39,17 +60,12 @@ def create_scan_job(source,
     task_conn_result.save()
 
     # Create Job
-    scan_job = ScanJob(scan_type=scan_type,
+    scan_job = ScanJob(scan=scan,
                        connection_results=job_conn_results)
     scan_job.save()
-    scan_job.sources.add(source)
 
-    options_to_use = scan_options
-    if options_to_use is None:
-        options_to_use = ScanJobOptions()
-        options_to_use.save()
-
-    scan_job.options = options_to_use
+    # Simulate what happens via the API to copy scan config
+    copy_scan_info_into_job(scan_job)
 
     # Add Task results to job results
     scan_job.connection_results.task_results.add(task_conn_result)

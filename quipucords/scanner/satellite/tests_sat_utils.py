@@ -15,12 +15,13 @@ import xmlrpc.client
 import requests_mock
 from django.test import TestCase
 from api.models import (Credential, Source, ScanTask,
-                        ScanJob, JobConnectionResult, SourceOptions)
+                        SourceOptions)
 from scanner.satellite.utils import (get_credential, get_connect_data,
                                      construct_url, execute_request,
                                      status, data_map, get_sat5_client,
                                      _status5)
 from scanner.satellite.api import SatelliteException
+from scanner.test_util import create_scan_job
 
 
 def mock_xml_fault(param1, param2):  # pylint: disable=unused-argument
@@ -55,17 +56,8 @@ class SatelliteUtilsTest(TestCase):
         self.source.options = self.options
         self.source.save()
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                  source=self.source, sequence_number=1)
-        self.scan_task.save()
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-        self.scan_job.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
 
     def tearDown(self):
         """Cleanup test case setup."""

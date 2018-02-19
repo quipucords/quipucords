@@ -26,7 +26,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob, Source)
+from api.models import (Scan, ScanTask, ScanJob, Source)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
@@ -38,6 +38,7 @@ from api.signals.scanjob_signal import (start_scan, pause_scan,
                                         cancel_scan, restart_scan)
 
 
+SCAN_KEY = 'scan'
 SOURCES_KEY = 'sources'
 RESULTS_KEY = 'task_results'
 TASKS_KEY = 'tasks'
@@ -60,6 +61,10 @@ def expand_scanjob(json_scan):
         pk__in=source_ids).values('id', 'name', 'source_type')
     if slim_sources:
         json_scan[SOURCES_KEY] = slim_sources
+
+    scan_id = json_scan.get(SCAN_KEY)
+    slim_scan = Scan.objects.filter(pk=scan_id).values('id', 'name').first()
+    json_scan[SCAN_KEY] = slim_scan
 
     if json_scan.get(TASKS_KEY):
         scan = ScanJob.objects.get(pk=json_scan.get('id'))
