@@ -25,7 +25,7 @@ class UserService {
   static whoami() {
     return axios({
       method: 'get',
-      url: `${process.env.REACT_APP_USER_SERVICE}current/`,
+      url: `${process.env.REACT_APP_USER_SERVICE_CURRENT}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
@@ -35,7 +35,7 @@ class UserService {
   static logoutUser() {
     return axios({
       method: 'put',
-      url: `${process.env.REACT_APP_USER_SERVICE}logout/`,
+      url: `${process.env.REACT_APP_USER_SERVICE_LOGOUT}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
