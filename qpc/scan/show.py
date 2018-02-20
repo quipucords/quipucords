@@ -54,10 +54,6 @@ class ScanShowCommand(CliCommand):
             json_data = response.json()
             count = json_data.get('count', 0)
             results = json_data.get('results', [])
-            # if count == 1:
-            #     scan_entry = results[0]
-            #     self.req_path = self.req_path + str(scan_entry['id']) + '/'
-            #     found = True
             if count >= 1:
                 for result in results:
                     if result['name'] == self.args.name:
