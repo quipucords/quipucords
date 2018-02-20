@@ -34,10 +34,10 @@ ROUTER.register(r'facts',
 ROUTER.register(r'sources',
                 SourceViewSet,
                 base_name='source')
-ROUTER.register(r'scanconfigs',
+ROUTER.register(r'scans',
                 ScanViewSet,
                 base_name='scan')
-ROUTER.register(r'scans',
+ROUTER.register(r'jobs',
                 ScanJobViewSet,
                 base_name='scanjob')
 ROUTER.register(r'users',

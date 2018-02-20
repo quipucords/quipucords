@@ -253,85 +253,6 @@ class ScanJobTest(TestCase):
                             'not be found in database.']})
 
     @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_list(self, start_scan):
-        """List all ScanJob objects."""
-        data_default = {'scan': self.inspect_scan.id}
-        data_discovery = {'scan': self.connect_scan.id}
-        self.create_expect_201(data_default)
-        self.create_expect_201(data_discovery)
-
-        url = reverse('scanjob-list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1,
-                     'scan': {'id': 2, 'name': 'inspect_test'},
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED},
-                    {'id': 2,
-                     'scan': {'id': 1, 'name': 'connect_test'},
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_filtered_list(self, start_scan):
-        """List filtered ScanJob objects."""
-        data_default = {'scan': self.inspect_scan.id}
-        data_discovery = {'scan': self.connect_scan.id}
-        self.create_expect_201(data_default)
-        self.create_expect_201(data_discovery)
-
-        url = reverse('scanjob-list')
-        response = self.client.get(
-            url, {'scan_type': ScanTask.SCAN_TYPE_CONNECT})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = []
-        expected = {'count': 0,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-        response = self.client.get(
-            url, {'status': ScanTask.PENDING})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
-        self.assertEqual(content, expected)
-
-        response = self.client.get(
-            url, {'status': ScanTask.CREATED})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1,
-                     'scan': {'id': 2, 'name': 'inspect_test'},
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED},
-                    {'id': 2,
-                     'scan': {'id': 1, 'name': 'connect_test'},
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
         """Get ScanJob details by primary key."""
         data_discovery = {'scan': self.connect_scan.id}
@@ -352,7 +273,7 @@ class ScanJobTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_details(self, start_scan):
         """Get ScanJob result details by primary key."""
         # pylint: disable=no-member
@@ -542,7 +463,7 @@ class ScanJobTest(TestCase):
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
         serializer = ScanJobSerializer(scan_job)
         json_scan = serializer.data
-        expand_scanjob(json_scan)
+        json_scan = expand_scanjob(json_scan)
 
         self.assertEqual(json_scan.get('systems_count'), 2)
         self.assertEqual(json_scan.get('systems_failed'), 1)
@@ -665,3 +586,96 @@ class ScanJobTest(TestCase):
                          'jboss_fuse': False,
                          'jboss_brms': False}
         self.assertEqual(extra_vars, expected_vars)
+
+    ############################################################
+    # Scan Job tests /jobs path
+    ############################################################
+
+    def create_job_expect_201(self, scan_id):
+        """Create a scan, return the response as a dict."""
+        url = reverse('scan-detail', args=(scan_id,)) + 'jobs/'
+        print(url)
+        response = self.client.post(url,
+                                    {},
+                                    'application/json')
+        response_json = response.json()
+        if response.status_code != status.HTTP_201_CREATED:
+            print('Cause of failure: ')
+            print(response_json)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response_json
+
+    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_list_jobs(self, start_scan):
+        """List all ScanJobs under a scan."""
+        self.create_job_expect_201(self.inspect_scan.id)
+        self.create_job_expect_201(self.connect_scan.id)
+
+        url = reverse('scan-detail', args=(self.inspect_scan.id,)) + 'jobs/'
+        print(url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        results1 = [{'id': 1,
+                     'scan': {'id': 2, 'name': 'inspect_test'},
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
+        self.assertEqual(content, expected)
+
+    # @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    # def test_filtered_list(self, start_scan):
+    #     """List filtered ScanJob objects."""
+    #     data_default = {'scan': self.inspect_scan.id}
+    #     data_discovery = {'scan': self.connect_scan.id}
+    #     self.create_expect_201(data_default)
+    #     self.create_expect_201(data_discovery)
+
+    #     url = reverse('scanjob-list')
+    #     response = self.client.get(
+    #         url, {'scan_type': ScanTask.SCAN_TYPE_CONNECT})
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    #     content = response.json()
+    #     results1 = []
+    #     expected = {'count': 0,
+    #                 'next': None,
+    #                 'previous': None,
+    #                 'results': results1}
+    #     self.assertEqual(content, expected)
+
+    #     response = self.client.get(
+    #         url, {'status': ScanTask.PENDING})
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    #     content = response.json()
+    #     expected = {'count': 0, 'next': None,
+    # 'previous': None, 'results': []}
+    #     self.assertEqual(content, expected)
+
+    #     response = self.client.get(
+    #         url, {'status': ScanTask.CREATED})
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    #     content = response.json()
+    #     results1 = [{'id': 1,
+    #                  'scan': {'id': 2, 'name': 'inspect_test'},
+    #                  'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+    #                  'status': 'created',
+    #                  'status_message': messages.SJ_STATUS_MSG_CREATED},
+    #                 {'id': 2,
+    #                  'scan': {'id': 1, 'name': 'connect_test'},
+    #                  'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+    #                  'status': 'created',
+    #                  'status_message': messages.SJ_STATUS_MSG_CREATED}]
+    #     expected = {'count': 2,
+    #                 'next': None,
+    #                 'previous': None,
+    #                 'results': results1}
+    #     self.assertEqual(content, expected)
