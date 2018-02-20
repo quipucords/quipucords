@@ -252,18 +252,12 @@ class ScanJobTest(TestCase):
         content = response.json()
         results1 = [{'id': 1,
                      'scan': {'id': 2, 'name': 'inspect_test'},
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'scan': {'id': 1, 'name': 'connect_test'},
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
         expected = {'count': 2,
@@ -286,15 +280,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        results1 = [{'id': 2,
-                     'scan': {'id': 1, 'name': 'connect_test'},
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 1,
+        results1 = []
+        expected = {'count': 0,
                     'next': None,
                     'previous': None,
                     'results': results1}
@@ -315,18 +302,12 @@ class ScanJobTest(TestCase):
         content = response.json()
         results1 = [{'id': 1,
                      'scan': {'id': 2, 'name': 'inspect_test'},
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED},
                     {'id': 2,
                      'scan': {'id': 1, 'name': 'connect_test'},
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                      'status': 'created',
                      'status_message': messages.SJ_STATUS_MSG_CREATED}]
         expected = {'count': 2,
@@ -344,11 +325,11 @@ class ScanJobTest(TestCase):
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('sources', response.json())
-        sources = response.json()['sources']
+        self.assertIn('scan', response.json())
+        scan = response.json()['scan']
 
         self.assertEqual(
-            sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
+            scan, {'id': 1, 'name': 'connect_test'})
 
     def test_retrieve_bad_id(self):
         """Get ScanJob details by bad primary key."""

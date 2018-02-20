@@ -19,7 +19,6 @@ from api.models import (Scan,
                         JobInspectionResult,
                         TaskConnectionResult,
                         TaskInspectionResult)
-from api.scanjob.serializer import copy_scan_info_into_job
 
 
 def create_scan_job(source,
@@ -65,7 +64,7 @@ def create_scan_job(source,
     scan_job.save()
 
     # Simulate what happens via the API to copy scan config
-    copy_scan_info_into_job(scan_job)
+    scan_job.copy_scan_configuration()
 
     # Add Task results to job results
     scan_job.connection_results.task_results.add(task_conn_result)

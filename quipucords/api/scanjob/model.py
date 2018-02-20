@@ -50,7 +50,8 @@ class ScanJobOptions(models.Model):
 class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
-    scan = models.ForeignKey(Scan, null=False)
+    # pylint: disable=too-many-instance-attributes
+    scan = models.ForeignKey(Scan, null=True)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
@@ -108,6 +109,25 @@ class ScanJob(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
 
+    def copy_scan_configuration(self):
+        """Copy scan info into the job."""
+        # pylint: disable=no-member
+        scan = self.scan
+        if scan is not None:
+            for source in scan.sources.all():
+                self.sources.add(source)
+            self.scan_type = scan.scan_type
+            if scan.options is not None:
+                disable_options = scan.options.disable_optional_products
+                scan_job_options = ScanJobOptions(
+                    max_concurrency=scan.options.max_concurrency,
+                    disable_optional_products=disable_options)
+            else:
+                scan_job_options = ScanJobOptions()
+            scan_job_options.save()
+            self.options = scan_job_options
+            self.save()
+
     def log_current_status(self,
                            show_status_message=False,
                            log_level=logging.INFO):
@@ -164,7 +184,9 @@ class ScanJob(models.Model):
 
         Change job state from CREATED TO PENDING.
         """
-        # pylint: disable=no-member
+        # pylint: disable=no-member,too-many-statements
+        self.copy_scan_configuration()
+
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(
             target_status, [ScanTask.CREATED])

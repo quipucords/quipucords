@@ -10,7 +10,6 @@
 #
 """Module for serializing all model object for database storage."""
 
-from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
@@ -28,24 +27,6 @@ from api.common.serializer import (NotEmptySerializer,
 from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 from api.common.util import is_int, convert_to_int
-
-
-@transaction.atomic
-def copy_scan_info_into_job(scan_job):
-    """Copy scan info into the job."""
-    scan = scan_job.scan
-    for source in scan.sources.all():
-        scan_job.sources.add(source)
-    scan_job.scan_type = scan.scan_type
-    if scan.options is not None:
-        scan_job_options = ScanJobOptions(
-            max_concurrency=scan.options.max_concurrency,
-            disable_optional_products=scan.options.disable_optional_products)
-    else:
-        scan_job_options = ScanJobOptions()
-    scan_job_options.save()
-    scan_job.options = scan_job_options
-    scan_job.save()
 
 
 class ScanJobOptionsSerializer(NotEmptySerializer):
@@ -96,7 +77,7 @@ class TaskField(PrimaryKeyRelatedField):
 class ScanJobSerializer(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
-    scan = ScanField(many=False, queryset=Scan.objects.all())
+    scan = ScanField(required=True, many=False, queryset=Scan.objects.all())
     sources = SourceField(many=True, read_only=True)
     scan_type = ValidStringChoiceField(read_only=True,
                                        choices=ScanTask.SCAN_TYPE_CHOICES)
@@ -124,15 +105,6 @@ class ScanJobSerializer(NotEmptySerializer):
                   'fact_collection_id',
                   'start_time',
                   'end_time']
-
-    @transaction.atomic
-    def create(self, validated_data):
-        """Create a scan job."""
-        scan_job = super().create(validated_data)
-
-        # Copy scan config into job to capture config for historic reference
-        copy_scan_info_into_job(scan_job)
-        return scan_job
 
     @staticmethod
     def validate_sources(sources):
