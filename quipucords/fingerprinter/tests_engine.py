@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -37,7 +37,7 @@ class EngineTest(TestCase):
     ################################################################
     def _create_network_fc_json(
             self,
-            fact_collection_id=1,
+            report_id=1,
             source_id=1,
             source_type=Source.NETWORK_SOURCE_TYPE,
             cpu_count=2,
@@ -124,12 +124,12 @@ class EngineTest(TestCase):
         if virt_what_type:
             fact['virt_what_type'] = virt_what_type
 
-        fact_collection = {'id': fact_collection_id, 'facts': [fact]}
+        fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
 
     def _create_vcenter_fc_json(
             self,
-            fact_collection_id=1,
+            report_id=1,
             source_id=2,
             source_type=Source.VCENTER_SOURCE_TYPE,
             vm_cpu_count=2,
@@ -191,12 +191,12 @@ class EngineTest(TestCase):
         if vm_cluster:
             fact['vm.cluster'] = vm_cluster
 
-        fact_collection = {'id': fact_collection_id, 'facts': [fact]}
+        fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
 
     def _create_satellite_fc_json(
             self,
-            fact_collection_id=1,
+            report_id=1,
             source_id=3,
             source_type=Source.SATELLITE_SOURCE_TYPE,
             hostname='9.8.7.6',
@@ -249,7 +249,7 @@ class EngineTest(TestCase):
         if num_sockets:
             fact['num_sockets'] = num_sockets
 
-        fact_collection = {'id': fact_collection_id, 'facts': [fact]}
+        fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
 
     def _validate_network_result(self, fingerprint, fact):

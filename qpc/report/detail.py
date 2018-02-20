@@ -34,14 +34,13 @@ class ReportDetailCommand(CliCommand):
 
     SUBCOMMAND = report.SUBCOMMAND
     ACTION = report.DETAIL
-    DETAIL_URI = report.FACT_URI
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            self.DETAIL_URI, [codes.ok])
+                            report.REPORT_URI, [codes.ok])
         self.parser.add_argument('--id', dest='scan_id', metavar='SCAN_ID',
                                  help=_(messages.REPORT_SCAN_ID_HELP),
                                  required=True)
@@ -55,7 +54,7 @@ class ReportDetailCommand(CliCommand):
         self.parser.add_argument('--output-file', dest='path', metavar='PATH',
                                  help=_(messages.REPORT_PATH_HELP),
                                  required=True)
-        self.fact_collection_id = None
+        self.report_id = None
 
     def _validate_args(self):
         CliCommand._validate_args(self)
@@ -76,10 +75,10 @@ class ReportDetailCommand(CliCommand):
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
-            self.fact_collection_id = json_data.get('fact_collection_id')
-            if self.fact_collection_id:
-                self.req_path = '%s%s' % (
-                    self.req_path, self.fact_collection_id)
+            self.report_id = json_data.get('report_id')
+            if self.report_id:
+                self.req_path = '%s%s%s' % (
+                    self.req_path, self.report_id, report.DETAILS_PATH_SUFFIX)
             else:
                 print(_(messages.REPORT_NO_REPORT_FOR_SJ %
                         self.args.scan_id))

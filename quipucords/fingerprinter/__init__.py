@@ -190,10 +190,10 @@ def _process_sources(fact_collection):
     return all_fingerprints
 
 
-def _process_source(fact_collection_id, source):
+def _process_source(report_id, source):
     """Process facts and convert to fingerprints.
 
-    :param fact_collection_id: id of fact collection
+    :param report_id: id of report
     associated with facts
     :param source_id: id of source associated with facts
     :param source_type: the type of source (network, vcenter, etc)
@@ -215,7 +215,7 @@ def _process_source(fact_collection_id, source):
                          source_type)
 
         if fingerprint is not None:
-            fingerprint['fact_collection_id'] = fact_collection_id
+            fingerprint['report_id'] = report_id
             fingerprints.append(fingerprint)
 
     return fingerprints

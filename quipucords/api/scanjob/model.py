@@ -72,7 +72,7 @@ class ScanJob(models.Model):
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
-    fact_collection_id = models.IntegerField(null=True)
+    report_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
     connection_results = models.ForeignKey(
@@ -88,7 +88,7 @@ class ScanJob(models.Model):
             'status:{}, '\
             'tasks: {}, '\
             'options: {}, '\
-            'fact_collection_id: {}, '\
+            'report_id: {}, '\
             'start_time: {}, '\
             'end_time: {}, '\
             'connection_results: {}, '\
@@ -98,7 +98,7 @@ class ScanJob(models.Model):
                                             self.status,
                                             self.tasks,
                                             self.options,
-                                            self.fact_collection_id,
+                                            self.report_id,
                                             self.start_time,
                                             self.end_time,
                                             self.connection_results,

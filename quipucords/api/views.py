@@ -15,6 +15,6 @@
 from api.fact.view import FactViewSet
 from api.credential.view import CredentialViewSet
 from api.source.view import SourceViewSet
-from api.report.view import ReportListView
+from api.report.view import details, deployments
 from api.scanjob.view import ScanJobViewSet
 from api.user.view import UserViewSet
