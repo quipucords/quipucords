@@ -43,11 +43,4 @@ const deleteCredentials = (ids = []) => dispatch => {
   });
 };
 
-export {
-  addCredential,
-  deleteCredential,
-  deleteCredentials,
-  getCredential,
-  getCredentials,
-  updateCredential
-};
+export { addCredential, deleteCredential, deleteCredentials, getCredential, getCredentials, updateCredential };

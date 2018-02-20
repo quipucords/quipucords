@@ -39,10 +39,7 @@ class SourceListItem extends React.Component {
     let typeIcon = helpers.sourceTypeIcon(item.source_type);
 
     return (
-      <SimpleTooltip
-        id="sourceTypeTip"
-        tooltip={helpers.sourceTypeString(item.source_type)}
-      >
+      <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(item.source_type)}>
         <ListView.Icon type={typeIcon.type} name={typeIcon.name} />
       </SimpleTooltip>
     );
@@ -59,11 +56,7 @@ class SourceListItem extends React.Component {
           </Button>
         </SimpleTooltip>
         <SimpleTooltip id="deleteTip" tooltip="Delete">
-          <Button
-            onClick={() => onDelete(item)}
-            bsStyle="link"
-            key="removeButton"
-          >
+          <Button onClick={() => onDelete(item)} bsStyle="link" key="removeButton">
             <Icon type="pf" name="delete" atria-label="Delete" />
           </Button>
         </SimpleTooltip>
@@ -84,17 +77,11 @@ class SourceListItem extends React.Component {
     return [
       <ListView.InfoItem
         key="credentials"
-        className={
-          'list-view-info-item-icon-count ' +
-          (credentialCount === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-icon-count ' + (credentialCount === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="credentialsTip"
-          tooltip={
-            credentialCount +
-            (credentialCount === 1 ? ' Credential' : ' Credentials')
-          }
+          tooltip={credentialCount + (credentialCount === 1 ? ' Credential' : ' Credentials')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'credentials'}
@@ -102,30 +89,18 @@ class SourceListItem extends React.Component {
               this.toggleExpand('credentials');
             }}
           >
-            <Icon
-              className="list-view-compound-item-icon"
-              type="fa"
-              name="key"
-            />
+            <Icon className="list-view-compound-item-icon" type="fa" name="key" />
             <strong>{credentialCount}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="okHosts"
-        className={
-          'list-view-info-item-icon-count ' +
-          (okHostCount === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-icon-count ' + (okHostCount === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="okHostsTip"
-          tooltip={
-            okHostCount +
-            (okHostCount === 1
-              ? ' Successful Authentication'
-              : ' Successful Authentications')
-          }
+          tooltip={okHostCount + (okHostCount === 1 ? ' Successful Authentication' : ' Successful Authentications')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'okHosts'}
@@ -133,30 +108,18 @@ class SourceListItem extends React.Component {
               this.toggleExpand('okHosts');
             }}
           >
-            <Icon
-              className="list-view-compound-item-icon"
-              type="pf"
-              name="ok"
-            />
+            <Icon className="list-view-compound-item-icon" type="pf" name="ok" />
             <strong>{okHostCount}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="failedHosts"
-        className={
-          'list-view-info-item-icon-count ' +
-          (failedHostCount === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-icon-count ' + (failedHostCount === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="failedHostsTip"
-          tooltip={
-            failedHostCount +
-            (failedHostCount === 1
-              ? ' Failed Authentication'
-              : ' Failed Authentications')
-          }
+          tooltip={failedHostCount + (failedHostCount === 1 ? ' Failed Authentication' : ' Failed Authentications')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'failedHosts'}
@@ -164,11 +127,7 @@ class SourceListItem extends React.Component {
               this.toggleExpand('failedHosts');
             }}
           >
-            <Icon
-              className="list-view-compound-item-icon"
-              type="pf"
-              name="error-circle-o"
-            />
+            <Icon className="list-view-compound-item-icon" type="pf" name="error-circle-o" />
             <strong>{failedHostCount}</strong>
           </ListView.Expand>
         </SimpleTooltip>
@@ -183,9 +142,7 @@ class SourceListItem extends React.Component {
       case 'okHosts':
         return <SourceHostsList hosts={item.hosts} status="ok" />;
       case 'failedHosts':
-        return (
-          <SourceHostsList hosts={item.failed_hosts} status="error-circle-o" />
-        );
+        return <SourceHostsList hosts={item.failed_hosts} status="error-circle-o" />;
       case 'credentials':
         return <SourceCredentialsList source={item} />;
       default:
@@ -201,16 +158,10 @@ class SourceListItem extends React.Component {
           <ListView.DescriptionHeading>{item.name}</ListView.DescriptionHeading>
           {item.hosts &&
             item.hosts.map((host, index) => {
-              return (
-                <ListView.DescriptionText key={index}>
-                  {host}
-                </ListView.DescriptionText>
-              );
+              return <ListView.DescriptionText key={index}>{host}</ListView.DescriptionText>;
             })}
         </span>
-        <span className="quipucords-description-right">
-          {this.renderScanStatus()}
-        </span>
+        <span className="quipucords-description-right">{this.renderScanStatus()}</span>
       </div>
     );
   }
@@ -234,33 +185,21 @@ class SourceListItem extends React.Component {
         break;
       case 'failed':
         scanDescription = 'Connection Failed';
-        icon = (
-          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
         break;
       case 'canceled':
         scanDescription = 'Connection Canceled';
-        icon = (
-          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
         break;
       case 'created':
       case 'pending':
       case 'running':
         scanDescription = 'Connection in Progress';
-        icon = (
-          <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />
-        );
+        icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
         break;
       case 'paused':
         scanDescription = 'Connection Paused';
-        icon = (
-          <Icon
-            className="scan-status-icon"
-            type="pf"
-            name="warning-triangle-o"
-          />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="warning-triangle-o" />;
         break;
       default:
         return null;
@@ -289,13 +228,7 @@ class SourceListItem extends React.Component {
         key={item.id}
         stacked
         className={classes}
-        checkboxInput={
-          <Checkbox
-            checked={selected}
-            bsClass=""
-            onClick={e => onItemSelectChange(item)}
-          />
-        }
+        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={e => onItemSelectChange(item)} />}
         actions={this.renderActions()}
         leftContent={this.renderSourceType()}
         description={this.renderDescription()}

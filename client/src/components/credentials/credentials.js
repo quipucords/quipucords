@@ -16,10 +16,7 @@ import {
   Modal
 } from 'patternfly-react';
 
-import {
-  getCredentials,
-  deleteCredential
-} from '../../redux/actions/credentialsActions';
+import { getCredentials, deleteCredential } from '../../redux/actions/credentialsActions';
 import {
   confirmationModalTypes,
   credentialsTypes,
@@ -36,10 +33,7 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import CredentialsEmptyState from './credentialsEmptyState';
 import { CredentialListItem } from './credentialListItem';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
-import {
-  CredentialFilterFields,
-  CredentialSortFields
-} from './crendentialConstants';
+import { CredentialFilterFields, CredentialSortFields } from './crendentialConstants';
 
 class Credentials extends React.Component {
   constructor() {
@@ -61,9 +55,7 @@ class Credentials extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getCredentials(
-      helpers.createViewQueryObject(this.props.viewOptions)
-    );
+    this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
   }
 
   componentWillReceiveProps(nextProps, nextState) {
@@ -79,12 +71,8 @@ class Credentials extends React.Component {
     }
 
     // Check for changes resulting in a fetch
-    if (
-      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
-    ) {
-      this.props.getCredentials(
-        helpers.createViewQueryObject(nextProps.viewOptions)
-      );
+    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
+      this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
     }
 
     if (this.props.update.delete) {
@@ -94,14 +82,11 @@ class Credentials extends React.Component {
           alertType: 'success',
           message: (
             <span>
-              Credential <strong>{this.deletingCredential.name}</strong>{' '}
-              successfully deleted.
+              Credential <strong>{this.deletingCredential.name}</strong> successfully deleted.
             </span>
           )
         });
-        this.props.getCredentials(
-          helpers.createViewQueryObject(nextProps.viewOptions)
-        );
+        this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
 
         Store.dispatch({
           type: credentialsTypes.DESELECT_CREDENTIAL,
@@ -118,8 +103,7 @@ class Credentials extends React.Component {
           header: 'Error',
           message: (
             <span>
-              Error removing credential{' '}
-              <strong>{this.deletingCredential}</strong>
+              Error removing credential <strong>{this.deletingCredential}</strong>
               <p>{nextProps.update.errorMessage}</p>
             </span>
           )
@@ -173,9 +157,7 @@ class Credentials extends React.Component {
       return;
     }
 
-    let heading = (
-      <span>Are you sure you want to delete the following credentials?</span>
-    );
+    let heading = <span>Are you sure you want to delete the following credentials?</span>;
 
     let credentialsList = '';
     selectedCredentials.forEach((item, index) => {
@@ -209,9 +191,7 @@ class Credentials extends React.Component {
 
   itemSelectChange(item) {
     Store.dispatch({
-      type: this.itemSelected(item)
-        ? credentialsTypes.DESELECT_CREDENTIAL
-        : credentialsTypes.SELECT_CREDENTIAL,
+      type: this.itemSelected(item) ? credentialsTypes.DESELECT_CREDENTIAL : credentialsTypes.SELECT_CREDENTIAL,
       credential: item
     });
   }
@@ -226,8 +206,7 @@ class Credentials extends React.Component {
   deleteCredential(item) {
     let heading = (
       <span>
-        Are you sure you want to delete the credential{' '}
-        <strong>{item.name}</strong>?
+        Are you sure you want to delete the credential <strong>{item.name}</strong>?
       </span>
     );
 
@@ -261,9 +240,7 @@ class Credentials extends React.Component {
   }
 
   refresh() {
-    this.props.getCredentials(
-      helpers.createViewQueryObject(this.props.viewOptions)
-    );
+    this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
   }
 
   clearFilters() {
@@ -278,29 +255,18 @@ class Credentials extends React.Component {
 
     return (
       <div className="form-group">
-        <DropdownButton
-          bsStyle="primary"
-          title="Create"
-          pullRight
-          id="createCredentialButton"
-        >
+        <DropdownButton bsStyle="primary" title="Create" pullRight id="createCredentialButton">
           <MenuItem eventKey="1" onClick={() => this.addCredential('network')}>
             Network Credential
           </MenuItem>
-          <MenuItem
-            eventKey="2"
-            onClick={() => this.addCredential('satellite')}
-          >
+          <MenuItem eventKey="2" onClick={() => this.addCredential('satellite')}>
             Satellite Credential
           </MenuItem>
           <MenuItem eventKey="2" onClick={() => this.addCredential('vcenter')}>
             VCenter Credential
           </MenuItem>
         </DropdownButton>
-        <Button
-          disabled={!selectedCredentials || selectedCredentials.length === 0}
-          onClick={this.deleteCredentials}
-        >
+        <Button disabled={!selectedCredentials || selectedCredentials.length === 0} onClick={this.deleteCredentials}>
           Delete
         </Button>
         <Button onClick={this.refresh} bsStyle="success">
@@ -347,12 +313,8 @@ class Credentials extends React.Component {
 
     return (
       <EmptyState className="list-view-blank-slate">
-        <EmptyState.Title>
-          No Results Match the Filter Criteria
-        </EmptyState.Title>
-        <EmptyState.Info>
-          The active filters are hiding all items.
-        </EmptyState.Info>
+        <EmptyState.Title>No Results Match the Filter Criteria</EmptyState.Title>
+        <EmptyState.Info>The active filters are hiding all items.</EmptyState.Info>
         <EmptyState.Action>
           <Button bsStyle="link" onClick={this.clearFilters}>
             Clear Filters
@@ -363,13 +325,7 @@ class Credentials extends React.Component {
   }
 
   render() {
-    const {
-      error,
-      errorMessage,
-      credentials,
-      selectedCredentials,
-      viewOptions
-    } = this.props;
+    const { error, errorMessage, credentials, selectedCredentials, viewOptions } = this.props;
 
     if (error) {
       return (
@@ -396,13 +352,8 @@ class Credentials extends React.Component {
               selectedCount={selectedCredentials.length}
               {...viewOptions}
             />
-            <ViewPaginationRow
-              viewType={viewTypes.CREDENTIALS_VIEW}
-              {...viewOptions}
-            />
-            <div className="quipucords-list-container">
-              {this.renderCredentialsList(credentials)}
-            </div>
+            <ViewPaginationRow viewType={viewTypes.CREDENTIALS_VIEW} {...viewOptions} />
+            <div className="quipucords-list-container">{this.renderCredentialsList(credentials)}</div>
           </div>
           {this.renderPendingMessage()}
           <CreateCredentialDialog credentials={credentials} />
@@ -419,10 +370,7 @@ class Credentials extends React.Component {
           onAddSource={this.addSource}
           onImportSources={this.importSources}
         />,
-        <CreateCredentialDialog
-          key="createCredentialDialog"
-          credentials={credentials}
-        />
+        <CreateCredentialDialog key="createCredentialDialog" credentials={credentials} />
       </React.Fragment>
     );
   }

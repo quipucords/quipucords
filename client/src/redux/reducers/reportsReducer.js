@@ -22,11 +22,7 @@ const reportsReducer = function(state = initialState, action) {
         'search',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,

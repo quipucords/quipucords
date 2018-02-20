@@ -40,21 +40,14 @@ class ConfirmationModal extends React.Component {
     return (
       <Modal show={show} onHide={this.cancel}>
         <Modal.Header>
-          <button
-            className="close"
-            onClick={this.cancel}
-            aria-hidden="true"
-            aria-label="Close"
-          >
+          <button className="close" onClick={this.cancel} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
           <Modal.Title>{confirmTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="confirm-modal-body">
-            {confirmIcon && (
-              <span className="confirm-modal-icon">{confirmIcon}</span>
-            )}
+            {confirmIcon && <span className="confirm-modal-icon">{confirmIcon}</span>}
             <span className="confirm-modal-content">
               <span className="spacer" />
               <p>{confirmHeading}</p>
@@ -64,12 +57,7 @@ class ConfirmationModal extends React.Component {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            autoFocus
-            bsStyle="default"
-            className="btn-cancel"
-            onClick={this.cancel}
-          >
+          <Button autoFocus bsStyle="default" className="btn-cancel" onClick={this.cancel}>
             {cancelButtonText}
           </Button>
           <Button bsStyle="primary" onClick={onConfirm}>

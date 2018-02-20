@@ -1,4 +1,4 @@
-import aboutReducer from './aboutReducer';
+import aboutReducer from '../aboutReducer';
 
 describe('AboutReducer', function() {
   it('should return the initial state', () => {
