@@ -17,6 +17,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         CharField,
                                         DateTimeField)
 from api.models import (Scan,
+                        Source,
                         ScanTask,
                         ScanJob,
                         ScanJobOptions)
@@ -27,6 +28,61 @@ from api.common.serializer import (NotEmptySerializer,
 from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 from api.common.util import is_int, convert_to_int
+
+SCAN_KEY = 'scan'
+SOURCES_KEY = 'sources'
+TASKS_KEY = 'tasks'
+SYSTEMS_COUNT_KEY = 'systems_count'
+SYSTEMS_SCANNED_KEY = 'systems_scanned'
+SYSTEMS_FAILED_KEY = 'systems_failed'
+
+
+def expand_scanjob(json_scan):
+    """Expand the source and calculate values.
+
+    Take scan object with source ids and pull objects from db.
+    create slim dictionary version of sources with name an value
+    to return to user. Calculate systems_count, systems_scanned,
+    systems_failed values from tasks.
+    """
+    source_ids = json_scan.get(SOURCES_KEY, [])
+    slim_sources = Source.objects.filter(
+        pk__in=source_ids).values('id', 'name', 'source_type')
+    if slim_sources:
+        print('here')
+        json_scan[SOURCES_KEY] = slim_sources
+
+    scan_id = json_scan.get(SCAN_KEY)
+    slim_scan = Scan.objects.filter(pk=scan_id).values('id', 'name').first()
+    json_scan[SCAN_KEY] = slim_scan
+
+    if json_scan.get(TASKS_KEY):
+        scan = ScanJob.objects.get(pk=json_scan.get('id'))
+        systems_count = None
+        systems_scanned = None
+        systems_failed = None
+        tasks = scan.tasks.filter(
+            scan_type=scan.scan_type).order_by('sequence_number')
+        for task in tasks:
+            if task.systems_count is not None:
+                if systems_count is None:
+                    systems_count = 0
+                systems_count += task.systems_count
+            if task.systems_scanned is not None:
+                if systems_scanned is None:
+                    systems_scanned = 0
+                systems_scanned += task.systems_scanned
+            if task.systems_failed is not None:
+                if systems_failed is None:
+                    systems_failed = 0
+                systems_failed += task.systems_failed
+        if systems_count is not None:
+            json_scan[SYSTEMS_COUNT_KEY] = systems_count
+        if systems_scanned is not None:
+            json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
+        if systems_failed is not None:
+            json_scan[SYSTEMS_FAILED_KEY] = systems_failed
+    return json_scan
 
 
 class ScanJobOptionsSerializer(NotEmptySerializer):

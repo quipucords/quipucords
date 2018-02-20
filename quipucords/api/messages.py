@@ -78,6 +78,9 @@ VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
 SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
 SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 
+# Scan messages
+SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
+
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'

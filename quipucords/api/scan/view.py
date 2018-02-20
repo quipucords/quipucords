@@ -11,6 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
+from rest_framework.decorators import detail_route
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from rest_framework.response import Response
@@ -25,8 +26,10 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (Scan, Source)
-from api.serializers import (ScanSerializer)
+from api.models import (Scan, ScanJob, Source)
+from api.serializers import (ScanSerializer, ScanJobSerializer)
+from api.scanjob.serializer import expand_scanjob
+from api.signals.scanjob_signal import start_scan
 
 
 # pylint: disable=too-many-branches
@@ -113,3 +116,40 @@ class ScanViewSet(ModelViewSet):
         json_scan = serializer.data
         expand_scan(json_scan)
         return Response(json_scan)
+
+    @detail_route(methods=['get', 'post'])
+    def jobs(self, request, pk=None):
+        """Get the jobs of a scan."""
+        result = []
+        scan = get_object_or_404(self.queryset, pk=pk)
+        if request.method == 'GET':
+            jobs = ScanJob.objects.filter(scan=scan)
+            page = self.paginate_queryset(jobs)
+
+            if page is not None:
+                serializer = ScanJobSerializer(page, many=True)
+                for scan in serializer.data:
+                    json_scan = expand_scanjob(scan)
+                    result.append(json_scan)
+                return self.get_paginated_response(serializer.data)
+
+            for job in jobs:
+                job_serializer = ScanJobSerializer(job)
+                job_json = job_serializer.data
+                job_json = expand_scanjob(job_serializer.data)
+                result.append(job_json)
+            return Response(result)
+        else:
+            job_data = request.data.copy()
+            job_data['scan'] = pk
+            job_serializer = ScanJobSerializer(data=job_data)
+            job_serializer.is_valid(raise_exception=True)
+            job_serializer.save()
+            headers = self.get_success_headers(job_serializer.data)
+            scanjob_obj = ScanJob.objects.get(pk=job_serializer.data['id'])
+            scanjob_obj.log_current_status()
+            start_scan.send(sender=self.__class__, instance=scanjob_obj)
+
+            return Response(job_serializer.data,
+                            status=status.HTTP_201_CREATED,
+                            headers=headers)

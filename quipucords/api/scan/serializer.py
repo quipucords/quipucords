@@ -74,6 +74,9 @@ class ScanSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
+        self.check_for_existing_name(
+            name=validated_data.get('name'))
+
         options = validated_data.pop('options', None)
         scan = super().create(validated_data)
         if options:
@@ -93,3 +96,23 @@ class ScanSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.SJ_REQ_SOURCES))
 
         return sources
+
+    @staticmethod
+    def check_for_existing_name(name, scan_id=None):
+        """Look for existing (different object) with same name.
+
+        :param name: Name of source to look for
+        :param source_id: Source to exclude
+        """
+        if scan_id is None:
+            # Look for existing with same name (create)
+            existing = Scan.objects.filter(name=name).first()
+        else:
+            # Look for existing.  Same name, different id (update)
+            existing = Scan.objects.filter(
+                name=name).exclude(id=scan_id).first()
+        if existing is not None:
+            error = {
+                'name': [_(messages.SCAN_NAME_ALREADY_EXISTS % name)]
+            }
+            raise ValidationError(error)
