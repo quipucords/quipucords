@@ -45,11 +45,7 @@ class CredentialListItem extends React.Component {
           <Icon type="pf" name="edit" />
         </Button>
       </SimpleTooltip>,
-      <SimpleTooltip
-        key="deleteButton"
-        id="deleteTip"
-        tooltip="Delete Credential"
-      >
+      <SimpleTooltip key="deleteButton" id="deleteTip" tooltip="Delete Credential">
         <Button
           onClick={() => {
             onDelete(item);
@@ -71,10 +67,7 @@ class CredentialListItem extends React.Component {
     return [
       <ListView.InfoItem
         key="sources"
-        className={
-          'list-view-info-item-icon-count ' +
-          (sourceCount === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-icon-count ' + (sourceCount === 0 ? 'invisible' : '')}
       >
         <ListView.Expand
           expanded={item.expanded && item.expandType === 'sources'}
@@ -111,10 +104,7 @@ class CredentialListItem extends React.Component {
                   <Grid.Row key={index}>
                     <Grid.Col xs={12} sm={4}>
                       <span>
-                        <SimpleTooltip
-                          id="sourceTypeTip"
-                          tooltip={helpers.sourceTypeString(source.source_type)}
-                        >
+                        <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(source.source_type)}>
                           <Icon type={typeIcon.type} name={typeIcon.name} />
                         </SimpleTooltip>
                         &nbsp; {source.name}
@@ -144,23 +134,11 @@ class CredentialListItem extends React.Component {
       <ListView.Item
         key={item.id}
         className={classes}
-        checkboxInput={
-          <Checkbox
-            checked={selected}
-            bsClass=""
-            onClick={e => onItemSelectChange(item)}
-          />
-        }
+        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={e => onItemSelectChange(item)} />}
         actions={this.renderActions()}
         leftContent={
-          <SimpleTooltip
-            id="credentialTypeTip"
-            tooltip={helpers.sourceTypeString(item.cred_type)}
-          >
-            <ListView.Icon
-              type={sourceTypeIcon.type}
-              name={sourceTypeIcon.name}
-            />
+          <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
+            <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
           </SimpleTooltip>
         }
         heading={item.name}

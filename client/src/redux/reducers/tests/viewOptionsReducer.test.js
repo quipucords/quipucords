@@ -1,4 +1,4 @@
-import viewOptionsReducer from './viewOptionsReducer';
+import viewOptionsReducer from '../viewOptionsReducer';
 
 describe('viewOptionsReducer', function() {
   it('should return the initial state', () => {

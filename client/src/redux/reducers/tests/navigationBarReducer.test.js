@@ -1,4 +1,4 @@
-import navigationBarReducer from './navigationBarReducer';
+import navigationBarReducer from '../navigationBarReducer';
 
 describe('NavigationBarReducer', function() {
   it('should return the initial state', () => {

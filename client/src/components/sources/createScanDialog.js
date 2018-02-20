@@ -61,12 +61,7 @@ class CreateScanDialog extends React.Component {
     return (
       <Modal show={show} onHide={onCancel}>
         <Modal.Header>
-          <button
-            className="close"
-            onClick={onCancel}
-            aria-hidden="true"
-            aria-label="Close"
-          >
+          <button className="close" onClick={onCancel} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
           <Modal.Title>Scan</Modal.Title>
@@ -79,12 +74,7 @@ class CreateScanDialog extends React.Component {
                 Name
               </Grid.Col>
               <Grid.Col sm={9}>
-                <Form.FormControl
-                  type="text"
-                  autoFocus
-                  value={scanName}
-                  onChange={e => this.updateScanName(e)}
-                />
+                <Form.FormControl type="text" autoFocus value={scanName} onChange={e => this.updateScanName(e)} />
               </Grid.Col>
             </Form.FormGroup>
             <Form.FormGroup>
@@ -108,11 +98,7 @@ class CreateScanDialog extends React.Component {
           <Button bsStyle="default" className="btn-cancel" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            bsStyle="primary"
-            onClick={this.confirm}
-            disabled={!validScanName}
-          >
+          <Button bsStyle="primary" onClick={this.confirm} disabled={!validScanName}>
             Scan
           </Button>
         </Modal.Footer>

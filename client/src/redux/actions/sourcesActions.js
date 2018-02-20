@@ -43,11 +43,4 @@ const updateSource = (id, data) => dispatch => {
   });
 };
 
-export {
-  addSource,
-  deleteSource,
-  deleteSources,
-  getSource,
-  getSources,
-  updateSource
-};
+export { addSource, deleteSource, deleteSources, getSource, getSources, updateSource };

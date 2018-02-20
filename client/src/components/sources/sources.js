@@ -3,14 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import {
-  Alert,
-  Button,
-  EmptyState,
-  Icon,
-  ListView,
-  Modal
-} from 'patternfly-react';
+import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
 import {
@@ -58,9 +51,7 @@ class Sources extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getSources(
-      helpers.createViewQueryObject(this.props.viewOptions)
-    );
+    this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -76,12 +67,8 @@ class Sources extends React.Component {
     }
 
     // Check for changes resulting in a fetch
-    if (
-      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
-    ) {
-      this.props.getSources(
-        helpers.createViewQueryObject(nextProps.viewOptions)
-      );
+    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
+      this.props.getSources(helpers.createViewQueryObject(nextProps.viewOptions));
     }
   }
 
@@ -127,9 +114,7 @@ class Sources extends React.Component {
 
   itemSelectChange(item) {
     Store.dispatch({
-      type: this.itemSelected(item)
-        ? sourcesTypes.DESELECT_SOURCE
-        : sourcesTypes.SELECT_SOURCE,
+      type: this.itemSelected(item) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
       source: item
     });
   }
@@ -203,10 +188,7 @@ class Sources extends React.Component {
         <Button bsStyle="primary" onClick={this.showAddSourceWizard}>
           Add
         </Button>
-        <Button
-          disabled={!selectedSources || selectedSources.length === 0}
-          onClick={this.scanSources}
-        >
+        <Button disabled={!selectedSources || selectedSources.length === 0} onClick={this.scanSources}>
           Scan
         </Button>
         <Button onClick={this.refresh} bsStyle="success">
@@ -254,12 +236,8 @@ class Sources extends React.Component {
 
     return (
       <EmptyState className="list-view-blank-slate">
-        <EmptyState.Title>
-          No Results Match the Filter Criteria
-        </EmptyState.Title>
-        <EmptyState.Info>
-          The active filters are hiding all items.
-        </EmptyState.Info>
+        <EmptyState.Title>No Results Match the Filter Criteria</EmptyState.Title>
+        <EmptyState.Info>The active filters are hiding all items.</EmptyState.Info>
         <EmptyState.Action>
           <Button bsStyle="link" onClick={this.clearFilters}>
             Clear Filters
@@ -270,19 +248,8 @@ class Sources extends React.Component {
   }
 
   render() {
-    const {
-      error,
-      errorMessage,
-      sources,
-      selectedSources,
-      viewOptions
-    } = this.props;
-    const {
-      scanDialogShown,
-      multiSourceScan,
-      currentScanSource,
-      addSourceWizardShown
-    } = this.state;
+    const { error, errorMessage, sources, selectedSources, viewOptions } = this.props;
+    const { scanDialogShown, multiSourceScan, currentScanSource, addSourceWizardShown } = this.state;
 
     if (error) {
       return (
@@ -309,13 +276,8 @@ class Sources extends React.Component {
               selectedCount={selectedSources.length}
               {...viewOptions}
             />
-            <ViewPaginationRow
-              viewType={viewTypes.SOURCES_VIEW}
-              {...viewOptions}
-            />
-            <div className="quipucords-list-container">
-              {this.renderSourcesList(sources)}
-            </div>
+            <ViewPaginationRow viewType={viewTypes.SOURCES_VIEW} {...viewOptions} />
+            <div className="quipucords-list-container">{this.renderSourcesList(sources)}</div>
           </div>
           {this.renderPendingMessage()}
           <AddSourceWizard show={addSourceWizardShown} />
@@ -331,10 +293,7 @@ class Sources extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState
-          onAddSource={this.showAddSourceWizard}
-          onImportSources={this.importSources}
-        />
+        <SourcesEmptyState onAddSource={this.showAddSourceWizard} onImportSources={this.importSources} />
         {this.renderPendingMessage()}
         <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>

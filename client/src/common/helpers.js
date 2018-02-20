@@ -91,17 +91,11 @@ const setStateProp = (prop, data, options) => {
   let obj = { ...state };
 
   if (!state[prop]) {
-    console.error(
-      `Error: Property ${prop} does not exist within the passed state.`,
-      state
-    );
+    console.error(`Error: Property ${prop} does not exist within the passed state.`, state);
   }
 
   if (reset && !initialState[prop]) {
-    console.warn(
-      `Warning: Property ${prop} does not exist within the passed initialState.`,
-      initialState
-    );
+    console.warn(`Warning: Property ${prop} does not exist within the passed initialState.`, initialState);
   }
 
   if (reset) {
@@ -137,15 +131,12 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 
   if (viewOptions) {
     if (viewOptions.sortField) {
-      queryObject.ordering = viewOptions.sortAscending
-        ? viewOptions.sortField
-        : `-${viewOptions.sortField}`;
+      queryObject.ordering = viewOptions.sortAscending ? viewOptions.sortField : `-${viewOptions.sortField}`;
     }
 
     if (viewOptions.activeFilters) {
       viewOptions.activeFilters.forEach(filter => {
-        queryObject[filter.field.id] =
-          filter.field.filterType === 'select' ? filter.value.id : filter.value;
+        queryObject[filter.field.id] = filter.field.filterType === 'select' ? filter.value.id : filter.value;
       });
     }
 
