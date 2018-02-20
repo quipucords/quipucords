@@ -12,10 +12,11 @@
 """Common module for handling request calls to the server."""
 
 import sys
+import json
 import requests
-from qpc.utils import log
+from qpc.utils import log, handle_error_response
 from qpc.translation import _
-from qpc.messages import SSL_ERROR_MSG, CONNECTION_ERROR_MSG
+import qpc.messages as messages
 from qpc.utils import (get_server_location, read_client_token, get_ssl_verify)
 
 # Need to determine how we get this information; config file at install?
@@ -25,6 +26,43 @@ GET = 'GET'
 PATCH = 'PATCH'
 DELETE = 'DELETE'
 PUT = 'PUT'
+
+CONNECTION_ERROR_MSG = messages.CONNECTION_ERROR_MSG
+SSL_ERROR_MSG = messages.SSL_ERROR_MSG
+
+# pylint: disable=invalid-name
+try:
+    exception_class = json.decoder.JSONDecodeError
+except AttributeError:
+    exception_class = ValueError
+
+
+def handle_token_errors(response):
+    """Handle token errors.
+
+    :param response: The response object.
+    :returns: The response object.
+    """
+    token_expired = {'detail': 'Token has expired'}
+    response_data = None
+    try:
+        response_data = response.json()
+    except exception_class:
+        pass
+
+    if response.status_code == 401:
+        handle_error_response(response)
+        log.error(_(messages.SERVER_LOGIN_REQUIRED))
+        log.error('$ qpc server login')
+        sys.exit(1)
+    elif (response.status_code == 400 and
+          response_data == token_expired):
+        handle_error_response(response)
+        log.error(_(messages.SERVER_LOGIN_REQUIRED))
+        log.error('$ qpc server login')
+        sys.exit(1)
+
+    return response
 
 
 def post(path, payload, headers=None):
@@ -110,15 +148,15 @@ def request(method, path, params=None, payload=None,
 
     try:
         if method == POST:
-            return post(path, payload, req_headers)
+            return handle_token_errors(post(path, payload, req_headers))
         elif method == GET:
-            return get(path, params, req_headers)
+            return handle_token_errors(get(path, params, req_headers))
         elif method == PATCH:
-            return patch(path, payload, req_headers)
+            return handle_token_errors(patch(path, payload, req_headers))
         elif method == DELETE:
-            return delete(path, req_headers)
+            return handle_token_errors(delete(path, req_headers))
         elif method == PUT:
-            return put(path, payload, req_headers)
+            return handle_token_errors(put(path, payload, req_headers))
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()
