@@ -11,6 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from rest_framework.response import Response
@@ -24,7 +25,11 @@ from rest_framework_expiring_authtoken.authentication import \
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
-from api.models import Source, Credential, ScanJob, ScanTask, ScanJobOptions
+from api.models import (Source,
+                        Credential,
+                        ScanJobOptions,
+                        ScanJob,
+                        ScanTask)
 import api.messages as messages
 from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
@@ -39,12 +44,44 @@ def expand_credential(json_source):
     Take source object with credential id and pull object from db.
     create slim dictionary version of the host credential with name an value
     to return to user.
+
+    :param json_source: JSON source data from serializer
+    :returns: JSON data
     """
     cred_ids = json_source.get('credentials', [])
-    slim_cred = Credential.objects.filter(pk__in=cred_ids).values('id', 'name')
+    slim_cred = Credential.objects.filter(
+        pk__in=cred_ids).values('id', 'name')
     # Update source JSON with cred JSON
     if slim_cred:
         json_source[CREDENTIALS_KEY] = slim_cred
+    return json_source
+
+
+def format_source(json_source):
+    """Format source with credentials and most recent connection scan.
+
+    :param json_source: JSON source data from serializer
+    :returns: JSON data
+    """
+    json_source = expand_credential(json_source)
+    source_id = json_source.get('id')
+
+    scan_task_qs = ScanTask.objects.filter(
+        source__id=source_id,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT)
+    if scan_task_qs.count() > 0:
+        scan_task = scan_task_qs.latest('start_time')
+        scan_job = ScanJob.objects.filter(
+            tasks__id=scan_task.id).latest('start_time')
+        json_scan_job = {'id': scan_job.id,
+                         'start_time': scan_job.start_time,
+                         'end_time': scan_job.end_time,
+                         'status': scan_job.status,
+                         'systems_count': scan_task.systems_count,
+                         'systems_scanned': scan_task.systems_scanned,
+                         'systems_failed': scan_task.systems_failed}
+        json_source['connection'] = json_scan_job
+    return json_source
 
 
 class SourceFilter(FilterSet):
@@ -87,7 +124,7 @@ class SourceViewSet(ModelViewSet):
             serializer = self.get_serializer(page, many=True)
             for source in serializer.data:
                 # Create expanded host cred JSON
-                expand_credential(source)
+                format_source(source)
                 result.append(source)
             return self.get_paginated_response(serializer.data)
 
@@ -96,29 +133,20 @@ class SourceViewSet(ModelViewSet):
             json_source = serializer.data
 
             # Create expanded host cred JSON
-            expand_credential(json_source)
+            format_source(json_source)
 
             result.append(json_source)
         return Response(result)
 
     # pylint: disable=unused-argument
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Create a source."""
         response = super().create(request, args, kwargs)
 
         # Modify json for response
         json_source = response.data
-        source_id = json_source.get('id')
-        if not source_id or (source_id and not isinstance(source_id, int)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
-            raise ValidationError(error)
-
-        get_object_or_404(self.queryset, pk=source_id)
-
-        # Create expanded host cred JSON
-        expand_credential(json_source)
+        format_source(json_source)
 
         # check to see if a connection scan was requested
         # through query parameter
@@ -136,9 +164,11 @@ class SourceViewSet(ModelViewSet):
                     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                        options=scan_options)
                     scan_job.save()
+
                     # Add the source
                     scan_job.sources.add(source_id)
                     scan_job.save()
+
                     # Start the scan
                     start_scan.send(sender=self.__class__, instance=scan_job)
             else:
@@ -161,7 +191,7 @@ class SourceViewSet(ModelViewSet):
         json_source = serializer.data
 
         # Create expanded host cred JSON
-        expand_credential(json_source)
+        format_source(json_source)
 
         return Response(json_source)
 
@@ -170,7 +200,7 @@ class SourceViewSet(ModelViewSet):
         """Update a source."""
         # Note: This method's implementation is basically a straight copy of
         # rest_framework.mixins.UpdateModelMixin but modified to include the
-        # call to expand_credential. We should probably refactor things here
+        # call to format_source. We should probably refactor things here
         # to reduce duplication of code.
         source = self.get_object()
         serializer = self.get_serializer(source, data=request.data,
@@ -180,6 +210,6 @@ class SourceViewSet(ModelViewSet):
         json_source = serializer.data
 
         # Create expanded host cred JSON
-        expand_credential(json_source)
+        format_source(json_source)
 
         return Response(json_source)

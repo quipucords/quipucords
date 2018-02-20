@@ -81,7 +81,10 @@ SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
+SJ_SCAN_IDS_INV = 'Scan identifiers must be integer values.'
 SJ_SOURCE_IDS_INV = 'Source identifiers must be integer values.'
+SJ_SCAN_DO_NOT_EXIST = 'Scan with id=%d could not be'\
+    ' found in database.'
 SJ_SOURCE_DO_NOT_EXIST = 'Source with id=%d could not be'\
     ' found in database.'
 SJ_STATUS_MSG_CREATED = 'Job is created.'

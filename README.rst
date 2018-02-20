@@ -2,6 +2,12 @@
     :target: https://travis-ci.org/quipucords/quipucords
 .. image:: https://coveralls.io/repos/github/quipucords/quipucords/badge.svg?branch=master
     :target: https://coveralls.io/github/quipucords/quipucords?branch=master
+.. image:: https://landscape.io/github/quipucords/quipucords/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/quipucords/quipucords/master
+   :alt: Code Health
+.. image:: https://requires.io/github/quipucords/quipucords/requirements.svg?branch=master
+    :target: https://requires.io/github/quipucords/quipucords/requirements/?branch=master
+    :alt: Requirements Status
 .. image:: https://readthedocs.org/projects/quipucords/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
