@@ -10,14 +10,12 @@
 #
 """Test the fact API."""
 
-import copy
 import json
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import api.messages as messages
 from api.models import (FactCollection,
                         Source, Credential)
-from api.fact.renderer import FactCollectionCSVRenderer
 from rest_framework import status
 
 
@@ -227,97 +225,3 @@ class FactCollectionTest(TestCase):
         self.assertEqual(
             response_json['invalid_sources'][0]['errors']['facts'],
             messages.FC_REQUIRED_ATTRIBUTE)
-
-    ##############################################################
-    # Test Model Retrieve
-    ##############################################################
-    def test_greenpath_retreive(self):
-        """Retrieve fact collection object via API."""
-        request_json = {'sources':
-                        [{'source_id': self.net_source.id,
-                          'source_type': self.net_source.source_type,
-                          'facts': [{'key': 'value'}]}]}
-
-        response_json = self.create_expect_201(
-            request_json)
-        identifier = response_json['id']
-        response_json = self.retrieve_expect_200(identifier)
-        self.assertEqual(response_json['id'], identifier)
-
-    ##############################################################
-    # Test CSV Renderer
-    ##############################################################
-    def test_csv_renderer(self):
-        """Test FactCollectionCSVRenderer."""
-        renderer = FactCollectionCSVRenderer()
-        # Test no FC id
-        test_json = {}
-        value = renderer.render(test_json)
-        self.assertIsNone(value)
-
-        # Test doesn't exist
-        test_json = {'id': 42}
-        value = renderer.render(test_json)
-        self.assertIsNone(value)
-
-        request_json = {'sources':
-                        [{'source_id': self.net_source.id,
-                          'source_type': self.net_source.source_type,
-                          'facts': [{'key': 'value'}]}]}
-
-        response_json = self.create_expect_201(
-            request_json)
-        test_json = copy.deepcopy(response_json)
-        csv_result = renderer.render(test_json)
-        expected = 'Fact Collection,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
-            '\r\nvalue\r\n\r\n\r\n'
-        self.assertEqual(csv_result, expected)
-
-        # Test cached works too
-        test_json = copy.deepcopy(response_json)
-        test_json['sources'][0]['facts'] = []
-        csv_result = renderer.render(test_json)
-        expected = 'Fact Collection,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
-            '\r\nvalue\r\n\r\n\r\n'
-        # These would be different if not cached
-        self.assertEqual(csv_result, expected)
-
-        # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
-
-        # Remove sources
-        test_json = copy.deepcopy(response_json)
-        test_json['sources'] = None
-        csv_result = renderer.render(test_json)
-        expected = 'Fact Collection,Number Sources\r\n1,0\r\n'
-        self.assertEqual(csv_result, expected)
-
-        # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
-
-        # Remove sources
-        test_json = copy.deepcopy(response_json)
-        test_json['sources'] = []
-        csv_result = renderer.render(test_json)
-        expected = 'Fact Collection,Number Sources\r\n1,0\r\n\r\n\r\n'
-        self.assertEqual(csv_result, expected)
-
-        # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
-
-        # Remove facts
-        test_json = copy.deepcopy(response_json)
-        test_json['sources'][0]['facts'] = []
-        csv_result = renderer.render(test_json)
-        expected = 'Fact Collection,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\n'\
-            '\r\n'
-        self.assertEqual(csv_result, expected)

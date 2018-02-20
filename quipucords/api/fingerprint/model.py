@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -31,8 +31,7 @@ class SystemFingerprint(models.Model):
     )
 
     # Scan information
-    fact_collection_id = models.ForeignKey(FactCollection,
-                                           models.CASCADE)
+    report_id = models.ForeignKey(FactCollection, models.CASCADE)
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)
@@ -118,7 +117,7 @@ class SystemFingerprint(models.Model):
             'vm_datacenter:{}, '\
             'vm_cluster:{} '\
             'metadata:{} '.format(self.id,
-                                  self.fact_collection_id.id,
+                                  self.report_id.id,
                                   self.name,
                                   self.os_name,
                                   self.os_version,

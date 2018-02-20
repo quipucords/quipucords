@@ -1,3 +1,4 @@
+import axios from 'axios';
 import cookies from 'js-cookie';
 
 class UserService {
@@ -5,7 +6,6 @@ class UserService {
     // ToDo: ReEvaluate placement of this spoof for auth. Also consider using a helper function.
     if (process.env.REACT_APP_ENV === 'development') {
       cookies.set(process.env.REACT_APP_AUTH_TOKEN, 'spoof');
-
       console.warn('Warning: Loading spoof auth token.');
     }
 
@@ -22,37 +22,23 @@ class UserService {
     });
   }
 
-  // ToDo: Replace randomized name generator
   static whoami() {
-    const arr = ['admin', 'John Doe', 'Jane Doe'];
-
-    return this.authorizeUser().then(
-      response =>
-        new Promise(resolve => {
-          resolve({
-            userName: arr[Math.floor(Math.random() * arr.length)]
-          });
-        })
-    );
+    return axios({
+      method: 'get',
+      url: `${process.env.REACT_APP_USER_SERVICE_CURRENT}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
   }
 
+
   static logoutUser() {
-    return this.whoami().then(
-      response =>
-        new Promise((resolve, reject) => {
-          if (response && response.userName) {
-            cookies.remove(process.env.REACT_APP_AUTH_TOKEN);
-
-            return resolve({
-              userName: response.userName
-            });
-          }
-
-          throw new Error(
-            `Error logging out, token doesn't exist for ${response.userName}.`
-          );
-        })
-    );
+    return axios({
+      method: 'put',
+      url: `${process.env.REACT_APP_USER_SERVICE_LOGOUT}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
   }
 }
 

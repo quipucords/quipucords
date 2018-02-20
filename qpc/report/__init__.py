@@ -16,4 +16,5 @@ SUMMARY = 'summary'
 DETAIL = 'detail'
 
 REPORT_URI = '/api/v1/reports/'
-FACT_URI = '/api/v1/facts/'
+DETAILS_PATH_SUFFIX = '/details/'
+DEPLOYMENTS_PATH_SUFFIX = '/deployments/'

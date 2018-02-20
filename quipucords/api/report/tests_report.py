@@ -12,16 +12,160 @@
 
 import json
 import uuid
+import copy
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from api.models import (Source,
-                        Credential)
-from api.report.renderer import ReportCSVRenderer
+                        Credential,
+                        FactCollection)
+from api.report.renderer import ReportCSVRenderer, FactCollectionCSVRenderer
 from rest_framework import status
 
 
-class SystemReportTest(TestCase):
-    """Tests against the System reports function."""
+class DetailReportTest(TestCase):
+    """Tests against the Detail reports function."""
+
+    def setUp(self):
+        """Create test case setup."""
+        self.net_source = Source.objects.create(
+            name='test_source', source_type=Source.NETWORK_SOURCE_TYPE)
+
+        self.net_cred = Credential.objects.create(
+            name='net_cred1',
+            cred_type=Credential.NETWORK_CRED_TYPE,
+            username='username',
+            password='password',
+            become_password=None,
+            ssh_keyfile=None)
+        self.net_source.credentials.add(self.net_cred)
+
+        self.net_source.hosts = '["1.2.3.4"]'
+        self.net_source.save()
+
+    def create(self, data):
+        """Call the create endpoint."""
+        url = reverse('facts-list')
+        return self.client.post(url,
+                                json.dumps(data),
+                                'application/json')
+
+    def create_expect_201(self, data):
+        """Create a source, return the response as a dict."""
+        response = self.create(data)
+        if response.status_code != status.HTTP_201_CREATED:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
+    def retrieve_expect_200(self, identifier):
+        """Create a source, return the response as a dict."""
+        url = '/api/v1/reports/' + str(identifier) + '/details/'
+        response = self.client.get(url)
+
+        if response.status_code != status.HTTP_200_OK:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.json()
+
+    ##############################################################
+    # Test details endpoint
+    ##############################################################
+    def test_details(self):
+        """Get details for a report via API."""
+        request_json = {'sources':
+                        [{'source_id': self.net_source.id,
+                          'source_type': self.net_source.source_type,
+                          'facts': [{'key': 'value'}]}]}
+
+        response_json = self.create_expect_201(
+            request_json)
+        identifier = response_json['id']
+        response_json = self.retrieve_expect_200(identifier)
+        self.assertEqual(response_json['id'], identifier)
+
+    ##############################################################
+    # Test CSV Renderer
+    ##############################################################
+    def test_csv_renderer(self):
+        """Test FactCollectionCSVRenderer."""
+        renderer = FactCollectionCSVRenderer()
+        # Test no FC id
+        test_json = {}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Test doesn't exist
+        test_json = {'id': 42}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        request_json = {'sources':
+                        [{'source_id': self.net_source.id,
+                          'source_type': self.net_source.source_type,
+                          'facts': [{'key': 'value'}]}]}
+
+        response_json = self.create_expect_201(
+            request_json)
+        test_json = copy.deepcopy(response_json)
+        csv_result = renderer.render(test_json)
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
+            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
+            '\r\nvalue\r\n\r\n\r\n'
+        self.assertEqual(csv_result, expected)
+
+        # Test cached works too
+        test_json = copy.deepcopy(response_json)
+        test_json['sources'][0]['facts'] = []
+        csv_result = renderer.render(test_json)
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
+            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
+            '\r\nvalue\r\n\r\n\r\n'
+        # These would be different if not cached
+        self.assertEqual(csv_result, expected)
+
+        # Clear cache
+        fact_collection = FactCollection.objects.get(id=response_json['id'])
+        fact_collection.csv_content = None
+        fact_collection.save()
+
+        # Remove sources
+        test_json = copy.deepcopy(response_json)
+        test_json['sources'] = None
+        csv_result = renderer.render(test_json)
+        expected = 'Report,Number Sources\r\n1,0\r\n'
+        self.assertEqual(csv_result, expected)
+
+        # Clear cache
+        fact_collection = FactCollection.objects.get(id=response_json['id'])
+        fact_collection.csv_content = None
+        fact_collection.save()
+
+        # Remove sources
+        test_json = copy.deepcopy(response_json)
+        test_json['sources'] = []
+        csv_result = renderer.render(test_json)
+        expected = 'Report,Number Sources\r\n1,0\r\n\r\n\r\n'
+        self.assertEqual(csv_result, expected)
+
+        # Clear cache
+        fact_collection = FactCollection.objects.get(id=response_json['id'])
+        fact_collection.csv_content = None
+        fact_collection.save()
+
+        # Remove facts
+        test_json = copy.deepcopy(response_json)
+        test_json['sources'][0]['facts'] = []
+        csv_result = renderer.render(test_json)
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
+            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\n'\
+            '\r\n'
+        self.assertEqual(csv_result, expected)
+
+
+class DeploymentReportTest(TestCase):
+    """Tests against the Deployment reports function."""
 
     # pylint: disable= no-self-use, invalid-name
     def setUp(self):
@@ -97,33 +241,16 @@ class SystemReportTest(TestCase):
         fact_collection = self.create_fact_collection_expect_201(fc_json)
         return fact_collection
 
-    def test_get_group_count_report_list(self):
-        """Get a group count report for all collections."""
-        url = '/api/v1/reports/?group_count=os_release'
-
-        # Create a system fingerprint via fact collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        report_list = response.json()
-        self.assertIsInstance(report_list, list)
-        self.assertEqual(len(report_list), 1)
-        self.assertEqual(report_list[0]['report'][0]['count'], 2)
-        self.assertEqual(report_list[0]['report'][1]['count'], 1)
-
     def test_get_fact_collection_group_report_count(self):
         """Get a specific group count report."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        filters = {'fact_collection_id': 1, 'group_count': 'os_release'}
+        filters = {'group_count': 'os_release'}
         response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
@@ -133,15 +260,14 @@ class SystemReportTest(TestCase):
 
     def test_get_fact_collection_group_report(self):
         """Get a specific group count report."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        filters = {'fact_collection_id': 1}
-        response = self.client.get(url, filters)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
@@ -149,15 +275,14 @@ class SystemReportTest(TestCase):
 
     def test_get_fact_collection_filter_report(self):
         """Get a specific group count report with filter."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        filters = {'fact_collection_id': 1,
-                   'os_name': True,
+        filters = {'os_name': True,
                    'os_release': 'true'}
         response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -168,28 +293,28 @@ class SystemReportTest(TestCase):
 
     def test_get_fact_collection_404(self):
         """Fail to get a report for missing collection."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/2/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        response = self.client.get(url, {'fact_collection_id': 2})
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_fact_collection_bad_id(self):
         """Fail to get a report for missing collection."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/string/deployments/'
 
         # Query API
-        response = self.client.get(url, {'fact_collection_id': 'string'})
+        response = self.client.get(url)
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
     def test_group_count_400_invalid_field(self):
         """Fail to get report with invalid field for group_count."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
@@ -201,7 +326,7 @@ class SystemReportTest(TestCase):
 
     def test_group_count_invalid_combo_400(self):
         """Fail to get report due to invalid filter combo."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
@@ -214,15 +339,14 @@ class SystemReportTest(TestCase):
 
     def test_group_count_invalid_combo2_400(self):
         """Fail to get report due to invalid filter combo."""
-        url = '/api/v1/reports/'
+        url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
 
         # Query API
-        filters = {'fact_collection_id': 1,
-                   'group_count': 'os_release',
+        filters = {'group_count': 'os_release',
                    'os_name': 'true'}
         response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -246,9 +370,8 @@ class SystemReportTest(TestCase):
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
-        filters = {'fact_collection_id': 1}
-        url = '/api/v1/reports/'
-        response = self.client.get(url, filters)
+        url = '/api/v1/reports/1/deployments/'
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
@@ -256,7 +379,7 @@ class SystemReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Fact Collection\r\n1\r\n\r\n\r\nReport:\r\nbios_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,infrastructure_type,ip_addresses,mac_addresses,name,os_name,os_release,os_version,subscription_manager_id,system_creation_date,virtualized_is_guest,virtualized_num_guests,virtualized_num_running_guests,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_cpu_cores,vm_host_cpu_threads,vm_host_socket_count,vm_memory_size,vm_state,vm_uuid\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.5,7.5,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n\r\n'  # noqa
+        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nbios_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,infrastructure_type,ip_addresses,mac_addresses,name,os_name,os_release,os_version,subscription_manager_id,system_creation_date,virtualized_is_guest,virtualized_num_guests,virtualized_num_running_guests,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_cpu_cores,vm_host_cpu_threads,vm_host_socket_count,vm_memory_size,vm_state,vm_uuid\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,,1.2.3.4,RHEL,RHEL 7.5,7.5,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
 
     def test_csv_renderer_only_name(self):
@@ -275,8 +398,8 @@ class SystemReportTest(TestCase):
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
-        filters = {'fact_collection_id': 1, 'name': True}
-        url = '/api/v1/reports/'
+        filters = {'name': True}
+        url = '/api/v1/reports/1/deployments/'
         response = self.client.get(url, filters)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
@@ -285,5 +408,5 @@ class SystemReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Fact Collection\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
+        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
