@@ -30,6 +30,7 @@ class MastheadOptions extends React.Component {
 
   render() {
     const { user } = this.props;
+
     return (
       <nav className="collapse navbar-collapse">
         <ul className="navbar-iconic nav navbar-nav navbar-right">
@@ -45,7 +46,7 @@ class MastheadOptions extends React.Component {
           <Dropdown componentClass="li" id="user">
             <Dropdown.Toggle useAnchor className="nav-item-iconic">
               <Icon type="pf" name="user" />{' '}
-              {user.currentUser && user.currentUser.userName}
+              {user.currentUser && user.currentUser.username}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <MenuItem onClick={this.logout}>Logout</MenuItem>

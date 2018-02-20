@@ -1,10 +1,70 @@
 {% extends "base.html" %}
 
-{% block page-title %}
+{% load static %}
+
+{% block includes %}
+<link rel="stylesheet" href="{% static '/assets/rcue/css/rcue.css' %}">
+<link rel="stylesheet" href="{% static '/assets/rcue/css/rcue-additions.css' %}">
+<link rel="stylesheet" href="{% static '/assets/css/entitlements.css' %}">
+{% endblock %}
+
+{% block pagetitle %}
 Red Hat Entitlements Reporting
 {% endblock %}
 
-{% block content %}
-You are now logged out.
+{% block pagelogo %}
+<img src="{% static '/assets/images/Red_Hat_logo.svg' %}" alt="Red Hat logo" style="height: 40px;"/>
 {% endblock %}
 
+{% block title %}
+<img src="{% static '/assets/images/title.svg' %}" alt="Red Hat Entitlements Reporting">
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+<div class="alert alert-danger">
+  <span class="pficon pficon-error-circle-o"></span>
+  Your username and password didn't match. Please try again.
+</div>
+{% else %}
+<div class="alert alert-info">
+  <span class="pficon pficon-info"></span>
+  You have been logged out. Please log in again.
+</div>
+{% endif %}
+
+<form class="form-horizontal" role="form" method="post" action="{% url 'login' %}">
+  <div class="form-group">
+    {% csrf_token %}
+    <label for="id_username" class="col-sm-2 col-md-2 control-label">Username</label>
+    <div class="col-sm-10 col-md-10">
+      <input type="text" class="form-control" placeholder="" tabindex="1" maxlength="254" id="id_username" name="username" required autofocus>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="id_password" class="col-sm-2 col-md-2 control-label">Password</label>
+    <div class="col-sm-10 col-md-10">
+      <input type="password" class="form-control" placeholder="" tabindex="2" id="id_password" name="password" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-xs-8 col-sm-offset-2 col-sm-6 col-md-offset-2 col-md-6">
+    </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 submit">
+      <button type="submit" class="btn btn-primary btn-lg" tabindex="4">Log In</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block description %}
+<p>
+  <strong>Welcome to Red Hat Entitlements Reporting!</strong>
+  Entitlements Reporting is an inspection and reporting tool to identify environment data, or facts, such as the number
+  of physical and virtual systems on a network, their operating systems and other configuration data, and versions of
+  some key packages and products for almost any Linux or UNIX version. The ability to inspect the software and systems
+  that are running on your network improves your ability to understand and report on your entitlement usage. Ultimately,
+  this inspection and reporting process is part of the larger system administration task of managing your inventories.
+</p>
+
+{% endblock %}
