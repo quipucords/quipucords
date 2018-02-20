@@ -24,6 +24,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+quipucords/client/assets
+quipucords/client/static
+quipucords/client/*.json
+quipucords/client/*.js
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
