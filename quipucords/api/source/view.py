@@ -11,6 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from rest_framework.response import Response
@@ -24,7 +25,11 @@ from rest_framework_expiring_authtoken.authentication import \
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
-from api.models import Source, Credential, ScanJob, ScanTask, ScanJobOptions
+from api.models import (Source,
+                        Credential,
+                        ScanJobOptions,
+                        ScanJob,
+                        ScanTask)
 import api.messages as messages
 from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
@@ -134,6 +139,7 @@ class SourceViewSet(ModelViewSet):
         return Response(result)
 
     # pylint: disable=unused-argument
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Create a source."""
         response = super().create(request, args, kwargs)
@@ -158,9 +164,11 @@ class SourceViewSet(ModelViewSet):
                     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                        options=scan_options)
                     scan_job.save()
+
                     # Add the source
                     scan_job.sources.add(source_id)
                     scan_job.save()
+
                     # Start the scan
                     start_scan.send(sender=self.__class__, instance=scan_job)
             else:

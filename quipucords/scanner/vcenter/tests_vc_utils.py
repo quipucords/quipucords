@@ -12,9 +12,9 @@
 
 from unittest.mock import Mock, patch, ANY
 from django.test import TestCase
-from api.models import (Credential, Source, SourceOptions, ScanTask,
-                        ScanJob, JobConnectionResult)
+from api.models import (Credential, Source, SourceOptions, ScanTask)
 from scanner.vcenter.utils import vcenter_connect
+from scanner.test_util import create_scan_job
 
 
 class VCenterUtilsTest(TestCase):
@@ -41,17 +41,8 @@ class VCenterUtilsTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                                  source=self.source, sequence_number=2)
-        self.scan_task.save()
-
-        self.scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        self.scan_job.save()
-        self.scan_job.tasks.add(self.scan_task)
-        self.conn_results = JobConnectionResult()
-        self.conn_results.save()
-        self.scan_job.connection_results = self.conn_results
-        self.scan_job.save()
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
     def tearDown(self):
         """Cleanup test case setup."""

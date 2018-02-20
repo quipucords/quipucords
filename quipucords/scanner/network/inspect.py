@@ -15,6 +15,7 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from api.credential.serializer import CredentialSerializer
 from api.models import (ScanTask,
+                        ScanOptions,
                         SystemConnectionResult,
                         SystemInspectionResult)
 from scanner.task import ScanTaskRunner
@@ -169,7 +170,8 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
-        extra_vars = self.scan_job.get_extra_vars()
+        extra_vars = ScanOptions.get_extra_vars(
+            self.scan_job.options.disable_optional_products)
         forks = self.scan_job.options.max_concurrency
 
         ssh_executable = os.path.abspath(

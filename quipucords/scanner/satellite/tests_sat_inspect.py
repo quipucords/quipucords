@@ -63,47 +63,48 @@ class InspectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT)
-
-        self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
-
-        conn_task = self.scan_task.prerequisites.first()
-        conn_task.complete()
-        self.scan_job.save()
-
     def tearDown(self):
         """Cleanup test case setup."""
         pass
 
+    def create_scan_job(self, satellite_version=None):
+        """Create scan job for tests."""
+        if satellite_version is not None:
+            options = SourceOptions(
+                satellite_version=satellite_version)
+            options.save()
+            self.source.options = options
+            self.source.save()
+        scan_job, inspect_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        inspect_task.update_stats('TEST_SAT.', sys_scanned=0)
+        return scan_job, inspect_task
+
     def test_run_failed_prereq(self):
         """Test the running connect task with no source options."""
-        self.scan_task.prerequisites.all().delete()
-        conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                             source=self.source, sequence_number=1)
-        conn_task.status = ScanTask.FAILED
-        conn_task.save()
-        self.scan_task.prerequisites.add(conn_task)
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job()
+        connect_task = inspect_task.prerequisites.first()
+        connect_task.status = ScanTask.FAILED
+        connect_task.save()
+        task = InspectTaskRunner(scan_job, inspect_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_no_source_options(self):
         """Test the running connect task with no source options."""
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job()
+        task = InspectTaskRunner(scan_job, inspect_task)
         status = task.run()
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat5_bad_status(self):
         """Test the running connect task for Satellite 5."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_5)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_5)
+        task = InspectTaskRunner(scan_job, inspect_task)
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(401, None)) as mock_sat_status:
             status = task.run()
@@ -112,12 +113,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_sat6_bad_status(self):
         """Test the running connect task for Sat 6 with bad status."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(401, None)) as mock_sat_status:
@@ -127,12 +125,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_sat6_bad_api_version(self):
         """Test the running connect task for Sat6 with bad api version."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 3)) as mock_sat_status:
@@ -142,12 +137,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_with_conn_err(self):
         """Test the running connect task with connection error."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_conn_exception) as mock_sat_status:
@@ -157,12 +149,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_with_sat_err(self):
         """Test the running connect task with satellite error."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_sat_exception) as mock_sat_status:
@@ -172,12 +161,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_with_timeout(self):
         """Test the running connect task with timeout error."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_timeout_error) as mock_sat_status:
@@ -187,12 +173,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_with_excep(self):
         """Test the running connect task with general exception."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    side_effect=mock_exception) as mock_sat_status:
@@ -203,12 +186,9 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_run_with_sat(self):
         """Test the running connect task with satellite."""
-        options = SourceOptions(
-            satellite_version=SourceOptions.SATELLITE_VERSION_62)
-        options.save()
-        self.source.options = options
-        self.source.save()
-        task = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_job, inspect_task = self.create_scan_job(
+            SourceOptions.SATELLITE_VERSION_62)
+        task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch('scanner.satellite.connect.utils.status',
                    return_value=(200, 2)) as mock_sat_status:
