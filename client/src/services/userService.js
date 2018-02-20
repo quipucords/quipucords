@@ -1,11 +1,10 @@
 import axios from 'axios';
 import cookies from 'js-cookie';
-import { helpers } from '../common/helpers';
 
 class UserService {
   static authorizeUser() {
-    // ToDo: ReEvaluate placement of this spoof for auth
-    if (helpers.DEV_MODE) {
+    // ToDo: ReEvaluate placement of this spoof for auth. Also consider using a helper function.
+    if (process.env.REACT_APP_ENV === 'development') {
       cookies.set(process.env.REACT_APP_AUTH_TOKEN, 'spoof');
       console.warn('Warning: Loading spoof auth token.');
     }

@@ -22,14 +22,14 @@ Red Hat Entitlements Reporting
 
 {% block content %}
 {% if form.errors %}
-<div class="alert alert-login-message">
-  <span class="pficon pficon-info"></span>
+<div class="alert alert-danger">
+  <span class="pficon pficon-error-circle-o"></span>
   Your username and password didn't match. Please try again.
 </div>
 {% else %}
-<div id="logged-out-alert" class="alert alert-login-message">
+<div class="alert alert-info">
   <span class="pficon pficon-info"></span>
-  You have been logged out. Please login again.
+  You have been logged out. Please log in again.
 </div>
 {% endif %}
 
