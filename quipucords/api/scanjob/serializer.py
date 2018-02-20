@@ -49,7 +49,6 @@ def expand_scanjob(json_scan):
     slim_sources = Source.objects.filter(
         pk__in=source_ids).values('id', 'name', 'source_type')
     if slim_sources:
-        print('here')
         json_scan[SOURCES_KEY] = slim_sources
 
     scan_id = json_scan.get(SCAN_KEY)
