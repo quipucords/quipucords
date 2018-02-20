@@ -101,7 +101,7 @@ class ScanSerializer(NotEmptySerializer):
     def check_for_existing_name(name, scan_id=None):
         """Look for existing (different object) with same name.
 
-        :param name: Name of source to look for
+        :param name: Name of scan to look for
         :param scan_id: Scan to exclude
         """
         if scan_id is None:
