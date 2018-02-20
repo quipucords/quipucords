@@ -120,6 +120,7 @@ class ScanViewSet(ModelViewSet):
     @detail_route(methods=['get', 'post'])
     def jobs(self, request, pk=None):
         """Get the jobs of a scan."""
+        # pylint: disable=invalid-name
         result = []
         scan = get_object_or_404(self.queryset, pk=pk)
         if request.method == 'GET':
