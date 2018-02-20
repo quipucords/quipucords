@@ -69,8 +69,8 @@ def details(request, pk=None):
     json_details = serializer.data
     http_accept = request.META.get('HTTP_ACCEPT')
     if http_accept and 'text/csv' not in http_accept:
-        json_details.pop('csv_content')
-        json_details.pop('status')
+        json_details.pop('csv_content', None)
+        json_details.pop('status', None)
     return Response(json_details)
 
 
