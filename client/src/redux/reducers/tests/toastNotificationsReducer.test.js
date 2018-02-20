@@ -1,4 +1,4 @@
-import toastNotificationsReducer from './toastNotificationsReducer';
+import toastNotificationsReducer from '../toastNotificationsReducer';
 
 describe('toastNotificationsReducer', function() {
   it('should return the initial state', () => {
