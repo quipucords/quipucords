@@ -102,7 +102,7 @@ class ScanSerializer(NotEmptySerializer):
         """Look for existing (different object) with same name.
 
         :param name: Name of source to look for
-        :param source_id: Source to exclude
+        :param scan_id: Scan to exclude
         """
         if scan_id is None:
             # Look for existing with same name (create)
