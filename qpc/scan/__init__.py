@@ -12,12 +12,15 @@
 """Constants for the Scan commands."""
 
 SUBCOMMAND = 'scan'
+ADD = 'add'
+EDIT = 'edit'
 START = 'start'
 LIST = 'list'
 SHOW = 'show'
 PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
+CLEAR = 'clear'
 
 # Status values
 SCAN_STATUS_CREATED = 'created'
@@ -29,7 +32,7 @@ SCAN_STATUS_COMPLETED = 'completed'
 SCAN_STATUS_FAILED = 'failed'
 
 
-SCAN_URI = '/api/v1/scans/'
+SCAN_URI = '/api/v1/scanconfigs/'
 
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
