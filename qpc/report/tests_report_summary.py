@@ -63,9 +63,9 @@ class ReportSummaryTests(unittest.TestCase):
 
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            REPORT_URI + '?fact_collection_id=1'
+            REPORT_URI + '1/deployments/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
@@ -89,10 +89,10 @@ class ReportSummaryTests(unittest.TestCase):
         report_out = StringIO()
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            REPORT_URI + '?fact_collection_id=1'
-        get_report_csv_data = 'Fact Collection\n'
+            REPORT_URI + '1/deployments/'
+        get_report_csv_data = 'Report\n'
         get_report_csv_data += '1\n\n\n'
         get_report_csv_data += 'key\n'
         get_report_csv_data += 'value\n'
@@ -144,7 +144,7 @@ class ReportSummaryTests(unittest.TestCase):
 
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
@@ -158,7 +158,7 @@ class ReportSummaryTests(unittest.TestCase):
                                      messages.REPORT_SJ_DOES_NOT_EXIST)
 
     def test_summary_report_invalid_scan_job(self):
-        """Summary report with scanjob but no fact_collection_id."""
+        """Summary report with scanjob but no report_id."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \

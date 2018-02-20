@@ -136,6 +136,6 @@ COMMON_ID_INV = 'The id must be an integer.'
 
 # report messages
 REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \
-    'other filters other than fact_collection_id.'
+    'other filters.'
 REPORT_GROUP_COUNT_FIELD = 'The group_count filter cannot be used with ' \
     'the invalid filter key %s.'

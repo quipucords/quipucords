@@ -28,7 +28,7 @@ class FingerprintModelTest(TestCase):
     ################################################################
     def test_empty_fingerprint(self):
         """Create an empty fingerprint."""
-        fingerprint_dict = {'fact_collection_id': self.fact_collection.id,
+        fingerprint_dict = {'report_id': self.fact_collection.id,
                             'metadata': {}}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)

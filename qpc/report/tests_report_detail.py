@@ -20,7 +20,7 @@ from argparse import ArgumentParser, Namespace
 import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
-from qpc.report import FACT_URI
+from qpc.report import REPORT_URI
 from qpc.scan import SCAN_URI
 from qpc.report.detail import ReportDetailCommand
 from qpc.utils import get_server_location, write_server_config
@@ -63,9 +63,9 @@ class ReportDetailTests(unittest.TestCase):
 
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            FACT_URI + '1'
+            REPORT_URI + '1/details/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
@@ -89,10 +89,10 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            FACT_URI + '1'
-        get_report_csv_data = 'Fact Collection\n'
+            REPORT_URI + '1/details/'
+        get_report_csv_data = 'Report\n'
         get_report_csv_data += '1\n\n\n'
         get_report_csv_data += 'key\n'
         get_report_csv_data += 'value\n'
@@ -144,7 +144,7 @@ class ReportDetailTests(unittest.TestCase):
 
         get_scanjob_url = get_server_location() + \
             SCAN_URI + '1'
-        get_scanjob_json_data = {'id': 1, 'fact_collection_id': 1}
+        get_scanjob_json_data = {'id': 1, 'report_id': 1}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
@@ -158,7 +158,7 @@ class ReportDetailTests(unittest.TestCase):
                                      messages.REPORT_SJ_DOES_NOT_EXIST)
 
     def test_detail_report_invalid_scan_job(self):
-        """Summary report with scanjob but no fact_collection_id."""
+        """Summary report with scanjob but no report_id."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \

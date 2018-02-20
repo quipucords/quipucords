@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -17,15 +17,12 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import (BrowsableAPIRenderer,
-                                      JSONRenderer)
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
 from api.models import FactCollection
 from api.serializers import FactCollectionSerializer
 from api.fact.util import (validate_fact_collection_json,
                            get_or_create_fact_collection)
-from api.fact.renderer import FactCollectionCSVRenderer
 from fingerprinter import pfc_signal
 
 
@@ -35,8 +32,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # pylint: disable=too-many-ancestors
 
 
-class FactViewSet(mixins.RetrieveModelMixin,
-                  mixins.CreateModelMixin,
+class FactViewSet(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     """ModelViewSet to publish system facts."""
 
@@ -48,8 +44,6 @@ class FactViewSet(mixins.RetrieveModelMixin,
 
     queryset = FactCollection.objects.all()
     serializer_class = FactCollectionSerializer
-    renderer_classes = (JSONRenderer, BrowsableAPIRenderer,
-                        FactCollectionCSVRenderer)
 
     def create(self, request, *args, **kwargs):
         """Create a fact collection."""
@@ -61,7 +55,7 @@ class FactViewSet(mixins.RetrieveModelMixin,
             return Response(validation_result,
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Create FC model and save data to JSON file
+        # Create FC model and save data
         fact_collection = get_or_create_fact_collection(request.data)
 
         # Send signal so fingerprint engine processes raw facts

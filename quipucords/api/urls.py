@@ -13,10 +13,9 @@
 from django.conf.urls import url
 from rest_framework_expiring_authtoken import views
 from rest_framework.routers import SimpleRouter
-from rest_framework.urlpatterns import format_suffix_patterns
 from api.views import (CredentialViewSet, FactViewSet,
-                       SourceViewSet, ScanJobViewSet, ReportListView,
-                       UserViewSet)
+                       SourceViewSet, ScanJobViewSet, UserViewSet,
+                       details, deployments)
 
 
 ROUTER = SimpleRouter()
@@ -39,10 +38,9 @@ ROUTER.register(r'users',
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    url(r'^reports/$', ReportListView.as_view())
+    url(r'^reports/(?P<pk>[^/.]+)/details/$', details),
+    url(r'^reports/(?P<pk>[^/.]+)/deployments/$', deployments),
 ]
-
-urlpatterns = format_suffix_patterns(urlpatterns)
 
 urlpatterns += [
     url(r'^token/', views.obtain_expiring_auth_token)
