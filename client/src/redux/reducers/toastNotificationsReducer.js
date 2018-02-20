@@ -5,10 +5,7 @@ const initialState = {
   paused: false
 };
 
-export default function toastNotificationsReducer(
-  state = initialState,
-  action
-) {
+export default function toastNotificationsReducer(state = initialState, action) {
   switch (action.type) {
     case toastNotificationTypes.TOAST_ADD:
       let newToast = {
@@ -35,11 +32,7 @@ export default function toastNotificationsReducer(
       }
 
       return Object.assign({}, state, {
-        toasts: [
-          ...state.toasts.slice(0, index),
-          action.toast,
-          ...state.toasts.slice(index + 1)
-        ]
+        toasts: [...state.toasts.slice(0, index), action.toast, ...state.toasts.slice(index + 1)]
       });
 
     case toastNotificationTypes.TOAST_PAUSE:

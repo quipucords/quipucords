@@ -123,11 +123,7 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
           add: true
         },
         {
@@ -142,11 +138,7 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
           delete: true
         },
         {
@@ -160,11 +152,7 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
           edit: true
         },
         {
@@ -178,11 +166,7 @@ const sourcesReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
@@ -207,14 +191,12 @@ const sourcesReducer = function(state = initialState, action) {
     // Success/Fulfilled
     case sourcesTypes.GET_SOURCES_FULFILLED:
       // Get resulting credentials and update the selected state of each
-      const sources = _.get(action, 'payload.data.results', []).map(
-        nextSource => {
-          return {
-            ...nextSource,
-            selected: selectedIndex(state, nextSource) !== -1
-          };
-        }
-      );
+      const sources = _.get(action, 'payload.data.results', []).map(nextSource => {
+        return {
+          ...nextSource,
+          selected: selectedIndex(state, nextSource) !== -1
+        };
+      });
       return helpers.setStateProp(
         'view',
         {

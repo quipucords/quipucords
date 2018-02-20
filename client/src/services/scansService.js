@@ -34,10 +34,7 @@ class ScansService {
   }
 
   static getScanResults(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESULTS.replace(
-      '{0}',
-      id
-    );
+    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESULTS.replace('{0}', id);
 
     return axios({
       url: apiPath
@@ -56,10 +53,7 @@ class ScansService {
   }
 
   static restartScan(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESTART.replace(
-      '{0}',
-      id
-    );
+    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESTART.replace('{0}', id);
 
     return axios({
       method: 'put',

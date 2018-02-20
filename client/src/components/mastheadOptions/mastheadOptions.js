@@ -45,8 +45,7 @@ class MastheadOptions extends React.Component {
           </Dropdown>
           <Dropdown componentClass="li" id="user">
             <Dropdown.Toggle useAnchor className="nav-item-iconic">
-              <Icon type="pf" name="user" />{' '}
-              {user.currentUser && user.currentUser.username}
+              <Icon type="pf" name="user" /> {user.currentUser && user.currentUser.username}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <MenuItem onClick={this.logout}>Logout</MenuItem>
