@@ -97,9 +97,24 @@ class ScanJobTest(TestCase):
 
     def test_queue_task(self):
         """Test create queue state change."""
-        scan_job, _ = create_scan_job(
-            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        tasks = scan_job.tasks.all().delete()
+        # Cannot use util because its testing queue
+        # Create scan configuration
+        scan = Scan(name='test',
+                    scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan.save()
+
+        # Add source to scan
+        scan.sources.add(self.source)
+
+        options_to_use = ScanOptions()
+        options_to_use.save()
+
+        scan.options = options_to_use
+        scan.save()
+
+        # Create Job
+        scan_job = ScanJob(scan=scan)
+        scan_job.save()
 
         # Job in created state
         self.assertEqual(scan_job.status, ScanTask.CREATED)

@@ -10,15 +10,10 @@
 #
 """Test util for the scan features."""
 
-from datetime import datetime
 from api.models import (Scan,
                         ScanOptions,
                         ScanTask,
-                        ScanJob,
-                        JobConnectionResult,
-                        JobInspectionResult,
-                        TaskConnectionResult,
-                        TaskInspectionResult)
+                        ScanJob)
 
 
 def create_scan_job(source,
@@ -50,64 +45,15 @@ def create_scan_job(source,
     scan.options = options_to_use
     scan.save()
 
-    # Create job results
-    job_conn_results = JobConnectionResult()
-    job_conn_results.save()
-
-    # Create task results
-    task_conn_result = TaskConnectionResult()
-    task_conn_result.save()
-
     # Create Job
-    scan_job = ScanJob(scan=scan,
-                       connection_results=job_conn_results)
+    scan_job = ScanJob(scan=scan)
     scan_job.save()
 
-    # Simulate what happens via the API to copy scan config
-    scan_job.copy_scan_configuration()
+    scan_job.queue()
 
-    # Add Task results to job results
-    scan_job.connection_results.task_results.add(task_conn_result)
-
-    # Create Connection Task
-    conn_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                         source=source, sequence_number=1,
-                         start_time=datetime.utcnow(),
-                         connection_result=task_conn_result)
-    conn_task.save()
-
-    # Add Tasks to job
-    scan_job.tasks.add(conn_task)
-
-    # Default return value
-    scan_task = conn_task
+    scan_task = scan_job.tasks.first()
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        # Create job results
-        job_inspect_results = JobInspectionResult()
-        job_inspect_results.save()
+        scan_task.complete()
+        scan_task = scan_job.tasks.last()
 
-        # Create task results
-        task_inspect_result = TaskInspectionResult()
-        task_inspect_result.save()
-
-        # Create Job
-        scan_job.inspection_results = job_inspect_results
-
-        # Add Task results to job results
-        scan_job.inspection_results.task_results.add(task_inspect_result)
-
-        # Create Inspection Task
-        scan_task = ScanTask(scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                             source=source, sequence_number=2,
-                             start_time=datetime.utcnow(),
-                             inspection_result=task_inspect_result)
-        scan_task.save()
-
-        scan_task.prerequisites.add(conn_task)
-        scan_task.save()
-
-        # Add Tasks to job
-        scan_job.tasks.add(scan_task)
-
-    scan_job.save()
     return scan_job, scan_task
