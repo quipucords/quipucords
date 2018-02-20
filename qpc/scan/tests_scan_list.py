@@ -109,7 +109,7 @@ class ScanListCliTests(unittest.TestCase):
                           'name': 'scan1'},
                       'status': 'completed'}
         results = [scan_entry]
-        next_link = 'http://127.0.0.1:8000/api/v1/scans/?page=2'
+        next_link = get_server_location() + SCAN_URI + '?page=2'
         data = {
             'count': 1,
             'next': next_link,

@@ -128,39 +128,22 @@ class ScanEditCommand(CliCommand):
             sys.exit(1)
 
         # check for valid source values
-        if len(self.args.sources) > 0:  # pylint: disable=len-as-condition
-            source_list = ','.join(self.args.sources)
-            response = request(parser=self.parser, method=GET,
-                               path=source.SOURCE_URI,
-                               params={'name': source_list},
-                               payload=None)
-            if response.status_code == codes.ok:  # pylint: disable=no-member
-                json_data = response.json()
-                count = json_data.get('count', 0)
-                results = json_data.get('results', [])
-                if count == len(self.args.sources):
-                    self.args.sources = []
-                    for source_entry in results:
-                        self.args.credentials.append(source_entry['id'])
-                else:
-                    for source_entry in results:
-                        source_name = source_entry['name']
-                        self.args.sources.remove(source_name)
-                    not_found_str = ','.join(self.args.sources)
-                    print(_(messages.SCAN_EDIT_SOURCES_NOT_FOUND %
-                            (not_found_str, self.args.name)))
-                    sys.exit(1)
-            else:
-                print(_(messages.SCAN_EDIT_SOURCES_PROCESS_ERR %
-                        self.args.name))
+        source_ids = []
+        if self.args.sources:
+            # check for existence of sources
+            not_found, source_ids = self._get_source_ids(self.args.sources)
+            if not_found is True:
                 sys.exit(1)
+        self.source_ids = source_ids
 
     def _build_data(self):
         """Construct the dictionary credential given our arguments.
 
         :returns: a dictionary representing the credential being added
         """
+        # self.req_payload = build_source_payload(self.args, add_none=False)
         self.req_payload = {
+            'name': self.args.name,
             'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {

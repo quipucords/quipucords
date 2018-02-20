@@ -115,6 +115,7 @@ class ScanAddCommand(CliCommand):
         :returns: a dictionary representing the credential being added
         """
         self.req_payload = {
+            'name': self.args.name,
             'sources': self.source_ids,
             'scan_type': scan.SCAN_TYPE_INSPECT,
             'options': {
@@ -128,4 +129,4 @@ class ScanAddCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         # Change id to name whenever name is added to scan model
-        print(_(messages.SCAN_ADDED % json_data['id']))
+        print(_(messages.SCAN_ADDED % json_data['name']))

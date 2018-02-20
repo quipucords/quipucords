@@ -17,7 +17,7 @@ from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
-from qpc.request import GET
+from qpc.request import GET, request
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -25,6 +25,7 @@ import qpc.messages as messages
 # pylint: disable=too-few-public-methods
 class ScanShowCommand(CliCommand):
     """Defines the show command.
+
     This command is for showing the status of a specific scan
     to gather facts.
     """
@@ -41,19 +42,30 @@ class ScanShowCommand(CliCommand):
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SCAN_NAME_HELP),
                                  required=True)
-        self.parser.add_argument('--id', dest='id', metavar='ID',
-                                 help=_(messages.SCAN_ID_HELP), required=True)
-        self.parser.add_argument('--results', dest='results',
-                                 action='store_true',
-                                 help=_(messages.SCAN_RESULTS_HELP),
-                                 required=False)
 
     def _validate_args(self):
         CliCommand._validate_args(self)
-        if self.args.id:
-            self.req_path = self.req_path + str(self.args.id) + '/'
-        if self.args.results:
-            self.req_path += 'results/'
+        found = False
+        response = request(parser=self.parser, method=GET,
+                           path=scan.SCAN_URI,
+                           params={'name': self.args.name},
+                           payload=None)
+        if response.status_code == codes.ok:  # pylint: disable=no-member
+            json_data = response.json()
+            count = json_data.get('count', 0)
+            results = json_data.get('results', [])
+            # if count == 1:
+            #     scan_entry = results[0]
+            #     self.req_path = self.req_path + str(scan_entry['id']) + '/'
+            #     found = True
+            if count >= 1:
+                for result in results:
+                    if result['name'] == self.args.name:
+                        self.req_path = self.req_path + str(result['id']) + '/'
+                        found = True
+            if not found or count == 0:
+                print(_(messages.SCAN_DOES_NOT_EXIST % self.args.name))
+                sys.exit(1)
 
     def _handle_response_success(self):
         json_data = self.response.json()
@@ -61,5 +73,5 @@ class ScanShowCommand(CliCommand):
         print(data)
 
     def _handle_response_error(self):
-        print(_(messages.SCAN_DOES_NOT_EXIST % self.args.id))
+        print(_(messages.SCAN_DOES_NOT_EXIST % self.args.name))
         sys.exit(1)

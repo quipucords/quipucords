@@ -52,7 +52,7 @@ class ScanClearCommand(CliCommand):
         deleted = False
         delete_uri = scan.SCAN_URI + str(scan_entry['id']) + '/'
         response = request(DELETE, delete_uri, parser=self.parser)
-        name = scan_entry['id']
+        name = scan_entry['name']
         # pylint: disable=no-member
         if response.status_code == codes.no_content:
             deleted = True
@@ -64,6 +64,7 @@ class ScanClearCommand(CliCommand):
                 print(_(messages.SCAN_FAILED_TO_REMOVE % name))
         return deleted
 
+    # pylint: disable=too-many-branches
     def _handle_response_success(self):
         json_data = self.response.json()
         count = json_data.get('count', 0)
@@ -76,6 +77,11 @@ class ScanClearCommand(CliCommand):
             entry = results[0]
             if self._delete_entry(entry) is False:
                 sys.exit(1)
+        elif self.args.name and count > 1:
+            for result in results:
+                if result['name'] == self.args.name:
+                    if self._delete_entry(result) is False:
+                        sys.exit(1)
         elif count == 0:
             print(_(messages.SCAN_NO_SCANS_TO_REMOVE))
             sys.exit(1)
@@ -87,10 +93,8 @@ class ScanClearCommand(CliCommand):
                 if self._delete_entry(entry, print_out=False) is False:
                     remove_error.append(entry['id'])
             if remove_error != []:
-                # cred_err = ','.join(remove_error)
-                # print(_(messages.SCAN_PARTIAL_REMOVE % cred_err))
-                # print("Remove Error: ")
-                # print(remove_error)
+                scan_err = ','.join(str(remove_error))
+                print(_(messages.SCAN_PARTIAL_REMOVE % scan_err))
                 sys.exit(1)
             else:
                 if not next_link:

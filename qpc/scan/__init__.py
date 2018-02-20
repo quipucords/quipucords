@@ -32,7 +32,7 @@ SCAN_STATUS_COMPLETED = 'completed'
 SCAN_STATUS_FAILED = 'failed'
 
 
-SCAN_URI = '/api/v1/scans/'
+SCAN_URI = '/api/v1/scanconfigs/'
 
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
