@@ -20,7 +20,7 @@ from api.models import (Credential,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
 from api.source.model import SourceOptions
-from scanner import input_log
+from scanner import scan_data_log
 from scanner.network.connect import construct_connect_inventory, connect, \
     ConnectResultStore
 from scanner.network import ConnectTaskRunner
@@ -92,7 +92,7 @@ class TestConnectResultCallback(unittest.TestCase):
 
     def setUp(self):
         """Disable the input logs for testing."""
-        input_log.disable_log_for_test()
+        scan_data_log.disable_log_for_test()
 
     def test_callback(self):
         """Test the callback."""
@@ -150,7 +150,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
         self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
-        input_log.disable_log_for_test()
+        scan_data_log.disable_log_for_test()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""

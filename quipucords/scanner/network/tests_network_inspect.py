@@ -24,7 +24,7 @@ from api.models import (Credential,
                         ScanOptions,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner import input_log
+from scanner import scan_data_log
 from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect_callback import InspectResultCallback, \
@@ -190,7 +190,7 @@ class NetworkInspectScannerTest(TestCase):
 
         self.scan_job.save()
 
-        input_log.disable_log_for_test()
+        scan_data_log.disable_log_for_test()
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""

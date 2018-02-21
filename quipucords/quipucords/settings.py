@@ -283,8 +283,9 @@ LOGGING = {
     },
 }
 
-INPUT_LOG_BASENAME = os.path.join(BASE_DIR, 'input_log')
-INPUT_LOG_MAX_BYTES = os.getenv('QUIPU_LOG_MAX_BYTES', 1 << 30)  # default 1 GB
+SCAN_DATA_LOG_BASENAME = os.path.join(BASE_DIR, 'scan_data_log')
+SCAN_DATA_LOG_MAX_BYTES = os.getenv('QUIPU_LOG_MAX_BYTES',
+                                    1 << 30)  # default 1 GB
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')

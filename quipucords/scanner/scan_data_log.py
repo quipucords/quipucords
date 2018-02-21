@@ -15,7 +15,7 @@ from logging import handlers
 import multiprocessing as mp
 import uuid
 from django.db import transaction
-from api import log_state
+from api import scan_data_log_state
 from api.source.serializer import SourceSerializer
 from api.source import util as view_util
 from quipucords import settings
@@ -34,9 +34,9 @@ def get_database_uuid():
     if UUID_CACHE is not None:
         return UUID_CACHE
 
-    uuid_obj = log_state.DatabaseUUID.objects.all().first()
+    uuid_obj = scan_data_log_state.DatabaseUUID.objects.all().first()
     if uuid_obj is None:
-        uuid_obj = log_state.DatabaseUUID(uuid=uuid.uuid4())
+        uuid_obj = scan_data_log_state.DatabaseUUID(uuid=uuid.uuid4())
         uuid_obj.save()
     UUID_CACHE = uuid_obj.uuid
 
@@ -51,9 +51,9 @@ def get_database_uuid():
 @transaction.atomic()
 def next_sequence_number():
     """Get the next sequence number and increment the counter."""
-    seq = log_state.LatestSequenceNumber.objects.all().first()
+    seq = scan_data_log_state.LatestSequenceNumber.objects.all().first()
     if seq is None:
-        seq = log_state.LatestSequenceNumber(number=0)
+        seq = scan_data_log_state.LatestSequenceNumber(number=0)
         seq.save()
 
     number = seq.number
@@ -95,12 +95,12 @@ class MultiprocessRotatingFileHandler(handlers.RotatingFileHandler):
         self.lock = mp.RLock()
 
 
-_INPUT_LOG = MultiprocessRotatingFileHandler(
-    filename=settings.INPUT_LOG_BASENAME,
+_HANDLER = MultiprocessRotatingFileHandler(
+    filename=settings.SCAN_DATA_LOG_BASENAME,
     encoding='utf-8',
-    maxBytes=settings.INPUT_LOG_MAX_BYTES // NUM_LOG_FILES,
+    maxBytes=settings.SCAN_DATA_LOG_MAX_BYTES // NUM_LOG_FILES,
     backupCount=NUM_LOG_FILES)
-_INPUT_LOG.setFormatter(JSONFormatter())
+_HANDLER.setFormatter(JSONFormatter())
 
 _DRY_RUN = False
 
@@ -114,7 +114,7 @@ def log_record(record):
     record['sequence_number'] = next_sequence_number()
 
     if not _DRY_RUN:
-        _INPUT_LOG.emit(record)
+        _HANDLER.emit(record)
 
 
 # pylint: disable=too-many-arguments
@@ -184,5 +184,5 @@ def safe_log_ansible_result(result, scan_task):
     """
     try:
         log_ansible_result(result, scan_task)
-    except:
+    except Exception:  # pylint: disable=broad-except
         pass

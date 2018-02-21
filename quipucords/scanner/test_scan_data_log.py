@@ -13,7 +13,7 @@ import uuid
 
 from django.test import TestCase
 
-from scanner import input_log
+from scanner import scan_data_log
 
 
 class TestDatabaseUUID(TestCase):
@@ -22,12 +22,12 @@ class TestDatabaseUUID(TestCase):
     def test_uuid(self):
         """Get UUID three times, verify stability."""
         # First retrieval makes new uuid
-        uuid_1 = input_log.get_database_uuid()
+        uuid_1 = scan_data_log.get_database_uuid()
         self.assertIsInstance(uuid_1, uuid.UUID)
 
         # Next retrievals should return the same object
-        self.assertEqual(input_log.get_database_uuid(), uuid_1)
-        self.assertEqual(input_log.get_database_uuid(), uuid_1)
+        self.assertEqual(scan_data_log.get_database_uuid(), uuid_1)
+        self.assertEqual(scan_data_log.get_database_uuid(), uuid_1)
 
 
 class TestNextSequenceNumber(TestCase):
@@ -36,8 +36,8 @@ class TestNextSequenceNumber(TestCase):
     def test_next_sequence_number(self):
         """Get next_sequence_number() three times."""
         # First retrieval starts at 0
-        self.assertEqual(input_log.next_sequence_number(), 0)
+        self.assertEqual(scan_data_log.next_sequence_number(), 0)
 
         # Next retrievals count up
-        self.assertEqual(input_log.next_sequence_number(), 1)
-        self.assertEqual(input_log.next_sequence_number(), 2)
+        self.assertEqual(scan_data_log.next_sequence_number(), 1)
+        self.assertEqual(scan_data_log.next_sequence_number(), 2)
