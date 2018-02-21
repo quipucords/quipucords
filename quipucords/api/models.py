@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -13,7 +13,7 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from api.fact.model import FactCollection
-from api.fingerprint.model import SystemFingerprint
+from api.fingerprint.model import (SystemFingerprint, Product, Entitlement)
 from api.credential.model import Credential
 from api.source.model import Source, SourceOptions
 from api.scanjob.model import ScanJob, ScanOptions
