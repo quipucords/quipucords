@@ -106,7 +106,7 @@ class InspectResultCallback(CallbackBase):
 
     def handle_result(self, result):
         """Handle an incoming result object."""
-        input_log.log_ansible_result(result, self.scan_task)
+        input_log.safe_log_ansible_result(result, self.scan_task)
         # pylint: disable=protected-access
         result_obj = _construct_result(result)
         self.results.append(result_obj)
@@ -193,7 +193,7 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result, self.scan_task)
+        input_log.safe_log_ansible_result(result, self.scan_task)
         result_obj = _construct_result(result)
         self.results.append(result_obj)
         logger.warning('%s', result_obj)

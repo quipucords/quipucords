@@ -42,7 +42,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result, self.scan_task)
+        input_log.safe_log_ansible_result(result, self.scan_task)
         host = result._host.name      # pylint: disable=protected-access
         task_result = result._result  # pylint: disable=protected-access
         if 'rc' in task_result and task_result['rc'] == 0:
@@ -55,7 +55,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result, self.scan_task)
+        input_log.safe_log_ansible_result(result, self.scan_task)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(
@@ -69,7 +69,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result, self.scan_task)
+        input_log.safe_log_ansible_result(result, self.scan_task)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(

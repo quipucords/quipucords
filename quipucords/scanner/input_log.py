@@ -98,7 +98,7 @@ class MultiprocessRotatingFileHandler(handlers.RotatingFileHandler):
 _INPUT_LOG = MultiprocessRotatingFileHandler(
     filename=settings.INPUT_LOG_BASENAME,
     encoding='utf-8',
-    maxBytes=settings.INPUT_LOG_MAX_SIZE // NUM_LOG_FILES,
+    maxBytes=settings.INPUT_LOG_MAX_BYTES // NUM_LOG_FILES,
     backupCount=NUM_LOG_FILES)
 _INPUT_LOG.setFormatter(JSONFormatter())
 
@@ -172,3 +172,17 @@ def log_ansible_result(result, scan_task):
                  source_json)
     # If _raw_params isn't in args, then args is not a raw command and
     # we don't need to record it. This occurs for set_facts tasks.
+
+
+def safe_log_ansible_result(result, scan_task):
+    """Log the results of a shell command.
+
+    This function should always return.
+
+    :param result: the Ansible result object, as a Python dict.
+    :param scan_task: the ScanTask of this Ansible task.
+    """
+    try:
+        log_ansible_result(result, scan_task)
+    except:
+        pass
