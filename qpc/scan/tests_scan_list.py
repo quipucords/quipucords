@@ -106,8 +106,7 @@ class ScanListCliTests(unittest.TestCase):
                       'scan_type': 'inspect',
                       'source': {
                           'id': 1,
-                          'name': 'scan1'},
-                      'status': 'completed'}
+                          'name': 'scan1'}}
         results = [scan_entry]
         next_link = get_server_location() + SCAN_URI + '?page=2'
         data = {
@@ -128,8 +127,8 @@ class ScanListCliTests(unittest.TestCase):
             with redirect_stdout(scan_out):
                 slc.main(args)
                 expected = '[{"id":1,"scan_type":"inspect"' \
-                           ',"source":{"id":1,"name":"scan1"},'\
-                           '"status":"completed"}]'
+                           ',"source":{"id":1,"name":"scan1"}'\
+                           '}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(),
                                  expected + expected)
@@ -143,8 +142,7 @@ class ScanListCliTests(unittest.TestCase):
                       'scan_type': 'inspect',
                       'source': {
                           'id': 1,
-                          'name': 'scan1'},
-                      'status': 'completed'}
+                          'name': 'scan1'}}
         results = [scan_entry]
         data = {
             'count': 1,
@@ -158,35 +156,7 @@ class ScanListCliTests(unittest.TestCase):
             with redirect_stdout(scan_out):
                 slc.main(args)
                 expected = '[{"id":1,"scan_type":"inspect"' \
-                           ',"source":{"id":1,"name":"scan1"},'\
-                           '"status":"completed"}]'
-                self.assertEqual(scan_out.getvalue().replace('\n', '')
-                                 .replace(' ', '').strip(), expected)
-
-    def test_list_filter_status(self):
-        """Testing the list scan with filter by state."""
-        scan_out = StringIO()
-        url = get_server_location() + SCAN_URI
-        scan_entry = {'id': 1,
-                      'scan_type': 'inspect',
-                      'source': {
-                          'id': 1,
-                          'name': 'scan1'},
-                      'status': 'completed'}
-        results = [scan_entry]
-        data = {
-            'count': 1,
-            'next': None,
-            'results': results
-        }
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, status_code=200, json=data)
-            slc = ScanListCommand(SUBPARSER)
-            args = Namespace(status='completed')
-            with redirect_stdout(scan_out):
-                slc.main(args)
-                expected = '[{"id":1,"scan_type":"inspect"' \
-                           ',"source":{"id":1,"name":"scan1"},'\
-                           '"status":"completed"}]'
+                           ',"source":{"id":1,"name":"scan1"}'\
+                           '}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
