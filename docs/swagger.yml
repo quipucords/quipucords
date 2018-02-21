@@ -49,29 +49,6 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Invalid input"
-  /facts/{fact_collection_id}:
-    get:
-      tags:
-        - "Fact"
-      summary: "Get an fact collection"
-      description: "Get raw facts in fact collection."
-      operationId: "getFacts"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "fact_collection_id"
-        in: "path"
-        description: "ID of fact collection."
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Fact collection retrieved"
-          schema:
-            $ref: "#/definitions/FactCollectionSource"
-        404:
-          description: "Fact collection not found"
   /credentials/:
     post:
       tags:
@@ -137,7 +114,7 @@ paths:
           description: "Credential retrieved"
           schema:
             $ref: "#/definitions/CredentialPagination"
-  /credentials/{cred_id}:
+  /credentials/{cred_id}/:
     get:
       tags:
         - "Credential"
@@ -212,20 +189,45 @@ paths:
           description: "Credential deleted"
         404:
           description: "Credential not found"
-  /reports/:
+  /reports/{report_id}/details/:
     get:
       tags:
         - "Report"
-      summary: "Retrieve list of reports for systems scanned"
-      description: "List reports for systems that have been scanned."
-      operationId: "listReports"
+      summary: "Retrieve a detailed report for systems scanned"
+      description: "Get detailed report for systems that have been scanned."
+      operationId: "getDetailReport"
       produces:
       - "application/json"
       parameters:
-        - name: "fact_collection_id"
-          in: "query"
-          description: "The Fact Collection ID to be queried"
-          type: "string"
+      - name: "report_id"
+        in: "path"
+        description: "The Report ID to be queried."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Detailed report for scanned systems retrieved"
+          schema:
+            $ref: "#/definitions/FactCollectionSource"
+        404:
+          description: "Report for report id not found"
+  /reports/{report_id}/deployments/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve a deployment report for systems scanned"
+      description: "Get deployment report for systems that have been scanned."
+      operationId: "getDeploymentReport"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "report_id"
+          in: "path"
+          description: "The Report ID to be queried."
+          required: true
+          type: "integer"
+          format: "int64"
         - name: "group_count"
           in: "query"
           description: "The field to group and count on. Cannot be used with other filters."
@@ -272,13 +274,13 @@ paths:
           type: "boolean"
       responses:
         200:
-          description: "List of reports for scanned systems"
+          description: "Deployment report for scanned systems retrieved"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/SystemReportOut"
         404:
-          description: "Report for fact collection id not found"
+          description: "Report for report id not found"
   /sources/:
     post:
       tags:
@@ -349,7 +351,7 @@ paths:
           description: "Sources retrieved"
           schema:
             $ref: "#/definitions/SourcePagination"
-  /sources/{source_id}:
+  /sources/{source_id}/:
     get:
       tags:
         - "Source"
@@ -496,7 +498,7 @@ paths:
           description: "Scan jobs retrieved"
           schema:
             $ref: "#/definitions/ScanJobPagination"
-  /scans/{scan_job_id}:
+  /scans/{scan_job_id}/:
     get:
       tags:
         - "Scan"
@@ -837,7 +839,7 @@ definitions:
           type: "integer"
           format: "int64"
           description: "Fingerprint database identifier"
-        fact_collection_id:
+        report_id:
             type: "integer"
             format: "int64"
             description: "Fact collection identifier"
@@ -929,7 +931,7 @@ definitions:
           description: "The number of times a grouped field appears in the scanned environment"
   SystemReportOut:
     properties:
-        fact_collection_id:
+        report_id:
           type: "string"
           description: "The fact collection id associate with report"
         report:
@@ -1229,7 +1231,7 @@ definitions:
             type: "integer"
             format: "int64"
             description: "The total number of systems that failed to scan."
-          fact_collection_id:
+          report_id:
             type: "integer"
             format: "int64"
             description: "The identifier of the sent fact collection."

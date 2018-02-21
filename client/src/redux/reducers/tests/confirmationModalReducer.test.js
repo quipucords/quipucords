@@ -1,5 +1,5 @@
-import { confirmationModalTypes } from '../constants';
-import confirmationModalReducer from './confirmationModalReducer';
+import { confirmationModalTypes } from '../../constants/index';
+import confirmationModalReducer from '../confirmationModalReducer';
 
 describe('ConfirmationModalReducer', function() {
   it('should return the initial state', () => {
@@ -39,11 +39,7 @@ describe('ConfirmationModalReducer', function() {
       type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
     };
 
-    expect(confirmationModalReducer(undefined, dispatchShow).show).toEqual(
-      true
-    );
-    expect(confirmationModalReducer(undefined, dispatchHide).show).toEqual(
-      false
-    );
+    expect(confirmationModalReducer(undefined, dispatchShow).show).toEqual(true);
+    expect(confirmationModalReducer(undefined, dispatchHide).show).toEqual(false);
   });
 });

@@ -1,29 +1,21 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
-import {
-  AboutModal,
-  Alert,
-  EmptyState,
-  Modal,
-  VerticalNav
-} from 'patternfly-react';
+import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 
 import { routes } from '../routes';
-import Store from '../redux/store';
 
+import About from './about/about';
 import Content from './content/content';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
 import MastheadOptions from './mastheadOptions/mastheadOptions';
 
-import logo from '../styles/images/Red_Hat_logo.svg';
 import productTitle from '../styles/images/title.svg';
-import _ from 'lodash';
-import { aboutTypes } from '../redux/constants';
 import { authorizeUser } from '../redux/actions/userActions';
 
 class App extends React.Component {
@@ -33,6 +25,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    console.log('auth?');
     this.props.authorizeUser();
   }
 
@@ -44,9 +37,7 @@ class App extends React.Component {
   renderMenuItems() {
     const { location } = this.props;
 
-    let activeItem = this.menu.find(item =>
-      _.startsWith(location.pathname, item.to)
-    );
+    let activeItem = this.menu.find(item => _.startsWith(location.pathname, item.to));
 
     return this.menu.map(item => {
       return (
@@ -61,19 +52,12 @@ class App extends React.Component {
     });
   }
 
-  showAboutModal() {
-    Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
-  }
-
-  render() {
-    const { showAbout, session } = this.props;
-
-    let closeAbout = () =>
-      Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_CLOSE });
+  renderContent() {
+    const { session } = this.props;
 
     if (session.error) {
       return (
-        <EmptyState>
+        <EmptyState className="full-page-blank-slate">
           <Alert type="error">
             <span>Login error: {session.errorMessage}</span>
           </Alert>
@@ -81,7 +65,7 @@ class App extends React.Component {
       );
     }
 
-    if (session.pending || !session.fulfilled) {
+    if (session.pending || !session.fulfilled || (!session.loggedIn && !session.wasLoggedIn)) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -92,29 +76,21 @@ class App extends React.Component {
       );
     }
 
-    if (!session.loggedIn) {
-      setTimeout(() => {
-        window.location = '/login';
-      }, 5000);
+    return (
+      <React.Fragment>
+        <Content />
+        <ToastNotificationsList key="toastList" />
+        <ConfirmationModal key="confirmationModal" />
+        <About />
+      </React.Fragment>
+    );
+  }
 
-      return (
-        <div className="layout-pf layout-pf-fixed hidden-nav-menu">
-          <VerticalNav persistentSecondary={false}>
-            <VerticalNav.Masthead>
-              <VerticalNav.Brand titleImg={productTitle} />
-            </VerticalNav.Masthead>
-          </VerticalNav>
-          <div className="container-pf-nav-pf-vertical">
-            <EmptyState className="full-page-blank-slate">
-              <Alert type="error">
-                <span>
-                  You have been logged out: redirecting to the login page.
-                </span>
-              </Alert>
-            </EmptyState>
-          </div>
-        </div>
-      );
+  render() {
+    const { session } = this.props;
+
+    if (!session.loggedIn && session.wasLoggedIn) {
+      window.location = '/logout';
     }
 
     return (
@@ -126,32 +102,7 @@ class App extends React.Component {
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
         </VerticalNav>
-        <div className="container-pf-nav-pf-vertical">
-          <Content />
-        </div>
-        <AboutModal
-          key="aboutModal"
-          show={showAbout}
-          onHide={closeAbout}
-          productTitle={
-            <img src={productTitle} alt="Red Hat Entitlements Reporting" />
-          }
-          logo={logo}
-          altLogo="RH ER"
-          trademarkText="Copyright (c) 2018 Red Hat Inc."
-        >
-          <AboutModal.Versions>
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-            <AboutModal.VersionItem label="Label" versionText="Version" />
-          </AboutModal.Versions>
-        </AboutModal>
-        <ToastNotificationsList key="toastList" />
-        <ConfirmationModal key="confirmationModal" />
+        <div className="container-pf-nav-pf-vertical">{this.renderContent()}</div>
       </div>
     );
   }
@@ -160,7 +111,6 @@ class App extends React.Component {
 App.propTypes = {
   authorizeUser: PropTypes.func,
   session: PropTypes.object,
-  showAbout: PropTypes.bool,
   location: PropTypes.object,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired
@@ -173,8 +123,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 function mapStateToProps(state, ownProps) {
   return {
-    session: state.user.session,
-    showAbout: state.about.show
+    session: state.user.session
   };
 }
 

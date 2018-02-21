@@ -128,8 +128,7 @@ def _validate_source_json(source_json):
 def get_or_create_fact_collection(json_fact_collection, scan_job=None):
     """Create fact collection.
 
-    Fact collection consists of a FactCollection record and a
-    corresponding JSON file with the name <fact_collection_id>.json
+    Fact collection consists of a FactCollection record
     :param json_fact_collection: dict representing a fact collection
     :param scan_job: scanjob to be associated with this fact_collection
     :returns: The newly created FactCollection
@@ -137,9 +136,9 @@ def get_or_create_fact_collection(json_fact_collection, scan_job=None):
     fact_collection = None
     if scan_job is not None:
         # check for existing fact collection
-        fact_collection_id = scan_job.fact_collection_id
+        report_id = scan_job.report_id
         fact_collection = FactCollection.objects.filter(
-            id=fact_collection_id).first()
+            id=report_id).first()
 
     if fact_collection is None:
         # Create new fact collection
@@ -155,7 +154,7 @@ def get_or_create_fact_collection(json_fact_collection, scan_job=None):
 
         # Update scan job if there is one
         if scan_job is not None:
-            scan_job.fact_collection_id = fact_collection.id
+            scan_job.report_id = fact_collection.id
             scan_job.save()
             fact_collection.save()
             logger.debug('Fact collection %d associated with scanjob %d',

@@ -2,10 +2,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  ToastNotificationList,
-  TimedToastNotification
-} from 'patternfly-react';
+import { ToastNotificationList, TimedToastNotification } from 'patternfly-react';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';

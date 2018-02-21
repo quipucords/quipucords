@@ -1,0 +1,331 @@
+import { sourcesTypes } from '../../constants/index';
+import sourcesReducer from '../sourcesReducer';
+
+const initialState = {
+  persist: {
+    selectedSources: []
+  },
+
+  view: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    sources: []
+  },
+
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    source: null,
+    sourceType: '',
+    show: false,
+    add: false,
+    edit: false,
+    delete: false
+  }
+};
+
+describe('SourcesReducer', function() {
+  it('should return the initial state', () => {
+    expect(sourcesReducer(undefined, {})).toEqual(initialState);
+  });
+
+  it('should handle SELECT_SOURCE and DESELECT_SOURCE', () => {
+    let dispatched = {
+      type: sourcesTypes.SELECT_SOURCE,
+      source: { name: 'selected', id: 1 }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.persist.selectedSources).toHaveLength(1);
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.update).toEqual(initialState.update);
+
+    dispatched.type = sourcesTypes.DESELECT_SOURCE;
+    resultState = sourcesReducer(resultState, dispatched);
+
+    expect(resultState.persist.selectedSources).toHaveLength(0);
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.update).toEqual(initialState.update);
+  });
+
+  it('should handle CREATE_SOURCE_SHOW', () => {
+    let dispatched = {
+      type: sourcesTypes.CREATE_SOURCE_SHOW
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.update.show).toBeTruthy();
+    expect(resultState.update.add).toBeTruthy();
+    expect(resultState.update.edit).toBeFalsy();
+    expect(resultState.update.delete).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+
+    dispatched = {
+      type: sourcesTypes.UPDATE_SOURCE_HIDE
+    };
+    resultState = sourcesReducer(resultState, dispatched);
+
+    expect(resultState.update.show).toBeFalsy();
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+  });
+
+  it('should handle EDIT_SOURCE_SHOW', () => {
+    let dispatched = {
+      type: sourcesTypes.EDIT_SOURCE_SHOW
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.update.show).toBeTruthy();
+    expect(resultState.update.add).toBeFalsy();
+    expect(resultState.update.edit).toBeTruthy();
+    expect(resultState.update.delete).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+
+    dispatched = {
+      type: sourcesTypes.UPDATE_SOURCE_HIDE
+    };
+    resultState = sourcesReducer(resultState, dispatched);
+
+    expect(resultState.update.show).toBeFalsy();
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+  });
+
+  it('should handle ADD_SOURCE_REJECTED', () => {
+    let dispatched = {
+      type: sourcesTypes.ADD_SOURCE_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'ADD ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.update.error).toBeTruthy();
+    expect(resultState.update.errorMessage).toEqual('ADD ERROR');
+    expect(resultState.update.add).toBeTruthy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+  });
+
+  it('should handle DELETE_SOURCE_REJECTED', () => {
+    let dispatched = {
+      type: sourcesTypes.DELETE_SOURCE_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'DELETE ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.update.error).toBeTruthy();
+    expect(resultState.update.errorMessage).toEqual('DELETE ERROR');
+    expect(resultState.update.delete).toBeTruthy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+  });
+
+  it('should handle UPDATE_SOURCE_REJECTED', () => {
+    let dispatched = {
+      type: sourcesTypes.UPDATE_SOURCE_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'UPDATE ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.update.error).toBeTruthy();
+    expect(resultState.update.errorMessage).toEqual('UPDATE ERROR');
+    expect(resultState.update.edit).toBeTruthy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+  });
+
+  it('should handle GET_SOURCES_REJECTED', () => {
+    let dispatched = {
+      type: sourcesTypes.GET_SOURCES_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'GET ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.view.error).toBeTruthy();
+    expect(resultState.view.errorMessage).toEqual('GET ERROR');
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.update).toEqual(initialState.update);
+  });
+
+  it('should handle GET_SOURCES_PENDING', () => {
+    let dispatched = {
+      type: sourcesTypes.GET_SOURCES_PENDING
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.view.pending).toBeTruthy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.update).toEqual(initialState.update);
+  });
+
+  it('should handle GET_SOURCES_FULFILLED', () => {
+    let dispatched = {
+      type: sourcesTypes.GET_SOURCES_FULFILLED,
+      payload: {
+        data: {
+          results: [
+            {
+              name: '1',
+              id: 1
+            },
+            {
+              name: '2',
+              id: 2
+            },
+            {
+              name: '3',
+              id: 3
+            },
+            {
+              name: '4',
+              id: 4
+            }
+          ]
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.view.fulfilled).toBeTruthy();
+    expect(resultState.view.sources).toHaveLength(4);
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.update).toEqual(initialState.update);
+  });
+
+  it('should maintain selections on new data', () => {
+    let dispatched = {
+      type: sourcesTypes.GET_SOURCES_FULFILLED,
+      error: true,
+      payload: {
+        data: {
+          results: [
+            {
+              name: '1',
+              id: 1
+            },
+            {
+              name: '2',
+              id: 2
+            },
+            {
+              name: '3',
+              id: 3
+            },
+            {
+              name: '4',
+              id: 4
+            }
+          ]
+        }
+      }
+    };
+
+    let resultState = sourcesReducer(undefined, dispatched);
+
+    expect(resultState.view.fulfilled).toBeTruthy();
+    expect(resultState.view.sources).toHaveLength(4);
+
+    dispatched = {
+      type: sourcesTypes.SELECT_SOURCE,
+      source: { name: '1', id: 1 }
+    };
+
+    resultState = sourcesReducer(resultState, dispatched);
+
+    expect(resultState.persist.selectedSources).toHaveLength(1);
+
+    dispatched = {
+      type: sourcesTypes.SELECT_SOURCE,
+      source: { name: '2', id: 2 }
+    };
+
+    resultState = sourcesReducer(resultState, dispatched);
+
+    expect(resultState.persist.selectedSources).toHaveLength(2);
+
+    dispatched = {
+      type: sourcesTypes.GET_SOURCES_FULFILLED,
+      error: true,
+      payload: {
+        data: {
+          results: [
+            {
+              name: '1',
+              id: 1
+            },
+            {
+              name: '5',
+              id: 5
+            },
+            {
+              name: '6',
+              id: 6
+            },
+            {
+              name: '7',
+              id: 7
+            }
+          ]
+        }
+      }
+    };
+
+    resultState = sourcesReducer(resultState, dispatched);
+    expect(resultState.persist.selectedSources).toHaveLength(2);
+  });
+});

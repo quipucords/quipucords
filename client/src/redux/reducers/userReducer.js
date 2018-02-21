@@ -28,11 +28,7 @@ export default function userReducer(state = initialState, action) {
         'user',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
@@ -58,7 +54,7 @@ export default function userReducer(state = initialState, action) {
       return helpers.setStateProp(
         'user',
         {
-          currentUser: action.payload,
+          currentUser: action.payload.data,
           fulfilled: true
         },
         {
@@ -73,11 +69,7 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
@@ -105,6 +97,7 @@ export default function userReducer(state = initialState, action) {
         {
           loggedIn: true,
           fulfilled: true,
+          wasLoggedIn: true,
           authToken: action.payload.authToken
         },
         {
@@ -119,11 +112,7 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,

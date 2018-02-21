@@ -209,12 +209,7 @@ class ViewToolbar extends React.Component {
   }
 
   renderCounts() {
-    const {
-      totalCount,
-      selectedCount,
-      itemsType,
-      itemsTypePlural
-    } = this.props;
+    const { totalCount, selectedCount, itemsType, itemsTypePlural } = this.props;
 
     return (
       <h5 className="quipucords-view-count">
@@ -234,11 +229,7 @@ class ViewToolbar extends React.Component {
         <Filter.List key="list">
           {activeFilters.map((item, index) => {
             return (
-              <Filter.Item
-                key={index}
-                onRemove={this.removeFilter}
-                filterData={item}
-              >
+              <Filter.Item key={index} onRemove={this.removeFilter} filterData={item}>
                 {item.label}
               </Filter.Item>
             );

@@ -87,10 +87,7 @@ export default function toolbarsReducer(state = initialState, action) {
     case viewToolbarTypes.ADD_FILTER:
       // Don't rea-add the same filter
       let filterExists = state[action.viewType].activeFilters.find(filter => {
-        return (
-          action.filter.field === filter.field &&
-          action.filter.value === filter.value
-        );
+        return action.filter.field === filter.field && action.filter.value === filter.value;
       });
       if (filterExists) {
         return state;
@@ -105,17 +102,13 @@ export default function toolbarsReducer(state = initialState, action) {
     case viewToolbarTypes.REMOVE_FILTER:
       let index = state[action.viewType].activeFilters.indexOf(action.filter);
       if (index >= 0) {
-        updateState[action.viewType] = Object.assign(
-          {},
-          state[action.viewType],
-          {
-            activeFilters: [
-              ...state[action.viewType].activeFilters.slice(0, index),
-              ...state[action.viewType].activeFilters.slice(index + 1)
-            ],
-            currentPage: 1
-          }
-        );
+        updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+          activeFilters: [
+            ...state[action.viewType].activeFilters.slice(0, index),
+            ...state[action.viewType].activeFilters.slice(index + 1)
+          ],
+          currentPage: 1
+        });
         return Object.assign({}, state, updateState);
       } else {
         return state;
@@ -171,9 +164,7 @@ export default function toolbarsReducer(state = initialState, action) {
       return Object.assign({}, state, updateState);
 
     case viewPaginationTypes.VIEW_NEXT_PAGE:
-      if (
-        state[action.viewType].currentPage >= state[action.viewType].totalPages
-      ) {
+      if (state[action.viewType].currentPage >= state[action.viewType].totalPages) {
         return state;
       }
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {

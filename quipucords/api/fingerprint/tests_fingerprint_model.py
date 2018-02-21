@@ -28,8 +28,40 @@ class FingerprintModelTest(TestCase):
     ################################################################
     def test_empty_fingerprint(self):
         """Create an empty fingerprint."""
-        fingerprint_dict = {'fact_collection_id': self.fact_collection.id,
+        fingerprint_dict = {'report_id': self.fact_collection.id,
                             'metadata': {}}
+
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            print(serializer.errors)
+        self.assertTrue(is_valid)
+        serializer.save()
+
+    def test_product_fingerprint(self):
+        """Create a fingerprint with products."""
+        product_dict = {'name': 'product1',
+                        'presence': 'unknown',
+                        'metadata': {}}
+        fingerprint_dict = {'report_id': self.fact_collection.id,
+                            'metadata': {},
+                            'products': [product_dict]}
+
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            print(serializer.errors)
+        self.assertTrue(is_valid)
+        serializer.save()
+
+    def test_entitlement_fingerprint(self):
+        """Create a fingerprint with entitlements."""
+        entitlement_dict = {'name': 'RHEL Server',
+                            'entitlement_id': '69',
+                            'metadata': {}}
+        fingerprint_dict = {'report_id': self.fact_collection.id,
+                            'metadata': {},
+                            'entitlements': [entitlement_dict]}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()

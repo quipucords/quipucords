@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -141,7 +141,7 @@ class ScanJobSerializer(NotEmptySerializer):
     status_message = CharField(read_only=True)
     tasks = TaskField(many=True, read_only=True)
     options = ScanJobOptionsSerializer(read_only=True, many=False)
-    fact_collection_id = IntegerField(read_only=True)
+    report_id = IntegerField(read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)
 
@@ -157,7 +157,7 @@ class ScanJobSerializer(NotEmptySerializer):
                   'status_message',
                   'tasks',
                   'options',
-                  'fact_collection_id',
+                  'report_id',
                   'start_time',
                   'end_time']
 

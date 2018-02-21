@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,15 +18,42 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         DateField,
                                         NullBooleanField,
                                         ModelSerializer)
-from api.models import (SystemFingerprint, FactCollection)
+from api.models import (SystemFingerprint,
+                        FactCollection,
+                        Product,
+                        Entitlement)
 from api.common.serializer import CustomJSONField
+
+
+class ProductSerializer(ModelSerializer):
+    """Serializer for the Product model."""
+
+    metadata = CustomJSONField(required=True)
+
+    class Meta:
+        """Meta class for ProductSerializer."""
+
+        model = Product
+        fields = ('name', 'version', 'presence', 'metadata')
+
+
+class EntitlementSerializer(ModelSerializer):
+    """Serializer for the Entitlement model."""
+
+    metadata = CustomJSONField(required=True)
+
+    class Meta:
+        """Meta class for EntitlementSerializer."""
+
+        model = Entitlement
+        fields = ('name', 'entitlement_id', 'metadata')
 
 
 class FingerprintSerializer(ModelSerializer):
     """Serializer for the Fingerprint model."""
 
     # Scan information
-    fact_collection_id = PrimaryKeyRelatedField(
+    report_id = PrimaryKeyRelatedField(
         queryset=FactCollection.objects.all())
 
     # Common facts
@@ -76,6 +103,11 @@ class FingerprintSerializer(ModelSerializer):
     vm_cluster = CharField(required=False, max_length=128)
     vm_datacenter = CharField(required=False, max_length=128)
 
+    products = ProductSerializer(many=True, allow_null=True, required=False)
+    entitlements = EntitlementSerializer(many=True,
+                                         allow_null=True,
+                                         required=False)
+
     metadata = CustomJSONField(required=True)
 
     class Meta:
@@ -83,3 +115,16 @@ class FingerprintSerializer(ModelSerializer):
 
         model = SystemFingerprint
         fields = '__all__'
+
+    def create(self, validated_data):
+        """Create a system fingerprint."""
+        products_data = validated_data.pop('products', [])
+        entitlements_data = validated_data.pop('entitlements', [])
+        fingerprint = SystemFingerprint.objects.create(**validated_data)
+        for product_data in products_data:
+            Product.objects.create(fingerprint=fingerprint,
+                                   **product_data)
+        for entitlement_data in entitlements_data:
+            Entitlement.objects.create(fingerprint=fingerprint,
+                                       **entitlement_data)
+        return fingerprint

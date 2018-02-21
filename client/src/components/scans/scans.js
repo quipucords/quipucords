@@ -3,27 +3,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import {
-  Alert,
-  Button,
-  EmptyState,
-  Icon,
-  ListView,
-  Modal
-} from 'patternfly-react';
+import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
-import {
-  getScans,
-  pauseScan,
-  cancelScan,
-  restartScan
-} from '../../redux/actions/scansActions';
-import {
-  sourcesTypes,
-  toastNotificationTypes,
-  viewToolbarTypes,
-  viewTypes
-} from '../../redux/constants';
+import { getScans, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
+import { sourcesTypes, toastNotificationTypes, viewToolbarTypes, viewTypes } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
 
@@ -85,9 +68,7 @@ class Scans extends React.Component {
     }
 
     // Check for changes resulting in a fetch
-    if (
-      helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)
-    ) {
+    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
       this.props.getScans(
         helpers.createViewQueryObject(this.props.viewOptions, {
           scan_type: 'inspect'
@@ -252,12 +233,8 @@ class Scans extends React.Component {
 
     return (
       <EmptyState className="list-view-blank-slate">
-        <EmptyState.Title>
-          No Results Match the Filter Criteria
-        </EmptyState.Title>
-        <EmptyState.Info>
-          The active filters are hiding all items.
-        </EmptyState.Info>
+        <EmptyState.Title>No Results Match the Filter Criteria</EmptyState.Title>
+        <EmptyState.Info>The active filters are hiding all items.</EmptyState.Info>
         <EmptyState.Action>
           <Button bsStyle="link" onClick={this.clearFilters}>
             Clear Filters
@@ -294,13 +271,8 @@ class Scans extends React.Component {
               itemsTypePlural="Scans"
               {...viewOptions}
             />
-            <ViewPaginationRow
-              viewType={viewTypes.SCANS_VIEW}
-              {...viewOptions}
-            />
-            <div className="quipucords-list-container">
-              {this.renderScansList(scans)}
-            </div>
+            <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
+            <div className="quipucords-list-container">{this.renderScansList(scans)}</div>
           </div>
           {this.renderPendingMessage()}
         </React.Fragment>
@@ -309,10 +281,7 @@ class Scans extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState
-          onAddSource={this.addSource}
-          onImportSources={this.importSources}
-        />
+        <SourcesEmptyState onAddSource={this.addSource} onImportSources={this.importSources} />
         {this.renderPendingMessage()}
       </React.Fragment>
     );

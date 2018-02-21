@@ -28,6 +28,7 @@
     "build:ui": "run-s build:css build:js",
     "build:asset-deps": "mkdir -p public/assets/rcue && cp -R node_modules/rcue/dist/* public/assets/rcue",
     "build:asset-images": "mkdir -p public/assets/images && cp -R src/styles/images/* public/assets/images",
+    "build:asset-css": "npm run build:css && mkdir -p public/assets/css && cp -R src/styles/css/* public/assets/css",
     "build:assets": "run-s build:asset-*",
     "build:finish": "mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client",
     "build": "run-s -l build:clean build:assets build:ui build:finish",
@@ -40,12 +41,13 @@
     "support:create-react-app": "create-react-app",
     "test": "run-s test:**",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "react-scripts test --env=jsdom"
+    "test:unit": "sh -ac '. .env.development; react-scripts test --env=jsdom'"
   },
   "dependencies": {
     "axios": "^0.17.1",
     "bootstrap": "^3.3.7",
     "js-cookie": "^2.2.0",
+    "moment": "^2.20.1",
     "patternfly": "^3.37.8",
     "patternfly-react": "^1.8.1",
     "rcue": "^3.38.0",
@@ -76,15 +78,18 @@
     "eslint-plugin-react": "^7.5.1",
     "eslint-plugin-standard": "^3.0.1",
     "express": "^4.16.2",
+    "fetch-mock": "^6.0.0",
     "jest": "^21.2.1",
     "jest-cli": "^21.2.1",
+    "moxios": "^0.4.0",
     "node-sass": "^4.7.2",
     "npm-run-all": "^4.1.2",
     "prettier": "^1.10.2",
     "react-app-rewired": "^1.4.1",
+    "redux-mock-store": "^1.5.1",
     "swagger-parser": "^4.0.2",
     "swagger-ui-express": "^2.0.14",
-    "yamljs": "^0.3.0",
-    "write-file-webpack-plugin": "^4.2.0"
+    "write-file-webpack-plugin": "^4.2.0",
+    "yamljs": "^0.3.0"
   }
 }

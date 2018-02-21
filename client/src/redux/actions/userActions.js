@@ -11,7 +11,7 @@ const getUser = () => dispatch => {
 const authorizeUser = () => dispatch => {
   return dispatch({
     type: userTypes.USER_AUTH,
-    payload: userService.authorizeUser()
+    payload: userService.whoami()
   });
 };
 
