@@ -83,8 +83,6 @@ def build_scan_payload(args, sources, disable_optional_products):
             options['max_concurrency'] = args.max_concurrency
     if hasattr(args, 'disable_optional_products') \
             and args.disable_optional_products:
-        req_payload['disable_optional_products'] \
-            = args.disable_optional_products
         if options is None:
             options = \
                 {'disable_optional_products': args.disable_optional_products}

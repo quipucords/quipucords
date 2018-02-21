@@ -39,7 +39,7 @@ class ScanEditCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PATCH,
-                            scan.SCAN_URI, [codes.created])
+                            scan.SCAN_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SCAN_NAME_HELP),
                                  required=True)
