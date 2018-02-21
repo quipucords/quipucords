@@ -21,3 +21,4 @@ from qpc.scan.pause import ScanPauseCommand
 from qpc.scan.cancel import ScanCancelCommand
 from qpc.scan.restart import ScanRestartCommand
 from qpc.scan.clear import ScanClearCommand
+from qpc.scan.status import ScanStatusCommand

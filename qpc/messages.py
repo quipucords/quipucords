@@ -111,6 +111,8 @@ SCAN_NAME_HELP = 'Scan name.'
 SCAN_ADDED = 'Scan "%s" was added.'
 SCAN_UPDATED = 'Scan "%s" was updated.'
 SCAN_ID_HELP = 'Scan identifier.'
+SCAN_JOB_ID_HELP = 'Scan job identifier.'
+SCAN_JOB_STATUS = 'Scan job "%s": %s.'
 SCAN_TYPE_FILTER_HELP = 'Filter for listing scan jobs by type. Valid '\
     'values: connect, inspect.'
 SCAN_STATUS_FILTER_HELP = 'Filter for listing scan jobs by status. Valid '\
@@ -119,6 +121,7 @@ SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; '\
     'default is 50.'
 SCAN_RESULTS_HELP = 'View results of the specified scan.'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist.'
+SCAN_JOB_DOES_NOT_EXIST = 'Scan job "%s" does not exist.'
 SCAN_LIST_NO_SCANS = 'No scans found.'
 SCAN_STARTED = 'Scan "%s" started.'
 SCAN_PAUSED = 'Scan "%s" paused.'

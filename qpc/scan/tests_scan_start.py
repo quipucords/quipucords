@@ -14,14 +14,11 @@ import unittest
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
-import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.scan import SCAN_URI
-from qpc.source import SOURCE_URI
 from qpc.scan.start import ScanStartCommand
 from qpc.utils import get_server_location, write_server_config
 
@@ -48,112 +45,65 @@ class ScanStartCliTests(unittest.TestCase):
     def test_start_req_args_err(self):
         """Testing the scan start command required flags."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'scan', 'start']
+            sys.argv = ['/bin/qpc', 'scan', 'start' '--name' 'scan1']
             CLI().main()
 
-    def test_scan_source_none(self):
+    def test_scan_with_scan_none(self):
         """Testing the scan start command for none existing source."""
         scan_out = StringIO()
-        url = get_server_location() + SOURCE_URI + '?name=source_none'
+        url = get_server_location() + SCAN_URI
+        url_post = get_server_location() + SCAN_URI + '1/'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json={'count': 0})
+            mocker.post(url_post, status_code=300, json=None)
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source_none'])
+            args = Namespace(name='scan_none')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
                     ssc.main(args)
-                    self.assertTrue('Source "source_none" does not exist'
-                                    in scan_out.getvalue())
-
-    def test_start_scan_ssl_err(self):
-        """Testing the start scan command with a connection error."""
-        scan_out = StringIO()
-        url = get_server_location() + SOURCE_URI + '?name=source1'
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.SSLError)
-            ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'])
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(scan_out):
-                    ssc.main(args)
-                    self.assertEqual(scan_out.getvalue(), SSL_ERROR_MSG)
-
-    def test_start_scan_conn_err(self):
-        """Testing the start scan command with a connection error."""
-        scan_out = StringIO()
-        url = get_server_location() + SOURCE_URI + '?name=source1'
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'])
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(scan_out):
-                    ssc.main(args)
-                    self.assertEqual(scan_out.getvalue(),
-                                     CONNECTION_ERROR_MSG)
-
-    def test_start_scan_bad_resp(self):
-        """Testing the start scan command successfully."""
-        scan_out = StringIO()
-        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        url_post = get_server_location() + SCAN_URI
-        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
-        source_data = {'count': 1, 'results': results}
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json=source_data)
-            mocker.post(url_post, status_code=201, json={'id': 1})
-            ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'], max_concurrency=4)
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(scan_out):
-                    ssc.main(args)
-                    self.assertTrue('Source "source_none" does not exist'
+                    print('\n\nscanouttt')
+                    print(scan_out.getvalue())
+                    self.assertTrue('Scan "scan_none" does not exist.'
                                     in scan_out.getvalue())
 
     def test_start_scan(self):
         """Testing the start scan command successfully."""
         scan_out = StringIO()
-        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        url_post = get_server_location() + SCAN_URI
-        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                    'credentials':[{'id': 2, 'name': 'cred2'}],
+        url_get_scan = get_server_location() + SCAN_URI
+        url_post = get_server_location() + SCAN_URI + '1/jobs/'
+        results = [{'id': 1, 'name': 'scan1', 'sources': ['source1'],
                     'disable-optional-products': {'jboss-eap': False,
                                                   'jboss-fuse': False,
                                                   'jboss-brms': False}}]
-        source_data = {'count': 1, 'results': results}
+        scan_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'], max_concurrency=4,
-                             disable_optional_products={'jboss-eap': False,
-                                                        'jboss-fuse': False,
-                                                        'jboss-brms': False})
+            args = Namespace(name='scan1')
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
                                  messages.SCAN_STARTED % '1' + '\n')
 
-    def test_disable_optional_products(self):
-        """Testing that the disable-optional-products flag works correctly."""
+    def test_unsuccessful_start_scan(self):
+        """Testing the start scan command unsuccessfully."""
         scan_out = StringIO()
-        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        url_post = get_server_location() + SCAN_URI
-        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
-                    'credentials':[{'id': 2, 'name': 'cred2'}],
-                    'disable_optional_products': ['jboss-fuse']}]
-        source_data = {'count': 1, 'results': results}
+        url_get_scan = get_server_location() + SCAN_URI
+        url_post = get_server_location() + SCAN_URI + '1/jobs/'
+        results = [{'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                    'disable-optional-products': {'jboss-eap': False,
+                                                  'jboss-fuse': False,
+                                                  'jboss-brms': False}}]
+        scan_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
             mocker.post(url_post, status_code=201, json={'id': 1})
             ssc = ScanStartCommand(SUBPARSER)
-            args = Namespace(sources=['source1'], max_concurrency=4,
-                             disable_optional_products={'jboss-eap': True,
-                                                        'jboss-fuse': False,
-                                                        'jboss-brms': True})
-            with redirect_stdout(scan_out):
-                ssc.main(args)
-                self.assertEqual(scan_out.getvalue(),
-                                 messages.SCAN_STARTED % '1' + '\n')
+            args = Namespace(name='scan2')
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(scan_out):
+                    ssc.main(args)
+                    self.assertTrue('Scan "scan2" does not exist'
+                                    in scan_out.getvalue())
