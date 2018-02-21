@@ -25,12 +25,17 @@ from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
 from api.models import Source
 
 
+SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse (Pilot)',
+                    'entitlement_id': 'ESA0009'}]
+SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
+
+
 class EngineTest(TestCase):
     """Tests Engine class."""
 
     # pylint: disable=no-self-use,too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
-    # pylint: disable=protected-access
+    # pylint: disable=protected-access, W0102
 
     ################################################################
     # Helper functions
@@ -48,6 +53,7 @@ class EngineTest(TestCase):
             ifconfig_mac_addresses=None,
             dmi_system_uuid='1234',
             subman_virt_uuid='4567',
+            subman_consumed=SUBMAN_CONSUMED,
             connection_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
             connection_host='1.2.3.4',
             connection_port=22,
@@ -93,6 +99,8 @@ class EngineTest(TestCase):
             fact['dmi_system_uuid'] = dmi_system_uuid
         if subman_virt_uuid:
             fact['subman_virt_uuid'] = subman_virt_uuid
+        if subman_consumed:
+            fact['subman_consumed'] = subman_consumed
         if connection_uuid:
             fact['connection_uuid'] = connection_uuid
         if connection_host:
@@ -210,7 +218,8 @@ class EngineTest(TestCase):
             virt_type='lxc',
             is_virtualized=True,
             virtual_host='9.3.4.6',
-            num_sockets=8):
+            num_sockets=8,
+            entitlements=SAT_ENTITLEMENTS):
         """Create an in memory FactCollection for tests."""
         fact = {}
         if source_id:
@@ -248,6 +257,8 @@ class EngineTest(TestCase):
             fact['virtual_host'] = virtual_host
         if num_sockets:
             fact['num_sockets'] = num_sockets
+        if entitlements:
+            fact['entitlements'] = entitlements
 
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
