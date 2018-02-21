@@ -2,13 +2,7 @@ import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import JSONPretty from 'react-json-pretty';
-import {
-  Button,
-  DropdownButton,
-  Icon,
-  ListView,
-  MenuItem
-} from 'patternfly-react';
+import { Button, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
 
@@ -54,51 +48,27 @@ class ScanListItem extends React.Component {
         break;
       case 'failed':
         scanDescription = 'Scan Failed';
-        icon = (
-          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
         break;
       case 'canceled':
         scanDescription = 'Scan Canceled';
-        icon = (
-          <Icon className="scan-status-icon" type="pf" name="error-circle-o" />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
         break;
       case 'created':
         scanDescription = 'Scan Created';
-        icon = (
-          <Icon
-            className="scan-status-icon invisible"
-            type="fa"
-            name="spinner"
-          />
-        );
+        icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
         break;
       case 'pending':
         scanDescription = 'Scan Pending';
-        icon = (
-          <Icon
-            className="scan-status-icon invisible"
-            type="fa"
-            name="spinner"
-          />
-        );
+        icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
         break;
       case 'running':
         scanDescription = 'Scan in Progress';
-        icon = (
-          <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />
-        );
+        icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
         break;
       case 'paused':
         scanDescription = 'Scan Paused';
-        icon = (
-          <Icon
-            className="scan-status-icon"
-            type="pf"
-            name="warning-triangle-o"
-          />
-        );
+        icon = <Icon className="scan-status-icon" type="pf" name="warning-triangle-o" />;
         break;
       default:
         return null;
@@ -123,19 +93,11 @@ class ScanListItem extends React.Component {
     return [
       <ListView.InfoItem
         key="systemsScanned"
-        className={
-          'list-view-info-item-text-count ' +
-          (item.systems_scanned === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-text-count ' + (item.systems_scanned === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="okHostsTip"
-          tooltip={
-            item.systems_scanned +
-            (item.systems_scanned === 1
-              ? ' Successful System'
-              : ' Successful Systems')
-          }
+          tooltip={item.systems_scanned + (item.systems_scanned === 1 ? ' Successful System' : ' Successful Systems')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'systemsScanned'}
@@ -143,28 +105,18 @@ class ScanListItem extends React.Component {
               this.toggleExpand('systemsScanned');
             }}
           >
-            <Icon
-              className="list-view-compound-item-icon"
-              type="pf"
-              name="ok"
-            />
+            <Icon className="list-view-compound-item-icon" type="pf" name="ok" />
             <strong>{item.systems_scanned}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="systemsFailed"
-        className={
-          'list-view-info-item-text-count ' +
-          (item.systems_failed === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-text-count ' + (item.systems_failed === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="failedHostsTip"
-          tooltip={
-            item.systems_failed +
-            (item.systems_failed === 1 ? ' Failed System' : ' Failed Systems')
-          }
+          tooltip={item.systems_failed + (item.systems_failed === 1 ? ' Failed System' : ' Failed Systems')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'systemsFailed'}
@@ -172,21 +124,14 @@ class ScanListItem extends React.Component {
               this.toggleExpand('systemsFailed');
             }}
           >
-            <Icon
-              className="list-view-compound-item-icon"
-              type="pf"
-              name="error-circle-o"
-            />
+            <Icon className="list-view-compound-item-icon" type="pf" name="error-circle-o" />
             <strong>{item.systems_failed}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="sources"
-        className={
-          'list-view-info-item-text-count ' +
-          (sourcesCount === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-text-count ' + (sourcesCount === 0 ? 'invisible' : '')}
       >
         <ListView.Expand
           expanded={item.expanded && item.expandType === 'sources'}
@@ -200,10 +145,7 @@ class ScanListItem extends React.Component {
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="scansCount"
-        className={
-          'list-view-info-item-text-count ' +
-          (item.scans_count === 0 ? 'invisible' : '')
-        }
+        className={'list-view-info-item-text-count ' + (item.scans_count === 0 ? 'invisible' : '')}
       >
         <ListView.Expand
           expanded={item.expanded && item.expandType === 'scans'}
@@ -219,25 +161,13 @@ class ScanListItem extends React.Component {
   }
 
   renderActions() {
-    const {
-      item,
-      onSummaryDownload,
-      onDetailedDownload,
-      onPause,
-      onCancel,
-      onStart,
-      onResume
-    } = this.props;
+    const { item, onSummaryDownload, onDetailedDownload, onPause, onCancel, onStart, onResume } = this.props;
 
     switch (item.status) {
       case 'completed':
         return [
           <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
-            <Button
-              key="restartButton"
-              onClick={() => onStart(item)}
-              bsStyle="link"
-            >
+            <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
               <Icon type="pf" name="spinner2" atria-label="Start" />
             </Button>
           </SimpleTooltip>,
@@ -260,11 +190,7 @@ class ScanListItem extends React.Component {
       case 'canceled':
         return (
           <SimpleTooltip id="restartTip" tooltip="Retry Scan">
-            <Button
-              key="restartButton"
-              onClick={() => onStart(item)}
-              bsStyle="link"
-            >
+            <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
               <Icon type="pf" name="spinner2" atria-label="Start" />
             </Button>
           </SimpleTooltip>
@@ -287,11 +213,7 @@ class ScanListItem extends React.Component {
       case 'paused':
         return (
           <SimpleTooltip id="resumeTip" tooltip="Resume Scan">
-            <Button
-              key="resumeButton"
-              onClick={() => onResume(item)}
-              bsStyle="link"
-            >
+            <Button key="resumeButton" onClick={() => onResume(item)} bsStyle="link">
               <Icon type="fa" name="play" atria-label="Resume" />
             </Button>
           </SimpleTooltip>
@@ -308,9 +230,7 @@ class ScanListItem extends React.Component {
       case 'systemsScanned':
         return <ScanHostsList hosts={item.hosts} status="ok" />;
       case 'systemsFailed':
-        return (
-          <ScanHostsList hosts={item.failed_hosts} status="error-circle-o" />
-        );
+        return <ScanHostsList hosts={item.failed_hosts} status="error-circle-o" />;
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'scans':

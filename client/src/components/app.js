@@ -5,12 +5,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
-import {
-  Alert,
-  EmptyState,
-  Modal,
-  VerticalNav
-} from 'patternfly-react';
+import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 
 import { routes } from '../routes';
 
@@ -30,6 +25,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    console.log('auth?');
     this.props.authorizeUser();
   }
 
@@ -41,9 +37,7 @@ class App extends React.Component {
   renderMenuItems() {
     const { location } = this.props;
 
-    let activeItem = this.menu.find(item =>
-      _.startsWith(location.pathname, item.to)
-    );
+    let activeItem = this.menu.find(item => _.startsWith(location.pathname, item.to));
 
     return this.menu.map(item => {
       return (
@@ -75,7 +69,7 @@ class App extends React.Component {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
-            <div className="spinner spinner-xl"/>
+            <div className="spinner spinner-xl" />
             <div className="text-center">Logging in...</div>
           </Modal.Body>
         </Modal>
@@ -108,9 +102,7 @@ class App extends React.Component {
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
         </VerticalNav>
-        <div className="container-pf-nav-pf-vertical">
-          {this.renderContent()}
-        </div>
+        <div className="container-pf-nav-pf-vertical">{this.renderContent()}</div>
       </div>
     );
   }

@@ -2,14 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { OverlayTrigger, Tooltip } from 'patternfly-react';
 
-const SimpleTooltip = ({
-  children,
-  tooltip,
-  placement,
-  trigger,
-  delayShow,
-  ...rest
-}) => {
+const SimpleTooltip = ({ children, tooltip, placement, trigger, delayShow, ...rest }) => {
   return (
     <OverlayTrigger
       overlay={<Tooltip {...rest}>{tooltip}</Tooltip>}

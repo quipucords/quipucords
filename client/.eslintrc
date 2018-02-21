@@ -2,8 +2,13 @@
   "rules": {
     "prettier/prettier": [
       "error",
-      { "singleQuote": true, "trailingComma": "none" }
-    ]
+      {
+        "singleQuote": true,
+        "trailingComma": "none",
+        "printWidth": 120
+      }
+    ],
+    "max-len": ["error", {"code": 240, "ignoreUrls": true}]
   },
   "extends": [
     "standard",

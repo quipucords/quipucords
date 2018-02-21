@@ -85,7 +85,7 @@ class SystemFingerprint(models.Model):
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
-            'fact_collection:{}, ' \
+            'report:{}, ' \
             'name:{}, '\
             'os_name:{}, '\
             'os_version:{}, '\
@@ -148,4 +148,59 @@ class SystemFingerprint(models.Model):
                                   self.vm_host_socket_count,
                                   self.vm_datacenter,
                                   self.vm_cluster,
+                                  self.metadata) + '}'
+
+
+class Product(models.Model):
+    """Represents a product."""
+
+    PRESENCE_TYPE = (
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('potential', 'Potential'),
+        ('unknown', 'Unknown')
+    )
+
+    fingerprint = models.ForeignKey(SystemFingerprint, models.CASCADE)
+    name = models.CharField(max_length=256, unique=False, null=False)
+    version = models.CharField(max_length=256, unique=False, null=True)
+    presence = models.CharField(
+        max_length=10, choices=PRESENCE_TYPE, default='unknown')
+
+    metadata = models.TextField(unique=False, null=False)
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'id:{}, '\
+            'fingerprint:{}, ' \
+            'name:{}, '\
+            'version:{}, '\
+            'presence:{}, '\
+            'metadata:{} '.format(self.id,
+                                  self.fingerprint.id,
+                                  self.name,
+                                  self.version,
+                                  self.presence,
+                                  self.metadata) + '}'
+
+
+class Entitlement(models.Model):
+    """Represents a Entitlement."""
+
+    fingerprint = models.ForeignKey(SystemFingerprint, models.CASCADE)
+    name = models.CharField(max_length=256, unique=False, null=True)
+    entitlement_id = models.CharField(max_length=256, unique=False, null=True)
+
+    metadata = models.TextField(unique=False, null=False)
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'id:{}, '\
+            'fingerprint:{}, ' \
+            'name:{}, '\
+            'entitlement_id:{}, '\
+            'metadata:{} '.format(self.id,
+                                  self.fingerprint.id,
+                                  self.name,
+                                  self.entitlement_id,
                                   self.metadata) + '}'

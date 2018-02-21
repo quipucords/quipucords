@@ -47,10 +47,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'persist',
         {
-          selectedCredentials: [
-            ...state.persist.selectedCredentials,
-            action.credential
-          ]
+          selectedCredentials: [...state.persist.selectedCredentials, action.credential]
         },
         {
           state,
@@ -126,12 +123,9 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
-          pending: false
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          pending: false,
+          add: true
         },
         {
           state,
@@ -146,11 +140,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
           delete: true,
           pending: false
         },
@@ -166,12 +156,9 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          ),
-          pending: false
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          pending: false,
+          edit: true
         },
         {
           state,
@@ -186,11 +173,7 @@ const credentialsReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(
-            action.payload,
-            'response.request.responseText',
-            action.payload.message
-          )
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
@@ -312,14 +295,12 @@ const credentialsReducer = function(state = initialState, action) {
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
       // Get resulting credentials and update the selected state of each
-      const credentials = _.get(action, 'payload.data.results', []).map(
-        nextCredential => {
-          return {
-            ...nextCredential,
-            selected: selectedIndex(state, nextCredential) !== -1
-          };
-        }
-      );
+      const credentials = _.get(action, 'payload.data.results', []).map(nextCredential => {
+        return {
+          ...nextCredential,
+          selected: selectedIndex(state, nextCredential) !== -1
+        };
+      });
       return helpers.setStateProp(
         'view',
         {
