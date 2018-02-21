@@ -99,16 +99,30 @@ class ScanSerializer(NotEmptySerializer):
             name=validated_data.get('name'),
             scan_id=instance.id)
 
-        instance.scan_type = validated_data.pop('scan_type', None)
-        instance.sources = validated_data.pop('sources', None)
+        name = validated_data.pop('name', None)
+        scan_type = validated_data.pop('scan_type', None)
+        sources = validated_data.pop('sources', None)
         options = validated_data.pop('options', None)
-        if options:
-            options = ScanOptions.objects.create(**options)
+        if not self.partial:
+            instance.name = name
+            instance.scan_type = scan_type
+            instance.sources = sources
+            if options:
+                options = ScanOptions.objects.create(**options)
+            else:
+                options = ScanOptions()
+            instance.options = options
         else:
-            options = ScanOptions()
-        instance.options = options
-        instance.save()
+            if name is not None:
+                instance.name = name
+            if scan_type is not None:
+                instance.scan_type = scan_type
+            if sources is not None:
+               instance.sources = sources
+            if options is not None:
+                instance.options = ScanOptions.objects.create(**options)
 
+        instance.save()
         return instance
 
     @staticmethod
