@@ -99,7 +99,7 @@ class ScanStatusCliTests(unittest.TestCase):
             args = Namespace(id='1')
             with redirect_stdout(scan_out):
                 nsc.main(args)
-                expected = 'Scanjob"1":"running".'
+                expected = 'Scanjob"1"status:"running".'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
 
@@ -118,6 +118,6 @@ class ScanStatusCliTests(unittest.TestCase):
             args = Namespace(id='1')
             with redirect_stdout(scan_out):
                 nsc.main(args)
-                expected = 'Scanjob"1":"paused".'
+                expected = 'Scanjob"1"status:"paused".'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
