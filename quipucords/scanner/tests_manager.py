@@ -18,6 +18,7 @@ from scanner.manager import Manager
 class MockTask(Thread):
     """Mock Task class."""
 
+    # pylint: disable=invalid-name
     def __init__(self):
         """Create a mock task."""
         Thread.__init__(self)
