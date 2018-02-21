@@ -139,7 +139,8 @@ class ConnectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(message)
 
             cred_data = CredentialSerializer(credential).data
-            callback = ConnectResultCallback(result_store, credential)
+            callback = ConnectResultCallback(result_store, credential,
+                                             self.scan_task)
             try:
                 connect(remaining_hosts, callback, cred_data,
                         connection_port, forks=forks)

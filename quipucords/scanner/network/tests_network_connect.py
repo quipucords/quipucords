@@ -19,6 +19,7 @@ from api.models import (Credential,
                         Source,
                         ScanTask)
 from api.serializers import CredentialSerializer, SourceSerializer
+from api.source.model import SourceOptions
 from scanner import input_log
 from scanner.network.connect import construct_connect_inventory, connect, \
     ConnectResultStore
@@ -96,8 +97,20 @@ class TestConnectResultCallback(unittest.TestCase):
     def test_callback(self):
         """Test the callback."""
         result_store = MockResultStore(['host1', 'host2', 'host3'])
-        credential = Mock(name='credential')
-        callback = ConnectResultCallback(result_store, credential)
+        credential = Mock(id=1, name='credential')
+        source = Mock(id=1,
+                      source_type='network',
+                      port=22,
+                      options=SourceOptions(),
+                      credentials=[credential],
+                      hosts='"host1"')
+        source.name = 'source-name'
+        scan_task = Mock(id=1,
+                         scanjob_set=Mock(
+                             all=lambda: [Mock(id=2)]),
+                         source=source)
+
+        callback = ConnectResultCallback(result_store, credential, scan_task)
 
         callback.v2_runner_on_ok(make_result('host1', 0))
         callback.v2_runner_on_ok(make_result('host2', 1))

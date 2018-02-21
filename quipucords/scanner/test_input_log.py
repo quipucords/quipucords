@@ -18,18 +18,18 @@ from django.test import TestCase
 from scanner import input_log
 
 
-class TestSonarUUID(TestCase):
+class TestDatabaseUUID(TestCase):
     """Test get_sonar_uuid()."""
 
     def test_uuid(self):
         """Get UUID three times, verify stability."""
         # First retrieval makes new uuid
-        uuid_1 = input_log.get_sonar_uuid()
+        uuid_1 = input_log.get_database_uuid()
         self.assertIsInstance(uuid_1, uuid.UUID)
 
         # Next retrievals should return the same object
-        self.assertEqual(input_log.get_sonar_uuid(), uuid_1)
-        self.assertEqual(input_log.get_sonar_uuid(), uuid_1)
+        self.assertEqual(input_log.get_database_uuid(), uuid_1)
+        self.assertEqual(input_log.get_database_uuid(), uuid_1)
 
 
 class TestNextSequenceNumber(TestCase):

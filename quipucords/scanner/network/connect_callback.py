@@ -33,15 +33,16 @@ class ConnectResultCallback(CallbackBase):
     scan, as we scan it.
     """
 
-    def __init__(self, result_store, credential, display=None):
+    def __init__(self, result_store, credential, scan_task, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.result_store = result_store
         self.credential = credential
+        self.scan_task = scan_task
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result)
+        input_log.log_ansible_result(result, self.scan_task)
         host = result._host.name      # pylint: disable=protected-access
         task_result = result._result  # pylint: disable=protected-access
         if 'rc' in task_result and task_result['rc'] == 0:
@@ -54,7 +55,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result)
+        input_log.log_ansible_result(result, self.scan_task)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(
@@ -68,7 +69,7 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
-        input_log.log_ansible_result(result)
+        input_log.log_ansible_result(result, self.scan_task)
         # pylint: disable=protected-access
         host = result._host.name
         result_message = result._result.get(

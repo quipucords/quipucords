@@ -17,6 +17,8 @@ import time
 import uuid
 from django.db import transaction
 from api import log_state
+from api.source.serializer import SourceSerializer
+from api.source import util as view_util
 from quipucords import settings
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -28,8 +30,8 @@ DEFAULT_MAX_AGE = 365 * 24 * 60 * 60  # 1 year, except on leap years
 
 
 @transaction.atomic()
-def get_sonar_uuid():
-    """Get the UUID of this Sonar installation."""
+def get_database_uuid():
+    """Get the UUID of this database."""
     global UUID_CACHE  # pylint: disable=global-statement
     if UUID_CACHE is not None:
         return UUID_CACHE
@@ -129,6 +131,8 @@ class RotatingLogFile(object):
 
         # Whether we've scanned the log directory for old log files.
         self.directory_scanned = False
+
+        self.write_lock = mp.Lock()
 
     def read_files_from_basename(self, basename):
         """Initialize log_files and file_counter from a basename."""
@@ -241,23 +245,20 @@ class RotatingLogFile(object):
         # happens with any frequency, then self.step_size is way too
         # small.)
         if not self.dry_run:
-            logger.debug('Writing input log record!')
-            self.open_log_file.write(binary_record)
-            self.open_log_file.flush()
+            with self.write_lock:
+                self.open_log_file.write(binary_record)
+                self.open_log_file.flush()
         self.log_files[0]['size'] += len(binary_record)
         self.total_bytes += len(binary_record)
 
 
 INPUT_LOG = None
-WRITE_LOCK = mp.Lock()
 
 
-def log_fact(host, fact, value):
-    """Write a new fact to the input log.
+def log_record(record):
+    """Write a new record to the input log.
 
-    :param host: string. the name of the host the fact came from.
-    :param fact: json object. The fact identifier.
-    :param value: the value of the fact.
+    :param record: the record. a Python dict, with JSON-compatible values.
     """
     global INPUT_LOG  # pylint: disable=global-statement
     if INPUT_LOG is None:
@@ -265,15 +266,29 @@ def log_fact(host, fact, value):
                                     max_age=DEFAULT_MAX_AGE)
         INPUT_LOG.read_files_from_basename(settings.INPUT_LOG_BASENAME)
 
-    database_uuid = get_sonar_uuid()
-    seq = next_sequence_number()
+    record['database_uuid'] = str(get_database_uuid())
+    record['sequence_number'] = next_sequence_number()
 
-    with WRITE_LOCK:
-        INPUT_LOG.write_record({'database_uuid': str(database_uuid),
-                                'host': host,
-                                'fact': fact,
-                                'sequence_number': seq,
-                                'result': value})
+    INPUT_LOG.write_record(record)
+
+
+# pylint: disable=too-many-arguments
+def log_fact(host, fact, value, scan_job, scan_task, source):
+    """Write a new fact to the input log.
+
+    :param host: string. the name of the host the fact came from.
+    :param fact: json object. The fact identifier.
+    :param value: the value of the fact.
+    :param scan_job: the scan job, as an int.
+    :param scan_task: the scan task, as an int.
+    :param source: the source, as a JSON dict.
+    """
+    log_record({'host': host,
+                'fact': fact,
+                'value': value,
+                'scan_job': scan_job,
+                'scan_task': scan_task,
+                'source': source})
 
 
 def disable_log_for_test():
@@ -288,14 +303,30 @@ def disable_log_for_test():
 RAW_PARAMS = '_raw_params'
 
 
-def log_ansible_result(result):
-    """Log a shell command."""
+def log_ansible_result(result, scan_task):
+    """Log the results of a shell command.
+
+    :param result: the Ansible result object, as a Python dict.
+    :param scan_task: the ScanTask of this Ansible task.
+    """
     # pylint: disable=protected-access
     args = result._task.args
+
+    source_json = SourceSerializer(scan_task.source).data
+    view_util.expand_credential(source_json)
+    scan_jobs = list(scan_task.scanjob_set.all())
+
+    # len(scan_jobs) should be 1
+    if len(scan_jobs) > 1:
+        logger.warning('ScanTask %s associated to multiple ScanJobs %s',
+                       scan_task.id, [job.id for job in scan_jobs])
 
     if RAW_PARAMS in args:
         log_fact(result._host.name,
                  {'type': 'shell', 'command': args[RAW_PARAMS]},
-                 result._result)
+                 result._result,
+                 scan_jobs[0].id,
+                 scan_task.id,
+                 source_json)
     # If _raw_params isn't in args, then args is not a raw command and
     # we don't need to record it. This occurs for set_facts tasks.

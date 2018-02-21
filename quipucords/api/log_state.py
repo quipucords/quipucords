@@ -18,6 +18,6 @@ class LatestSequenceNumber(models.Model):
 
 
 class DatabaseUUID(models.Model):
-    """The UUID of this Sonar installation."""
+    """The UUID of this database."""
 
     uuid = models.UUIDField()
