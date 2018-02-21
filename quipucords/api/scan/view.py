@@ -35,7 +35,7 @@ from api.scanjob.serializer import expand_scanjob
 from api.signals.scanjob_signal import start_scan
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,invalid-name
 
 SOURCES_KEY = 'sources'
 
@@ -74,7 +74,7 @@ else:
 @api_view(['get', 'post'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-def jobs(request, pk=None, format='json'):
+def jobs(request, pk=None):
     """Get the jobs of a scan."""
     # pylint: disable=invalid-name
     if pk is not None:
