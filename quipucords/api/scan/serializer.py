@@ -118,7 +118,7 @@ class ScanSerializer(NotEmptySerializer):
             if scan_type is not None:
                 instance.scan_type = scan_type
             if sources is not None:
-               instance.sources = sources
+                instance.sources = sources
             if options is not None:
                 instance.options = ScanOptions.objects.create(**options)
 
