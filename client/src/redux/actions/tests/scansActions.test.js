@@ -1,15 +1,19 @@
-import configureMockStore from 'redux-mock-store';
 import promiseMiddleware from 'redux-promise-middleware';
-import moxios from 'moxios';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import expect from 'expect';
 
-import { scansTypes } from '../../constants';
 import * as actions from '../scansActions';
+import { reducers } from '../../reducers';
 
-const middlewares = [promiseMiddleware()];
-const mockStore = configureMockStore(middlewares);
+// const mockStore = configureMockStore(middlewares);
+
+import moxios from 'moxios';
+import scansReducer from '../../reducers/scansReducer';
 
 describe('ScansActions', function() {
+  const middlewares = [promiseMiddleware()];
+  const generateStore = () => createStore(combineReducers({ ...reducers }), applyMiddleware(...middlewares));
+
   beforeEach(() => {
     moxios.install();
   });
@@ -19,32 +23,28 @@ describe('ScansActions', function() {
   });
 
   const getScansMock = {
-    body: {
-      data: {
-        results: [
-          {
-            name: '1',
-            id: 1
-          },
-          {
-            name: '5',
-            id: 5
-          },
-          {
-            name: '6',
-            id: 6
-          },
-          {
-            name: '7',
-            id: 7
-          }
-        ]
+    results: [
+      {
+        name: '1',
+        id: 1
+      },
+      {
+        name: '5',
+        id: 5
+      },
+      {
+        name: '6',
+        id: 6
+      },
+      {
+        name: '7',
+        id: 7
       }
-    },
+    ],
     headers: { 'content-type': 'application/json' }
   };
 
-  it('creates GET_SCANS_FULFILLED when adding source has been done', () => {
+  it('updates the scans view state when getScans has been done', done => {
     moxios.wait(() => {
       const request = moxios.requests.mostRecent();
       request.respondWith({
@@ -53,14 +53,17 @@ describe('ScansActions', function() {
       });
     });
 
-    const expectedActions = [scansTypes.GET_SCANS_PENDING, scansTypes.GET_SCANS_FULFILLED];
-    const store = mockStore({ todos: [] });
-
-    return store.dispatch(actions.dispatchObjects.getScans()).then(() => {
-      const dispatchedActions = store.getActions();
-      const actionTypes = dispatchedActions.map(action => action.type);
-
-      expect(actionTypes).toEqual(expectedActions);
+    const store = generateStore();
+    expect(store.scans).toEqual(scansReducer.initialState);
+    let dispatcher = actions.getScans();
+    dispatcher(store.dispatch).then(() => {
+      let view = store.getState().scans.view;
+      expect(view.scans).toEqual(getScansMock.results);
+      expect(view.fulfilled).toBeTruthy();
+      expect(view.pending).toBeFalsy();
+      expect(view.error).toBeFalsy();
+      expect(view.errorMessage).toEqual('');
+      done();
     });
   });
 });
