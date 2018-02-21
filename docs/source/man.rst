@@ -327,9 +327,11 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
 ``--max-concurrency=concurrency``
 
-  Contains the maximum number of parallel system scans. If this value is not provided, the default is ``50``.
+  Optional. Contains the maximum number of parallel system scans. If this value is not provided, the default is ``50``.
 
 ``--disable-optional-products=products_list``
+
+  Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
 The information in a scan might change as the structure of the network changes. Use the ``qpc scan edit`` command to edit an existing scan to accommodate those changes.
 
