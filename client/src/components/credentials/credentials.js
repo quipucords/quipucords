@@ -356,7 +356,7 @@ class Credentials extends React.Component {
             <div className="quipucords-list-container">{this.renderCredentialsList(credentials)}</div>
           </div>
           {this.renderPendingMessage()}
-          <CreateCredentialDialog credentials={credentials} />
+          <CreateCredentialDialog />
         </React.Fragment>
       );
     }
@@ -365,12 +365,11 @@ class Credentials extends React.Component {
       <React.Fragment>
         {this.renderPendingMessage()}
         <CredentialsEmptyState
-          key="emptyState"
           onAddCredential={this.addCredential}
           onAddSource={this.addSource}
           onImportSources={this.importSources}
         />,
-        <CreateCredentialDialog key="createCredentialDialog" credentials={credentials} />
+        <CreateCredentialDialog />
       </React.Fragment>
     );
   }
