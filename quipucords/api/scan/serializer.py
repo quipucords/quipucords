@@ -89,6 +89,28 @@ class ScanSerializer(NotEmptySerializer):
 
         return scan
 
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update a scan."""
+        # If we ever add optional fields to Scan, we need to
+        # add logic here to clear them on full update even if they are
+        # not supplied.
+        self.check_for_existing_name(
+            name=validated_data.get('name'),
+            scan_id=instance.id)
+
+        instance.scan_type = validated_data.pop('scan_type', None)
+        instance.sources = validated_data.pop('sources', None)
+        options = validated_data.pop('options', None)
+        if options:
+            options = ScanOptions.objects.create(**options)
+        else:
+            options = ScanOptions()
+        instance.options = options
+        instance.save()
+
+        return instance
+
     @staticmethod
     def validate_sources(sources):
         """Make sure the source is present."""
