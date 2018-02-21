@@ -11,7 +11,9 @@
 """Describes the views associated with the API models."""
 
 import os
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import (api_view,
+                                       authentication_classes,
+                                       permission_classes)
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,15 +28,108 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (Scan, ScanJob, Source)
+from api.common.pagination import StandardResultsSetPagination
+from api.models import (Scan, ScanTask, ScanJob, Source)
 from api.serializers import (ScanSerializer, ScanJobSerializer)
 from api.scanjob.serializer import expand_scanjob
 from api.signals.scanjob_signal import start_scan
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,invalid-name
 
 SOURCES_KEY = 'sources'
+
+##################################################
+# Independent jobs route
+##################################################
+JOB_ORDER_FIELDS = ['id',
+                    '-id',
+                    'scan_type',
+                    '-scan_type',
+                    'status',
+                    '-status',
+                    'start_time',
+                    '-start_time',
+                    'end_time',
+                    '-end_time']
+JOB_VALID_STATUS = [ScanTask.CREATED,
+                    ScanTask.PENDING,
+                    ScanTask.RUNNING,
+                    ScanTask.PAUSED,
+                    ScanTask.CANCELED,
+                    ScanTask.COMPLETED,
+                    ScanTask.FAILED]
+
+authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+
+if authentication_enabled:
+    auth_classes = (ExpiringTokenAuthentication,
+                    SessionAuthentication)
+    perm_classes = (IsAuthenticated,)
+else:
+    auth_classes = ()
+    perm_classes = ()
+
+
+@api_view(['get', 'post'])
+@authentication_classes(auth_classes)
+@permission_classes(perm_classes)
+def jobs(request, pk=None):
+    """Get the jobs of a scan."""
+    # pylint: disable=invalid-name
+    if pk is not None:
+        if not is_int(pk):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    result = []
+    scan = get_object_or_404(Scan.objects.all(), pk=pk)
+    if request.method == 'GET':
+        job_queryset = get_job_queryset_query_set(scan,
+                                                  request.query_params)
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(job_queryset, request)
+
+        if page is not None:
+            serializer = ScanJobSerializer(page, many=True)
+            for scan in serializer.data:
+                json_scan = expand_scanjob(scan)
+                result.append(json_scan)
+            return paginator.get_paginated_response(serializer.data)
+
+        for job in job_queryset:
+            job_serializer = ScanJobSerializer(job)
+            job_json = job_serializer.data
+            job_json = expand_scanjob(job_serializer.data)
+            result.append(job_json)
+        return Response(result)
+    else:
+        job_data = request.data.copy()
+        job_data['scan'] = pk
+        job_serializer = ScanJobSerializer(data=job_data)
+        job_serializer.is_valid(raise_exception=True)
+        job_serializer.save()
+        scanjob_obj = ScanJob.objects.get(pk=job_serializer.data['id'])
+        scanjob_obj.log_current_status()
+        start_scan.send(sender=ScanViewSet.__class__, instance=scanjob_obj)
+
+        return Response(job_serializer.data,
+                        status=status.HTTP_201_CREATED)
+
+
+def get_job_queryset_query_set(scan, query_params):
+    """Build job queryset."""
+    job_queryset = ScanJob.objects.filter(scan=scan)
+
+    status_filter = query_params.get('status')
+    if status_filter is not None and \
+            status_filter.lower() in JOB_VALID_STATUS:
+        job_queryset = job_queryset.filter(status=status_filter)
+
+    ordering = query_params.get('ordering')
+    if ordering is not None and ordering in JOB_ORDER_FIELDS:
+        job_queryset = job_queryset.order_by(ordering)
+    else:
+        job_queryset = job_queryset.order_by('id')
+    return job_queryset
 
 
 def expand_scan(json_scan):
@@ -119,41 +214,3 @@ class ScanViewSet(ModelViewSet):
         json_scan = serializer.data
         expand_scan(json_scan)
         return Response(json_scan)
-
-    @detail_route(methods=['get', 'post'])
-    def jobs(self, request, pk=None):
-        """Get the jobs of a scan."""
-        # pylint: disable=invalid-name
-        result = []
-        scan = get_object_or_404(self.queryset, pk=pk)
-        if request.method == 'GET':
-            jobs = ScanJob.objects.filter(scan=scan)
-            page = self.paginate_queryset(jobs)
-
-            if page is not None:
-                serializer = ScanJobSerializer(page, many=True)
-                for scan in serializer.data:
-                    json_scan = expand_scanjob(scan)
-                    result.append(json_scan)
-                return self.get_paginated_response(serializer.data)
-
-            for job in jobs:
-                job_serializer = ScanJobSerializer(job)
-                job_json = job_serializer.data
-                job_json = expand_scanjob(job_serializer.data)
-                result.append(job_json)
-            return Response(result)
-        else:
-            job_data = request.data.copy()
-            job_data['scan'] = pk
-            job_serializer = ScanJobSerializer(data=job_data)
-            job_serializer.is_valid(raise_exception=True)
-            job_serializer.save()
-            headers = self.get_success_headers(job_serializer.data)
-            scanjob_obj = ScanJob.objects.get(pk=job_serializer.data['id'])
-            scanjob_obj.log_current_status()
-            start_scan.send(sender=self.__class__, instance=scanjob_obj)
-
-            return Response(job_serializer.data,
-                            status=status.HTTP_201_CREATED,
-                            headers=headers)

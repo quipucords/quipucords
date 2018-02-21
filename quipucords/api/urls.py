@@ -17,6 +17,7 @@ from api.views import (CredentialViewSet,
                        FactViewSet,
                        SourceViewSet,
                        ScanViewSet,
+                       jobs,
                        ScanJobViewSet,
                        UserViewSet,
                        details,
@@ -48,6 +49,10 @@ ROUTER.register(r'users',
 urlpatterns = [
     url(r'^reports/(?P<pk>[^/.]+)/details/$', details),
     url(r'^reports/(?P<pk>[^/.]+)/deployments/$', deployments),
+]
+
+urlpatterns += [
+    url(r'^scans/(?P<pk>[^/.]+)/jobs/$', jobs),
 ]
 
 urlpatterns += [
