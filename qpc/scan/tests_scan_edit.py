@@ -14,12 +14,10 @@ import unittest
 import sys
 from io import StringIO
 from argparse import ArgumentParser, Namespace
-import requests
 import requests_mock
 import qpc.messages as messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.source import SOURCE_URI
 from qpc.scan import SCAN_URI
 from qpc.scan.edit import ScanEditCommand
@@ -47,7 +45,7 @@ class SourceEditCliTests(unittest.TestCase):
         sys.stderr = self.orig_stderr
 
     def test_edit_req_args_err(self):
-        """Testing the add edit command required flags."""
+        """Testing the edit command required flags."""
         source_out = StringIO()
         with self.assertRaises(SystemExit):
             with redirect_stdout(source_out):
@@ -72,35 +70,6 @@ class SourceEditCliTests(unittest.TestCase):
                     aec.main(args)
                     self.assertTrue(messages.SCAN_DOES_NOT_EXIST % 'scan_none'
                                     in scan_out.getvalue())
-
-    def test_edit_scan_ssl_err(self):
-        """Testing the edit scan command with a connection error."""
-        scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '?name=scan1'
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.SSLError)
-            aec = ScanEditCommand(SUBPARSER)
-            args = Namespace(name='scan1', sources=['source1'],
-                             max_concurrency=50,
-                             disable_optional_products=None)
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(scan_out):
-                    aec.main(args)
-                    self.assertEqual(scan_out.getvalue(), SSL_ERROR_MSG)
-
-    def test_edit_scan_conn_err(self):
-        """Testing the edit scan command with a connection error."""
-        scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '?name=scan1'
-        with requests_mock.Mocker() as mocker:
-            mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            aec = ScanEditCommand(SUBPARSER)
-            args = Namespace(name='scan1', sources=['source1'])
-            with self.assertRaises(SystemExit):
-                with redirect_stdout(scan_out):
-                    aec.main(args)
-                    self.assertEqual(scan_out.getvalue(),
-                                     CONNECTION_ERROR_MSG)
 
     def test_edit_scan_source(self):
         """Testing the edit scan source command successfully."""

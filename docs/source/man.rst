@@ -317,7 +317,7 @@ A scan defines a collection of network information, including the sources to sca
 
 Creating and Editing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that contains each of the host names or IP addresses that are defined in the supplied sources, as well as any options supplied by the user. Each instance of a scan object is assigned a unique *identifier* to identify the scan jobs that are associated with that scan.
+Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user. Each instance of a scan object is assigned a unique *identifier* to identify the scan jobs that are associated with that scan.
 
 **qpc scan add --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
