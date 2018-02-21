@@ -350,11 +350,11 @@ Listing and Showing Scans
 
 The ``qpc scan list`` command returns the summary details for all created scan objects or all created scan objects of a certain type. The output of this command includes the identifier, the source or sources, and any options supplied by the user.
 
-**qpc scan list** (**--type=** *(connect | inspect)*| --all)
+**qpc scan list** **--type=** *(connect | inspect)*
 
 ``--type=type``
 
-  Optional. Filters the results by scan type. This value must be ``connect`` or ``inspect``. A scan of type ``connect`` is a scan that began the process of connecting to the defined systems in the sources, but did not transition into inspecting the contents of those systems. A scan of type ``inspect`` is a scan that moves into the inspection process. Mutually exclusive with the ``--all`` option.
+  Optional. Filters the results by scan type. This value must be ``connect`` or ``inspect``. A scan of type ``connect`` is a scan that began the process of connecting to the defined systems in the sources, but did not transition into inspecting the contents of those systems. A scan of type ``inspect`` is a scan that moves into the inspection process.
 
 The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
 
