@@ -50,17 +50,18 @@ class Manager(Thread):
         """
         self.scan_queue.insert(0, task)
 
-    def kill(self, task_id):
+    def kill(self, job):
         """Kill a task or remove it from the running queue.
 
-        :param task_id: The identifier of the task to queue.
+        :param job: The task to kill.
         :returns: True if killed, False otherwise.
         """
         killed = False
-        logger.info('Killing task %d', task_id)
+        job_id = job.id
+        job.log_message('TERMINATING TASK PROCESS')
         logger.debug('Current task is %s.', self.current_task)
         if (self.current_task is not None and
-                self.current_task.identifier == task_id and
+                self.current_task.identifier == job_id and
                 self.current_task.is_alive()):
             self.current_task.terminate()
             self.current_task = None
@@ -68,18 +69,18 @@ class Manager(Thread):
         else:
             logger.debug('Checking scan queue for task to remove.')
             removed = False
-            for task in self.scan_queue:
-                if task.identifier == task_id:
-                    self.scan_queue.remove(task)
+            for queued_job in self.scan_queue:
+                if queued_job.identifier == job_id:
+                    self.scan_queue.remove(queued_job)
                     removed = True
                     break
             if removed:
                 killed = True
                 logger.debug('Task %d has been removed from the scan queue.',
-                             task_id)
+                             job_id)
             else:
                 logger.debug('Task %d was not found in the scan queue.',
-                             task_id)
+                             job_id)
             return killed
 
     def restart_incomplete_scansjobs(self):

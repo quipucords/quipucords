@@ -103,6 +103,9 @@ SJ_EXTRA_VARS_KEY = 'Extra vars keys must be jboss_eap, jboss_fuse, '\
     'or jboss_brms.'
 
 
+# Scan Manager/Signal
+SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
+
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'
 ST_STATUS_MSG_RUNNING = 'Task is running.'
