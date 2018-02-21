@@ -308,14 +308,18 @@ As the network infrastructure changes, it might be necessary to delete some sour
   Clears all stored sources. Mutually exclusive with the ``--name`` option.
 
 
-Scanning
---------
+Scans
+----------------
 
-Use the ``qpc scan start`` command to run scans on one or more sources. This command scans all of the host names or IP addresses that are defined in the supplied sources. Each instance of a scan is assigned a unique *identifier* to identify the scan results, so that the results data can be viewed later.
+Use the ``qpc scan`` command to create, run and manage scans.
 
-**IMPORTANT:** If any ssh-agent connection is set up for a target host, that connection will be used as a fallback connection.
+A scan defines a collection of network information, including the sources to scan and additional options, such as elective products to omit from the scan and the maximum number of parallel system scans. The creation of a scan references information such as sources so that the act of running the scan is repeatable, without a requirement to reenter network information for each scan attempt.
 
-**qpc scan start --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
+Creating and Editing Scans
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user. Each instance of a scan object is assigned a unique *identifier* to identify the scan jobs that are associated with that scan.
+
+**qpc scan add --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
 ``--sources=source_list``
 
@@ -323,69 +327,134 @@ Use the ``qpc scan start`` command to run scans on one or more sources. This com
 
 ``--max-concurrency=concurrency``
 
-  Contains the maximum number of parallel system scans. If this value is not provided, the default is ``50``.
+  Optional. Contains the maximum number of parallel system scans. If this value is not provided, the default is ``50``.
 
 ``--disable-optional-products=products_list``
 
-  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+  Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+
+The information in a scan might change as the structure of the network changes. Use the ``qpc scan edit`` command to edit an existing scan to accommodate those changes.
+
+Although ``qpc scan`` options can accept more than one value, the ``qpc scan edit`` command is not additive. To edit a scan and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc scan edit`` command. Options that are not included are not changed.
+
+**qpc scan edit --name** *name* --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
+
+For example, if a scan contains a value of ``network1sources`` for the ``--sources`` option, and you want to change that scan to use both the ``network1sources`` and ``network2sources`` sources, you would edit the scan as follows:
+
+``qpc scan edit --name=myscan --sources network1sources network2sources``
+
+**TIP:** After editing a scan use the ``qpc scan show`` command to review those edits.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``qpc scan list`` command returns the summary details for all executed scans. The output of this command includes the identifier, the source or sources, and the current state of the scan.
+The ``qpc scan list`` command returns the summary details for all created scan objects or all created scan objects of a certain type. The output of this command includes the identifier, the source or sources, and any options supplied by the user.
 
-**qpc scan list** **--type=** *(connect | inspect)* **--state=** *(created | pending | running | paused | canceled | completed | failed)*
+**qpc scan list** **--type=** *(connect | inspect)*
 
 ``--type=type``
 
   Optional. Filters the results by scan type. This value must be ``connect`` or ``inspect``. A scan of type ``connect`` is a scan that began the process of connecting to the defined systems in the sources, but did not transition into inspecting the contents of those systems. A scan of type ``inspect`` is a scan that moves into the inspection process.
 
-``--state=state``
+The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
 
-  Optional. Filters the results by scan state. This value must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed``, or ``failed``.
+**qpc scan job** --name** *scan_name* (**--id=** *scan_job_identifier*| --all) **--status=** *(created | pending | running | paused | canceled | completed | failed)* **[--results]**
 
-The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns summary details for a single specified scan. You can also use this command to display the results of a scan.
+``--name=name``
 
-**qpc scan show --id=** *scan_identifier* **[--results]**
+  Required. Contains the name of the scan object of which to display the scan jobs.
 
-``--id=scan_identifier``
+``--id=scan_job_identifier``
 
-  Required. Contains the scan identifier to display.
+  Optional. Contains the identifier of the scan job to show. Mutually exclusive with the ``--all`` option.
+
+``--all``
+
+  Optional. Lists all scan jobs related to the provided scan object. Mutually exclusive with the ``--id`` option
+
+``--status=status``
+
+  Optional. Filters the results by scan job state. This value must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed``, or ``failed``.
 
 ``--results``
 
-  Optional. Displays the results of the scan instead of the status. The results are the raw output of the scan before that output is consolidated into a report. Because the results can include many lines of data, you might want to redirect the output of this command to a file if you use the ``--results`` option.
+  Optional. Displays the results of the scan job instead of the status. The results are the raw output of the scan before that output is consolidated into a report. Because the results can include many lines of data, you might want to redirect the output of this command to a file if you use the ``--results`` option.
+
+The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns summary details for a single specified scan object.
+
+**qpc scan show --name** *name*
+
+``--name=name``
+
+  Required. Contains the name of the scan object to display.
+
+The ``qpc scan status`` command returns the status details for a single specified scan job.
+
+**qpc scan status** **--id=** *scan_job_identifier*
+
+``--id=scan_job_identifier``
+
+  Required. Contains the identifier of the scan job to show.
+
+Scanning
+--------
+
+Use the ``qpc scan start`` command to create and run a scan job from an existing scan object. This command scans all of the host names or IP addresses that are defined in the supplied sources of the scan object from which the job is created. Each instance of a scan job is assigned a unique *identifier* to identify the scan results, so that the results data can be viewed later.
+
+**IMPORTANT:** If any ssh-agent connection is set up for a target host, that connection will be used as a fallback connection.
+
+**qpc scan start --name** *scan_name*
+
+``--name=name``
+
+  Contains the name of the scan object to run.
 
 Controlling Scans
 ~~~~~~~~~~~~~~~~~
 
-When scans are queued and running, you might need to control the execution of scans due to the needs of other business processes in your organization. The ``pause``, ``restart``, and ``cancel`` subcommands enable you to control scan execution.
+When scan jobs are queued and running, you might need to control the execution of scan jobs due to the needs of other business processes in your organization. The ``pause``, ``restart``, and ``cancel`` subcommands enable you to control scan job execution.
 
-The ``qpc scan pause`` command halts the execution of a scan, but enables it to be restarted at a later time.
+The ``qpc scan pause`` command halts the execution of a scan job, but enables it to be restarted at a later time.
 
-**qpc scan pause --id=** *scan_identifier*
+**qpc scan pause --id=** *scan_job_identifier*
 
-``--id=scan_identifier``
+``--id=scan_job_identifier``
 
-  Required. Contains the identifier of the scan to pause.
-
-
-The ``qpc scan restart`` command restarts the execution of a scan that is paused.
-
-**qpc scan restart --id=** *scan_identifier*
-
-``--id=scan_identifier``
-
-  Required. Contains the identifier of the scan to restart.
+  Required. Contains the identifier of the scan job to pause.
 
 
-The ``qpc scan cancel`` command cancels the execution of a scan. A canceled scan cannot be restarted.
+The ``qpc scan restart`` command restarts the execution of a scan job that is paused.
 
-**qpc scan cancel --id=** *scan_identifier*
+**qpc scan restart --id=** *scan_job_identifier*
 
-``--id=scan_identifier``
+``--id=scan_job_identifier``
 
-  Required. Contains the identifier of the scan to cancel.
+  Required. Contains the identifier of the scan job to restart.
+
+
+The ``qpc scan cancel`` command cancels the execution of a scan job. A canceled scan job cannot be restarted.
+
+**qpc scan cancel --id=** *scan_job_identifier*
+
+``--id=scan_job_identifier``
+
+  Required. Contains the identifier of the scan job to cancel.
+
+
+Clearing Scans
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As the network infrastructure changes, it might be necessary to delete some scan objects. Use the ``qpc scan clear`` command to delete scans.
+
+**qpc scan clear (--name=** *name* **| --all)**
+
+``--name=name``
+
+  Contains the name of the source to clear. Mutually exclusive with the ``--all`` option.
+
+``--all``
+
+  Clears all stored scan objects. Mutually exclusive with the ``--name`` option
 
 
 Reports
