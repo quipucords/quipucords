@@ -141,7 +141,7 @@ class ReportCSVRenderer(renderers.BaseRenderer):
 
         headers = csv_helper.generate_headers(
             systems_list, exclude=set([
-                'id', 'report_id', 'metadata']))
+                'id', 'report_id', 'metadata', 'products', 'entitlements']))
         csv_writer.writerow(headers)
         for system in systems_list:
             row = []

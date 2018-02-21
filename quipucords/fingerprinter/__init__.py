@@ -42,6 +42,8 @@ FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
 
 META_DATA_KEY = 'metadata'
 
+ENTITLEMENTS_KEY = 'entitlements'
+
 
 def process_fact_collection(sender, instance, **kwargs):
     """Process the fact collection.
@@ -418,13 +420,18 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     if META_DATA_KEY in keys_to_add_list:
         keys_to_add_list.remove(META_DATA_KEY)
 
-    # Add vcenter facts
     for fact_key in keys_to_add_list:
         to_merge_fact = to_merge_fingerprint.get(fact_key)
         if to_merge_fact:
             priority_fingerprint[META_DATA_KEY][fact_key] = \
                 to_merge_fingerprint[META_DATA_KEY][fact_key]
             priority_fingerprint[fact_key] = to_merge_fact
+
+    if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
+        if ENTITLEMENTS_KEY not in priority_fingerprint:
+            priority_fingerprint[ENTITLEMENTS_KEY] = []
+        for entitlement in to_merge_fingerprint.get(ENTITLEMENTS_KEY):
+            priority_fingerprint[ENTITLEMENTS_KEY].append(entitlement)
 
     return priority_fingerprint
 
@@ -466,6 +473,52 @@ def add_fact_to_fingerprint(source,
             'source_type': source['source_type'],
             'raw_fact_key': raw_fact_key
         }
+
+
+# pylint: disable=C0103
+def add_fact_entitlements_to_fingerprint(source,
+                                         raw_fact_key,
+                                         raw_fact,
+                                         fingerprint):
+    """Create the fingerprint entitlements with fact and metadata.
+
+    :param source: Source used to gather raw facts.
+    :param raw_fact_key: Raw fact key used to obtain value
+    :param raw_fact: Raw fact used used to obtain value
+    :param fingerprint: dict containing all fingerprint facts
+    this fact.
+    """
+    # pylint: disable=too-many-arguments
+    source_object = Source.objects.filter(id=source.get('source_id')).first()
+    if source_object:
+        source_name = source_object.name
+    else:
+        source_name = None
+    actual_fact_value = None
+    if raw_fact.get(raw_fact_key) is not None:
+        actual_fact_value = raw_fact.get(raw_fact_key)
+
+    if actual_fact_value is not None and isinstance(actual_fact_value, list):
+        entitlements = []
+        for entitlement in actual_fact_value:
+            add = False
+            f_ent = {}
+            if entitlement.get('name'):
+                f_ent['name'] = entitlement.get('name')
+                add = True
+            if entitlement.get('entitlement_id'):
+                f_ent['entitlement_id'] = entitlement.get('entitlement_id')
+                add = True
+            if add:
+                f_ent[META_DATA_KEY] = {
+                    'source_id': source['source_id'],
+                    'source_name': source_name,
+                    'source_type': source['source_type'],
+                    'raw_fact_key': raw_fact_key
+                }
+                entitlements.append(f_ent)
+
+        fingerprint[ENTITLEMENTS_KEY] = entitlements
 
 
 def _process_network_fact(source, fact):
@@ -580,6 +633,9 @@ def _process_network_fact(source, fact):
                             fact, 'virtualized_num_running_guests',
                             fingerprint)
 
+    add_fact_entitlements_to_fingerprint(source, 'subman_consumed',
+                                         fact, fingerprint)
+
     return fingerprint
 
 
@@ -691,6 +747,9 @@ def _process_satellite_fact(source, fact):
                             'cpu_core_count', fingerprint)
     add_fact_to_fingerprint(source, 'num_sockets', fact,
                             'cpu_socket_count', fingerprint)
+
+    add_fact_entitlements_to_fingerprint(source, 'entitlements',
+                                         fact, fingerprint)
 
     return fingerprint
 

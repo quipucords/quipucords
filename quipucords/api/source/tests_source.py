@@ -130,6 +130,7 @@ class SourceTest(TestCase):
         start = datetime.now()
         source = Source(
             name='source1',
+            hosts=json.dumps(['1.2.3.4']),
             source_type='network',
             port=22)
         source.save()
@@ -156,6 +157,7 @@ class SourceTest(TestCase):
                     'name': 'source1',
                     'source_type': 'network',
                     'port': 22,
+                    'hosts': ['1.2.3.4'],
                     'connection': {'id': 1, 'start_time': start,
                                    'end_time': end, 'status': 'completed',
                                    'systems_count': 10,

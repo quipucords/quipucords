@@ -10,7 +10,6 @@
 """Infrastructure for the initial data postprocessing."""
 
 import abc
-import json
 from logging import (ERROR, DEBUG)
 import traceback
 
@@ -140,9 +139,7 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
         scan_task.log_message(log_message, log_level=ERROR)
         return NO_DATA
 
-    # https://docs.python.org/3/library/json.html suggests that
-    # these separators will give the most compact representation.
-    return json.dumps(processor_out, separators=(',', ':'))
+    return processor_out
 
 
 class ProcessorMeta(abc.ABCMeta):

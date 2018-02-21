@@ -180,7 +180,7 @@ class TestProcess(TestCase):
         self.assertEqual(
             process.process(self.scan_task, {},
                             TEST_KEY, ansible_result(process.NO_DATA),
-                            HOST), '1')
+                            HOST), 1)
 
     def test_missing_dependency(self):
         """Test a key whose processor is missing a dependency."""
