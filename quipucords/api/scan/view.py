@@ -44,6 +44,7 @@ def expand_scan(json_scan):
         pk__in=source_ids).values('id', 'name', 'source_type')
     if slim_sources:
         json_scan[SOURCES_KEY] = slim_sources
+    return json_scan
 
 
 class ScanFilter(FilterSet):
@@ -80,7 +81,9 @@ class ScanViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
+        json_scan = serializer.data
+        json_scan = expand_scan(json_scan)
+        return Response(json_scan, status=status.HTTP_201_CREATED,
                         headers=headers)
 
     def list(self, request):  # pylint: disable=unused-argument
@@ -98,7 +101,7 @@ class ScanViewSet(ModelViewSet):
         for scan in queryset:
             serializer = ScanSerializer(scan)
             json_scan = serializer.data
-            expand_scan(json_scan)
+            json_scan = expand_scan(json_scan)
             result.append(json_scan)
         return Response(result)
 
