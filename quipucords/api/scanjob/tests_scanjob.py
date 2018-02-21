@@ -95,6 +95,21 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response_json
 
+    def create_job_expect_201(self, scan_id):
+        """Create a scan, return the response as a dict."""
+        url = reverse('scan-detail', args=(scan_id,)) + 'jobs/'
+        print(url)
+        response = self.client.post(url,
+                                    {},
+                                    'application/json')
+        response_json = response.json()
+        if response.status_code != status.HTTP_201_CREATED:
+            print('Cause of failure: ')
+            print(response_json)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response_json
+
     def test_queue_task(self):
         """Test create queue state change."""
         # Cannot use util because its testing queue
@@ -177,8 +192,7 @@ class ScanJobTest(TestCase):
         scan_job.complete()
         self.assertEqual(scan_job.status, ScanTask.COMPLETED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_start_task(self, start_scan):
+    def test_start_task(self):
         """Test start pending task."""
         scan_job, _ = create_scan_job(
             self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
@@ -197,8 +211,7 @@ class ScanJobTest(TestCase):
         # Start job
         scan_job.start()
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_pause_restart_task(self, start_scan):
+    def test_pause_restart_task(self):
         """Test pause and restart task."""
         scan_job, _ = create_scan_job(
             self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
@@ -232,31 +245,16 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.CANCELED)
         self.assertEqual(connect_task.status, ScanTask.CANCELED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
-        data = {'scan': self.connect_scan.id}
-        response = self.create_expect_201(data)
+        response = self.create_job_expect_201(self.connect_scan.id)
         self.assertIn('id', response)
 
-    def test_create_invalid_srcs_type(self):
-        """A create request must have integer ids."""
-        data = {'scan': 'foo'}
-        self.create_expect_400(
-            data, {'scan': ['Scan identifiers must be integer values.']})
-
-    def test_create_invalid_srcs_id(self):
-        """A create request must have vaild ids."""
-        data = {'scan': 100000}
-        self.create_expect_400(
-            data, {'scan': ['Scan with id=100000 could '
-                            'not be found in database.']})
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
         """Get ScanJob details by primary key."""
-        data_discovery = {'scan': self.connect_scan.id}
-        initial = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.get(url)
@@ -273,8 +271,7 @@ class ScanJobTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scan.view.start_scan', side_effect=dummy_start)
-    def test_details(self, start_scan):
+    def test_details(self):
         """Get ScanJob result details by primary key."""
         # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(
@@ -330,11 +327,10 @@ class ScanJobTest(TestCase):
                        'facts': [
                            {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
         """Completely update a Source."""
-        data_discovery = {'scan': self.connect_scan.id}
-        initial = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
@@ -350,11 +346,10 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed_disable_optional_products(self, start_scan):
         """Completely update a Source & fail due to disable_opt_products."""
-        data_discovery = {'scan': self.connect_scan.id}
-        initial = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
@@ -367,11 +362,10 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_partial_update(self, start_scan):
         """Partially update a ScanJob is not supported."""
-        data_discovery = {'scan': self.connect_scan.id}
-        initial = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         url = reverse('scanjob-detail', args=(initial['id'],))
@@ -382,24 +376,22 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_delete(self, start_scan):
         """Delete a ScanJob is not supported."""
-        data_discovery = {'scan': self.connect_scan.id}
-        response = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_pause_bad_state(self, start_scan):
         """Pause a scanjob."""
-        data_host = {'scan': self.inspect_scan.id}
-        response = self.create_expect_201(data_host)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}pause/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -413,13 +405,12 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
-        data_host = {'scan': self.inspect_scan.id}
-        response = self.create_expect_201(data_host)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}cancel/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -433,13 +424,12 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
-        data_host = {'scan': self.inspect_scan.id}
-        response = self.create_expect_201(data_host)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}restart/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -587,26 +577,10 @@ class ScanJobTest(TestCase):
                          'jboss_brms': False}
         self.assertEqual(extra_vars, expected_vars)
 
-    ############################################################
-    # Scan Job tests /jobs path
-    ############################################################
-
-    def create_job_expect_201(self, scan_id):
-        """Create a scan, return the response as a dict."""
-        url = reverse('scan-detail', args=(scan_id,)) + 'jobs/'
-        print(url)
-        response = self.client.post(url,
-                                    {},
-                                    'application/json')
-        response_json = response.json()
-        if response.status_code != status.HTTP_201_CREATED:
-            print('Cause of failure: ')
-            print(response_json)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        return response_json
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    # ############################################################
+    # # Scan Job tests /jobs path
+    # ############################################################
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_list_jobs(self, start_scan):
         """List all ScanJobs under a scan."""
         self.create_job_expect_201(self.inspect_scan.id)
@@ -629,7 +603,7 @@ class ScanJobTest(TestCase):
                     'results': results1}
         self.assertEqual(content, expected)
 
-    # @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    # @patch('api.scan.view.start_scan', side_effect=dummy_start)
     # def test_filtered_list(self, start_scan):
     #     """List filtered ScanJob objects."""
     #     data_default = {'scan': self.inspect_scan.id}

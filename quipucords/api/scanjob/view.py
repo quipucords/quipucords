@@ -11,7 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.authentication import SessionAuthentication
@@ -35,7 +35,7 @@ from api.serializers import (ScanJobSerializer,
                              SystemInspectionResultSerializer,
                              RawFactSerializer)
 from api.scanjob.serializer import expand_scanjob
-from api.signals.scanjob_signal import (start_scan, pause_scan,
+from api.signals.scanjob_signal import (pause_scan,
                                         cancel_scan, restart_scan)
 
 
@@ -142,7 +142,6 @@ class ScanJobFilter(FilterSet):
 
 # pylint: disable=too-many-ancestors
 class ScanJobViewSet(mixins.RetrieveModelMixin,
-                     mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
@@ -158,20 +157,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     filter_class = ScanJobFilter
     ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
     ordering = ('id',)
-
-    # pylint: disable=unused-argument
-    def create(self, request, *args, **kwargs):
-        """Create a scanjob."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
-        scanjob_obj.log_current_status()
-        start_scan.send(sender=self.__class__, instance=scanjob_obj)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
 
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
