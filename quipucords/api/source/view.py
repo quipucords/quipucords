@@ -34,13 +34,14 @@ from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
 from api.source.util import expand_credential
 
+
 def format_source(json_source):
     """Format source with credentials and most recent connection scan.
 
     :param json_source: JSON source data from serializer
     :returns: JSON data
     """
-    json_source = expand_credential(json_source)
+    expand_credential(json_source)
     source_id = json_source.get('id')
 
     scan_task_qs = ScanTask.objects.filter(
