@@ -358,7 +358,7 @@ The ``qpc scan list`` command returns the summary details for all created scan o
 
 The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
 
-**qpc scan job** --name** *scan_name* (**--id=** *scan_job_identifier*| --all) **--status=** *(created | pending | running | paused | canceled | completed | failed)* **[--results]**
+**qpc scan job** --name** *scan_name* **--id=** *scan_job_identifier* **--status=** *(created | pending | running | paused | canceled | completed | failed)*
 
 ``--name=name``
 
@@ -366,19 +366,11 @@ The ``qpc scan job`` command returns the the list of scan jobs or a single scan 
 
 ``--id=scan_job_identifier``
 
-  Optional. Contains the identifier of the scan job to show. Mutually exclusive with the ``--all`` option.
-
-``--all``
-
-  Optional. Lists all scan jobs related to the provided scan object. Mutually exclusive with the ``--id`` option
+  Optional. Contains the identifier of a specified scan job to show.
 
 ``--status=status``
 
   Optional. Filters the results by scan job state. This value must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed``, or ``failed``.
-
-``--results``
-
-  Optional. Displays the results of the scan job instead of the status. The results are the raw output of the scan before that output is consolidated into a report. Because the results can include many lines of data, you might want to redirect the output of this command to a file if you use the ``--results`` option.
 
 The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns summary details for a single specified scan object.
 

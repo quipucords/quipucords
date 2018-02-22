@@ -14,9 +14,10 @@
 from __future__ import print_function
 import sys
 from requests import codes
-from qpc.request import POST, GET, request
+from qpc.request import POST
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
+from qpc.scan.utils import _get_scan_object_id
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -42,38 +43,12 @@ class ScanStartCommand(CliCommand):
                                  help=_(messages.SCAN_NAME_HELP),
                                  required=True)
 
-    def _get_scan_id(self):
-        """Grab the scan id from the scan object if it exists.
-
-        :returns Boolean on whether or not the scan object was found &
-        the scan object id for the path
-        """
-        found = False
-        scan_object_id = None
-        response = request(parser=self.parser, method=GET,
-                           path=scan.SCAN_URI,
-                           params={'name': self.args.name},
-                           payload=None)
-        if response.status_code == codes.ok:  # pylint: disable=no-member
-            json_data = response.json()
-            count = json_data.get('count', 0)
-            results = json_data.get('results', [])
-            if count >= 1:
-                for result in results:
-                    if result['name'] == self.args.name:
-                        scan_object_id = str(result['id']) + '/'
-                        found = True
-            if not found or count == 0:
-                print(_(messages.SCAN_DOES_NOT_EXIST % self.args.name))
-        else:
-            print(_(messages.SCAN_DOES_NOT_EXIST % self.args.name))
-        return found, scan_object_id
-
     def _validate_args(self):
         CliCommand._validate_args(self)
         if self.args.name:
             # check for existence of scan object
-            found, scan_object_id = self._get_scan_id()
+            found, scan_object_id = _get_scan_object_id(self.parser,
+                                                        self.args.name)
             if found is False:
                 sys.exit(1)
             else:
