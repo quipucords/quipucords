@@ -1,3 +1,5 @@
+import _ from 'lodash';
+import * as moment from 'moment';
 import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
@@ -41,6 +43,8 @@ class ScanListItem extends React.Component {
     let scanDescription = '';
 
     let icon = null;
+    let scanTime = _.get(item, 'end_time');
+
     switch (item.status) {
       case 'completed':
         scanDescription = 'Last Scanned';
@@ -61,10 +65,12 @@ class ScanListItem extends React.Component {
       case 'pending':
         scanDescription = 'Scan Pending';
         icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
+        scanTime = _.get(item, 'start_time');
         break;
       case 'running':
         scanDescription = 'Scan in Progress';
         icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
+        scanTime = _.get(item, 'start_time');
         break;
       case 'paused':
         scanDescription = 'Scan Paused';
@@ -79,7 +85,12 @@ class ScanListItem extends React.Component {
         {icon}
         <div className="scan-status-text">
           <div>{scanDescription}</div>
-          <div>Started 5 min ago</div>
+          <div>
+            {moment
+              .utc(scanTime)
+              .utcOffset(moment().utcOffset())
+              .fromNow()}
+          </div>
         </div>
       </div>
     );
@@ -90,14 +101,17 @@ class ScanListItem extends React.Component {
 
     let sourcesCount = item.sources ? item.sources.length : 0;
 
+    let successHosts = Number.isNaN(item.systems_scanned) ? 0 : item.systems_scanned;
+    let failedHosts = Number.isNaN(item.systems_failed) ? 0 : item.systems_failed;
+
     return [
       <ListView.InfoItem
         key="systemsScanned"
-        className={'list-view-info-item-text-count ' + (item.systems_scanned === 0 ? 'invisible' : '')}
+        className={'list-view-info-item-text-count ' + (successHosts === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="okHostsTip"
-          tooltip={item.systems_scanned + (item.systems_scanned === 1 ? ' Successful System' : ' Successful Systems')}
+          tooltip={successHosts + (successHosts === 1 ? ' Successful System' : ' Successful Systems')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'systemsScanned'}
@@ -106,17 +120,17 @@ class ScanListItem extends React.Component {
             }}
           >
             <Icon className="list-view-compound-item-icon" type="pf" name="ok" />
-            <strong>{item.systems_scanned}</strong>
+            <strong>{successHosts}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
       <ListView.InfoItem
         key="systemsFailed"
-        className={'list-view-info-item-text-count ' + (item.systems_failed === 0 ? 'invisible' : '')}
+        className={'list-view-info-item-text-count ' + (failedHosts === 0 ? 'invisible' : '')}
       >
         <SimpleTooltip
           id="failedHostsTip"
-          tooltip={item.systems_failed + (item.systems_failed === 1 ? ' Failed System' : ' Failed Systems')}
+          tooltip={failedHosts + (failedHosts === 1 ? ' Failed System' : ' Failed Systems')}
         >
           <ListView.Expand
             expanded={item.expanded && item.expandType === 'systemsFailed'}
@@ -125,7 +139,7 @@ class ScanListItem extends React.Component {
             }}
           >
             <Icon className="list-view-compound-item-icon" type="pf" name="error-circle-o" />
-            <strong>{item.systems_failed}</strong>
+            <strong>{failedHosts}</strong>
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>,
@@ -249,6 +263,7 @@ class ScanListItem extends React.Component {
       active: item.selected
     });
 
+    console.dir(item);
     return (
       <ListView.Item
         key={item.id}
