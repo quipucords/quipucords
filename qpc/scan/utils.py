@@ -45,6 +45,34 @@ def _get_source_ids(parser, source_names):
     return not_found, source_ids
 
 
+def _get_scan_object_id(parser, name):
+    """Grab the scan id from the scan object if it exists.
+
+    :returns Boolean on whether or not the scan object was found &
+    the scan object id for the path
+    """
+    found = False
+    scan_object_id = None
+    response = request(parser=parser, method=GET,
+                       path=scan.SCAN_URI,
+                       params={'name': name},
+                       payload=None)
+    if response.status_code == codes.ok:  # pylint: disable=no-member
+        json_data = response.json()
+        count = json_data.get('count', 0)
+        results = json_data.get('results', [])
+        if count >= 1:
+            for result in results:
+                if result['name'] == name:
+                    scan_object_id = str(result['id']) + '/'
+                    found = True
+        if not found or count == 0:
+            print(_(messages.SCAN_DOES_NOT_EXIST % name))
+    else:
+        print(_(messages.SCAN_DOES_NOT_EXIST % name))
+    return found, scan_object_id
+
+
 def _get_optional_products(disable_optional_products):
     """Construct a dictionary based on the disable-optional-products args.
 
