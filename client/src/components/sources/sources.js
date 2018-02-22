@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
+import { addScan } from '../../redux/actions/scansActions';
 import {
   sourcesTypes,
   toastNotificationTypes,
@@ -68,6 +69,29 @@ class Sources extends React.Component {
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
       this.props.getSources(helpers.createViewQueryObject(nextProps.viewOptions));
+    }
+  }
+
+  notifyCreateScanStatus(error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Started new scan <strong>{_.get(results, 'data.id')}</strong>.
+          </span>
+        )
+      });
+      this.hideScanDialog();
+      this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
     }
   }
 
@@ -148,13 +172,16 @@ class Sources extends React.Component {
   }
 
   createScan(scanName, sources) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: scanName,
-      message: 'Scanning sources is not yet implemented'
-    });
-    this.hideScanDialog();
+    const { addScan } = this.props;
+
+    let data = {
+      sources: sources.map(item => item.id)
+    };
+
+    addScan(data).then(
+      response => this.notifyCreateScanStatus(false, response.value),
+      error => this.notifyCreateScanStatus(true, error.message)
+    );
   }
 
   refresh() {
@@ -291,6 +318,7 @@ class Sources extends React.Component {
 
 Sources.propTypes = {
   getSources: PropTypes.func,
+  addScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -300,7 +328,8 @@ Sources.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getSources: queryObj => dispatch(getSources(queryObj))
+  getSources: queryObj => dispatch(getSources(queryObj)),
+  addScan: data => dispatch(addScan(data))
 });
 
 const mapStateToProps = function(state) {
