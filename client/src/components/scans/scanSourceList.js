@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Icon } from 'patternfly-react';
+import { helpers } from '../../common/helpers';
 
 class ScanSourceList extends React.Component {
   constructor() {
@@ -42,16 +43,9 @@ class ScanSourceList extends React.Component {
   }
 
   renderSourceIcon(source) {
-    switch (source.source_type) {
-      case 'vcenter':
-        return <Icon type="pf" name="virtual-machine" />;
-      case 'network':
-        return <Icon type="pf" name="network" />;
-      case 'satellite':
-        return <Icon type="fa" name="space-shuttle" />;
-      default:
-        return null;
-    }
+    let iconInfo = helpers.sourceTypeIcon(source.source_type);
+
+    return <Icon type={iconInfo.type} name={iconInfo.name} />;
   }
 
   render() {

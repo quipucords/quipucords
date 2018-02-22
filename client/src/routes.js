@@ -10,20 +10,20 @@ const baseName = '/client';
  */
 const routes = () => [
   {
-    iconClass: 'pficon pficon-network',
+    iconClass: 'fa fa-crosshairs',
     title: 'Sources',
     to: '/sources',
     redirect: true,
     component: Sources
   },
   {
-    iconClass: 'fa fa-wifi',
+    iconClass: 'pficon pficon-orders',
     title: 'Scans',
     to: '/scans',
     component: Scans
   },
   {
-    iconClass: 'fa fa-key',
+    iconClass: 'fa fa-id-card',
     title: 'Credentials',
     to: '/credentials',
     component: Credentials

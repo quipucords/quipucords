@@ -89,7 +89,7 @@ class SourceListItem extends React.Component {
               this.toggleExpand('credentials');
             }}
           >
-            <Icon className="list-view-compound-item-icon" type="fa" name="key" />
+            <Icon className="list-view-compound-item-icon" type="fa" name="id-card" />
             <strong>{credentialCount}</strong>
           </ListView.Expand>
         </SimpleTooltip>
@@ -252,4 +252,4 @@ SourceListItem.propTypes = {
   onScan: PropTypes.func
 };
 
-export { SourceListItem };
+export default SourceListItem;

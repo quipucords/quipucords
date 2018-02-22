@@ -20,7 +20,7 @@ import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import SourcesEmptyState from './sourcesEmptyState';
-import { SourceListItem } from './sourceListItem';
+import SourceListItem from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
 import AddSourceWizard from '../addSourceWizard/addSourceWizard';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
@@ -30,7 +30,6 @@ class Sources extends React.Component {
     super();
 
     helpers.bindMethods(this, [
-      'importSources',
       'scanSource',
       'scanSources',
       'itemSelectChange',
@@ -91,12 +90,6 @@ class Sources extends React.Component {
     Store.dispatch({
       type: sourcesTypes.EDIT_SOURCE_SHOW,
       source: item
-    });
-  }
-
-  importSources() {
-    Store.dispatch({
-      type: sourcesTypes.IMPORT_SOURCE_SHOW
     });
   }
 
@@ -288,7 +281,7 @@ class Sources extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState onAddSource={this.showAddSourceWizard} onImportSources={this.importSources} />
+        <SourcesEmptyState onAddSource={this.showAddSourceWizard} />
         {this.renderPendingMessage()}
         <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
