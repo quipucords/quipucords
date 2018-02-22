@@ -25,6 +25,7 @@ import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
                                    CustomJSONField)
+from api.common.util import check_for_existing_name
 
 
 class CredentialsField(PrimaryKeyRelatedField):
@@ -94,8 +95,11 @@ class SourceSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
-        SourceSerializer.check_for_existing_name(
-            name=validated_data.get('name'))
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Source.objects,
+            name,
+            _(messages.SOURCE_NAME_ALREADY_EXISTS % name))
 
         if 'source_type' not in validated_data:
             error = {
@@ -203,9 +207,12 @@ class SourceSerializer(NotEmptySerializer):
         # If we ever add optional fields to Source, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        SourceSerializer.check_for_existing_name(
-            name=validated_data.get('name'),
-            source_id=instance.id)
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Source.objects,
+            name,
+            _(messages.SOURCE_NAME_ALREADY_EXISTS % name),
+            search_id=instance.id)
 
         if 'source_type' in validated_data:
             error = {
@@ -308,26 +315,6 @@ class SourceSerializer(NotEmptySerializer):
         if disable_ssl is not None:
             instance_options.disable_ssl = disable_ssl
         instance_options.save()
-
-    @staticmethod
-    def check_for_existing_name(name, source_id=None):
-        """Look for existing (different object) with same name.
-
-        :param name: Name of source to look for
-        :param source_id: Source to exclude
-        """
-        if source_id is None:
-            # Look for existing with same name (create)
-            existing = Source.objects.filter(name=name).first()
-        else:
-            # Look for existing.  Same name, different id (update)
-            existing = Source.objects.filter(
-                name=name).exclude(id=source_id).first()
-        if existing is not None:
-            error = {
-                'name': [_(messages.SOURCE_NAME_ALREADY_EXISTS % name)]
-            }
-            raise ValidationError(error)
 
     @staticmethod
     def check_credential_type(source_type, credential):
