@@ -188,11 +188,16 @@ class SatelliteFiveTest(TestCase):
         """Test the host details with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
-            virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
-            self.api.host_details(host_id=1, host_name='sys1',
-                                  last_checkin='', virtual_hosts=virt,
-                                  virtual_guests={1: 2})
+        virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
+        details = self.api.host_details(host_id=1, host_name='sys1',
+                                        last_checkin='',
+                                        virtual_hosts=virt,
+                                        virtual_guests={1: 2})
+        inspect_result = self.scan_task.inspection_result
+        self.assertEqual(len(inspect_result.systems.all()), 1)
+        sys_result = inspect_result.systems.all().first()
+        self.assertEqual(sys_result.status, SystemInspectionResult.FAILED)
+        self.assertEqual(details, {})
 
     @patch('xmlrpc.client.ServerProxy')
     def test_virtual_guests_with_err(self, mock_serverproxy):
