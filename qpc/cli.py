@@ -40,7 +40,7 @@ from qpc.scan.commands import (ScanAddCommand, ScanStartCommand,
                                ScanListCommand, ScanShowCommand,
                                ScanPauseCommand, ScanCancelCommand,
                                ScanRestartCommand, ScanEditCommand,
-                               ScanClearCommand)
+                               ScanClearCommand, ScanStatusCommand)
 from qpc.report.commands import (ReportSummaryCommand,
                                  ReportDetailCommand)
 from qpc.translation import _
@@ -88,7 +88,7 @@ class CLI(object):
                               ScanListCommand, ScanShowCommand,
                               ScanPauseCommand, ScanCancelCommand,
                               ScanRestartCommand, ScanEditCommand,
-                              ScanClearCommand])
+                              ScanClearCommand, ScanStatusCommand])
         self._add_subcommand(report.SUBCOMMAND,
                              [ReportSummaryCommand, ReportDetailCommand])
         ensure_data_dir_exists()

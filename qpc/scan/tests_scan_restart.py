@@ -19,7 +19,7 @@ import requests_mock
 import qpc.messages as messages
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
-from qpc.scan import SCAN_URI
+from qpc.scan import SCAN_JOB_URI
 from qpc.scan.restart import ScanRestartCommand
 from qpc.utils import get_server_location, write_server_config
 
@@ -46,7 +46,7 @@ class ScanRestartCliTests(unittest.TestCase):
     def test_restart_scan_ssl_err(self):
         """Testing the restart scan command with a connection error."""
         scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '1/restart/'
+        url = get_server_location() + SCAN_JOB_URI + '1/restart/'
         with requests_mock.Mocker() as mocker:
             mocker.put(url, exc=requests.exceptions.SSLError)
             nsc = ScanRestartCommand(SUBPARSER)
@@ -59,7 +59,7 @@ class ScanRestartCliTests(unittest.TestCase):
     def test_restart_scan_conn_err(self):
         """Testing the restart scan command with a connection error."""
         scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '1/restart/'
+        url = get_server_location() + SCAN_JOB_URI + '1/restart/'
         with requests_mock.Mocker() as mocker:
             mocker.put(url, exc=requests.exceptions.ConnectTimeout)
             nsc = ScanRestartCommand(SUBPARSER)
@@ -73,7 +73,7 @@ class ScanRestartCliTests(unittest.TestCase):
     def test_restart_scan_internal_err(self):
         """Testing the restart scan command with an internal error."""
         scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '1/restart/'
+        url = get_server_location() + SCAN_JOB_URI + '1/restart/'
         with requests_mock.Mocker() as mocker:
             mocker.put(url, status_code=500, json={'error': ['Server Error']})
             nsc = ScanRestartCommand(SUBPARSER)
@@ -86,15 +86,9 @@ class ScanRestartCliTests(unittest.TestCase):
     def test_restart_scan_data(self):
         """Testing the restart scan command successfully with stubbed data."""
         scan_out = StringIO()
-        url = get_server_location() + SCAN_URI + '1/restart/'
-        scan_entry = {'id': 1,
-                      'source': {
-                          'id': 1,
-                          'name': 'scan1'},
-                      'scan_type': 'host',
-                      'status': 'completed'}
+        url = get_server_location() + SCAN_JOB_URI + '1/restart/'
         with requests_mock.Mocker() as mocker:
-            mocker.put(url, status_code=200, json=scan_entry)
+            mocker.put(url, status_code=200, json=None)
             nsc = ScanRestartCommand(SUBPARSER)
             args = Namespace(id='1')
             with redirect_stdout(scan_out):

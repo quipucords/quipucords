@@ -17,6 +17,7 @@ EDIT = 'edit'
 START = 'start'
 LIST = 'list'
 SHOW = 'show'
+STATUS = 'status'
 PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
@@ -33,7 +34,7 @@ SCAN_STATUS_FAILED = 'failed'
 
 
 SCAN_URI = '/api/v1/scans/'
-SCAN_JOB_URI = '/api/v1/jobs'
+SCAN_JOB_URI = '/api/v1/jobs/'
 
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'
