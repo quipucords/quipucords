@@ -276,89 +276,88 @@ class ScanTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # def test_update(self):
-    #     """Completely update a scan."""
-    #     data_discovery = {'name': 'test',
-    #                       'sources': [self.source.id],
-    #                       'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-    #                       'options': {'disable_optional_products':
-    #                                   {'jboss_eap': True,
-    #                                    'jboss_fuse': True,
-    #                                    'jboss_brms': True}}}
-    #     initial = self.create_expect_201(data_discovery)
+    def test_update(self):
+        """Completely update a scan."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disable_optional_products':
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
+        initial = self.create_expect_201(data_discovery)
 
-    #     data = {'name': 'test',
-    #             'sources': [self.source.id],
-    #             'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-    #             'options': {'disable_optional_products':
-    #                         {'jboss_eap': True,
-    #                          'jboss_fuse': True,
-    #                          'jboss_brms': True}}}
-    #     url = reverse('scan-detail', args=(initial['id'],))
-    #     response = self.client.put(url,
-    #                                json.dumps(data),
-    #                                content_type='application/json',
-    #                                format='json')
-    #     self.assertEqual(response.status_code,
-    #                      status.HTTP_200_OK)
+        data = {'name': 'test2',
+                'sources': [self.source.id],
+                'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                'options': {'disable_optional_products':
+                            {'jboss_eap': False,
+                             'jboss_fuse': True,
+                             'jboss_brms': True}}}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertFalse(response_json.get('options').get('jboss_eap'))
 
-    # @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    # def test_update_not_allowed_disable_optional_products(self, start_scan):
-    #     """Completely update a Source & fail due to disable_opt_products."""
-    #     data_discovery = {'sources': [self.source.id],
-    #                       'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-    #                       'options': {'disable_optional_products':
-    #                                   {'jboss_eap': True,
-    #                                    'jboss_fuse': True,
-    #                                    'jboss_brms': True}}}
-    #     initial = self.create_expect_201(data_discovery)
+    def test_partial_update(self):
+        """Test partial update a scan."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disable_optional_products':
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
+        initial = self.create_expect_201(data_discovery)
 
-    #     data = {'sources': [self.source.id],
-    #             'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-    #             'options': {'disable_optional_products': 'bar'}}
-    #     url = reverse('scan-detail', args=(initial['id'],))
-    #     response = self.client.put(url,
-    #                                json.dumps(data),
-    #                                content_type='application/json',
-    #                                format='json')
-    #     self.assertEqual(response.status_code,
-    #                      status.HTTP_405_METHOD_NOT_ALLOWED)
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        data = {'name': 'test2',
+                'options': {'disable_optional_products':
+                            {'jboss_eap': False,
+                             'jboss_fuse': True,
+                             'jboss_brms': True}}}
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertFalse(response_json.get('options').get('jboss_eap'))
 
-    # @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    # def test_partial_update(self, start_scan):
-    #     """Partially update a ScanJob is not supported."""
-    #     data_discovery = {'sources': [self.source.id],
-    #                       'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-    #                       'options': {'disable_optional_products':
-    #                                   {'jboss_eap': True,
-    #                                    'jboss_fuse': True,
-    #                                    'jboss_brms': True}}}
-    #     initial = self.create_expect_201(data_discovery)
+    def test_delete(self):
+        """Delete a scan."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disable_optional_products':
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
+        response = self.create_expect_201(data_discovery)
 
-    #     data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
-    #     url = reverse('scan-detail', args=(initial['id'],))
-    #     response = self.client.patch(url,
-    #                                  json.dumps(data),
-    #                                  content_type='application/json',
-    #                                  format='json')
-    #     self.assertEqual(response.status_code,
-    #                      status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    # def test_delete(self):
-    #     """Delete a Scan is not supported."""
-    #     data_discovery = {'name': 'test',
-    #                       'sources': [self.source.id],
-    #                       'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-    #                       'options': {'disable_optional_products':
-    #                                   {'jboss_eap': True,
-    #                                    'jboss_fuse': True,
-    #                                    'jboss_brms': True}}}
-    #     response = self.create_expect_201(data_discovery)
-
-    #     url = reverse('scan-detail', args=(response['id'],))
-    #     response = self.client.delete(url, format='json')
-    #     self.assertEqual(response.status_code,
-    #                      status.HTTP_204_NO_CONTENT)
+        url = reverse('scan-detail', args=(response['id'],))
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_204_NO_CONTENT)
 
     def test_expand_scan(self):
         """Test view expand_scan."""

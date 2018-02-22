@@ -27,7 +27,6 @@ HC_NOT_BOTH = 'A host credential must have either' \
 HC_KEY_INVALID = 'ssh_keyfile, %s, is not a valid file on the system.'
 HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
     ' a ssh_passphrase is provided.'
-HC_NAME_ALREADY_EXISTS = 'Host credential with name=%s already exists'
 CRED_TYPE_REQUIRED_CREATED = 'cred_type is required for credential creation'
 CRED_TYPE_NOT_ALLOWED_UPDATE = 'cred_type is invalid for credential update'
 
@@ -40,7 +39,6 @@ SAT_FIELDS_NOT_ALLOWED = 'Satellite cannot use a become password, ssh'\
     ' keyfile, become user, become method, or ssh passphrase.'
 
 # source messages
-SOURCE_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
 SOURCE_NAME_VALIDATION = 'Source must have printable name.'
 SOURCE_HOSTS_CANNOT_BE_EMPTY = 'hosts cannot be the empty list.'
 SOURCE_HOST_MUST_BE_JSON_ARRAY = 'hosts must be a JSON array of strings'
@@ -77,9 +75,6 @@ VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
 
 SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
 SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
-
-# Scan messages
-SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
@@ -142,6 +137,10 @@ COMMON_CHOICE_STR = 'Must be a string. Valid values are %s.'
 COMMON_CHOICE_BLANK = 'This field may not be blank. Valid values are %s.'
 COMMON_CHOICE_INV = '%s, is an invalid choice. Valid values are %s.'
 COMMON_ID_INV = 'The id must be an integer.'
+
+# Common util
+OBJECT_NAME_ALREADY_EXISTS = '%s with name=%s already exists'
+
 
 # report messages
 REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \

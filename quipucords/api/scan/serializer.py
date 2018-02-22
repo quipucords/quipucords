@@ -22,6 +22,7 @@ from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
                                    CustomJSONField)
 from api.scantasks.serializer import SourceField
+from api.common.util import check_for_existing_name
 
 
 class ScanOptionsSerializer(NotEmptySerializer):
@@ -74,8 +75,8 @@ class ScanSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
-        self.check_for_existing_name(
-            name=validated_data.get('name'))
+        check_for_existing_name('Scan', Scan.objects,
+                                name=validated_data.get('name'))
 
         options = validated_data.pop('options', None)
         scan = super().create(validated_data)
@@ -95,9 +96,9 @@ class ScanSerializer(NotEmptySerializer):
         # If we ever add optional fields to Scan, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        self.check_for_existing_name(
-            name=validated_data.get('name'),
-            scan_id=instance.id)
+        check_for_existing_name('Scan', Scan.objects,
+                                name=validated_data.get('name'),
+                                search_id=instance.id)
 
         name = validated_data.pop('name', None)
         scan_type = validated_data.pop('scan_type', None)
@@ -132,23 +133,3 @@ class ScanSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.SJ_REQ_SOURCES))
 
         return sources
-
-    @staticmethod
-    def check_for_existing_name(name, scan_id=None):
-        """Look for existing (different object) with same name.
-
-        :param name: Name of scan to look for
-        :param scan_id: Scan to exclude
-        """
-        if scan_id is None:
-            # Look for existing with same name (create)
-            existing = Scan.objects.filter(name=name).first()
-        else:
-            # Look for existing.  Same name, different id (update)
-            existing = Scan.objects.filter(
-                name=name).exclude(id=scan_id).first()
-        if existing is not None:
-            error = {
-                'name': [_(messages.SCAN_NAME_ALREADY_EXISTS % name)]
-            }
-            raise ValidationError(error)

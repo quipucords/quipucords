@@ -12,6 +12,9 @@
 """Util for common operations."""
 
 import logging
+from django.utils.translation import ugettext as _
+from rest_framework.serializers import ValidationError
+import api.messages as messages
 
 
 # Get an instance of a logger
@@ -62,6 +65,28 @@ def convert_to_boolean(value):
     """
     if is_boolean(value):
         return value.lower() == 'true'
+
+
+def check_for_existing_name(class_name, queryset, name, search_id=None):
+    """Look for existing (different object) with same name.
+
+    :param queryset: Queryset used in searches
+    :param name: Name of scan to look for
+    :param search_id: ID to exclude from search for existing
+    """
+    if search_id is None:
+        # Look for existing with same name (create)
+        existing = queryset.filter(name=name).first()
+    else:
+        # Look for existing.  Same name, different id (update)
+        existing = queryset.filter(
+            name=name).exclude(id=search_id).first()
+    if existing is not None:
+        error = {
+            'name': [
+                _(messages.OBJECT_NAME_ALREADY_EXISTS % (class_name, name))]
+        }
+        raise ValidationError(error)
 
 
 class CSVHelper:

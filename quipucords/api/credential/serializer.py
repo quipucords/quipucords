@@ -17,6 +17,7 @@ from rest_framework.serializers import (ValidationError,
 from api.models import Credential
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.util import check_for_existing_name
 
 
 def expand_filepath(filepath):
@@ -60,8 +61,8 @@ class CredentialSerializer(NotEmptySerializer):
 
     def create(self, validated_data):
         """Create host credential."""
-        CredentialSerializer.check_for_existing_name(
-            name=validated_data.get('name'))
+        check_for_existing_name('Credential', Credential.objects,
+                                name=validated_data.get('name'))
 
         if 'cred_type' not in validated_data:
             error = {
@@ -84,9 +85,9 @@ class CredentialSerializer(NotEmptySerializer):
 
     def update(self, instance, validated_data):
         """Update a host credential."""
-        CredentialSerializer.check_for_existing_name(
-            name=validated_data.get('name'),
-            cred_id=instance.id)
+        check_for_existing_name('Credential', Credential.objects,
+                                name=validated_data.get('name'),
+                                search_id=instance.id)
 
         if 'cred_type' in validated_data:
             error = {
@@ -95,26 +96,6 @@ class CredentialSerializer(NotEmptySerializer):
             raise ValidationError(error)
 
         return super().update(instance, validated_data)
-
-    @staticmethod
-    def check_for_existing_name(name, cred_id=None):
-        """Look for existing (different object) with same name.
-
-        :param name: Name of credential to look for
-        :param cred_id: Host credential to exclude
-        """
-        if cred_id is None:
-            # Look for existing with same name (create)
-            existing = Credential.objects.filter(name=name).first()
-        else:
-            # Look for existing.  Same name, different id (update)
-            existing = Credential.objects.filter(
-                name=name).exclude(id=cred_id).first()
-        if existing is not None:
-            error = {
-                'name': [_(messages.HC_NAME_ALREADY_EXISTS % name)]
-            }
-            raise ValidationError(error)
 
     def validate(self, attrs):
         """Validate the attributes."""
