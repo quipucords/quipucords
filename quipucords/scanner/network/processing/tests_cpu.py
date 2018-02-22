@@ -12,6 +12,7 @@
 
 
 import unittest
+from scanner.network.processing import process
 from scanner.network.processing import cpu
 from scanner.network.processing.test_util import ansible_result
 
@@ -24,14 +25,14 @@ class TestProcessCpuModelVer(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuModelVer.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test_not_found(self):
         """Did not find cpu model ver."""
         self.assertEqual(
             cpu.ProcessCpuModelVer.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class TestProcessCpuCpuFamily(unittest.TestCase):
@@ -42,14 +43,14 @@ class TestProcessCpuCpuFamily(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCpuFamily.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test__not_found(self):
         """Did not find cpu family."""
         self.assertEqual(
             cpu.ProcessCpuCpuFamily.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class TestProcessCpuVendorId(unittest.TestCase):
@@ -60,14 +61,14 @@ class TestProcessCpuVendorId(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuVendorId.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test__not_found(self):
         """Did not find cpu vendor id."""
         self.assertEqual(
             cpu.ProcessCpuVendorId.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class TestProcessCpuModelName(unittest.TestCase):
@@ -78,14 +79,14 @@ class TestProcessCpuModelName(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuModelName.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test__not_found(self):
         """Did not find cpu model name."""
         self.assertEqual(
             cpu.ProcessCpuModelName.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class TestProcessCpuBogomips(unittest.TestCase):
@@ -96,11 +97,11 @@ class TestProcessCpuBogomips(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuBogomips.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test__not_found(self):
         """Did not find cpu bogomips."""
         self.assertEqual(
             cpu.ProcessCpuBogomips.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)

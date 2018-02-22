@@ -30,7 +30,8 @@ class ProcessJbossBRMSManifestMF(process.Processor):
         manifest_contents = {}
         for result in output['results']:
             # map a directory (the item) to the manifest output
-            manifest_contents[result['item']] = result['stdout']
+            if result['stdout'] != '':
+                manifest_contents[result['item']] = result['stdout']
         return manifest_contents
 
 

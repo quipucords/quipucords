@@ -256,7 +256,7 @@ class CatResultsProcessor(process.Processor):
 class ProcessEapHomeLs(IndicatorFileFinder):
     """Process the output of 'ls -1 ...'."""
 
-    KEY = 'ls_eap_home'
+    KEY = 'eap_home_ls'
 
     INDICATOR_FILES = ['appclient', 'standalone', 'JBossEULA.txt',
                        'modules', 'jboss-modules.jar', 'version.txt']

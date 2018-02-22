@@ -12,6 +12,7 @@
 
 
 import unittest
+from scanner.network.processing import process
 from scanner.network.processing import date
 from scanner.network.processing.test_util import ansible_result
 
@@ -24,14 +25,14 @@ class TestProcessDateDate(unittest.TestCase):
         self.assertEqual(
             date.ProcessDateDate.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test_not_found(self):
         """Did not find date."""
         self.assertEqual(
             date.ProcessDateDate.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class ProcessDateFilesystemCreate(unittest.TestCase):
@@ -42,14 +43,14 @@ class ProcessDateFilesystemCreate(unittest.TestCase):
         self.assertEqual(
             date.ProcessDateFilesystemCreate.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test_not_found(self):
         """Did not find date file system create."""
         self.assertEqual(
             date.ProcessDateFilesystemCreate.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
 
 
 class ProcessDateMachineId(unittest.TestCase):
@@ -60,11 +61,11 @@ class ProcessDateMachineId(unittest.TestCase):
         self.assertEqual(
             date.ProcessDateMachineId.process(
                 ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            'a')
 
     def test_not_found(self):
         """Did not find date file system create."""
         self.assertEqual(
             date.ProcessDateMachineId.process(
                 ansible_result('')),
-            [])
+            process.NO_DATA)
