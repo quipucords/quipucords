@@ -12,6 +12,7 @@
 
 import logging
 import xmlrpc.client
+from api.models import SystemInspectionResult
 from scanner.satellite.api import SatelliteInterface, SatelliteException
 from scanner.satellite import utils
 
@@ -187,12 +188,16 @@ class SatelliteFive(SatelliteInterface):
                     details[VIRTUAL_HOST_NAME] = virtual_host.get(NAME)
 
             client.auth.logout(key)
-        except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
 
-        self.record_inspect_result(host_name, details)
-        logger.debug('host_id=%s, host_details=%s',
-                     host_id, details)
+            self.record_inspect_result(host_name, details)
+            logger.debug('host_id=%s, host_details=%s',
+                         host_id, details)
+        except xmlrpc.client.Fault as xml_error:
+            error_message = 'Satellite error encountered: %s\n' % xml_error
+            self.record_inspect_result(host_name, details,
+                                       status=SystemInspectionResult.FAILED)
+            logger.error(error_message)
+
         return details
 
     def virtual_guests(self, virtual_host_id):
