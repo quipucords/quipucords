@@ -21,6 +21,11 @@ import qpc.messages as messages
 
 
 def _get_source_ids(parser, source_names):
+    """Grab the source ids from the source if it exists.
+
+    :returns Boolean regarding the existence of source &
+    the source ids
+    """
     not_found = False
     source_ids = []
     for source_name in set(source_names):
@@ -48,8 +53,8 @@ def _get_source_ids(parser, source_names):
 def _get_scan_object_id(parser, name):
     """Grab the scan id from the scan object if it exists.
 
-    :returns Boolean on whether or not the scan object was found &
-    the scan object id for the path
+    :returns Boolean regarding the existence of the object &
+    the scan object id
     """
     found = False
     scan_object_id = None
