@@ -22,11 +22,11 @@ const sourceTypeString = sourceType => {
 const sourceTypeIcon = sourceType => {
   switch (sourceType) {
     case 'vcenter':
-      return { type: 'pf', name: 'virtual-machine' };
+      return { type: 'pf', name: 'vcenter' };
     case 'network':
-      return { type: 'pf', name: 'network' };
+      return { type: 'pf', name: 'network-range' };
     case 'satellite':
-      return { type: 'fa', name: 'space-shuttle' };
+      return { type: 'pf', name: 'satellite' };
     default:
       return { type: '', name: '' };
   }
@@ -147,6 +147,11 @@ const createViewQueryObject = (viewOptions, queryObj) => {
   return queryObject;
 };
 
+const DEV_MODE = process.env.REACT_APP_ENV === 'development';
+const normalizeCount = (count, modulus = 100) => {
+  return Math.abs(count) % modulus;
+};
+
 export const helpers = {
   bindMethods,
   noop,
@@ -158,7 +163,9 @@ export const helpers = {
   authorizationTypeString,
   setStateProp,
   viewPropsChanged,
-  createViewQueryObject
+  createViewQueryObject,
+  DEV_MODE,
+  normalizeCount
 };
 
 export default helpers;

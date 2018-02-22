@@ -1,4 +1,3 @@
-import { apiTypes } from '../../constants';
 import { sourcesTypes } from '../constants';
 import helpers from '../../common/helpers';
 import _ from 'lodash';
@@ -40,21 +39,6 @@ function addSourceWizardReducer(state = initialState, action) {
           show: true,
           edit: true,
           source: action.source,
-          stepOneValid: true
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    case sourcesTypes.IMPORT_SOURCE_SHOW:
-      return helpers.setStateProp(
-        'view',
-        {
-          show: true,
-          edit: true,
-          source: { [apiTypes.API_SOURCE_TYPE]: 'import' },
           stepOneValid: true
         },
         {

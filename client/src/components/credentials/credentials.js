@@ -46,7 +46,6 @@ class Credentials extends React.Component {
       'editCredential',
       'deleteCredential',
       'addSource',
-      'importSources',
       'refresh'
     ]);
 
@@ -230,15 +229,6 @@ class Credentials extends React.Component {
     });
   }
 
-  importSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Importing sources is not yet implemented'
-    });
-  }
-
   refresh() {
     this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
   }
@@ -364,11 +354,7 @@ class Credentials extends React.Component {
     return (
       <React.Fragment>
         {this.renderPendingMessage()}
-        <CredentialsEmptyState
-          onAddCredential={this.addCredential}
-          onAddSource={this.addSource}
-          onImportSources={this.importSources}
-        />,
+        <CredentialsEmptyState onAddCredential={this.addCredential} onAddSource={this.addSource} />,
         <CreateCredentialDialog />
       </React.Fragment>
     );

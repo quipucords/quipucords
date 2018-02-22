@@ -42,7 +42,7 @@ class SourceCredentialsList extends React.Component {
           <Grid.Row key={index}>
             <Grid.Col xs={12} sm={4}>
               <span>
-                <Icon type="fa" name="key" />
+                <Icon type="fa" name="id-card" />
                 &nbsp; {item.name}
               </span>
             </Grid.Col>

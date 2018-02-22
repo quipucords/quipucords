@@ -29,7 +29,6 @@ class Scans extends React.Component {
       'doStartScan',
       'doResumeScan',
       'addSource',
-      'importSources',
       'refresh',
       'notifyActionStatus'
     ]);
@@ -92,7 +91,7 @@ class Scans extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Scan <strong>${results.id}</strong> {actionText}.
+            Scan <strong>{_.get(results, 'data.id')}</strong> {actionText}.
           </span>
         )
       });
@@ -123,12 +122,12 @@ class Scans extends React.Component {
   }
 
   doStartScan(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Start scan is not yet implemented'
-    });
+    this.props
+      .restartScan(item.id)
+      .then(
+        response => this.notifyActionStatus('started', false, response.value),
+        error => this.notifyActionStatus('started', true, error.message)
+      );
   }
 
   doPauseScan(item) {
@@ -161,15 +160,6 @@ class Scans extends React.Component {
   addSource() {
     Store.dispatch({
       type: sourcesTypes.EDIT_SOURCE_SHOW
-    });
-  }
-
-  importSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Importing sources is not yet implemented'
     });
   }
 
@@ -281,7 +271,7 @@ class Scans extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState onAddSource={this.addSource} onImportSources={this.importSources} />
+        <SourcesEmptyState onAddSource={this.addSource} />
         {this.renderPendingMessage()}
       </React.Fragment>
     );

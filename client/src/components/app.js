@@ -25,7 +25,6 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log('auth?');
     this.props.authorizeUser();
   }
 
