@@ -12,9 +12,7 @@
 """Util for common operations."""
 
 import logging
-from django.utils.translation import ugettext as _
 from rest_framework.serializers import ValidationError
-import api.messages as messages
 
 
 # Get an instance of a logger
@@ -67,11 +65,12 @@ def convert_to_boolean(value):
         return value.lower() == 'true'
 
 
-def check_for_existing_name(class_name, queryset, name, search_id=None):
+def check_for_existing_name(queryset, name, error_message, search_id=None):
     """Look for existing (different object) with same name.
 
     :param queryset: Queryset used in searches
     :param name: Name of scan to look for
+    :param error_message: message to display
     :param search_id: ID to exclude from search for existing
     """
     if search_id is None:
@@ -83,8 +82,7 @@ def check_for_existing_name(class_name, queryset, name, search_id=None):
             name=name).exclude(id=search_id).first()
     if existing is not None:
         error = {
-            'name': [
-                _(messages.OBJECT_NAME_ALREADY_EXISTS % (class_name, name))]
+            'name': [error_message]
         }
         raise ValidationError(error)
 

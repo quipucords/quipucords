@@ -95,8 +95,11 @@ class SourceSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
-        check_for_existing_name('Source', Source.objects,
-                                name=validated_data.get('name'))
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Source.objects,
+            name,
+            _(messages.SOURCE_NAME_ALREADY_EXISTS % name))
 
         if 'source_type' not in validated_data:
             error = {
@@ -204,9 +207,12 @@ class SourceSerializer(NotEmptySerializer):
         # If we ever add optional fields to Source, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        check_for_existing_name('Source', Source.objects,
-                                name=validated_data.get('name'),
-                                search_id=instance.id)
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Source.objects,
+            name,
+            _(messages.SOURCE_NAME_ALREADY_EXISTS % name),
+            search_id=instance.id)
 
         if 'source_type' in validated_data:
             error = {

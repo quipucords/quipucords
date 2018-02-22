@@ -61,8 +61,11 @@ class CredentialSerializer(NotEmptySerializer):
 
     def create(self, validated_data):
         """Create host credential."""
-        check_for_existing_name('Credential', Credential.objects,
-                                name=validated_data.get('name'))
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Credential.objects,
+            name,
+            _(messages.HC_NAME_ALREADY_EXISTS % name))
 
         if 'cred_type' not in validated_data:
             error = {
@@ -85,9 +88,12 @@ class CredentialSerializer(NotEmptySerializer):
 
     def update(self, instance, validated_data):
         """Update a host credential."""
-        check_for_existing_name('Credential', Credential.objects,
-                                name=validated_data.get('name'),
-                                search_id=instance.id)
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Credential.objects,
+            name,
+            _(messages.HC_NAME_ALREADY_EXISTS % name),
+            search_id=instance.id)
 
         if 'cred_type' in validated_data:
             error = {

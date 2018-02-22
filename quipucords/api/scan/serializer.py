@@ -75,8 +75,11 @@ class ScanSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
-        check_for_existing_name('Scan', Scan.objects,
-                                name=validated_data.get('name'))
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Scan.objects,
+            name,
+            _(messages.SCAN_NAME_ALREADY_EXISTS % name))
 
         options = validated_data.pop('options', None)
         scan = super().create(validated_data)
@@ -96,9 +99,12 @@ class ScanSerializer(NotEmptySerializer):
         # If we ever add optional fields to Scan, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        check_for_existing_name('Scan', Scan.objects,
-                                name=validated_data.get('name'),
-                                search_id=instance.id)
+        name = validated_data.get('name')
+        check_for_existing_name(
+            Scan.objects,
+            name,
+            _(messages.HC_NAME_ALREADY_EXISTS % name),
+            search_id=instance.id)
 
         name = validated_data.pop('name', None)
         scan_type = validated_data.pop('scan_type', None)
