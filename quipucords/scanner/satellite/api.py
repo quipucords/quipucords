@@ -64,28 +64,34 @@ class SatelliteInterface(object):
         self.scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @transaction.atomic
-    def record_inspect_result(self, name, facts):
+    def record_inspect_result(self, name, facts,
+                              status=SystemInspectionResult.SUCCESS):
         """Record a new result.
 
         :param name: The host name
         :param facts: The dictionary of facts
+        :param status: The status of the inspection
         """
         sys_result = SystemInspectionResult(
             name=name,
-            status=SystemInspectionResult.SUCCESS)
+            status=status)
         sys_result.save()
 
-        for key, val in facts.items():
-            if val is not None:
-                final_value = json.dumps(val)
-                stored_fact = RawFact(name=key, value=final_value)
-                stored_fact.save()
-                sys_result.facts.add(stored_fact)
+        if status == SystemInspectionResult.SUCCESS:
+            for key, val in facts.items():
+                if val is not None:
+                    final_value = json.dumps(val)
+                    stored_fact = RawFact(name=key, value=final_value)
+                    stored_fact.save()
+                    sys_result.facts.add(stored_fact)
 
         self.inspect_result.systems.add(sys_result)
         self.inspect_result.save()
 
-        self.scan_task.increment_stats(name, increment_sys_scanned=True)
+        if status == SystemInspectionResult.SUCCESS:
+            self.scan_task.increment_stats(name, increment_sys_scanned=True)
+        else:
+            self.scan_task.increment_stats(name, increment_sys_failed=True)
 
     def host_count(self):
         """Obtain the count of managed hosts."""
