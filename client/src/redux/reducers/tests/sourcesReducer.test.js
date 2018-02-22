@@ -18,12 +18,7 @@ const initialState = {
     error: false,
     errorMessage: '',
     pending: false,
-    fulfilled: false,
-    source: null,
-    sourceType: '',
-    show: false,
-    add: false,
-    edit: false,
+    sourceId: '',
     delete: false
   }
 };
@@ -53,80 +48,6 @@ describe('SourcesReducer', function() {
     expect(resultState.update).toEqual(initialState.update);
   });
 
-  it('should handle CREATE_SOURCE_SHOW', () => {
-    let dispatched = {
-      type: sourcesTypes.CREATE_SOURCE_SHOW
-    };
-
-    let resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.update.show).toBeTruthy();
-    expect(resultState.update.add).toBeTruthy();
-    expect(resultState.update.edit).toBeFalsy();
-    expect(resultState.update.delete).toBeFalsy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-
-    dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_HIDE
-    };
-    resultState = sourcesReducer(resultState, dispatched);
-
-    expect(resultState.update.show).toBeFalsy();
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
-  it('should handle EDIT_SOURCE_SHOW', () => {
-    let dispatched = {
-      type: sourcesTypes.EDIT_SOURCE_SHOW
-    };
-
-    let resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.update.show).toBeTruthy();
-    expect(resultState.update.add).toBeFalsy();
-    expect(resultState.update.edit).toBeTruthy();
-    expect(resultState.update.delete).toBeFalsy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-
-    dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_HIDE
-    };
-    resultState = sourcesReducer(resultState, dispatched);
-
-    expect(resultState.update.show).toBeFalsy();
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
-  it('should handle ADD_SOURCE_REJECTED', () => {
-    let dispatched = {
-      type: sourcesTypes.ADD_SOURCE_REJECTED,
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          request: {
-            responseText: 'ADD ERROR'
-          }
-        }
-      }
-    };
-
-    let resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.update.error).toBeTruthy();
-    expect(resultState.update.errorMessage).toEqual('ADD ERROR');
-    expect(resultState.update.add).toBeTruthy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
   it('should handle DELETE_SOURCE_REJECTED', () => {
     let dispatched = {
       type: sourcesTypes.DELETE_SOURCE_REJECTED,
@@ -146,30 +67,6 @@ describe('SourcesReducer', function() {
     expect(resultState.update.error).toBeTruthy();
     expect(resultState.update.errorMessage).toEqual('DELETE ERROR');
     expect(resultState.update.delete).toBeTruthy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
-  it('should handle UPDATE_SOURCE_REJECTED', () => {
-    let dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_REJECTED,
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          request: {
-            responseText: 'UPDATE ERROR'
-          }
-        }
-      }
-    };
-
-    let resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.update.error).toBeTruthy();
-    expect(resultState.update.errorMessage).toEqual('UPDATE ERROR');
-    expect(resultState.update.edit).toBeTruthy();
 
     expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);

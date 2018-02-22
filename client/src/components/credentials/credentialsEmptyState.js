@@ -13,9 +13,9 @@ class CredentialsEmptyState extends React.Component {
             <EmptyState.Icon />
             <EmptyState.Title>Welcome to Red Hat Entitlements Reporting</EmptyState.Title>
             <EmptyState.Info>
-              There are no stored credentials for Red Hat Entitlements Reporting<br />
-              You can add credentials here or you can add some networks to search for Red Hat products. You can add a
-              source here or download them from a spreadsheet template.
+              A credential defines a set of user authentication information to be used during a scan.<br />A credential
+              includes a username and a password or SSH key. Entitlements Reporting uses SSH<br />to connect to servers
+              on the network and uses credentials to access those servers.
             </EmptyState.Info>
             <EmptyState.Action>
               <DropdownButton bsStyle="primary" title="Add Credential" pullRight id="createCredentialButton">
@@ -34,9 +34,6 @@ class CredentialsEmptyState extends React.Component {
               <Button bsStyle="default" onClick={this.props.onAddSource}>
                 Add Source
               </Button>
-              <Button bsStyle="default" onClick={this.props.onImportSources}>
-                Import Credentials
-              </Button>
             </EmptyState.Action>
           </EmptyState>
         </Row>
@@ -47,8 +44,7 @@ class CredentialsEmptyState extends React.Component {
 
 CredentialsEmptyState.propTypes = {
   onAddCredential: PropTypes.func,
-  onAddSource: PropTypes.func,
-  onImportSources: PropTypes.func
+  onAddSource: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {

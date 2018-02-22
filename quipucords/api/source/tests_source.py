@@ -130,6 +130,7 @@ class SourceTest(TestCase):
         start = datetime.now()
         source = Source(
             name='source1',
+            hosts=json.dumps(['1.2.3.4']),
             source_type='network',
             port=22)
         source.save()
@@ -144,17 +145,16 @@ class SourceTest(TestCase):
         serializer = SourceSerializer(source)
         json_source = serializer.data
         out = format_source(json_source)
-        connect_result = {'id': 1,
-                          'start_time': start,
-                          'end_time': end, 'status': 'completed',
-                          'systems_count': scan_task.systems_count,
-                          'systems_scanned': scan_task.systems_scanned,
-                          'systems_failed': scan_task.systems_failed}
         expected = {'id': 1,
                     'name': 'source1',
                     'source_type': 'network',
                     'port': 22,
-                    'connection': connect_result}
+                    'hosts': ['1.2.3.4'],
+                    'connection': {'id': 1, 'start_time': start,
+                                   'end_time': end, 'status': 'completed',
+                                   'systems_count': 10,
+                                   'systems_scanned': 9,
+                                   'systems_failed': 1}}
 
         self.assertEqual(out, expected)
 

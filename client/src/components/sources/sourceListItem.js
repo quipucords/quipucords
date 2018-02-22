@@ -1,11 +1,17 @@
+import _ from 'lodash';
+import * as moment from 'moment';
 import React from 'react';
+import { connect } from 'react-redux';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import JSONPretty from 'react-json-pretty';
+
 import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
+
 import { helpers } from '../../common/helpers';
+import { getScanResults } from '../../redux/actions/scansActions';
+
 import { SourceCredentialsList } from './sourceCredentialsList';
-import { SourceHostsList } from './sourceHostList';
+import SourceHostList from './sourceHostList';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class SourceListItem extends React.Component {
@@ -23,6 +29,28 @@ class SourceListItem extends React.Component {
     } else {
       item.expanded = true;
       item.expandType = expandType;
+
+      if (expandType === 'okHosts' || expandType === 'failedHosts') {
+        if (!item.scanResults) {
+          item.scanResultsPending = true;
+          item.scanResultsError = null;
+          this.props
+            .getScanResults(item.connection.id)
+            .then(results => {
+              console.dir(results);
+              item.scanResultsPending = false;
+              item.scanResults = _.get(results.value, 'data');
+            })
+            .catch(error => {
+              item.scanResultsPending = false;
+              item.scanResultsError = _.get(error.payload, 'response.request.responseText', error.payload.message);
+            })
+            .finally(() => {
+              item.scanResultsPending = false;
+              this.forceUpdate();
+            });
+        }
+      }
     }
     this.forceUpdate();
   }
@@ -70,9 +98,14 @@ class SourceListItem extends React.Component {
   renderStatusItems() {
     const { item } = this.props;
 
-    let credentialCount = item.credentials ? item.credentials.length : 0;
-    let okHostCount = item.hosts ? item.hosts.length : 0;
-    let failedHostCount = item.failed_hosts ? item.failed_hosts.length : 0;
+    let credentialCount = _.size(_.get(item, 'credentials', []));
+    let okHostCount = _.get(item, 'connection.systems_scanned', 0);
+    let failedHostCount = _.get(item, 'connection.systems_failed', 0);
+
+    if (helpers.DEV_MODE) {
+      okHostCount = helpers.normalizeCount(okHostCount);
+      failedHostCount = helpers.normalizeCount(failedHostCount);
+    }
 
     return [
       <ListView.InfoItem
@@ -89,7 +122,7 @@ class SourceListItem extends React.Component {
               this.toggleExpand('credentials');
             }}
           >
-            <Icon className="list-view-compound-item-icon" type="fa" name="key" />
+            <Icon className="list-view-compound-item-icon" type="fa" name="id-card" />
             <strong>{credentialCount}</strong>
           </ListView.Expand>
         </SimpleTooltip>
@@ -140,13 +173,13 @@ class SourceListItem extends React.Component {
 
     switch (item.expandType) {
       case 'okHosts':
-        return <SourceHostsList hosts={item.hosts} status="ok" />;
+        return <SourceHostList source={item} status="success" />;
       case 'failedHosts':
-        return <SourceHostsList hosts={item.failed_hosts} status="error-circle-o" />;
+        return <SourceHostList source={item} status="failed" />;
       case 'credentials':
         return <SourceCredentialsList source={item} />;
       default:
-        return <JSONPretty json={item} />;
+        return null;
     }
   }
 
@@ -169,16 +202,12 @@ class SourceListItem extends React.Component {
   renderScanStatus() {
     const { item } = this.props;
 
+    let scan = _.get(item, 'connection');
     let scanDescription = '';
-    let scan = item.connection_scan;
-    if (!scan) {
-      scan = {
-        status: 'running'
-      };
-    }
+    let scanTime = _.get(scan, 'end_time');
 
     let icon = null;
-    switch (scan.status) {
+    switch (_.get(scan, 'status')) {
       case 'completed':
         scanDescription = 'Last Connected';
         icon = <Icon className="scan-status-icon" type="pf" name="ok" />;
@@ -194,6 +223,7 @@ class SourceListItem extends React.Component {
       case 'created':
       case 'pending':
       case 'running':
+        scanTime = _.get(scan, 'start_time');
         scanDescription = 'Connection in Progress';
         icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
         break;
@@ -210,7 +240,12 @@ class SourceListItem extends React.Component {
         {icon}
         <div className="scan-status-text">
           <div>{scanDescription}</div>
-          <div>Started 5 min ago</div>
+          <div>
+            {moment
+              .utc(scanTime)
+              .utcOffset(moment().utcOffset())
+              .fromNow()}
+          </div>
         </div>
       </div>
     );
@@ -249,7 +284,16 @@ SourceListItem.propTypes = {
   onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
-  onScan: PropTypes.func
+  onScan: PropTypes.func,
+  getScanResults: PropTypes.func
 };
 
-export { SourceListItem };
+const mapStateToProps = function(state) {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  getScanResults: id => dispatch(getScanResults(id))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SourceListItem);

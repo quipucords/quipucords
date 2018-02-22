@@ -15,3 +15,4 @@ from . import brms
 from . import karaf
 from . import cpu
 from . import date
+from . import subman

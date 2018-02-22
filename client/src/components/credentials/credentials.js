@@ -46,7 +46,6 @@ class Credentials extends React.Component {
       'editCredential',
       'deleteCredential',
       'addSource',
-      'importSources',
       'refresh'
     ]);
 
@@ -230,15 +229,6 @@ class Credentials extends React.Component {
     });
   }
 
-  importSources() {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Importing sources is not yet implemented'
-    });
-  }
-
   refresh() {
     this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
   }
@@ -356,7 +346,7 @@ class Credentials extends React.Component {
             <div className="quipucords-list-container">{this.renderCredentialsList(credentials)}</div>
           </div>
           {this.renderPendingMessage()}
-          <CreateCredentialDialog credentials={credentials} />
+          <CreateCredentialDialog />
         </React.Fragment>
       );
     }
@@ -364,13 +354,8 @@ class Credentials extends React.Component {
     return (
       <React.Fragment>
         {this.renderPendingMessage()}
-        <CredentialsEmptyState
-          key="emptyState"
-          onAddCredential={this.addCredential}
-          onAddSource={this.addSource}
-          onImportSources={this.importSources}
-        />,
-        <CreateCredentialDialog key="createCredentialDialog" credentials={credentials} />
+        <CredentialsEmptyState onAddCredential={this.addCredential} onAddSource={this.addSource} />,
+        <CreateCredentialDialog />
       </React.Fragment>
     );
   }

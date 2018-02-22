@@ -24,6 +24,12 @@ from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
 from scanner.test_util import create_scan_job
 
 
+# pylint: disable=unused-argument
+def mock_sat_exception(param1, param2, param3, param4, param5):
+    """Mock method to throw satellite error."""
+    raise SatelliteException()
+
+
 # pylint: disable=too-many-instance-attributes
 class SatelliteSixV1Test(TestCase):
     """Tests Satellite 6 v1 functions."""
@@ -232,6 +238,18 @@ class SatelliteSixV1Test(TestCase):
         detail = self.api.host_details(1, 1, 'sys1')
         self.assertEqual(len(inspect_result.systems.all()), 1)
         self.assertEqual(detail, {})
+
+    def test_host_details_err(self):
+        """Test host_details method for error mark a failed system."""
+        with patch('scanner.satellite.six.host_fields',
+                   side_effect=mock_sat_exception) as mock_fields:
+            detail = self.api.host_details(1, 1, 'sys1')
+            inspect_result = self.scan_task.inspection_result
+            self.assertEqual(len(inspect_result.systems.all()), 1)
+            sys_result = inspect_result.systems.all().first()
+            self.assertEqual(sys_result.status, SystemInspectionResult.FAILED)
+            self.assertEqual(detail, {})
+            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
 
     def test_host_details(self):
         """Test host_details method with mock data."""
@@ -613,6 +631,18 @@ class SatelliteSixV2Test(TestCase):
                           'start_date': '2016-03-24 04:00:00 UTC',
                           'end_date': '2022-01-01 04:59:59 UTC'}]}
             self.assertEqual(subs, expected)
+
+    def test_host_details_err(self):
+        """Test host_details method for error mark a failed system."""
+        with patch('scanner.satellite.six.host_fields',
+                   side_effect=mock_sat_exception) as mock_fields:
+            detail = self.api.host_details(1, 'sys1')
+            inspect_result = self.scan_task.inspection_result
+            self.assertEqual(len(inspect_result.systems.all()), 1)
+            sys_result = inspect_result.systems.all().first()
+            self.assertEqual(sys_result.status, SystemInspectionResult.FAILED)
+            self.assertEqual(detail, {})
+            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
 
     def test_host_details(self):
         """Test host_details method with mock data."""

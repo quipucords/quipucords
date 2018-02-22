@@ -41,13 +41,13 @@
 
 - name: ls EAP_HOME candidates
   raw: ls -1 "{{ item }}"
-  register: ls_eap_home
+  register: eap_home_ls
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
 - name: get version.txt from EAP_HOME candidates
-  raw: cat "{{ item }}"/version.txt
+  raw: cat "{{ item }}"/version.txt 2>/dev/null
   register: eap_home_version_txt
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
@@ -63,7 +63,7 @@
   when: 'jboss_eap'
 
 - name: check JBoss layers.conf
-  raw: cat "{{ item }}"/modules/layers.conf
+  raw: cat "{{ item }}"/modules/layers.conf 2>/dev/null
   register: eap_home_layers_conf
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"

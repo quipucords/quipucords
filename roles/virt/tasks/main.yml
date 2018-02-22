@@ -96,7 +96,7 @@
   when: '"stdout_lines" not in internal_sys_manu_kvm_cmd'
 
 - name: check cpu model name for QEMU
-  raw: model_name=$(cat /proc/cpuinfo | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
+  raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
   register: internal_cpu_model_name_kvm
   ignore_errors: yes
 

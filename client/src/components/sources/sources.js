@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
 import { getSources } from '../../redux/actions/sourcesActions';
+import { addScan } from '../../redux/actions/scansActions';
 import {
   sourcesTypes,
   toastNotificationTypes,
@@ -20,7 +21,7 @@ import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import SourcesEmptyState from './sourcesEmptyState';
-import { SourceListItem } from './sourceListItem';
+import SourceListItem from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
 import AddSourceWizard from '../addSourceWizard/addSourceWizard';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
@@ -30,7 +31,6 @@ class Sources extends React.Component {
     super();
 
     helpers.bindMethods(this, [
-      'importSources',
       'scanSource',
       'scanSources',
       'itemSelectChange',
@@ -72,6 +72,29 @@ class Sources extends React.Component {
     }
   }
 
+  notifyCreateScanStatus(error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Started new scan <strong>{_.get(results, 'data.id')}</strong>.
+          </span>
+        )
+      });
+      this.hideScanDialog();
+      this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
+    }
+  }
+
   itemSelected(item) {
     const { selectedSources } = this.props;
     return (
@@ -83,16 +106,14 @@ class Sources extends React.Component {
 
   showAddSourceWizard() {
     Store.dispatch({
-      type: sourcesTypes.EDIT_SOURCE_SHOW
+      type: sourcesTypes.CREATE_SOURCE_SHOW
     });
   }
 
-  importSources() {
+  editSource(item) {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Importing sources is not yet implemented'
+      type: sourcesTypes.EDIT_SOURCE_SHOW,
+      source: item
     });
   }
 
@@ -116,15 +137,6 @@ class Sources extends React.Component {
     Store.dispatch({
       type: this.itemSelected(item) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
       source: item
-    });
-  }
-
-  editSource(item) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.name,
-      message: 'Editing sources is not yet implemented'
     });
   }
 
@@ -160,13 +172,16 @@ class Sources extends React.Component {
   }
 
   createScan(scanName, sources) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: scanName,
-      message: 'Scanning sources is not yet implemented'
-    });
-    this.hideScanDialog();
+    const { addScan } = this.props;
+
+    let data = {
+      sources: sources.map(item => item.id)
+    };
+
+    addScan(data).then(
+      response => this.notifyCreateScanStatus(false, response.value),
+      error => this.notifyCreateScanStatus(true, error.message)
+    );
   }
 
   refresh() {
@@ -293,7 +308,7 @@ class Sources extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState onAddSource={this.showAddSourceWizard} onImportSources={this.importSources} />
+        <SourcesEmptyState onAddSource={this.showAddSourceWizard} />
         {this.renderPendingMessage()}
         <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
@@ -303,6 +318,7 @@ class Sources extends React.Component {
 
 Sources.propTypes = {
   getSources: PropTypes.func,
+  addScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -312,7 +328,8 @@ Sources.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getSources: queryObj => dispatch(getSources(queryObj))
+  getSources: queryObj => dispatch(getSources(queryObj)),
+  addScan: data => dispatch(addScan(data))
 });
 
 const mapStateToProps = function(state) {

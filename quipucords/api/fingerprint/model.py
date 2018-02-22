@@ -115,7 +115,7 @@ class SystemFingerprint(models.Model):
             'vm_host_cpu_threads:{}, '\
             'vm_host_socket_count:{}, '\
             'vm_datacenter:{}, '\
-            'vm_cluster:{} '\
+            'vm_cluster:{}, '\
             'metadata:{} '.format(self.id,
                                   self.report_id.id,
                                   self.name,
@@ -161,7 +161,9 @@ class Product(models.Model):
         ('unknown', 'Unknown')
     )
 
-    fingerprint = models.ForeignKey(SystemFingerprint, models.CASCADE)
+    fingerprint = models.ForeignKey(SystemFingerprint,
+                                    models.CASCADE,
+                                    related_name='products')
     name = models.CharField(max_length=256, unique=False, null=False)
     version = models.CharField(max_length=256, unique=False, null=True)
     presence = models.CharField(
@@ -187,7 +189,9 @@ class Product(models.Model):
 class Entitlement(models.Model):
     """Represents a Entitlement."""
 
-    fingerprint = models.ForeignKey(SystemFingerprint, models.CASCADE)
+    fingerprint = models.ForeignKey(SystemFingerprint,
+                                    models.CASCADE,
+                                    related_name='entitlements')
     name = models.CharField(max_length=256, unique=False, null=True)
     entitlement_id = models.CharField(max_length=256, unique=False, null=True)
 

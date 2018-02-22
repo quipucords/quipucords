@@ -11,6 +11,7 @@
 
 import logging
 from scanner.network.processing import process
+from scanner.network.processing.util import get_line
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -27,7 +28,7 @@ class ProcessCpuModelVer(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessCpuCpuFamily(process.Processor):
@@ -38,7 +39,7 @@ class ProcessCpuCpuFamily(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessCpuVendorId(process.Processor):
@@ -49,7 +50,7 @@ class ProcessCpuVendorId(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessCpuModelName(process.Processor):
@@ -60,7 +61,7 @@ class ProcessCpuModelName(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessCpuBogomips(process.Processor):
@@ -71,4 +72,4 @@ class ProcessCpuBogomips(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])

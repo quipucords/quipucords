@@ -13,17 +13,12 @@ class SourcesEmptyState extends React.Component {
             <EmptyState.Icon />
             <EmptyState.Title>Welcome to Red Hat Entitlements Reporting</EmptyState.Title>
             <EmptyState.Info>
-              Add some networks to search for Red Hat products. You can add them here or download a spreadsheet
-              template.
+              A source defines a collection of network information, including IP addresses or host names,<br /> or
+              systems management solution information, in addition to SSH ports and SSH credentials
             </EmptyState.Info>
             <EmptyState.Action>
               <Button bsStyle="primary" bsSize="large" onClick={this.props.onAddSource}>
                 Add Source
-              </Button>
-            </EmptyState.Action>
-            <EmptyState.Action secondary>
-              <Button bsStyle="default" bsSize="large" onClick={this.props.onImportSources}>
-                Import Sources
               </Button>
             </EmptyState.Action>
           </EmptyState>
@@ -34,8 +29,7 @@ class SourcesEmptyState extends React.Component {
 }
 
 SourcesEmptyState.propTypes = {
-  onAddSource: PropTypes.func,
-  onImportSources: PropTypes.func
+  onAddSource: PropTypes.func
 };
 
 function mapStateToProps(state, ownProps) {
