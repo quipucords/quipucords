@@ -11,6 +11,8 @@
 
 import logging
 from scanner.network.processing import process
+from scanner.network.processing.util import get_line
+
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -27,7 +29,7 @@ class ProcessDateDate(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessDateFilesystemCreate(process.Processor):
@@ -38,7 +40,7 @@ class ProcessDateFilesystemCreate(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])
 
 
 class ProcessDateMachineId(process.Processor):
@@ -49,4 +51,4 @@ class ProcessDateMachineId(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return output['stdout_lines']
+        return get_line(output['stdout_lines'])

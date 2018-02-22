@@ -12,6 +12,19 @@
 from scanner.network.processing import process
 
 
+def get_line(lines, line_index=0):
+    """Get a line from output.
+
+    :param lines: list of output lines
+    :param line_index: The index line to retrieve
+    :returns: The specific line or empty string
+    """
+    num_lines = len(lines)
+    if num_lines > line_index:
+        return lines[line_index]
+    return process.NO_DATA
+
+
 # pylint: disable=too-few-public-methods
 class InitLineFinder(process.Processor):
     """Process the output of an init system.
