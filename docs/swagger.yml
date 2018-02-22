@@ -430,6 +430,166 @@ paths:
     post:
       tags:
         - "Scan"
+      summary: "Create a scan"
+      description: "Create a new scan."
+      operationId: "createScan"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Scan object that configures a scan"
+        required: true
+        schema:
+          $ref: "#/definitions/ScanIn"
+      responses:
+        201:
+          description: "Scan created"
+          schema:
+            $ref: "#/definitions/ScanOut"
+        400:
+          description: "Invalid input"
+    get:
+      tags:
+        - "Scan"
+      summary: "List exsiting scans"
+      description: "List all scans."
+      operationId: "listScan"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "scan_type"
+          in: "query"
+          description: "Filter list based on scan type"
+          type: "string"
+          enum:
+            - connect
+            - inspect
+        - name: "page"
+          in: "query"
+          description: "Value for selecting a page of results."
+          type: "integer"
+          format: "int64"
+        - name: "page_size"
+          in: "query"
+          description: "Value for the maximum number of results per page."
+          type: "integer"
+          format: "int64"
+        - name: "ordering"
+          in: "query"
+          description: "Order the results with the field name; '-' means descending"
+          type: "string"
+      responses:
+        200:
+          description: "Scans retrieved"
+          schema:
+            $ref: "#/definitions/ScanPagination"
+  /scans/{scan_id}/:
+    get:
+      tags:
+        - "Scan"
+      summary: "Get an existing scan"
+      description: "Get a scan's current configuration."
+      operationId: "getScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_id"
+        in: "path"
+        description: "ID of scan to retrieve"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job retrieved"
+          schema:
+            $ref: "#/definitions/ScanOut"
+        404:
+          description: "Scan not found"
+    put:
+      tags:
+        - "Scan"
+      summary: "Update an existing scan"
+      description: "Update a scan's configuration."
+      operationId: "updateScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_id"
+        in: "path"
+        description: "ID of scan to update"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Scan object that configures a scan"
+        required: true
+        schema:
+          $ref: "#/definitions/ScanIn"
+      responses:
+        200:
+          description: "Scan job updated"
+          schema:
+            $ref: "#/definitions/ScanOut"
+        404:
+          description: "Scan not found"
+    patch:
+      tags:
+        - "Scan"
+      summary: "Partial update an existing scan"
+      description: "Partial update a scan's configuration."
+      operationId: "partialUpdateScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_id"
+        in: "path"
+        description: "ID of scan to update"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Scan object that configures a scan"
+        required: true
+        schema:
+          $ref: "#/definitions/ScanIn"
+      responses:
+        200:
+          description: "Scan job updated"
+          schema:
+            $ref: "#/definitions/ScanOut"
+        404:
+          description: "Scan not found"
+    delete:
+      tags:
+        - "Scan"
+      summary: "Delete an existing scan"
+      description: "Delete a scan."
+      operationId: "deleteScan"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_id"
+        in: "path"
+        description: "ID of scan to delete"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        204:
+          description: "Scan deleted"
+        404:
+          description: "Scan not found"
+
+  /scans/{scan_id}/jobs/:
+    post:
+      tags:
+        - "Scan Job"
       summary: "Trigger a scan"
       description: "Create a new scan job."
       operationId: "triggerScan"
@@ -438,12 +598,12 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Scan job object that tracks a scan"
-        required: true
-        schema:
-          $ref: "#/definitions/ScanJobIn"
+        - name: "scan_id"
+          in: "path"
+          description: "Scan used to create job."
+          required: true
+          type: "integer"
+          format: "int64"
       responses:
         201:
           description: "Scan job created"
@@ -453,13 +613,20 @@ paths:
           description: "Invalid input"
     get:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "List exsiting scan jobs"
       description: "List all scans."
       operationId: "listScanJobs"
       produces:
         - "application/json"
       parameters:
+        - name: "scan_id"
+          in: "path"
+          description: "Scan used to create job."
+          required: true
+          type: "integer"
+          format: "int64"
+
         - name: "status"
           in: "query"
           description: "Filter list based on job status"
@@ -498,10 +665,10 @@ paths:
           description: "Scan jobs retrieved"
           schema:
             $ref: "#/definitions/ScanJobPagination"
-  /scans/{scan_job_id}/:
+  /jobs/{scan_job_id}/:
     get:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "Get an existing scan job"
       description: "Get a scan job's current status."
       operationId: "getScanJob"
@@ -521,10 +688,10 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         404:
           description: "Scan job not found"
-  /scans/{scan_job_id}/results/:
+  /jobs/{scan_job_id}/results/:
     get:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "Get the results of existing scan job"
       description: "Get the results of a scan."
       operationId: "getScanResults"
@@ -544,10 +711,10 @@ paths:
             $ref: "#/definitions/ScanJobResultsOut"
         404:
           description: "Scan job results not found"
-  /scans/{scan_job_id}/pause/:
+  /jobs/{scan_job_id}/pause/:
     put:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "Pauses an existing scan job"
       description: "Pauses a scan if its currently running, fails otherwise."
       operationId: "pauseScan"
@@ -569,10 +736,10 @@ paths:
           description: "Scan job not running"
         404:
           description: "Scan job not found"
-  /scans/{scan_job_id}/cancel/:
+  /jobs/{scan_job_id}/cancel/:
     put:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "Cancels an existing scan job"
       description: "Cancels a scan if its has not finished, fails otherwise."
       operationId: "cancelScan"
@@ -594,10 +761,10 @@ paths:
           description: "Scan job has already finished"
         404:
           description: "Scan job not found"
-  /scans/{scan_job_id}/restart/:
+  /jobs/{scan_job_id}/restart/:
     put:
       tags:
-        - "Scan"
+        - "Scan Job"
       summary: "Restarts an existing scan job"
       description: "Restarts a scan if its has been paused, fails otherwise."
       operationId: "restartScan"
@@ -965,41 +1132,6 @@ definitions:
       disable_ssl:
         type: "boolean"
         description: "If true disable SSL communication."
-  ScanDetails:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      start_time:
-        type: "string"
-        format: "date-time"
-      end_time:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "The status of the scan job."
-        enum:
-          - created
-          - pending
-          - running
-          - paused
-          - canceled
-          - failed
-          - completed
-      systems_count:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems to be scanned in the source."
-      systems_scanned:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems that have been scanned in the source."
-      systems_failed:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems that failed during the scan of the source."
   Source:
     type: "object"
     required:
@@ -1081,7 +1213,7 @@ definitions:
           options:
             $ref: "#/definitions/SourceOptions"
           connection:
-            $ref: "#/definitions/ScanDetails"
+            $ref: "#/definitions/ScanJobDetails"
   SourcePagination:
     allOf:
       - $ref: "#/definitions/ListPagination"
@@ -1148,6 +1280,69 @@ definitions:
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+  ScanOptions:
+    type: "object"
+    properties:
+      max_concurrency:
+        type: "integer"
+        format: "int64"
+        description: "The maximum concurrent host scans. default is 50."
+      disabled_optional_products:
+        $ref: "#/definitions/DisableOptionalProducts"
+  Scan:
+    type: "object"
+    properties:
+        scan_type:
+          type: "string"
+          description: "The type of scan. 'connect' is the default."
+          enum:
+            - inspect
+            - connect
+        options:
+          $ref: "#/definitions/ScanOptions"
+
+  ScanIn:
+    allOf:
+      - $ref: "#/definitions/Scan"
+      - type: "object"
+        required:
+          - sources
+        properties:
+          sources:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+            description: "The list of source identifiers"
+  ScanOut:
+    allOf:
+      - type: "object"
+        required:
+          - id
+          - sources
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          sources:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceMin"
+            description: "The list of sources"
+      - $ref: "#/definitions/Scan"
+  ScanPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanOut"
+            description: "The paginated scan"
+
   ScanJobOptions:
     type: "object"
     properties:
@@ -1168,19 +1363,42 @@ definitions:
             - connect
         options:
           $ref: "#/definitions/ScanJobOptions"
-  ScanJobIn:
-    allOf:
-      - $ref: "#/definitions/ScanJob"
-      - type: "object"
-        required:
-          - sources
-        properties:
-          sources:
-            type: "array"
-            items:
-              type: "integer"
-              format: "int64"
-            description: "The list of source identifiers"
+
+  ScanJobDetails:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+        description: "The status of the scan job."
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the source."
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that have been scanned in the source."
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that failed during the scan of the source."
   ScanJobOut:
     allOf:
       - $ref: "#/definitions/ScanJob"
