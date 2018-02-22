@@ -13,6 +13,7 @@ import { getScanResults } from '../../redux/actions/scansActions';
 import { SourceCredentialsList } from './sourceCredentialsList';
 import SourceHostList from './sourceHostList';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import ListStatusItem from '../listStatusItem/listStatusItem';
 
 class SourceListItem extends React.Component {
   constructor() {
@@ -107,65 +108,46 @@ class SourceListItem extends React.Component {
       failedHostCount = helpers.normalizeCount(failedHostCount);
     }
 
-    return [
-      <ListView.InfoItem
-        key="credentials"
-        className={'list-view-info-item-icon-count ' + (credentialCount === 0 ? 'invisible' : '')}
-      >
-        <SimpleTooltip
-          id="credentialsTip"
-          tooltip={credentialCount + (credentialCount === 1 ? ' Credential' : ' Credentials')}
-        >
-          <ListView.Expand
-            expanded={item.expanded && item.expandType === 'credentials'}
-            toggleExpanded={() => {
-              this.toggleExpand('credentials');
-            }}
-          >
-            <Icon className="list-view-compound-item-icon" type="fa" name="id-card" />
-            <strong>{credentialCount}</strong>
-          </ListView.Expand>
-        </SimpleTooltip>
-      </ListView.InfoItem>,
-      <ListView.InfoItem
-        key="okHosts"
-        className={'list-view-info-item-icon-count ' + (okHostCount === 0 ? 'invisible' : '')}
-      >
-        <SimpleTooltip
-          id="okHostsTip"
-          tooltip={okHostCount + (okHostCount === 1 ? ' Successful Authentication' : ' Successful Authentications')}
-        >
-          <ListView.Expand
-            expanded={item.expanded && item.expandType === 'okHosts'}
-            toggleExpanded={() => {
-              this.toggleExpand('okHosts');
-            }}
-          >
-            <Icon className="list-view-compound-item-icon" type="pf" name="ok" />
-            <strong>{okHostCount}</strong>
-          </ListView.Expand>
-        </SimpleTooltip>
-      </ListView.InfoItem>,
-      <ListView.InfoItem
-        key="failedHosts"
-        className={'list-view-info-item-icon-count ' + (failedHostCount === 0 ? 'invisible' : '')}
-      >
-        <SimpleTooltip
-          id="failedHostsTip"
-          tooltip={failedHostCount + (failedHostCount === 1 ? ' Failed Authentication' : ' Failed Authentications')}
-        >
-          <ListView.Expand
-            expanded={item.expanded && item.expandType === 'failedHosts'}
-            toggleExpanded={() => {
-              this.toggleExpand('failedHosts');
-            }}
-          >
-            <Icon className="list-view-compound-item-icon" type="pf" name="error-circle-o" />
-            <strong>{failedHostCount}</strong>
-          </ListView.Expand>
-        </SimpleTooltip>
-      </ListView.InfoItem>
-    ];
+    return (
+      <React.Fragment>
+        <ListStatusItem
+          id="credential"
+          count={credentialCount}
+          emptyText="0 Credentials"
+          tipSingular="Credential"
+          tipPlural="Credentials"
+          expanded={item.expanded && item.expandType === 'credentials'}
+          expandType="credentials"
+          toggleExpand={this.toggleExpand}
+          iconType="fa"
+          iconName="id-card"
+        />
+        <ListStatusItem
+          id="okHosts"
+          count={okHostCount}
+          emptyText="0 Successful"
+          tipSingular="Successful Authentication"
+          tipPlural="Successful Authentications"
+          expanded={item.expanded && item.expandType === 'okHosts'}
+          expandType="okHosts"
+          toggleExpand={this.toggleExpand}
+          iconType="pf"
+          iconName="ok"
+        />
+        <ListStatusItem
+          id="failedHosts"
+          count={failedHostCount}
+          emptyText="0 Failed"
+          tipSingular="Failed Authentication"
+          tipPlural="Failed Authentications"
+          expanded={item.expanded && item.expandType === 'failedHosts'}
+          expandType="failedHosts"
+          toggleExpand={this.toggleExpand}
+          iconType="pf"
+          iconName="error-circle-o"
+        />
+      </React.Fragment>
+    );
   }
 
   renderExpansionContents() {

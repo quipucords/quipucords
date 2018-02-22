@@ -11,6 +11,7 @@ import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
 import { ScanHostsList } from './scanHostList';
+import ListStatusItem from '../listStatusItem/listStatusItem';
 
 class ScanListItem extends React.Component {
   constructor() {
@@ -104,74 +105,54 @@ class ScanListItem extends React.Component {
     let successHosts = Number.isNaN(item.systems_scanned) ? 0 : item.systems_scanned;
     let failedHosts = Number.isNaN(item.systems_failed) ? 0 : item.systems_failed;
 
-    return [
-      <ListView.InfoItem
-        key="systemsScanned"
-        className={'list-view-info-item-text-count ' + (successHosts === 0 ? 'invisible' : '')}
-      >
-        <SimpleTooltip
-          id="okHostsTip"
-          tooltip={successHosts + (successHosts === 1 ? ' Successful System' : ' Successful Systems')}
-        >
-          <ListView.Expand
-            expanded={item.expanded && item.expandType === 'systemsScanned'}
-            toggleExpanded={() => {
-              this.toggleExpand('systemsScanned');
-            }}
-          >
-            <Icon className="list-view-compound-item-icon" type="pf" name="ok" />
-            <strong>{successHosts}</strong>
-          </ListView.Expand>
-        </SimpleTooltip>
-      </ListView.InfoItem>,
-      <ListView.InfoItem
-        key="systemsFailed"
-        className={'list-view-info-item-text-count ' + (failedHosts === 0 ? 'invisible' : '')}
-      >
-        <SimpleTooltip
-          id="failedHostsTip"
-          tooltip={failedHosts + (failedHosts === 1 ? ' Failed System' : ' Failed Systems')}
-        >
-          <ListView.Expand
-            expanded={item.expanded && item.expandType === 'systemsFailed'}
-            toggleExpanded={() => {
-              this.toggleExpand('systemsFailed');
-            }}
-          >
-            <Icon className="list-view-compound-item-icon" type="pf" name="error-circle-o" />
-            <strong>{failedHosts}</strong>
-          </ListView.Expand>
-        </SimpleTooltip>
-      </ListView.InfoItem>,
-      <ListView.InfoItem
-        key="sources"
-        className={'list-view-info-item-text-count ' + (sourcesCount === 0 ? 'invisible' : '')}
-      >
-        <ListView.Expand
+    return (
+      <React.Fragment>
+        <ListStatusItem
+          id="successHosts"
+          count={successHosts}
+          emptyText="0 Successful"
+          tipSingular="Successful System"
+          tipPlural="Successful Systems"
+          expanded={item.expanded && item.expandType === 'systemsScanned'}
+          expandType="systemsScanned"
+          toggleExpand={this.toggleExpand}
+          iconType="pf"
+          iconName="ok"
+        />
+        <ListStatusItem
+          id="systemsFailed"
+          count={failedHosts}
+          emptyText="0 Failed"
+          tipSingular="Failed System"
+          tipPlural="Failed Systems"
+          expanded={item.expanded && item.expandType === 'systemsFailed'}
+          expandType="systemsFailed"
+          toggleExpand={this.toggleExpand}
+          iconType="pf"
+          iconName="error-circle-o"
+        />
+        <ListStatusItem
+          id="sources"
+          count={sourcesCount}
+          emptyText="0 Sources"
+          tipSingular="Source"
+          tipPlural="Sources"
           expanded={item.expanded && item.expandType === 'sources'}
-          toggleExpanded={() => {
-            this.toggleExpand('sources');
-          }}
-        >
-          <strong>{sourcesCount} </strong>
-          {sourcesCount === 1 ? ' Source' : ' Sources'}
-        </ListView.Expand>
-      </ListView.InfoItem>,
-      <ListView.InfoItem
-        key="scansCount"
-        className={'list-view-info-item-text-count ' + (item.scans_count === 0 ? 'invisible' : '')}
-      >
-        <ListView.Expand
+          expandType="sources"
+          toggleExpand={this.toggleExpand}
+        />
+        <ListStatusItem
+          id="scans"
+          count={item.scans_count}
+          emptyText="0 Previous"
+          tipSingular="Previous"
+          tipPlural="Previous"
           expanded={item.expanded && item.expandType === 'scans'}
-          toggleExpanded={() => {
-            this.toggleExpand('scans');
-          }}
-        >
-          <strong>{item.scans_count} </strong>
-          {item.scans_count === 1 ? ' Previous' : ' Previous'}
-        </ListView.Expand>
-      </ListView.InfoItem>
-    ];
+          expandType="scans"
+          toggleExpand={this.toggleExpand}
+        />
+      </React.Fragment>
+    );
   }
 
   renderActions() {

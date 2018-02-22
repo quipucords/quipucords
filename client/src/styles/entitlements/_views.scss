@@ -117,16 +117,15 @@
   margin: 0 20px;
 }
 
-.list-view-info-item-text-count {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 95px;
-}
-
 .list-view-info-item-icon-count {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 95px;
+
+  &.empty-count {
+    font-style: italic;
+    opacity: 0.8;
+  }
 }
 
 .quipucords-form-control.form-control[readonly] {
