@@ -12,6 +12,7 @@
 
 import logging
 import requests
+from api.models import SystemInspectionResult
 from scanner.satellite.api import SatelliteInterface, SatelliteException
 from scanner.satellite import utils
 
@@ -399,15 +400,20 @@ class SatelliteSixV1(SatelliteInterface):
                          host_name)
             return details
 
-        details.update(host_fields(self.scan_task, 1, HOSTS_FIELDS_V1_URL,
-                                   org_id, host_id))
-        details.update(host_subscriptions(self.scan_task,
-                                          HOSTS_SUBS_V1_URL,
-                                          org_id, host_id))
-
-        self.record_inspect_result(host_name, details)
-        logger.debug('host_id=%s, host_details=%s',
-                     host_id, details)
+        try:
+            details.update(host_fields(self.scan_task, 1, HOSTS_FIELDS_V1_URL,
+                                       org_id, host_id))
+            details.update(host_subscriptions(self.scan_task,
+                                              HOSTS_SUBS_V1_URL,
+                                              org_id, host_id))
+            self.record_inspect_result(host_name, details)
+            logger.debug('host_id=%s, host_details=%s',
+                         host_id, details)
+        except SatelliteException as sat_error:
+            error_message = 'Satellite error encountered: %s\n' % sat_error
+            self.record_inspect_result(host_name, details,
+                                       status=SystemInspectionResult.FAILED)
+            logger.error(error_message)
         return details
 
     def hosts_facts(self):
@@ -498,15 +504,21 @@ class SatelliteSixV2(SatelliteInterface):
             logger.debug('Results already captured for host_name=%s',
                          host_name)
             return details
-
-        details.update(host_fields(self.scan_task, 2, HOSTS_FIELDS_V2_URL,
-                                   None, host_id))
-        details.update(host_subscriptions(self.scan_task, HOSTS_SUBS_V2_URL,
-                                          None, host_id))
-
-        self.record_inspect_result(host_name, details)
-        logger.debug('host_id=%s, host_details=%s',
-                     host_id, details)
+        try:
+            details.update(host_fields(self.scan_task, 2,
+                                       HOSTS_FIELDS_V2_URL,
+                                       None, host_id))
+            details.update(host_subscriptions(self.scan_task,
+                                              HOSTS_SUBS_V2_URL,
+                                              None, host_id))
+            self.record_inspect_result(host_name, details)
+            logger.debug('host_id=%s, host_details=%s',
+                         host_id, details)
+        except SatelliteException as sat_error:
+            error_message = 'Satellite error encountered: %s\n' % sat_error
+            self.record_inspect_result(host_name, details,
+                                       status=SystemInspectionResult.FAILED)
+            logger.error(error_message)
         return details
 
     def hosts_facts(self):
