@@ -56,31 +56,14 @@ def expand_scanjob(json_scan):
     json_scan[SCAN_KEY] = slim_scan
 
     if json_scan.get(TASKS_KEY):
-        scan = ScanJob.objects.get(pk=json_scan.get('id'))
-        systems_count = None
-        systems_scanned = None
-        systems_failed = None
-        tasks = scan.tasks.filter(
-            scan_type=scan.scan_type).order_by('sequence_number')
-        for task in tasks:
-            if task.systems_count is not None:
-                if systems_count is None:
-                    systems_count = 0
-                systems_count += task.systems_count
-            if task.systems_scanned is not None:
-                if systems_scanned is None:
-                    systems_scanned = 0
-                systems_scanned += task.systems_scanned
-            if task.systems_failed is not None:
-                if systems_failed is None:
-                    systems_failed = 0
-                systems_failed += task.systems_failed
-        if systems_count is not None:
-            json_scan[SYSTEMS_COUNT_KEY] = systems_count
-        if systems_scanned is not None:
-            json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
-        if systems_failed is not None:
-            json_scan[SYSTEMS_FAILED_KEY] = systems_failed
+        scan_job = ScanJob.objects.get(pk=json_scan.get('id'))
+        systems_count,\
+            systems_scanned,\
+            systems_failed = scan_job.calculate_counts()
+
+        json_scan[SYSTEMS_COUNT_KEY] = systems_count
+        json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
+        json_scan[SYSTEMS_FAILED_KEY] = systems_failed
     return json_scan
 
 
