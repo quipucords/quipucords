@@ -40,13 +40,12 @@ class ScanJobCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             scan.SCAN_URI, [codes.ok])
-        self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help=_(messages.SCAN_NAME_HELP),
-                                 required=True)
-        self.parser.add_argument('--id', dest='id',
-                                 metavar='ID',
-                                 help=_(messages.SCAN_JOB_ID_HELP),
-                                 required=False)
+        group = self.parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--name', dest='name', metavar='NAME',
+                           help=_(messages.SCAN_NAME_HELP))
+        group.add_argument('--id', dest='id',
+                           metavar='ID',
+                           help=_(messages.SCAN_JOB_ID_HELP))
         self.parser.add_argument('--status', dest='status',
                                  choices=[scan.SCAN_STATUS_CREATED,
                                           scan.SCAN_STATUS_PENDING,
@@ -59,16 +58,25 @@ class ScanJobCommand(CliCommand):
                                  help=_(messages.SCAN_STATUS_FILTER_HELP),
                                  required=False)
 
+    def _validate_args(self):
+        """Validate the scan job arguments."""
+        CliCommand._validate_args(self)
+        if self.args.id and self.args.status:
+            print(_(messages.SCAN_JOB_ID_STATUS))
+            self.parser.print_usage()
+            sys.exit(1)
+
     def _build_req_params(self):
         """Add filter by scan_type/state query param."""
-        found, scan_object_id = _get_scan_object_id(self.parser,
-                                                    self.args.name)
-        if not found:
-            sys.exit(1)
+        if 'name' in self.args and self.args.name:
+            found, scan_object_id = _get_scan_object_id(self.parser,
+                                                        self.args.name)
+            if found:
+                self.req_path += scan_object_id + 'jobs/'
+            else:
+                sys.exit(1)
         if 'id' in self.args and self.args.id:
             self.req_path = scan.SCAN_JOB_URI + self.args.id + '/'
-        else:
-            self.req_path += scan_object_id + 'jobs/'
         if 'status' in self.args and self.args.status:
             self.req_params = {'status': self.args.status}
 
@@ -82,11 +90,6 @@ class ScanJobCommand(CliCommand):
                 # if GET is used for single scan job,
                 # count doesn't exist and will be 0
                 if 'id' in self.args and self.args.id:
-                    data = pretty_print(json_data)
-                    print(data)
-                elif 'status' in self.args \
-                        and self.args.status \
-                        and (results != []):
                     data = pretty_print(json_data)
                     print(data)
                 else:
