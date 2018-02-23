@@ -7,7 +7,7 @@ python:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install codecov
   - nvm install node
   - npm install swagger-cli
 # command to run tests
@@ -18,7 +18,7 @@ script:
   - make test-coverage
   - make swagger-valid
 after_success:
-  - coveralls
+  - codecov
 addons:
   apt:
     packages:
