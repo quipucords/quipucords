@@ -20,6 +20,7 @@ from api.serializers import FingerprintSerializer
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_brms import detect_jboss_brms
+from fingerprinter.utils import strip_suffix
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -807,7 +808,8 @@ def _process_satellite_fact(source, fact):
     reg_time = fact.get('registration_time')
     if reg_time:
         try:
-            dt_obj = datetime.strptime(reg_time, '%Y-%m-%d %H:%M:%S UTC')
+            reg_time = strip_suffix(reg_time, ' UTC')
+            dt_obj = datetime.strptime(reg_time, '%Y-%m-%d %H:%M:%S')
             add_fact_to_fingerprint(source, 'registration_time', fact,
                                     'system_creation_date', fingerprint,
                                     fact_value=dt_obj.date())
