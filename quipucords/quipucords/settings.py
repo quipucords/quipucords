@@ -201,8 +201,18 @@ QUIPUCORDS_LOGGING_LEVEL = os.getenv('QUIPUCORDS_LOG_LEVEL', 'INFO')
 LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
 VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
     '%(process)d %(thread)d %(message)s'
-DEFAULT_LOG_FILE = os.path.join(BASE_DIR, 'app.log')
+
+LOG_DIRECTORY = os.getenv('LOG_DIRECTORY', BASE_DIR)
+DEFAULT_LOG_FILE = os.path.join(LOG_DIRECTORY, 'app.log')
 LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
+
+DEFAULT_SCAN_DATA_LOG_FILE = os.path.join(LOG_DIRECTORY, 'scan_data.log')
+SCAN_DATA_LOG_FILE = os.getenv('SCAN_DATA_LOG_FILE',
+                               DEFAULT_SCAN_DATA_LOG_FILE)
+SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
+                                    1 << 30)  # default 1 GB
+DISABLE_SCAN_DATA_LOG = 'DISABLE_SCAN_DATA_LOG' in os.environ
+
 
 LOGGING = {
     'version': 1,

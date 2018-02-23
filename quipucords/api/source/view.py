@@ -26,35 +26,13 @@ from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
 from api.models import (Source,
-                        Credential,
                         ScanJobOptions,
                         ScanJob,
                         ScanTask)
 import api.messages as messages
 from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
-
-
-CREDENTIALS_KEY = 'credentials'
-
-
-def expand_credential(json_source):
-    """Expand host credentials.
-
-    Take source object with credential id and pull object from db.
-    create slim dictionary version of the host credential with name an value
-    to return to user.
-
-    :param json_source: JSON source data from serializer
-    :returns: JSON data
-    """
-    cred_ids = json_source.get('credentials', [])
-    slim_cred = Credential.objects.filter(
-        pk__in=cred_ids).values('id', 'name')
-    # Update source JSON with cred JSON
-    if slim_cred:
-        json_source[CREDENTIALS_KEY] = slim_cred
-    return json_source
+from api.source.util import expand_credential
 
 
 def format_source(json_source):
@@ -63,7 +41,7 @@ def format_source(json_source):
     :param json_source: JSON source data from serializer
     :returns: JSON data
     """
-    json_source = expand_credential(json_source)
+    expand_credential(json_source)
     source_id = json_source.get('id')
 
     scan_task_qs = ScanTask.objects.filter(
