@@ -18,10 +18,15 @@ from scanner.manager import Manager
 class MockTask(Thread):
     """Mock Task class."""
 
+    # pylint: disable=invalid-name
     def __init__(self):
         """Create a mock task."""
         Thread.__init__(self)
-        self.identifier = 1
+        self.id = 1
+
+    def log_message(self, message):
+        """Fake log message."""
+        pass
 
 
 class ScanManagerTest(TestCase):
@@ -55,5 +60,6 @@ class ScanManagerTest(TestCase):
 
     def test_kill_missing(self):
         """Test kill on missing id."""
-        killed = self.scan_manager.kill(1)
+        task = MockTask()
+        killed = self.scan_manager.kill(task)
         self.assertFalse(killed)

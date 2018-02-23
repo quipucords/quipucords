@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,12 +12,17 @@
 """Constants for the Scan commands."""
 
 SUBCOMMAND = 'scan'
+ADD = 'add'
+EDIT = 'edit'
 START = 'start'
 LIST = 'list'
+JOB = 'job'
 SHOW = 'show'
+STATUS = 'status'
 PAUSE = 'pause'
 CANCEL = 'cancel'
 RESTART = 'restart'
+CLEAR = 'clear'
 
 # Status values
 SCAN_STATUS_CREATED = 'created'
@@ -30,6 +35,7 @@ SCAN_STATUS_FAILED = 'failed'
 
 
 SCAN_URI = '/api/v1/scans/'
+SCAN_JOB_URI = '/api/v1/jobs/'
 
 SCAN_TYPE_CONNECT = 'connect'
 SCAN_TYPE_INSPECT = 'inspect'

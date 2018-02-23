@@ -78,10 +78,16 @@ VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
 SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
 SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 
+# Scan messages
+SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
+
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
+SJ_SCAN_IDS_INV = 'Scan identifiers must be integer values.'
 SJ_SOURCE_IDS_INV = 'Source identifiers must be integer values.'
+SJ_SCAN_DO_NOT_EXIST = 'Scan with id=%d could not be'\
+    ' found in database.'
 SJ_SOURCE_DO_NOT_EXIST = 'Source with id=%d could not be'\
     ' found in database.'
 SJ_STATUS_MSG_CREATED = 'Job is created.'
@@ -96,6 +102,9 @@ SJ_EXTRA_VARS_BOOL = 'Extra vars values must be type boolean.'
 SJ_EXTRA_VARS_KEY = 'Extra vars keys must be jboss_eap, jboss_fuse, '\
     'or jboss_brms.'
 
+
+# Scan Manager/Signal
+SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
 
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'

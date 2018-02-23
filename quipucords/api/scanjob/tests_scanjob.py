@@ -16,10 +16,11 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 import api.messages as messages
-from api.serializers import ScanJobSerializer
+from api.scanjob.serializer import (ScanJobSerializer)
 from api.models import (Credential,
                         Source,
                         ScanTask,
+                        Scan,
                         ScanOptions,
                         ScanJob,
                         SystemConnectionResult,
@@ -58,23 +59,23 @@ class ScanJobTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-    def create(self, data):
-        """Call the create endpoint."""
-        url = reverse('scanjob-list')
-        return self.client.post(url,
-                                json.dumps(data),
-                                'application/json')
+        self.connect_scan = Scan(name='connect_test',
+                                 scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        self.connect_scan.save()
+        self.connect_scan.sources.add(self.source)
+        self.connect_scan.save()
 
-    def create_expect_400(self, data, expected_response):
-        """We will do a lot of create tests that expect HTTP 400s."""
-        response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_json = response.json()
-        self.assertEqual(response_json, expected_response)
+        self.inspect_scan = Scan(name='inspect_test')
+        self.inspect_scan.save()
+        self.inspect_scan.sources.add(self.source)
+        self.inspect_scan.save()
 
-    def create_expect_201(self, data):
-        """Create a source, return the response as a dict."""
-        response = self.create(data)
+    def create_job_expect_201(self, scan_id):
+        """Create a scan, return the response as a dict."""
+        url = reverse('scan-detail', args=(scan_id,)) + 'jobs/'
+        response = self.client.post(url,
+                                    {},
+                                    'application/json')
         response_json = response.json()
         if response.status_code != status.HTTP_201_CREATED:
             print('Cause of failure: ')
@@ -85,9 +86,24 @@ class ScanJobTest(TestCase):
 
     def test_queue_task(self):
         """Test create queue state change."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        # Cannot use util because its testing queue
+        # Create scan configuration
+        scan = Scan(name='test',
+                    scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan.save()
+
+        # Add source to scan
+        scan.sources.add(self.source)
+
+        options_to_use = ScanOptions()
+        options_to_use.save()
+
+        scan.options = options_to_use
+        scan.save()
+
+        # Create Job
+        scan_job = ScanJob(scan=scan)
         scan_job.save()
-        scan_job.sources.add(self.source)
 
         # Job in created state
         self.assertEqual(scan_job.status, ScanTask.CREATED)
@@ -116,10 +132,9 @@ class ScanJobTest(TestCase):
 
     def test_queue_invalid_state_changes(self):
         """Test create queue failed."""
-        scan_job = ScanJob(status=ScanTask.FAILED,
-                           scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
+        scan_job, _ = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_job.status = ScanTask.FAILED
 
         # Queue job to run
         scan_job.queue()
@@ -151,12 +166,10 @@ class ScanJobTest(TestCase):
         scan_job.complete()
         self.assertEqual(scan_job.status, ScanTask.COMPLETED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_start_task(self, start_scan):
+    def test_start_task(self):
         """Test start pending task."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
+        scan_job, _ = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
 
         # Job in created state
         tasks = scan_job.tasks.all()
@@ -172,16 +185,10 @@ class ScanJobTest(TestCase):
         # Start job
         scan_job.start()
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_pause_restart_task(self, start_scan):
+    def test_pause_restart_task(self):
         """Test pause and restart task."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
-
-        # Job in created state
-        tasks = scan_job.tasks.all()
-        self.assertEqual(0, len(tasks))
+        scan_job, _ = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
 
         # Queue job to run
         scan_job.queue()
@@ -212,225 +219,25 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.CANCELED)
         self.assertEqual(connect_task.status, ScanTask.CANCELED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
-        data = {'sources': [self.source.id],
-                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        response = self.create_expect_201(data)
+        response = self.create_job_expect_201(self.connect_scan.id)
         self.assertIn('id', response)
 
-    def test_create_no_source(self):
-        """A create request must have a source."""
-        self.create_expect_400(
-            {}, {'sources': ['This field is required.']})
-
-    def test_create_invalid_scan_type(self):
-        """A create request must have a valid scan_type."""
-        data = {'sources': [self.source.id],
-                'scan_type': 'foo',
-                'options': {'disable_optional_products': {'jboss_eap': True,
-                                                          'jboss_fuse': True,
-                                                          'jboss_brms': True}}}
-        self.create_expect_400(
-            data, {'scan_type': ['foo, is an invalid choice. '
-                                 'Valid values are connect,inspect.']})
-
-    def test_create_blank_scan_type(self):
-        """A create request must not have a blank scan_type."""
-        data = {'sources': [self.source.id],
-                'scan_type': ''}
-        self.create_expect_400(
-            data, {'scan_type': ['This field may not be blank. '
-                                 'Valid values are connect,inspect.']})
-
-    def test_create_invalid_srcs_type(self):
-        """A create request must have integer ids."""
-        data = {'sources': ['foo'],
-                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        self.create_expect_400(
-            data, {'sources': ['Source identifiers must be integer values.']})
-
-    def test_create_invalid_srcs_id(self):
-        """A create request must have vaild ids."""
-        data = {'sources': [100000],
-                'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        self.create_expect_400(
-            data, {'sources': ['Source with id=100000 could '
-                               'not be found in database.']})
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_create_default_host_type(self, start_scan):
-        """A valid create request should succeed with defaulted type."""
-        data = {'sources': [self.source.id],
-                'options': {'disable_optional_products': {'jboss_eap': True,
-                                                          'jboss_fuse': True,
-                                                          'jboss_brms': True}}}
-        response = self.create_expect_201(data)
-        self.assertIn('id', response)
-        self.assertIn('scan_type', response)
-        self.assertEqual(response['scan_type'], ScanTask.SCAN_TYPE_INSPECT)
-
-    def test_create_invalid_source(self):
-        """The Source name must valid."""
-        self.create_expect_400(
-            {'sources': -1},
-            {'sources':
-             ['Expected a list of items but got type "int".']})
-
-    def test_create_invalid_forks(self):
-        """Test valid number of forks."""
-        data = {'sources': [self.source.id],
-                'options': {'max_concurrency': -5,
-                            'disable_optional_products': {'jboss_eap': True}}}
-        self.create_expect_400(data, {
-            'options': {'max_concurrency':
-                        ['Ensure this value is greater than or equal '
-                         'to 1.']}})
-
-    def test_create_invalid_disable_optional_products_type(self):
-        """Test invalid type for disable_optional_products type."""
-        data = {'sources': [self.source.id],
-                'options': {'disable_optional_products': 'foo'}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars must be a dictionary.']}})
-
-    def test_create_invalid_disable_optional_products_key(self):
-        """Test invalid type for disable_optional_products key."""
-        data = {'sources': [self.source.id],
-                'options': {'disable_optional_products': {'foo': True}}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars keys must be jboss_eap,'
-                         ' jboss_fuse, or jboss_brms.']}})
-
-    def test_create_invalid_disable_optional_products_val(self):
-        """Test invalid type for disable_optional_products value."""
-        data = {'sources': [self.source.id],
-                'options': {'disable_optional_products':
-                            {'jboss_eap': 'True'}}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars values must be type boolean.']}})
-
-    def test_get_optional_products(self):
-        """Test the get_optional_products method when arg is None."""
-        disable_optional_products = None
-        expected = {}
-        content = ScanJob.get_optional_products(disable_optional_products)
-        self.assertEqual(content, expected)
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_list(self, start_scan):
-        """List all ScanJob objects."""
-        data_default = {'sources': [self.source.id]}
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        self.create_expect_201(data_default)
-        self.create_expect_201(data_discovery)
-
-        url = reverse('scanjob-list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1,
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED},
-                    {'id': 2,
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_filtered_list(self, start_scan):
-        """List filtered ScanJob objects."""
-        data_default = {'sources': [self.source.id]}
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        self.create_expect_201(data_default)
-        self.create_expect_201(data_discovery)
-
-        url = reverse('scanjob-list')
-        response = self.client.get(
-            url, {'scan_type': ScanTask.SCAN_TYPE_CONNECT})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 2,
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 1,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-        response = self.client.get(
-            url, {'status': ScanTask.PENDING})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
-        self.assertEqual(content, expected)
-
-        response = self.client.get(
-            url, {'status': ScanTask.CREATED})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1,
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED},
-                    {'id': 2,
-                     'options': {'max_concurrency': 50},
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'status': 'created',
-                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_retrieve(self, start_scan):
         """Get ScanJob details by primary key."""
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        initial = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('sources', response.json())
-        sources = response.json()['sources']
+        self.assertIn('scan', response.json())
+        scan = response.json()['scan']
 
         self.assertEqual(
-            sources, [{'id': 1, 'name': 'source1', 'source_type': 'network'}])
+            scan, {'id': 1, 'name': 'connect_test'})
 
     def test_retrieve_bad_id(self):
         """Get ScanJob details by bad primary key."""
@@ -438,8 +245,7 @@ class ScanJobTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
-    def test_details(self, start_scan):
+    def test_details(self):
         """Get ScanJob result details by primary key."""
         # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(
@@ -495,16 +301,29 @@ class ScanJobTest(TestCase):
                        'facts': [
                            {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    def test_post_jobs_not_allowed(self):
+        """Test post jobs not allowed."""
+        url = reverse('scanjob-detail', args=(1,))
+        url = url[:-2]
+        response = self.client.post(url,
+                                    {},
+                                    'application/json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+    def test_list_not_allowed(self):
+        """Test list all jobs not allowed."""
+        url = reverse('scanjob-detail', args=(1,))
+        url = url[:-2]
+        response = self.client.get(url,
+                                   format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
-        """Completely update a Source."""
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
-        initial = self.create_expect_201(data_discovery)
+        """Test update scanjob not allowed."""
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
@@ -520,16 +339,10 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_update_not_allowed_disable_optional_products(self, start_scan):
-        """Completely update a Source & fail due to disable_opt_products."""
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
-        initial = self.create_expect_201(data_discovery)
+        """Test update scan job options not allowed."""
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
@@ -542,16 +355,10 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_partial_update(self, start_scan):
-        """Partially update a ScanJob is not supported."""
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
-        initial = self.create_expect_201(data_discovery)
+        """Test partial update not allow for scanjob."""
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
         data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
         url = reverse('scanjob-detail', args=(initial['id'],))
@@ -562,35 +369,22 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_delete(self, start_scan):
         """Delete a ScanJob is not supported."""
-        data_discovery = {'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
-        response = self.create_expect_201(data_discovery)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_pause_bad_state(self, start_scan):
         """Pause a scanjob."""
-        data_host = {'sources': [self.source.id],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True}}}
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        response = self.create_expect_201(data_host)
-
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}pause/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -604,18 +398,12 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_cancel(self, start_scan):
         """Cancel a scanjob."""
-        data_host = {'sources': [self.source.id],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True}}}
-        response = self.create_expect_201(data_host)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}cancel/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -629,18 +417,12 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_400_BAD_REQUEST)
 
-    @patch('api.scanjob.view.start_scan', side_effect=dummy_start)
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
         """Restart a scanjob."""
-        data_host = {'sources': [self.source.id],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True}}}
-        response = self.create_expect_201(data_host)
+        initial = self.create_job_expect_201(self.connect_scan.id)
 
-        url = reverse('scanjob-detail', args=(response['id'],))
+        url = reverse('scanjob-detail', args=(initial['id'],))
         pause_url = '{}restart/'.format(url)
         response = self.client.put(pause_url, format='json')
         self.assertEqual(response.status_code,
@@ -656,24 +438,15 @@ class ScanJobTest(TestCase):
 
     def test_expand_scanjob(self):
         """Test view expand_scanjob."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_job.save()
-        scan_job.sources.add(self.source)
-
-        # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
-        tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
-
-        # Queue job to run
-        scan_job.queue()
-        task = scan_job.tasks.all()[1]
-        task.update_stats('TEST_VC.', sys_count=2, sys_failed=1, sys_scanned=1)
+        scan_job, scan_task = create_scan_job(
+            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan_task.update_stats('TEST_VC.', sys_count=2,
+                               sys_failed=1, sys_scanned=1)
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
         serializer = ScanJobSerializer(scan_job)
         json_scan = serializer.data
-        expand_scanjob(json_scan)
+        json_scan = expand_scanjob(json_scan)
 
         self.assertEqual(json_scan.get('systems_count'), 2)
         self.assertEqual(json_scan.get('systems_failed'), 1)
@@ -748,14 +521,14 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan_job.save()
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {}
         scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        extra_vars = scan_job.get_extra_vars()
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+        extra_vars = ScanOptions.get_extra_vars(
+            scan_job.options.disable_optional_products)
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True}
@@ -763,15 +536,16 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': True}
         scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        extra_vars = scan_job.get_extra_vars()
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+        extra_vars = ScanOptions.get_extra_vars(
+            scan_job.options.disable_optional_products)
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': False,
                          'jboss_brms': True}
@@ -779,16 +553,76 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
-        scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         scan_options = ScanOptions()
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}
         scan_options.save()
-        scan_job.options = scan_options
-        scan_job.save()
-        extra_vars = scan_job.get_extra_vars()
+
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+
+        extra_vars = ScanOptions.get_extra_vars(
+            scan_job.options.disable_optional_products)
         expected_vars = {'jboss_eap': False,
                          'jboss_fuse': False,
                          'jboss_brms': False}
         self.assertEqual(extra_vars, expected_vars)
+
+    # ############################################################
+    # # Scan Job tests /jobs path
+    # ############################################################
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
+    def test_list_jobs(self, start_scan):
+        """List all ScanJobs under a scan."""
+        self.create_job_expect_201(self.inspect_scan.id)
+        self.create_job_expect_201(self.connect_scan.id)
+
+        url = reverse('scan-detail', args=(self.inspect_scan.id,)) + 'jobs/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        results1 = [{'id': 1,
+                     'scan': {'id': 2, 'name': 'inspect_test'},
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
+        self.assertEqual(content, expected)
+
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
+    def test_filtered_list(self, start_scan):
+        """List filtered ScanJob objects."""
+        self.create_job_expect_201(self.inspect_scan.id)
+
+        url = reverse('scan-detail', args=(self.inspect_scan.id,)) + 'jobs/'
+
+        response = self.client.get(
+            url, {'status': ScanTask.PENDING})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        expected = {'count': 0, 'next': None,
+                    'previous': None, 'results': []}
+        self.assertEqual(content, expected)
+
+        response = self.client.get(
+            url, {'status': ScanTask.CREATED})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        results1 = [{'id': 1,
+                     'scan': {'id': 2, 'name': 'inspect_test'},
+                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
+                     'status': 'created',
+                     'status_message': messages.SJ_STATUS_MSG_CREATED}]
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
+        self.assertEqual(content, expected)

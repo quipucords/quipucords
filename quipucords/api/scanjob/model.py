@@ -14,11 +14,11 @@ These models are used in the REST definitions.
 """
 from datetime import datetime
 import logging
-import json
 from django.utils.translation import ugettext as _
 from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
+from api.scan.model import Scan
 from api.scantasks.model import ScanTask
 from api.connresults.model import (JobConnectionResult,
                                    TaskConnectionResult)
@@ -30,7 +30,7 @@ import api.messages as messages
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class ScanOptions(models.Model):
+class ScanJobOptions(models.Model):
     """The scan options allows configuration of a scan job."""
 
     max_concurrency = models.PositiveIntegerField(default=50)
@@ -50,10 +50,8 @@ class ScanOptions(models.Model):
 class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
-    JBOSS_EAP = 'jboss_eap'
-    JBOSS_FUSE = 'jboss_fuse'
-    JBOSS_BRMS = 'jboss_brms'
-
+    # pylint: disable=too-many-instance-attributes
+    scan = models.ForeignKey(Scan, null=True)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
@@ -71,7 +69,7 @@ class ScanJob(models.Model):
         default=_(messages.SJ_STATUS_MSG_CREATED))
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
-        ScanOptions, null=True, on_delete=models.CASCADE)
+        ScanJobOptions, null=True, on_delete=models.CASCADE)
     report_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
@@ -83,6 +81,7 @@ class ScanJob(models.Model):
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
+            'scan:{}, '\
             'sources:{}, '\
             'scan_type:{}, '\
             'status:{}, '\
@@ -93,6 +92,7 @@ class ScanJob(models.Model):
             'end_time: {}, '\
             'connection_results: {}, '\
             'inspection_results: {}'.format(self.id,
+                                            self.scan,
                                             self.sources,
                                             self.scan_type,
                                             self.status,
@@ -108,6 +108,25 @@ class ScanJob(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
+
+    def copy_scan_configuration(self):
+        """Copy scan info into the job."""
+        # pylint: disable=no-member
+        scan = self.scan
+        if scan is not None:
+            for source in scan.sources.all():
+                self.sources.add(source)
+            self.scan_type = scan.scan_type
+            if scan.options is not None:
+                disable_options = scan.options.disable_optional_products
+                scan_job_options = ScanJobOptions(
+                    max_concurrency=scan.options.max_concurrency,
+                    disable_optional_products=disable_options)
+            else:
+                scan_job_options = ScanJobOptions()
+            scan_job_options.save()
+            self.options = scan_job_options
+            self.save()
 
     def log_current_status(self,
                            show_status_message=False,
@@ -165,7 +184,9 @@ class ScanJob(models.Model):
 
         Change job state from CREATED TO PENDING.
         """
-        # pylint: disable=no-member
+        # pylint: disable=no-member,too-many-statements
+        self.copy_scan_configuration()
+
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(
             target_status, [ScanTask.CREATED])
@@ -416,47 +437,3 @@ class ScanJob(models.Model):
                              log_level=logging.ERROR)
             return True
         return False
-
-    def get_extra_vars(self):
-        """Construct a dictionary based on the disabled products.
-
-        :returns: a dictionary representing the updated collection
-        status of the optional products to be assigned as the extra
-        vars for the ansibile task runner
-        """
-        # Grab the optional products status dict and create
-        # a default dict (all products default to True)
-        product_status = self.get_optional_products(
-            self.options.disable_optional_products)
-        product_default = {self.JBOSS_EAP: True,
-                           self.JBOSS_FUSE: True,
-                           self.JBOSS_BRMS: True}
-
-        if product_status == {}:
-            return product_default
-        # If specified, turn off fact collection for fuse
-        if product_status.get(self.JBOSS_FUSE) is False:
-            product_default[self.JBOSS_FUSE] = False
-        # If specified, turn off fact collection for brms
-        if product_status.get(self.JBOSS_BRMS) is False:
-            product_default[self.JBOSS_BRMS] = False
-        # If specified and both brms & fuse are false
-        # turn off fact collection for eap
-        if product_status.get(self.JBOSS_EAP) is False and \
-                (not product_default.get(self.JBOSS_FUSE)) and \
-                (not product_default.get(self.JBOSS_BRMS)):
-            product_default[self.JBOSS_EAP] = False
-
-        return product_default
-
-    @staticmethod
-    def get_optional_products(disable_optional_products):
-        """Access disabled_optional_products as a dict instead of a string.
-
-        :returns: python dict containing the status of optional products
-        """
-        if disable_optional_products is not None:
-            if isinstance(disable_optional_products, dict):
-                return disable_optional_products
-            return json.loads(disable_optional_products)
-        return {}

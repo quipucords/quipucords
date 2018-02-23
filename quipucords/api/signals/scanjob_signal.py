@@ -13,6 +13,8 @@
 
 import logging
 import django.dispatch
+from django.utils.translation import ugettext as _
+import api.messages as messages
 from scanner.manager import SCAN_MANAGER
 from scanner import ScanJobRunner
 
@@ -34,6 +36,7 @@ def handle_scan(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('START'))
     scanner = ScanJobRunner(instance)
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
@@ -52,9 +55,8 @@ def scan_action(sender, instance, action, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    logger.info('Handling %s action on scan %s', action, instance)
     if action == PAUSE or action == CANCEL:
-        SCAN_MANAGER.kill(instance.id)
+        SCAN_MANAGER.kill(instance)
 
 
 def scan_pause(sender, instance, **kwargs):
@@ -65,6 +67,7 @@ def scan_pause(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('PAUSE'))
     scan_action(sender, instance, PAUSE, **kwargs)
 
 
@@ -76,6 +79,7 @@ def scan_cancel(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('CANCEL'))
     scan_action(sender, instance, CANCEL, **kwargs)
 
 
@@ -87,6 +91,7 @@ def scan_restart(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('RESTART'))
     scanner = ScanJobRunner(instance)
 
     if not SCAN_MANAGER.is_alive():

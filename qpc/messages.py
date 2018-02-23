@@ -107,7 +107,12 @@ SOURCE_TYPE_FILTER_HELP = 'Filter for listing sources by type. Valid '\
     'values: vcenter, network.'
 
 
+SCAN_NAME_HELP = 'Scan name.'
+SCAN_ADDED = 'Scan "%s" was added.'
+SCAN_UPDATED = 'Scan "%s" was updated.'
 SCAN_ID_HELP = 'Scan identifier.'
+SCAN_JOB_ID_HELP = 'Scan job identifier.'
+SCAN_JOB_STATUS = 'Scan job "%s" status: %s.'
 SCAN_TYPE_FILTER_HELP = 'Filter for listing scan jobs by type. Valid '\
     'values: connect, inspect.'
 SCAN_STATUS_FILTER_HELP = 'Filter for listing scan jobs by status. Valid '\
@@ -116,11 +121,29 @@ SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; '\
     'default is 50.'
 SCAN_RESULTS_HELP = 'View results of the specified scan.'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist.'
+SCAN_JOB_DOES_NOT_EXIST = 'Scan job "%s" does not exist.'
 SCAN_LIST_NO_SCANS = 'No scans found.'
 SCAN_STARTED = 'Scan "%s" started.'
 SCAN_PAUSED = 'Scan "%s" paused.'
 SCAN_RESTARTED = 'Scan "%s" restarted.'
 SCAN_CANCELED = 'Scan "%s" canceled.'
+SCAN_CLEAR_ALL_HELP = 'Remove all scans.'
+SCAN_REMOVED = 'Scan "%s" was removed.'
+SCAN_FAILED_TO_REMOVE = 'Failed to remove scan "%s".'
+SCAN_NOT_FOUND = 'Scan "%s" was not found.'
+SCAN_NO_SCANS_TO_REMOVE = 'No scans exist to be removed.'
+SCAN_PARTIAL_REMOVE = 'Some scans were removed. However, an error '\
+    'occurred while removing the following scan: %s. For more '\
+    'information, see the server log file.'
+SCAN_CLEAR_ALL_SUCCESS = 'All scans were removed.'
+SCAN_EDIT_NO_ARGS = 'No arguments were provided to edit scan %s.'
+SCAN_EDIT_SOURCES_NOT_FOUND = 'An error occurred while processing the '\
+    '"--sources" input values. References for the following sources '\
+    'could not be found: %s. Failed to edit scan "%s". For more '\
+    'information, see the server log file.'
+SCAN_EDIT_SOURCES_PROCESS_ERR = 'An error occurred while processing the '\
+    '"--sources" input values. Failed to edit scan "%s". For more '\
+    'information, see the server log file.'
 
 REPORT_SCAN_ID_HELP = 'Scan job identifier.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'

@@ -136,18 +136,10 @@ class SourceTest(TestCase):
         source.save()
         end = datetime.now()
         scan_job, scan_task = create_scan_job(source)
-
-        scan_task.status = ScanTask.COMPLETED
-        scan_task.systems_count = 10
-        scan_task.systems_scanned = 9
-        scan_task.systems_failed = 1
-        scan_task.start_time = start
-        scan_task.end_time = end
-        scan_task.save()
-
-        scan_job.status = ScanTask.COMPLETED
+        scan_task.update_stats('', sys_count=10, sys_scanned=9, sys_failed=1)
         scan_job.start_time = start
         scan_job.end_time = end
+        scan_job.status = ScanTask.COMPLETED
         scan_job.save()
 
         serializer = SourceSerializer(source)

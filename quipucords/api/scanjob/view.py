@@ -11,7 +11,7 @@
 """Describes the views associated with the API models."""
 
 import os
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.authentication import SessionAuthentication
@@ -26,7 +26,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob, Source)
+from api.models import (ScanTask, ScanJob)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
@@ -34,59 +34,12 @@ from api.serializers import (ScanJobSerializer,
                              JobInspectionResultSerializer,
                              SystemInspectionResultSerializer,
                              RawFactSerializer)
-from api.signals.scanjob_signal import (start_scan, pause_scan,
+from api.scanjob.serializer import expand_scanjob
+from api.signals.scanjob_signal import (pause_scan,
                                         cancel_scan, restart_scan)
 
 
-SOURCES_KEY = 'sources'
 RESULTS_KEY = 'task_results'
-TASKS_KEY = 'tasks'
-SYSTEMS_COUNT_KEY = 'systems_count'
-SYSTEMS_SCANNED_KEY = 'systems_scanned'
-SYSTEMS_FAILED_KEY = 'systems_failed'
-
-
-# pylint: disable=too-many-branches
-def expand_scanjob(json_scan):
-    """Expand the source and calculate values.
-
-    Take scan object with source ids and pull objects from db.
-    create slim dictionary version of sources with name an value
-    to return to user. Calculate systems_count, systems_scanned,
-    systems_failed values from tasks.
-    """
-    source_ids = json_scan.get(SOURCES_KEY, [])
-    slim_sources = Source.objects.filter(
-        pk__in=source_ids).values('id', 'name', 'source_type')
-    if slim_sources:
-        json_scan[SOURCES_KEY] = slim_sources
-
-    if json_scan.get(TASKS_KEY):
-        scan = ScanJob.objects.get(pk=json_scan.get('id'))
-        systems_count = None
-        systems_scanned = None
-        systems_failed = None
-        tasks = scan.tasks.filter(
-            scan_type=scan.scan_type).order_by('sequence_number')
-        for task in tasks:
-            if task.systems_count is not None:
-                if systems_count is None:
-                    systems_count = 0
-                systems_count += task.systems_count
-            if task.systems_scanned is not None:
-                if systems_scanned is None:
-                    systems_scanned = 0
-                systems_scanned += task.systems_scanned
-            if task.systems_failed is not None:
-                if systems_failed is None:
-                    systems_failed = 0
-                systems_failed += task.systems_failed
-        if systems_count is not None:
-            json_scan[SYSTEMS_COUNT_KEY] = systems_count
-        if systems_scanned is not None:
-            json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
-        if systems_failed is not None:
-            json_scan[SYSTEMS_FAILED_KEY] = systems_failed
 
 
 def expand_sys_conn_result(conn_result):
@@ -189,8 +142,6 @@ class ScanJobFilter(FilterSet):
 
 # pylint: disable=too-many-ancestors
 class ScanJobViewSet(mixins.RetrieveModelMixin,
-                     mixins.CreateModelMixin,
-                     mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
@@ -207,39 +158,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
     ordering = ('id',)
 
-    # pylint: disable=unused-argument
-    def create(self, request, *args, **kwargs):
-        """Create a scanjob."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        scanjob_obj = ScanJob.objects.get(pk=serializer.data['id'])
-        scanjob_obj.log_current_status()
-        start_scan.send(sender=self.__class__, instance=scanjob_obj)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
-
-    def list(self, request):  # pylint: disable=unused-argument
-        """List the collection of scan jobs."""
-        result = []
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            for scan in serializer.data:
-                expand_scanjob(scan)
-                result.append(scan)
-            return self.get_paginated_response(serializer.data)
-
-        for scan in queryset:
-            serializer = ScanJobSerializer(scan)
-            json_scan = serializer.data
-            expand_scanjob(json_scan)
-            result.append(json_scan)
-        return Response(result)
-
     # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         """Get a scan job."""
@@ -252,7 +170,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         scan = get_object_or_404(self.queryset, pk=pk)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_scanjob(json_scan)
+        json_scan = expand_scanjob(json_scan)
         return Response(json_scan)
 
     # pylint: disable=unused-argument,invalid-name,no-self-use
@@ -295,7 +213,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             pause_scan.send(sender=self.__class__, instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_scanjob(json_scan)
+            json_scan = expand_scanjob(json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.PAUSED:
             err_msg = _(messages.ALREADY_PAUSED)
@@ -323,7 +241,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         cancel_scan.send(sender=self.__class__, instance=scan)
         serializer = ScanJobSerializer(scan)
         json_scan = serializer.data
-        expand_scanjob(json_scan)
+        json_scan = expand_scanjob(json_scan)
         return Response(json_scan, status=200)
 
     @detail_route(methods=['put'])
@@ -341,7 +259,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                               instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
-            expand_scanjob(json_scan)
+            json_scan = expand_scanjob(json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.RUNNING:
             err_msg = _(messages.ALREADY_RUNNING)
