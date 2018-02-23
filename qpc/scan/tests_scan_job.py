@@ -210,12 +210,16 @@ class ScanJobCliTests(unittest.TestCase):
         """Testing the scan job with name & id."""
         scan_out = StringIO()
         sjc = ScanJobCommand(SUBPARSER)
-        args = Namespace(name='scan1', id=1)
+        args = Namespace(name='scan1', id=1, status=None)
         with self.assertRaises(SystemExit):
             with redirect_stdout(scan_out):
                 sjc.main(args)
+                expected = 'usage: qpc scan job [-h] (--name NAME | '\
+                           '--id ID) [--status STATUS]\nqpc scan job'\
+                           ': error: argument --name: not allowed '\
+                           'with argument --id'
                 self.assertEqual(scan_out.getvalue(),
-                                 messages.SCAN_JOB_NAME_ID + '\n')
+                                 expected)
 
     def test_scan_job_no_name_or_id(self):
         """Testing the scan job with no name or id."""
@@ -236,8 +240,12 @@ class ScanJobCliTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             with redirect_stdout(scan_out):
                 sjc.main(args)
+                expected = 'usage: qpc scan job [-h] (--name NAME | ' \
+                           '--id ID) [--status STATUS]\nqpc scan job' \
+                           ': error: one of the arguments --name '\
+                           '--id is required'
                 self.assertEqual(scan_out.getvalue(),
-                                 messages.SCAN_JOB_ID_STATUS + '\n')
+                                 expected)
 
     def test_scan_job_no_jobs(self):
         """Testing the scan job with no jobs."""

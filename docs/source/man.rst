@@ -381,15 +381,15 @@ Viewing Scans jobs
 
 The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
 
-**qpc scan job (--name** *scan_name* | **--id=** *scan_job_identifier*) **--status=** *(created | pending | running | paused | canceled | completed | failed)*
+**qpc scan job (--name** *scan_name* | **--id=** *scan_job_identifier* **) --status=** *(created | pending | running | paused | canceled | completed | failed)*
 
 ``--name=name``
 
-  Optional. Contains the name of the scan object of which to display the scan jobs. Mutually exclusive with the ``--id`` option.
+  Contains the name of the scan object of which to display the scan jobs. Mutually exclusive with the ``--id`` option.
 
 ``--id=scan_job_identifier``
 
-  Optional. Contains the identifier of a specified scan job to display. Mutually exclusive with the ``--name`` option.
+  Contains the identifier of a specified scan job to display. Mutually exclusive with the ``--name`` option.
 
 ``--status=status``
 

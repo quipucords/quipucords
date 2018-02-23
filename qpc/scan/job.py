@@ -39,13 +39,12 @@ class ScanJobCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             scan.SCAN_URI, [codes.ok])
-        self.parser.add_argument('--name', dest='name', metavar='NAME',
-                                 help=_(messages.SCAN_NAME_HELP),
-                                 required=False)
-        self.parser.add_argument('--id', dest='id',
-                                 metavar='ID',
-                                 help=_(messages.SCAN_JOB_ID_HELP),
-                                 required=False)
+        group = self.parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--name', dest='name', metavar='NAME',
+                           help=_(messages.SCAN_NAME_HELP))
+        group.add_argument('--id', dest='id',
+                           metavar='ID',
+                           help=_(messages.SCAN_JOB_ID_HELP))
         self.parser.add_argument('--status', dest='status',
                                  choices=[scan.SCAN_STATUS_CREATED,
                                           scan.SCAN_STATUS_PENDING,
@@ -61,18 +60,8 @@ class ScanJobCommand(CliCommand):
     def _validate_args(self):
         """Validate the scan job arguments."""
         CliCommand._validate_args(self)
-        # Check to see if args were provided
-        error = False
-        if not(self.args.name or self.args.id):
-            print(_(messages.SCAN_JOB_NO_ARGS))
-            error = True
-        elif self.args.name and self.args.id:
-            print(_(messages.SCAN_JOB_NAME_ID))
-            error = True
-        elif self.args.id and self.args.status:
+        if self.args.id and self.args.status:
             print(_(messages.SCAN_JOB_ID_STATUS))
-            error = True
-        if error:
             self.parser.print_usage()
             sys.exit(1)
 
