@@ -132,15 +132,9 @@ class ScanTask(models.Model):
             sys_scanned = 0
         if sys_failed is None:
             sys_failed = 0
-        if self.start_time is None:
-            elapsed_time = 0
-        else:
-            elapsed_time = (datetime.utcnow() -
-                            self.start_time).total_seconds()
-        message = '%s Stats: elapsed_time=%ds, systems_count=%d,'\
+        message = '%s Stats: systems_count=%d,'\
             ' systems_scanned=%d, systems_failed=%d' %\
             (prefix,
-             elapsed_time,
              sys_count,
              sys_scanned,
              sys_failed)
@@ -148,12 +142,24 @@ class ScanTask(models.Model):
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this task."""
-        actual_message = 'Task %d (%s, %s, %s) - ' % (self.id,
-                                                      self.scan_type,
-                                                      self.source.source_type,
-                                                      self.source.name)
+        elapsed_time = self._compute_elapsed_time()
+        actual_message = 'Task %d (%s, %s, %s, elapsed_time: %ds) - ' % \
+            (self.id,
+             self.scan_type,
+             self.source.source_type,
+             self.source.name,
+             elapsed_time)
         actual_message += message.strip()
         logger.log(log_level, actual_message)
+
+    def _compute_elapsed_time(self):
+        """Compute elapsed time."""
+        if self.start_time is None:
+            elapsed_time = 0
+        else:
+            elapsed_time = (datetime.utcnow() -
+                            self.start_time).total_seconds()
+        return elapsed_time
 
     @transaction.atomic
     def update_stats(self,
