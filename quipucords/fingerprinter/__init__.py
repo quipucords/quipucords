@@ -564,6 +564,7 @@ def add_entitlements_to_fingerprint(source,
         fingerprint[ENTITLEMENTS_KEY] = entitlements
 
 
+# pylint: disable=R0915
 def _process_network_fact(source, fact):
     """Process a fact and convert to a fingerprint.
 
@@ -623,15 +624,23 @@ def _process_network_fact(source, fact):
     raw_fact_key = None
     if fact.get('date_anaconda_log'):
         raw_fact_key = 'date_anaconda_log'
-        system_creation_date = datetime.strptime(
-            fact['date_anaconda_log'], '%Y-%m-%d')
+        try:
+            system_creation_date = datetime.strptime(
+                fact['date_anaconda_log'], '%Y-%m-%d')
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['date_anaconda_log'], date_err)
 
     if system_creation_date and fact.get('date_yum_history'):
-        date_yum_history = datetime.strptime(
-            fact['date_yum_history'], '%Y-%m-%d')
-        if date_yum_history < system_creation_date:
-            raw_fact_key = 'date_yum_history'
-            system_creation_date = date_yum_history
+        try:
+            date_yum_history = datetime.strptime(
+                fact['date_yum_history'], '%Y-%m-%d')
+            if date_yum_history < system_creation_date:
+                raw_fact_key = 'date_yum_history'
+                system_creation_date = date_yum_history
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['date_yum_history'], date_err)
 
     if system_creation_date:
         add_fact_to_fingerprint(source, raw_fact_key, fact,
@@ -794,6 +803,16 @@ def _process_satellite_fact(source, fact):
                             'cpu_core_count', fingerprint)
     add_fact_to_fingerprint(source, 'num_sockets', fact,
                             'cpu_socket_count', fingerprint)
+
+    reg_time = fact.get('registration_time')
+    if reg_time:
+        try:
+            dt_obj = datetime.strptime(reg_time, '%Y-%m-%d %H:%M:%S UTC')
+            add_fact_to_fingerprint(source, 'registration_time', fact,
+                                    'system_creation_date', fingerprint,
+                                    fact_value=dt_obj.date())
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s', reg_time, date_err)
 
     add_entitlements_to_fingerprint(source, 'entitlements',
                                     fact, fingerprint)
