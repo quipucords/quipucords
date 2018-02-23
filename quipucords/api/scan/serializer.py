@@ -66,7 +66,9 @@ class JobField(PrimaryKeyRelatedField):
 
     def to_representation(self, value):
         """Create output representation."""
-        job = {'id': value.id, 'report_id': value.report_id}
+        job = {'id': value.id}
+        if value.report_id is not None:
+            job['report_id'] = value.report_id
         return job
 
 
@@ -85,7 +87,6 @@ class ScanSerializer(NotEmptySerializer):
 
         model = Scan
         fields = ['id', 'name', 'sources', 'scan_type', 'options', 'jobs']
-        qpc_allow_empty_fields = ['jobs']
 
     @transaction.atomic
     def create(self, validated_data):
