@@ -108,7 +108,7 @@ class ScanJob(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
-        ordering = ['-start_time']
+        ordering = ['-id']
 
     def copy_scan_configuration(self):
         """Copy scan info into the job."""
@@ -153,6 +153,31 @@ class ScanJob(models.Model):
              elapsed_time)
         actual_message += message
         logger.log(log_level, actual_message)
+
+    def calculate_counts(self):
+        """Calculate scan counts from tasks.
+
+        :return: systems_count, systems_scanned, systems_failed
+        """
+        systems_count = None
+        systems_scanned = None
+        systems_failed = None
+        tasks = self.tasks.filter(
+            scan_type=self.scan_type).order_by('sequence_number')
+        for task in tasks:
+            if task.systems_count is not None:
+                if systems_count is None:
+                    systems_count = 0
+                systems_count += task.systems_count
+            if task.systems_scanned is not None:
+                if systems_scanned is None:
+                    systems_scanned = 0
+                systems_scanned += task.systems_scanned
+            if task.systems_failed is not None:
+                if systems_failed is None:
+                    systems_failed = 0
+                systems_failed += task.systems_failed
+        return systems_count, systems_scanned, systems_failed
 
     def _log_stats(self, prefix):
         """Log stats for scan."""

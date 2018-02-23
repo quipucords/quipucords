@@ -38,6 +38,8 @@ from api.signals.scanjob_signal import start_scan
 # pylint: disable=too-many-branches,invalid-name
 
 SOURCES_KEY = 'sources'
+MOST_RECENT = 'most_recent'
+JOBS_KEY = 'jobs'
 
 ##################################################
 # Independent jobs route
@@ -139,6 +141,46 @@ def expand_scan(json_scan):
         pk__in=source_ids).values('id', 'name', 'source_type')
     if slim_sources:
         json_scan[SOURCES_KEY] = slim_sources
+
+    scan_jobs = json_scan.get(JOBS_KEY)
+    latest_job = None
+    if bool(scan_jobs):
+        latest_job = scan_jobs[0]
+        latest_job = ScanJob.objects.filter(id=latest_job['id']).first()
+
+    if latest_job is not None:
+        systems_count, \
+            systems_scanned, \
+            systems_failed = latest_job.calculate_counts()
+        report_id = latest_job.report_id
+        start_time = latest_job.start_time
+        end_time = latest_job.end_time
+        systems_count = systems_count
+        systems_scanned = systems_scanned
+        systems_failed = systems_failed
+        job_status = latest_job.status
+
+        most_recent = {
+            'id': latest_job.id,
+        }
+
+        if report_id is not None:
+            most_recent['report_id'] = report_id
+        if start_time is not None:
+            most_recent['start_time'] = start_time
+        if end_time is not None:
+            most_recent['end_time'] = end_time
+        if systems_count is not None:
+            most_recent['systems_count'] = systems_count
+        if systems_scanned is not None:
+            most_recent['systems_scanned'] = systems_scanned
+        if systems_failed is not None:
+            most_recent['systems_failed'] = systems_failed
+        if job_status is not None:
+            most_recent['status'] = job_status
+
+        json_scan[MOST_RECENT] = most_recent
+
     return json_scan
 
 
