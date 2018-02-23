@@ -38,7 +38,6 @@ class SourceListItem extends React.Component {
           this.props
             .getScanResults(item.connection.id)
             .then(results => {
-              console.dir(results);
               item.scanResultsPending = false;
               item.scanResults = _.get(results.value, 'data');
             })
@@ -108,46 +107,47 @@ class SourceListItem extends React.Component {
       failedHostCount = helpers.normalizeCount(failedHostCount);
     }
 
-    return (
-      <React.Fragment>
-        <ListStatusItem
-          id="credential"
-          count={credentialCount}
-          emptyText="0 Credentials"
-          tipSingular="Credential"
-          tipPlural="Credentials"
-          expanded={item.expanded && item.expandType === 'credentials'}
-          expandType="credentials"
-          toggleExpand={this.toggleExpand}
-          iconType="fa"
-          iconName="id-card"
-        />
-        <ListStatusItem
-          id="okHosts"
-          count={okHostCount}
-          emptyText="0 Successful"
-          tipSingular="Successful Authentication"
-          tipPlural="Successful Authentications"
-          expanded={item.expanded && item.expandType === 'okHosts'}
-          expandType="okHosts"
-          toggleExpand={this.toggleExpand}
-          iconType="pf"
-          iconName="ok"
-        />
-        <ListStatusItem
-          id="failedHosts"
-          count={failedHostCount}
-          emptyText="0 Failed"
-          tipSingular="Failed Authentication"
-          tipPlural="Failed Authentications"
-          expanded={item.expanded && item.expandType === 'failedHosts'}
-          expandType="failedHosts"
-          toggleExpand={this.toggleExpand}
-          iconType="pf"
-          iconName="error-circle-o"
-        />
-      </React.Fragment>
-    );
+    return [
+      <ListStatusItem
+        key="credential"
+        id="credential"
+        count={credentialCount}
+        emptyText="0 Credentials"
+        tipSingular="Credential"
+        tipPlural="Credentials"
+        expanded={item.expanded && item.expandType === 'credentials'}
+        expandType="credentials"
+        toggleExpand={this.toggleExpand}
+        iconType="fa"
+        iconName="id-card"
+      />,
+      <ListStatusItem
+        key="okHosts"
+        id="okHosts"
+        count={okHostCount}
+        emptyText="0 Successful"
+        tipSingular="Successful Authentication"
+        tipPlural="Successful Authentications"
+        expanded={item.expanded && item.expandType === 'okHosts'}
+        expandType="okHosts"
+        toggleExpand={this.toggleExpand}
+        iconType="pf"
+        iconName="ok"
+      />,
+      <ListStatusItem
+        key="failedHosts"
+        id="failedHosts"
+        count={failedHostCount}
+        emptyText="0 Failed"
+        tipSingular="Failed Authentication"
+        tipPlural="Failed Authentications"
+        expanded={item.expanded && item.expandType === 'failedHosts'}
+        expandType="failedHosts"
+        toggleExpand={this.toggleExpand}
+        iconType="pf"
+        iconName="error-circle-o"
+      />
+    ];
   }
 
   renderExpansionContents() {
