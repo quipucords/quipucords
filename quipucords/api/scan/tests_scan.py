@@ -213,15 +213,13 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'max_concurrency': 50},
-                     'jobs': []},
+                     'options': {'max_concurrency': 50}},
                     {'id': 2,
                      'name': 'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50},
-                     'jobs': []}]
+                     'options': {'max_concurrency': 50}}]
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -249,8 +247,7 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50},
-                     'jobs': []}]
+                     'options': {'max_concurrency': 50}}]
         expected = {'count': 1,
                     'next': None,
                     'previous': None,
@@ -372,7 +369,17 @@ class ScanTest(TestCase):
 
         serializer = ScanSerializer(scan_job.scan)
         json_scan = serializer.data
-        expand_scan(json_scan)
+        json_scan = expand_scan(json_scan)
+
+        print('#' * 120)
+        print(json_scan)
 
         self.assertEqual(json_scan.get(
             'sources').first().get('name'), 'source1')
+        self.assertEqual(
+            json_scan.get('most_recent'),
+            {'id': 1,
+             'systems_count': 2,
+             'systems_scanned': 1,
+             'systems_failed': 1,
+             'status': 'pending'})
