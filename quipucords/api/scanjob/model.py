@@ -146,7 +146,11 @@ class ScanJob(models.Model):
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this job."""
-        actual_message = 'Job %d (%s) - ' % (self.id, self.scan_type)
+        elapsed_time = self._compute_elapsed_time()
+        actual_message = 'Job %d (%s, elapsed_time: %ds) - ' % \
+            (self.id,
+             self.scan_type,
+             elapsed_time)
         actual_message += message
         logger.log(log_level, actual_message)
 
@@ -165,19 +169,22 @@ class ScanJob(models.Model):
             if task.systems_scanned is not None:
                 sys_scanned += task.systems_scanned
 
+        message = '%s Stats: systems_count=%d,'\
+            ' systems_scanned=%d, systems_failed=%d' %\
+            (prefix,
+             sys_count,
+             sys_scanned,
+             sys_failed)
+        self.log_message(message)
+
+    def _compute_elapsed_time(self):
+        """Compute elapsed time."""
         if self.start_time is None:
             elapsed_time = 0
         else:
             elapsed_time = (datetime.utcnow() -
                             self.start_time).total_seconds()
-        message = '%s Stats: elapsed_time=%ds, systems_count=%d,'\
-            ' systems_scanned=%d, systems_failed=%d' %\
-            (prefix,
-             elapsed_time,
-             sys_count,
-             sys_scanned,
-             sys_failed)
-        self.log_message(message)
+        return elapsed_time
 
     @transaction.atomic
     def queue(self):

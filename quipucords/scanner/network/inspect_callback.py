@@ -122,7 +122,7 @@ class InspectResultCallback(CallbackBase):
                 result.task_name == 'internal_host_started_processing_role':
             role_name = result._result.get(
                 ANSIBLE_FACTS).get(STARTED_PROCESSING_ROLE)
-            log_message = 'PROCESSING %s.  ANSIBLE ROLE %s' % (host, role_name)
+            log_message = 'PROCESSING %s - ANSIBLE ROLE %s' % (host, role_name)
             self.scan_task.log_message(log_message)
         for key, value in results_to_store:
             if key == HOST_DONE:
