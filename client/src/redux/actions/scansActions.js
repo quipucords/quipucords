@@ -29,6 +29,13 @@ const addScan = data => dispatch => {
   });
 };
 
+const startScan = id => dispatch => {
+  return dispatch({
+    type: scansTypes.START_SCAN,
+    payload: scansService.startScan(id)
+  });
+};
+
 const cancelScan = id => dispatch => {
   return dispatch({
     type: scansTypes.CANCEL_SCAN,
@@ -50,4 +57,4 @@ const restartScan = id => dispatch => {
   });
 };
 
-export { getScan, getScans, getScanResults, addScan, cancelScan, pauseScan, restartScan };
+export { getScan, getScans, getScanResults, addScan, startScan, cancelScan, pauseScan, restartScan };
