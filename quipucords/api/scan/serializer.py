@@ -13,10 +13,14 @@
 import json
 from django.db import transaction
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ValidationError,
+from rest_framework.serializers import (PrimaryKeyRelatedField,
+                                        ValidationError,
                                         IntegerField,
                                         CharField)
-from api.models import Source, ScanTask, Scan, ScanOptions
+from api.models import (Source,
+                        ScanTask,
+                        Scan,
+                        ScanOptions)
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
@@ -57,6 +61,15 @@ class ScanOptionsSerializer(NotEmptySerializer):
         return json.dumps(disable_optional_products)
 
 
+class JobField(PrimaryKeyRelatedField):
+    """Representation of the source associated with a scan job."""
+
+    def to_representation(self, value):
+        """Create output representation."""
+        job = {'id': value.id, 'report_id': value.report_id}
+        return job
+
+
 class ScanSerializer(NotEmptySerializer):
     """Serializer for the Scan model."""
 
@@ -65,12 +78,14 @@ class ScanSerializer(NotEmptySerializer):
     scan_type = ValidStringChoiceField(required=False,
                                        choices=ScanTask.SCAN_TYPE_CHOICES)
     options = ScanOptionsSerializer(required=False, many=False)
+    jobs = JobField(required=False, many=True, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
 
         model = Scan
-        fields = ['id', 'name', 'sources', 'scan_type', 'options']
+        fields = ['id', 'name', 'sources', 'scan_type', 'options', 'jobs']
+        qpc_allow_empty_fields = ['jobs']
 
     @transaction.atomic
     def create(self, validated_data):
