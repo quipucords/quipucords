@@ -210,6 +210,7 @@ DEFAULT_SCAN_DATA_LOG = os.path.join(LOG_DIRECTORY, 'scan_data_log')
 SCAN_DATA_LOG = os.getenv('SCAN_DATA_LOG', DEFAULT_SCAN_DATA_LOG)
 SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
                                     1 << 30)  # default 1 GB
+DISABLE_SCAN_DATA_LOG = 'DISABLE_SCAN_DATA_LOG' in os.environ
 
 
 LOGGING = {

@@ -61,7 +61,7 @@ _HANDLER = MultiprocessRotatingFileHandler(
     backupCount=NUM_LOG_FILES)
 _HANDLER.setFormatter(JSONFormatter())
 
-_DRY_RUN = False
+_DRY_RUN = settings.DISABLE_SCAN_DATA_LOG
 
 
 # pylint: disable=too-many-arguments
