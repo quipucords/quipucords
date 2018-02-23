@@ -213,13 +213,15 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'max_concurrency': 50}},
+                     'options': {'max_concurrency': 50},
+                     'jobs': []},
                     {'id': 2,
                      'name': 'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50}}]
+                     'options': {'max_concurrency': 50},
+                     'jobs': []}]
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -247,7 +249,8 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50}}]
+                     'options': {'max_concurrency': 50},
+                     'jobs': []}]
         expected = {'count': 1,
                     'next': None,
                     'previous': None,
