@@ -13,6 +13,7 @@
 
 from __future__ import print_function
 import sys
+import urllib.parse as urlparse
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
@@ -97,6 +98,16 @@ class ScanJobCommand(CliCommand):
             else:
                 data = pretty_print(results)
                 print(data)
+            if json_data.get('next'):
+                next_link = json_data.get('next')
+                params = urlparse.parse_qs(urlparse.urlparse(next_link).query)
+                page = params.get('page', ['1'])[0]
+                if self.req_params:
+                    self.req_params['page'] = page
+                else:
+                    self.req_params = {'page': page}
+                input(_(messages.NEXT_RESULTS))
+                self._do_command()
         else:
             print(_(messages.SCAN_LIST_NO_SCANS))
             sys.exit(1)
