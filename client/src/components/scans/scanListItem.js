@@ -10,8 +10,10 @@ import { helpers } from '../../common/helpers';
 
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
-import { ScanHostsList } from './scanHostList';
+import ScanHostsList from './scanHostList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
+import { getScanResults } from '../../redux/actions/scansActions';
+import { connect } from 'react-redux';
 
 class ScanListItem extends React.Component {
   constructor() {
@@ -28,6 +30,26 @@ class ScanListItem extends React.Component {
     } else {
       item.expanded = true;
       item.expandType = expandType;
+      if (expandType === 'systemsScanned' || expandType === 'systemsFailed') {
+        if (!item.scanResults) {
+          item.scanResultsPending = true;
+          item.scanResultsError = null;
+          this.props
+            .getScanResults(item.id)
+            .then(results => {
+              item.scanResultsPending = false;
+              item.scanResults = _.get(results.value, 'data');
+            })
+            .catch(error => {
+              item.scanResultsPending = false;
+              item.scanResultsError = _.get(error.payload, 'response.request.responseText', error.payload.message);
+            })
+            .finally(() => {
+              item.scanResultsPending = false;
+              this.forceUpdate();
+            });
+        }
+      }
     }
     this.forceUpdate();
   }
@@ -102,57 +124,64 @@ class ScanListItem extends React.Component {
 
     let sourcesCount = item.sources ? item.sources.length : 0;
 
-    let successHosts = Number.isNaN(item.systems_scanned) ? 0 : item.systems_scanned;
-    let failedHosts = Number.isNaN(item.systems_failed) ? 0 : item.systems_failed;
+    let successHosts = 0;
+    let failedHosts = 0;
 
-    return (
-      <React.Fragment>
-        <ListStatusItem
-          id="successHosts"
-          count={successHosts}
-          emptyText="0 Successful"
-          tipSingular="Successful System"
-          tipPlural="Successful Systems"
-          expanded={item.expanded && item.expandType === 'systemsScanned'}
-          expandType="systemsScanned"
-          toggleExpand={this.toggleExpand}
-          iconType="pf"
-          iconName="ok"
-        />
-        <ListStatusItem
-          id="systemsFailed"
-          count={failedHosts}
-          emptyText="0 Failed"
-          tipSingular="Failed System"
-          tipPlural="Failed Systems"
-          expanded={item.expanded && item.expandType === 'systemsFailed'}
-          expandType="systemsFailed"
-          toggleExpand={this.toggleExpand}
-          iconType="pf"
-          iconName="error-circle-o"
-        />
-        <ListStatusItem
-          id="sources"
-          count={sourcesCount}
-          emptyText="0 Sources"
-          tipSingular="Source"
-          tipPlural="Sources"
-          expanded={item.expanded && item.expandType === 'sources'}
-          expandType="sources"
-          toggleExpand={this.toggleExpand}
-        />
-        <ListStatusItem
-          id="scans"
-          count={item.scans_count}
-          emptyText="0 Previous"
-          tipSingular="Previous"
-          tipPlural="Previous"
-          expanded={item.expanded && item.expandType === 'scans'}
-          expandType="scans"
-          toggleExpand={this.toggleExpand}
-        />
-      </React.Fragment>
-    );
+    _.forEach(_.get(item, 'tasks', []), task => {
+      successHosts += _.get(task, 'systems_scanned', 0);
+      failedHosts += _.get(task, 'systems_failed', 0);
+    });
+
+    return [
+      <ListStatusItem
+        key="successHosts"
+        id="successHosts"
+        count={successHosts}
+        emptyText="0 Successful"
+        tipSingular="Successful System"
+        tipPlural="Successful Systems"
+        expanded={item.expanded && item.expandType === 'systemsScanned'}
+        expandType="systemsScanned"
+        toggleExpand={this.toggleExpand}
+        iconType="pf"
+        iconName="ok"
+      />,
+      <ListStatusItem
+        key="systemsFailed"
+        id="systemsFailed"
+        count={failedHosts}
+        emptyText="0 Failed"
+        tipSingular="Failed System"
+        tipPlural="Failed Systems"
+        expanded={item.expanded && item.expandType === 'systemsFailed'}
+        expandType="systemsFailed"
+        toggleExpand={this.toggleExpand}
+        iconType="pf"
+        iconName="error-circle-o"
+      />,
+      <ListStatusItem
+        key="sources"
+        id="sources"
+        count={sourcesCount}
+        emptyText="0 Sources"
+        tipSingular="Source"
+        tipPlural="Sources"
+        expanded={item.expanded && item.expandType === 'sources'}
+        expandType="sources"
+        toggleExpand={this.toggleExpand}
+      />,
+      <ListStatusItem
+        key="scans"
+        id="scans"
+        count={item.scans_count}
+        emptyText="0 Previous"
+        tipSingular="Previous"
+        tipPlural="Previous"
+        expanded={item.expanded && item.expandType === 'scans'}
+        expandType="scans"
+        toggleExpand={this.toggleExpand}
+      />
+    ];
   }
 
   renderActions() {
@@ -214,7 +243,13 @@ class ScanListItem extends React.Component {
           </SimpleTooltip>
         );
       default:
-        return null;
+        return (
+          <SimpleTooltip id="startTip" tooltip="Start Scan">
+            <Button onClick={() => onStart(item)} bsStyle="link">
+              <Icon type="fa" name="play" atria-label="Start" />
+            </Button>
+          </SimpleTooltip>
+        );
     }
   }
 
@@ -223,9 +258,9 @@ class ScanListItem extends React.Component {
 
     switch (item.expandType) {
       case 'systemsScanned':
-        return <ScanHostsList hosts={item.hosts} status="ok" />;
+        return <ScanHostsList scan={item} status="success" />;
       case 'systemsFailed':
-        return <ScanHostsList hosts={item.failed_hosts} status="error-circle-o" />;
+        return <ScanHostsList scan={item} status="failed" />;
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'scans':
@@ -244,13 +279,12 @@ class ScanListItem extends React.Component {
       active: item.selected
     });
 
-    console.dir(item);
     return (
       <ListView.Item
         key={item.id}
         className={classes}
         actions={this.renderActions()}
-        leftContent={<strong>ID: {item.id}</strong>}
+        leftContent={<strong>{item.name}</strong>}
         description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
@@ -270,7 +304,16 @@ ScanListItem.propTypes = {
   onPause: PropTypes.func,
   onCancel: PropTypes.func,
   onStart: PropTypes.func,
-  onResume: PropTypes.func
+  onResume: PropTypes.func,
+  getScanResults: PropTypes.func
 };
 
-export { ScanListItem };
+const mapStateToProps = function(state) {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  getScanResults: id => dispatch(getScanResults(id))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ScanListItem);

@@ -1,55 +1,68 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Icon } from 'patternfly-react';
 
-class ScanHostsList extends React.Component {
-  constructor() {
-    super();
+import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
 
-    this.state = {
-      hosts: []
-    };
-  }
+class ScansHostList extends React.Component {
+  render() {
+    const { status, scan } = this.props;
 
-  componentDidMount() {
-    const { hosts } = this.props;
-    let sortedHosts = [...hosts];
+    if (scan.scanResultsPending === true) {
+      return (
+        <Modal bsSize="lg" backdrop={false} show animation={false}>
+          <Modal.Body>
+            <div className="spinner spinner-xl" />
+            <div className="text-center">Loading scan results...</div>
+          </Modal.Body>
+        </Modal>
+      );
+    }
 
-    sortedHosts.sort((item1, item2) => {
-      return item1.localeCompare(item2);
+    if (scan.scanResultsError) {
+      return (
+        <EmptyState>
+          <EmptyState.Icon name="error-circle-o" />
+          <EmptyState.Title>Error retrieving scan results</EmptyState.Title>
+          <EmptyState.info>{scan.scanResultsError}</EmptyState.info>
+        </EmptyState>
+      );
+    }
+
+    let connectionResults = _.get(scan, 'scanResults.connection_results', []);
+
+    let displayHosts = [];
+    _.forEach(connectionResults.task_results, taskResult => {
+      _.forEach(taskResult.systems, system => {
+        if (system.status === status) {
+          displayHosts.push(system);
+        }
+      });
     });
 
-    this.setState({ hosts: sortedHosts });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.hosts !== this.props.hosts) {
-      const { hosts } = nextProps;
-      let sortedHosts = [...hosts];
-
-      sortedHosts.sort((item1, item2) => {
-        return item1.localeCompare(item2);
-      });
-
-      this.setState({ hosts: sortedHosts });
-    }
-  }
-
-  render() {
-    const { status } = this.props;
-    const { hosts } = this.state;
+    displayHosts.sort((item1, item2) => {
+      return item1.name.localeCompare(item2.name);
+    });
 
     return (
       <Grid fluid>
-        {hosts &&
-          hosts.map((item, index) => (
+        {displayHosts &&
+          displayHosts.map((host, index) => (
             <Grid.Row key={index}>
-              <Grid.Col xs={12} sm={4}>
+              <Grid.Col xs={6} sm={4}>
                 <span>
-                  <Icon type="pf" name={status} />
-                  &nbsp; {item}
+                  <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+                  &nbsp; {host.name}
                 </span>
               </Grid.Col>
+              {host.status === 'success' && (
+                <Grid.Col xs={6} sm={4}>
+                  <span>
+                    <Icon type="fa" name="id-card" />
+                    &nbsp; {host.credential.name}
+                  </span>
+                </Grid.Col>
+              )}
             </Grid.Row>
           ))}
       </Grid>
@@ -57,9 +70,9 @@ class ScanHostsList extends React.Component {
   }
 }
 
-ScanHostsList.propTypes = {
-  hosts: PropTypes.array,
+ScansHostList.propTypes = {
+  scan: PropTypes.object,
   status: PropTypes.string
 };
 
-export { ScanHostsList };
+export default ScansHostList;

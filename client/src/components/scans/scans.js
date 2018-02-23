@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
-import { getScans, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
+import { getScans, startScan, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
 import { sourcesTypes, toastNotificationTypes, viewToolbarTypes, viewTypes } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
@@ -14,7 +14,7 @@ import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import SourcesEmptyState from '../sources/sourcesEmptyState';
-import { ScanListItem } from './scanListItem';
+import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
 
 class Scans extends React.Component {
@@ -47,22 +47,6 @@ class Scans extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.scans && nextProps.scans !== this.props.scans) {
-      nextProps.scans.forEach(scan => {
-        scan.systems_scanned = Math.abs(scan.systems_scanned) % 100;
-        scan.systems_failed = Math.abs(scan.systems_failed) % 100;
-        scan.scans_count = Math.floor(Math.random() * 10);
-
-        // TODO: Get real hosts or wait until expansion?
-        scan.hosts = [];
-        for (let i = 0; i < scan.systems_scanned; i++) {
-          scan.hosts.push('host' + (i + 1));
-        }
-        scan.failed_hosts = [];
-        for (let i = 0; i < scan.systems_failed; i++) {
-          scan.failed_hosts.push('failedHost' + (i + 1));
-        }
-      });
-
       this.setState({ selectedItems: [] });
     }
 
@@ -91,7 +75,7 @@ class Scans extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Scan <strong>{_.get(results, 'data.id')}</strong> {actionText}.
+            Scan <strong>{_.get(results, 'data.name')}</strong> {actionText}.
           </span>
         )
       });
@@ -123,7 +107,7 @@ class Scans extends React.Component {
 
   doStartScan(item) {
     this.props
-      .restartScan(item.id)
+      .startScan(item.id)
       .then(
         response => this.notifyActionStatus('started', false, response.value),
         error => this.notifyActionStatus('started', true, error.message)
@@ -280,6 +264,7 @@ class Scans extends React.Component {
 
 Scans.propTypes = {
   getScans: PropTypes.func,
+  startScan: PropTypes.func,
   pauseScan: PropTypes.func,
   cancelScan: PropTypes.func,
   restartScan: PropTypes.func,
@@ -292,6 +277,7 @@ Scans.propTypes = {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getScans: queryObj => dispatch(getScans(queryObj)),
+  startScan: id => dispatch(startScan(id)),
   pauseScan: id => dispatch(pauseScan(id)),
   restartScan: id => dispatch(restartScan(id)),
   cancelScan: id => dispatch(cancelScan(id))

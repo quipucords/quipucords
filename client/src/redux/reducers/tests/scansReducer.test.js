@@ -34,6 +34,7 @@ const initialState = {
     pending: false,
     fulfilled: false,
     add: false,
+    start: false,
     cancel: false,
     pause: false,
     restart: false
@@ -317,6 +318,7 @@ describe('scansReducer', function() {
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('ADD ERROR');
     expect(resultState.action.add).toBeTruthy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -336,6 +338,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeTruthy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -356,6 +359,78 @@ describe('scansReducer', function() {
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeTruthy();
+    expect(resultState.action.start).toBeFalsy();
+    expect(resultState.action.cancel).toBeFalsy();
+    expect(resultState.action.pause).toBeFalsy();
+    expect(resultState.action.restart).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle START_SCAN_REJECTED', () => {
+    let dispatched = {
+      type: scansTypes.START_SCAN_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'START ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.action.error).toBeTruthy();
+    expect(resultState.action.errorMessage).toEqual('START ERROR');
+    expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeTruthy();
+    expect(resultState.action.cancel).toBeFalsy();
+    expect(resultState.action.pause).toBeFalsy();
+    expect(resultState.action.restart).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle START_SCAN_PENDING', () => {
+    let dispatched = {
+      type: scansTypes.START_SCAN_PENDING
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.action.pending).toBeTruthy();
+    expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeTruthy();
+    expect(resultState.action.cancel).toBeFalsy();
+    expect(resultState.action.pause).toBeFalsy();
+    expect(resultState.action.restart).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle START_SCAN_FULFILLED', () => {
+    let dispatched = {
+      type: scansTypes.START_SCAN_FULFILLED,
+      payload: {}
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.action.fulfilled).toBeTruthy();
+    expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeTruthy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -385,6 +460,7 @@ describe('scansReducer', function() {
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('CANCEL ERROR');
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeTruthy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -404,6 +480,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeTruthy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -424,6 +501,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeTruthy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
@@ -453,6 +531,7 @@ describe('scansReducer', function() {
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('PAUSE ERROR');
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
@@ -472,6 +551,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
@@ -492,6 +572,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
@@ -521,6 +602,7 @@ describe('scansReducer', function() {
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('RESTART ERROR');
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
@@ -540,6 +622,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
@@ -560,6 +643,7 @@ describe('scansReducer', function() {
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
+    expect(resultState.action.start).toBeFalsy();
     expect(resultState.action.cancel).toBeFalsy();
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
