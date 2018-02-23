@@ -40,6 +40,10 @@ urlpatterns = [
         name='home'),
 
     # static files (*.css, *.js, *.jpg etc.)
+    url(r'^(client/(sources|scans|credentials|))$',
+        RedirectView.as_view(url='/client/index.html', permanent=False),
+        name='client'),
+
     url(r'^(?!/?client/)(?P<path>.*\..*)$',
         RedirectView.as_view(url='/client/%(path)s', permanent=False),
         name='client'),
