@@ -318,7 +318,7 @@ A scan defines a collection of network information, including the sources to sca
 Creating and Editing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user.
-**qpc scan add --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **[--disable-optional-products=** *products_list* **]**
+**qpc scan add --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **[--disable-optional-products=** *products_list* **]**
 
 ``--sources=source_list``
 
@@ -336,7 +336,7 @@ The information in a scan might change as the structure of the network changes. 
 
 Although ``qpc scan`` options can accept more than one value, the ``qpc scan edit`` command is not additive. To edit a scan and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc scan edit`` command. Options that are not included are not changed.
 
-**qpc scan edit --name** *name* --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
+**qpc scan edit --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
 For example, if a scan contains a value of ``network1source`` for the ``--sources`` option, and you want to change that scan to use both the ``network1source`` and ``satellite1source`` sources, you would edit the scan as follows:
 
