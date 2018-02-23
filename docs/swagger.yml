@@ -1329,6 +1329,13 @@ definitions:
             items:
               $ref: "#/definitions/SourceMin"
             description: "The list of sources"
+          jobs:
+            type: "array"
+            items:
+              $ref: "#/definitions/JobMin"
+          most_recent:
+            type: "object"
+            $ref: "#/definitions/JobMostRecent"
       - $ref: "#/definitions/Scan"
   ScanPagination:
     allOf:
@@ -1465,6 +1472,60 @@ definitions:
             items:
               $ref: "#/definitions/ScanJobOut"
             description: "The paginated scan jobs"
+  JobMostRecent:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        example: 42
+      report_id:
+        type: "integer"
+        format: "int64"
+        example: 3
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      systems_count:
+        type: "integer"
+        format: "int64"
+        example: 21
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        example: 20
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        example: 1
+      status:
+        type: "string"
+        description: "The status of the scan."
+        example: "completed"
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+  JobMin:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      report_id:
+        type: "integer"
+        format: "int64"
   SysConnResultOut:
     type: "object"
     required:
