@@ -371,9 +371,6 @@ class ScanTest(TestCase):
         json_scan = serializer.data
         json_scan = expand_scan(json_scan)
 
-        print('#' * 120)
-        print(json_scan)
-
         self.assertEqual(json_scan.get(
             'sources').first().get('name'), 'source1')
         self.assertEqual(
