@@ -51,7 +51,7 @@ class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
     # pylint: disable=too-many-instance-attributes
-    scan = models.ForeignKey(Scan, null=True)
+    scan = models.ForeignKey(Scan, related_name='jobs', null=True)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
@@ -108,6 +108,7 @@ class ScanJob(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
+        ordering = ['-start_time']
 
     def copy_scan_configuration(self):
         """Copy scan info into the job."""
