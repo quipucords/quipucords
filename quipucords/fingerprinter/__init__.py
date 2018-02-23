@@ -15,8 +15,11 @@ import logging
 import uuid
 from datetime import datetime
 import django.dispatch
-from api.models import FactCollection, Source
+from api.models import FactCollection, Source, Product
 from api.serializers import FingerprintSerializer
+from fingerprinter.jboss_eap import detect_jboss_eap
+from fingerprinter.jboss_fuse import detect_jboss_fuse
+from fingerprinter.jboss_brms import detect_jboss_brms
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -41,8 +44,10 @@ NETWORK_VCENTER_MERGE_KEYS = [
 FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
 
 META_DATA_KEY = 'metadata'
-
 ENTITLEMENTS_KEY = 'entitlements'
+PRODUCTS_KEY = 'products'
+NAME_KEY = 'name'
+PRESENCE_KEY = 'presence'
 
 
 def process_fact_collection(sender, instance, **kwargs):
@@ -402,6 +407,7 @@ def _create_index_for_fingerprints(id_key,
     return result_by_key, key_not_found_list
 
 
+# pylint: disable=too-many-branches
 def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     """Merge two fingerprints.
 
@@ -430,8 +436,29 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
         if ENTITLEMENTS_KEY not in priority_fingerprint:
             priority_fingerprint[ENTITLEMENTS_KEY] = []
-        for entitlement in to_merge_fingerprint.get(ENTITLEMENTS_KEY):
-            priority_fingerprint[ENTITLEMENTS_KEY].append(entitlement)
+        priority_fingerprint[ENTITLEMENTS_KEY] += \
+            to_merge_fingerprint.get(ENTITLEMENTS_KEY, [])
+
+    if to_merge_fingerprint.get(PRODUCTS_KEY):
+        if PRODUCTS_KEY not in priority_fingerprint:
+            priority_fingerprint[PRODUCTS_KEY] = \
+                to_merge_fingerprint.get(PRODUCTS_KEY, [])
+        else:
+            priority_prod_dict = {}
+            priority_prod = priority_fingerprint.get(PRODUCTS_KEY, [])
+            to_merge_prod = to_merge_fingerprint.get(PRODUCTS_KEY, [])
+            for prod in priority_prod:
+                priority_prod_dict[prod[NAME_KEY]] = prod
+            for prod in to_merge_prod:
+                merge_prod = priority_prod_dict.get(prod[NAME_KEY])
+                presence = merge_prod.get(PRESENCE_KEY)
+                if (merge_prod and presence == Product.ABSENT and
+                        prod.get(PRESENCE_KEY) != Product.ABSENT):
+                    priority_prod_dict[prod[NAME_KEY]] = prod
+                elif merge_prod is None:
+                    priority_prod_dict[prod[NAME_KEY]] = prod
+            priority_fingerprint[PRODUCTS_KEY] = list(
+                priority_prod_dict.values())
 
     return priority_fingerprint
 
@@ -475,11 +502,26 @@ def add_fact_to_fingerprint(source,
         }
 
 
-# pylint: disable=C0103
-def add_fact_entitlements_to_fingerprint(source,
-                                         raw_fact_key,
-                                         raw_fact,
-                                         fingerprint):
+def add_products_to_fingerprint(source,
+                                raw_fact,
+                                fingerprint):
+    """Create the fingerprint products with fact and metadata.
+
+    :param source: Source used to gather raw facts.
+    :param raw_fact: Raw fact used used to obtain value
+    :param fingerprint: dict containing all fingerprint facts
+    this fact.
+    """
+    eap = detect_jboss_eap(source, raw_fact)
+    fuse = detect_jboss_fuse(source, raw_fact)
+    brms = detect_jboss_brms(source, raw_fact)
+    fingerprint['products'] = [eap, fuse, brms]
+
+
+def add_entitlements_to_fingerprint(source,
+                                    raw_fact_key,
+                                    raw_fact,
+                                    fingerprint):
     """Create the fingerprint entitlements with fact and metadata.
 
     :param source: Source used to gather raw facts.
@@ -497,9 +539,8 @@ def add_fact_entitlements_to_fingerprint(source,
     actual_fact_value = None
     if raw_fact.get(raw_fact_key) is not None:
         actual_fact_value = raw_fact.get(raw_fact_key)
-
+    entitlements = []
     if actual_fact_value is not None and isinstance(actual_fact_value, list):
-        entitlements = []
         for entitlement in actual_fact_value:
             add = False
             f_ent = {}
@@ -519,8 +560,11 @@ def add_fact_entitlements_to_fingerprint(source,
                 entitlements.append(f_ent)
 
         fingerprint[ENTITLEMENTS_KEY] = entitlements
+    else:
+        fingerprint[ENTITLEMENTS_KEY] = entitlements
 
 
+# pylint: disable=R0915
 def _process_network_fact(source, fact):
     """Process a fact and convert to a fingerprint.
 
@@ -580,15 +624,23 @@ def _process_network_fact(source, fact):
     raw_fact_key = None
     if fact.get('date_anaconda_log'):
         raw_fact_key = 'date_anaconda_log'
-        system_creation_date = datetime.strptime(
-            fact['date_anaconda_log'], '%Y-%m-%d')
+        try:
+            system_creation_date = datetime.strptime(
+                fact['date_anaconda_log'], '%Y-%m-%d')
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['date_anaconda_log'], date_err)
 
     if system_creation_date and fact.get('date_yum_history'):
-        date_yum_history = datetime.strptime(
-            fact['date_yum_history'], '%Y-%m-%d')
-        if date_yum_history < system_creation_date:
-            raw_fact_key = 'date_yum_history'
-            system_creation_date = date_yum_history
+        try:
+            date_yum_history = datetime.strptime(
+                fact['date_yum_history'], '%Y-%m-%d')
+            if date_yum_history < system_creation_date:
+                raw_fact_key = 'date_yum_history'
+                system_creation_date = date_yum_history
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['date_yum_history'], date_err)
 
     if system_creation_date:
         add_fact_to_fingerprint(source, raw_fact_key, fact,
@@ -633,8 +685,9 @@ def _process_network_fact(source, fact):
                             fact, 'virtualized_num_running_guests',
                             fingerprint)
 
-    add_fact_entitlements_to_fingerprint(source, 'subman_consumed',
-                                         fact, fingerprint)
+    add_entitlements_to_fingerprint(source, 'subman_consumed',
+                                    fact, fingerprint)
+    add_products_to_fingerprint(source, fact, fingerprint)
 
     return fingerprint
 
@@ -689,6 +742,9 @@ def _process_vcenter_fact(source, fact):
                             fact, 'vm_datacenter', fingerprint)
     add_fact_to_fingerprint(source, 'vm.cluster', fact,
                             'vm_cluster', fingerprint)
+
+    fingerprint[ENTITLEMENTS_KEY] = []
+    fingerprint[PRODUCTS_KEY] = []
 
     return fingerprint
 
@@ -748,8 +804,19 @@ def _process_satellite_fact(source, fact):
     add_fact_to_fingerprint(source, 'num_sockets', fact,
                             'cpu_socket_count', fingerprint)
 
-    add_fact_entitlements_to_fingerprint(source, 'entitlements',
-                                         fact, fingerprint)
+    reg_time = fact.get('registration_time')
+    if reg_time:
+        try:
+            dt_obj = datetime.strptime(reg_time, '%Y-%m-%d %H:%M:%S UTC')
+            add_fact_to_fingerprint(source, 'registration_time', fact,
+                                    'system_creation_date', fingerprint,
+                                    fact_value=dt_obj.date())
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s', reg_time, date_err)
+
+    add_entitlements_to_fingerprint(source, 'entitlements',
+                                    fact, fingerprint)
+    add_products_to_fingerprint(source, fact, fingerprint)
 
     return fingerprint
 

@@ -148,8 +148,20 @@ class CSVHelper:
         """Generate column headers from fact list."""
         headers = set()
         for fact in fact_list:
+            fact_addon = {}
             for fact_key in fact.keys():
-                headers.add(fact_key)
+                if fact_key == 'products':
+                    prods = fact.get(fact_key, [])
+                    for prod in prods:
+                        prod_name = prod.get('name')
+                        if prod_name:
+                            prod_name = prod_name.lower()
+                            headers.add(prod_name)
+                            fact_addon[prod_name] = prod.get('presence',
+                                                             'unknown')
+                else:
+                    headers.add(fact_key)
+            fact.update(fact_addon)
 
         if exclude and isinstance(exclude, set):
             headers = headers - exclude
