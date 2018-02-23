@@ -60,3 +60,9 @@ class ConfigureHostCommand(CliCommand):
                          'use_http': self.args.use_http,
                          'ssl_verify': self.args.ssl_verify}
         write_server_config(server_config)
+        protocol = 'https'
+        if self.args.use_http:
+            protocol = 'http'
+        print(_(messages.SERVER_CONFIG_SUCCESS) % (protocol,
+                                                   self.args.host,
+                                                   self.args.port))

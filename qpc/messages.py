@@ -198,6 +198,8 @@ SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
 SERVER_CONFIG_PORT_HELP = 'Port number for the server; the default is 443.'
 SERVER_CONFIG_SSL_CERT_HELP = 'File path to the SSL certificate '\
     'to use for verification.'
+SERVER_CONFIG_SUCCESS = 'Server connectivity was successfully configured. '\
+    'The server will be contacted via "%s" at host "%s" with port "%s".'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
 LOGIN_USERNAME_PROMPT = 'User name: '
