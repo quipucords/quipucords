@@ -151,7 +151,7 @@ class CSVHelper:
             fact_addon = {}
             for fact_key in fact.keys():
                 if fact_key == 'products':
-                    prods = fact.get(fact_key)
+                    prods = fact.get(fact_key, [])
                     for prod in prods:
                         prod_name = prod.get('name')
                         if prod_name:

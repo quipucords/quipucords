@@ -444,7 +444,6 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
             priority_fingerprint[PRODUCTS_KEY] = \
                 to_merge_fingerprint.get(PRODUCTS_KEY, [])
         else:
-            merged_products = []
             priority_prod_dict = {}
             priority_prod = priority_fingerprint.get(PRODUCTS_KEY, [])
             to_merge_prod = to_merge_fingerprint.get(PRODUCTS_KEY, [])
@@ -458,9 +457,8 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
                     priority_prod_dict[prod[NAME_KEY]] = prod
                 elif merge_prod is None:
                     priority_prod_dict[prod[NAME_KEY]] = prod
-            for _, prod in priority_prod_dict:
-                merged_products.append(prod)
-            priority_fingerprint[PRODUCTS_KEY] = merged_products
+            priority_fingerprint[PRODUCTS_KEY] = list(
+                priority_prod_dict.values())
 
     return priority_fingerprint
 
