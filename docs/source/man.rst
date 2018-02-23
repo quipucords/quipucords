@@ -363,6 +363,21 @@ The ``qpc scan show`` command is the same as the ``qpc scan list`` command, exce
 
   Required. Contains the name of the scan object to display.
 
+Clearing Scans
+~~~~~~~~~~~~~~
+
+As the network infrastructure changes, it might be necessary to delete some scan objects. Use the ``qpc scan clear`` command to delete scans.
+
+**qpc scan clear (--name=** *name* **| --all)**
+
+``--name=name``
+
+  Contains the name of the source to clear. Mutually exclusive with the ``--all`` option.
+
+``--all``
+
+  Clears all stored scan objects. Mutually exclusive with the ``--name`` option
+
 Scanning
 --------
 
@@ -434,22 +449,6 @@ The ``qpc scan cancel`` command cancels the execution of a scan job. A canceled 
 ``--id=scan_job_identifier``
 
   Required. Contains the identifier of the scan job to cancel.
-
-
-Clearing Scans
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As the network infrastructure changes, it might be necessary to delete some scan objects. Use the ``qpc scan clear`` command to delete scans.
-
-**qpc scan clear (--name=** *name* **| --all)**
-
-``--name=name``
-
-  Contains the name of the source to clear. Mutually exclusive with the ``--all`` option.
-
-``--all``
-
-  Clears all stored scan objects. Mutually exclusive with the ``--name`` option
 
 
 Reports
