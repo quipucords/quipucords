@@ -15,7 +15,7 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "sassDepIncludes": "--include-path node_modules/patternfly/dist/sass --include-path node_modules/patternfly/node_modules/bootstrap-sass/assets/stylesheets --include-path node_modules/patternfly/node_modules/font-awesome-sass/assets/stylesheets",
+  "sassDepIncludes": "--include-path node_modules/patternfly/dist/sass --include-path node_modules/bootstrap-sass/assets/stylesheets --include-path node_modules/font-awesome-sass/assets/stylesheets",
   "scripts": {
     "api:dev": "sh ./scripts/api.sh -p 4000 -f \"$(pwd)/../docs/swagger.yml\"",
     "api:stage": "sh ./scripts/api.sh -p 4001 -t stage -d \"$(pwd)/build\"",
@@ -46,10 +46,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "^3.3.7",
+    "detect-browser": "^1.9.0",
     "js-cookie": "^2.2.0",
     "moment": "^2.20.1",
     "patternfly": "^3.40.0",
-    "patternfly-react": "^1.9.1",
+    "patternfly-react": "^1.9.3",
     "rcue": "^3.40.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",

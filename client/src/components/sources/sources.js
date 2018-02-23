@@ -55,17 +55,6 @@ class Sources extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.sources && nextProps.sources !== this.props.sources) {
-      // TODO: Remove once we get real failed host data
-      nextProps.sources.forEach(source => {
-        let failedCount = Math.floor(Math.random() * 10);
-        source.failed_hosts = [];
-        for (let i = 0; i < failedCount; i++) {
-          source.failed_hosts.push('failedHost' + (i + 1));
-        }
-      });
-    }
-
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
       this.props.getSources(helpers.createViewQueryObject(nextProps.viewOptions));
@@ -86,7 +75,7 @@ class Sources extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Started new scan <strong>{_.get(results, 'data.id')}</strong>.
+            Started new scan <strong>{_.get(results, 'data.name')}</strong>.
           </span>
         )
       });
@@ -175,6 +164,7 @@ class Sources extends React.Component {
     const { addScan } = this.props;
 
     let data = {
+      name: scanName,
       sources: sources.map(item => item.id)
     };
 
