@@ -44,13 +44,13 @@ class ScanJobCliTests(unittest.TestCase):
         sys.stderr = self.orig_stderr
 
     def test_scan_job_ssl_err(self):
-        """Testing the scan job command with a connection error."""
+        """Testing the scan job command with an ssl error."""
         scan_out = StringIO()
         url = get_server_location() + SCAN_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1')
+            args = Namespace(name='scan1', id=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     sjc.main(args)
@@ -63,7 +63,7 @@ class ScanJobCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1')
+            args = Namespace(name='scan1', id=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     sjc.main(args)
@@ -77,7 +77,7 @@ class ScanJobCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1')
+            args = Namespace(name='scan1', id=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     sjc.main(args)
@@ -90,7 +90,7 @@ class ScanJobCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json={'count': 0})
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1')
+            args = Namespace(name='scan1', id=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     sjc.main(args)
@@ -123,7 +123,7 @@ class ScanJobCliTests(unittest.TestCase):
             mocker.get(url, status_code=200, json=data)
             mocker.get(urlscanjob, status_code=200, json=scan_job)
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1', id='1')
+            args = Namespace(name=None, id='1', status=None)
             with redirect_stdout(scan_out):
                 sjc.main(args)
                 expected = '{"id":1,"scan":"scan1","status":"completed"}'
@@ -160,7 +160,7 @@ class ScanJobCliTests(unittest.TestCase):
             mocker.get(url, status_code=200, json=data)
             mocker.get(urlscanjob, status_code=200, json=scan_job)
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1', status='completed')
+            args = Namespace(name='scan1', status='completed', id=None)
             with redirect_stdout(scan_out):
                 sjc.main(args)
                 expected = '[{"id":1,"scan":"scan1","status":"completed"},' \
@@ -187,7 +187,7 @@ class ScanJobCliTests(unittest.TestCase):
         }
         # set up scan jobs
         urlscanjob = get_server_location() + SCAN_URI + '1/jobs/'
-        scan_job = {'count': 3,
+        scan_job = {'count': 2,
                     'results': [{'id': 1,
                                  'status': 'completed',
                                  'scan': 'scan1'},
@@ -198,10 +198,75 @@ class ScanJobCliTests(unittest.TestCase):
             mocker.get(url, status_code=200, json=data)
             mocker.get(urlscanjob, status_code=200, json=scan_job)
             sjc = ScanJobCommand(SUBPARSER)
-            args = Namespace(name='scan1')
+            args = Namespace(name='scan1', id=None)
             with redirect_stdout(scan_out):
                 sjc.main(args)
                 expected = '[{"id":1,"scan":"scan1","status":"completed"},' \
                            '{"id":2,"scan":"scan1","status":"running"}]'
                 self.assertEqual(scan_out.getvalue().replace('\n', '')
                                  .replace(' ', '').strip(), expected)
+
+    def test_scan_job_name_and_id(self):
+        """Testing the scan job with name & id."""
+        scan_out = StringIO()
+        sjc = ScanJobCommand(SUBPARSER)
+        args = Namespace(name='scan1', id=1)
+        with self.assertRaises(SystemExit):
+            with redirect_stdout(scan_out):
+                sjc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_JOB_NAME_ID + '\n')
+
+    def test_scan_job_no_name_or_id(self):
+        """Testing the scan job with no name or id."""
+        scan_out = StringIO()
+        sjc = ScanJobCommand(SUBPARSER)
+        args = Namespace(name=None, id=None)
+        with self.assertRaises(SystemExit):
+            with redirect_stdout(scan_out):
+                sjc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_JOB_NO_ARGS + '\n')
+
+    def test_scan_job_id_and_status(self):
+        """Testing the scan job with id and status filter."""
+        scan_out = StringIO()
+        sjc = ScanJobCommand(SUBPARSER)
+        args = Namespace(name=None, id=1, status='completed')
+        with self.assertRaises(SystemExit):
+            with redirect_stdout(scan_out):
+                sjc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_JOB_ID_STATUS + '\n')
+
+    def test_scan_job_no_jobs(self):
+        """Testing the scan job with no jobs."""
+        scan_out = StringIO()
+        url = get_server_location() + SCAN_URI
+        # set up scan object
+        scan_entry = {'id': 1,
+                      'name': 'scan1',
+                      'scan_type': 'inspect',
+                      'source': {
+                          'id': 1,
+                          'name': 'scan1'}}
+        results = [scan_entry]
+        data = {
+            'count': 1,
+            'next': None,
+            'results': results
+        }
+        # set up no scan jobs
+        urlscanjob = get_server_location() + SCAN_URI + '1/jobs/'
+        scan_job = {'count': 0,
+                    'results': []}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url, status_code=200, json=data)
+            mocker.get(urlscanjob, status_code=200, json=scan_job)
+            sjc = ScanJobCommand(SUBPARSER)
+            args = Namespace(name='scan1', id=None)
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(scan_out):
+                    sjc.main(args)
+                    self.assertEqual(scan_out.getvalue(),
+                                     messages.SCAN_LIST_NO_SCANS)

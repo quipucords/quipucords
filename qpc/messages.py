@@ -137,6 +137,11 @@ SCAN_PARTIAL_REMOVE = 'Some scans were removed. However, an error '\
     'information, see the server log file.'
 SCAN_CLEAR_ALL_SUCCESS = 'All scans were removed.'
 SCAN_EDIT_NO_ARGS = 'No arguments were provided to edit scan %s.'
+SCAN_JOB_NO_ARGS = 'No scan name or job id was provided to the job command.'
+SCAN_JOB_NAME_ID = 'Provide either a scan name to list all related jobs, or '\
+    'a scan job identifier to list a specific job.'
+SCAN_JOB_ID_STATUS = 'Provide the "--status" filter with a scan name to '\
+    'filter the list of related scan jobs.'
 SCAN_EDIT_SOURCES_NOT_FOUND = 'An error occurred while processing the '\
     '"--sources" input values. References for the following sources '\
     'could not be found: %s. Failed to edit scan "%s". For more '\

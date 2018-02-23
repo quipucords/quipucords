@@ -13,7 +13,6 @@
 
 from __future__ import print_function
 import sys
-import urllib.parse as urlparse
 from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
@@ -42,7 +41,7 @@ class ScanJobCommand(CliCommand):
                             scan.SCAN_URI, [codes.ok])
         self.parser.add_argument('--name', dest='name', metavar='NAME',
                                  help=_(messages.SCAN_NAME_HELP),
-                                 required=True)
+                                 required=False)
         self.parser.add_argument('--id', dest='id',
                                  metavar='ID',
                                  help=_(messages.SCAN_JOB_ID_HELP),
@@ -59,16 +58,36 @@ class ScanJobCommand(CliCommand):
                                  help=_(messages.SCAN_STATUS_FILTER_HELP),
                                  required=False)
 
+    def _validate_args(self):
+        """Validate the scan job arguments."""
+        CliCommand._validate_args(self)
+        # Check to see if args were provided
+        error = False
+        if not(self.args.name or self.args.id):
+            print(_(messages.SCAN_JOB_NO_ARGS))
+            error = True
+        elif self.args.name and self.args.id:
+            print(_(messages.SCAN_JOB_NAME_ID))
+            error = True
+        elif self.args.id and self.args.status:
+            print(_(messages.SCAN_JOB_ID_STATUS))
+            error = True
+        if error:
+            self.parser.print_usage()
+            sys.exit(1)
+
     def _build_req_params(self):
         """Add filter by scan_type/state query param."""
-        found, scan_object_id = _get_scan_object_id(self.parser,
-                                                    self.args.name)
-        if not found:
-            sys.exit(1)
+        if 'name' in self.args and self.args.name:
+            found, scan_object_id = _get_scan_object_id(self.parser,
+                                                        self.args.name)
+            if found:
+                self.req_path += scan_object_id + 'jobs/'
+            else:
+                sys.exit(1)
         if 'id' in self.args and self.args.id:
             self.req_path = scan.SCAN_JOB_URI + self.args.id + '/'
-        else:
-            self.req_path += scan_object_id + 'jobs/'
+
         if 'status' in self.args and self.args.status:
             self.req_params = {'status': self.args.status}
 
@@ -84,27 +103,12 @@ class ScanJobCommand(CliCommand):
                 if 'id' in self.args and self.args.id:
                     data = pretty_print(json_data)
                     print(data)
-                elif 'status' in self.args \
-                        and self.args.status \
-                        and (results != []):
-                    data = pretty_print(json_data)
-                    print(data)
                 else:
                     print(_(messages.SCAN_LIST_NO_SCANS))
                     sys.exit(1)
             else:
                 data = pretty_print(results)
                 print(data)
-            if json_data.get('next'):
-                next_link = json_data.get('next')
-                params = urlparse.parse_qs(urlparse.urlparse(next_link).query)
-                page = params.get('page', ['1'])[0]
-                if self.req_params:
-                    self.req_params['page'] = page
-                else:
-                    self.req_params = {'page': page}
-                input(_(messages.NEXT_RESULTS))
-                self._do_command()
         else:
             print(_(messages.SCAN_LIST_NO_SCANS))
             sys.exit(1)
