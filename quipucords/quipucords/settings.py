@@ -201,8 +201,16 @@ QUIPUCORDS_LOGGING_LEVEL = os.getenv('QUIPUCORDS_LOG_LEVEL', 'INFO')
 LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
 VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
     '%(process)d %(thread)d %(message)s'
-DEFAULT_LOG_FILE = os.path.join(BASE_DIR, 'app.log')
+
+LOG_DIRECTORY = os.getenv('LOG_DIRECTORY', BASE_DIR)
+DEFAULT_LOG_FILE = os.path.join(LOG_DIRECTORY, 'app.log')
 LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
+
+DEFAULT_SCAN_DATA_LOG = os.path.join(LOG_DIRECTORY, 'scan_data_log')
+SCAN_DATA_LOG = os.getenv('SCAN_DATA_LOG', DEFAULT_SCAN_DATA_LOG)
+SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
+                                    1 << 30)  # default 1 GB
+
 
 LOGGING = {
     'version': 1,
@@ -282,12 +290,6 @@ LOGGING = {
         },
     },
 }
-
-DEFAULT_SCAN_DATA_LOG_BASENAME = os.path.join(BASE_DIR, 'scan_data_log')
-SCAN_DATA_LOG_BASENAME = os.getenv('SCAN_DATA_LOG',
-                                   DEFAULT_SCAN_DATA_LOG_BASENAME)
-SCAN_DATA_LOG_MAX_BYTES = os.getenv('QUIPU_LOG_MAX_BYTES',
-                                    1 << 30)  # default 1 GB
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')

@@ -96,7 +96,7 @@ class MultiprocessRotatingFileHandler(handlers.RotatingFileHandler):
 
 
 _HANDLER = MultiprocessRotatingFileHandler(
-    filename=settings.SCAN_DATA_LOG_BASENAME,
+    filename=settings.SCAN_DATA_LOG,
     encoding='utf-8',
     maxBytes=settings.SCAN_DATA_LOG_MAX_BYTES // NUM_LOG_FILES,
     backupCount=NUM_LOG_FILES)
@@ -115,7 +115,7 @@ def log_record(record):
 
     if record['sequence_number'] % 100 == 0:
         logger.info('Logging scan data to %s, dry_run=%s',
-                    settings.SCAN_DATA_LOG_BASENAME, _DRY_RUN)
+                    settings.SCAN_DATA_LOG, _DRY_RUN)
 
     if not _DRY_RUN:
         _HANDLER.emit(record)
