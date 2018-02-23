@@ -317,9 +317,8 @@ A scan defines a collection of network information, including the sources to sca
 
 Creating and Editing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user. Each instance of a scan object is assigned a unique *identifier* to identify the scan jobs that are associated with that scan.
-
-**qpc scan add --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
+Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user.
+**qpc scan add --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **[--disable-optional-products=** *products_list* **]**
 
 ``--sources=source_list``
 
@@ -339,9 +338,9 @@ Although ``qpc scan`` options can accept more than one value, the ``qpc scan edi
 
 **qpc scan edit --name** *name* --name** *name* --sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disable-optional-products=** *products_list*
 
-For example, if a scan contains a value of ``network1sources`` for the ``--sources`` option, and you want to change that scan to use both the ``network1sources`` and ``network2sources`` sources, you would edit the scan as follows:
+For example, if a scan contains a value of ``network1source`` for the ``--sources`` option, and you want to change that scan to use both the ``network1source`` and ``satellite1source`` sources, you would edit the scan as follows:
 
-``qpc scan edit --name=myscan --sources network1sources network2sources``
+``qpc scan edit --name=myscan --sources network1source satellite1source``
 
 **TIP:** After editing a scan use the ``qpc scan show`` command to review those edits.
 
@@ -355,6 +354,30 @@ The ``qpc scan list`` command returns the summary details for all created scan o
 ``--type=type``
 
   Optional. Filters the results by scan type. This value must be ``connect`` or ``inspect``. A scan of type ``connect`` is a scan that began the process of connecting to the defined systems in the sources, but did not transition into inspecting the contents of those systems. A scan of type ``inspect`` is a scan that moves into the inspection process.
+
+The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns summary details for a single specified scan object.
+
+**qpc scan show --name** *name*
+
+``--name=name``
+
+  Required. Contains the name of the scan object to display.
+
+Scanning
+--------
+
+Use the ``qpc scan start`` command to create and run a scan job from an existing scan object. This command scans all of the host names or IP addresses that are defined in the supplied sources of the scan object from which the job is created. Each instance of a scan job is assigned a unique *identifier* to identify the scan results, so that the results data can be viewed later.
+
+**IMPORTANT:** If any ssh-agent connection is set up for a target host, that connection will be used as a fallback connection.
+
+**qpc scan start --name** *scan_name*
+
+``--name=name``
+
+  Contains the name of the scan object to run.
+
+Viewing Scans jobs
+~~~~~~~~~~~~~~~~~~
 
 The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
 
@@ -372,13 +395,6 @@ The ``qpc scan job`` command returns the the list of scan jobs or a single scan 
 
   Optional. Filters the results by scan job state. This value must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed``, or ``failed``.
 
-The ``qpc scan show`` command is the same as the ``qpc scan list`` command, except that it returns summary details for a single specified scan object.
-
-**qpc scan show --name** *name*
-
-``--name=name``
-
-  Required. Contains the name of the scan object to display.
 
 The ``qpc scan status`` command returns the status details for a single specified scan job.
 
@@ -387,19 +403,6 @@ The ``qpc scan status`` command returns the status details for a single specifie
 ``--id=scan_job_identifier``
 
   Required. Contains the identifier of the scan job to show.
-
-Scanning
---------
-
-Use the ``qpc scan start`` command to create and run a scan job from an existing scan object. This command scans all of the host names or IP addresses that are defined in the supplied sources of the scan object from which the job is created. Each instance of a scan job is assigned a unique *identifier* to identify the scan results, so that the results data can be viewed later.
-
-**IMPORTANT:** If any ssh-agent connection is set up for a target host, that connection will be used as a fallback connection.
-
-**qpc scan start --name** *scan_name*
-
-``--name=name``
-
-  Contains the name of the scan object to run.
 
 Controlling Scans
 ~~~~~~~~~~~~~~~~~
