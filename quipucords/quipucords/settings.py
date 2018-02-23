@@ -206,8 +206,9 @@ LOG_DIRECTORY = os.getenv('LOG_DIRECTORY', BASE_DIR)
 DEFAULT_LOG_FILE = os.path.join(LOG_DIRECTORY, 'app.log')
 LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
 
-DEFAULT_SCAN_DATA_LOG = os.path.join(LOG_DIRECTORY, 'scan_data_log')
-SCAN_DATA_LOG = os.getenv('SCAN_DATA_LOG', DEFAULT_SCAN_DATA_LOG)
+DEFAULT_SCAN_DATA_LOG_FILE = os.path.join(LOG_DIRECTORY, 'scan_data.log')
+SCAN_DATA_LOG_FILE = os.getenv('SCAN_DATA_LOG_FILE',
+                               DEFAULT_SCAN_DATA_LOG_FILE)
 SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
                                     1 << 30)  # default 1 GB
 DISABLE_SCAN_DATA_LOG = 'DISABLE_SCAN_DATA_LOG' in os.environ

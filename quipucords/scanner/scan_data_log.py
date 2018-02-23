@@ -55,7 +55,7 @@ class MultiprocessRotatingFileHandler(handlers.RotatingFileHandler):
 
 
 _HANDLER = MultiprocessRotatingFileHandler(
-    filename=settings.SCAN_DATA_LOG,
+    filename=settings.SCAN_DATA_LOG_FILE,
     encoding='utf-8',
     maxBytes=settings.SCAN_DATA_LOG_MAX_BYTES // NUM_LOG_FILES,
     backupCount=NUM_LOG_FILES)

@@ -32,12 +32,11 @@ class ConnectResultCallback(CallbackBase):
     scan, as we scan it.
     """
 
-    def __init__(self, result_store, credential, scan_task, display=None):
+    def __init__(self, result_store, credential, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.result_store = result_store
         self.credential = credential
-        self.scan_task = scan_task
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
