@@ -154,11 +154,15 @@ class SystemFingerprint(models.Model):
 class Product(models.Model):
     """Represents a product."""
 
+    PRESENT = 'present'
+    ABSENT = 'absent'
+    POTENTIAL = 'potential'
+    UNKNOWN = 'unknown'
     PRESENCE_TYPE = (
-        ('present', 'Present'),
-        ('absent', 'Absent'),
-        ('potential', 'Potential'),
-        ('unknown', 'Unknown')
+        (PRESENT, 'Present'),
+        (ABSENT, 'Absent'),
+        (POTENTIAL, 'Potential'),
+        (UNKNOWN, 'Unknown')
     )
 
     fingerprint = models.ForeignKey(SystemFingerprint,
