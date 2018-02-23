@@ -35,6 +35,7 @@ const initialState = {
     pending: false,
     fulfilled: false,
     add: false,
+    start: false,
     cancel: false,
     pause: false,
     restart: false
@@ -211,6 +212,51 @@ const scansReducer = function(state = initialState, action) {
         'action',
         {
           add: true,
+          pending: false,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Error/Rejected
+    case scansTypes.START_SCAN_REJECTED:
+      return helpers.setStateProp(
+        'action',
+        {
+          pending: false,
+          start: true,
+          error: action.error,
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Loading/Pending
+    case scansTypes.START_SCAN_PENDING:
+      return helpers.setStateProp(
+        'action',
+        {
+          start: true,
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Success/Fulfilled
+    case scansTypes.START_SCAN_FULFILLED:
+      return helpers.setStateProp(
+        'action',
+        {
+          start: true,
           pending: false,
           fulfilled: true
         },

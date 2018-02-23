@@ -11,6 +11,17 @@ class ScansService {
     });
   }
 
+  static startScan(id) {
+    let apiPath = process.env.REACT_APP_SCANS_SERVICE_START.replace('{0}', id);
+
+    return axios({
+      method: 'post',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
   static cancelScan(id) {
     let apiPath = process.env.REACT_APP_SCANS_SERVICE_CANCEL.replace('{0}', id);
 
