@@ -13,54 +13,13 @@ import json
 import logging
 from logging import handlers
 import multiprocessing as mp
-import uuid
-from django.db import transaction
-from api import scan_data_log_state
 from api.source.serializer import SourceSerializer
 from api.source import util as view_util
 from quipucords import settings
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-UUID_CACHE = None
-
 NUM_LOG_FILES = 10  # Divide the log into 10 different files
-
-
-@transaction.atomic()
-def get_database_uuid():
-    """Get the UUID of this database."""
-    global UUID_CACHE  # pylint: disable=global-statement
-    if UUID_CACHE is not None:
-        return UUID_CACHE
-
-    uuid_obj = scan_data_log_state.DatabaseUUID.objects.all().first()
-    if uuid_obj is None:
-        uuid_obj = scan_data_log_state.DatabaseUUID(uuid=uuid.uuid4())
-        uuid_obj.save()
-    UUID_CACHE = uuid_obj.uuid
-
-    return uuid_obj.uuid
-
-
-# This is a potential performance bottleneck since we are touching the
-# database every time we write a record. This isn't necessary - we
-# could get the state of the counter by reading the last few entries
-# of the existing log files on startup. I don't plan to implement that
-# unless we find that this is actually a problem.
-@transaction.atomic()
-def next_sequence_number():
-    """Get the next sequence number and increment the counter."""
-    seq = scan_data_log_state.LatestSequenceNumber.objects.all().first()
-    if seq is None:
-        seq = scan_data_log_state.LatestSequenceNumber(number=0)
-        seq.save()
-
-    number = seq.number
-    seq.number += 1
-    seq.save()
-
-    return number
 
 
 # We use the standard Python loggers when possible, but with two main
@@ -105,22 +64,6 @@ _HANDLER.setFormatter(JSONFormatter())
 _DRY_RUN = False
 
 
-def log_record(record):
-    """Write a new record to the scan data log.
-
-    :param record: the record. a Python dict, with JSON-compatible values.
-    """
-    record['database_uuid'] = str(get_database_uuid())
-    record['sequence_number'] = next_sequence_number()
-
-    if record['sequence_number'] % 100 == 0:
-        logger.info('Logging scan data to %s, dry_run=%s',
-                    settings.SCAN_DATA_LOG, _DRY_RUN)
-
-    if not _DRY_RUN:
-        _HANDLER.emit(record)
-
-
 # pylint: disable=too-many-arguments
 def log_fact(host, fact, value, scan_job, scan_task, source):
     """Write a new fact to the scan data log.
@@ -132,12 +75,15 @@ def log_fact(host, fact, value, scan_job, scan_task, source):
     :param scan_task: the scan task, as an int.
     :param source: the source, as a JSON dict.
     """
-    log_record({'host': host,
-                'fact': fact,
-                'value': value,
-                'scan_job': scan_job,
-                'scan_task': scan_task,
-                'source': source})
+    record = {'host': host,
+              'fact': fact,
+              'value': value,
+              'scan_job': scan_job,
+              'scan_task': scan_task,
+              'source': source}
+
+    if not _DRY_RUN:
+        _HANDLER.emit(record)
 
 
 def disable_log_for_test():
