@@ -7,7 +7,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Test the input logger."""
+"""Test the scan data logger."""
 
 import uuid
 

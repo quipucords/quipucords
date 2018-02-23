@@ -7,7 +7,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Log all input to the filesystem for later debugging."""
+"""Log all scan data to the filesystem for later debugging."""
 
 import json
 import logging
@@ -77,7 +77,7 @@ def next_sequence_number():
 #    around.
 
 class JSONFormatter(logging.Formatter):
-    """Write input log messages as plain JSON dicts."""
+    """Write scan data log messages as plain JSON dicts."""
 
     def format(self, record):
         """Format a JSON dict as a JSON string."""
@@ -106,12 +106,16 @@ _DRY_RUN = False
 
 
 def log_record(record):
-    """Write a new record to the input log.
+    """Write a new record to the scan data log.
 
     :param record: the record. a Python dict, with JSON-compatible values.
     """
     record['database_uuid'] = str(get_database_uuid())
     record['sequence_number'] = next_sequence_number()
+
+    if record['sequence_number'] % 100 == 0:
+        logger.info('Logging scan data to %s, dry_run=%s',
+                    settings.SCAN_DATA_LOG_BASENAME, _DRY_RUN)
 
     if not _DRY_RUN:
         _HANDLER.emit(record)
@@ -119,7 +123,7 @@ def log_record(record):
 
 # pylint: disable=too-many-arguments
 def log_fact(host, fact, value, scan_job, scan_task, source):
-    """Write a new fact to the input log.
+    """Write a new fact to the scan data log.
 
     :param host: string. the name of the host the fact came from.
     :param fact: json object. The fact identifier.
@@ -137,7 +141,7 @@ def log_fact(host, fact, value, scan_job, scan_task, source):
 
 
 def disable_log_for_test():
-    """Disable the input log for testing purposes."""
+    """Disable the scan data log for testing purposes."""
     global _DRY_RUN  # pylint: disable=global-statement
     _DRY_RUN = True
 

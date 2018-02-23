@@ -283,7 +283,9 @@ LOGGING = {
     },
 }
 
-SCAN_DATA_LOG_BASENAME = os.path.join(BASE_DIR, 'scan_data_log')
+DEFAULT_SCAN_DATA_LOG_BASENAME = os.path.join(BASE_DIR, 'scan_data_log')
+SCAN_DATA_LOG_BASENAME = os.getenv('SCAN_DATA_LOG',
+                                   DEFAULT_SCAN_DATA_LOG_BASENAME)
 SCAN_DATA_LOG_MAX_BYTES = os.getenv('QUIPU_LOG_MAX_BYTES',
                                     1 << 30)  # default 1 GB
 
