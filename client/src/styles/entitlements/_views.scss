@@ -28,6 +28,12 @@
   }
 }
 
+.nav-pf-vertical .list-group-item.collapsed-nav-item {
+  @media (min-width: $screen-sm-min) {
+    display: none;
+  }
+}
+
 .quipucords-view-container {
   background-color: $color-pf-white;
   display: flex;
@@ -72,7 +78,22 @@
     border: 0;
     padding-top: 2px;
   }
+
+  .list-group-item-container {
+    .container-fluid {
+      padding-right: 40px;
+      .dropdown.btn-group {
+        .dropdown-toggle {
+          color: $color-pf-black-700;
+          &:hover, &:focus {
+            color: $color-pf-blue;
+          }
+        }
+      }
+    }
+  }
 }
+
 
 .list-view-pagination-top {
   padding: 0 14px;

@@ -22,6 +22,13 @@ const getScanResults = id => dispatch => {
   });
 };
 
+const getScanJobs = id => dispatch => {
+  return dispatch({
+    type: scansTypes.GET_SCAN_JOBS,
+    payload: scansService.getScanJobs(id)
+  });
+};
+
 const addScan = data => dispatch => {
   return dispatch({
     type: scansTypes.ADD_SCAN,
@@ -57,4 +64,4 @@ const restartScan = id => dispatch => {
   });
 };
 
-export { getScan, getScans, getScanResults, addScan, startScan, cancelScan, pauseScan, restartScan };
+export { getScan, getScans, getScanResults, getScanJobs, addScan, startScan, cancelScan, pauseScan, restartScan };

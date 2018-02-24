@@ -52,6 +52,13 @@ class ScansService {
     });
   }
 
+  static getScanJobs(id) {
+    let apiPath = process.env.REACT_APP_SCANS_SERVICE_JOBS.replace('{0}', id);
+    return axios({
+      url: apiPath
+    });
+  }
+
   static pauseScan(id) {
     let apiPath = process.env.REACT_APP_SCANS_SERVICE_PAUSE.replace('{0}', id);
 

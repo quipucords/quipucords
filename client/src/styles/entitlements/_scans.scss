@@ -19,3 +19,9 @@
   margin-right: 10px;
   margin-top: 6px;
 }
+.scan-job-status-icon {
+  margin-right: 5px;
+  &.systems:before, &.systems:before {
+    color: $color-pf-black;
+  }
+}

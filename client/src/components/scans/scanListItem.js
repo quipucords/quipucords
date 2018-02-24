@@ -3,7 +3,8 @@ import * as moment from 'moment';
 import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import JSONPretty from 'react-json-pretty';
+import { connect } from 'react-redux';
+
 import { Button, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
@@ -11,9 +12,9 @@ import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
 import ScanHostsList from './scanHostList';
+import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
-import { getScanResults } from '../../redux/actions/scansActions';
-import { connect } from 'react-redux';
+import { getScanResults, getScanJobs } from '../../redux/actions/scansActions';
 
 class ScanListItem extends React.Component {
   constructor() {
@@ -49,6 +50,27 @@ class ScanListItem extends React.Component {
               this.forceUpdate();
             });
         }
+      } else if (expandType === 'jobs') {
+        if (!item.scanJobs) {
+          item.scanJobsPending = true;
+          item.scanJobsError = null;
+          this.props
+            .getScanJobs(item.id)
+            .then(results => {
+              item.scanJobsPending = false;
+              console.log('results:');
+              console.dir(results);
+              item.scanJobs = _.get(results.value, 'data.results');
+            })
+            .catch(error => {
+              item.scanJobsPending = false;
+              item.scanJobsError = _.get(error.payload, 'response.request.responseText', error.payload.message);
+            })
+            .finally(() => {
+              item.scanJobsPending = false;
+              this.forceUpdate();
+            });
+        }
       }
     }
     this.forceUpdate();
@@ -66,9 +88,9 @@ class ScanListItem extends React.Component {
     let scanDescription = '';
 
     let icon = null;
-    let scanTime = _.get(item, 'end_time');
+    let scanTime = _.get(item, 'most_recent.end_time');
 
-    switch (item.status) {
+    switch (_.get(item, 'most_recent.status')) {
       case 'completed':
         scanDescription = 'Last Scanned';
         icon = <Icon className="scan-status-icon" type="pf" name="ok" />;
@@ -88,12 +110,12 @@ class ScanListItem extends React.Component {
       case 'pending':
         scanDescription = 'Scan Pending';
         icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
-        scanTime = _.get(item, 'start_time');
+        scanTime = _.get(item, 'most_recent.start_time');
         break;
       case 'running':
         scanDescription = 'Scan in Progress';
         icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
-        scanTime = _.get(item, 'start_time');
+        scanTime = _.get(item, 'most_recent.start_time');
         break;
       case 'paused':
         scanDescription = 'Scan Paused';
@@ -123,14 +145,9 @@ class ScanListItem extends React.Component {
     const { item } = this.props;
 
     let sourcesCount = item.sources ? item.sources.length : 0;
-
-    let successHosts = 0;
-    let failedHosts = 0;
-
-    _.forEach(_.get(item, 'tasks', []), task => {
-      successHosts += _.get(task, 'systems_scanned', 0);
-      failedHosts += _.get(task, 'systems_failed', 0);
-    });
+    let prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+    let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+    let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
 
     return [
       <ListStatusItem
@@ -173,12 +190,12 @@ class ScanListItem extends React.Component {
       <ListStatusItem
         key="scans"
         id="scans"
-        count={item.scans_count}
+        count={prevCount}
         emptyText="0 Previous"
         tipSingular="Previous"
         tipPlural="Previous"
-        expanded={item.expanded && item.expandType === 'scans'}
-        expandType="scans"
+        expanded={item.expanded && item.expandType === 'jobs'}
+        expandType="jobs"
         toggleExpand={this.toggleExpand}
       />
     ];
@@ -187,7 +204,7 @@ class ScanListItem extends React.Component {
   renderActions() {
     const { item, onSummaryDownload, onDetailedDownload, onPause, onCancel, onStart, onResume } = this.props;
 
-    switch (item.status) {
+    switch (_.get(item, 'most_recent.status')) {
       case 'completed':
         return [
           <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
@@ -202,10 +219,10 @@ class ScanListItem extends React.Component {
             pullRight
             id={`downloadButton_${item.id}`}
           >
-            <MenuItem eventKey="1" onClick={onSummaryDownload}>
+            <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
               Summary Report
             </MenuItem>
-            <MenuItem eventKey="2" onClick={onDetailedDownload}>
+            <MenuItem eventKey="2" onClick={() => onDetailedDownload(_.get(item, 'most_recent.report_id'))}>
               Detailed Report
             </MenuItem>
           </DropdownButton>
@@ -254,7 +271,7 @@ class ScanListItem extends React.Component {
   }
 
   renderExpansionContents() {
-    const { item } = this.props;
+    const { item, onSummaryDownload, onDetailedDownload } = this.props;
 
     switch (item.expandType) {
       case 'systemsScanned':
@@ -263,10 +280,12 @@ class ScanListItem extends React.Component {
         return <ScanHostsList scan={item} status="failed" />;
       case 'sources':
         return <ScanSourceList scan={item} />;
-      case 'scans':
-        return <JSONPretty json={item} />;
+      case 'jobs':
+        return (
+          <ScanJobsList scan={item} onSummaryDownload={onSummaryDownload} onDetailedDownload={onDetailedDownload} />
+        );
       default:
-        return <JSONPretty json={item} />;
+        return null;
     }
   }
 
@@ -305,7 +324,8 @@ ScanListItem.propTypes = {
   onCancel: PropTypes.func,
   onStart: PropTypes.func,
   onResume: PropTypes.func,
-  getScanResults: PropTypes.func
+  getScanResults: PropTypes.func,
+  getScanJobs: PropTypes.func
 };
 
 const mapStateToProps = function(state) {
@@ -313,7 +333,8 @@ const mapStateToProps = function(state) {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScanResults: id => dispatch(getScanResults(id))
+  getScanResults: id => dispatch(getScanResults(id)),
+  getScanJobs: id => dispatch(getScanJobs(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScanListItem);
