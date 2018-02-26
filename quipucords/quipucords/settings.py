@@ -246,6 +246,10 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
+        'api.scan': {
+            'handlers': LOGGING_HANDLERS,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
+        },
         'api.scantasks': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
