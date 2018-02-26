@@ -27,9 +27,9 @@ from rest_framework_expiring_authtoken.authentication import \
 from django.db.models import Q
 from django.db import transaction
 from django.http import Http404
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 import api.messages as messages
 from api.common.util import is_int
 from api.common.pagination import StandardResultsSetPagination
@@ -110,7 +110,7 @@ def jobs(request, pk=None):
             result.append(job_json)
         return Response(result)
     else:
-        job_data = request.data.copy()
+        job_data = {}
         job_data['scan'] = pk
         job_serializer = ScanJobSerializer(data=job_data)
         job_serializer.is_valid(raise_exception=True)
@@ -264,11 +264,12 @@ class ScanViewSet(ModelViewSet):
         return Response(json_scan)
 
     @transaction.atomic
-    def destroy(self, request, pk, format=None):
+    def destroy(self, request, pk):
         """Delete a scan, its jobs, and the results."""
+        # pylint: disable=too-many-nested-blocks
         try:
             scan = Scan.objects.get(pk=pk)
-            logger.info('Deleting scan jobs associated with scan %s' % pk)
+            logger.info('Deleting scan jobs associated with scan %s', pk)
             if scan.jobs is not None:
                 jobs_to_cancel = scan.jobs.exclude(
                     Q(status=ScanTask.FAILED) |
@@ -280,11 +281,11 @@ class ScanViewSet(ModelViewSet):
                         cancel_scan.send(sender=self.__class__, instance=job)
 
                 for job in scan.jobs.all():
-                    logger.info('Deleting job %s and its results' % job.id)
+                    logger.info('Deleting job %s and its results', job.id)
                     if job.connection_results is not None:
                         logger.info(
                             'Deleting connection results associated '
-                            'with job %s' % job.id)
+                            'with job %s', job.id)
                         for task_connection_result in \
                                 job.connection_results.task_results.all():
                             task_connection_result.systems.all().delete()
@@ -293,12 +294,12 @@ class ScanViewSet(ModelViewSet):
                     if job.inspection_results is not None:
                         logger.info(
                             'Deleting inspection results associated '
-                            'with job %s' % job.id)
+                            'with job %s', job.id)
                         for task_inspection_result in \
                                 job.inspection_results.task_results.all():
                             logger.info(
                                 'Deleting inspection results associated '
-                                'with job %s' % job.id)
+                                'with job %s', job.id)
                             for system in task_inspection_result.systems.all():
                                 system.facts.all().delete()
                                 system.delete()
@@ -307,11 +308,11 @@ class ScanViewSet(ModelViewSet):
                     if job.tasks is not None:
                         logger.info(
                             'Deleting scan tasks associated '
-                            'with job %s' % job.id)
+                            'with job %s', job.id)
                         job.tasks.all().delete()
                         job.delete()
 
-            logger.info('Deleting scan %s' % pk)
+            logger.info('Deleting scan %s', pk)
             scan.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Scan.DoesNotExist:
