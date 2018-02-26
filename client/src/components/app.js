@@ -12,6 +12,7 @@ import { authorizeUser, getUser, logoutUser } from '../redux/actions/userActions
 import helpers from '../common/helpers';
 
 import About from './about/about';
+import AddSourceWizard from './addSourceWizard/addSourceWizard';
 import Content from './content/content';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
@@ -110,6 +111,7 @@ class App extends React.Component {
         <ToastNotificationsList key="toastList" />
         <ConfirmationModal key="confirmationModal" />
         <About user={user} shown={aboutShown} onClose={this.closeAbout} />
+        <AddSourceWizard />
       </React.Fragment>
     );
   }

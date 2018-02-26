@@ -22,6 +22,13 @@ const getCredentials = (query = {}) => dispatch => {
   });
 };
 
+const getWizardCredentials = (query = {}) => dispatch => {
+  return dispatch({
+    type: credentialsTypes.GET_WIZARD_CREDENTIALS,
+    payload: credentialsService.getCredentials('', query)
+  });
+};
+
 const updateCredential = (id, data) => dispatch => {
   return dispatch({
     type: credentialsTypes.UPDATE_CREDENTIAL,
@@ -43,4 +50,12 @@ const deleteCredentials = (ids = []) => dispatch => {
   });
 };
 
-export { addCredential, deleteCredential, deleteCredentials, getCredential, getCredentials, updateCredential };
+export {
+  addCredential,
+  deleteCredential,
+  deleteCredentials,
+  getCredential,
+  getCredentials,
+  getWizardCredentials,
+  updateCredential
+};
