@@ -4,13 +4,12 @@ import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import Store from '../redux/store';
 
 import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 
 import { routes } from '../routes';
-import { aboutTypes } from '../redux/constants';
-import { authorizeUser, logoutUser } from '../redux/actions/userActions';
+import { authorizeUser, getUser, logoutUser } from '../redux/actions/userActions';
+import helpers from '../common/helpers';
 
 import About from './about/about';
 import Content from './content/content';
@@ -24,10 +23,20 @@ class App extends React.Component {
   constructor() {
     super();
     this.menu = routes();
+    this.state = {
+      aboutShown: false
+    };
+    helpers.bindMethods(this, ['showAbout', 'closeAbout']);
   }
 
   componentDidMount() {
     this.props.authorizeUser();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (_.get(nextProps, 'session.loggedIn') && !_.get(this.props, 'session.loggedIn')) {
+      this.props.getUser();
+    }
   }
 
   navigateTo(path) {
@@ -36,7 +45,11 @@ class App extends React.Component {
   }
 
   showAbout() {
-    Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
+    this.setState({ aboutShown: true });
+  }
+
+  closeAbout() {
+    this.setState({ aboutShown: false });
   }
 
   renderMenuItems() {
@@ -67,7 +80,8 @@ class App extends React.Component {
   }
 
   renderContent() {
-    const { session } = this.props;
+    const { session, user } = this.props;
+    const { aboutShown } = this.state;
 
     if (session.error) {
       return (
@@ -95,13 +109,13 @@ class App extends React.Component {
         <Content />
         <ToastNotificationsList key="toastList" />
         <ConfirmationModal key="confirmationModal" />
-        <About />
+        <About user={user} shown={aboutShown} onClose={this.closeAbout} />
       </React.Fragment>
     );
   }
 
   render() {
-    const { session, logoutUser } = this.props;
+    const { user, session, logoutUser } = this.props;
 
     if (!session.loggedIn && session.wasLoggedIn) {
       window.location = '/logout';
@@ -112,7 +126,7 @@ class App extends React.Component {
         <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={productTitle} />
-            <MastheadOptions showAboutModal={this.showAbout} logoutUser={logoutUser} />
+            <MastheadOptions user={user} showAboutModal={this.showAbout} logoutUser={logoutUser} />
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
           {this.renderMenuActions()}
@@ -125,8 +139,10 @@ class App extends React.Component {
 
 App.propTypes = {
   authorizeUser: PropTypes.func,
+  getUser: PropTypes.func,
   logoutUser: PropTypes.func,
   session: PropTypes.object,
+  user: PropTypes.object,
   location: PropTypes.object,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired
@@ -135,12 +151,14 @@ App.propTypes = {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   authorizeUser: () => dispatch(authorizeUser()),
+  getUser: () => dispatch(getUser()),
   logoutUser: () => dispatch(logoutUser())
 });
 
 function mapStateToProps(state, ownProps) {
   return {
-    session: state.user.session
+    session: state.user.session,
+    user: state.user.user
   };
 }
 

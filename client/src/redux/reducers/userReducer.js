@@ -9,7 +9,8 @@ const initialState = {
     pending: false,
     fulfilled: false,
     loggedIn: false,
-    authToken: null
+    authToken: null,
+    wasLoggedIn: false
   },
   user: {
     error: false,
@@ -69,7 +70,8 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          wasLoggedIn: state.session.wasLoggedIn
         },
         {
           state,
@@ -82,7 +84,8 @@ export default function userReducer(state = initialState, action) {
       return helpers.setStateProp(
         'session',
         {
-          pending: true
+          pending: true,
+          wasLoggedIn: state.session.wasLoggedIn
         },
         {
           state,
@@ -112,7 +115,8 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          wasLoggedIn: state.session.wasLoggedIn
         },
         {
           state,
@@ -125,7 +129,8 @@ export default function userReducer(state = initialState, action) {
       return helpers.setStateProp(
         'session',
         {
-          pending: true
+          pending: true,
+          wasLoggedIn: state.session.wasLoggedIn
         },
         {
           state,
@@ -139,7 +144,8 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           loggedIn: false,
-          fulfilled: true
+          fulfilled: true,
+          wasLoggedIn: state.session.wasLoggedIn
         },
         {
           state,

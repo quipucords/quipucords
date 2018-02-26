@@ -8,7 +8,8 @@ const initialState = {
     pending: false,
     fulfilled: false,
     loggedIn: false,
-    authToken: null
+    authToken: null,
+    wasLoggedIn: false
   },
   user: {
     error: false,
