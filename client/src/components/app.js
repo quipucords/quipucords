@@ -4,10 +4,13 @@ import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
+import Store from '../redux/store';
 
 import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 
 import { routes } from '../routes';
+import { aboutTypes } from '../redux/constants';
+import { authorizeUser, logoutUser } from '../redux/actions/userActions';
 
 import About from './about/about';
 import Content from './content/content';
@@ -16,7 +19,6 @@ import ConfirmationModal from './confirmationModal/confirmationModal';
 import MastheadOptions from './mastheadOptions/mastheadOptions';
 
 import productTitle from '../styles/images/title.svg';
-import { authorizeUser } from '../redux/actions/userActions';
 
 class App extends React.Component {
   constructor() {
@@ -31,6 +33,10 @@ class App extends React.Component {
   navigateTo(path) {
     const { history } = this.props;
     history.push(path);
+  }
+
+  showAbout() {
+    Store.dispatch({ type: aboutTypes.ABOUT_DIALOG_OPEN });
   }
 
   renderMenuItems() {
@@ -49,6 +55,15 @@ class App extends React.Component {
         />
       );
     });
+  }
+
+  renderMenuActions() {
+    const { logoutUser } = this.props;
+
+    return [
+      <VerticalNav.Item key="about" className="collapsed-nav-item" title="About" onClick={() => this.showAbout()} />,
+      <VerticalNav.Item key="logout" className="collapsed-nav-item" title="Logout" onClick={logoutUser} />
+    ];
   }
 
   renderContent() {
@@ -86,7 +101,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { session } = this.props;
+    const { session, logoutUser } = this.props;
 
     if (!session.loggedIn && session.wasLoggedIn) {
       window.location = '/logout';
@@ -97,9 +112,10 @@ class App extends React.Component {
         <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={productTitle} />
-            <MastheadOptions />
+            <MastheadOptions showAboutModal={this.showAbout} logoutUser={logoutUser} />
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
+          {this.renderMenuActions()}
         </VerticalNav>
         <div className="container-pf-nav-pf-vertical">{this.renderContent()}</div>
       </div>
@@ -109,6 +125,7 @@ class App extends React.Component {
 
 App.propTypes = {
   authorizeUser: PropTypes.func,
+  logoutUser: PropTypes.func,
   session: PropTypes.object,
   location: PropTypes.object,
   history: PropTypes.shape({
@@ -117,7 +134,8 @@ App.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  authorizeUser: () => dispatch(authorizeUser())
+  authorizeUser: () => dispatch(authorizeUser()),
+  logoutUser: () => dispatch(logoutUser())
 });
 
 function mapStateToProps(state, ownProps) {

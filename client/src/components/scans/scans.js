@@ -87,7 +87,7 @@ class Scans extends React.Component {
     }
   }
 
-  downloadSummaryReport() {
+  downloadSummaryReport(reportId) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
@@ -96,12 +96,12 @@ class Scans extends React.Component {
     });
   }
 
-  downloadDetailedReport() {
+  downloadDetailedReport(reportId) {
     Store.dispatch({
       type: toastNotificationTypes.TOAST_ADD,
       alertType: 'error',
       header: 'NYI',
-      message: 'Downloading summary reports is not yet implemented'
+      message: 'Downloading detailed reports is not yet implemented'
     });
   }
 

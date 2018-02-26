@@ -29,6 +29,14 @@ const initialState = {
     results: []
   },
 
+  jobs: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    jobs: []
+  },
+
   action: {
     error: false,
     errorMessage: '',
@@ -167,6 +175,50 @@ const scansReducer = function(state = initialState, action) {
         'results',
         {
           results: action.payload.data.results,
+          pending: false,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Error/Rejected
+    case scansTypes.GET_SCAN_JOBS_REJECTED:
+      return helpers.setStateProp(
+        'jobs',
+        {
+          pending: false,
+          error: action.error,
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Loading/Pending
+    case scansTypes.GET_SCAN_JOBS_PENDING:
+      return helpers.setStateProp(
+        'jobs',
+        {
+          pending: true,
+          jobs: state.jobs.jobs
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Success/Fulfilled
+    case scansTypes.GET_SCAN_JOBS_FULFILLED:
+      return helpers.setStateProp(
+        'jobs',
+        {
+          jobs: action.payload.data.results,
           pending: false,
           fulfilled: true
         },
