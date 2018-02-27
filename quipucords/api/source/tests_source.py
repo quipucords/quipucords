@@ -809,7 +809,7 @@ class SourceTest(TestCase):
         response_json = response.json()
         self.assertEqual(
             response_json['message'],
-            messages.SOURCE_DELETE_NOT_VALID_W_SCANS % (source.id, source.id))
+            messages.SOURCE_DELETE_NOT_VALID_W_SCANS)
         self.assertEqual(response_json['scans'][0]['name'], 'test_scan')
 
     #################################################

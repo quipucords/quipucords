@@ -207,9 +207,8 @@ class SourceViewSet(ModelViewSet):
             scans = Scan.objects.filter(
                 sources__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
             if scans:
-                message = messages.SOURCE_DELETE_NOT_VALID_W_SCANS % \
-                    (pk, pk)
-                error = {'message': message}
+                message = messages.SOURCE_DELETE_NOT_VALID_W_SCANS
+                error = {'detail': message}
                 slim_scans = []
                 for scan in scans:
                     slim_scans.append(scan)
