@@ -52,3 +52,23 @@ class InitLineFinder(process.Processor):
                 matches.append(line.strip())
 
         return matches
+
+
+class ProcessFindJarVer(process.Processor):
+    """Process the results of a find jar version command."""
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Return the command's output."""
+        versions = []
+        for line in output['stdout_lines']:
+            if line == '':
+                continue
+            line_data = line.split('; ')
+            for version_stamp in line_data:
+                jar, date = version_stamp.split('**')
+                version = {'jar': jar, 'date': date}
+                versions.append(version)
+        return versions
