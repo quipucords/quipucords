@@ -184,7 +184,23 @@ Installing the Quipucords Server Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 After Docker is installed, you can obtain and install the container image that enables the use of the Quipucords server.
 
-**TBD**
+Start by downloading the server container image from the provided URL::
+
+  #  curl -k -O -sSL https://ftp.redhat.com/repo/container/quipucords.pilot.tar.gz
+
+
+Load the container image into the local Docker registry with the following command::
+
+  #  sudo docker load -i quipucords.pilot.tar.gz
+  ...
+  Loaded image: quipucords:pilot
+
+
+You can verify the image within the local Docker registry::
+
+  #  sudo docker images
+  REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+  quipucords              pilot               fdadcc4b326f        3 days ago          969MB
 
 
 Configuring and Starting Quipucords
@@ -239,7 +255,7 @@ These commands start the server on port ``443`` and map the ``sshkeys``, ``data`
 
 To view the status of the server after it is running, enter the following command::
 
-  # docker ps
+  # sudo docker ps
 
 Changing the Default Password for the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
