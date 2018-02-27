@@ -1,7 +1,10 @@
 .. image:: https://travis-ci.org/quipucords/quipucords.svg?branch=master
     :target: https://travis-ci.org/quipucords/quipucords
-.. image:: https://codecov.io/gh//quipucords/quipucords/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/quipucords/quipucords
+.. image:: https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/quipucords/quipucords
+.. image:: https://landscape.io/github/quipucords/quipucords/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/quipucords/quipucords/master
+   :alt: Code Health
 .. image:: https://requires.io/github/quipucords/quipucords/requirements.svg?branch=master
     :target: https://requires.io/github/quipucords/quipucords/requirements/?branch=master
     :alt: Requirements Status
