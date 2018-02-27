@@ -529,9 +529,13 @@ class ScanJobTest(TestCase):
                                       scan_options=scan_options)
         extra_vars = ScanOptions.get_extra_vars(
             scan_job.options.disable_optional_products)
+
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
-                         'jboss_brms': True}
+                         'jboss_brms': True,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_mixed(self):
@@ -546,9 +550,13 @@ class ScanJobTest(TestCase):
                                       scan_options=scan_options)
         extra_vars = ScanOptions.get_extra_vars(
             scan_job.options.disable_optional_products)
+
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': False,
-                         'jboss_brms': True}
+                         'jboss_brms': True,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_false(self):
@@ -565,9 +573,13 @@ class ScanJobTest(TestCase):
 
         extra_vars = ScanOptions.get_extra_vars(
             scan_job.options.disable_optional_products)
+
         expected_vars = {'jboss_eap': False,
                          'jboss_fuse': False,
-                         'jboss_brms': False}
+                         'jboss_brms': False,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     # ############################################################
