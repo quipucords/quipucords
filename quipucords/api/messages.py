@@ -54,6 +54,8 @@ SOURCE_CONNECTION_SCAN = 'The query parameter scan must be a boolean.'
 SOURCE_TYPE_INV = 'A source_type must not be provided when updating a source.'
 SOURCE_CRED_IDS_INV = 'Credential identifiers must be integer values.'
 SOURCE_MIN_CREDS = 'Source must have at least one set of credentials.'
+SOURCE_DELETE_NOT_VALID_W_SCANS = 'Source cannot be deleted '\
+    'because it is used by 1 or more scans.'
 
 NET_HOST_AS_STRING = 'A host range must be a string.'
 NET_MIN_HOST = 'Source of type network must have at least one host.'
