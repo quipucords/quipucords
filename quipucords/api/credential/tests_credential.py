@@ -14,7 +14,7 @@ import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import Credential
+from api.models import Credential, Source
 import api.messages as messages
 from api.vault import decrypt_data_as_unicode
 
@@ -330,6 +330,24 @@ class CredentialTest(TestCase):
         url = reverse('cred-detail', args=(cred.pk,))
         resp = self.client.delete(url, format='json')
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_cred_delete_with_source(self):
+        """Tests delete when cred used by source."""
+        cred = Credential(name='cred2', username='user2',
+                          password='pass2')
+        cred.save()
+        source = Source(name='cred_source',
+                        source_type=Source.NETWORK_SOURCE_TYPE,
+                        hosts=['1.2.3.4'])
+        source.save()
+        source.credentials.add(cred)
+        source.save()
+
+        url = reverse('cred-detail', args=(cred.pk,))
+        resp = self.client.delete(url, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        response_json = resp.json()
+        self.assertEqual(response_json['sources'][0]['name'], 'cred_source')
 
     def test_vcentercred_create(self):
         """Ensure we can create a new vcenter credential."""
