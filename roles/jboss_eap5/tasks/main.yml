@@ -70,4 +70,4 @@
   register: eap5_home_run_jar_version
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
-  when: 'jboss_eap'
+  when: 'have_java and jboss_eap'
