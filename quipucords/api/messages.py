@@ -30,9 +30,8 @@ HC_NO_KEY_W_PASS = 'A host credential must have an ssh_keyfile provided if' \
 HC_NAME_ALREADY_EXISTS = 'Host credential with name=%s already exists'
 CRED_TYPE_REQUIRED_CREATED = 'cred_type is required for credential creation'
 CRED_TYPE_NOT_ALLOWED_UPDATE = 'cred_type is invalid for credential update'
-CRED_DELETE_NOT_VALID_W_SOURCES = 'Credential %s cannot be deleted '\
-    'because it is used by 1 or more sources.  '\
-    'First edit sources to remove credential %s.'
+CRED_DELETE_NOT_VALID_W_SOURCES = 'Credential cannot be deleted '\
+    'because it is used by 1 or more sources.'
 
 VC_PWD_AND_USERNAME = 'VCenter requires both username and password.'
 VC_FIELDS_NOT_ALLOWED = 'VCenter cannot use a become password, ssh'\

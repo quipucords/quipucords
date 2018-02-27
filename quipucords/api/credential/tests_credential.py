@@ -348,8 +348,8 @@ class CredentialTest(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
         response_json = resp.json()
         self.assertEqual(
-            response_json['message'],
-            messages.CRED_DELETE_NOT_VALID_W_SOURCES % (cred.id, cred.id))
+            response_json['detail'],
+            messages.CRED_DELETE_NOT_VALID_W_SOURCES)
         self.assertEqual(response_json['sources'][0]['name'], 'cred_source')
 
     def test_vcentercred_create(self):
