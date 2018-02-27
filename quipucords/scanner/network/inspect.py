@@ -53,6 +53,8 @@ DEFAULT_ROLES = [
     'host_done',
 ]
 
+DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']
+
 
 class ScannerException(Exception):
     """Exception for issues detected during scans."""
@@ -172,6 +174,9 @@ class InspectTaskRunner(ScanTaskRunner):
 
         extra_vars = ScanOptions.get_extra_vars(
             self.scan_job.options.disable_optional_products)
+        if extra_vars.get(ScanOptions.EXT_PRODUCT_SEARCH_DIRS) is None:
+            extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = \
+                ' '.join(DEFAULT_SCAN_DIRS)
         forks = self.scan_job.options.max_concurrency
 
         ssh_executable = os.path.abspath(
@@ -190,7 +195,8 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with concurrent of %d' % forks
+        log_message = 'START PROCESSING GROUPS with %d forks' \
+            ' and extra_vars=%s' % (forks, extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'

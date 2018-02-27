@@ -295,3 +295,32 @@ class TestProcessEapHomeLayersConf(unittest.TestCase):
             eap.ProcessEapHomeLayersConf.process(ansible_results(
                 [{'item': 'foo', 'stdout': '', 'rc': 1}])),
             {'foo': False})
+
+
+class TestProcessFindJbossEAPJarVer(unittest.TestCase):
+    """Test ProcessFindJbossEAPJarVer."""
+
+    def test_success_case(self):
+        """Return stdout_lines in case of success."""
+        in_line = '1.3.6.Final-redhat-1**2018-01-18; ' \
+            '1.3.6.Final-redhat-1**2018-01-18; ' \
+            '1.3.6.Final-redhat-1**2018-01-18\n'
+        expected = {'jar': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
+        self.assertEqual(
+            eap.ProcessFindJbossEAPJarVer.process(ansible_result(in_line)),
+            [expected, expected, expected])
+
+
+class TestProcessFindJbossEAPRunJarVer(unittest.TestCase):
+    """Test ProcessFindJbossEAPRunJarVer."""
+
+    def test_success_case(self):
+        """Return stdout_lines in case of success."""
+        in_line = '1.3.6.Final-redhat-1**2018-01-18; ' \
+            '1.3.6.Final-redhat-1**2018-01-18; ' \
+            '1.3.6.Final-redhat-1**2018-01-18\n'
+        expected = {'jar': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
+        self.assertEqual(
+            eap.ProcessFindJbossEAPRunJarVer.process(
+                ansible_result(in_line)),
+            [expected, expected, expected])

@@ -31,6 +31,11 @@ class ScanOptions(models.Model):
     JBOSS_FUSE = 'jboss_fuse'
     JBOSS_BRMS = 'jboss_brms'
 
+    EXT_PRODUCT_SEARCH_DIRS = 'search_directories'
+    JBOSS_EAP_EXT = 'jboss_eap_ext'
+    JBOSS_FUSE_EXT = 'jboss_fuse_ext'
+    JBOSS_BRMS_EXT = 'jboss_brms_ext'
+
     max_concurrency = models.PositiveIntegerField(default=50)
     disable_optional_products = models.TextField(null=True)
 
@@ -60,7 +65,10 @@ class ScanOptions(models.Model):
             disable_optional_products)
         product_default = {ScanOptions.JBOSS_EAP: True,
                            ScanOptions.JBOSS_FUSE: True,
-                           ScanOptions.JBOSS_BRMS: True}
+                           ScanOptions.JBOSS_BRMS: True,
+                           ScanOptions.JBOSS_EAP_EXT: False,
+                           ScanOptions.JBOSS_FUSE_EXT: False,
+                           ScanOptions.JBOSS_BRMS_EXT: False}
 
         if product_status == {}:
             return product_default
