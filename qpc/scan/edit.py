@@ -49,7 +49,7 @@ class ScanEditCommand(CliCommand):
                                  required=False)
         self.parser.add_argument('--max-concurrency', dest='max_concurrency',
                                  metavar='MAX_CONCURRENCY',
-                                 type=int, default=50,
+                                 type=int, default=None,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.parser.add_argument('--disable-optional-products',
                                  dest='disable_optional_products',
