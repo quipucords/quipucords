@@ -44,13 +44,6 @@
 
 # Filters that will help us find true EAP_HOME directories
 
-- name: ls EAP_HOME candidates
-  raw: ls -1 "{{ item }}"
-  register: eap5_home_ls
-  ignore_errors: yes
-  with_items: "{{ eap5_home_candidates }}"
-  when: 'jboss_eap'
-
 - name: get version.txt from EAP_HOME candidates
   raw: cat "{{ item }}"/version.txt 2>/dev/null
   register: eap5_home_version_txt
@@ -73,7 +66,7 @@
   when: 'jboss_eap'
 
 - name: EAP_HOME/jboss-as/bin/run.jar
-  raw: java -jar "{{ item }}/jboss-as/bin/run.jar --version"
+  raw: java -jar "{{ item }}"/jboss-as/bin/run.jar --version
   register: eap5_home_run_jar_version
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
