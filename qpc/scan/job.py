@@ -72,11 +72,11 @@ class ScanJobCommand(CliCommand):
             found, scan_object_id = _get_scan_object_id(self.parser,
                                                         self.args.name)
             if found:
-                self.req_path += scan_object_id + 'jobs/'
+                self.req_path += str(scan_object_id) + 'jobs/'
             else:
                 sys.exit(1)
         if 'id' in self.args and self.args.id:
-            self.req_path = scan.SCAN_JOB_URI + self.args.id + '/'
+            self.req_path = scan.SCAN_JOB_URI + str(self.args.id) + '/'
         if 'status' in self.args and self.args.status:
             self.req_params = {'status': self.args.status}
 
