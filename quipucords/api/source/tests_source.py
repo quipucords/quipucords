@@ -808,7 +808,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_json = response.json()
         self.assertEqual(
-            response_json['message'],
+            response_json['detail'],
             messages.SOURCE_DELETE_NOT_VALID_W_SCANS)
         self.assertEqual(response_json['scans'][0]['name'], 'test_scan')
 
