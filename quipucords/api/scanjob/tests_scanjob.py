@@ -626,3 +626,50 @@ class ScanJobTest(TestCase):
                     'previous': None,
                     'results': results1}
         self.assertEqual(content, expected)
+
+    @patch('api.scan.view.start_scan', side_effect=dummy_start)
+    def test_delete_scan_cascade(self, start_scan):
+        """Delete a scan and its related data."""
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        scan = scan_job.scan
+        scan_id = scan.id
+
+        self.create_job_expect_201(scan_id)
+
+        # Create a connection system result
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result = scan_task.prerequisites.first().connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        # Create an inspection system result
+        sys_result = SystemInspectionResult(name='Foo',
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        sys_result.facts.add(fact)
+        sys_result.save()
+
+        inspect_result = scan_task.inspection_result
+        inspect_result.systems.add(sys_result)
+        inspect_result.save()
+        scan_job.save()
+
+        job_count = len(scan.jobs.all())
+        self.assertNotEqual(job_count, 0)
+        url = reverse('scan-detail', args=(scan_id,))
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_204_NO_CONTENT)
+        job_count = len(scan.jobs.all())
+        self.assertEqual(job_count, 0)

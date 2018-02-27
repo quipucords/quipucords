@@ -343,22 +343,6 @@ class ScanTest(TestCase):
         self.assertEqual(response_json.get('name'), 'test2')
         self.assertFalse(response_json.get('options').get('jboss_eap'))
 
-    def test_delete(self):
-        """Delete a scan."""
-        data_discovery = {'name': 'test',
-                          'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
-                                      {'jboss_eap': True,
-                                       'jboss_fuse': True,
-                                       'jboss_brms': True}}}
-        response = self.create_expect_201(data_discovery)
-
-        url = reverse('scan-detail', args=(response['id'],))
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code,
-                         status.HTTP_204_NO_CONTENT)
-
     def test_expand_scan(self):
         """Test view expand_scan."""
         scan_job, scan_task = create_scan_job(
@@ -380,3 +364,19 @@ class ScanTest(TestCase):
              'systems_scanned': 1,
              'systems_failed': 1,
              'status': 'pending'})
+
+    def test_delete(self):
+        """Delete a scan."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disable_optional_products':
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
+        response = self.create_expect_201(data_discovery)
+
+        url = reverse('scan-detail', args=(response['id'],))
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_204_NO_CONTENT)
