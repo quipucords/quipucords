@@ -13,6 +13,8 @@
 import os
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+from django.db import transaction
+from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -162,3 +164,25 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         self.perform_update(serializer)
         cred = format_credential(serializer.data)
         return Response(cred)
+
+    @transaction.atomic
+    def destroy(self, request, pk):
+        """Delete a cred."""
+        try:
+            cred = Credential.objects.get(pk=pk)
+            sources = Source.objects.filter(
+                credentials__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
+            if sources:
+                message = messages.CRED_DELETE_NOT_VALID_W_SOURCES % \
+                    (pk, pk)
+                error = {'message': message}
+                slim_sources = []
+                for source in sources:
+                    slim_sources.append(source)
+                error['sources'] = slim_sources
+                raise ValidationError(error)
+            cred.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Credential.DoesNotExist:
+            raise Http404
