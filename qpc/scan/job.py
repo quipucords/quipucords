@@ -76,7 +76,7 @@ class ScanJobCommand(CliCommand):
             else:
                 sys.exit(1)
         if 'id' in self.args and self.args.id:
-            self.req_path = scan.SCAN_JOB_URI + self.args.id + '/'
+            self.req_path = scan.SCAN_JOB_URI + str(self.args.id) + '/'
         if 'status' in self.args and self.args.status:
             self.req_params = {'status': self.args.status}
 
