@@ -11,9 +11,11 @@
 """Describes the views associated with the API models."""
 
 import os
+from django.http import Http404
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import SessionAuthentication
@@ -26,6 +28,7 @@ from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 from api.filters import ListFilter
 from api.serializers import SourceSerializer
 from api.models import (Source,
+                        Scan,
                         ScanJobOptions,
                         ScanJob,
                         ScanTask)
@@ -33,6 +36,10 @@ import api.messages as messages
 from api.common.util import is_int, is_boolean, convert_to_boolean
 from api.signals.scanjob_signal import start_scan
 from api.source.util import expand_credential
+
+
+IDENTIFIER_KEY = 'id'
+NAME_KEY = 'name'
 
 
 def format_source(json_source):
@@ -191,3 +198,25 @@ class SourceViewSet(ModelViewSet):
         format_source(json_source)
 
         return Response(json_source)
+
+    @transaction.atomic
+    def destroy(self, request, pk):
+        """Delete a cred."""
+        try:
+            source = Source.objects.get(pk=pk)
+            scans = Scan.objects.filter(
+                sources__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
+            if scans:
+                message = messages.SOURCE_DELETE_NOT_VALID_W_SCANS % \
+                    (pk, pk)
+                error = {'message': message}
+                slim_scans = []
+                for scan in scans:
+                    slim_scans.append(scan)
+                error['scans'] = slim_scans
+                raise ValidationError(error)
+            source.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Source.DoesNotExist:
+            raise Http404

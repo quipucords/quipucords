@@ -16,7 +16,10 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from api.models import (Credential, Source, ScanTask)
+from api.models import (Credential,
+                        Scan,
+                        Source,
+                        ScanTask)
 import api.messages as messages
 from api.source.view import format_source
 from api.serializers import SourceSerializer
@@ -782,6 +785,32 @@ class SourceTest(TestCase):
         url = reverse('source-detail', args=(response['id'],))
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_with_scans(self):
+        """Delete a Source used by a scan."""
+        cred = Credential(name='cred2', username='user2',
+                          password='pass2')
+        cred.save()
+        source = Source(name='cred_source',
+                        source_type=Source.NETWORK_SOURCE_TYPE,
+                        hosts=['1.2.3.4'])
+        source.save()
+        source.credentials.add(cred)
+        source.save()
+
+        scan = Scan(name='test_scan',
+                    scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan.save()
+        scan.sources.add(source)
+
+        url = reverse('source-detail', args=(source.id,))
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response_json = response.json()
+        self.assertEqual(
+            response_json['message'],
+            messages.SOURCE_DELETE_NOT_VALID_W_SCANS % (source.id, source.id))
+        self.assertEqual(response_json['scans'][0]['name'], 'test_scan')
 
     #################################################
     # VCenter Tests
