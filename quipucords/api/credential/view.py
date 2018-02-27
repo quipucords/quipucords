@@ -173,9 +173,8 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
             sources = Source.objects.filter(
                 credentials__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
             if sources:
-                message = messages.CRED_DELETE_NOT_VALID_W_SOURCES % \
-                    (pk, pk)
-                error = {'message': message}
+                message = messages.CRED_DELETE_NOT_VALID_W_SOURCES
+                error = {'detail': message}
                 slim_sources = []
                 for source in sources:
                     slim_sources.append(source)
