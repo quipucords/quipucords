@@ -173,9 +173,7 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
             sources = Source.objects.filter(
                 credentials__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
             if sources:
-                message = 'Credential %s cannot be deleted '\
-                    'because it is used by 1 or more sources.  '\
-                    'First edit sources to remove credential %s.' % \
+                message = messages.CRED_DELETE_NOT_VALID_W_SOURCES % \
                     (pk, pk)
                 error = {'message': message}
                 slim_sources = []
