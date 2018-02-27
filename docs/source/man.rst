@@ -532,7 +532,7 @@ The authentication data in the credentials and the network-specific and system-s
 Authors
 -------
 
-Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, and Kevan Holdaway <kholdawa@redhat.com>.
+Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, Kevan Holdaway <kholdawa@redhat.com>, and Ashley Aiken <aaiken@redhat.com>.
 
 Copyright
 ---------
