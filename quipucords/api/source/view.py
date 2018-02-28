@@ -29,7 +29,7 @@ from api.filters import ListFilter
 from api.serializers import SourceSerializer
 from api.models import (Source,
                         Scan,
-                        ScanJobOptions,
+                        ScanOptions,
                         ScanJob,
                         ScanTask)
 import api.messages as messages
@@ -143,7 +143,7 @@ class SourceViewSet(ModelViewSet):
                     # Grab the source id
                     source_id = response.data['id']
                     # Define the scan options object
-                    scan_options = ScanJobOptions()
+                    scan_options = ScanOptions()
                     scan_options.save()
                     # Create the scan job
                     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT,

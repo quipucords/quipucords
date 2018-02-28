@@ -21,7 +21,6 @@ from ansible.errors import AnsibleError
 from api.models import (Credential,
                         Source,
                         ScanTask,
-                        ScanOptions,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner import scan_data_log
@@ -152,16 +151,10 @@ class NetworkInspectScannerTest(TestCase):
         self.host_list = [('1.2.3.4', self.cred_data)]
 
         # setup scan options
-        scan_options = ScanOptions()
-        scan_options.disable_optional_products = {'jboss_eap': False,
-                                                  'jboss_fuse': False,
-                                                  'jboss_brms': False}
-        scan_options.save()
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source,
-            ScanTask.SCAN_TYPE_INSPECT,
-            scan_options=scan_options)
+            ScanTask.SCAN_TYPE_INSPECT)
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         self.connect_scan_task.update_stats(

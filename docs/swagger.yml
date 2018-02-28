@@ -1349,16 +1349,6 @@ definitions:
             items:
               $ref: "#/definitions/ScanOut"
             description: "The paginated scan"
-
-  ScanJobOptions:
-    type: "object"
-    properties:
-      max_concurrency:
-        type: "integer"
-        format: "int64"
-        description: "The maximum concurrent host scans. default is 50."
-      disabled_optional_products:
-        $ref: "#/definitions/DisableOptionalProducts"
   ScanJob:
     type: "object"
     properties:
@@ -1369,7 +1359,7 @@ definitions:
             - inspect
             - connect
         options:
-          $ref: "#/definitions/ScanJobOptions"
+          $ref: "#/definitions/ScanOptions"
 
   ScanJobDetails:
     type: "object"

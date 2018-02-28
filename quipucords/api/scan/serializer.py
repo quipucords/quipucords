@@ -16,11 +16,13 @@ from django.utils.translation import ugettext as _
 from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         ValidationError,
                                         IntegerField,
-                                        CharField)
+                                        CharField,
+                                        BooleanField)
 from api.models import (Source,
                         ScanTask,
                         Scan,
-                        ScanOptions)
+                        ScanOptions,
+                        ExtendedProductSearchOptions)
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
@@ -29,18 +31,56 @@ from api.scantasks.serializer import SourceField
 from api.common.util import check_for_existing_name
 
 
+class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
+    """The extended production search options of a scan."""
+
+    jboss_eap = BooleanField(required=False)
+    jboss_fuse = BooleanField(required=False)
+    jboss_brms = BooleanField(required=False)
+    search_directories = CustomJSONField(required=False)
+
+    class Meta:
+        """Metadata for serializer."""
+
+        model = ExtendedProductSearchOptions
+        fields = ['jboss_eap',
+                  'jboss_fuse',
+                  'jboss_brms',
+                  'search_directories']
+
+    @staticmethod
+    def validate_search_directories(search_directories):
+        """Validate search directories."""
+        try:
+            search_directories_list = json.loads(search_directories)
+            if not isinstance(search_directories_list, list):
+                raise ValidationError(
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+            for directory in search_directories_list:
+                if not isinstance(directory, str):
+                    raise ValidationError(
+                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+        except json.decoder.JSONDecodeError:
+            raise ValidationError(
+                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+        return search_directories
+
+
 class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
     disable_optional_products = CustomJSONField(required=False)
+    enable_extended_product_search = ExtendedProductSearchOptionsSerializer(
+        required=False)
 
     class Meta:
         """Metadata for serializer."""
 
         model = ScanOptions
         fields = ['max_concurrency',
-                  'disable_optional_products']
+                  'disable_optional_products',
+                  'enable_extended_product_search']
 
     # pylint: disable=invalid-name
     @staticmethod
@@ -99,11 +139,25 @@ class ScanSerializer(NotEmptySerializer):
 
         options = validated_data.pop('options', None)
         scan = super().create(validated_data)
+
         if options:
+            extended_search = options.pop(
+                'enable_extended_product_search', None)
+            if extended_search:
+                extended_search = ExtendedProductSearchOptions.objects.create(
+                    **extended_search)
+            else:
+                extended_search = ExtendedProductSearchOptions()
+            extended_search.save()
             options = ScanOptions.objects.create(**options)
+            options.enable_extended_product_search = extended_search
         else:
-            options = ScanOptions()
+            extended_search = ExtendedProductSearchOptions()
+            extended_search.save()
+            options = ScanOptions(
+                enable_extended_product_search=extended_search)
         options.save()
+
         scan.options = options
         scan.save()
 
@@ -130,10 +184,26 @@ class ScanSerializer(NotEmptySerializer):
             instance.name = name
             instance.scan_type = scan_type
             instance.sources = sources
+
             if options:
+                extended_search = options.pop(
+                    'enable_extended_product_search', None)
+                if extended_search:
+                    extended_search = \
+                        ExtendedProductSearchOptions.objects.create(
+                            **extended_search)
+                else:
+                    extended_search = ExtendedProductSearchOptions()
+                extended_search.save()
                 options = ScanOptions.objects.create(**options)
+                options.enable_extended_product_search = extended_search
             else:
-                options = ScanOptions()
+                extended_search = ExtendedProductSearchOptions()
+                extended_search.save()
+                options = ScanOptions(
+                    enable_extended_product_search=extended_search)
+            options.save()
+
             instance.options = options
         else:
             if name is not None:
@@ -143,7 +213,19 @@ class ScanSerializer(NotEmptySerializer):
             if sources is not None:
                 instance.sources = sources
             if options is not None:
+                extended_search = options.pop(
+                    'enable_extended_product_search', None)
+                if extended_search:
+                    extended_search = \
+                        ExtendedProductSearchOptions.objects.create(
+                            **extended_search)
+                else:
+                    extended_search = ExtendedProductSearchOptions()
+                extended_search.save()
                 instance.options = ScanOptions.objects.create(**options)
+                instance.options.enable_extended_product_search = \
+                    extended_search
+                instance.options.save()
 
         instance.save()
         return instance

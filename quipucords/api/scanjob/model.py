@@ -18,7 +18,7 @@ from django.utils.translation import ugettext as _
 from django.db import (models, transaction)
 from django.db.models import Q
 from api.source.model import Source
-from api.scan.model import Scan
+from api.scan.model import Scan, ScanOptions
 from api.scantasks.model import ScanTask
 from api.connresults.model import (JobConnectionResult,
                                    TaskConnectionResult)
@@ -28,23 +28,6 @@ import api.messages as messages
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-class ScanJobOptions(models.Model):
-    """The scan options allows configuration of a scan job."""
-
-    max_concurrency = models.PositiveIntegerField(default=50)
-    disable_optional_products = models.TextField(null=True)
-
-    def __str__(self):
-        """Convert to string."""
-        return '{' + 'id:{}, '\
-            'max_concurrency: {}, '\
-            'disable_optional_products:' \
-                     ' {}'.format(self.id,
-                                  self.max_concurrency,
-                                  self.disable_optional_products)\
-            + '}'
 
 
 class ScanJob(models.Model):
@@ -69,7 +52,7 @@ class ScanJob(models.Model):
         default=_(messages.SJ_STATUS_MSG_CREATED))
     tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
-        ScanJobOptions, null=True, on_delete=models.CASCADE)
+        ScanOptions, null=True, on_delete=models.CASCADE)
     report_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
@@ -120,11 +103,13 @@ class ScanJob(models.Model):
             self.scan_type = scan.scan_type
             if scan.options is not None:
                 disable_options = scan.options.disable_optional_products
-                scan_job_options = ScanJobOptions(
+                extended_search = scan.options.enable_extended_product_search
+                scan_job_options = ScanOptions(
                     max_concurrency=scan.options.max_concurrency,
-                    disable_optional_products=disable_options)
+                    disable_optional_products=disable_options,
+                    enable_extended_product_search=extended_search)
             else:
-                scan_job_options = ScanJobOptions()
+                scan_job_options = ScanOptions()
             scan_job_options.save()
             self.options = scan_job_options
             self.save()
