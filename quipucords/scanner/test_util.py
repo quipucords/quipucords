@@ -12,6 +12,7 @@
 
 from api.models import (Scan,
                         ScanOptions,
+                        ExtendedProductSearchOptions,
                         ScanTask,
                         ScanJob)
 
@@ -39,7 +40,10 @@ def create_scan_job(source,
     # Add options to scan
     options_to_use = scan_options
     if options_to_use is None:
-        options_to_use = ScanOptions()
+        extended_options = ExtendedProductSearchOptions()
+        extended_options.save()
+        options_to_use = ScanOptions(
+            enabled_extended_product_search=extended_options)
         options_to_use.save()
 
     scan.options = options_to_use

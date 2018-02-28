@@ -208,18 +208,27 @@ class ScanTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
-        results1 = [{'id': 1,
-                     'name': 'test1',
+        results1 = [{'id': 1, 'name':
+                     'test1',
+                     'sources': [{'id': 1,
+                                  'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': 'inspect',
+                     'options': {'max_concurrency': 50,
+                                 'enabled_extended_product_search':
+                                 {'jboss_eap': False,
+                                  'jboss_fuse': False,
+                                  'jboss_brms': False}}},
+                    {'id': 2, 'name':
+                     'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                     'options': {'max_concurrency': 50}},
-                    {'id': 2,
-                     'name': 'test2',
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50}}]
+                     'scan_type': 'connect',
+                     'options': {'max_concurrency': 50,
+                                 'enabled_extended_product_search':
+                                 {'jboss_eap': False,
+                                  'jboss_fuse': False,
+                                  'jboss_brms': False}}}]
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -246,8 +255,13 @@ class ScanTest(TestCase):
                      'name': 'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                     'options': {'max_concurrency': 50}}]
+                     'scan_type': 'connect',
+                     'options': {
+                         'max_concurrency': 50,
+                         'enabled_extended_product_search':
+                         {'jboss_eap': False,
+                          'jboss_fuse': False,
+                          'jboss_brms': False}}}]
         expected = {'count': 1,
                     'next': None,
                     'previous': None,

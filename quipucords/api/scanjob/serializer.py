@@ -19,12 +19,11 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
 from api.models import (Scan,
                         Source,
                         ScanTask,
-                        ScanJob,
-                        ScanJobOptions)
+                        ScanJob)
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
-                                   ValidStringChoiceField,
-                                   CustomJSONField)
+                                   ValidStringChoiceField)
+from api.scan.serializer import ScanOptionsSerializer
 from api.scantasks.serializer import ScanTaskSerializer
 from api.scantasks.serializer import SourceField
 from api.common.util import is_int, convert_to_int
@@ -65,20 +64,6 @@ def expand_scanjob(json_scan):
         json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
         json_scan[SYSTEMS_FAILED_KEY] = systems_failed
     return json_scan
-
-
-class ScanJobOptionsSerializer(NotEmptySerializer):
-    """Serializer for the ScanJobOptions model."""
-
-    max_concurrency = IntegerField(read_only=True)
-    disable_optional_products = CustomJSONField(read_only=True)
-
-    class Meta:
-        """Metadata for serializer."""
-
-        model = ScanJobOptions
-        fields = ['max_concurrency',
-                  'disable_optional_products']
 
 
 class ScanField(PrimaryKeyRelatedField):
@@ -123,7 +108,7 @@ class ScanJobSerializer(NotEmptySerializer):
                                     choices=ScanTask.STATUS_CHOICES)
     status_message = CharField(read_only=True)
     tasks = TaskField(many=True, read_only=True)
-    options = ScanJobOptionsSerializer(read_only=True, many=False)
+    options = ScanOptionsSerializer(read_only=True, many=False)
     report_id = IntegerField(read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)

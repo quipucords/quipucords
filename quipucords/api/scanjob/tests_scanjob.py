@@ -21,6 +21,7 @@ from api.models import (Credential,
                         Source,
                         ScanTask,
                         Scan,
+                        ExtendedProductSearchOptions,
                         ScanOptions,
                         ScanJob,
                         SystemConnectionResult,
@@ -521,14 +522,15 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
-        scan_options = ScanOptions()
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {}
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
                                       ScanTask.SCAN_TYPE_INSPECT,
                                       scan_options=scan_options)
-        extra_vars = ScanOptions.get_extra_vars(
-            scan_job.options.disable_optional_products)
+        extra_vars = scan_job.options.get_extra_vars()
 
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
@@ -538,9 +540,36 @@ class ScanJobTest(TestCase):
                          'jboss_brms_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
+    def test_get_extra_vars_extended_search(self):
+        """Tests the get_extra_vars method with extended search."""
+        extended = ExtendedProductSearchOptions(
+            jboss_eap=True,
+            jboss_fuse=True,
+            jboss_brms=True,
+            search_directories='["a", "b"]')
+        extended.save()
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
+        scan_options.disable_optional_products = {}
+        scan_options.save()
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+        extra_vars = scan_job.options.get_extra_vars()
+
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True,
+                         'jboss_eap_ext': True,
+                         'jboss_fuse_ext': True,
+                         'jboss_brms_ext': True,
+                         'search_directories': 'a b'}
+        self.assertEqual(extra_vars, expected_vars)
+
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
-        scan_options = ScanOptions()
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': True}
@@ -548,8 +577,7 @@ class ScanJobTest(TestCase):
         scan_job, _ = create_scan_job(self.source,
                                       ScanTask.SCAN_TYPE_INSPECT,
                                       scan_options=scan_options)
-        extra_vars = ScanOptions.get_extra_vars(
-            scan_job.options.disable_optional_products)
+        extra_vars = scan_job.options.get_extra_vars()
 
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': False,
@@ -561,18 +589,18 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
-        scan_options = ScanOptions()
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}
         scan_options.save()
-
         scan_job, _ = create_scan_job(self.source,
                                       ScanTask.SCAN_TYPE_INSPECT,
                                       scan_options=scan_options)
 
-        extra_vars = ScanOptions.get_extra_vars(
-            scan_job.options.disable_optional_products)
+        extra_vars = scan_job.options.get_extra_vars()
 
         expected_vars = {'jboss_eap': False,
                          'jboss_fuse': False,

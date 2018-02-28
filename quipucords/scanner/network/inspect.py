@@ -173,8 +173,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
-        extra_vars = ScanOptions.get_extra_vars(
-            self.scan_job.options.disable_optional_products)
+        extra_vars = self.scan_job.options.get_extra_vars()
         if extra_vars.get(ScanOptions.EXT_PRODUCT_SEARCH_DIRS) is None:
             extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = \
                 ' '.join(DEFAULT_SCAN_DIRS)
