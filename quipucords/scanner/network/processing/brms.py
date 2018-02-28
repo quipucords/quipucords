@@ -48,3 +48,36 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
             if 'rc' in result and result['rc'] == 0:
                 kie_api_files.extend(result['stdout_lines'])
         return kie_api_files
+
+
+class ProcessFindBRMSKieApiVer(process.Processor):
+    """Process the results of a find command."""
+
+    KEY = 'jboss_brms_kie_api_ver'
+
+    @staticmethod
+    def process(output):
+        """Return the command's output."""
+        return output['stdout_lines']
+
+
+class ProcessFindBRMSDroolsCoreVer(process.Processor):
+    """Process the results of a find command."""
+
+    KEY = 'jboss_brms_drools_core_ver'
+
+    @staticmethod
+    def process(output):
+        """Return the command's output."""
+        return output['stdout_lines']
+
+
+class ProcessFindBRMSKieWarVer(process.Processor):
+    """Process the results of a find command."""
+
+    KEY = 'jboss_brms_kie_war_ver'
+
+    @staticmethod
+    def process(output):
+        """Return the command's output."""
+        return output['stdout_lines']
