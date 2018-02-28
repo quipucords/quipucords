@@ -130,7 +130,7 @@ class ScanListItem extends React.Component {
         {icon}
         <div className="scan-status-text">
           <div>{scanDescription}</div>
-          <div>
+          <div className="text-muted">
             {moment
               .utc(scanTime)
               .utcOffset(moment().utcOffset())
@@ -212,13 +212,7 @@ class ScanListItem extends React.Component {
               <Icon type="pf" name="spinner2" atria-label="Start" />
             </Button>
           </SimpleTooltip>,
-          <DropdownButton
-            key="downLoadButton"
-            bsStyle="primary"
-            title="Download"
-            pullRight
-            id={`downloadButton_${item.id}`}
-          >
+          <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
             <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
               Summary Report
             </MenuItem>

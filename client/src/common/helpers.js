@@ -6,6 +6,8 @@ const bindMethods = (context, methods) => {
 
 const noop = Function.prototype;
 
+const generateId = prefix => `${prefix || 'generatedid'}-${Math.ceil(1e5 * Math.random())}`;
+
 const sourceTypeString = sourceType => {
   switch (sourceType) {
     case 'vcenter':
@@ -155,6 +157,7 @@ const normalizeCount = (count, modulus = 100) => {
 export const helpers = {
   bindMethods,
   noop,
+  generateId,
   sourceTypeString,
   sourceTypeIcon,
   scanTypeString,

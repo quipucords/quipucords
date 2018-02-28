@@ -7,7 +7,12 @@ import { Modal, Alert, Button, Icon, Form, Grid, SplitButton, MenuItem } from 'p
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
-import { addCredential, getCredentials, updateCredential } from '../../redux/actions/credentialsActions';
+import {
+  addCredential,
+  getCredentials,
+  getWizardCredentials,
+  updateCredential
+} from '../../redux/actions/credentialsActions';
 
 class CreateCredentialDialog extends React.Component {
   constructor() {
@@ -125,7 +130,9 @@ class CreateCredentialDialog extends React.Component {
     if (this.props.edit) {
       this.props.updateCredential(credential.id, credential);
     } else {
-      this.props.addCredential(credential);
+      this.props.addCredential(credential).finally(() => {
+        this.props.getWizardCredentials();
+      });
     }
   }
 
@@ -463,6 +470,7 @@ class CreateCredentialDialog extends React.Component {
 CreateCredentialDialog.propTypes = {
   addCredential: PropTypes.func,
   getCredentials: PropTypes.func,
+  getWizardCredentials: PropTypes.func,
   updateCredential: PropTypes.func,
   credential: PropTypes.object,
   credentialType: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
@@ -476,6 +484,7 @@ CreateCredentialDialog.propTypes = {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getCredentials: queryObj => dispatch(getCredentials(queryObj)),
+  getWizardCredentials: () => dispatch(getWizardCredentials()),
   addCredential: data => dispatch(addCredential(data)),
   updateCredential: (id, data) => dispatch(updateCredential(id, data))
 });

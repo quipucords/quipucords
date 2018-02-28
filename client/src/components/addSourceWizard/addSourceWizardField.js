@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Form, Grid } from 'patternfly-react';
+import helpers from '../../common/helpers';
 
 const addSourceWizardField = ({ children, colLabel = 3, colField = 9, id, label, error, errorMessage, ...props }) => {
-  const setId = id || `generatedid-${Math.ceil(1e5 * Math.random())}`;
+  const setId = id || helpers.generateId();
 
   return (
     <Form.FormGroup controlId={setId} validationState={error ? 'error' : null} {...props}>

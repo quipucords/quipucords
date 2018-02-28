@@ -23,7 +23,6 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import SourcesEmptyState from './sourcesEmptyState';
 import SourceListItem from './sourceListItem';
 import { CreateScanDialog } from './createScanDialog';
-import AddSourceWizard from '../addSourceWizard/addSourceWizard';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
@@ -45,8 +44,7 @@ class Sources extends React.Component {
     this.state = {
       scanDialogShown: false,
       multiSourceScan: false,
-      currentScanSource: null,
-      addSourceWizardShown: false
+      currentScanSource: null
     };
   }
 
@@ -254,7 +252,7 @@ class Sources extends React.Component {
 
   render() {
     const { error, errorMessage, sources, selectedSources, viewOptions } = this.props;
-    const { scanDialogShown, multiSourceScan, currentScanSource, addSourceWizardShown } = this.state;
+    const { scanDialogShown, multiSourceScan, currentScanSource } = this.state;
 
     if (error) {
       return (
@@ -285,7 +283,6 @@ class Sources extends React.Component {
             <div className="quipucords-list-container">{this.renderSourcesList(sources)}</div>
           </div>
           {this.renderPendingMessage()}
-          <AddSourceWizard show={addSourceWizardShown} />
           <CreateScanDialog
             show={scanDialogShown}
             sources={multiSourceScan ? selectedSources : [currentScanSource]}
@@ -300,7 +297,6 @@ class Sources extends React.Component {
       <React.Fragment>
         <SourcesEmptyState onAddSource={this.showAddSourceWizard} />
         {this.renderPendingMessage()}
-        <AddSourceWizard show={addSourceWizardShown} />
       </React.Fragment>
     );
   }

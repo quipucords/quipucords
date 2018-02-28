@@ -14,7 +14,8 @@
 
 import unittest
 from scanner.network.processing import brms
-from scanner.network.processing.test_util import ansible_results
+from scanner.network.processing.test_util import (ansible_results,
+                                                  ansible_result)
 
 
 class TestProcessJbossBRMSManifestMF(unittest.TestCase):
@@ -48,3 +49,34 @@ class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
         self.assertEqual(
             brms.ProcessJbossBRMSKieBusinessCentral.process(self.ls_results),
             [self.good_result['stdout']])
+
+
+class TestProcessFindBRMSKieApiVer(unittest.TestCase):
+    """Test ProcessFindBRMSKieApiVer."""
+
+    def test_success_case(self):
+        """Return stdout_lines in case of success."""
+        self.assertEqual(
+            brms.ProcessFindBRMSKieApiVer.process(ansible_result('a\nb\nc')),
+            ['a', 'b', 'c'])
+
+
+class TestProcessFindBRMSDroolsCoreVer(unittest.TestCase):
+    """Test ProcessFindBRMSDroolsCoreVer."""
+
+    def test_success_case(self):
+        """Return stdout_lines in case of success."""
+        self.assertEqual(
+            brms.ProcessFindBRMSDroolsCoreVer.process(
+                ansible_result('a\nb\nc')),
+            ['a', 'b', 'c'])
+
+
+class TestProcessFindBRMSKieWarVer(unittest.TestCase):
+    """Test ProcessFindBRMSKieWarVer."""
+
+    def test_success_case(self):
+        """Return stdout_lines in case of success."""
+        self.assertEqual(
+            brms.ProcessFindBRMSKieWarVer.process(ansible_result('a\nb\nc')),
+            ['a', 'b', 'c'])

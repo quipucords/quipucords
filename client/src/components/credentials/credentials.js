@@ -20,6 +20,7 @@ import { getCredentials, deleteCredential } from '../../redux/actions/credential
 import {
   confirmationModalTypes,
   credentialsTypes,
+  sourcesTypes,
   toastNotificationTypes,
   viewToolbarTypes,
   viewTypes
@@ -222,10 +223,7 @@ class Credentials extends React.Component {
 
   addSource() {
     Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Adding sources is not yet implemented'
+      type: sourcesTypes.CREATE_SOURCE_SHOW
     });
   }
 

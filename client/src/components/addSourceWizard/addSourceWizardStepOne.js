@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Form, Radio } from 'patternfly-react';
 import Store from '../../redux/store';
@@ -92,10 +91,6 @@ class AddSourceWizardStepOne extends React.Component {
     );
   }
 }
-
-AddSourceWizardStepOne.propTypes = {
-  source: PropTypes.object
-};
 
 const mapStateToProps = function(state) {
   return Object.assign({}, state.addSourceWizard.view);

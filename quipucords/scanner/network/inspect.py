@@ -42,6 +42,7 @@ DEFAULT_ROLES = [
     'etc_release',
     'file_contents',
     'jboss_eap',
+    'jboss_eap5',
     'jboss_brms',
     'jboss_fuse',
     'jboss_fuse_on_karaf',
