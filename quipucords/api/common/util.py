@@ -87,9 +87,10 @@ def check_for_existing_name(queryset, name, error_message, search_id=None):
         }
         raise ValidationError(error)
 
+
 def check_path_validity(path_list):
-    """Given a list of paths it verifies that all paths are valid absolute
-    path inputs for a scoped scan. If not it return a list of invalid paths.
+    """Validate list of paths.
+
     :param path_list: list of paths to validate
     :return: empty list or list of invalid paths
     """
@@ -98,6 +99,7 @@ def check_path_validity(path_list):
         if not os.path.isabs(a_path):
             invalid_paths.append(a_path)
     return invalid_paths
+
 
 class CSVHelper:
     """Helper for CSV serialization of list/dict values."""
