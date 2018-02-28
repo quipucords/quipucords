@@ -172,7 +172,7 @@ def request(method, path, params=None, payload=None,
                              url, result.json(), result.status_code)
         except ValueError:
             log_request_info(method, log_command,
-                             url, None, result.status_code)
+                             url, result.text, result.status_code)
         return result
     except requests.exceptions.SSLError as ssl_error:
         print(_(SSL_ERROR_MSG))

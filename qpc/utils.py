@@ -35,7 +35,6 @@ CONFIG_USE_HTTP = 'use_http'
 CONFIG_SSL_VERIFY = 'ssl_verify'
 
 LOG_LEVEL_INFO = 0
-LOG_LEVEL_WARNING = 1
 
 # pylint: disable=invalid-name
 logging.captureWarnings(True)
@@ -216,9 +215,7 @@ def setup_logging(verbosity):
     :param verbosity: verbosity level, as measured in -v's on the command line.
         Can be None for default.
     """
-    if verbosity == LOG_LEVEL_WARNING:
-        log_level = logging.WARNING
-    elif verbosity == LOG_LEVEL_INFO:
+    if verbosity == LOG_LEVEL_INFO:
         log_level = logging.INFO
     else:
         log_level = logging.DEBUG
