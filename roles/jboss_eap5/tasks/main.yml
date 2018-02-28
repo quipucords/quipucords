@@ -15,7 +15,7 @@
 # make a determination.
 - name: locate --ignore-case jboss
   raw: locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
-  register: jboss_eap5_locate_jboss_homes
+  register: internal_jboss_eap5_locate_jboss_homes
   ignore_errors: yes
   when: 'have_locate and jboss_eap'
 
@@ -27,7 +27,7 @@
 # candidate EAP_HOME directories.
 - name: gather jboss.eap.processes
   raw: ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
-  register: jboss_eap5_process_jboss_homes
+  register: internal_jboss_eap5_process_jboss_homes
   ignore_errors: yes
   when: 'jboss_eap'
 
@@ -37,8 +37,8 @@
 - name: combine EAP_HOME candidates into single list
   set_fact:
     eap5_home_candidates: "{{
-      (jboss_eap5_locate_jboss_homes.get('stdout_lines', []) +
-       jboss_eap5_process_jboss_homes.get('stdout_lines', [])) | unique }}"
+      (internal_jboss_eap5_locate_jboss_homes.get('stdout_lines', []) +
+       internal_jboss_eap5_process_jboss_homes.get('stdout_lines', [])) | unique }}"
   ignore_errors: yes
   when: 'jboss_eap'
 
