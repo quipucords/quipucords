@@ -300,13 +300,13 @@ class ProcessEapHomeLayersConf(process.Processor):
                 for result in output['results']}
 
 
-class ProcessFindJbossEAPJarVer(util.ProcessFindJarVer):
+class ProcessFindJbossEAPJarVer(util.FindJarVer):
     """Process the results of a find jar version command."""
 
     KEY = 'jboss_eap_jar_ver'
 
 
-class ProcessFindJbossEAPRunJarVer(util.ProcessFindJarVer):
+class ProcessFindJbossEAPRunJarVer(util.FindJarVer):
     """Process the results of a find jar version command."""
 
     KEY = 'jboss_eap_run_jar_ver'

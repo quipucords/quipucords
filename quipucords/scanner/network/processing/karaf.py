@@ -45,8 +45,6 @@ class ProcessFindKaraf(process.Processor):
     @staticmethod
     def process(output):
         """Return the command's output."""
-        print('\n\n\nProcessFindKaraf )line 50): \n')
-        print(str(output['stdout_lines']))
         return output['stdout_lines']
 
 

@@ -21,7 +21,7 @@ import requests_mock
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
 from qpc.report import REPORT_URI
-from qpc.scan import SCAN_URI
+from qpc.scan import SCAN_JOB_URI
 from qpc.report.detail import ReportDetailCommand
 from qpc.utils import get_server_location, write_server_config
 import qpc.messages as messages
@@ -62,7 +62,7 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
-            SCAN_URI + '1'
+            SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
@@ -73,7 +73,8 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_id='1', output_json=True, output_csv=False,
+            args = Namespace(scan_job_id='1', output_json=True,
+                             output_csv=False,
                              path=self.test_json_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -88,7 +89,7 @@ class ReportDetailTests(unittest.TestCase):
         """Testing retreiving detail report as csv."""
         report_out = StringIO()
         get_scanjob_url = get_server_location() + \
-            SCAN_URI + '1'
+            SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
@@ -104,7 +105,8 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_report_url, status_code=200,
                        json=get_report_csv_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_id='1', output_json=False, output_csv=True,
+            args = Namespace(scan_job_id='1', output_json=False,
+                             output_csv=True,
                              path=self.test_csv_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -143,13 +145,14 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
-            SCAN_URI + '1'
+            SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1, 'report_id': 1}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_id='1', output_json=True, output_csv=False,
+            args = Namespace(scan_job_id='1', output_json=True,
+                             output_csv=False,
                              path=self.test_json_filename)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
@@ -162,13 +165,14 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
-            SCAN_URI + '1'
+            SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_id='1', output_json=True, output_csv=False,
+            args = Namespace(scan_job_id='1', output_json=True,
+                             output_csv=False,
                              path=self.test_json_filename)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
