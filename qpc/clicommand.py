@@ -70,7 +70,8 @@ class CliCommand(object):
                                 path=self.req_path,
                                 params=self.req_params,
                                 payload=self.req_payload,
-                                headers=self.req_headers)
+                                headers=self.req_headers,
+                                parser=self.parser)
         # pylint: disable=no-member
         if self.response.status_code not in self.success_codes:
             # handle error cases

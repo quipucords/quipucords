@@ -14,7 +14,7 @@
 import sys
 import json
 import requests
-from qpc.utils import log, handle_error_response
+from qpc.utils import log, log_request_info, handle_error_response
 from qpc.translation import _
 import qpc.messages as messages
 from qpc.utils import (get_server_location, read_client_token, get_ssl_verify)
@@ -65,67 +65,67 @@ def handle_token_errors(response):
     return response
 
 
-def post(path, payload, headers=None):
-    """Post JSON payload to the given path with the configured server location.
+def post(url, payload, headers=None):
+    """Post JSON payload to the given url.
 
-    :param path: path after server and port (i.e. /api/v1/credentials)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/scans/)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = get_server_location() + path
     ssl_verify = get_ssl_verify()
     return requests.post(url, json=payload, headers=headers, verify=ssl_verify)
 
 
-def get(path, params=None, headers=None):
-    """Get JSON data from the given path with the configured server location.
+def get(url, params=None, headers=None):
+    """Get JSON data from the given url.
 
-    :param path:  path after server and port (i.e. /api/v1/credentials)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/credentials)
     :param params: uri encoding params (i.e. ?param1=hello&param2=world)
     :returns: reponse object
     """
-    url = get_server_location() + path
     ssl_verify = get_ssl_verify()
     return requests.get(url, params=params, headers=headers, verify=ssl_verify)
 
 
-def patch(path, payload, headers=None):
-    """Patch JSON payload to the given path with the configured server location.
+def patch(url, payload, headers=None):
+    """Patch JSON payload to the given url.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/1)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/credentials/1)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = get_server_location() + path
     ssl_verify = get_ssl_verify()
     return requests.patch(url, json=payload, headers=headers,
                           verify=ssl_verify)
 
 
-def delete(path, headers=None):
-    """Delete the item with the given path with the configured server location.
+def delete(url, headers=None):
+    """Delete the item with the given url.
 
-    :param path: path after server and port (i.e. /api/v1/credentials/1)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/credentials/1)
     :returns: reponse object
     """
-    url = get_server_location() + path
     ssl_verify = get_ssl_verify()
     return requests.delete(url, headers=headers, verify=ssl_verify)
 
 
-def put(path, payload, headers=None):
-    """Put JSON payload to the given path with the configured server location.
+def put(url, payload, headers=None):
+    """Put JSON payload to the given url.
 
-    :param path: path after server and port (i.e. /api/v1/credentials)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/credentials/1)
     :param payload: dictionary of payload to be posted
     :returns: reponse object
     """
-    url = get_server_location() + path
     ssl_verify = get_ssl_verify()
     return requests.put(url, json=payload, headers=headers, verify=ssl_verify)
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-branches
 def request(method, path, params=None, payload=None,
             parser=None, headers=None):
     """Create a generic handler for passing to specific request methods.
@@ -139,8 +139,14 @@ def request(method, path, params=None, payload=None,
     :returns: reponse object
     :raises: AssertionError error if method is not supported
     """
+    # grab the cli command for the log if the parser is provided
+    log_command = None
+    if parser is not None:
+        log_command = parser.prog
     req_headers = {}
     token = read_client_token()
+    # create the url by adding the path to the configured server location
+    url = get_server_location() + path
     if headers:
         req_headers.update(headers)
     if token:
@@ -148,19 +154,21 @@ def request(method, path, params=None, payload=None,
 
     try:
         if method == POST:
-            return handle_token_errors(post(path, payload, req_headers))
+            result = handle_token_errors(post(url, payload, req_headers))
         elif method == GET:
-            return handle_token_errors(get(path, params, req_headers))
+            result = handle_token_errors(get(url, params, req_headers))
         elif method == PATCH:
-            return handle_token_errors(patch(path, payload, req_headers))
+            result = handle_token_errors(patch(url, payload, req_headers))
         elif method == DELETE:
-            return handle_token_errors(delete(path, req_headers))
+            result = handle_token_errors(delete(url, req_headers))
         elif method == PUT:
-            return handle_token_errors(put(path, payload, req_headers))
+            result = handle_token_errors(put(url, payload, req_headers))
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()
             sys.exit(1)
+        log_request_info(method, log_command, url, payload, result.status_code)
+        return result
     except requests.exceptions.SSLError as ssl_error:
         print(_(SSL_ERROR_MSG))
         log.error(ssl_error)
