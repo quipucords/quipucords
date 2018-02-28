@@ -6,11 +6,11 @@ import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
-import { apiTypes } from '../../constants';
 import { addSourceWizardSteps } from './addSourceWizardConstants';
 import { addSource, updateSource } from '../../redux/actions/sourcesActions';
 import AddSourceWizardStepOne from './addSourceWizardStepOne';
 import AddSourceWizardStepTwo from './addSourceWizardStepTwo';
+import AddSourceWizardStepThree from './addSourceWizardStepThree';
 
 class AddSourceWizard extends React.Component {
   constructor(props) {
@@ -147,7 +147,7 @@ class AddSourceWizard extends React.Component {
 
   // ToDo: Final wizard step needs additional spinner animation, copy/error messaging for submit failures.
   render() {
-    const { show, source } = this.props;
+    const { show } = this.props;
     const { activeStepIndex, stepOneValid, stepTwoValid } = this.state;
     const wizardSteps = addSourceWizardSteps;
 
@@ -169,14 +169,9 @@ class AddSourceWizard extends React.Component {
                   {wizardSteps.map((step, stepIndex) => {
                     return (
                       <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
-                        {stepIndex === 0 && <AddSourceWizardStepOne source={source} />}
-                        {stepIndex === 1 && <AddSourceWizardStepTwo source={source} />}
-                        {stepIndex === 2 && (
-                          <div>
-                            <p>Searching {source[apiTypes.API_SOURCE_TYPE]} for hosts...</p>
-                            <p>You can dismiss this and receive a notification when the search is complete.</p>
-                          </div>
-                        )}
+                        {stepIndex === 0 && <AddSourceWizardStepOne />}
+                        {stepIndex === 1 && <AddSourceWizardStepTwo />}
+                        {stepIndex === 2 && <AddSourceWizardStepThree />}
                       </Wizard.Contents>
                     );
                   })}
@@ -184,7 +179,7 @@ class AddSourceWizard extends React.Component {
               </Wizard.Row>
             </Modal.Body>
             <Modal.Footer className="wizard-pf-footer">
-              <Button bsStyle="default" className="btn-cancel" onClick={this.onCancel}>
+              <Button bsStyle="default" className="btn-cancel" disabled={activeStepIndex === 2} onClick={this.onCancel}>
                 Cancel
               </Button>
               <Button bsStyle="default" disabled={activeStepIndex === 0 || activeStepIndex === 2} onClick={this.onBack}>

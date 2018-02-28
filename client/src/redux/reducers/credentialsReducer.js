@@ -35,6 +35,16 @@ const selectedIndex = function(state, credential) {
   });
 };
 
+// Update the selected state of each credential
+const selectedCredentials = function(state, credentials) {
+  return credentials.map(nextCredential => {
+    return {
+      ...nextCredential,
+      selected: selectedIndex(state, nextCredential) !== -1
+    };
+  });
+};
+
 const credentialsReducer = function(state = initialState, action) {
   switch (action.type) {
     // Persist
@@ -129,7 +139,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -146,7 +155,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -162,7 +170,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -190,7 +197,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -206,7 +212,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -219,7 +224,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -251,7 +255,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -270,7 +273,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
@@ -287,29 +289,34 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );
 
     case credentialsTypes.GET_CREDENTIAL_FULFILLED:
     case credentialsTypes.GET_CREDENTIALS_FULFILLED:
-      // Get resulting credentials and update the selected state of each
-      const credentials = _.get(action, 'payload.data.results', []).map(nextCredential => {
-        return {
-          ...nextCredential,
-          selected: selectedIndex(state, nextCredential) !== -1
-        };
-      });
       return helpers.setStateProp(
         'view',
         {
-          credentials: credentials,
+          credentials: selectedCredentials(state, _.get(action, 'payload.data.results', [])),
           fulfilled: true
         },
         {
           state,
           initialState
+        }
+      );
+
+    case credentialsTypes.GET_WIZARD_CREDENTIALS_FULFILLED:
+      return helpers.setStateProp(
+        'view',
+        {
+          credentials: selectedCredentials(state, _.get(action, 'payload.data.results', [])),
+          pending: false
+        },
+        {
+          state,
+          reset: false
         }
       );
 
@@ -322,7 +329,6 @@ const credentialsReducer = function(state = initialState, action) {
         },
         {
           state,
-          initialState,
           reset: false
         }
       );

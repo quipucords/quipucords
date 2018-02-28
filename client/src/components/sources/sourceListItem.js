@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
-import { ListView, Button, Checkbox, Icon } from 'patternfly-react';
+import { Popover, OverlayTrigger, ListView, Button, Checkbox, Icon } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
 import { getScanResults } from '../../redux/actions/scansActions';
@@ -167,14 +167,41 @@ class SourceListItem extends React.Component {
 
   renderDescription() {
     const { item } = this.props;
+
+    const itemHostsPopover = (
+      <Popover id={helpers.generateId()} className="quipucords-sources-popover-scroll">
+        <ul className="quipucords-popover-list">
+          {item.hosts &&
+            item.hosts.map((host, index) => {
+              return <li key={index}>{host}</li>;
+            })}
+        </ul>
+      </Popover>
+    );
+
+    let itemDescription;
+
+    if (_.size(item.hosts)) {
+      if (item.source_type === 'network') {
+        itemDescription = (
+          <ListView.DescriptionText>
+            <OverlayTrigger trigger="click" rootClose placement="left" overlay={itemHostsPopover}>
+              <Button bsStyle="link" className="quipucords-sources-network-button">
+                Network Range
+              </Button>
+            </OverlayTrigger>
+          </ListView.DescriptionText>
+        );
+      } else {
+        itemDescription = <ListView.DescriptionText>{item.hosts[0]}</ListView.DescriptionText>;
+      }
+    }
+
     return (
       <div className="quipucords-split-description">
         <span className="quipucords-description-left">
           <ListView.DescriptionHeading>{item.name}</ListView.DescriptionHeading>
-          {item.hosts &&
-            item.hosts.map((host, index) => {
-              return <ListView.DescriptionText key={index}>{host}</ListView.DescriptionText>;
-            })}
+          {itemDescription}
         </span>
         <span className="quipucords-description-right">{this.renderScanStatus()}</span>
       </div>
