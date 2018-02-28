@@ -193,30 +193,12 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1,
                                   'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'inspect',
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True},
-                                 'enabled_extended_product_search':
-                                 {'jboss_eap': False,
-                                  'jboss_fuse': False,
-                                  'jboss_brms': False}}},
+                     'scan_type': 'inspect'},
                     {'id': 2, 'name':
                      'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'connect',
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True},
-                                 'enabled_extended_product_search':
-                                 {'jboss_eap': False,
-                                  'jboss_fuse': False,
-                                  'jboss_brms': False}}}]
+                     'scan_type': 'connect'}]
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -243,17 +225,7 @@ class ScanTest(TestCase):
                      'name': 'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'connect',
-                     'options': {
-                         'max_concurrency': 50,
-                         'disable_optional_products':
-                         {'jboss_eap': True,
-                          'jboss_fuse': True,
-                          'jboss_brms': True},
-                         'enabled_extended_product_search':
-                         {'jboss_eap': False,
-                          'jboss_fuse': False,
-                          'jboss_brms': False}}}]
+                     'scan_type': 'connect'}]
         expected = {'count': 1,
                     'next': None,
                     'previous': None,

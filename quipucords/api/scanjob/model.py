@@ -108,10 +108,8 @@ class ScanJob(models.Model):
                     max_concurrency=scan.options.max_concurrency,
                     disable_optional_products=disable_options,
                     enabled_extended_product_search=extended_search)
-            else:
-                scan_job_options = ScanOptions()
-            scan_job_options.save()
-            self.options = scan_job_options
+                scan_job_options.save()
+                self.options = scan_job_options
             self.save()
 
     def log_current_status(self,
