@@ -187,73 +187,7 @@ class ProcessJbossEapSystemctl(InitLineFinder):
     KEYWORDS = ['jboss', 'eap']
 
 
-class IndicatorFileFinder(process.Processor):
-    """Look for indicator files in the output of many 'ls -1's.
-
-    Use by subclassing and defining a class variable INDICATOR_FILES,
-    which is an iterable of the files to look for. Example usage:
-
-    class ProcessMyLsResults(IndicatorFileFinder):
-        KEY = 'my_great_ls'
-        INDICATOR_FILES = ['find', 'my', 'directory']
-    """
-
-    KEY = None
-
-    @classmethod
-    def process(cls, output):
-        """Find indicator files in the output, item by item."""
-        results = {}
-
-        for item in output['results']:
-            directory = item['item']
-            if item['rc']:
-                results[directory] = []
-                continue
-
-            files = item['stdout_lines']
-            # pylint: disable=no-member
-            found_in_dir = [filename for filename in cls.INDICATOR_FILES
-                            if filename in files]
-            if found_in_dir:
-                results[directory] = found_in_dir
-            else:
-                results[directory] = []
-
-        return results
-
-
-class CatResultsProcessor(process.Processor):
-    """Look for 'Red Hat' in the output of many 'cat's.
-
-    Use by making subclasses with their own KEYs.
-    """
-
-    KEY = None
-
-    @staticmethod
-    def process(output):
-        """Process the output of a with_items cat from Ansible.
-
-        :param cat_out: the output of a with_items cat task from
-        Ansible.
-
-        :returns: a dictionary mapping each directory name to True if
-          'Red Hat' was found in that directory's cat, and False
-          otherwise.
-        """
-        results = {}
-        for item in output['results']:
-            directory = item['item']
-            if item['rc']:
-                results[directory] = False
-            else:
-                results[directory] = 'Red Hat' in item['stdout']
-
-        return results
-
-
-class ProcessEapHomeLs(IndicatorFileFinder):
+class ProcessEapHomeLs(util.IndicatorFileFinder):
     """Process the output of 'ls -1 ...'."""
 
     KEY = 'eap_home_ls'
@@ -262,13 +196,14 @@ class ProcessEapHomeLs(IndicatorFileFinder):
                        'modules', 'jboss-modules.jar', 'version.txt']
 
 
-class ProcessEapHomeCat(CatResultsProcessor):
+class ProcessEapHomeCat(util.StdoutSearchProcessor):
     """Process the output of 'cat .../version.txt'."""
 
     KEY = 'eap_home_version_txt'
+    SEARCH_STRING = 'Red Hat'
 
 
-class ProcessEapHomeBinForFuse(IndicatorFileFinder):
+class ProcessEapHomeBinForFuse(util.IndicatorFileFinder):
     """Process the output of 'ls -1' for eap_home_bin to check for fuse."""
 
     KEY = 'eap_home_bin'

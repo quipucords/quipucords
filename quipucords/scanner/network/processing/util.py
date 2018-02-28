@@ -89,3 +89,70 @@ class FindJar(process.Processor):
             line_data = line.split('; ')
             versions += line_data
         return versions
+
+
+class IndicatorFileFinder(process.Processor):
+    """Look for indicator files in the output of many 'ls -1's.
+
+    Use by subclassing and defining a class variable INDICATOR_FILES,
+    which is an iterable of the files to look for. Example usage:
+
+    class ProcessMyLsResults(IndicatorFileFinder):
+        KEY = 'my_great_ls'
+        INDICATOR_FILES = ['find', 'my', 'directory']
+    """
+
+    KEY = None
+
+    @classmethod
+    def process(cls, output):
+        """Find indicator files in the output, item by item."""
+        results = {}
+
+        for item in output['results']:
+            directory = item['item']
+            if item['rc']:
+                results[directory] = []
+                continue
+
+            files = item['stdout_lines']
+            # pylint: disable=no-member
+            found_in_dir = [filename for filename in cls.INDICATOR_FILES
+                            if filename in files]
+            if found_in_dir:
+                results[directory] = found_in_dir
+            else:
+                results[directory] = []
+
+        return results
+
+
+class StdoutSearchProcessor(process.Processor):
+    """Look for a string in the output of a with_items task.
+
+    Use by subclassing and setting SEARCH_STRING to the string to look
+    for.
+    """
+
+    KEY = None
+    SEARCH_STRING = None
+
+    @classmethod
+    def process(cls, output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a dictionary mapping each item name to True if
+          SEARCH_STRING was found in that item's stdout, and False
+          otherwise.
+        """
+        results = {}
+        for item in output['results']:
+            item_name = item['item']
+            if item['rc']:
+                results[item_name] = False
+            else:
+                results[item_name] = cls.SEARCH_STRING in item['stdout']
+
+        return results
