@@ -85,7 +85,7 @@ SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
 SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST = \
-    'search_directories must be a JSON array of paths'
+    'search_directories must be a JSON array of valid paths'
 
 # scan jobs messages
 PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'

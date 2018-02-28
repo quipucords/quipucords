@@ -43,7 +43,7 @@ def create_scan_job(source,
         extended_options = ExtendedProductSearchOptions()
         extended_options.save()
         options_to_use = ScanOptions(
-            enable_extended_product_search=extended_options)
+            enabled_extended_product_search=extended_options)
         options_to_use.save()
 
     scan.options = options_to_use

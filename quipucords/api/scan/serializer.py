@@ -28,7 +28,8 @@ from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
                                    CustomJSONField)
 from api.scantasks.serializer import SourceField
-from api.common.util import check_for_existing_name
+from api.common.util import (check_for_existing_name,
+                             check_path_validity)
 
 # pylint: disable=invalid-name
 try:
@@ -66,6 +67,10 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
                 if not isinstance(directory, str):
                     raise ValidationError(
                         _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+            invalid_paths = check_path_validity(search_directories_list)
+            if bool(invalid_paths):
+                raise ValidationError(
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
         except json_exception_class:
             raise ValidationError(
                 _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
@@ -77,7 +82,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
     disable_optional_products = CustomJSONField(required=False)
-    enable_extended_product_search = ExtendedProductSearchOptionsSerializer(
+    enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
         required=False)
 
     class Meta:
@@ -86,7 +91,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
         model = ScanOptions
         fields = ['max_concurrency',
                   'disable_optional_products',
-                  'enable_extended_product_search']
+                  'enabled_extended_product_search']
 
     # pylint: disable=invalid-name
     @staticmethod
@@ -148,7 +153,7 @@ class ScanSerializer(NotEmptySerializer):
 
         if options:
             extended_search = options.pop(
-                'enable_extended_product_search', None)
+                'enabled_extended_product_search', None)
             if extended_search:
                 extended_search = ExtendedProductSearchOptions.objects.create(
                     **extended_search)
@@ -156,12 +161,12 @@ class ScanSerializer(NotEmptySerializer):
                 extended_search = ExtendedProductSearchOptions()
             extended_search.save()
             options = ScanOptions.objects.create(**options)
-            options.enable_extended_product_search = extended_search
+            options.enabled_extended_product_search = extended_search
         else:
             extended_search = ExtendedProductSearchOptions()
             extended_search.save()
             options = ScanOptions(
-                enable_extended_product_search=extended_search)
+                enabled_extended_product_search=extended_search)
         options.save()
 
         scan.options = options
@@ -193,7 +198,7 @@ class ScanSerializer(NotEmptySerializer):
 
             if options:
                 extended_search = options.pop(
-                    'enable_extended_product_search', None)
+                    'enabled_extended_product_search', None)
                 if extended_search:
                     extended_search = \
                         ExtendedProductSearchOptions.objects.create(
@@ -202,12 +207,12 @@ class ScanSerializer(NotEmptySerializer):
                     extended_search = ExtendedProductSearchOptions()
                 extended_search.save()
                 options = ScanOptions.objects.create(**options)
-                options.enable_extended_product_search = extended_search
+                options.enabled_extended_product_search = extended_search
             else:
                 extended_search = ExtendedProductSearchOptions()
                 extended_search.save()
                 options = ScanOptions(
-                    enable_extended_product_search=extended_search)
+                    enabled_extended_product_search=extended_search)
             options.save()
 
             instance.options = options
@@ -220,7 +225,7 @@ class ScanSerializer(NotEmptySerializer):
                 instance.sources = sources
             if options is not None:
                 extended_search = options.pop(
-                    'enable_extended_product_search', None)
+                    'enabled_extended_product_search', None)
                 if extended_search:
                     extended_search = \
                         ExtendedProductSearchOptions.objects.create(
@@ -229,7 +234,7 @@ class ScanSerializer(NotEmptySerializer):
                     extended_search = ExtendedProductSearchOptions()
                 extended_search.save()
                 instance.options = ScanOptions.objects.create(**options)
-                instance.options.enable_extended_product_search = \
+                instance.options.enabled_extended_product_search = \
                     extended_search
                 instance.options.save()
 

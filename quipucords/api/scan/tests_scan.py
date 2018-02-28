@@ -215,7 +215,7 @@ class ScanTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': 'inspect',
                      'options': {'max_concurrency': 50,
-                                 'enable_extended_product_search':
+                                 'enabled_extended_product_search':
                                  {'jboss_eap': False,
                                   'jboss_fuse': False,
                                   'jboss_brms': False}}},
@@ -225,7 +225,7 @@ class ScanTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': 'connect',
                      'options': {'max_concurrency': 50,
-                                 'enable_extended_product_search':
+                                 'enabled_extended_product_search':
                                  {'jboss_eap': False,
                                   'jboss_fuse': False,
                                   'jboss_brms': False}}}]
@@ -258,7 +258,7 @@ class ScanTest(TestCase):
                      'scan_type': 'connect',
                      'options': {
                          'max_concurrency': 50,
-                         'enable_extended_product_search':
+                         'enabled_extended_product_search':
                          {'jboss_eap': False,
                           'jboss_fuse': False,
                           'jboss_brms': False}}}]

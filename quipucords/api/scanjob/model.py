@@ -103,11 +103,11 @@ class ScanJob(models.Model):
             self.scan_type = scan.scan_type
             if scan.options is not None:
                 disable_options = scan.options.disable_optional_products
-                extended_search = scan.options.enable_extended_product_search
+                extended_search = scan.options.enabled_extended_product_search
                 scan_job_options = ScanOptions(
                     max_concurrency=scan.options.max_concurrency,
                     disable_optional_products=disable_options,
-                    enable_extended_product_search=extended_search)
+                    enabled_extended_product_search=extended_search)
             else:
                 scan_job_options = ScanOptions()
             scan_job_options.save()

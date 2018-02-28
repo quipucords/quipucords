@@ -1306,7 +1306,7 @@ definitions:
         description: "The maximum concurrent host scans. default is 50."
       disabled_optional_products:
         $ref: "#/definitions/DisableOptionalProducts"
-      enable_extended_product_search:
+      enabled_extended_product_search:
         $ref: "#/definitions/ExtendedSearchProducts"
   Scan:
     type: "object"

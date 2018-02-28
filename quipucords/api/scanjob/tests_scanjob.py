@@ -524,7 +524,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with empty dict."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        scan_options = ScanOptions(enable_extended_product_search=extended)
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {}
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
@@ -548,7 +548,7 @@ class ScanJobTest(TestCase):
             jboss_brms=True,
             search_directories='["a", "b"]')
         extended.save()
-        scan_options = ScanOptions(enable_extended_product_search=extended)
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {}
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
@@ -569,7 +569,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with mixed values."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        scan_options = ScanOptions(enable_extended_product_search=extended)
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': True}
@@ -591,7 +591,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with all False."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        scan_options = ScanOptions(enable_extended_product_search=extended)
+        scan_options = ScanOptions(enabled_extended_product_search=extended)
         scan_options.disable_optional_products = {'jboss_eap': False,
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}

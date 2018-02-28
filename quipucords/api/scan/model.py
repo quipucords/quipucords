@@ -66,7 +66,7 @@ class ScanOptions(models.Model):
 
     max_concurrency = models.PositiveIntegerField(default=50)
     disable_optional_products = models.TextField(null=True)
-    enable_extended_product_search = \
+    enabled_extended_product_search = \
         models.ForeignKey(ExtendedProductSearchOptions,
                           on_delete=models.CASCADE, null=True)
 
@@ -75,11 +75,11 @@ class ScanOptions(models.Model):
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
             'disable_optional_products: {}, ' \
-            'enable_extended_product_search:' \
+            'enabled_extended_product_search:' \
                      ' {}'.format(self.id,
                                   self.max_concurrency,
                                   self.disable_optional_products,
-                                  self.enable_extended_product_search)\
+                                  self.enabled_extended_product_search)\
             + '}'
 
     def get_extra_vars(self):
@@ -95,7 +95,7 @@ class ScanOptions(models.Model):
         # a default dict (all products default to True)
         product_status = ScanOptions.get_optional_products(
             self.disable_optional_products)
-        extended_search = self.enable_extended_product_search
+        extended_search = self.enabled_extended_product_search
         product_default = {self.JBOSS_EAP: True,
                            self.JBOSS_FUSE: True,
                            self.JBOSS_BRMS: True,
