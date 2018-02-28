@@ -167,7 +167,12 @@ def request(method, path, params=None, payload=None,
             log.error('Unsupported request method %s', method)
             parser.print_help()
             sys.exit(1)
-        log_request_info(method, log_command, url, payload, result.status_code)
+        try:
+            log_request_info(method, log_command,
+                             url, result.json(), result.status_code)
+        except ValueError:
+            log_request_info(method, log_command,
+                             url, None, result.status_code)
         return result
     except requests.exceptions.SSLError as ssl_error:
         print(_(SSL_ERROR_MSG))

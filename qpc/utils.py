@@ -15,6 +15,7 @@ from __future__ import print_function
 import logging
 import os
 import json
+from datetime import datetime
 from qpc.translation import _ as t
 import qpc.messages as messages
 
@@ -34,13 +35,8 @@ CONFIG_PORT_KEY = 'port'
 CONFIG_USE_HTTP = 'use_http'
 CONFIG_SSL_VERIFY = 'ssl_verify'
 
-
-# 'log' is a convenience for getting the appropriate logger from the
-# logging module. Use it like this:
-#
-#   from qpc.utils import log
-#   ...
-#   log.error('Too many Tribbles!')
+LOG_LEVEL_INFO = 0
+LOG_LEVEL_WARNING = 1
 
 # pylint: disable=invalid-name
 logging.captureWarnings(True)
@@ -221,9 +217,9 @@ def setup_logging(verbosity):
     :param verbosity: verbosity level, as measured in -v's on the command line.
         Can be None for default.
     """
-    if verbosity is None:
+    if verbosity == LOG_LEVEL_WARNING:
         log_level = logging.WARNING
-    elif verbosity == 1:
+    elif verbosity == LOG_LEVEL_INFO:
         log_level = logging.INFO
     else:
         log_level = logging.DEBUG
@@ -241,31 +237,31 @@ def setup_logging(verbosity):
     log.addHandler(stderr_handler)
 
 
-def change_log_level(verbosity):
-    """Change the log level when specified."""
-    if verbosity is None:
-        log_level = logging.WARNING
-    elif verbosity == 1:
-        log_level = logging.INFO
-    else:
-        log_level = logging.DEBUG
-    log.setLevel(log_level)
-
-
-def log_request_info(method, command, url, payload, response):
+def log_request_info(method, command, url, response_json, response_code):
     """Log the information regarding the request being made.
 
     :param method: the method being called (ie. POST)
     :param command: the command being used (ie. qpc cred add)
     :param url: the server, port, and path
     (i.e. http://127.0.0.1:8000/api/v1/credentials/1)
-    :param payload: the information being sent
-    :param response: the status code being returned (ie. 200)
+    :param response_json: the response returned from the request
+    :param response_code: the status code being returned (ie. 200)
     """
-    change_log_level(1)
+    timestamp = datetime.utcnow()
     message = 'Method: "%s", Command: "%s", URL: "%s", '\
-              'Payload: "%s", Status Code: "%s"'
-    log.info(message, method, command, url, payload, response)
+              'Response: "%s", Status Code: "%s, Time: %s"'
+    log.info(message, method, command, url,
+             response_json, response_code, timestamp)
+
+
+def log_args(args):
+    """Log the arguments for each qpc command.
+
+    :param args: the arguments provided to the qpc command
+    """
+    timestamp = datetime.utcnow()
+    message = 'Args: "%s", Time: "%s"'
+    log.info(message, args, timestamp)
 
 
 def handle_error_response(response):
