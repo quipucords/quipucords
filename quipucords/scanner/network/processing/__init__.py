@@ -11,6 +11,7 @@
 
 # flake8: noqa
 from . import eap
+from . import eap5
 from . import brms
 from . import fuse
 from . import karaf
