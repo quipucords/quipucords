@@ -15,7 +15,6 @@ from __future__ import print_function
 import logging
 import os
 import json
-from datetime import datetime
 from qpc.translation import _ as t
 import qpc.messages as messages
 
@@ -226,7 +225,9 @@ def setup_logging(verbosity):
 
     # Using basicConfig here means that all log messages, even
     # those not coming from qpc, will go to the log file
-    logging.basicConfig(filename=QPC_LOG)
+    logging.basicConfig(filename=QPC_LOG,
+                        format='%(asctime)s - %(name)s - ' +
+                               '%(levelname)s - %(message)s')
     # but we only adjust the log level for the 'qpc' logger.
     log.setLevel(log_level)
     # the StreamHandler sends warnings and above to stdout, but
@@ -247,11 +248,10 @@ def log_request_info(method, command, url, response_json, response_code):
     :param response_json: the response returned from the request
     :param response_code: the status code being returned (ie. 200)
     """
-    timestamp = datetime.utcnow()
     message = 'Method: "%s", Command: "%s", URL: "%s", '\
-              'Response: "%s", Status Code: "%s, Time: %s"'
+              'Response: "%s", Status Code: "%s'
     log.info(message, method, command, url,
-             response_json, response_code, timestamp)
+             response_json, response_code)
 
 
 def log_args(args):
@@ -259,9 +259,8 @@ def log_args(args):
 
     :param args: the arguments provided to the qpc command
     """
-    timestamp = datetime.utcnow()
-    message = 'Args: "%s", Time: "%s"'
-    log.info(message, args, timestamp)
+    message = 'Args: "%s"'
+    log.info(message, args)
 
 
 def handle_error_response(response):
