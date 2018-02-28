@@ -225,9 +225,8 @@ def setup_logging(verbosity):
 
     # Using basicConfig here means that all log messages, even
     # those not coming from qpc, will go to the log file
-    logging.basicConfig(filename=QPC_LOG,
-                        format='%(asctime)s - %(name)s - ' +
-                               '%(levelname)s - %(message)s')
+    logging.basicConfig(filename=QPC_LOG, format='%(asctime)s - %(name)s - '
+                                                 '%(levelname)s - %(message)s')
     # but we only adjust the log level for the 'qpc' logger.
     log.setLevel(log_level)
     # the StreamHandler sends warnings and above to stdout, but
