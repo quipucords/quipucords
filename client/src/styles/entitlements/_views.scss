@@ -52,6 +52,9 @@
   overflow-y: auto;
   width: 100%;
 
+  .list-view-pf-checkbox {
+    padding-top: 3px;
+  }
 }
 
 .quipicords-list-view {
@@ -76,7 +79,6 @@
 
   .list-view-pf-left .pficon.list-view-pf-icon-sm, .list-view-pf-left .fa.list-view-pf-icon-sm {
     border: 0;
-    padding-top: 2px;
   }
 
   .list-group-item-container {
@@ -114,6 +116,10 @@
   margin-right: 10px;
   .list-group-item-heading {
     margin-right: 0px;
+
+    .btn-link {
+      font-size: inherit;
+    }
   }
   .list-group-item-text {
     overflow: hidden;
@@ -125,6 +131,21 @@
 
 .quipucords-description-right {
   width: 50%;
+}
+
+.quipucords-sources-popover-scroll {
+  .popover-content {
+    max-height: 80px;
+    overflow-y: scroll;
+  }
+}
+
+.quipucords-popover-list {
+  padding-left: inherit;
+}
+
+.quipucords-sources-network-button {
+  padding-left: 0;
 }
 
 .blank-slate-pf.full-page-blank-slate {
@@ -161,6 +182,7 @@
 
 .quipucords-scan-list-item .list-view-pf-left {
   overflow: hidden;
+  padding-top: 6px;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;

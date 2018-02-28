@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { SplitButton, MenuItem, Checkbox, Button, Icon, Form } from 'patternfly-react';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
-import { getCredentials } from '../../redux/actions/credentialsActions';
 import { addSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
 import { sourcesTypes, credentialsTypes } from '../../redux/constants';
+import { getWizardCredentials } from '../../redux/actions/credentialsActions';
 import _ from 'lodash';
 
 class AddSourceWizardStepTwo extends React.Component {
@@ -59,39 +59,7 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   componentDidMount() {
-    this.loadAllCredentials();
-  }
-
-  loadAllCredentials() {
-    this.props.getCredentials().then(response => {
-      this.setState(
-        {
-          allCredentials: response.value.data.results || []
-        },
-        () => this.updateCredentials()
-      );
-    });
-  }
-
-  updateCredentials(id, checked = true) {
-    const { credentials, allCredentials } = this.state;
-
-    if (id) {
-      let index = _.findIndex(allCredentials, { id: id });
-      if (index > -1) {
-        allCredentials[index].displayChecked = checked;
-      }
-    } else {
-      _.each(allCredentials, value => {
-        if (credentials.indexOf(value.id) > -1) {
-          value.displayChecked = true;
-        }
-      });
-    }
-
-    this.setState({
-      allCredentials: allCredentials
-    });
+    this.props.getWizardCredentials();
   }
 
   credentialInfo(id) {
@@ -118,7 +86,8 @@ class AddSourceWizardStepTwo extends React.Component {
       satelliteVersion: nextProps.source[apiTypes.API_SOURCE_SAT_VERSION] || '',
       sslProtocol: nextProps.source[apiTypes.API_SOURCE_SSL_PROT] || '',
       sslCertVerify: nextProps.source[apiTypes.API_SOURCE_SSL_CERT] || '',
-      disableSsl: nextProps.source[apiTypes.API_SOURCE_SSL_DISABLE] || ''
+      disableSsl: nextProps.source[apiTypes.API_SOURCE_SSL_DISABLE] || '',
+      allCredentials: nextProps.allCredentials || []
     };
   }
 
@@ -216,8 +185,6 @@ class AddSourceWizardStepTwo extends React.Component {
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
       credentialType: sourceType === 'import' ? 'network' : sourceType
     });
-
-    // ToDo: adding a credential should update the credentials pulled into the wizard
   }
 
   validateHosts(value) {
@@ -447,12 +414,11 @@ class AddSourceWizardStepTwo extends React.Component {
 }
 
 AddSourceWizardStepTwo.propTypes = {
-  getCredentials: PropTypes.func,
-  source: PropTypes.object
+  getWizardCredentials: PropTypes.func
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getCredentials: () => dispatch(getCredentials())
+  getWizardCredentials: () => dispatch(getWizardCredentials())
 });
 
 const mapStateToProps = function(state) {

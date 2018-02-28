@@ -32,6 +32,7 @@ class Scans extends React.Component {
       'refresh',
       'notifyActionStatus'
     ]);
+
     this.state = {
       selectedItems: []
     };
@@ -143,7 +144,7 @@ class Scans extends React.Component {
 
   addSource() {
     Store.dispatch({
-      type: sourcesTypes.EDIT_SOURCE_SHOW
+      type: sourcesTypes.CREATE_SOURCE_SHOW
     });
   }
 

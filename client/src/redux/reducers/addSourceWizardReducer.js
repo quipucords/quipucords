@@ -1,4 +1,4 @@
-import { sourcesTypes } from '../constants';
+import { credentialsTypes, sourcesTypes } from '../constants';
 import helpers from '../../common/helpers';
 import _ from 'lodash';
 
@@ -7,6 +7,7 @@ const initialState = {
     show: false,
     add: false,
     edit: false,
+    allCredentials: [],
     source: {},
     error: false,
     errorMessage: null,
@@ -24,7 +25,8 @@ function addSourceWizardReducer(state = initialState, action) {
         'view',
         {
           show: true,
-          add: true
+          add: true,
+          allCredentials: state.view.allCredentials
         },
         {
           state,
@@ -122,6 +124,18 @@ function addSourceWizardReducer(state = initialState, action) {
         {
           source: action.payload.data,
           fulfilled: true
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
+    case credentialsTypes.GET_WIZARD_CREDENTIALS_FULFILLED:
+      return helpers.setStateProp(
+        'view',
+        {
+          allCredentials: _.get(action, 'payload.data.results', [])
         },
         {
           state,

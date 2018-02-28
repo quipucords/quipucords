@@ -6,6 +6,7 @@ const initialState = {
     show: false,
     add: false,
     edit: false,
+    allCredentials: [],
     source: {},
     error: false,
     errorMessage: null,
@@ -15,7 +16,7 @@ const initialState = {
   }
 };
 
-describe('SourcesReducer', function() {
+describe('AddSourceWizardReducer', function() {
   it('should return the initial state', () => {
     expect(addSourceWizardReducer(undefined, {})).toEqual(initialState);
   });
