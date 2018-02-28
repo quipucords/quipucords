@@ -30,6 +30,7 @@ from api.common.serializer import (NotEmptySerializer,
 from api.scantasks.serializer import SourceField
 from api.common.util import check_for_existing_name
 
+# pylint: disable=invalid-name
 try:
     json_exception_class = json.decoder.JSONDecodeError
 except AttributeError:
