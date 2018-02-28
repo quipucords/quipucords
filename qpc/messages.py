@@ -147,7 +147,7 @@ SCAN_EDIT_SOURCES_PROCESS_ERR = 'An error occurred while processing the '\
     '"--sources" input values. Failed to edit scan "%s". For more '\
     'information, see the server log file.'
 
-REPORT_SCAN_ID_HELP = 'Scan job identifier.'
+REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
 REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'

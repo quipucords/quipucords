@@ -41,8 +41,9 @@ class ReportDetailCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             report.REPORT_URI, [codes.ok])
-        self.parser.add_argument('--id', dest='scan_id', metavar='SCAN_ID',
-                                 help=_(messages.REPORT_SCAN_ID_HELP),
+        self.parser.add_argument('--id', dest='scan_job_id',
+                                 metavar='SCAN_JOB_ID',
+                                 help=_(messages.REPORT_SCAN_JOB_ID_HELP),
                                  required=True)
 
         group = self.parser.add_mutually_exclusive_group(required=True)
@@ -71,7 +72,8 @@ class ReportDetailCommand(CliCommand):
 
         # Lookup scan job id
         response = request(parser=self.parser, method=GET,
-                           path='%s%s' % (scan.SCAN_URI, self.args.scan_id),
+                           path='%s%s' % (scan.SCAN_JOB_URI,
+                                          self.args.scan_job_id),
                            payload=None)
         if response.status_code == codes.ok:  # pylint: disable=no-member
             json_data = response.json()
@@ -81,11 +83,11 @@ class ReportDetailCommand(CliCommand):
                     self.req_path, self.report_id, report.DETAILS_PATH_SUFFIX)
             else:
                 print(_(messages.REPORT_NO_REPORT_FOR_SJ %
-                        self.args.scan_id))
+                        self.args.scan_job_id))
                 sys.exit(1)
         else:
             print(_(messages.REPORT_SJ_DOES_NOT_EXIST %
-                    self.args.scan_id))
+                    self.args.scan_job_id))
             sys.exit(1)
 
     def _handle_response_success(self):
@@ -106,5 +108,5 @@ class ReportDetailCommand(CliCommand):
 
     def _handle_response_error(self):
         print(_(messages.REPORT_NO_REPORT_FOR_SJ %
-                self.args.scan_id))
+                self.args.scan_job_id))
         sys.exit(1)
