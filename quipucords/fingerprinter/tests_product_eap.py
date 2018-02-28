@@ -21,10 +21,14 @@ class ProductEAPTest(TestCase):
     def test_detect_jboss_eap_present(self):
         """Test the detect_jboss_eap method."""
         source = {'source_id': 1, 'source_type': 'network'}
-        facts = {'eap_home_ls': {'opt/eap6/': ['jboss-modules.jar']}}
+        facts = {'eap_home_ls': {'opt/eap6/': ['jboss-modules.jar']},
+                 'jboss_eap_jar_ver': [
+                     {'version': '1.3.6.Final-redhat-1',
+                      'date': '2018-01-18'}]}
         product = detect_jboss_eap(source, facts)
         expected = {'name': 'JBoss EAP',
                     'presence': 'present',
+                    'version': ['EAP-6.4'],
                     'metadata': {
                         'source_id': 1,
                         'source_name': None,
@@ -93,5 +97,5 @@ class ProductEAPTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'satellite',
-                        'raw_fact_key': ''}}
+                        'raw_fact_key': None}}
         self.assertEqual(product, expected)

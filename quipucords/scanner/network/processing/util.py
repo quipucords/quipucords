@@ -69,7 +69,7 @@ class FindJarVer(process.Processor):
             line_data = line.split('; ')
             for version_stamp in line_data:
                 jar, date = version_stamp.split('**')
-                version = {'jar': jar, 'date': date}
+                version = {'version': jar, 'date': date}
                 versions.append(version)
         return versions
 
