@@ -13,7 +13,7 @@
 
 from __future__ import print_function
 import sys
-from qpc.utils import handle_error_response
+from qpc.utils import handle_error_response, log_args
 from qpc.request import request
 
 
@@ -87,5 +87,6 @@ class CliCommand(object):
         """
         self.args = args
         self._validate_args()
+        log_args(self.args)
 
         self._do_command()

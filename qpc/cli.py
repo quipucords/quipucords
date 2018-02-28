@@ -67,7 +67,7 @@ class CLI(object):
         self.parser.add_argument('--version', action='version',
                                  version=__version__)
         self.parser.add_argument('-v', dest='verbosity', action='count',
-                                 help=_(messages.VERBOSITY_HELP))
+                                 default=0, help=_(messages.VERBOSITY_HELP))
         self.subparsers = self.parser.add_subparsers(dest='subcommand')
         self.name = name
         self.args = None
