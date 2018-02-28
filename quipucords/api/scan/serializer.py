@@ -30,6 +30,11 @@ from api.common.serializer import (NotEmptySerializer,
 from api.scantasks.serializer import SourceField
 from api.common.util import check_for_existing_name
 
+try:
+    json_exception_class = json.decoder.JSONDecodeError
+except AttributeError:
+    json_exception_class = ValueError
+
 
 class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
     """The extended production search options of a scan."""
@@ -60,7 +65,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
                 if not isinstance(directory, str):
                     raise ValidationError(
                         _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
-        except json.decoder.JSONDecodeError:
+        except json_exception_class:
             raise ValidationError(
                 _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
         return search_directories

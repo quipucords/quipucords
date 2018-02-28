@@ -574,7 +574,6 @@ class ScanJobTest(TestCase):
                                                   'jboss_fuse': False,
                                                   'jboss_brms': True}
         scan_options.save()
-
         scan_job, _ = create_scan_job(self.source,
                                       ScanTask.SCAN_TYPE_INSPECT,
                                       scan_options=scan_options)
@@ -597,7 +596,6 @@ class ScanJobTest(TestCase):
                                                   'jboss_fuse': False,
                                                   'jboss_brms': False}
         scan_options.save()
-
         scan_job, _ = create_scan_job(self.source,
                                       ScanTask.SCAN_TYPE_INSPECT,
                                       scan_options=scan_options)
