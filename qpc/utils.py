@@ -38,7 +38,7 @@ CONFIG_SSL_VERIFY = 'ssl_verify'
 # 'log' is a convenience for getting the appropriate logger from the
 # logging module. Use it like this:
 #
-#   from rho.utilities import log
+#   from qpc.utils import log
 #   ...
 #   log.error('Too many Tribbles!')
 
@@ -229,16 +229,43 @@ def setup_logging(verbosity):
         log_level = logging.DEBUG
 
     # Using basicConfig here means that all log messages, even
-    # those not coming from rho, will go to the log file
+    # those not coming from qpc, will go to the log file
     logging.basicConfig(filename=QPC_LOG)
-    # but we only adjust the log level for the 'rho' logger.
+    # but we only adjust the log level for the 'qpc' logger.
     log.setLevel(log_level)
     # the StreamHandler sends warnings and above to stdout, but
-    # only for messages going to the 'rho' logger, i.e. Rho
+    # only for messages going to the 'qpc' logger, i.e. QPC
     # output.
     stderr_handler = logging.StreamHandler()
     stderr_handler.setLevel(logging.ERROR)
     log.addHandler(stderr_handler)
+
+
+def change_log_level(verbosity):
+    """Change the log level when specified."""
+    if verbosity is None:
+        log_level = logging.WARNING
+    elif verbosity == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    log.setLevel(log_level)
+
+
+def log_request_info(method, command, url, payload, response):
+    """Log the information regarding the request being made.
+
+    :param method: the method being called (ie. POST)
+    :param command: the command being used (ie. qpc cred add)
+    :param url: the server, port, and path
+    (i.e. http://127.0.0.1:8000/api/v1/credentials/1)
+    :param payload: the information being sent
+    :param response: the status code being returned (ie. 200)
+    """
+    change_log_level(1)
+    message = 'Method: "%s", Command: "%s", URL: "%s", '\
+              'Payload: "%s", Status Code: "%s"'
+    log.info(message, method, command, url, payload, response)
 
 
 def handle_error_response(response):
