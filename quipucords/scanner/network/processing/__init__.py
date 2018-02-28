@@ -12,6 +12,7 @@
 # flake8: noqa
 from . import eap
 from . import brms
+from . import fuse
 from . import karaf
 from . import cpu
 from . import date

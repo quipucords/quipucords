@@ -43,6 +43,7 @@ DEFAULT_ROLES = [
     'file_contents',
     'jboss_eap',
     'jboss_brms',
+    'jboss_fuse',
     'jboss_fuse_on_karaf',
     'ifconfig',
     'redhat_packages',

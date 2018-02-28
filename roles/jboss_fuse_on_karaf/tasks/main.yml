@@ -45,10 +45,10 @@
   when: 'have_locate and jboss_fuse'
 
 - name: Use find to look for karaf.jar
-  raw: find {{scan_dirs}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
+  raw: find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
   register: karaf_find_karaf_jar
   ignore_errors: yes
-  when: false
+  when: 'jboss_fuse_ext'
 
 # Combine the outputs of the above into a single fact
 
