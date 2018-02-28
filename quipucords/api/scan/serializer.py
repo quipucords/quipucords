@@ -98,7 +98,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
-    disable_optional_products = DisableOptionalProductsOptionsSerializer(
+    disabled_optional_products = DisableOptionalProductsOptionsSerializer(
         required=False)
     enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
         required=False)
@@ -108,7 +108,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
 
         model = ScanOptions
         fields = ['max_concurrency',
-                  'disable_optional_products',
+                  'disabled_optional_products',
                   'enabled_extended_product_search']
 
 
@@ -153,7 +153,7 @@ class ScanSerializer(NotEmptySerializer):
 
         if options:
             optional_products = options.pop(
-                'disable_optional_products', None)
+                'disabled_optional_products', None)
             extended_search = options.pop(
                 'enabled_extended_product_search', None)
             options = ScanOptions.objects.create(**options)
@@ -162,7 +162,7 @@ class ScanSerializer(NotEmptySerializer):
                     DisableOptionalProductsOptions.objects.create(
                         **optional_products)
                 optional_products.save()
-                options.disable_optional_products = optional_products
+                options.disabled_optional_products = optional_products
 
             if extended_search:
                 extended_search = \
@@ -201,7 +201,7 @@ class ScanSerializer(NotEmptySerializer):
 
             if options:
                 optional_products = options.pop(
-                    'disable_optional_products', None)
+                    'disabled_optional_products', None)
                 extended_search = options.pop(
                     'enabled_extended_product_search', None)
                 options = ScanOptions.objects.create(**options)
@@ -210,7 +210,7 @@ class ScanSerializer(NotEmptySerializer):
                         DisableOptionalProductsOptions.objects.create(
                             **optional_products)
                     optional_products.save()
-                    options.disable_optional_products = optional_products
+                    options.disabled_optional_products = optional_products
 
                 if extended_search:
                     extended_search = \
@@ -229,7 +229,7 @@ class ScanSerializer(NotEmptySerializer):
                 instance.sources = sources
             if options is not None:
                 optional_products = options.pop(
-                    'disable_optional_products', None)
+                    'disabled_optional_products', None)
                 extended_search = options.pop(
                     'enabled_extended_product_search', None)
                 instance.options = ScanOptions.objects.create(**options)
@@ -238,7 +238,7 @@ class ScanSerializer(NotEmptySerializer):
                         DisableOptionalProductsOptions.objects.create(
                             **optional_products)
                     optional_products.save()
-                    instance.options.disable_optional_products = \
+                    instance.options.disabled_optional_products = \
                         optional_products
 
                 if extended_search:

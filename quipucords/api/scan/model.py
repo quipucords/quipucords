@@ -84,7 +84,7 @@ class ScanOptions(models.Model):
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
 
     max_concurrency = models.PositiveIntegerField(default=50)
-    disable_optional_products = \
+    disabled_optional_products = \
         models.ForeignKey(DisableOptionalProductsOptions,
                           on_delete=models.CASCADE,
                           null=True)
@@ -96,11 +96,11 @@ class ScanOptions(models.Model):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
-            'disable_optional_products: {}, ' \
+            'disabled_optional_products: {}, ' \
             'enabled_extended_product_search:' \
                      ' {}'.format(self.id,
                                   self.max_concurrency,
-                                  self.disable_optional_products,
+                                  self.disabled_optional_products,
                                   self.enabled_extended_product_search)\
             + '}'
 
@@ -128,7 +128,7 @@ class ScanOptions(models.Model):
     def get_extra_vars(self):
         """Construct a dictionary based on the disabled products.
 
-        :param disable_optional_products: option products config
+        :param disabled_optional_products: option products config
         for scan.
         :returns: a dictionary representing the updated collection
         status of the optional products to be assigned as the extra
@@ -136,7 +136,7 @@ class ScanOptions(models.Model):
         """
         extra_vars = self.get_default_extra_vars()
         # pylint: disable=no-member
-        disable_products = self.disable_optional_products
+        disable_products = self.disabled_optional_products
         if disable_products is not None:
             extra_vars[self.JBOSS_EAP] = \
                 disable_products.jboss_brms or \

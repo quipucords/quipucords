@@ -91,7 +91,7 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products=None)
+                             disabled_optional_products=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -118,7 +118,7 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products=None)
+                             disabled_optional_products=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -133,7 +133,7 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products=None)
+                             disabled_optional_products=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     aec.main(args)

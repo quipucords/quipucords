@@ -329,7 +329,7 @@ class ScanJobTest(TestCase):
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                'options': {'disable_optional_products':
+                'options': {'disabled_optional_products':
                             {'jboss_eap': True,
                              'jboss_fuse': True,
                              'jboss_brms': True}}}
@@ -348,7 +348,7 @@ class ScanJobTest(TestCase):
 
         data = {'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                'options': {'disable_optional_products': 'bar'}}
+                'options': {'disabled_optional_products': 'bar'}}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -528,7 +528,7 @@ class ScanJobTest(TestCase):
         disabled = DisableOptionalProductsOptions()
         disabled.save()
         scan_options = ScanOptions(
-            disable_optional_products=disabled,
+            disabled_optional_products=disabled,
             enabled_extended_product_search=extended)
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
@@ -555,7 +555,7 @@ class ScanJobTest(TestCase):
         disabled = DisableOptionalProductsOptions()
         disabled.save()
         scan_options = ScanOptions(
-            disable_optional_products=disabled,
+            disabled_optional_products=disabled,
             enabled_extended_product_search=extended)
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
@@ -582,7 +582,7 @@ class ScanJobTest(TestCase):
             jboss_brms=True)
         disabled.save()
         scan_options = ScanOptions(
-            disable_optional_products=disabled,
+            disabled_optional_products=disabled,
             enabled_extended_product_search=extended)
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,
@@ -608,7 +608,7 @@ class ScanJobTest(TestCase):
             jboss_brms=False)
         disabled.save()
         scan_options = ScanOptions(
-            disable_optional_products=disabled,
+            disabled_optional_products=disabled,
             enabled_extended_product_search=extended)
         scan_options.save()
         scan_job, _ = create_scan_job(self.source,

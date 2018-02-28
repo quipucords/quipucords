@@ -52,7 +52,7 @@ class ScanEditCommand(CliCommand):
                                  type=int, default=None,
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.parser.add_argument('--disable-optional-products',
-                                 dest='disable_optional_products',
+                                 dest='disabled_optional_products',
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
                                  metavar='DISABLE_OPTIONAL_PRODUCTS',
@@ -65,7 +65,7 @@ class ScanEditCommand(CliCommand):
         CliCommand._validate_args(self)
         # Check to see if args were provided
         if not(self.args.sources or self.args.max_concurrency or
-               self.args.disable_optional_products):
+               self.args.disabled_optional_products):
             print(_(messages.SCAN_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
@@ -109,12 +109,12 @@ class ScanEditCommand(CliCommand):
 
         :returns: a dictionary representing the scan changes
         """
-        disable_optional_products \
-            = _get_optional_products(self.args.disable_optional_products)
+        disabled_optional_products \
+            = _get_optional_products(self.args.disabled_optional_products)
         self.req_payload \
             = build_scan_payload(self.args,
                                  self.source_ids,
-                                 disable_optional_products)
+                                 disabled_optional_products)
 
     def _handle_response_success(self):
         json_data = self.response.json()
