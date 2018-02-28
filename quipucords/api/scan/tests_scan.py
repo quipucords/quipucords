@@ -16,8 +16,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import (Credential,
                         Source,
-                        ScanTask,
-                        ScanOptions)
+                        ScanTask)
 from api.scan.view import (expand_scan)
 from api.scan.serializer import ScanSerializer
 from scanner.test_util import create_scan_job
@@ -57,6 +56,11 @@ class ScanTest(TestCase):
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_json = response.json()
+        if response.status_code != status.HTTP_400_BAD_REQUEST:
+            print('Cause of failure: ')
+            print('expected: %s' % expected_response)
+            print('actual: %s' % response_json)
+
         self.assertEqual(response_json, expected_response)
 
     def create_expect_201(self, data):
@@ -162,36 +166,12 @@ class ScanTest(TestCase):
         data = {'name': 'test',
                 'sources': [self.source.id],
                 'options': {'disable_optional_products': 'foo'}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars must be a dictionary.']}})
-
-    def test_create_invalid_disable_optional_products_key(self):
-        """Test invalid type for disable_optional_products key."""
-        data = {'name': 'test',
-                'sources': [self.source.id],
-                'options': {'disable_optional_products': {'foo': True}}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars keys must be jboss_eap,'
-                         ' jboss_fuse, or jboss_brms.']}})
-
-    def test_create_invalid_disable_optional_products_val(self):
-        """Test invalid type for disable_optional_products value."""
-        data = {'name': 'test',
-                'sources': [self.source.id],
-                'options': {'disable_optional_products':
-                            {'jboss_eap': 'True'}}}
-        self.create_expect_400(data, {
-            'options': {'disable_optional_products':
-                        ['Extra vars values must be type boolean.']}})
-
-    def test_get_optional_products(self):
-        """Test the get_optional_products method when arg is None."""
-        disable_optional_products = None
-        expected = {}
-        content = ScanOptions.get_optional_products(disable_optional_products)
-        self.assertEqual(content, expected)
+        self.create_expect_400(
+            data,
+            {'options':
+             {'disable_optional_products':
+              {'non_field_errors':
+               ['Invalid data. Expected a dictionary, but got str.']}}})
 
     def test_list(self):
         """List all scan objects."""
@@ -215,6 +195,10 @@ class ScanTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': 'inspect',
                      'options': {'max_concurrency': 50,
+                                 'disable_optional_products':
+                                 {'jboss_eap': True,
+                                  'jboss_fuse': True,
+                                  'jboss_brms': True},
                                  'enabled_extended_product_search':
                                  {'jboss_eap': False,
                                   'jboss_fuse': False,
@@ -225,6 +209,10 @@ class ScanTest(TestCase):
                                   'source_type': 'network'}],
                      'scan_type': 'connect',
                      'options': {'max_concurrency': 50,
+                                 'disable_optional_products':
+                                 {'jboss_eap': True,
+                                  'jboss_fuse': True,
+                                  'jboss_brms': True},
                                  'enabled_extended_product_search':
                                  {'jboss_eap': False,
                                   'jboss_fuse': False,
@@ -258,6 +246,10 @@ class ScanTest(TestCase):
                      'scan_type': 'connect',
                      'options': {
                          'max_concurrency': 50,
+                         'disable_optional_products':
+                         {'jboss_eap': True,
+                          'jboss_fuse': True,
+                          'jboss_brms': True},
                          'enabled_extended_product_search':
                          {'jboss_eap': False,
                           'jboss_fuse': False,

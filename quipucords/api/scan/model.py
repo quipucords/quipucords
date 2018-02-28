@@ -52,6 +52,25 @@ class ExtendedProductSearchOptions(models.Model):
         return []
 
 
+class DisableOptionalProductsOptions(models.Model):
+    """The disable optional products options of a scan."""
+
+    jboss_eap = models.BooleanField(null=False, default=True)
+    jboss_fuse = models.BooleanField(null=False, default=True)
+    jboss_brms = models.BooleanField(null=False, default=True)
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' + 'id:{}, '\
+            'jboss_eap: {}, '\
+            'jboss_fuse: {}, '\
+            'jboss_brms:' \
+                     ' {}'.format(self.id,
+                                  self.jboss_eap,
+                                  self.jboss_fuse,
+                                  self.jboss_brms) + '}'
+
+
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan."""
 
@@ -65,7 +84,10 @@ class ScanOptions(models.Model):
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
 
     max_concurrency = models.PositiveIntegerField(default=50)
-    disable_optional_products = models.TextField(null=True)
+    disable_optional_products = \
+        models.ForeignKey(DisableOptionalProductsOptions,
+                          on_delete=models.CASCADE,
+                          null=True)
     enabled_extended_product_search = \
         models.ForeignKey(ExtendedProductSearchOptions,
                           on_delete=models.CASCADE, null=True)
@@ -91,52 +113,30 @@ class ScanOptions(models.Model):
         status of the optional products to be assigned as the extra
         vars for the ansibile task runner
         """
-        # Grab the optional products status dict and create
-        # a default dict (all products default to True)
-        product_status = ScanOptions.get_optional_products(
-            self.disable_optional_products)
-        extended_search = self.enabled_extended_product_search
-        product_default = {self.JBOSS_EAP: True,
-                           self.JBOSS_FUSE: True,
-                           self.JBOSS_BRMS: True,
-                           self.JBOSS_EAP_EXT: extended_search.jboss_eap,
-                           self.JBOSS_FUSE_EXT: extended_search.jboss_fuse,
-                           self.JBOSS_BRMS_EXT: extended_search.jboss_brms}
+        # pylint: disable=no-member
+        disable_products = self.disable_optional_products
 
+        # Scan for EAP if fuse or brms are in scan
+        scan_for_eap = disable_products.jboss_brms or \
+            disable_products.jboss_fuse or \
+            disable_products.jboss_eap
+
+        extended_search = self.enabled_extended_product_search
+        extra_vars = {self.JBOSS_EAP: scan_for_eap,
+                      self.JBOSS_FUSE: disable_products.jboss_fuse,
+                      self.JBOSS_BRMS: disable_products.jboss_brms,
+                      self.JBOSS_EAP_EXT: extended_search.jboss_eap,
+                      self.JBOSS_FUSE_EXT: extended_search.jboss_fuse,
+                      self.JBOSS_BRMS_EXT: extended_search.jboss_brms}
+
+        # Add search directories if it is not None, not empty
         if extended_search.search_directories is not None:
             search_directories = json.loads(extended_search.search_directories)
             if search_directories and isinstance(search_directories, list):
                 search_directories = ' '.join(search_directories)
-                product_default[self.EXT_PRODUCT_SEARCH_DIRS] = \
-                    search_directories
-        if product_status == {}:
-            return product_default
-        # If specified, turn off fact collection for fuse
-        if product_status.get(self.JBOSS_FUSE) is False:
-            product_default[self.JBOSS_FUSE] = False
-        # If specified, turn off fact collection for brms
-        if product_status.get(self.JBOSS_BRMS) is False:
-            product_default[self.JBOSS_BRMS] = False
-        # If specified and both brms & fuse are false
-        # turn off fact collection for eap
-        if product_status.get(self.JBOSS_EAP) is False and \
-                (not product_default.get(self.JBOSS_FUSE)) and \
-                (not product_default.get(self.JBOSS_BRMS)):
-            product_default[self.JBOSS_EAP] = False
+                extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = search_directories
 
-        return product_default
-
-    @staticmethod
-    def get_optional_products(disable_optional_products):
-        """Access disabled_optional_products as a dict instead of a string.
-
-        :returns: python dict containing the status of optional products
-        """
-        if disable_optional_products is not None:
-            if isinstance(disable_optional_products, dict):
-                return disable_optional_products
-            return json.loads(disable_optional_products)
-        return {}
+        return extra_vars
 
 
 class Scan(models.Model):
