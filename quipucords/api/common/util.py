@@ -11,6 +11,7 @@
 
 """Util for common operations."""
 
+import os
 import logging
 from rest_framework.serializers import ValidationError
 
@@ -85,6 +86,19 @@ def check_for_existing_name(queryset, name, error_message, search_id=None):
             'name': [error_message]
         }
         raise ValidationError(error)
+
+
+def check_path_validity(path_list):
+    """Validate list of paths.
+
+    :param path_list: list of paths to validate
+    :return: empty list or list of invalid paths
+    """
+    invalid_paths = []
+    for a_path in path_list:
+        if not os.path.isabs(a_path):
+            invalid_paths.append(a_path)
+    return invalid_paths
 
 
 class CSVHelper:

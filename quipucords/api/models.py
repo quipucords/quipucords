@@ -16,8 +16,10 @@ from api.fact.model import FactCollection
 from api.fingerprint.model import (SystemFingerprint, Product, Entitlement)
 from api.credential.model import Credential
 from api.source.model import Source, SourceOptions
-from api.scan.model import Scan, ScanOptions
-from api.scanjob.model import ScanJob, ScanJobOptions
+from api.scan.model import (Scan,
+                            ScanOptions,
+                            ExtendedProductSearchOptions)
+from api.scanjob.model import ScanJob
 from api.connresults.model import (JobConnectionResult, TaskConnectionResult,
                                    SystemConnectionResult)
 from api.inspectresults.model import (JobInspectionResult, TaskInspectionResult,

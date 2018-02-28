@@ -1280,6 +1280,23 @@ definitions:
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+  ExtendedSearchProducts:
+    type: "object"
+    properties:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+      search_directories:
+        type: "array"
+        items:
+          type: "string"
+        description: "Search directories for the find command."
   ScanOptions:
     type: "object"
     properties:
@@ -1289,6 +1306,8 @@ definitions:
         description: "The maximum concurrent host scans. default is 50."
       disabled_optional_products:
         $ref: "#/definitions/DisableOptionalProducts"
+      enabled_extended_product_search:
+        $ref: "#/definitions/ExtendedSearchProducts"
   Scan:
     type: "object"
     properties:
@@ -1349,16 +1368,6 @@ definitions:
             items:
               $ref: "#/definitions/ScanOut"
             description: "The paginated scan"
-
-  ScanJobOptions:
-    type: "object"
-    properties:
-      max_concurrency:
-        type: "integer"
-        format: "int64"
-        description: "The maximum concurrent host scans. default is 50."
-      disabled_optional_products:
-        $ref: "#/definitions/DisableOptionalProducts"
   ScanJob:
     type: "object"
     properties:
@@ -1369,7 +1378,7 @@ definitions:
             - inspect
             - connect
         options:
-          $ref: "#/definitions/ScanJobOptions"
+          $ref: "#/definitions/ScanOptions"
 
   ScanJobDetails:
     type: "object"
