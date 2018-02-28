@@ -305,7 +305,7 @@ class TestProcessFindJbossEAPJarVer(unittest.TestCase):
         in_line = '1.3.6.Final-redhat-1**2018-01-18; ' \
             '1.3.6.Final-redhat-1**2018-01-18; ' \
             '1.3.6.Final-redhat-1**2018-01-18\n'
-        expected = {'jar': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
+        expected = {'version': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
         self.assertEqual(
             eap.ProcessFindJbossEAPJarVer.process(ansible_result(in_line)),
             [expected, expected, expected])
@@ -319,7 +319,7 @@ class TestProcessFindJbossEAPRunJarVer(unittest.TestCase):
         in_line = '1.3.6.Final-redhat-1**2018-01-18; ' \
             '1.3.6.Final-redhat-1**2018-01-18; ' \
             '1.3.6.Final-redhat-1**2018-01-18\n'
-        expected = {'jar': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
+        expected = {'version': '1.3.6.Final-redhat-1', 'date': '2018-01-18'}
         self.assertEqual(
             eap.ProcessFindJbossEAPRunJarVer.process(
                 ansible_result(in_line)),

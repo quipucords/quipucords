@@ -38,6 +38,24 @@ class FingerprintModelTest(TestCase):
         self.assertTrue(is_valid)
         serializer.save()
 
+    # pylint: disable=invalid-name
+    def test_product_with_version_fingerprint(self):
+        """Create a fingerprint with products."""
+        product_dict = {'name': 'product1',
+                        'presence': 'unknown',
+                        'version': ['1', '2'],
+                        'metadata': {}}
+        fingerprint_dict = {'report_id': self.fact_collection.id,
+                            'metadata': {},
+                            'products': [product_dict]}
+
+        serializer = FingerprintSerializer(data=fingerprint_dict)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            print(serializer.errors)
+        self.assertTrue(is_valid)
+        serializer.save()
+
     def test_product_fingerprint(self):
         """Create a fingerprint with products."""
         product_dict = {'name': 'product1',
