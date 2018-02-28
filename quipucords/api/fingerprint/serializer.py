@@ -28,6 +28,7 @@ from api.common.serializer import CustomJSONField
 class ProductSerializer(ModelSerializer):
     """Serializer for the Product model."""
 
+    version = CustomJSONField(required=False)
     metadata = CustomJSONField(required=True)
 
     class Meta:
