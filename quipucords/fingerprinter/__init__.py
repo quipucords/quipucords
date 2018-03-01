@@ -576,7 +576,7 @@ def _process_network_fact(source, fact):
     fingerprint = {META_DATA_KEY: {}}
 
     # Common facts
-    add_fact_to_fingerprint(source, 'connection_host',
+    add_fact_to_fingerprint(source, 'uname_hostname',
                             fact, 'name', fingerprint)
 
     # Set OS information
