@@ -15,7 +15,7 @@ Synopsis
 Description
 -----------
 
-Quipucords, accessed through the ``qpc`` command, is an inspection and reporting tool to identify environment data, or *facts*, such as the number of physical and virtual systems on a network, their operating systems and other configuration data, and versions of some key packages and products for almost any Linux or UNIX version. The ability to inspect the software and systems that are running on your network improves your ability to understand and report on your entitlement usage. Ultimately, this inspection and reporting process is part of the larger system administration task of managing your inventories.
+Quipucords, accessed through the ``qpc`` command, is an inspection and reporting tool. It is designed to identify environment data, or *facts*, such as the number of physical and virtual systems on a network, their operating systems and other configuration data. In addition, it is designed to identify and report more detailed facts for some versions of key Red Hat packages and products for the Linux based IT resources in that network. The ability to inspect the software and systems that are running on your network improves your ability to understand and report on your entitlement usage. Ultimately, this inspection and reporting process is part of the larger system administration task of managing your inventories.
 
 Quipucords uses two types of configuration to manage the inspection process. A *credential* contains configuration such as the username and password or SSH key of the user that runs the inspection process.  A *source* defines the entity to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite, plus includes one or more credentials to use to access that network or systems management solution during the inspection process. You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the output as a *report* to review the results.
 
@@ -28,7 +28,7 @@ This man page describes the commands, subcommands, and options for the ``qpc`` c
 Usage
 -----
 
-``qpc`` performs five major tasks:
+The ``qpc`` command has several subcommands that encompass the inspection and reporting workflow. Within that workflow, ``qpc`` performs the following major tasks:
 
 * Logging in to the server:
 
@@ -48,9 +48,13 @@ Usage
 
 * Working with scans:
 
-  ``qpc scan show --id=X``
+  ``qpc scan show --id=1``
 
-The following sections describe these commands, their subcommands, and their options in more detail.
+* Generating reports:
+
+  ``qpc report summary --id 1 --csv --output-file=~/scan_result.csv``
+
+The following sections describe these commands, their subcommands, and their options in more detail. They also describe additional tasks that are not highlighted in the previous list of major workflow tasks.
 
 Server Authentication
 ---------------------
@@ -70,7 +74,7 @@ To configure the connection to the server, supply the host address. Supplying a 
 
 ``--port=port``
 
-  Optional. Sets the port to use to connect to the server. The default is ``8000``.
+  Optional. Sets the port to use to connect to the server. The default is ``443``.
 
 
 Logging in to the server
@@ -139,7 +143,7 @@ To create a credential, supply the type of credential and supply SSH credentials
 
 ``--become-user=user``
 
-  Sets the user to become when running a privileged command during network scan.
+  Sets the user to become when running a privileged command during a network scan.
 
 ``--become-password``
 
@@ -192,7 +196,7 @@ Sources
 
 Use the ``qpc source`` command to create and manage sources.
 
-A source defines a collection of network information, including IP addresses or host names, or systems management solution information, in addition to SSH ports and SSH credentials. The SSH credentials are provided through reference to one or more credentials. A scan can reference a source so that the act of running the scan is automatic and repeatable, without a requirement to reenter network information for each scan attempt.
+A source defines a collection of network information, including IP addresses or host names, or systems management solution information, in addition to SSH ports and SSH credentials. The SSH credentials are provided through reference to one or more credentials. A scan can reference a source so that the act of running the scan is repeatable, without a requirement to reenter network information for each scan attempt.
 
 Creating and Editing Sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -221,7 +225,7 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
     --hosts 192.0.2.19
 
-  * An IP address range, only valid for the ``network`` type:
+  * An IP address range, provided in CIDR or Ansible notation. This value is only valid for the ``network`` type:
 
     --hosts 192.0.2.[0:255]
     or
@@ -245,7 +249,7 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
 ``--satellite-version=satellite_version``
 
-  Optional. Sets the version of the Satellite server to be used for the scan. This value supports "5", "6.2", or "6.3".
+  Optional. Sets the version of the Satellite server to be used for the scan. The value must be ``6.2`` or ``6.3``.
 
 ``--ssl-cert-verify={True,False}``
 
@@ -253,7 +257,7 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
 ``--ssl-protocol=protocol``
 
-  Optional. Determines the SSL protocol to be used for a secure connection during the scan. This value supports "SSLv23", "TLSv1", "TLSv1_1", or "TLSv1_2".
+  Optional. Determines the SSL protocol to be used for a secure connection during the scan. The value must be ``SSLv23``, ``TLSv1``, "``LSv1_1``, or ``TLSv1_2``.
 
 ``--disable-ssl={True,False}``
 
@@ -308,8 +312,8 @@ As the network infrastructure changes, it might be necessary to delete some sour
   Clears all stored sources. Mutually exclusive with the ``--name`` option.
 
 
-Scanning
---------
+Scans
+-----
 
 Use the ``qpc scan start`` command to run scans on one or more sources. This command scans all of the host names or IP addresses that are defined in the supplied sources. Each instance of a scan is assigned a unique *identifier* to identify the scan results, so that the results data can be viewed later.
 
@@ -327,9 +331,10 @@ Use the ``qpc scan start`` command to run scans on one or more sources. This com
 
 ``--disable-optional-products=products_list``
 
-  The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+  Contains the list of products to exclude from inspection. To add multiple values to the list, separate each value with a space. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
 
 Listing and Showing Scans
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``qpc scan list`` command returns the summary details for all executed scans. The output of this command includes the identifier, the source or sources, and the current state of the scan.
@@ -391,43 +396,54 @@ The ``qpc scan cancel`` command cancels the execution of a scan. A canceled scan
 Reports
 --------
 
-Use the ``qpc report`` command to view the reports from a scan.  Reports can be viewed as JSON or a CSV.  There are two different types of report: detail and summary.
+Use the ``qpc report`` command to generate a report from a scan. You can generate a report as JavaScript Object Notation (JSON) format or as comma-separated values (CSV) format. There are two different types of report that you can generate, a *detail* report and a *summary* report.
 
 
-View Detail Report
-~~~~~~~~~~~~~~~~~~~
-The ``qpc report detail`` command provides unprocessed facts gathered during a scan.  These are the raw output from network, vcenter, and satellite scans.
+Viewing the Detail Report
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The ``qpc report detail`` command generates a report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans.
 
 **qpc report detail --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
 
 ``--id=scan_identifier``
-  Required. Contains the report's scan identifier to display.
+
+  Required. Contains the scan identifier for the scan that is used to generate the report.
 
 ``--json``
-  Displays the results of the report as JSON.  Mutually exclusive with the ``--csv`` option.
+
+  Displays the results of the report in JSON format. Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
-  Displays the results of the report as CSV.  Mutually exclusive with the ``--json`` option.
+
+  Displays the results of the report in CSV format. Mutually exclusive with the ``--json`` option.
 
 ``--output-file=PATH``
-  Required. Path to a file location where the report data will be saved.
 
-View Summary Report
-~~~~~~~~~~~~~~~~~~~
-The ``qpc report summary`` command provides processed fingerprints gathered during a scan.  Processed fingerprints are the result after merging facts from various sources.  Deduplication is also performed when possible.  For example, a system with an identical mac address could be seen during a network scan and a vcenter scan.  The raw facts would be merged to provide a fingerprint consisting of information from both network and vcenter data.
+  Required. Path to a file location where the report data is saved.
+
+Viewing the Summary Report
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ``qpc report summary`` command generates a report that contains the processed fingerprints from a scan. A *fingerprint* is the set of system, product, and entitlement facts for a particular physical or virtual machine. A processed fingerprint results from a procedure that merges facts from various sources, and, when possible, deduplicates redundant systems.
+
+For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a report summary results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
 
 **qpc report summary --id** *scan_identifier* **(--json|--csv)** **--output-file** *PATH*
+
 ``--id=scan_identifier``
-  Required. Contains the report's scan identifier to display.
+
+  Required. Contains the scan identifier for the scan that is used to generate the report.
 
 ``--json``
-  Displays the results of the report as JSON.  Mutually exclusive with the ``--csv`` option.
+
+  Displays the results of the report in JSON format. Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
-  Displays the results of the report as CSV.  Mutually exclusive with the ``--json`` option.
+
+  Displays the results of the report in CSV format. Mutually exclusive with the ``--json`` option.
 
 ``--output-file=PATH``
-  Required. Path to a file location where the report data will be saved.
+
+  Required. Path to a file location where the report data is saved.
 
 
 Options for All Commands
@@ -469,7 +485,7 @@ The authentication data in the credentials and the network-specific and system-s
 Authors
 -------
 
-Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, and Kevan Holdaway <kholdawa@redhat.com>.
+Quipucords was originally written by Chris Hambridge <chambrid@redhat.com>, Noah Lavine <nlavine@redhat.com>, Kevan Holdaway <kholdawa@redhat.com>, and Ashley Aiken <aaiken@redhat.com>.
 
 Copyright
 ---------
