@@ -74,7 +74,8 @@ class ScanJobRunner(Process):
             try:
                 status_message, task_status = runner.run()
             except Exception as error:
-                self.scan_job.fail(str(error))
+                message = 'FATAL ERROR. %s' % str(error)
+                self.scan_job.fail(message)
                 raise error
 
             # Save Task status
