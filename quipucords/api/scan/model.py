@@ -52,7 +52,7 @@ class ExtendedProductSearchOptions(models.Model):
         return []
 
 
-class DisableOptionalProductsOptions(models.Model):
+class DisabledOptionalProductsOptions(models.Model):
     """The disable optional products options of a scan."""
 
     jboss_eap = models.BooleanField(null=False, default=True)
@@ -85,7 +85,7 @@ class ScanOptions(models.Model):
 
     max_concurrency = models.PositiveIntegerField(default=50)
     disabled_optional_products = \
-        models.ForeignKey(DisableOptionalProductsOptions,
+        models.ForeignKey(DisabledOptionalProductsOptions,
                           on_delete=models.CASCADE,
                           null=True)
     enabled_extended_product_search = \

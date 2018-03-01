@@ -19,7 +19,7 @@ from api.source.model import Source, SourceOptions
 from api.scan.model import (Scan,
                             ScanOptions,
                             ExtendedProductSearchOptions,
-                            DisableOptionalProductsOptions)
+                            DisabledOptionalProductsOptions)
 from api.scanjob.model import ScanJob
 from api.connresults.model import (JobConnectionResult, TaskConnectionResult,
                                    SystemConnectionResult)

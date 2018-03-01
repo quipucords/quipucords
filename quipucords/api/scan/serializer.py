@@ -23,7 +23,7 @@ from api.models import (Source,
                         Scan,
                         ScanOptions,
                         ExtendedProductSearchOptions,
-                        DisableOptionalProductsOptions)
+                        DisabledOptionalProductsOptions)
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
@@ -88,7 +88,7 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
     class Meta:
         """Metadata for serializer."""
 
-        model = DisableOptionalProductsOptions
+        model = DisabledOptionalProductsOptions
         fields = ['jboss_eap',
                   'jboss_fuse',
                   'jboss_brms']
@@ -159,7 +159,7 @@ class ScanSerializer(NotEmptySerializer):
             options = ScanOptions.objects.create(**options)
             if optional_products:
                 optional_products = \
-                    DisableOptionalProductsOptions.objects.create(
+                    DisabledOptionalProductsOptions.objects.create(
                         **optional_products)
                 optional_products.save()
                 options.disabled_optional_products = optional_products
@@ -207,7 +207,7 @@ class ScanSerializer(NotEmptySerializer):
                 options = ScanOptions.objects.create(**options)
                 if optional_products:
                     optional_products = \
-                        DisableOptionalProductsOptions.objects.create(
+                        DisabledOptionalProductsOptions.objects.create(
                             **optional_products)
                     optional_products.save()
                     options.disabled_optional_products = optional_products
@@ -235,7 +235,7 @@ class ScanSerializer(NotEmptySerializer):
                 instance.options = ScanOptions.objects.create(**options)
                 if optional_products:
                     optional_products = \
-                        DisableOptionalProductsOptions.objects.create(
+                        DisabledOptionalProductsOptions.objects.create(
                             **optional_products)
                     optional_products.save()
                     instance.options.disabled_optional_products = \

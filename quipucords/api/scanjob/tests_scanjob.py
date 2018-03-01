@@ -22,7 +22,7 @@ from api.models import (Credential,
                         ScanTask,
                         Scan,
                         ExtendedProductSearchOptions,
-                        DisableOptionalProductsOptions,
+                        DisabledOptionalProductsOptions,
                         ScanOptions,
                         ScanJob,
                         SystemConnectionResult,
@@ -525,7 +525,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with empty dict."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        disabled = DisableOptionalProductsOptions()
+        disabled = DisabledOptionalProductsOptions()
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,
@@ -552,7 +552,7 @@ class ScanJobTest(TestCase):
             jboss_brms=True,
             search_directories='["a", "b"]')
         extended.save()
-        disabled = DisableOptionalProductsOptions()
+        disabled = DisabledOptionalProductsOptions()
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,
@@ -576,7 +576,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with mixed values."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        disabled = DisableOptionalProductsOptions(
+        disabled = DisabledOptionalProductsOptions(
             jboss_eap=False,
             jboss_fuse=False,
             jboss_brms=True)
@@ -602,7 +602,7 @@ class ScanJobTest(TestCase):
         """Tests the get_extra_vars method with all False."""
         extended = ExtendedProductSearchOptions()
         extended.save()
-        disabled = DisableOptionalProductsOptions(
+        disabled = DisabledOptionalProductsOptions(
             jboss_eap=False,
             jboss_fuse=False,
             jboss_brms=False)
