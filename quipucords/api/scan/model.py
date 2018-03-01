@@ -52,7 +52,7 @@ class ExtendedProductSearchOptions(models.Model):
         return []
 
 
-class DisableOptionalProductsOptions(models.Model):
+class DisabledOptionalProductsOptions(models.Model):
     """The disable optional products options of a scan."""
 
     jboss_eap = models.BooleanField(null=False, default=True)
@@ -84,8 +84,8 @@ class ScanOptions(models.Model):
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
 
     max_concurrency = models.PositiveIntegerField(default=50)
-    disable_optional_products = \
-        models.ForeignKey(DisableOptionalProductsOptions,
+    disabled_optional_products = \
+        models.ForeignKey(DisabledOptionalProductsOptions,
                           on_delete=models.CASCADE,
                           null=True)
     enabled_extended_product_search = \
@@ -96,38 +96,61 @@ class ScanOptions(models.Model):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'max_concurrency: {}, '\
-            'disable_optional_products: {}, ' \
+            'disabled_optional_products: {}, ' \
             'enabled_extended_product_search:' \
                      ' {}'.format(self.id,
                                   self.max_concurrency,
-                                  self.disable_optional_products,
+                                  self.disabled_optional_products,
                                   self.enabled_extended_product_search)\
             + '}'
+
+    @staticmethod
+    def get_default_forks():
+        """Create the default set of extra_vars.
+
+        :returns: a dictionary representing extra vars
+        """
+        return 50
+
+    @staticmethod
+    def get_default_extra_vars():
+        """Create the default set of extra_vars.
+
+        :returns: a dictionary representing extra vars
+        """
+        return {ScanOptions.JBOSS_EAP: True,
+                ScanOptions.JBOSS_FUSE: True,
+                ScanOptions.JBOSS_BRMS: True,
+                ScanOptions.JBOSS_EAP_EXT: False,
+                ScanOptions.JBOSS_FUSE_EXT: False,
+                ScanOptions.JBOSS_BRMS_EXT: False}
 
     def get_extra_vars(self):
         """Construct a dictionary based on the disabled products.
 
-        :param disable_optional_products: option products config
+        :param disabled_optional_products: option products config
         for scan.
         :returns: a dictionary representing the updated collection
         status of the optional products to be assigned as the extra
         vars for the ansibile task runner
         """
+        extra_vars = self.get_default_extra_vars()
         # pylint: disable=no-member
-        disable_products = self.disable_optional_products
+        disable_products = self.disabled_optional_products
+        if disable_products is not None:
+            extra_vars[self.JBOSS_EAP] = \
+                disable_products.jboss_brms or \
+                disable_products.jboss_fuse or \
+                disable_products.jboss_eap
+            extra_vars[self.JBOSS_FUSE] = disable_products.jboss_fuse
+            extra_vars[self.JBOSS_BRMS] = disable_products.jboss_brms
 
         # Scan for EAP if fuse or brms are in scan
-        scan_for_eap = disable_products.jboss_brms or \
-            disable_products.jboss_fuse or \
-            disable_products.jboss_eap
-
         extended_search = self.enabled_extended_product_search
-        extra_vars = {self.JBOSS_EAP: scan_for_eap,
-                      self.JBOSS_FUSE: disable_products.jboss_fuse,
-                      self.JBOSS_BRMS: disable_products.jboss_brms,
-                      self.JBOSS_EAP_EXT: extended_search.jboss_eap,
-                      self.JBOSS_FUSE_EXT: extended_search.jboss_fuse,
-                      self.JBOSS_BRMS_EXT: extended_search.jboss_brms}
+        if extended_search is not None:
+            extra_vars[self.JBOSS_EAP_EXT] = extended_search.jboss_eap
+            extra_vars[self.JBOSS_FUSE_EXT] = extended_search.jboss_fuse
+            extra_vars[self.JBOSS_BRMS_EXT] = extended_search.jboss_brms
 
         # Add search directories if it is not None, not empty
         if extended_search.search_directories is not None:

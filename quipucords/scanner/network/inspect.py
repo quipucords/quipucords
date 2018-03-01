@@ -174,11 +174,16 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
-        extra_vars = self.scan_job.options.get_extra_vars()
+        if self.scan_job.options is not None:
+            forks = self.scan_job.options.max_concurrency
+            extra_vars = self.scan_job.options.get_extra_vars()
+        else:
+            forks = ScanOptions.get_default_forks()
+            extra_vars = ScanOptions.get_default_extra_vars()
+
         if extra_vars.get(ScanOptions.EXT_PRODUCT_SEARCH_DIRS) is None:
             extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = \
                 ' '.join(DEFAULT_SCAN_DIRS)
-        forks = self.scan_job.options.max_concurrency
 
         ssh_executable = os.path.abspath(
             os.path.join(os.path.dirname(__file__),

@@ -23,7 +23,7 @@ from api.models import (Source,
                         Scan,
                         ScanOptions,
                         ExtendedProductSearchOptions,
-                        DisableOptionalProductsOptions)
+                        DisabledOptionalProductsOptions)
 import api.messages as messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField,
@@ -88,7 +88,7 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
     class Meta:
         """Metadata for serializer."""
 
-        model = ExtendedProductSearchOptions
+        model = DisabledOptionalProductsOptions
         fields = ['jboss_eap',
                   'jboss_fuse',
                   'jboss_brms']
@@ -98,7 +98,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1, default=50)
-    disable_optional_products = DisableOptionalProductsOptionsSerializer(
+    disabled_optional_products = DisableOptionalProductsOptionsSerializer(
         required=False)
     enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
         required=False)
@@ -108,7 +108,7 @@ class ScanOptionsSerializer(NotEmptySerializer):
 
         model = ScanOptions
         fields = ['max_concurrency',
-                  'disable_optional_products',
+                  'disabled_optional_products',
                   'enabled_extended_product_search']
 
 
@@ -153,39 +153,26 @@ class ScanSerializer(NotEmptySerializer):
 
         if options:
             optional_products = options.pop(
-                'disable_optional_products', None)
+                'disabled_optional_products', None)
             extended_search = options.pop(
                 'enabled_extended_product_search', None)
             options = ScanOptions.objects.create(**options)
             if optional_products:
                 optional_products = \
-                    DisableOptionalProductsOptions.objects.create(
+                    DisabledOptionalProductsOptions.objects.create(
                         **optional_products)
-            else:
-                optional_products = DisableOptionalProductsOptions()
-            optional_products.save()
-            options.disable_optional_products = optional_products
+                optional_products.save()
+                options.disabled_optional_products = optional_products
 
             if extended_search:
                 extended_search = \
                     ExtendedProductSearchOptions.objects.create(
                         **extended_search)
-            else:
-                extended_search = ExtendedProductSearchOptions()
-            extended_search.save()
-            options.enabled_extended_product_search = extended_search
-        else:
-            optional_products = DisableOptionalProductsOptions()
-            optional_products.save()
-            extended_search = ExtendedProductSearchOptions()
-            extended_search.save()
-            options = ScanOptions(
-                disable_optional_products=optional_products,
-                enabled_extended_product_search=extended_search)
-        options.save()
-
-        scan.options = options
-        scan.save()
+                extended_search.save()
+                options.enabled_extended_product_search = extended_search
+            options.save()
+            scan.options = options
+            scan.save()
 
         return scan
 
@@ -214,38 +201,25 @@ class ScanSerializer(NotEmptySerializer):
 
             if options:
                 optional_products = options.pop(
-                    'disable_optional_products', None)
+                    'disabled_optional_products', None)
                 extended_search = options.pop(
                     'enabled_extended_product_search', None)
                 options = ScanOptions.objects.create(**options)
                 if optional_products:
                     optional_products = \
-                        DisableOptionalProductsOptions.objects.create(
+                        DisabledOptionalProductsOptions.objects.create(
                             **optional_products)
-                else:
-                    optional_products = DisableOptionalProductsOptions()
-                optional_products.save()
-                options.disable_optional_products = optional_products
+                    optional_products.save()
+                    options.disabled_optional_products = optional_products
 
                 if extended_search:
                     extended_search = \
                         ExtendedProductSearchOptions.objects.create(
                             **extended_search)
-                else:
-                    extended_search = ExtendedProductSearchOptions()
-                extended_search.save()
-                options.enabled_extended_product_search = extended_search
-            else:
-                optional_products = DisableOptionalProductsOptions()
-                optional_products.save()
-                extended_search = ExtendedProductSearchOptions()
-                extended_search.save()
-                options = ScanOptions(
-                    disable_optional_products=optional_products,
-                    enabled_extended_product_search=extended_search)
-            options.save()
-
-            instance.options = options
+                    extended_search.save()
+                    options.enabled_extended_product_search = extended_search
+                options.save()
+                instance.options = options
         else:
             if name is not None:
                 instance.name = name
@@ -255,28 +229,25 @@ class ScanSerializer(NotEmptySerializer):
                 instance.sources = sources
             if options is not None:
                 optional_products = options.pop(
-                    'disable_optional_products', None)
+                    'disabled_optional_products', None)
                 extended_search = options.pop(
                     'enabled_extended_product_search', None)
                 instance.options = ScanOptions.objects.create(**options)
                 if optional_products:
                     optional_products = \
-                        DisableOptionalProductsOptions.objects.create(
+                        DisabledOptionalProductsOptions.objects.create(
                             **optional_products)
-                else:
-                    optional_products = DisableOptionalProductsOptions()
-                optional_products.save()
-                instance.options.disable_optional_products = optional_products
+                    optional_products.save()
+                    instance.options.disabled_optional_products = \
+                        optional_products
 
                 if extended_search:
                     extended_search = \
                         ExtendedProductSearchOptions.objects.create(
                             **extended_search)
-                else:
-                    extended_search = ExtendedProductSearchOptions()
-                extended_search.save()
-                instance.options.enabled_extended_product_search = \
-                    extended_search
+                    extended_search.save()
+                    instance.options.enabled_extended_product_search = \
+                        extended_search
 
                 instance.options.save()
 

@@ -11,9 +11,6 @@
 """Test util for the scan features."""
 
 from api.models import (Scan,
-                        ScanOptions,
-                        ExtendedProductSearchOptions,
-                        DisableOptionalProductsOptions,
                         ScanTask,
                         ScanJob)
 
@@ -39,19 +36,9 @@ def create_scan_job(source,
         scan.sources.add(source)
 
     # Add options to scan
-    options_to_use = scan_options
-    if options_to_use is None:
-        extended_options = ExtendedProductSearchOptions()
-        extended_options.save()
-        optional_products = DisableOptionalProductsOptions()
-        optional_products.save()
-        options_to_use = ScanOptions(
-            disable_optional_products=optional_products,
-            enabled_extended_product_search=extended_options)
-        options_to_use.save()
-
-    scan.options = options_to_use
-    scan.save()
+    if scan_options is not None:
+        scan.options = scan_options
+        scan.save()
 
     # Create Job
     scan_job = ScanJob(scan=scan)

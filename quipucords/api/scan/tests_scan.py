@@ -97,9 +97,10 @@ class ScanTest(TestCase):
         data = {'name': 'test',
                 'sources': [self.source.id],
                 'scan_type': 'foo',
-                'options': {'disable_optional_products': {'jboss_eap': True,
-                                                          'jboss_fuse': True,
-                                                          'jboss_brms': True}}}
+                'options': {'disabled_optional_products':
+                            {'jboss_eap': True,
+                             'jboss_fuse': True,
+                             'jboss_brms': True}}}
         self.create_expect_400(
             data, {'scan_type': ['foo, is an invalid choice. '
                                  'Valid values are connect,inspect.']})
@@ -134,9 +135,10 @@ class ScanTest(TestCase):
         """A valid create request should succeed with defaulted type."""
         data = {'name': 'test',
                 'sources': [self.source.id],
-                'options': {'disable_optional_products': {'jboss_eap': True,
-                                                          'jboss_fuse': True,
-                                                          'jboss_brms': True}}}
+                'options': {'disabled_optional_products':
+                            {'jboss_eap': True,
+                             'jboss_fuse': True,
+                             'jboss_brms': True}}}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
         self.assertIn('scan_type', response)
@@ -155,21 +157,21 @@ class ScanTest(TestCase):
         data = {'name': 'test',
                 'sources': [self.source.id],
                 'options': {'max_concurrency': -5,
-                            'disable_optional_products': {'jboss_eap': True}}}
+                            'disabled_optional_products': {'jboss_eap': True}}}
         self.create_expect_400(data, {
             'options': {'max_concurrency':
                         ['Ensure this value is greater than or equal '
                          'to 1.']}})
 
     def test_create_invalid_disable_optional_products_type(self):
-        """Test invalid type for disable_optional_products type."""
+        """Test invalid type for disabled_optional_products type."""
         data = {'name': 'test',
                 'sources': [self.source.id],
-                'options': {'disable_optional_products': 'foo'}}
+                'options': {'disabled_optional_products': 'foo'}}
         self.create_expect_400(
             data,
             {'options':
-             {'disable_optional_products':
+             {'disabled_optional_products':
               {'non_field_errors':
                ['Invalid data. Expected a dictionary, but got str.']}}})
 
@@ -193,30 +195,12 @@ class ScanTest(TestCase):
                      'sources': [{'id': 1,
                                   'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'inspect',
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True},
-                                 'enabled_extended_product_search':
-                                 {'jboss_eap': False,
-                                  'jboss_fuse': False,
-                                  'jboss_brms': False}}},
+                     'scan_type': 'inspect'},
                     {'id': 2, 'name':
                      'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'connect',
-                     'options': {'max_concurrency': 50,
-                                 'disable_optional_products':
-                                 {'jboss_eap': True,
-                                  'jboss_fuse': True,
-                                  'jboss_brms': True},
-                                 'enabled_extended_product_search':
-                                 {'jboss_eap': False,
-                                  'jboss_fuse': False,
-                                  'jboss_brms': False}}}]
+                     'scan_type': 'connect'}]
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -243,17 +227,7 @@ class ScanTest(TestCase):
                      'name': 'test2',
                      'sources': [{'id': 1, 'name': 'source1',
                                   'source_type': 'network'}],
-                     'scan_type': 'connect',
-                     'options': {
-                         'max_concurrency': 50,
-                         'disable_optional_products':
-                         {'jboss_eap': True,
-                          'jboss_fuse': True,
-                          'jboss_brms': True},
-                         'enabled_extended_product_search':
-                         {'jboss_eap': False,
-                          'jboss_fuse': False,
-                          'jboss_brms': False}}}]
+                     'scan_type': 'connect'}]
         expected = {'count': 1,
                     'next': None,
                     'previous': None,
@@ -287,7 +261,7 @@ class ScanTest(TestCase):
         data_discovery = {'name': 'test',
                           'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
+                          'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
                                        'jboss_brms': True}}}
@@ -296,7 +270,7 @@ class ScanTest(TestCase):
         data = {'name': 'test2',
                 'sources': [self.source.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
-                'options': {'disable_optional_products':
+                'options': {'disabled_optional_products':
                             {'jboss_eap': False,
                              'jboss_fuse': True,
                              'jboss_brms': True}}}
@@ -318,7 +292,7 @@ class ScanTest(TestCase):
         data_discovery = {'name': 'test',
                           'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
+                          'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
                                        'jboss_brms': True}}}
@@ -335,7 +309,7 @@ class ScanTest(TestCase):
         self.assertEqual(response_json.get('scan_type'),
                          ScanTask.SCAN_TYPE_INSPECT)
         data = {'name': 'test2',
-                'options': {'disable_optional_products':
+                'options': {'disabled_optional_products':
                             {'jboss_eap': False,
                              'jboss_fuse': True,
                              'jboss_brms': True}}}
@@ -376,7 +350,7 @@ class ScanTest(TestCase):
         data_discovery = {'name': 'test',
                           'sources': [self.source.id],
                           'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-                          'options': {'disable_optional_products':
+                          'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
                                        'jboss_brms': True}}}

@@ -130,9 +130,9 @@ class ScanAddCliTests(unittest.TestCase):
             ssc = ScanAddCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products={'jboss-eap': False,
-                                                        'jboss-fuse': False,
-                                                        'jboss-brms': False})
+                             disabled_optional_products={'jboss-eap': False,
+                                                         'jboss-fuse': False,
+                                                         'jboss-brms': False})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -146,7 +146,7 @@ class ScanAddCliTests(unittest.TestCase):
         results = [{'id': 1, 'name': 'scan1',
                     'sources': ['source1'],
                     'max-concurrency': 4,
-                    'disable_optional_products': ['jboss-fuse']}]
+                    'disabled_optional_products': ['jboss-fuse']}]
         source_data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get_source, status_code=200, json=source_data)
@@ -155,9 +155,9 @@ class ScanAddCliTests(unittest.TestCase):
             args = Namespace(name='scan1',
                              sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products={'jboss-eap': True,
-                                                        'jboss-fuse': False,
-                                                        'jboss-brms': True})
+                             disabled_optional_products={'jboss-eap': True,
+                                                         'jboss-fuse': False,
+                                                         'jboss-brms': True})
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -177,7 +177,7 @@ class ScanAddCliTests(unittest.TestCase):
             ssc = ScanAddCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disable_optional_products=None)
+                             disabled_optional_products=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

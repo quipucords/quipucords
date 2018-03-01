@@ -17,6 +17,7 @@ from ansible.parsing.splitter import parse_kv
 from api.serializers import SourceSerializer, CredentialSerializer
 from api.models import (Credential,
                         ScanTask,
+                        ScanOptions,
                         SystemConnectionResult)
 from django.db import transaction
 from scanner.task import ScanTaskRunner
@@ -121,7 +122,10 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
-        forks = self.scan_job.options.max_concurrency
+        if self.scan_job.options is None:
+            forks = ScanOptions.get_default_forks()
+        else:
+            forks = self.scan_job.options.max_concurrency
         connection_port = source['port']
         credentials = source['credentials']
 

@@ -78,7 +78,7 @@ def _get_scan_object_id(parser, name):
     return found, scan_object_id
 
 
-def _get_optional_products(disable_optional_products):
+def _get_optional_products(disabled_optional_products):
     """Construct a dictionary based on the disable-optional-products args.
 
     :returns: a dictionary representing the collection status of optional
@@ -86,8 +86,8 @@ def _get_optional_products(disable_optional_products):
     """
     optional_product_status = {}
 
-    if disable_optional_products:
-        for product in disable_optional_products:
+    if disabled_optional_products:
+        for product in disabled_optional_products:
             optional_product_status[product] = False
     else:
         return None
@@ -96,7 +96,7 @@ def _get_optional_products(disable_optional_products):
 
 
 # pylint: disable=R0912
-def build_scan_payload(args, sources, disable_optional_products):
+def build_scan_payload(args, sources, disabled_optional_products):
     """Construct payload from command line arguments.
 
     :param args: the command line arguments
@@ -114,13 +114,13 @@ def build_scan_payload(args, sources, disable_optional_products):
             options = {'max_concurrency': args.max_concurrency}
         else:
             options['max_concurrency'] = args.max_concurrency
-    if hasattr(args, 'disable_optional_products') \
-            and args.disable_optional_products:
+    if hasattr(args, 'disabled_optional_products') \
+            and args.disabled_optional_products:
         if options is None:
             options = \
-                {'disable_optional_products': args.disable_optional_products}
+                {'disabled_optional_products': args.disabled_optional_products}
         else:
-            options['disable_optional_products'] = disable_optional_products
+            options['disabled_optional_products'] = disabled_optional_products
     if options is not None:
         req_payload['options'] = options
     req_payload['scan_type'] = scan.SCAN_TYPE_INSPECT
