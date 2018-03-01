@@ -17,6 +17,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 import api.messages as messages
 from api.scanjob.serializer import (ScanJobSerializer)
+from api.scan.serializer import ExtendedProductSearchOptionsSerializer
 from api.models import (Credential,
                         Source,
                         ScanTask,
@@ -543,6 +544,82 @@ class ScanJobTest(TestCase):
                          'jboss_fuse_ext': False,
                          'jboss_brms_ext': False}
         self.assertEqual(extra_vars, expected_vars)
+
+    def test_get_extra_vars_missing_disable_product(self):
+        """Tests the get_extra_vars with extended search None."""
+        disabled = DisabledOptionalProductsOptions()
+        disabled.save()
+        scan_options = ScanOptions(
+            disabled_optional_products=disabled)
+        scan_options.save()
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+        extra_vars = scan_job.options.get_extra_vars()
+
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
+        self.assertEqual(extra_vars, expected_vars)
+
+    def test_get_extra_vars_missing_extended_search(self):
+        """Tests the get_extra_vars with disabled products None."""
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(
+            enabled_extended_product_search=extended)
+        scan_options.save()
+        scan_job, _ = create_scan_job(self.source,
+                                      ScanTask.SCAN_TYPE_INSPECT,
+                                      scan_options=scan_options)
+        extra_vars = scan_job.options.get_extra_vars()
+
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
+        self.assertEqual(extra_vars, expected_vars)
+
+    def test_get_extra_vars_missing_search_directories_empty(self):
+        """Tests the get_extra_vars with search_directories empty."""
+        extended = {
+            'search_directories': []
+        }
+        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
+        is_valid = serializer.is_valid()
+        self.assertTrue(is_valid)
+
+    def test_get_extra_vars_missing_search_directories_w_int(self):
+        """Tests the get_extra_vars with search_directories contains int."""
+        extended = {
+            'search_directories': [1]
+        }
+        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
+        is_valid = serializer.is_valid()
+        self.assertFalse(is_valid)
+
+    def test_get_extra_vars_missing_search_directories_w_not_path(self):
+        """Tests the get_extra_vars with search_directories no path."""
+        extended = {
+            'search_directories': ['a']
+        }
+        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
+        is_valid = serializer.is_valid()
+        self.assertFalse(is_valid)
+
+    def test_get_extra_vars_missing_search_directories_w_path(self):
+        """Tests the get_extra_vars with search_directories no path."""
+        extended = {
+            'search_directories': ['/a']
+        }
+        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
+        is_valid = serializer.is_valid()
+        self.assertTrue(is_valid)
 
     def test_get_extra_vars_extended_search(self):
         """Tests the get_extra_vars method with extended search."""

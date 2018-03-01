@@ -152,12 +152,15 @@ class ScanOptions(models.Model):
             extra_vars[self.JBOSS_FUSE_EXT] = extended_search.jboss_fuse
             extra_vars[self.JBOSS_BRMS_EXT] = extended_search.jboss_brms
 
-        # Add search directories if it is not None, not empty
-        if extended_search.search_directories is not None:
-            search_directories = json.loads(extended_search.search_directories)
-            if search_directories and isinstance(search_directories, list):
-                search_directories = ' '.join(search_directories)
-                extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = search_directories
+            # Add search directories if it is not None, not empty
+            if extended_search.search_directories is not None:
+                search_directories = json.loads(
+                    extended_search.search_directories)
+                if search_directories and \
+                        isinstance(search_directories, list):
+                    search_directories = ' '.join(search_directories)
+                    extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = \
+                        search_directories
 
         return extra_vars
 
