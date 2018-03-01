@@ -43,8 +43,8 @@ To create a network source, use the following steps:
 
    For example, for a network credential where the ``/sshkeys`` directory for the server is mapped to ``~/quipucords/sshkeys``, the credential name is ``roothost1``, the user with root-level access is ``root``, and the SSH key for the user is in the ``~/.ssh/id_rsa`` file, you would enter the following commands:
 
-   ``# cp ~/.ssh/id_rsa ~/quipucords/sshkeys
-     # qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa``
+   ``# cp ~/.ssh/id_rsa ~/quipucords/sshkeys``
+   ``# qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa``
 
    Privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options is also supported to create a network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
 
@@ -117,57 +117,70 @@ To create a satellite source, use the following steps:
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the Satellite server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The Satellite server does not support disabling SSL, so the ``--disable-ssl`` option has no effect.
 
+Creating a Scan
+---------------
+After you set up your credentials and sources, you can run a Quipucords scan to inspect your IT environment. You can create a scan on a single source or combine sources, even sources of different types.
+
+To create a scan, use the following steps:
+
+Create the scan by using the ``scan add`` command, specifying a name for the ``name`` option and one or more sources for the ``sources`` option:
+
+  ``# qpc scan add --name scan1 --sources source_name1 source_name2``
+
+For example, if you want to create a scan called ``myscan`` with the network source ``mynetwork`` and the Satellite source ``mysatellite6``, you would enter the following command:
+
+  ``# qpc scan add --name myscan --sources mynetwork mysatellite6``
+
 Running a Scan
 --------------
-After you set up your credentials and sources, you can run a Quipucords scan to inspect your IT environment. You can run a scan on a single source or combine sources, even sources of different types.
 
 **IMPORTANT:** Scans run consecutively on the Quipucords server, in the order in which the ``qpc scan start`` command for each scan is entered.
 
 To run a scan, use the following steps:
 
-Run the scan by using the ``scan start`` command, specifying one or more sources for the ``sources`` option:
+Run the scan by using the ``scan start`` command, specifying the name of a scan for the ``name`` option:
 
-  ``# qpc scan start --sources source_name1 source_name2``
+  ``# qpc scan start --name scan_name1``
 
-For example, if you want to scan the network source ``mynetwork`` and the Satellite source ``mysatellite6``, you would enter the following command:
+For example, if you want to run the scan ``myscan``, you would enter the following command:
 
-  ``# qpc scan start --sources mynetwork mysatellite6``
+  ``# qpc scan start --name myscan``
 
-Showing Scan Results for an Active Scan
----------------------------------------
-When you run the ``scan start`` command, the output provides an identifier for that scan. You can show the scan results to follow the status of the scan by using the ``scan show`` command and specifying the provided identifier.
+Showing Scan Job Results for an Active Scan
+-------------------------------------------
+When you run the ``scan start`` command, the output provides an identifier for that scan job. You can show the scan job results to follow the status of the scan job by using the ``scan job`` command and specifying the provided identifier.
 
-**IMPORTANT:** The ``scan show`` command can show results only after the scan starts running. You can also use this command on a scan that is completed.
+**IMPORTANT:** The ``scan job`` command can show results only after the scan job starts running. You can also use this command on a scan job that is completed.
 
 For example, you could run the following scan as the first scan in your environment:
 
-  ``# qpc scan start --sources mynetwork mysatellite6``
+  ``# qpc scan start --name myscan``
 
-The output for the command shows the following information, with ``1`` listed as the scan identifier.
+The output for the command shows the following information, with ``1`` listed as the scan job identifier.
 
   ``Scan "1" started``
 
 To show the scan results to follow the status of that scan, you would enter the following command:
 
-  ``# qpc scan show --id 1``
+  ``# qpc scan job --id 1``
 
 Listing Scan Results
 --------------------
-In addition to showing the status of a single scan, you can also show a list of all scans that are in progress or are completed on the Quipucords server. To show this list of scans, you use the ``scan list`` command. The output of this command includes the scan identifier, the source or sources for that scan, and the current state of the scan.
+In addition to showing the status of a single scan job, you can also show a list of all scans that are in progress or are completed for a particular scan. To show this list of scan jobs, you use the ``scan job`` command. The output of this command includes the scan job identifier, the source or sources for that scan, and the current state of the scan.
 
-  ``# qpc scan list``
+  ``# qpc scan job --name scan_name1``
 
 Viewing the Scan Report
 -----------------------
-When the scan completes, you have the capability to produce a report for that scan. You can request a report with all the details, or facts, of the scan, or request a report with a summary. The summary report process runs steps to deduplicate and merge the facts found during the inspection of the various hosts that are contacted during the scan. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
+When the scan job completes, you have the capability to produce a report for that scan. You can request a report with all the details, or facts, of the scan, or request a report with a summary. The summary report process runs steps to deduplicate and merge the facts found during the inspection of the various hosts that are contacted during the scan. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
 
-To generate a summary report, enter the ``report summary`` command and specify the identifier for the scan and the format for the output file.
+To generate a summary report, enter the ``report summary`` command and specify the identifier for the scan job and the format for the output file.
 
-For example, if you want to create the report summary for a scan with the scan identifier of ``1`` and you want to generate that report in CSV format in the ``~/scan_result.csv`` file, you would enter the following command:
+For example, if you want to create the report summary for a scan with the scan job identifier of ``1`` and you want to generate that report in CSV format in the ``~/scan_result.csv`` file, you would enter the following command:
 
   ``# qpc report summary --id 1 --csv --output-file=~/scan_result.csv``
 
-However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan identifer ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command:
+However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan job identifer ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command:
 
   ``# qpc report detail --id 1 --csv --output-file=~/scan_result.csv``
 
@@ -177,9 +190,9 @@ As you use Quipucords, you might need to stop a currently running scan. There mi
 
 When you stop a scan by using the ``scan pause`` command, you can restart that same scan by using the ``scan restart`` command. To pause and restart a scan, use the following steps:
 
-1. Make sure that you have the scan identifer for the currently running scan. To obtain the scan identifier, see the information in `Showing Scan Results for an Active Scan`_.
+1. Make sure that you have the scan job identifier for the currently running scan. To obtain the scan job identifier, see the information in `Showing Scan Job Results for an Active Scan`_.
 
-2. Enter the command to pause the scan. For example, if the scan identifier is ``1``, you would enter the following command:
+2. Enter the command to pause the scan. For example, if the scan job identifier is ``1``, you would enter the following command:
 
   ::
 
