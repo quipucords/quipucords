@@ -88,8 +88,9 @@ def detect_jboss_fuse(source, facts):
         versions = []
         if fuse_versions:
             for version_data in fuse_versions:
-                if version_data in FUSE_CLASSIFICATIONS:
-                    versions.append(FUSE_CLASSIFICATIONS.get(version_data))
+                unknown_release = 'Unknown-Release: ' + version_data
+                versions.append(FUSE_CLASSIFICATIONS.get(version_data,
+                                                         unknown_release))
             if versions:
                 product_dict[VERSION_KEY] = versions
     elif systemctl_files or chkconfig:
