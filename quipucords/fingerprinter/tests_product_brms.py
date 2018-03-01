@@ -21,15 +21,18 @@ class ProductBRMSTest(TestCase):
     def test_detect_jboss_brms_present(self):
         """Test the detect_jboss_brms method."""
         source = {'source_id': 1, 'source_type': 'network'}
-        facts = {'jboss_brms_manifest_mf': {'opt/brms/': 'Red Hat'}}
+        facts = {'jboss_brms_manifest_mf': {'opt/brms/': 'Red Hat'},
+                 'jboss_brms_kie_api_ver': ['6.4.0.Final-redhat-3']}
         product = detect_jboss_brms(source, facts)
         expected = {'name': 'JBoss BRMS',
                     'presence': 'present',
+                    'version': ['BRMS 6.3.0'],
                     'metadata': {
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'jboss_brms_manifest_mf'}}
+                        'raw_fact_key': 'jboss_brms_kie_api_ver/'
+                                        'jboss_brms_manifest_mf'}}
         self.assertEqual(product, expected)
 
     # pylint: disable=C0103

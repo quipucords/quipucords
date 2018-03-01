@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 PRODUCT = 'JBoss BRMS'
 PRESENCE_KEY = 'presence'
+VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
 META_DATA_KEY = 'metadata'
 BUSINESS_CENTRAL_CANDIDATES = 'business_central_candidates'
@@ -30,6 +31,9 @@ KIE_SERVER_CANDIDATES = 'kie_server_candidates'
 JBOSS_BRMS_MANIFEST_MF = 'jboss_brms_manifest_mf'
 JBOSS_BRMS_KIE_IN_BC = 'jboss_brms_kie_in_business_central'
 JBOSS_BRMS_LOCATE_KIE_API = 'jboss_brms_locate_kie_api'
+JBOSS_BRMS_KIE_API_VER = 'jboss_brms_kie_api_ver'
+JBOSS_BRMS_KIE_WAR_VER = 'jboss_brms_kie_war_ver'
+JBOSS_BRMS_DROOLS_CORE_VER = 'jboss_brms_drools_core_ver'
 SUBMAN_CONSUMED = 'subman_consumed'
 ENTITLEMENTS = 'entitlements'
 
@@ -78,7 +82,7 @@ def classify_kie_file(pathname):
     return None
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=R0912,R0914,R0915
 def detect_jboss_brms(source, facts):
     """Detect if JBoss BRMS is present based on system facts.
 
@@ -91,10 +95,14 @@ def detect_jboss_brms(source, facts):
     manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, {})
     kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, [])
     locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, [])
+    find_kie_api = facts.get(JBOSS_BRMS_KIE_API_VER, [])
+    find_kie_war = facts.get(JBOSS_BRMS_KIE_WAR_VER, [])
+    find_drools = facts.get(JBOSS_BRMS_DROOLS_CORE_VER, [])
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
     base_directories = set(business_central_candidates + kie_server_candidates)
     kie_files = kie_in_bc + locate_kie_api
+    ext_search_versions = list(set(find_kie_api + find_kie_war + find_drools))
 
     kie_versions_by_directory = {}
     for directory in base_directories:
@@ -113,7 +121,9 @@ def detect_jboss_brms(source, facts):
                           for _, manifest in manifest_mfs.items()))
     found_versions = any((version
                           for _, version in kie_versions_by_directory.items()))
-    found_redhat_brms = (found_manifest or found_versions)
+    found_redhat_brms = (found_manifest or
+                         found_versions or
+                         ext_search_versions)
 
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
@@ -132,10 +142,22 @@ def detect_jboss_brms(source, facts):
         raw_facts_dict = {JBOSS_BRMS_MANIFEST_MF: found_manifest,
                           JBOSS_BRMS_KIE_IN_BC: (found_versions and kie_in_bc),
                           JBOSS_BRMS_LOCATE_KIE_API: (found_versions and
-                                                      locate_kie_api)}
+                                                      locate_kie_api),
+                          JBOSS_BRMS_KIE_API_VER: find_kie_api,
+                          JBOSS_BRMS_KIE_WAR_VER: find_kie_war,
+                          JBOSS_BRMS_DROOLS_CORE_VER: find_drools}
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         metadata[RAW_FACT_KEY] = raw_facts
         product_dict[PRESENCE_KEY] = Product.PRESENT
+        versions = []
+        if ext_search_versions:
+            for version_data in ext_search_versions:
+                unknown_release = 'Unknown-Release: ' + version_data
+                versions.append(BRMS_CLASSIFICATIONS.get(version_data,
+                                                         unknown_release))
+            if versions:
+                product_dict[VERSION_KEY] = versions
+
     elif product_entitlement_found(subman_consumed, PRODUCT):
         metadata[RAW_FACT_KEY] = SUBMAN_CONSUMED
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
