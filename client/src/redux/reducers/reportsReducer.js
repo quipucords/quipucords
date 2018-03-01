@@ -5,7 +5,15 @@ import { reportsTypes } from '../constants';
 const initialState = {
   persist: {},
 
-  search: {
+  deployments: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    reports: []
+  },
+
+  details: {
     error: false,
     errorMessage: '',
     pending: false,
@@ -17,9 +25,24 @@ const initialState = {
 const reportsReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case reportsTypes.GET_REPORTS_REJECTED:
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_REJECTED:
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_REJECTED:
       return helpers.setStateProp(
-        'search',
+        'deployments',
+        {
+          error: action.error,
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case reportsTypes.GET_REPORT_DETAILS_REJECTED:
+    case reportsTypes.GET_REPORT_DETAILS_CSV_REJECTED:
+      return helpers.setStateProp(
+        'details',
         {
           error: action.error,
           errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
@@ -31,9 +54,23 @@ const reportsReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case reportsTypes.GET_REPORTS_PENDING:
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_PENDING:
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_PENDING:
       return helpers.setStateProp(
-        'search',
+        'deployments',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case reportsTypes.GET_REPORT_DETAILS_PENDING:
+    case reportsTypes.GET_REPORT_DETAILS_CSV_PENDING:
+      return helpers.setStateProp(
+        'details',
         {
           pending: true
         },
@@ -44,11 +81,48 @@ const reportsReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case reportsTypes.GET_REPORTS_FULFILLED:
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_FULFILLED:
       return helpers.setStateProp(
-        'search',
+        'deployments',
         {
           reports: action.payload.data,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case reportsTypes.GET_REPORT_DETAILS_FULFILLED:
+      return helpers.setStateProp(
+        'details',
+        {
+          reports: action.payload.data,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_FULFILLED:
+      return helpers.setStateProp(
+        'deployments',
+        {
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case reportsTypes.GET_REPORT_DETAILS_CSV_FULFILLED:
+      return helpers.setStateProp(
+        'details',
+        {
           fulfilled: true
         },
         {
