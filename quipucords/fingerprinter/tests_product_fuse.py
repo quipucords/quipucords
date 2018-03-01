@@ -21,15 +21,17 @@ class ProductFuseTest(TestCase):
     def test_detect_jboss_fuse_present(self):
         """Test the detect_jboss_fuse method."""
         source = {'source_id': 1, 'source_type': 'network'}
-        facts = {'eap_home_bin': {'opt/fuse/': ['jboss-fuse.jar']}}
+        facts = {'eap_home_bin': {'opt/fuse/': ['jboss-fuse.jar']},
+                 'jboss_activemq_ver': ['redhat-630187']}
         product = detect_jboss_fuse(source, facts)
         expected = {'name': 'JBoss Fuse',
                     'presence': 'present',
+                    'version': ['Fuse-6.3.0'],
                     'metadata': {
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'eap_home_bin/karaf_home_bin_fuse'}}
+                        'raw_fact_key': 'eap_home_bin/jboss_activemq_ver'}}
         self.assertEqual(product, expected)
 
     # pylint: disable=C0103
@@ -44,8 +46,7 @@ class ProductFuseTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'jboss_fuse_systemctl_unit_files/'
-                                        'jboss_fuse_chkconfig'}}
+                        'raw_fact_key': 'jboss_fuse_systemctl_unit_files'}}
         self.assertEqual(product, expected)
 
     def test_detect_jboss_fuse_potential_sub(self):
@@ -87,5 +88,5 @@ class ProductFuseTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'satellite',
-                        'raw_fact_key': ''}}
+                        'raw_fact_key': None}}
         self.assertEqual(product, expected)

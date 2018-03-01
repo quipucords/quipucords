@@ -29,9 +29,7 @@ class ProductBRMSTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'jboss_brms_manifest_mf/'
-                                        'jboss_brms_kie_in_business_central/'
-                                        'jboss_brms_locate_kie_api'}}
+                        'raw_fact_key': 'jboss_brms_manifest_mf'}}
         self.assertEqual(product, expected)
 
     # pylint: disable=C0103
@@ -74,5 +72,5 @@ class ProductBRMSTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'satellite',
-                        'raw_fact_key': ''}}
+                        'raw_fact_key': None}}
         self.assertEqual(product, expected)
