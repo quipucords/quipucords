@@ -184,7 +184,23 @@ Installing the Quipucords Server Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 After Docker is installed, you can obtain and install the container image that enables the use of the Quipucords server.
 
-**TBD**
+Start by downloading the server container image from the provided URL::
+
+  #  curl -k -O -sSL https://ftp.redhat.com/repo/container/quipucords.pilot.tar.gz
+
+
+Load the container image into the local Docker registry with the following command::
+
+  #  sudo docker load -i quipucords.pilot.tar.gz
+  ...
+  Loaded image: quipucords:pilot
+
+
+You can verify the image within the local Docker registry::
+
+  #  sudo docker images
+  REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+  quipucords              pilot               fdadcc4b326f        3 days ago          969MB
 
 
 Configuring and Starting Quipucords
@@ -229,17 +245,17 @@ After you make the decisions on the configuration options for the server, you ca
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
 
-  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:latest
+  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:pilot
 
 If your system does have SELinux enabled, you must append ``:z`` to each volume as follows::
 
-  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:latest
+  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:pilot
 
 These commands start the server on port ``443`` and map the ``sshkeys``, ``data``, and ``log`` directories to the ``~/quipucords`` home directory for the server.
 
 To view the status of the server after it is running, enter the following command::
 
-  # docker ps
+  # sudo docker ps
 
 Changing the Default Password for the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

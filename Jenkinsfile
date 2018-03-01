@@ -25,16 +25,16 @@ node('f25-os') {
 
         sh "ls -lta"
         sh "cat Dockerfile"
-        sh "sudo docker -D build . -t quipucords:beta"
+        sh "sudo docker -D build . -t quipucords:pilot"
 
         //sh "sudo docker tag quipucords:beta $DOCKER_REGISTRY/quipucords/quipucords:beta"
         //sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         //sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:beta"
 
 
-        def tarfile = "quipucords.beta." + commitHash + ".tar"
+        def tarfile = "quipucords.pilot." + commitHash + ".tar"
         def targzfile = tarfile + ".gz"
-        sh "sudo docker save -o $tarfile quipucords:beta"
+        sh "sudo docker save -o $tarfile quipucords:pilot"
         sh "sudo chmod 755 $tarfile"
         sh "sudo gzip -f --best $tarfile"
         sh "sudo chmod 755 $targzfile"
