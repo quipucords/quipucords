@@ -16,7 +16,8 @@ import logging
 from api.models import Product, Source
 from fingerprinter.utils import (strip_prefix,
                                  strip_suffix,
-                                 product_entitlement_found)
+                                 product_entitlement_found,
+                                 generate_raw_fact_members)
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -88,12 +89,12 @@ def detect_jboss_brms(source, facts):
     business_central_candidates = facts.get(BUSINESS_CENTRAL_CANDIDATES, [])
     kie_server_candidates = facts.get(KIE_SERVER_CANDIDATES, [])
     manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, {})
-    kie_in_business_central = facts.get(JBOSS_BRMS_KIE_IN_BC, [])
+    kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, [])
     locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, [])
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
     base_directories = set(business_central_candidates + kie_server_candidates)
-    kie_files = kie_in_business_central + locate_kie_api
+    kie_files = kie_in_bc + locate_kie_api
 
     kie_versions_by_directory = {}
     for directory in base_directories:
@@ -108,11 +109,11 @@ def detect_jboss_brms(source, facts):
                 # because it means that they are not Red Hat files.
         kie_versions_by_directory[directory] = versions_in_dir
 
-    found_redhat_brms = (
-        any(('Red Hat' in manifest
-             for _, manifest in manifest_mfs.items())) or
-        any((version
-             for _, version in kie_versions_by_directory.items())))
+    found_manifest = any(('Red Hat' in manifest
+                          for _, manifest in manifest_mfs.items()))
+    found_versions = any((version
+                          for _, version in kie_versions_by_directory.items()))
+    found_redhat_brms = (found_manifest or found_versions)
 
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
@@ -128,10 +129,12 @@ def detect_jboss_brms(source, facts):
     product_dict = {'name': PRODUCT}
 
     if found_redhat_brms:
-        raw_fact_key = '{}/{}/{}'.format(JBOSS_BRMS_MANIFEST_MF,
-                                         JBOSS_BRMS_KIE_IN_BC,
-                                         JBOSS_BRMS_LOCATE_KIE_API)
-        metadata[RAW_FACT_KEY] = raw_fact_key
+        raw_facts_dict = {JBOSS_BRMS_MANIFEST_MF: found_manifest,
+                          JBOSS_BRMS_KIE_IN_BC: (found_versions and kie_in_bc),
+                          JBOSS_BRMS_LOCATE_KIE_API: (found_versions and
+                                                      locate_kie_api)}
+        raw_facts = generate_raw_fact_members(raw_facts_dict)
+        metadata[RAW_FACT_KEY] = raw_facts
         product_dict[PRESENCE_KEY] = Product.PRESENT
     elif product_entitlement_found(subman_consumed, PRODUCT):
         metadata[RAW_FACT_KEY] = SUBMAN_CONSUMED
@@ -140,7 +143,7 @@ def detect_jboss_brms(source, facts):
         metadata[RAW_FACT_KEY] = ENTITLEMENTS
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     else:
-        metadata[RAW_FACT_KEY] = ''
+        metadata[RAW_FACT_KEY] = None
         product_dict[PRESENCE_KEY] = Product.ABSENT
 
     product_dict[META_DATA_KEY] = metadata

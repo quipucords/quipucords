@@ -33,10 +33,7 @@ class ProductEAPTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'jboss_eap_running_paths'
-                                        '/jboss_eap_packages'
-                                        '/jboss_eap_locate_jboss_modules_jar'
-                                        '/eap_home_ls'}}
+                        'raw_fact_key': 'eap_home_ls/jboss_eap_jar_ver'}}
         self.assertEqual(product, expected)
 
     # pylint: disable=C0103
@@ -51,11 +48,7 @@ class ProductEAPTest(TestCase):
                         'source_id': 1,
                         'source_name': None,
                         'source_type': 'network',
-                        'raw_fact_key': 'jboss_eap_id_jboss/'
-                                        'jboss_eap_common_files/'
-                                        'jboss_eap_processes/'
-                                        'jboss_eap_systemctl_unit_files/'
-                                        'jboss_eap_chkconfig'}}
+                        'raw_fact_key': 'jboss_eap_common_files'}}
         self.assertEqual(product, expected)
 
     def test_detect_jboss_eap_potential_sub(self):

@@ -13,7 +13,8 @@
 
 import logging
 from api.models import Product, Source
-from fingerprinter.utils import product_entitlement_found
+from fingerprinter.utils import (product_entitlement_found,
+                                 generate_raw_fact_members)
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -130,17 +131,19 @@ def detect_jboss_eap(source, facts):
         'source_type': source['source_type'],
     }
     product_dict = {'name': PRODUCT}
-
+    raw_facts = None
     if (running_paths or
             packages or
             modules_jar or
             eap_home or
             eap_jar_versions):
-        raw_fact_key = '{}/{}/{}/{}'.format(JBOSS_EAP_RUNNING_PATHS,
-                                            JBOSS_EAP_PACKAGES,
-                                            JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR,
-                                            JBOSS_EAP_EAP_HOME)
-        metadata[RAW_FACT_KEY] = raw_fact_key
+        raw_facts_dict = {JBOSS_EAP_RUNNING_PATHS: running_paths,
+                          JBOSS_EAP_PACKAGES: packages,
+                          JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR: modules_jar,
+                          JBOSS_EAP_EAP_HOME: eap_home,
+                          JBOSS_EAP_JAR_VER: eap_jar_versions,
+                          JBOSS_EAP_RUN_JAR_VER: eap_run_jar_versions}
+        raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.PRESENT
         if eap_jar_versions:
             versions = []
@@ -157,23 +160,22 @@ def detect_jboss_eap(source, facts):
           eap_processes or
           systemctl_files or
           chkconfig):
-        raw_fact_key = '{}/{}/{}/{}/{}'.format(
-            JBOSS_EAP_JBOSS_USER,
-            JBOSS_EAP_COMMON_FILES,
-            JBOSS_EAP_PROCESSES,
-            JBOSS_EAP_SYSTEMCTL_FILES,
-            JBOSS_EAP_CHKCONFIG)
-        metadata[RAW_FACT_KEY] = raw_fact_key
+        raw_facts_dict = {JBOSS_EAP_JBOSS_USER: jboss_user,
+                          JBOSS_EAP_COMMON_FILES: common_files,
+                          JBOSS_EAP_PROCESSES: eap_processes,
+                          JBOSS_EAP_SYSTEMCTL_FILES: systemctl_files,
+                          JBOSS_EAP_CHKCONFIG: chkconfig}
+        raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     elif product_entitlement_found(subman_consumed, PRODUCT):
-        metadata[RAW_FACT_KEY] = SUBMAN_CONSUMED
+        raw_facts = SUBMAN_CONSUMED
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     elif product_entitlement_found(entitlements, PRODUCT):
-        metadata[RAW_FACT_KEY] = ENTITLEMENTS
+        raw_facts = ENTITLEMENTS
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     else:
-        metadata[RAW_FACT_KEY] = None
         product_dict[PRESENCE_KEY] = Product.ABSENT
 
+    metadata[RAW_FACT_KEY] = raw_facts
     product_dict[META_DATA_KEY] = metadata
     return product_dict

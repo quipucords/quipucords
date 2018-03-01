@@ -52,3 +52,19 @@ def strip_suffix(string, suffix):
         return string[:-len(suffix)]
 
     return string
+
+
+def generate_raw_fact_members(raw_facts_dict):
+    """Generate the raw_facts string.
+
+    :param raw_facts_dict: The dictionary of raw_fact names and boolean values
+    :returns: string of contributing raw_facts or None
+    """
+    raw_facts = None
+    raw_fact_list = []
+    for key, value in raw_facts_dict.items():
+        if value:
+            raw_fact_list.append(key)
+    if raw_fact_list:
+        raw_facts = '/'.join(raw_fact_list)
+    return raw_facts
