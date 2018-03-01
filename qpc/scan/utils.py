@@ -20,7 +20,7 @@ from qpc.translation import _
 import qpc.messages as messages
 
 
-def _get_source_ids(parser, source_names):
+def get_source_ids(parser, source_names):
     """Grab the source ids from the source if it exists.
 
     :returns Boolean regarding the existence of source &
@@ -50,7 +50,7 @@ def _get_source_ids(parser, source_names):
     return not_found, source_ids
 
 
-def _get_scan_object_id(parser, name):
+def get_scan_object_id(parser, name):
     """Grab the scan id from the scan object if it exists.
 
     :returns Boolean regarding the existence of the object &
@@ -78,7 +78,7 @@ def _get_scan_object_id(parser, name):
     return found, scan_object_id
 
 
-def _get_optional_products(disabled_optional_products):
+def get_optional_products(disabled_optional_products):
     """Construct a dictionary based on the disable-optional-products args.
 
     :returns: a dictionary representing the collection status of optional
@@ -95,12 +95,41 @@ def _get_optional_products(disabled_optional_products):
     return optional_product_status
 
 
+def get_extended_products(enabled_extended_product_search,
+                          ext_product_search_dirs, edit):
+    """Construct a dictionary based on the enabled extended product search args.
+
+    :param enabled_extended_product_search The products to enable
+    :param ext_product_search_dirs: The search dirs for the extended products
+    :param edit: boolean regarding if we are editing the extended products
+    :returns: a dictionary representing the enabled search status of extended
+    products
+    """
+    enabled_product_search_status = {}
+
+    if enabled_extended_product_search:
+        for product in enabled_extended_product_search:
+            enabled_product_search_status[product] = True
+    else:
+        if not edit:
+            return None
+    # add the search directories if they are provided
+    if ext_product_search_dirs:
+        enabled_product_search_status['search_directories'] \
+            = ext_product_search_dirs
+
+    return enabled_product_search_status
+
+
 # pylint: disable=R0912
-def build_scan_payload(args, sources, disabled_optional_products):
+def build_scan_payload(args, sources, disabled_optional_products,
+                       enabled_extended_product_search):
     """Construct payload from command line arguments.
 
     :param args: the command line arguments
-    :param add_none: add None for a key if True vs. not in dictionary
+    :param sources: the source ids
+    :param disabled_optional_products: the disabled products dictionary
+    :param enabled_extended_product_search: the enabled products dictionary
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
@@ -118,9 +147,17 @@ def build_scan_payload(args, sources, disabled_optional_products):
             and args.disabled_optional_products:
         if options is None:
             options = \
-                {'disabled_optional_products': args.disabled_optional_products}
+                {'disabled_optional_products': disabled_optional_products}
         else:
             options['disabled_optional_products'] = disabled_optional_products
+    if hasattr(args, 'enabled_extended_product_search') \
+            and args.enabled_extended_product_search:
+        if options is None:
+            options = {'enabled_extended_product_search':
+                       enabled_extended_product_search}
+        else:
+            options['enabled_extended_product_search'] = \
+                enabled_extended_product_search
     if options is not None:
         req_payload['options'] = options
     req_payload['scan_type'] = scan.SCAN_TYPE_INSPECT

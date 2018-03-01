@@ -18,7 +18,7 @@ from requests import codes
 from qpc.utils import pretty_print
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
-from qpc.scan.utils import _get_scan_object_id
+from qpc.scan.utils import get_scan_object_id
 from qpc.request import GET
 from qpc.translation import _
 import qpc.messages as messages
@@ -69,8 +69,8 @@ class ScanJobCommand(CliCommand):
     def _build_req_params(self):
         """Add filter by scan_type/state query param."""
         if 'name' in self.args and self.args.name:
-            found, scan_object_id = _get_scan_object_id(self.parser,
-                                                        self.args.name)
+            found, scan_object_id = get_scan_object_id(self.parser,
+                                                       self.args.name)
             if found:
                 self.req_path += scan_object_id + 'jobs/'
             else:

@@ -132,7 +132,9 @@ class ScanAddCliTests(unittest.TestCase):
                              max_concurrency=50,
                              disabled_optional_products={'jboss-eap': False,
                                                          'jboss-fuse': False,
-                                                         'jboss-brms': False})
+                                                         'jboss-brms': False},
+                             enabled_extended_product_search=None,
+                             ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -157,7 +159,67 @@ class ScanAddCliTests(unittest.TestCase):
                              max_concurrency=50,
                              disabled_optional_products={'jboss-eap': True,
                                                          'jboss-fuse': False,
-                                                         'jboss-brms': True})
+                                                         'jboss-brms': True},
+                             enabled_extended_product_search=None,
+                             ext_product_search_dirs=None)
+            with redirect_stdout(scan_out):
+                ssc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_ADDED % 'scan1' + '\n')
+
+    def test_enabled_products_and_dirs(self):
+        """Testing that the ext products & search dirs flags work correctly."""
+        scan_out = StringIO()
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_post = get_server_location() + SCAN_URI
+        results = [{'id': 1, 'name': 'scan1',
+                    'sources': ['source1'],
+                    'max-concurrency': 4,
+                    'enabled_extended_product_search': {'jboss-eap': True,
+                                                        'jboss-fuse': False,
+                                                        'jboss-brms': True,
+                                                        'search_directories':
+                                                            ['/foo/bar/']}}]
+        source_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.post(url_post, status_code=201, json={'name': 'scan1'})
+            ssc = ScanAddCommand(SUBPARSER)
+            args = Namespace(name='scan1',
+                             sources=['source1'],
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_extended_product_search=['jboss-eap',
+                                                              'jboss-brms'],
+                             ext_product_search_dirs='/foo/bar/')
+            with redirect_stdout(scan_out):
+                ssc.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_ADDED % 'scan1' + '\n')
+
+    def test_enabled_products_only(self):
+        """Testing that the enabled-extended-product-search flag works."""
+        scan_out = StringIO()
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_post = get_server_location() + SCAN_URI
+        results = [{'id': 1, 'name': 'scan1',
+                    'sources': ['source1'],
+                    'max-concurrency': 4,
+                    'enabled_extended_product_search': {'jboss_eap': True,
+                                                        'jboss_fuse': False,
+                                                        'jboss_brms': True}}]
+        source_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.post(url_post, status_code=201, json={'name': 'scan1'})
+            ssc = ScanAddCommand(SUBPARSER)
+            args = Namespace(name='scan1',
+                             sources=['source1'],
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_extended_product_search=['jboss_eap',
+                                                              'jboss_brms'],
+                             ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -177,7 +239,9 @@ class ScanAddCliTests(unittest.TestCase):
             ssc = ScanAddCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disabled_optional_products=None)
+                             disabled_optional_products=None,
+                             enabled_extended_product_search=None,
+                             ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
                 self.assertEqual(scan_out.getvalue(),

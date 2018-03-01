@@ -146,6 +146,11 @@ SCAN_EDIT_SOURCES_NOT_FOUND = 'An error occurred while processing the '\
 SCAN_EDIT_SOURCES_PROCESS_ERR = 'An error occurred while processing the '\
     '"--sources" input values. Failed to edit scan "%s". For more '\
     'information, see the server log file.'
+SCAN_ENABLED_PRODUCT_HELP = \
+    'Contains the list of products to include for extended search. '\
+    'Valid values: jboss_eap, jboss_fuse, jboss_brms.'
+SCAN_EXT_SEARCH_DIRS_HELP = \
+    'The path to the search directories for extended search products.'
 
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
