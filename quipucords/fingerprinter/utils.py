@@ -11,6 +11,8 @@
 
 """Utility functions for system fingerprinting."""
 
+from collections import OrderedDict
+
 NAME = 'name'
 
 
@@ -62,7 +64,9 @@ def generate_raw_fact_members(raw_facts_dict):
     """
     raw_facts = None
     raw_fact_list = []
-    for key, value in raw_facts_dict.items():
+    ordered_facts = OrderedDict(sorted(raw_facts_dict.items(),
+                                       key=lambda t: t[0]))
+    for key, value in ordered_facts.items():
         if value:
             raw_fact_list.append(key)
     if raw_fact_list:
