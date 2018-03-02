@@ -17,7 +17,7 @@ from requests import codes
 from qpc.request import POST
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
-from qpc.scan.utils import _get_scan_object_id
+from qpc.scan.utils import get_scan_object_id
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -47,8 +47,8 @@ class ScanStartCommand(CliCommand):
         CliCommand._validate_args(self)
         if self.args.name:
             # check for existence of scan object
-            found, scan_object_id = _get_scan_object_id(self.parser,
-                                                        self.args.name)
+            found, scan_object_id = get_scan_object_id(self.parser,
+                                                       self.args.name)
             if found is False:
                 sys.exit(1)
             else:

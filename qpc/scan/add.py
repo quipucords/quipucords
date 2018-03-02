@@ -17,7 +17,9 @@ from requests import codes
 from qpc.request import POST
 from qpc.clicommand import CliCommand
 import qpc.scan as scan
-from qpc.scan.utils import _get_source_ids, _get_optional_products
+from qpc.scan.utils import (get_source_ids,
+                            get_optional_products,
+                            get_enabled_products)
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -54,8 +56,22 @@ class ScanAddCommand(CliCommand):
                                  dest='disabled_optional_products',
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='DISABLE_OPTIONAL_PRODUCTS',
+                                 metavar='DISABLED_PRODUCT_LIST',
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
+                                 required=False)
+        self.parser.add_argument('--enabled-ext-product-search',
+                                 dest='enabled_ext_product_search',
+                                 nargs='+',
+                                 choices=scan.OPTIONAL_PRODUCTS,
+                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
+                                 help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
+                                 required='--ext-product-search-dirs' in
+                                 sys.argv)
+        self.parser.add_argument('--ext-product-search-dirs',
+                                 dest='ext_product_search_dirs',
+                                 nargs='+',
+                                 metavar='EXTENDED_PRODUCT_SEARCH_DIRS',
+                                 help=_(messages.SCAN_EXT_SEARCH_DIRS_HELP),
                                  required=False)
         self.source_ids = []
 
@@ -64,8 +80,8 @@ class ScanAddCommand(CliCommand):
         source_ids = []
         if self.args.sources:
             # check for existence of sources
-            not_found, source_ids = _get_source_ids(self.parser,
-                                                    self.args.sources)
+            not_found, source_ids = get_source_ids(self.parser,
+                                                   self.args.sources)
             if not_found is True:
                 sys.exit(1)
         self.source_ids = source_ids
@@ -83,10 +99,16 @@ class ScanAddCommand(CliCommand):
                 'max_concurrency': self.args.max_concurrency}
         }
         disabled_optional_products \
-            = _get_optional_products(self.args.disabled_optional_products)
+            = get_optional_products(self.args.disabled_optional_products)
+        enabled_ext_product_search \
+            = get_enabled_products(self.args.enabled_ext_product_search,
+                                   self.args.ext_product_search_dirs, False)
         if disabled_optional_products is not None:
             self.req_payload['options']['disabled_optional_products']\
                 = disabled_optional_products
+        if enabled_ext_product_search is not None:
+            self.req_payload['options']['enabled_extended_product_search'] \
+                = enabled_ext_product_search
 
     def _handle_response_success(self):
         json_data = self.response.json()
