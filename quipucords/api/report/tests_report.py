@@ -231,6 +231,7 @@ class DeploymentReportTest(TestCase):
                 'etc_release_name': os_name,
                 'etc_release_version': version,
                 'etc_release_release': release,
+                'uname_hostname': '1.2.3.4',
                 'virt_virt': 'virt-guest',
                 'virt_type': 'vmware',
                 'virt_num_guests': 1,

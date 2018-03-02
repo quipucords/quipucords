@@ -105,6 +105,7 @@ class EngineTest(TestCase):
             fact['connection_uuid'] = connection_uuid
         if connection_host:
             fact['connection_host'] = connection_host
+            fact['uname_hostname'] = connection_host
         if connection_port:
             fact['connection_port'] = connection_port
         if cpu_core_per_socket:

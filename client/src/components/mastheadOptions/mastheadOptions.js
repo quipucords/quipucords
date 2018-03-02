@@ -20,7 +20,7 @@ const MastheadOptions = ({ user, logoutUser, showAboutModal }) => {
             <Icon type="pf" name="user" /> {user.currentUser && user.currentUser.username}
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            <MenuItem onClick={logoutUser}>Logout</MenuItem>
+            <MenuItem onClick={logoutUser}>Log out</MenuItem>
           </Dropdown.Menu>
         </Dropdown>
       </ul>
