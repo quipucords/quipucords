@@ -10,10 +10,11 @@
 #
 """Describes the views associated with the API models."""
 
+import logging
 import os
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
@@ -26,18 +27,26 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob)
+from api.models import (ScanTask, ScanJob, FactCollection)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
                              SystemConnectionResultSerializer,
                              JobInspectionResultSerializer,
                              SystemInspectionResultSerializer,
-                             RawFactSerializer)
+                             RawFactSerializer,
+                             FactCollectionSerializer)
 from api.scanjob.serializer import expand_scanjob
 from api.signals.scanjob_signal import (pause_scan,
                                         cancel_scan, restart_scan)
+from api.fact.util import (build_sources_from_tasks,
+                           validate_fact_collection_json,
+                           get_or_create_fact_collection)
+from fingerprinter import pfc_signal
 
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 RESULTS_KEY = 'task_results'
 
@@ -267,3 +276,102 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
         err_msg = _(messages.NO_RESTART)
         return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+
+    @list_route(methods=['put'])
+    def merge(self, request):
+        """Merge jobs."""
+        jobs = self.validate_merge_jobs(request.data)
+        sources = []
+        for job in jobs:
+            inspect_tasks = job.tasks.filter(
+                scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by(
+                    'sequence_number')
+            sources += build_sources_from_tasks(inspect_tasks.all())
+
+        fact_collection_json = {'sources': sources}
+        has_errors, validation_result = validate_fact_collection_json(
+            fact_collection_json)
+        error = {
+            'jobs': []
+        }
+        if has_errors:
+            message = _(messages.SJ_MERGE_JOB_NO_RESULTS % validation_result)
+            error.get('jobs').append(message)
+            raise ValidationError(error)
+
+        # Create FC model and save data
+        fact_collection = get_or_create_fact_collection(fact_collection_json)
+
+        # Send signal so fingerprint engine processes raw facts
+        try:
+            pfc_signal.send(sender=self.__class__,
+                            instance=fact_collection)
+            # Transition from persisted to complete after processing
+            fact_collection.status = FactCollection.FC_STATUS_COMPLETE
+            fact_collection.save()
+            logger.debug(
+                'Fact collection %d successfully processed.',
+                fact_collection.id)
+        except Exception as error:
+            # Transition from persisted to failed after engine failed
+            fact_collection.status = FactCollection.FC_STATUS_FAILED
+            fact_collection.save()
+            logger.error(
+                'Fact collection %d failed to be processed.',
+                fact_collection.id)
+            logger.error('%s:%s', error.__class__.__name__, error)
+            raise ValidationError(error)
+
+        # Prepare REST response body
+        serializer = FactCollectionSerializer(fact_collection)
+        result = serializer.data
+        return Response(result, status=status.HTTP_201_CREATED)
+
+    def validate_merge_jobs(self, data):
+        """Validate merge jobs."""
+        error = {
+            'jobs': []
+        }
+        if not isinstance(data, dict) or \
+                data.get('jobs') is None:
+            error.get('jobs').append(_(messages.SJ_MERGE_JOB_REQUIRED))
+            raise ValidationError(error)
+        job_ids = data.get('jobs')
+        if not isinstance(job_ids, list):
+            error.get('jobs').append(_(messages.SJ_MERGE_JOB_NOT_LIST))
+            raise ValidationError(error)
+
+        job_id_count = len(job_ids)
+        if job_id_count < 2:
+            error.get('jobs').append(_(messages.SJ_MERGE_JOB_TOO_SHORT))
+            raise ValidationError(error)
+
+        non_integer_values = [
+            job_id for job_id in job_ids if not is_int(job_id)]
+        if bool(non_integer_values):
+            error.get('jobs').append(_(messages.SJ_MERGE_JOB_NOT_INT))
+            raise ValidationError(error)
+
+        unique_id_count = len(set(job_ids))
+        if unique_id_count != job_id_count:
+            error.get('jobs').append(_(messages.SJ_MERGE_JOB_NOT_UNIQUE))
+            raise ValidationError(error)
+
+        jobs = ScanJob.objects.filter(pk__in=job_ids).order_by('-end_time')
+        actual_job_ids = [job.id for job in jobs]
+        missing_jobs = set(job_ids) - set(actual_job_ids)
+        if bool(missing_jobs):
+            message = _(messages.SJ_MERGE_JOB_NOT_FOUND) % (
+                ', '.join([str(i) for i in missing_jobs]))
+            error.get('jobs').append(message)
+            raise ValidationError(error)
+
+        incomplete_jobs = [job.id for job in jobs if job.status not in [
+            ScanTask.FAILED, ScanTask.COMPLETED]]
+        if bool(incomplete_jobs):
+            jobs_str = (
+                ', '.join([str(i) for i in incomplete_jobs]))
+            message = _(messages.SJ_MERGE_JOB_NOT_COMPLETE % jobs_str)
+            error.get('jobs').append(message)
+            raise ValidationError(error)
+        return jobs.filter(scan_type=ScanTask.SCAN_TYPE_INSPECT)

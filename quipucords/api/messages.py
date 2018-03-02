@@ -108,6 +108,17 @@ SJ_EXTRA_VARS_BOOL = 'Extra vars values must be type boolean.'
 SJ_EXTRA_VARS_KEY = 'Extra vars keys must be jboss_eap, jboss_fuse, '\
     'or jboss_brms.'
 
+SJ_MERGE_JOB_REQUIRED = 'This field is required'
+SJ_MERGE_JOB_NOT_LIST = 'This field must be a list of job ids.'
+SJ_MERGE_JOB_TOO_SHORT = 'Two or more job ids are required.'
+SJ_MERGE_JOB_NOT_INT = 'Job ids must be integers.'
+SJ_MERGE_JOB_NOT_UNIQUE = 'Set of ids must be unique.'
+SJ_MERGE_JOB_NOT_FOUND = 'Not all job ids exist. Jobs note found: %s'
+SJ_MERGE_JOB_NOT_COMPLETE = 'Not all job are completed.  Only completed '\
+    'jobs may be merged. Incomplete jobs: %s'
+SJ_MERGE_JOB_NO_RESULTS = 'The specified set of jobs'\
+    ' produced invalid fact collection.  Error: %s'
+
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'

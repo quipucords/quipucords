@@ -15,7 +15,7 @@ import logging
 from django.db import transaction
 from django.utils.translation import ugettext as _
 import api.messages as messages
-from api.models import Source, FactCollection
+from api.models import Source, FactCollection, ScanTask
 from api.serializers import FactCollectionSerializer
 
 
@@ -31,6 +31,26 @@ SOURCE_TYPE_KEY = 'source_type'
 FACTS_KEY = 'facts'
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def build_sources_from_tasks(tasks):
+    """Build sources for a set of tasks.
+
+    :param tasks: ScanTask objects used to build results
+    :returns: dict containing sources structure for facts endpoint
+    """
+    sources = []
+    for inspect_task in tasks:
+        if inspect_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:
+            continue
+        task_facts = inspect_task.get_facts()
+        if task_facts:
+            source = inspect_task.source
+            source_dict = {'source_id': source.id,
+                           'source_type': source.source_type,
+                           'facts': task_facts}
+            sources.append(source_dict)
+    return sources
 
 
 def validate_fact_collection_json(fact_collection_json):
