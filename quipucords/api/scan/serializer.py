@@ -176,6 +176,7 @@ class ScanSerializer(NotEmptySerializer):
 
         return scan
 
+    # pylint: disable=too-many-locals
     @transaction.atomic
     def update(self, instance, validated_data):
         """Update a scan."""
@@ -193,6 +194,7 @@ class ScanSerializer(NotEmptySerializer):
         name = validated_data.pop('name', None)
         scan_type = validated_data.pop('scan_type', None)
         sources = validated_data.pop('sources', None)
+        old_options = instance.options
         options = validated_data.pop('options', None)
         if not self.partial:
             instance.name = name
@@ -228,27 +230,81 @@ class ScanSerializer(NotEmptySerializer):
             if sources is not None:
                 instance.sources = sources
             if options is not None:
+                # grab the old options
+                old_optional_products = old_options.disabled_optional_products
+                old_extended_search = \
+                    old_options.enabled_extended_product_search
+                old_jboss_eap_ext = False
+                old_jboss_brms_ext = False
+                old_jboss_fuse_ext = False
+                old_search_directories = None
+                if old_extended_search:
+                    old_jboss_eap_ext = old_extended_search.jboss_eap
+                    old_jboss_brms_ext = old_extended_search.jboss_brms
+                    old_jboss_fuse_ext = old_extended_search.jboss_fuse
+                    old_search_directories = \
+                        old_extended_search.search_directories
+                # grab the new options
                 optional_products = options.pop(
                     'disabled_optional_products', None)
                 extended_search = options.pop(
                     'enabled_extended_product_search', None)
-                instance.options = ScanOptions.objects.create(**options)
+                if extended_search:
+                    # Grab the new extended search options
+                    jboss_eap_ext = extended_search.pop('jboss_eap', None)
+                    jboss_fuse_ext = extended_search.pop('jboss_fuse', None)
+                    jboss_brms_ext = extended_search.pop('jboss_brms', None)
+                    search_directories = extended_search.pop(
+                        'search_directories', None)
+
+                    real_extended_search = {}
+                    # for each extended search option, set if provided
+                    # else set to the old option
+                    if jboss_eap_ext is not None:
+                        real_extended_search['jboss_eap'] = jboss_eap_ext
+                    else:
+                        real_extended_search['jboss_eap'] = old_jboss_eap_ext
+                    if jboss_brms_ext is not None:
+                        real_extended_search['jboss_brms'] = jboss_brms_ext
+                    else:
+                        real_extended_search['jboss_brms'] = old_jboss_brms_ext
+                    if jboss_fuse_ext is not None:
+                        real_extended_search['jboss_fuse'] = jboss_fuse_ext
+                    else:
+                        real_extended_search['jboss_fuse'] = old_jboss_fuse_ext
+                    if search_directories is not None:
+                        # If search directories = /reset/the/dir/
+                        # we don't add search_directories to the {}
+                        if search_directories != '["/reset/the/dir/"]':
+                            real_extended_search['search_directories'] = \
+                                search_directories
+                    else:
+                        if old_search_directories:
+                            real_extended_search['search_directories'] = \
+                                old_search_directories
+                    extended_search = \
+                        ExtendedProductSearchOptions.objects.create(
+                            **real_extended_search)
+                    extended_search.save()
+
+                else:
+                    extended_search = old_extended_search
+
                 if optional_products:
                     optional_products = \
                         DisabledOptionalProductsOptions.objects.create(
                             **optional_products)
                     optional_products.save()
-                    instance.options.disabled_optional_products = \
-                        optional_products
-
-                if extended_search:
-                    extended_search = \
-                        ExtendedProductSearchOptions.objects.create(
-                            **extended_search)
-                    extended_search.save()
-                    instance.options.enabled_extended_product_search = \
-                        extended_search
-
+                else:
+                    optional_products = old_optional_products
+                # create Scan Options for the instance
+                instance.options = ScanOptions.objects.create(**options)
+                # set the disabled products
+                instance.options.disabled_optional_products = \
+                    optional_products
+                # set the enabled products
+                instance.options.enabled_extended_product_search = \
+                    extended_search
                 instance.options.save()
 
         instance.save()
