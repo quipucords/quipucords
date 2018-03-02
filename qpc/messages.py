@@ -153,6 +153,7 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
     'search.'
 
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
+REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
 REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'
@@ -165,6 +166,8 @@ REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
+REPORT_SUCCESSFULLY_MERGED = 'Scan job results successfully merged.  '\
+    'Report ID is %s.'
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\

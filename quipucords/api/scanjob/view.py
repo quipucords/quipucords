@@ -352,6 +352,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             error.get('jobs').append(_(messages.SJ_MERGE_JOB_NOT_INT))
             raise ValidationError(error)
 
+        job_ids = [int(job_id) for job_id in job_ids]
         unique_id_count = len(set(job_ids))
         if unique_id_count != job_id_count:
             error.get('jobs').append(_(messages.SJ_MERGE_JOB_NOT_UNIQUE))
