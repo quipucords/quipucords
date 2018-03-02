@@ -110,12 +110,12 @@ SJ_EXTRA_VARS_KEY = 'Extra vars keys must be jboss_eap, jboss_fuse, '\
 
 SJ_MERGE_JOB_REQUIRED = 'This field is required'
 SJ_MERGE_JOB_NOT_LIST = 'This field must be a list of job ids.'
-SJ_MERGE_JOB_TOO_SHORT = 'Two or more job ids are required.'
-SJ_MERGE_JOB_NOT_INT = 'Job ids must be integers.'
+SJ_MERGE_JOB_TOO_SHORT = 'Two or more scan job ids are required.'
+SJ_MERGE_JOB_NOT_INT = 'Scan job ids must be integers.'
 SJ_MERGE_JOB_NOT_UNIQUE = 'Set of ids must be unique.'
-SJ_MERGE_JOB_NOT_FOUND = 'Not all job ids exist. Jobs note found: %s'
-SJ_MERGE_JOB_NOT_COMPLETE = 'Not all job are completed.  Only completed '\
-    'jobs may be merged. Incomplete jobs: %s'
+SJ_MERGE_JOB_NOT_FOUND = 'Not all scan job ids exist. Scan jobs not found: %s'
+SJ_MERGE_JOB_NOT_COMPLETE = 'Not all scan job are completed.'\
+    '  Only completed scan jobs may be merged. Incomplete scan jobs: %s'
 SJ_MERGE_JOB_NO_RESULTS = 'The specified set of jobs'\
     ' produced invalid fact collection.  Error: %s'
 

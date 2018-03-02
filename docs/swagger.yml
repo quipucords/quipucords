@@ -786,6 +786,29 @@ paths:
           description: "Scan job was not in paused state"
         404:
           description: "Scan job not found"
+  /jobs/merge/:
+    put:
+      tags:
+        - "Scan Job"
+      summary: "Merge results from multiple scan jobs."
+      description: "Merge results from two or more completed scan jobs."
+      operationId: "mergeJobResults"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Scan jobs to combine"
+        required: true
+        schema:
+          $ref: "#/definitions/ScanJobMerge"
+      responses:
+        201:
+          description: "Scan job results merged and fact collection created."
+          schema:
+            $ref: "#/definitions/FactCollectionOut"
+        400:
+          description: "Scan job not merged due to invalid request."
   /users/current/:
     get:
       tags:
@@ -1469,6 +1492,13 @@ definitions:
             type: "integer"
             format: "int64"
             description: "The identifier of the sent fact collection."
+  ScanJobMerge:
+    type: "object"
+    properties:
+      jobs:
+        type: "array"
+        items:
+          type: "integer"
   ScanJobPagination:
     allOf:
       - $ref: "#/definitions/ListPagination"
