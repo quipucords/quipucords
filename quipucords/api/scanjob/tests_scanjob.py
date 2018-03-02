@@ -10,6 +10,8 @@
 #
 """Test the API application."""
 
+# pylint: disable=unused-argument,invalid-name,too-many-lines
+
 from unittest.mock import patch
 import json
 from django.test import TestCase
@@ -41,7 +43,6 @@ def dummy_start():
     pass
 
 
-# pylint: disable=unused-argument,invalid-name
 class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
