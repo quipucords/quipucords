@@ -491,7 +491,7 @@ To show the scan results to follow the status of that scan, you would enter the 
 
 Listing Scan Results
 ^^^^^^^^^^^^^^^^^^^^
-In addition to showing the status of a single scan, you can also show a list of all scans that are in progress or are completed on the Quipucords server. To show this list of scans, you use the ``scan list`` command. The output of this command includes the scan identifier, the source or sources for that scan, and the current state of the scan:.
+In addition to showing the status of a single scan, you can also show a list of all scans that are in progress or are completed on the Quipucords server. To show this list of scans, you use the ``scan list`` command. The output of this command includes the scan identifier, the source or sources for that scan, and the current state of the scan.
 
 To show the list of scans, enter the following command::
 
