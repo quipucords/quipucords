@@ -18,15 +18,8 @@ class AddSourceWizard extends React.Component {
 
     this.initialState = {
       activeStepIndex: 0,
-      show: false,
-      add: false,
-      edit: false,
-      source: {},
       stepOneValid: false,
-      stepTwoValid: false,
-      fulfilled: false,
-      error: false,
-      errorMessage: ''
+      stepTwoValid: false
     };
 
     this.state = { ...this.initialState };
@@ -42,11 +35,7 @@ class AddSourceWizard extends React.Component {
     if (nextProps.stepOneValid || nextProps.stepTwoValid) {
       this.setState({
         stepOneValid: nextProps.stepOneValid || false,
-        stepTwoValid: nextProps.stepTwoValid || false,
-        source: nextProps.source,
-        fulfilled: nextProps.fulfilled,
-        error: nextProps.error,
-        errorMessage: nextProps.errorMessage
+        stepTwoValid: nextProps.stepTwoValid || false
       });
     }
   }
@@ -60,7 +49,7 @@ class AddSourceWizard extends React.Component {
   }
 
   onCancel() {
-    const { fulfilled, error } = this.state;
+    const { fulfilled, error } = this.props;
 
     const closeWizard = () => {
       Store.dispatch({
@@ -109,8 +98,8 @@ class AddSourceWizard extends React.Component {
   }
 
   onSubmit(event) {
-    const { addSource, updateSource } = this.props;
-    const { stepOneValid, stepTwoValid, source, edit } = this.state;
+    const { addSource, updateSource, source, edit } = this.props;
+    const { stepOneValid, stepTwoValid } = this.state;
 
     if (stepOneValid && stepTwoValid) {
       if (edit) {
@@ -212,12 +201,12 @@ AddSourceWizard.propTypes = {
   addSource: PropTypes.func,
   updateSource: PropTypes.func,
   show: PropTypes.bool.isRequired,
+  edit: PropTypes.bool,
   source: PropTypes.object,
   stepOneValid: PropTypes.bool,
   stepTwoValid: PropTypes.bool,
   fulfilled: PropTypes.bool,
-  error: PropTypes.bool,
-  errorMessage: PropTypes.string
+  error: PropTypes.bool
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

@@ -58,8 +58,6 @@ class ScanListItem extends React.Component {
             .getScanJobs(item.id)
             .then(results => {
               item.scanJobsPending = false;
-              console.log('results:');
-              console.dir(results);
               item.scanJobs = _.get(results.value, 'data.results');
             })
             .catch(error => {
