@@ -471,11 +471,15 @@ Viewing the Detail Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The ``qpc report detail`` command generates a report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans.
 
-**qpc report detail --id** *scan_job_identifier* **(--json|--csv)** **--output-file** *PATH*
+**qpc report detail (--scan-job** *scan_job_identifier*|**--report** *report_identifier* **) (--json|--csv)** **--output-file** *PATH*
 
-``--id=scan_job_identifier``
+``--scan-job=scan_job_identifier``
 
-  Required. Contains the scan job identifier for the scan that is used to generate the report.
+  Required. Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
+
+``--report=report_identifier``
+
+  Required. Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
 
 ``--json``
 
@@ -495,11 +499,15 @@ The ``qpc report summary`` command generates a report that contains the processe
 
 For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a report summary results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
 
-**qpc report summary --id** *scan_job_identifier* **(--json|--csv)** **--output-file** *PATH*
+**qpc report summary (--scan-job** *scan_job_identifier*|**--report** *report_identifier* **) (--json|--csv)** **--output-file** *PATH*
 
-``--id=scan_job_identifier``
+``--scan-job=scan_job_identifier``
 
-  Required. Contains the scan job identifier for the scan that is used to generate the report.
+  Required. Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
+
+``--report=report_identifier``
+
+  Required. Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
 
 ``--json``
 

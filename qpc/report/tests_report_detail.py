@@ -73,7 +73,34 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_job_id='1', output_json=True,
+            args = Namespace(scan_job_id='1',
+                             report_id=None,
+                             output_json=True,
+                             output_csv=False,
+                             path=self.test_json_filename)
+            with redirect_stdout(report_out):
+                nac.main(args)
+                self.assertEqual(report_out.getvalue().strip(),
+                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
+                with open(self.test_json_filename, 'r') as json_file:
+                    data = json_file.read()
+                    file_content_dict = json.loads(data)
+                self.assertDictEqual(get_report_json_data, file_content_dict)
+
+    def test_detail_report_as_json_report_id(self):
+        """Testing retreiving detail report as json with report id."""
+        report_out = StringIO()
+
+        get_report_url = get_server_location() + \
+            REPORT_URI + '1/details/'
+        get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_report_url, status_code=200,
+                       json=get_report_json_data)
+            nac = ReportDetailCommand(SUBPARSER)
+            args = Namespace(scan_job_id=None,
+                             report_id='1',
+                             output_json=True,
                              output_csv=False,
                              path=self.test_json_filename)
             with redirect_stdout(report_out):
@@ -105,7 +132,9 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_report_url, status_code=200,
                        json=get_report_csv_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_job_id='1', output_json=False,
+            args = Namespace(scan_job_id='1',
+                             report_id=None,
+                             output_json=False,
                              output_csv=True,
                              path=self.test_csv_filename)
             with redirect_stdout(report_out):
@@ -151,7 +180,9 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_job_id='1', output_json=True,
+            args = Namespace(scan_job_id='1',
+                             report_id=None,
+                             output_json=True,
                              output_csv=False,
                              path=self.test_json_filename)
             with self.assertRaises(SystemExit):
@@ -171,11 +202,13 @@ class ReportDetailTests(unittest.TestCase):
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             nac = ReportDetailCommand(SUBPARSER)
-            args = Namespace(scan_job_id='1', output_json=True,
+            args = Namespace(scan_job_id='1',
+                             report_id=None,
+                             output_json=True,
                              output_csv=False,
                              path=self.test_json_filename)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
                     nac.main(args)
                     self.assertEqual(report_out.getvalue(),
-                                     messages.REPORT_NO_REPORT_FOR_SJ)
+                                     messages.REPORT_NO_DETAIL_REPORT_FOR_SJ)
