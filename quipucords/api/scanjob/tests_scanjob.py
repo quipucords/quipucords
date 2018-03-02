@@ -10,6 +10,8 @@
 #
 """Test the API application."""
 
+# pylint: disable=unused-argument,invalid-name,too-many-lines
+
 from unittest.mock import patch
 import json
 from django.test import TestCase
@@ -41,7 +43,6 @@ def dummy_start():
     pass
 
 
-# pylint: disable=unused-argument,invalid-name
 class ScanJobTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 
@@ -303,6 +304,222 @@ class ScanJobTest(TestCase):
                      [{'name': 'Foo', 'status': 'success',
                        'facts': [
                            {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
+
+    def test_merge_empty_body(self):
+        """Test merge with empty body."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_REQUIRED]})
+
+    def test_merge_empty_dict(self):
+        """Test merge with empty dict."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_REQUIRED]})
+
+    def test_merge_jobs_not_list(self):
+        """Test merge with not list."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {'jobs': 5}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_NOT_LIST]})
+
+    def test_merge_jobs_list_too_short(self):
+        """Test merge with list too short."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {'jobs': [5]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_TOO_SHORT]})
+
+    def test_merge_jobs_list_contains_string(self):
+        """Test merge with containing str."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {'jobs': [5, 'hello']}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_NOT_INT]})
+
+    def test_merge_jobs_list_contains_duplicates(self):
+        """Test merge with containing duplicates."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {'jobs': [5, 5]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs': [messages.SJ_MERGE_JOB_NOT_UNIQUE]})
+
+    def test_merge_jobs_list_contains_invalid_job_ids(self):
+        """Test merge with containing duplicates."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-merge')
+        data = {'jobs': [5, 6]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'jobs':
+                            [messages.SJ_MERGE_JOB_NOT_FOUND % '5, 6']})
+
+    def test_merge_jobs_not_complete(self):
+        """Test merge jobs not complete."""
+        # pylint: disable=no-member
+        scan_job1, _ = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test1')
+
+        scan_job2, _ = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test2')
+
+        url = reverse('scanjob-merge')
+        data = {'jobs': [scan_job1.id, scan_job2.id]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        error_message = messages.SJ_MERGE_JOB_NOT_COMPLETE % (
+            ', '.join([str(i) for i in [scan_job1.id, scan_job2.id]]))
+        self.assertEqual(
+            json_response, {'jobs': [error_message]})
+
+    def test_merge_jobs_no_results(self):
+        """Test merge job no results."""
+        # pylint: disable=no-member
+        scan_job1, _ = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test1')
+
+        scan_job2, _ = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test2')
+
+        scan_job1.status = ScanTask.COMPLETED
+        scan_job1.save()
+
+        scan_job2.status = ScanTask.COMPLETED
+        scan_job2.save()
+
+        url = reverse('scanjob-merge')
+        data = {'jobs': [scan_job1.id, scan_job2.id]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        validation_result = {'sources': 'Required. May not be null or empty.'}
+        error_message = messages.SJ_MERGE_JOB_NO_RESULTS % validation_result
+        self.assertEqual(
+            json_response, {'jobs': [error_message]})
+
+    def test_merge_jobs_success(self):
+        """Test merge jobs success."""
+        # pylint: disable=no-member
+        scan_job1, scan_task1 = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test1')
+
+        scan_job2, scan_task2 = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test2')
+
+        # Create a connection system result
+        connect_sys_result = SystemConnectionResult(
+            name='Foo',
+            credential=self.cred,
+            status=SystemConnectionResult
+            .SUCCESS)
+        connect_sys_result.save()
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult
+            .SUCCESS)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        conn_result = scan_task1.prerequisites.first().connection_result
+        conn_result.systems.add(connect_sys_result)
+        conn_result.save()
+
+        inspect_result = scan_task1.inspection_result
+        inspect_result.systems.add(inspect_sys_result)
+        inspect_result.save()
+        scan_task1.status = ScanTask.COMPLETED
+        scan_task1.save()
+
+        conn_result = scan_task2.prerequisites.first().connection_result
+        conn_result.systems.add(connect_sys_result)
+        conn_result.save()
+
+        inspect_result = scan_task2.inspection_result
+        inspect_result.systems.add(inspect_sys_result)
+        inspect_result.save()
+        scan_task1.status = ScanTask.COMPLETED
+        scan_task1.save()
+
+        scan_job1.status = ScanTask.COMPLETED
+        scan_job1.save()
+
+        scan_job2.status = ScanTask.COMPLETED
+        scan_job2.save()
+
+        url = reverse('scanjob-merge')
+        data = {'jobs': [scan_job1.id, scan_job2.id]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        json_response = response.json()
+        expected = {'id': 1, 'sources':
+                    [{'source_id': 1,
+                      'source_type': 'network',
+                      'facts': [{'fact_key': 'fact_value'}]},
+                     {'source_id': 1,
+                      'source_type': 'network',
+                      'facts': [{'fact_key': 'fact_value'}]}],
+                    'status': 'complete'}
+        self.assertEqual(
+            json_response, expected)
 
     def test_post_jobs_not_allowed(self):
         """Test post jobs not allowed."""
