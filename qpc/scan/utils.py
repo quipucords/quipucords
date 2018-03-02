@@ -114,8 +114,11 @@ def get_extended_products(enabled_extended_product_search,
     enabled_default = {scan.JBOSS_FUSE: False,
                        scan.JBOSS_EAP: False,
                        scan.JBOSS_BRMS: False}
-    # if someone wants to reset products or directories, we return default vals
+    # if someone wants to reset products or directories, we grab default vals
     if ext_product_search_dirs == [] or enabled_extended_product_search == []:
+        if enabled_extended_product_search:
+            for product in enabled_extended_product_search:
+                enabled_default[product] = True
         return enabled_default
     # else we grab the provided products
     elif enabled_extended_product_search:
@@ -156,14 +159,17 @@ def build_scan_payload(args, sources, disabled_optional_products,
         else:
             options['max_concurrency'] = args.max_concurrency
     if hasattr(args, 'disabled_optional_products') \
-            and args.disabled_optional_products:
+            and (args.disabled_optional_products or
+                 args.disabled_optional_products == []):
         if options is None:
             options = \
                 {'disabled_optional_products': disabled_optional_products}
         else:
             options['disabled_optional_products'] = disabled_optional_products
     if hasattr(args, 'enabled_extended_product_search') \
-            and args.enabled_extended_product_search:
+            and (args.enabled_extended_product_search or
+                 args.enabled_extended_product_search == [] or
+                 args.ext_product_search_dirs == []):
         if options is None:
             options = {'enabled_extended_product_search':
                        enabled_extended_product_search}
