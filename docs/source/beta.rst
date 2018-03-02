@@ -1,10 +1,8 @@
 =====================
 Quipucords User Guide
 =====================
-Sonar Project, Pilot Phase
-..........................
 
-This version of the *Quipucords User Guide* is provided as a preview during the pilot phase of the Sonar project. This guide is under development and is subject to substantial change. Because one of the goals of the pilot phase is to gather feedback on the documentation and workflows, you are encouraged to provide feedback about potential improvements to this information. Submit your feedback to the Sonar project support contacts that are provided in your pilot kickoff materials (*more specific contact info when the pilot contact email address is available...*).
+This version of the *Quipucords User Guide* is provided as a preview during the pilot phase of Project Sonar. This guide is under development and is subject to substantial change. Because one of the goals of the pilot phase is to gather feedback on the documentation and workflows, you are encouraged to provide feedback about potential improvements to this information. Submit your feedback to the Project Sonar support contacts that are provided in your pilot phase kickoff materials (*more specific contact info when the pilot contact email address is available...*).
 
 About Quipucords
 ----------------
@@ -12,7 +10,7 @@ Quipucords, accessed through the ``qpc`` command, is an inspection and reporting
 
 The ability to inspect the software and systems that are running on your network improves your ability to understand and report on your entitlement usage. Ultimately, this inspection and reporting process is part of the larger system administration task of managing your inventories.
 
-Quipucords uses two types of configuration to manage the inspection process. A *credential* contains configuration such as the username and password or SSH key of the user that runs the inspection process. A *source* defines the entity to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Red Hat Satellite, plus includes one or more credentials to use to access that network or systems management solution during the inspection process. You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the output as a *report* to review the results.
+Quipucords requires two types of data to access IT resources and run the inspection process. A *credential* defines user information such as the user name and password or SSH key of the user that runs the inspection process. A *source* defines the entity to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Red Hat Satellite, plus includes one or more credentials to use to access that network or systems management solution during the inspection process. You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the output as a *report* to review the results.
 
 Requirements
 ------------
@@ -45,25 +43,23 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 2. Add the COPR repo to your server. You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_.
 
 
-  - For Red Hat Enterprise Linux 7, enter the following command:
-
-  ::
+  - For Red Hat Enterprise Linux 7, enter the following command::
 
    # wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
 
-  - For Red Hat Enterprise Linux 6, enter the following command:
-
-  ::
+  - For Red Hat Enterprise Linux 6, enter the following command::
 
     # wget -O /etc/yum.repos.d/chambridge-qpc-epel-6.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-6/chambridge-qpc-epel-6.repo
 
 3. Install the qpc beta package:
 
-  - For Red Hat Enterprise Linux 7, enter the following command:
-    ``# yum -y install qpc-0.0.1-1.git.342.44b5e58.el7.centos``
+  - For Red Hat Enterprise Linux 7, enter the following command::
 
-  - For Red Hat Enterprise Linux 6, enter the following command:
-    ``# yum -y install qpc-0.0.1-1.git.342.44b5e58.el6``
+    # yum -y install qpc-0.0.1-1.git.342.44b5e58.el7.centos``
+
+  - For Red Hat Enterprise Linux 6, enter the following command::
+
+    # yum -y install qpc-0.0.1-1.git.342.44b5e58.el6
 
 Installing the Quipucords Server Requirement and Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -79,23 +75,23 @@ You can install Docker in different ways, depending on your needs:
 
 - You can set up the Docker repositories and then install from them. This choice is the recommended approach because it simplifies the installation and upgrade tasks.
 
-- You can download the RPM package, install it manually, and manage upgrades manually. This choice is useful when Docker is installed on air-gapped systems that have no access to the internet.
+- You can download the RPM package, install it manually, and manage upgrades manually. This choice is useful when Docker is installed on systems with limited or no access to the internet.
 
 Installing from the repository
 ++++++++++++++++++++++++++++++
 1. Make sure that you are logged in as a user with ``sudo`` or ``root`` privileges.
 
-2. Install the required packages:
+2. Install the required packages::
 
-  ``# sudo yum install -y yum-utils device-mapper-persistent-data lvm2``
+  # sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 
-3. Add the repository:
+3. Add the repository::
 
-  ``# sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo``
+  # sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-4. Install Docker from the repository:
+4. Install Docker from the repository::
 
-  ``# sudo yum install docker-ce``
+  # sudo yum install docker-ce
 
 Installing from a package
 +++++++++++++++++++++++++
@@ -103,23 +99,23 @@ Installing from a package
 
 2. Make sure that you are logged in as a user with ``sudo`` or ``root`` privileges.
 
-3. Install Docker, changing the path in the following example to the path where you downloaded the Docker package:
+3. Install Docker, changing the path in the following example to the path where you downloaded the Docker package::
 
- ``# sudo yum install /path/to/package.rpm``
+ # sudo yum install /path/to/package.rpm
 
 Starting Docker on Red Hat Enterprise Linux 7
 +++++++++++++++++++++++++++++++++++++++++++++
 After you install Docker, you must start it and verify that it is running.
 
-1. Start Docker:
+1. Start Docker::
 
-  ``# sudo systemctl start docker``
+  # sudo systemctl start docker
 
-2. Verify that Docker is installed correctly. To do this step, run the hello-world image:
+2. Verify that Docker is installed correctly. To do this step, run the hello-world image::
 
-  ``# sudo docker run hello-world``
+  # sudo docker run hello-world
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or later, you can continue with the steps to obtain the Quipucords server container image.
+After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or later, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image`_.
 
 Installing Docker on Red Hat Enterprise Linux 6.6 or later
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,25 +135,26 @@ When your system meets the minimum required kernel release, you can use the foll
 
 1. Make sure that you are logged in as a user with ``sudo`` or ``root`` privileges.
 
-2. Download the Docker RPM package to the current directory:
+2. Download the Docker RPM package to the current directory::
 
-  ``# curl -k -O -sSL https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm``
+  # curl -k -O -sSL https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
 
-3. Install the Docker package with yum:
+3. Install the Docker package with yum::
 
-  ``# sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm``
+  # sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm
+
 
 Starting Docker on Red Hat Enterprise Linux 6.6 or later
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 After you install Docker, you must start it and verify that it is running.
 
-1. Start the Docker daemon:
+1. Start the Docker daemon::
 
-  ``# sudo service docker start``
+  # sudo service docker start
 
-2. Verify that Docker is installed correctly. To do this step, run the hello-world image:
+2. Verify that Docker is installed correctly. To do this step, run the hello-world image::
 
-  ``# sudo docker run hello-world``
+  # sudo docker run hello-world
 
 This command displays output similar to the following truncated example. The first section of the output contains a message about the installation status::
 
@@ -174,33 +171,41 @@ This command displays output similar to the following truncated example. The fir
   ...
 
 
-3. To ensure that Docker starts when you start your system, enter the following command:
+3. To ensure that Docker starts when you start your system, enter the following command::
 
-  ``# sudo chkconfig docker on``
+  # sudo chkconfig docker on
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6 or later, you can continue with the steps to obtain the Quipucords server container image.
+After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6 or later, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image`_.
 
 Installing the Quipucords Server Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 After Docker is installed, you can obtain and install the container image that enables the use of the Quipucords server.
 
-Start by downloading the server container image from the provided URL::
+1. Download the server container image by entering the following command::
 
-  #  curl -k -O -sSL https://ftp.redhat.com/repo/container/quipucords.pilot.tar.gz
+    #  curl -k -O -sSL https://ftp.redhat.com/repo/container/quipucords.pilot.tar.gz
+
+2. Load the container image into the local Docker registry by entering the following command:
+
+  ::
+
+    #  sudo docker load -i quipucords.pilot.tar.gz
+
+  The output appears similar to the following example::
+
+   Loaded image: quipucords:pilot
 
 
-Load the container image into the local Docker registry with the following command::
+3. Verify the image within the local Docker registry by entering the following command:
 
-  #  sudo docker load -i quipucords.pilot.tar.gz
-  ...
-  Loaded image: quipucords:pilot
+  ::
 
+   #  sudo docker images
 
-You can verify the image within the local Docker registry::
+  The output appears similar to the following example::
 
-  #  sudo docker images
-  REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
-  quipucords              pilot               fdadcc4b326f        3 days ago          969MB
+   REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+   quipucords              pilot               fdadcc4b326f        3 days ago          969MB
 
 
 Configuring and Starting Quipucords
@@ -221,17 +226,17 @@ The following steps guide you through those choices.
 1. Accept or change the default exposed server port to use for HTTPS communication. By default, the server exposes port 443, which is the standard HTTPS port. You can choose to use that port or remap the port to be used on your server.
 
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
-   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the followng option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
+   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of thse three options.
+2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
-   \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``:
+   \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
-    ``# mkdir -p ~/quipucords``
+    # mkdir -p ~/quipucords
 
-   \b. Change to that home directory. For example:
+   \b. Change to that home directory. For example::
 
-    ``# cd ~/quipucords``
+    # cd ~/quipucords
 
    \c. Create subdirectories to house the SSH keys, (``~/quipucords/sshkeys``), database (``~/quipucords/data``), and log output (``~/quipucords/log``). For example::
 
@@ -283,42 +288,42 @@ The ``qpc server config`` command takes the following options:
 - The ``--host`` option is required. If you are using the qpc command line tool on the same system where the server is running, you can supply the loopback address ``127.0.0.1`` as the value. Otherwise, supply the IP address for your Quipucords server.
 - The ``--port`` option is optional. The default value for this option is ``443``. If you decided to remap the Quipucords default exposed server port to another port, the port option is required. You must supply the port option and the remapped value in the command, for example, ``--port 8443``.
 
-For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool:
+For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool::
 
-  ``# qpc server config --host 127.0.0.1``
+  # qpc server config --host 127.0.0.1
 
-However, if you are configuring the command line tool on a system that is remote from the server, the Quipucords server is running on the IP address 192.0.2.0, and the port is remapped to 8443, you would enter the following command to configure the qpc command line tool:
+However, if you are configuring the command line tool on a system that is remote from the server, the Quipucords server is running on the IP address 192.0.2.0, and the port is remapped to 8443, you would enter the following command to configure the qpc command line tool::
 
-  ``# qpc server config --host 192.0.2.0 --port 8443``
+  # qpc server config --host 192.0.2.0 --port 8443
 
-Logging in to and Logging out of the qpc Command Line Interface
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-After the connection between the qpc command line tool and the Quipcords server is configured on the system where you want to use the qpc command line interface, you can log in to the interface and begin using it to run qpc commands.
+Logging in to the Quipucords Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run qpc commands.
 
-To log in to the qpc command line interface, enter the following command:
+1. To log in to the server, enter the following command::
 
-  ``# qpc server login``
+  # qpc server login
 
-The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server. To log out of the server, enter the following command:
+2. Enter the server user name and password at the prompts.
 
-  ``# qpc server logout``
+The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server, and expires daily.
 
 Getting Started with Quipucords
 -------------------------------
 You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. The following information describes how you use the qpc command line interface to complete common Quipucords tasks. The complete list of options for each qpc command and subcommand are listed in the qpc man page.
 
-Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the username and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
+Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
 
 You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the collection of *facts* in the output as a *report* to review the results.
 
 Before You Begin: Check the Connection to the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people might hold this responsibility. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that their command line tool instance is configured to connect to the server and that they can log in to the command line interface.
+In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people might hold this responsibility. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that the command line tool instance is configured to connect to the server and that the user name can log in to the command line interface.
 
 For more information, see the following sections:
 
 - `Configuring the qpc Command Line Tool Connection`_
-- `Logging in to and Logging out of the qpc Command Line Interface`_.
+- `Logging in to the Quipucords Server`_
 
 Creating Credentials and Sources for the Different Source Types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -340,22 +345,28 @@ To create a network source, use the following steps:
 
 1. Create at least one network credential with root-level access:
 
-   ``# qpc cred add --type network --name cred_name --username root_name [--sshkeyfile key_file] [--password]``
+   ::
 
-   If you did not use the ``sshkeyfile`` option to provide an SSH key for the username value, enter the password of the user with root-level access at the connection password prompt.
+    # qpc cred add --type network --name cred_name --username root_name [--sshkeyfile key_file] [--password]
+
+   If you did not use the ``sshkeyfile`` option to provide an SSH key for the user name value, enter the password of the user with root-level access at the connection password prompt.
 
    If you want to use SSH keyfiles in the credential, you must copy the keys into the directory that you mapped to ``/sshkeys`` during Quipucords server configuration. In the example information for that procedure, that directory is ``~/quipucords/sshkeys``. The server references these files locally, so refer to the keys as if they are in the ``/sshkeys`` directory from the qpc command.
 
    For example, for a network credential where the ``/sshkeys`` directory for the server is mapped to ``~/quipucords/sshkeys``, the credential name is ``roothost1``, the user with root-level access is ``root``, and the SSH key for the user is in the ``~/.ssh/id_rsa`` file, you would enter the following commands:
 
-   ``# cp ~/.ssh/id_rsa ~/quipucords/sshkeys
-     # qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa``
+   ::
+
+    # cp ~/.ssh/id_rsa ~/quipucords/sshkeys
+    # qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa
 
    Privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options is also supported to create a network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
 
    For example, for a network credential where the credential name is ``sudouser1``, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command:
 
-   ``# qpc cred add --type network --name sudouser1 --username sysadmin --password --become-password``
+   ::
+
+    # qpc cred add --type network --name sudouser1 --username sysadmin --password --become-password
 
    After you enter this command, you are prompted to enter two passwords. First, you would enter the connection password for the ``username`` user, and then you would enter the password for the ``become-method``, which is the ``sudo`` command by default.
 
@@ -363,15 +374,21 @@ To create a network source, use the following steps:
 
    **TIP:** You can provide IP range values in CIDR or Ansible notation.
 
-   ``# qpc source add --type network --name source_name --hosts host_name_or_file --cred cred_name``
+   ::
+
+    # qpc source add --type network --name source_name --hosts host_name_or_file --cred cred_name
 
    For example, for a network source where the source name is ``mynetwork``, the network to be scanned is the ``192.0.2.0/24`` subnet, and the network credentials that are used to run the scan are ``roothost1`` and ``roothost2``, you would enter the following command:
 
-   ``# qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2``
+   ::
 
-   You can also use a file to pass in the network identifiers. If you use a file to enter multiple network identifiers, such as multiple individual IP addresses, enter each on a single line. For example, for a network profile where the path to this file is ``/home/user1/hosts_file``, you would enter the following command::
+    # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2
 
-   ``# qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2``
+   You can also use a file to pass in the network identifiers. If you use a file to enter multiple network identifiers, such as multiple individual IP addresses, enter each on a single line. For example, for a network profile where the path to this file is ``/home/user1/hosts_file``, you would enter the following command:
+
+   ::
+
+    # qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
 
 
 Creating a vCenter Source
@@ -380,21 +397,29 @@ To create a vcenter source, use the following steps:
 
 1. Create at least one vcenter credential:
 
-   ``# qpc cred add --type vcenter --name cred_name --username vcenter_user --password``
+   ::
+
+    # qpc cred add --type vcenter --name cred_name --username vcenter_user --password
 
    Enter the password of the user with access to vCenter Server at the connection password prompt.
 
-   For example, for a vcenter credential where the credential name is ``vcenter_admin`` and the user with access to the vCenter Server server is ``admin``, you would enter the following command::
+   For example, for a vcenter credential where the credential name is ``vcenter_admin`` and the user with access to the vCenter Server server is ``admin``, you would enter the following command:
 
-   ``# qpc cred add --type vcenter --name vcenter_admin --username admin --password``
+   ::
+
+    # qpc cred add --type vcenter --name vcenter_admin --username admin --password
 
 2. Create at least one vcenter source that specifies the host name or IP address of the server for vCenter Server and one vcenter credential to be used for the scan:
 
-   ``# qpc source add --type vcenter --name source_name --hosts host_name --cred cred_name``
+   ::
+
+    # qpc source add --type vcenter --name source_name --hosts host_name --cred cred_name
 
    For example, for a vcenter source where the source name is ``myvcenter``, the server for the vCenter Server is located at the ``192.0.2.10`` IP address, and the vcenter credential for that server is ``vcenter_admin``, you would enter the following command:
 
-   ``# qpc source add --type vcenter --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin``
+   ::
+
+    # qpc source add --type vcenter --name myvcenter --hosts 192.0.2.10 --cred vcenter_admin
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the server for vCenter Server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The ``--disable-ssl`` option can take a value of ``True`` to connect to the server over standard HTTP.
 
@@ -404,21 +429,29 @@ To create a satellite source, use the following steps:
 
 1. Create at least one satellite credential:
 
-   ``# qpc cred add --type satellite --name cred_name --username satellite_user --password``
+   ::
+
+     # qpc cred add --type satellite --name cred_name --username satellite_user --password
 
    Enter the password of the user with access to the Satellite server at the connection password prompt.
 
    For example, for a satellite credential where the credential name is ``satellite_admin`` and the user with access is to the Satellite server is ``admin``, you would enter the following command:
 
-   ``# qpc cred add --type satellite --name satellite_admin --username admin --password``
+   ::
+
+    # qpc cred add --type satellite --name satellite_admin --username admin --password
 
 2. Create at least one satellite source that specifies the host name or IP address of the Satellite server, one satellite credential to be used for the scan, and the version of the Satellite server (supported version values are ``6.2``, ``6.3``):
 
-   ``# qpc source add --type satellite --name source_name --hosts host_name --cred cred_name --satellite-version sat_ver``
+   ::
+
+    # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name --satellite-version sat_ver
 
    For example, for a satellite source where the source name is ``mysatellite6``, the Satellite server is located at the ``192.0.2.15`` IP address, the satellite credential for that server is ``satellite_admin``, and the version of the Satellite server is ``6.2``, you would enter the following command:
 
-   ``# qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin --satellite-version 6.2``
+   ::
+
+    # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin --satellite-version 6.2
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the Satellite server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The Satellite server does not support disabling SSL, so the ``--disable-ssl`` option has no effect.
 
@@ -430,13 +463,13 @@ After you set up your credentials and sources, you can run a Quipucords scan to 
 
 To run a scan, use the following steps:
 
-Run the scan by using the ``scan start`` command, specifying one or more sources for the ``sources`` option:
+Run the scan by using the ``scan start`` command, specifying one or more sources for the ``sources`` option::
 
-  ``# qpc scan start --sources source_name1 source_name2``
+  # qpc scan start --sources source_name1 source_name2
 
-For example, if you want to scan the network source ``mynetwork`` and the Satellite source ``mysatellite6``, you would enter the following command:
+For example, if you want to scan the network source ``mynetwork`` and the satellite source ``mysatellite6``, you would enter the following command::
 
-  ``# qpc scan start --sources mynetwork mysatellite6``
+  # qpc scan start --sources mynetwork mysatellite6
 
 Showing Scan Results for an Active Scan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -444,37 +477,39 @@ When you run the ``scan start`` command, the output provides an identifier for t
 
 **IMPORTANT:** The ``scan show`` command can show results only after the scan starts running. You can also use this command on a scan that is completed.
 
-For example, you could run the following scan as the first scan in your environment:
+For example, you could run the following scan as the first scan in your environment::
 
-  ``# qpc scan start --sources mynetwork mysatellite6``
+  # qpc scan start --sources mynetwork mysatellite6
 
-The output for the command shows the following information, with ``1`` listed as the scan identifier.
+The output for the command shows the following information, with ``1`` listed as the scan identifier::
 
-  ``Scan "1" started``
+  Scan "1" started
 
-To show the scan results to follow the status of that scan, you would enter the following command:
+To show the scan results to follow the status of that scan, you would enter the following command::
 
-  ``# qpc scan show --id 1``
+  # qpc scan show --id 1
 
 Listing Scan Results
 ^^^^^^^^^^^^^^^^^^^^
 In addition to showing the status of a single scan, you can also show a list of all scans that are in progress or are completed on the Quipucords server. To show this list of scans, you use the ``scan list`` command. The output of this command includes the scan identifier, the source or sources for that scan, and the current state of the scan.
 
-  ``# qpc scan list``
+To show the list of scans, enter the following command::
+
+  # qpc scan list
 
 Viewing the Scan Report
 ^^^^^^^^^^^^^^^^^^^^^^^
-When the scan completes, you have the capability to produce a report for that scan. You can request a report with all the details, or facts, of the scan, or request a report with a summary. The summary report process runs steps to deduplicate and merge the facts found during the inspection of the various hosts that are contacted during the scan. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
+When the scan completes, you have the capability to produce a report for that scan. You can request a report with all the details, or facts, of the scan, or request a report with a summary. The summary report process runs steps to merge the facts found during the inspection of the various hosts that are contacted during the scan. When possible, the report process also runs steps to deduplicate redundant systems. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
 
 To generate a summary report, enter the ``report summary`` command and specify the identifier for the scan and the format for the output file.
 
-For example, if you want to create the report summary for a scan with the scan identifier of ``1`` and you want to generate that report in CSV format in the ``~/scan_result.csv`` file, you would enter the following command:
+For example, if you want to create the report summary for a scan with the scan identifier of ``1`` and you want to generate that report in CSV format in the ``~/scan_result.csv`` file, you would enter the following command::
 
-  ``# qpc report summary --id 1 --csv --output-file=~/scan_result.csv``
+  # qpc report summary --id 1 --csv --output-file=~/scan_result.csv
 
-However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan identifer ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command:
+However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan identifier ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command::
 
-  ``# qpc report detail --id 1 --csv --output-file=~/scan_result.csv``
+  # qpc report detail --id 1 --csv --output-file=~/scan_result.csv
 
 Pausing and Restarting a Scan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -482,16 +517,20 @@ As you use Quipucords, you might need to stop a currently running scan. There mi
 
 When you stop a scan by using the ``scan pause`` command, you can restart that same scan by using the ``scan restart`` command. To pause and restart a scan, use the following steps:
 
-1. Make sure that you have the scan identifer for the currently running scan. To obtain the scan identifier, see the information in `Showing Scan Results for an Active Scan`_.
+1. Make sure that you have the scan identifier for the currently running scan. To obtain the scan identifier, see the information in `Showing Scan Results for an Active Scan`_.
 
-2. Enter the command to pause the scan. For example, if the scan identifier is ``1``, you would enter the following command:
-
-  ::
+2. Enter the command to pause the scan. For example, if the scan identifier is ``1``, you would enter the following command::
 
     # qpc scan pause --id 1
 
-3. When you are ready to start the scan again, enter the command to restart the scan. For example, to restart scan ``1``, you would enter the following command:
-
-  ::
+3. When you are ready to start the scan again, enter the command to restart the scan. For example, to restart scan ``1``, you would enter the following command::
 
     # qpc scan restart --id 1
+
+Logging out of the Quipucords Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When you log in to the server, the command retrieves a token that is used for authentication with subsequent command line interface commands. That token expires daily. In addition, the token is removed when you log out of the server.
+
+To log out of the server, enter the following command::
+
+  # qpc server logout
