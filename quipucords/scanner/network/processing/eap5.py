@@ -21,14 +21,14 @@ class ProcessVersionTxt(util.StdoutSearchProcessor):
     """Process the output of 'cat .../version.txt'."""
 
     KEY = 'eap5_home_version_txt'
-    SEARCH_STRING = 'JBoss Enterprise Application Platform'
+    SEARCH_STRING = 'JBoss Enterprise Application Platform - Version 5'
 
 
 class ProcessReadmeHtml(util.StdoutSearchProcessor):
     """Process the output of 'cat .../readme.html'."""
 
     KEY = 'eap5_home_readme_html'
-    SEARCH_STRING = 'JBoss Enterprise Application Platform'
+    SEARCH_STRING = 'JBoss Enterprise Application Platform 5'
 
 
 class ProcessLsJbossAs(util.IndicatorFileFinder):
