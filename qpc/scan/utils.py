@@ -100,11 +100,11 @@ def get_optional_products(disabled_optional_products):
     return disabled_products
 
 
-def get_extended_products(enabled_extended_product_search,
-                          ext_product_search_dirs, edit):
+def get_enabled_products(enabled_ext_product_search,
+                         ext_product_search_dirs, edit):
     """Construct a dictionary based on the enabled extended product search args.
 
-    :param enabled_extended_product_search The products to enable
+    :param enabled_ext_product_search The products to enable
     :param ext_product_search_dirs: The search dirs for the extended products
     :param edit: boolean regarding if we are editing the extended products
     :returns: a dictionary representing the enabled search status of extended
@@ -115,19 +115,19 @@ def get_extended_products(enabled_extended_product_search,
                        scan.JBOSS_EAP: False,
                        scan.JBOSS_BRMS: False}
     # if someone wants to reset products or directories, we grab default vals
-    if ext_product_search_dirs == [] or enabled_extended_product_search == []:
-        if enabled_extended_product_search:
-            for product in enabled_extended_product_search:
+    if ext_product_search_dirs == [] or enabled_ext_product_search == []:
+        if enabled_ext_product_search:
+            for product in enabled_ext_product_search:
                 enabled_default[product] = True
         return enabled_default
     # else we grab the provided products
-    elif enabled_extended_product_search:
-        for product in enabled_extended_product_search:
+    elif enabled_ext_product_search:
+        for product in enabled_ext_product_search:
             enabled_products[product] = True
         if ext_product_search_dirs:
             enabled_products['search_directories'] = ext_product_search_dirs
         return enabled_products
-    elif ext_product_search_dirs and not enabled_extended_product_search:
+    elif ext_product_search_dirs and not enabled_ext_product_search:
         # if only search dirs are provided, we must make sure that it is an
         # edit. We set the dirs but not products
         if edit:
@@ -138,7 +138,7 @@ def get_extended_products(enabled_extended_product_search,
 
 # pylint: disable=R0912
 def build_scan_payload(args, sources, disabled_optional_products,
-                       enabled_extended_product_search):
+                       enabled_ext_product_search):
     """Construct payload from command line arguments.
 
     :param args: the command line arguments
@@ -166,16 +166,17 @@ def build_scan_payload(args, sources, disabled_optional_products,
                 {'disabled_optional_products': disabled_optional_products}
         else:
             options['disabled_optional_products'] = disabled_optional_products
-    if hasattr(args, 'enabled_extended_product_search') \
-            and (args.enabled_extended_product_search or
-                 args.enabled_extended_product_search == [] or
-                 args.ext_product_search_dirs == []):
+    if (hasattr(args, 'enabled_ext_product_search') or
+            (hasattr(args, 'ext-product-search-dirs'))) and \
+            (args.enabled_ext_product_search or
+             args.enabled_ext_product_search == [] or
+             args.ext_product_search_dirs == []):
         if options is None:
             options = {'enabled_extended_product_search':
-                       enabled_extended_product_search}
+                       enabled_ext_product_search}
         else:
             options['enabled_extended_product_search'] = \
-                enabled_extended_product_search
+                enabled_ext_product_search
     if options is not None:
         req_payload['options'] = options
     req_payload['scan_type'] = scan.SCAN_TYPE_INSPECT

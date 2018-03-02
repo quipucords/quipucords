@@ -336,7 +336,7 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
   Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
-``--enabled-extended-product-search=products_list``
+``--enabled-ext-product-search=products_list``
 
   Optional. The list of products to include for extended product search. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
@@ -354,7 +354,7 @@ For example, if a scan contains a value of ``network1source`` for the ``--source
 
 ``qpc scan edit --name=myscan --sources network1source satellite1source``
 
-If you would like to reset the ``--disabled-optional-products``, ``--enabled-extended-product-search``, or ``--ext-product-search-dirs`` back to their default values, you must provide the flag without adding an argument.
+If you would like to reset the ``--disabled-optional-products``, ``--enabled-ext-product-search``, or ``--ext-product-search-dirs`` back to their default values, you must provide the flag without any product values.
 
 For example, if you would like to reset the ``--disabled-optional-products`` option back to the default values, you would edit the scan as follows:
 

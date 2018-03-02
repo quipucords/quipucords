@@ -133,7 +133,7 @@ class ScanAddCliTests(unittest.TestCase):
                              disabled_optional_products={'jboss-eap': False,
                                                          'jboss-fuse': False,
                                                          'jboss-brms': False},
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
@@ -160,7 +160,7 @@ class ScanAddCliTests(unittest.TestCase):
                              disabled_optional_products={'jboss-eap': True,
                                                          'jboss-fuse': False,
                                                          'jboss-brms': True},
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
@@ -189,8 +189,8 @@ class ScanAddCliTests(unittest.TestCase):
                              sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=['jboss-eap',
-                                                              'jboss-brms'],
+                             enabled_ext_product_search=['jboss-eap',
+                                                         'jboss-brms'],
                              ext_product_search_dirs='/foo/bar/')
             with redirect_stdout(scan_out):
                 ssc.main(args)
@@ -198,7 +198,7 @@ class ScanAddCliTests(unittest.TestCase):
                                  messages.SCAN_ADDED % 'scan1' + '\n')
 
     def test_enabled_products_only(self):
-        """Testing that the enabled-extended-product-search flag works."""
+        """Testing that the enabled-ext-product-search flag works."""
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         url_post = get_server_location() + SCAN_URI
@@ -217,8 +217,8 @@ class ScanAddCliTests(unittest.TestCase):
                              sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=['jboss_eap',
-                                                              'jboss_brms'],
+                             enabled_ext_product_search=['jboss_eap',
+                                                         'jboss_brms'],
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)
@@ -240,7 +240,7 @@ class ScanAddCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 ssc.main(args)

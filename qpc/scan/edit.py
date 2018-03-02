@@ -20,7 +20,7 @@ import qpc.scan as scan
 from qpc.scan.utils import (get_source_ids,
                             build_scan_payload,
                             get_optional_products,
-                            get_extended_products)
+                            get_enabled_products)
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -59,11 +59,11 @@ class ScanEditCommand(CliCommand):
                                  metavar='DISABLED_PRODUCT_LIST',
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
                                  required=False)
-        self.parser.add_argument('--enabled-extended-product-search',
-                                 dest='enabled_extended_product_search',
+        self.parser.add_argument('--enabled-ext-product-search',
+                                 dest='enabled_ext_product_search',
                                  nargs='*',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
+                                 metavar='EXT_PRODUCT_SEARCH_LIST',
                                  help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
                                  required=False)
         self.parser.add_argument('--ext-product-search-dirs',
@@ -81,8 +81,8 @@ class ScanEditCommand(CliCommand):
         if not(self.args.sources or self.args.max_concurrency or
                (self.args.disabled_optional_products or
                 self.args.disabled_optional_products == []) or
-               (self.args.enabled_extended_product_search or
-                self.args.enabled_extended_product_search == []) or
+               (self.args.enabled_ext_product_search or
+                self.args.enabled_ext_product_search == []) or
                (self.args.ext_product_search_dirs or
                 self.args.ext_product_search_dirs == [])):
             print(_(messages.SCAN_EDIT_NO_ARGS % (self.args.name)))
@@ -130,14 +130,14 @@ class ScanEditCommand(CliCommand):
         """
         disabled_optional_products \
             = get_optional_products(self.args.disabled_optional_products)
-        enabled_extended_product_search \
-            = get_extended_products(self.args.enabled_extended_product_search,
-                                    self.args.ext_product_search_dirs, True)
+        enabled_ext_product_search \
+            = get_enabled_products(self.args.enabled_ext_product_search,
+                                   self.args.ext_product_search_dirs, True)
         self.req_payload \
             = build_scan_payload(self.args,
                                  self.source_ids,
                                  disabled_optional_products,
-                                 enabled_extended_product_search)
+                                 enabled_ext_product_search)
 
     def _handle_response_success(self):
         json_data = self.response.json()

@@ -19,7 +19,7 @@ from qpc.clicommand import CliCommand
 import qpc.scan as scan
 from qpc.scan.utils import (get_source_ids,
                             get_optional_products,
-                            get_extended_products)
+                            get_enabled_products)
 from qpc.translation import _
 import qpc.messages as messages
 
@@ -59,11 +59,11 @@ class ScanAddCommand(CliCommand):
                                  metavar='DISABLED_PRODUCT_LIST',
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
                                  required=False)
-        self.parser.add_argument('--enabled-extended-product-search',
-                                 dest='enabled_extended_product_search',
+        self.parser.add_argument('--enabled-ext-product-search',
+                                 dest='enabled_ext_product_search',
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
+                                 metavar='EXT_PRODUCT_SEARCH_LIST',
                                  help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
                                  required='--ext-product-search-dirs' in
                                  sys.argv)
@@ -100,15 +100,15 @@ class ScanAddCommand(CliCommand):
         }
         disabled_optional_products \
             = get_optional_products(self.args.disabled_optional_products)
-        enabled_extended_product_search \
-            = get_extended_products(self.args.enabled_extended_product_search,
-                                    self.args.ext_product_search_dirs, False)
+        enabled_ext_product_search \
+            = get_enabled_products(self.args.enabled_ext_product_search,
+                                   self.args.ext_product_search_dirs, False)
         if disabled_optional_products is not None:
             self.req_payload['options']['disabled_optional_products']\
                 = disabled_optional_products
-        if enabled_extended_product_search is not None:
+        if enabled_ext_product_search is not None:
             self.req_payload['options']['enabled_extended_product_search'] \
-                = enabled_extended_product_search
+                = enabled_ext_product_search
 
     def _handle_response_success(self):
         json_data = self.response.json()

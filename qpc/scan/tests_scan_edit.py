@@ -92,7 +92,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -121,7 +121,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -148,8 +148,8 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=None,
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=['jboss_eap',
-                                                              'jboss_brms'],
+                             enabled_ext_product_search=['jboss_eap',
+                                                         'jboss_brms'],
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -174,7 +174,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=None,
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs='/foo/bar/')
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -202,7 +202,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=None,
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=[],
+                             enabled_ext_product_search=[],
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -230,7 +230,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=None,
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=[])
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -258,7 +258,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=None,
                              max_concurrency=50,
                              disabled_optional_products=[],
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
@@ -275,7 +275,7 @@ class SourceEditCliTests(unittest.TestCase):
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
                              disabled_optional_products=None,
-                             enabled_extended_product_search=None,
+                             enabled_ext_product_search=None,
                              ext_product_search_dirs=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
