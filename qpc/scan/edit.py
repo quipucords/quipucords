@@ -63,13 +63,13 @@ class ScanEditCommand(CliCommand):
                                  dest='enabled_ext_product_search',
                                  nargs='*',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='EXT_PRODUCT_SEARCH_LIST',
+                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
                                  help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
                                  required=False)
         self.parser.add_argument('--ext-product-search-dirs',
                                  dest='ext_product_search_dirs',
                                  nargs='*',
-                                 metavar='EXT_PRODUCT_SEARCH_DIRS',
+                                 metavar='EXTENDED_PRODUCT_SEARCH_DIRS',
                                  help=_(messages.SCAN_EXT_SEARCH_DIRS_HELP),
                                  required=False)
         self.source_ids = []
