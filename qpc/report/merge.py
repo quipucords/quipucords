@@ -25,7 +25,7 @@ import qpc.messages as messages
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
 
-    This command merging scan job results into a
+    This command is for merging scan job results into a
     single report.
     """
 

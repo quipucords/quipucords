@@ -513,6 +513,16 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
   Required. Path to a file location where the report data is saved.
 
+Merging Scan Job Results
+~~~~~~~~~~~~~~~~~~~~~~~~
+The ``qpc report merge`` command combines results from two or more scan jobs.
+
+**qpc report merge --ids** *scan_job_identifiers*
+
+``--ids=scan_job_identifiers``
+
+  Required. Contains the scan job identifiers that will be merged.
+
 
 Options for All Commands
 ------------------------
