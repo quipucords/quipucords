@@ -515,7 +515,7 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 Merging Scan Job Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report merge`` command combines results from two or more scan jobs.
+The ``qpc report merge`` command combines results from two or more scan jobs to create a report. The ``qpc report summary`` or ``qpc report detail can be used to obtain the report.
 
 **qpc report merge --ids** *scan_job_identifiers*
 
