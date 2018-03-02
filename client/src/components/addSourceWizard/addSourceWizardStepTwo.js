@@ -343,6 +343,9 @@ class AddSourceWizardStepTwo extends React.Component {
 
     const hasSingleCredential = sourceType === 'vcenter' || sourceType === 'satellite';
 
+    const availableCredentials = allCredentials.filter(credential => {
+      return credential.cred_type === sourceType;
+    });
     let titleAddSelect;
     let title;
 
@@ -351,7 +354,7 @@ class AddSourceWizardStepTwo extends React.Component {
     }
 
     if (!title || !credentials.length) {
-      titleAddSelect = allCredentials.length ? 'Select' : 'Add';
+      titleAddSelect = availableCredentials.length ? 'Select' : 'Add';
       title = hasSingleCredential ? `${titleAddSelect} a credential` : `${titleAddSelect} one or more credentials`;
     }
 
@@ -363,11 +366,11 @@ class AddSourceWizardStepTwo extends React.Component {
               className="form-control"
               bsStyle="default"
               id="credential-select"
-              disabled={!allCredentials.length}
+              disabled={!availableCredentials.length}
               title={title}
             >
-              {allCredentials.length &&
-                allCredentials.map((value, index) => {
+              {availableCredentials.length &&
+                availableCredentials.map((value, index) => {
                   return (
                     <MenuItem key={value.id} eventKey={index} onClick={e => this.onChangeCredential(e, value)}>
                       {!hasSingleCredential && (
