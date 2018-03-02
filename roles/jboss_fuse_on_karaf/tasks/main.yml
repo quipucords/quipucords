@@ -64,7 +64,7 @@
 # Look for fuse inside KARAF_HOME directories
 
 - name: check bin/fuse
-  raw: ls -1 "{{ item }}/bin/fuse"
+  raw: ls -1 "{{ item }}"/bin/fuse 2>/dev/null
   register: karaf_home_bin_fuse
   ignore_errors: yes
   with_items: "{{ karaf_homes }}"
@@ -72,7 +72,7 @@
 
 
 - name: check system/org/jboss/fuse
-  raw: ls -1 "{{ item }}/system/org/jboss"
+  raw: ls -1 "{{ item }}"/system/org/jboss 2>/dev/null
   register: karaf_home_system_org_jboss
   ignore_errors: yes
   with_items: "{{ karaf_homes }}"
