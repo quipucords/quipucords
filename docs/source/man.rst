@@ -475,11 +475,11 @@ The ``qpc report detail`` command generates a report that contains the unprocess
 
 ``--scan-job=scan_job_identifier``
 
-  Required. Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
+  Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
 
 ``--report=report_identifier``
 
-  Required. Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
+  Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
 
 ``--json``
 
@@ -503,11 +503,11 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 ``--scan-job=scan_job_identifier``
 
-  Required. Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
+  Contains the scan job identifier for the scan that is used to generate the report. Mutually exclusive with the ``--report`` option.
 
 ``--report=report_identifier``
 
-  Required. Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
+  Contains the report identifier to retrieve.  Mutually exclusive with the ``--scan-job`` option.
 
 ``--json``
 
