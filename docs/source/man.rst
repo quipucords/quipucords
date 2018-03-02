@@ -415,15 +415,6 @@ The ``qpc scan job`` command returns the the list of scan jobs or a single scan 
 
   Optional. Filters the results by scan job state. This value must be ``created``, ``pending``, ``running``, ``paused``, ``canceled``, ``completed``, or ``failed``.
 
-
-The ``qpc scan status`` command returns the status details for a single specified scan job.
-
-**qpc scan status** **--id=** *scan_job_identifier*
-
-``--id=scan_job_identifier``
-
-  Required. Contains the identifier of the scan job to show.
-
 Controlling Scans
 ~~~~~~~~~~~~~~~~~
 
