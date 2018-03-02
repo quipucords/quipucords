@@ -37,7 +37,7 @@
 # Filters that will help us find true EAP_HOME directories
 
 - name: ls EAP_HOME candidates
-  raw: ls -1 "{{ item }}"
+  raw: ls -1 "{{ item }}" 2>/dev/null
   register: eap_home_ls
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
@@ -53,7 +53,7 @@
 # Look for fuse inside EAP_HOME directories
 
 - name: check JBoss bin directory
-  raw: ls -1 "{{ item }}"/bin
+  raw: ls -1 "{{ item }}"/bin 2>/dev/null
   register: eap_home_bin
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
@@ -67,7 +67,7 @@
   when: 'jboss_eap'
 
 - name: check JBoss modules/system/layers
-  raw: ls -1 "{{ item }}"/modules/system/layers
+  raw: ls -1 "{{ item }}"/modules/system/layers 2>/dev/null
   register: eap_home_layers
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
