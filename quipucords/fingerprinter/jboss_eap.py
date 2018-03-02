@@ -34,8 +34,12 @@ JBOSS_EAP_CHKCONFIG = 'jboss_eap_chkconfig'
 JBOSS_EAP_EAP_HOME = 'eap_home_ls'
 JBOSS_EAP_JAR_VER = 'jboss_eap_jar_ver'
 JBOSS_EAP_RUN_JAR_VER = 'jboss_eap_run_jar_ver'
+EAP5_HOME_VERSION_TXT = 'eap5_home_version_txt'
+EAP5_HOME_README_HTML = 'eap5_home_readme_html'
 SUBMAN_CONSUMED = 'subman_consumed'
 ENTITLEMENTS = 'entitlements'
+
+EAP5 = 'EAP 5'
 
 EAP_CLASSIFICATIONS = {
     'JBoss_4_0_0': 'JBossAS-4',
@@ -96,7 +100,7 @@ EAP_CLASSIFICATIONS = {
 }
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements
 def detect_jboss_eap(source, facts):
     """Detect if JBoss EAP is present based on system facts.
 
@@ -115,6 +119,8 @@ def detect_jboss_eap(source, facts):
     eap_home = facts.get(JBOSS_EAP_EAP_HOME)
     eap_jar_versions = facts.get(JBOSS_EAP_JAR_VER, [])
     eap_run_jar_versions = facts.get(JBOSS_EAP_RUN_JAR_VER, [])
+    eap5_home_version_txt = facts.get(EAP5_HOME_VERSION_TXT)
+    eap5_home_readme_html = facts.get(EAP5_HOME_README_HTML)
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
     eap_jar_versions += eap_run_jar_versions
@@ -132,29 +138,38 @@ def detect_jboss_eap(source, facts):
     }
     product_dict = {'name': PRODUCT}
     raw_facts = None
+
+    # pylint: disable=too-many-boolean-expressions
     if (running_paths or
             packages or
             modules_jar or
             eap_home or
-            eap_jar_versions):
+            eap_jar_versions or
+            eap5_home_version_txt or
+            eap5_home_readme_html):
+
         raw_facts_dict = {JBOSS_EAP_RUNNING_PATHS: running_paths,
                           JBOSS_EAP_PACKAGES: packages,
                           JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR: modules_jar,
                           JBOSS_EAP_EAP_HOME: eap_home,
                           JBOSS_EAP_JAR_VER: eap_jar_versions,
-                          JBOSS_EAP_RUN_JAR_VER: eap_run_jar_versions}
+                          JBOSS_EAP_RUN_JAR_VER: eap_run_jar_versions,
+                          EAP5_HOME_VERSION_TXT: eap5_home_version_txt,
+                          EAP5_HOME_README_HTML: eap5_home_readme_html}
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.PRESENT
+
+        versions = set()
         if eap_jar_versions:
-            versions = []
             for version_data in eap_jar_versions:
                 version = version_data.get(VERSION_KEY)
                 unknown_release = 'Unknown-Release: ' + version
-                versions.append(EAP_CLASSIFICATIONS.get(version,
-                                                        unknown_release))
-                if versions != []:
-                    version_set = set(versions)
-                    product_dict[VERSION_KEY] = list(version_set)
+                versions.add(EAP_CLASSIFICATIONS.get(version,
+                                                     unknown_release))
+        if eap5_home_version_txt or eap5_home_readme_html:
+            versions.add(EAP5)
+        if versions:
+            product_dict[VERSION_KEY] = list(versions)
     elif (jboss_user or
           common_files or
           eap_processes or
