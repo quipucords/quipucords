@@ -59,7 +59,7 @@
   when: 'jboss_eap'
 
 - name: ls EAP_HOME/jboss-as
-  raw: ls -1 "{{ item }}/jboss-as"
+  raw: ls -1 "{{ item }}"/jboss-as 2>/dev/null
   register: eap5_home_ls_jboss_as
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
