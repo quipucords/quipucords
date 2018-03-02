@@ -20,7 +20,7 @@ from qpc.translation import _
 import qpc.messages as messages
 
 
-def _get_source_ids(parser, source_names):
+def get_source_ids(parser, source_names):
     """Grab the source ids from the source if it exists.
 
     :returns Boolean regarding the existence of source &
@@ -50,7 +50,7 @@ def _get_source_ids(parser, source_names):
     return not_found, source_ids
 
 
-def _get_scan_object_id(parser, name):
+def get_scan_object_id(parser, name):
     """Grab the scan id from the scan object if it exists.
 
     :returns Boolean regarding the existence of the object &
@@ -78,29 +78,73 @@ def _get_scan_object_id(parser, name):
     return found, scan_object_id
 
 
-def _get_optional_products(disabled_optional_products):
+def get_optional_products(disabled_optional_products):
     """Construct a dictionary based on the disable-optional-products args.
 
     :returns: a dictionary representing the collection status of optional
     products
     """
-    optional_product_status = {}
+    disabled_products = {}
+    disabled_default = {scan.JBOSS_FUSE: True,
+                        scan.JBOSS_EAP: True,
+                        scan.JBOSS_BRMS: True}
 
     if disabled_optional_products:
         for product in disabled_optional_products:
-            optional_product_status[product] = False
+            disabled_products[product] = False
+    elif disabled_optional_products == []:
+        return disabled_default
     else:
         return None
 
-    return optional_product_status
+    return disabled_products
+
+
+def get_enabled_products(enabled_ext_product_search,
+                         ext_product_search_dirs, edit):
+    """Construct a dictionary based on the enabled extended product search args.
+
+    :param enabled_ext_product_search The products to enable
+    :param ext_product_search_dirs: The search dirs for the extended products
+    :param edit: boolean regarding if we are editing the extended products
+    :returns: a dictionary representing the enabled search status of extended
+    products
+    """
+    enabled_products = {}
+    enabled_default = {scan.JBOSS_FUSE: False,
+                       scan.JBOSS_EAP: False,
+                       scan.JBOSS_BRMS: False}
+    # if someone wants to reset products or directories, we grab default vals
+    if ext_product_search_dirs == [] or enabled_ext_product_search == []:
+        if enabled_ext_product_search:
+            for product in enabled_ext_product_search:
+                enabled_default[product] = True
+        return enabled_default
+    # else we grab the provided products
+    elif enabled_ext_product_search:
+        for product in enabled_ext_product_search:
+            enabled_products[product] = True
+        if ext_product_search_dirs:
+            enabled_products['search_directories'] = ext_product_search_dirs
+        return enabled_products
+    elif ext_product_search_dirs and not enabled_ext_product_search:
+        # if only search dirs are provided, we must make sure that it is an
+        # edit. We set the dirs but not products
+        if edit:
+            enabled_products['search_directories'] = ext_product_search_dirs
+            return enabled_products
+    return None
 
 
 # pylint: disable=R0912
-def build_scan_payload(args, sources, disabled_optional_products):
+def build_scan_payload(args, sources, disabled_optional_products,
+                       enabled_ext_product_search):
     """Construct payload from command line arguments.
 
     :param args: the command line arguments
-    :param add_none: add None for a key if True vs. not in dictionary
+    :param sources: the source ids
+    :param disabled_optional_products: the disabled products dictionary
+    :param enabled_extended_product_search: the enabled products dictionary
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
@@ -115,12 +159,24 @@ def build_scan_payload(args, sources, disabled_optional_products):
         else:
             options['max_concurrency'] = args.max_concurrency
     if hasattr(args, 'disabled_optional_products') \
-            and args.disabled_optional_products:
+            and (args.disabled_optional_products or
+                 args.disabled_optional_products == []):
         if options is None:
             options = \
-                {'disabled_optional_products': args.disabled_optional_products}
+                {'disabled_optional_products': disabled_optional_products}
         else:
             options['disabled_optional_products'] = disabled_optional_products
+    if (hasattr(args, 'enabled_ext_product_search') or
+            (hasattr(args, 'ext-product-search-dirs'))) and \
+            (args.enabled_ext_product_search or
+             args.enabled_ext_product_search == [] or
+             args.ext_product_search_dirs == []):
+        if options is None:
+            options = {'enabled_extended_product_search':
+                       enabled_ext_product_search}
+        else:
+            options['enabled_extended_product_search'] = \
+                enabled_ext_product_search
     if options is not None:
         req_payload['options'] = options
     req_payload['scan_type'] = scan.SCAN_TYPE_INSPECT

@@ -336,15 +336,29 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
   Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
 
+``--enabled-ext-product-search=products_list``
+
+  Optional. The list of products to include for extended product search. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+
+``--ext-product-search-dirs=search_dirs_list``
+
+  Optional. A list of fully-qualified paths to search for extended product search.
+
 The information in a scan might change as the structure of the network changes. Use the ``qpc scan edit`` command to edit an existing scan to accommodate those changes.
 
 Although ``qpc scan`` options can accept more than one value, the ``qpc scan edit`` command is not additive. To edit a scan and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc scan edit`` command. Options that are not included are not changed.
 
-**qpc scan edit --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disabled-optional-products=** *products_list*
+**qpc scan edit --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **--disabled-optional-products=** *products_list* **--enabled-extended-product-search=** *products_list* **----ext-product-search-dirs=** *search_dirs_list*
 
 For example, if a scan contains a value of ``network1source`` for the ``--sources`` option, and you want to change that scan to use both the ``network1source`` and ``satellite1source`` sources, you would edit the scan as follows:
 
 ``qpc scan edit --name=myscan --sources network1source satellite1source``
+
+If you would like to reset the ``--disabled-optional-products``, ``--enabled-ext-product-search``, or ``--ext-product-search-dirs`` back to their default values, you must provide the flag without any product values.
+
+For example, if you would like to reset the ``--disabled-optional-products`` option back to the default values, you would edit the scan as follows:
+
+``qpc scan edit --name=myscan --disabled-optional-products``
 
 **TIP:** After editing a scan use the ``qpc scan show`` command to review those edits.
 

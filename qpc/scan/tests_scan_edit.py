@@ -91,7 +91,9 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disabled_optional_products=None)
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -118,7 +120,146 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disabled_optional_products=None)
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs=None)
+            with redirect_stdout(scan_out):
+                aec.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_UPDATED % 'scan1' + '\n')
+
+    def test_edit_scan_ext_products(self):
+        """Testing the edit scanvcommand with enabled products successfully."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
+        url_patch = get_server_location() + SCAN_URI + '1/'
+        scan_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1']}
+        updated_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                         'options': {'enabled_extended_product_search':
+                                     {'jboss_eap': True,
+                                      'jboss_fuse': False,
+                                      'jboss_brms': True}}}
+        results = [scan_entry]
+        scan_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
+            mocker.patch(url_patch, status_code=200, json=updated_entry)
+            aec = ScanEditCommand(SUBPARSER)
+            args = Namespace(name='scan1', sources=None,
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=['jboss_eap',
+                                                         'jboss_brms'],
+                             ext_product_search_dirs=None)
+            with redirect_stdout(scan_out):
+                aec.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_UPDATED % 'scan1' + '\n')
+
+    def test_edit_scan_search_dirs(self):
+        """Testing the edit scan command with search dirs successfully."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
+        url_patch = get_server_location() + SCAN_URI + '1/'
+        scan_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1']}
+        updated_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                         'options': {'enabled_extended_product_search':
+                                     {'search_directories': '/foo/bar/'}}}
+        results = [scan_entry]
+        scan_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
+            mocker.patch(url_patch, status_code=200, json=updated_entry)
+            aec = ScanEditCommand(SUBPARSER)
+            args = Namespace(name='scan1', sources=None,
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs='/foo/bar/')
+            with redirect_stdout(scan_out):
+                aec.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_UPDATED % 'scan1' + '\n')
+
+    # pylint: disable=invalid-name
+    def test_edit_scan_reset_ext_products(self):
+        """Testing the edit scan command with reset successfully."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
+        url_patch = get_server_location() + SCAN_URI + '1/'
+        scan_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1']}
+        updated_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                         'options': {'enabled_extended_product_search':
+                                     {'jboss_eap': False,
+                                      'jboss_fuse': False,
+                                      'jboss_brms': False}}}
+        results = [scan_entry]
+        scan_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
+            mocker.patch(url_patch, status_code=200, json=updated_entry)
+            aec = ScanEditCommand(SUBPARSER)
+            args = Namespace(name='scan1', sources=None,
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=[],
+                             ext_product_search_dirs=None)
+            with redirect_stdout(scan_out):
+                aec.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_UPDATED % 'scan1' + '\n')
+
+    # pylint: disable=invalid-name
+    def test_edit_scan_reset_search_dirs(self):
+        """Testing the edit scan command with reset successfully."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
+        url_patch = get_server_location() + SCAN_URI + '1/'
+        scan_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1']}
+        updated_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                         'options': {'enabled_extended_product_search':
+                                     {'jboss_eap': False,
+                                      'jboss_fuse': False,
+                                      'jboss_brms': False}}}
+        results = [scan_entry]
+        scan_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
+            mocker.patch(url_patch, status_code=200, json=updated_entry)
+            aec = ScanEditCommand(SUBPARSER)
+            args = Namespace(name='scan1', sources=None,
+                             max_concurrency=50,
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs=[])
+            with redirect_stdout(scan_out):
+                aec.main(args)
+                self.assertEqual(scan_out.getvalue(),
+                                 messages.SCAN_UPDATED % 'scan1' + '\n')
+
+    # pylint: disable=invalid-name
+    def test_edit_scan_reset_dis_products(self):
+        """Testing the edit scan command with reset successfully."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
+        url_patch = get_server_location() + SCAN_URI + '1/'
+        scan_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1']}
+        updated_entry = {'id': 1, 'name': 'scan1', 'sources': ['source1'],
+                         'options': {'disabled_optional_products':
+                                     {'jboss_eap': True,
+                                      'jboss_fuse': True,
+                                      'jboss_brms': True}}}
+        results = [scan_entry]
+        scan_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=200, json=scan_data)
+            mocker.patch(url_patch, status_code=200, json=updated_entry)
+            aec = ScanEditCommand(SUBPARSER)
+            args = Namespace(name='scan1', sources=None,
+                             max_concurrency=50,
+                             disabled_optional_products=[],
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs=None)
             with redirect_stdout(scan_out):
                 aec.main(args)
                 self.assertEqual(scan_out.getvalue(),
@@ -133,7 +274,9 @@ class SourceEditCliTests(unittest.TestCase):
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
-                             disabled_optional_products=None)
+                             disabled_optional_products=None,
+                             enabled_ext_product_search=None,
+                             ext_product_search_dirs=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     aec.main(args)
