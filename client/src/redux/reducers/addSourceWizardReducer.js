@@ -92,14 +92,12 @@ function addSourceWizardReducer(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          show: state.view.show,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          add: true
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
-          initialState
+          reset: false
         }
       );
 
@@ -107,14 +105,12 @@ function addSourceWizardReducer(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          show: state.view.show,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          edit: true
+          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
         },
         {
           state,
-          initialState
+          reset: false
         }
       );
 
