@@ -54,14 +54,14 @@
   when: 'jboss_brms'
 
 - name: cat MANIFEST.MF files
-  raw: cat {{ item }}/META-INF/MANIFEST.MF 2>/dev/null
+  raw: cat "{{ item }}"/META-INF/MANIFEST.MF 2>/dev/null
   register: jboss_brms_manifest_mf
   ignore_errors: yes
   with_items: "{{ business_central_candidates + kie_server_candidates }}"
   when: 'jboss_brms'
 
 - name: look for kie-api files inside candidate directories
-  raw: ls -1 {{ item }}/WEB-INF/lib/kie-api* 2>/dev/null
+  raw: ls -1 "{{ item }}"/WEB-INF/lib/kie-api* 2>/dev/null
   register: jboss_brms_kie_in_business_central
   ignore_errors: yes
   with_items: "{{ business_central_candidates }}"
