@@ -14,6 +14,7 @@ from multiprocessing import Process
 from django.db.models import Q
 from fingerprinter import pfc_signal
 from api.fact.util import (validate_fact_collection_json,
+                           build_sources_from_tasks,
                            get_or_create_fact_collection)
 from api.models import (FactCollection,
                         ScanTask,
@@ -144,16 +145,7 @@ class ScanJobRunner(Process):
         """
         inspect_tasks = self.scan_job.tasks.filter(
             scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
-        sources = []
-        for inspect_task in inspect_tasks.all():
-            task_facts = inspect_task.get_facts()
-            if task_facts:
-                source = inspect_task.source
-                source_dict = {'source_id': source.id,
-                               'source_type': source.source_type,
-                               'facts': task_facts}
-                sources.append(source_dict)
-
+        sources = build_sources_from_tasks(inspect_tasks.all())
         if bool(sources):
             fact_collection_json = {'sources': sources}
             has_errors, validation_result = validate_fact_collection_json(
