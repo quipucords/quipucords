@@ -14,7 +14,9 @@
 SUBCOMMAND = 'report'
 SUMMARY = 'summary'
 DETAIL = 'detail'
+MERGE = 'merge'
 
 REPORT_URI = '/api/v1/reports/'
 DETAILS_PATH_SUFFIX = '/details/'
 DEPLOYMENTS_PATH_SUFFIX = '/deployments/'
+MERGE_URI = '/api/v1/jobs/merge/'
