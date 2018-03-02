@@ -84,15 +84,20 @@ def get_optional_products(disabled_optional_products):
     :returns: a dictionary representing the collection status of optional
     products
     """
-    optional_product_status = {}
+    disabled_products = {}
+    disabled_default = {scan.JBOSS_FUSE: True,
+                        scan.JBOSS_EAP: True,
+                        scan.JBOSS_BRMS: True}
 
     if disabled_optional_products:
         for product in disabled_optional_products:
-            optional_product_status[product] = False
+            disabled_products[product] = False
+    elif disabled_optional_products == []:
+        return disabled_default
     else:
         return None
 
-    return optional_product_status
+    return disabled_products
 
 
 def get_extended_products(enabled_extended_product_search,
@@ -105,20 +110,27 @@ def get_extended_products(enabled_extended_product_search,
     :returns: a dictionary representing the enabled search status of extended
     products
     """
-    enabled_product_search_status = {}
-
-    if enabled_extended_product_search:
+    enabled_products = {}
+    enabled_default = {scan.JBOSS_FUSE: False,
+                       scan.JBOSS_EAP: False,
+                       scan.JBOSS_BRMS: False}
+    # if someone wants to reset products or directories, we return default vals
+    if ext_product_search_dirs == [] or enabled_extended_product_search == []:
+        return enabled_default
+    # else we grab the provided products
+    elif enabled_extended_product_search:
         for product in enabled_extended_product_search:
-            enabled_product_search_status[product] = True
-    else:
-        if not edit:
-            return None
-    # add the search directories if they are provided
-    if ext_product_search_dirs:
-        enabled_product_search_status['search_directories'] \
-            = ext_product_search_dirs
-
-    return enabled_product_search_status
+            enabled_products[product] = True
+        if ext_product_search_dirs:
+            enabled_products['search_directories'] = ext_product_search_dirs
+        return enabled_products
+    elif ext_product_search_dirs and not enabled_extended_product_search:
+        # if only search dirs are provided, we must make sure that it is an
+        # edit. We set the dirs but not products
+        if edit:
+            enabled_products['search_directories'] = ext_product_search_dirs
+            return enabled_products
+    return None
 
 
 # pylint: disable=R0912

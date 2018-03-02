@@ -54,21 +54,21 @@ class ScanEditCommand(CliCommand):
                                  help=_(messages.SCAN_MAX_CONCURRENCY_HELP))
         self.parser.add_argument('--disabled-optional-products',
                                  dest='disabled_optional_products',
-                                 nargs='+',
+                                 nargs='*',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='DISABLE_OPTIONAL_PRODUCTS',
+                                 metavar='DISABLED_PRODUCT_LIST',
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
                                  required=False)
         self.parser.add_argument('--enabled-extended-product-search',
                                  dest='enabled_extended_product_search',
-                                 nargs='+',
+                                 nargs='*',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='ENABLED_EXTENDED_PRODUCT_SEARCH',
+                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
                                  help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
                                  required=False)
         self.parser.add_argument('--ext-product-search-dirs',
                                  dest='ext_product_search_dirs',
-                                 nargs='+',
+                                 nargs='*',
                                  metavar='EXT_PRODUCT_SEARCH_DIRS',
                                  help=_(messages.SCAN_EXT_SEARCH_DIRS_HELP),
                                  required=False)
@@ -79,9 +79,12 @@ class ScanEditCommand(CliCommand):
         CliCommand._validate_args(self)
         # Check to see if args were provided
         if not(self.args.sources or self.args.max_concurrency or
-               self.args.disabled_optional_products or
-               self.args.enabled_extended_product_search or
-               self.args.ext_product_search_dirs):
+               (self.args.disabled_optional_products or
+                self.args.disabled_optional_products == []) or
+               (self.args.enabled_extended_product_search or
+                self.args.enabled_extended_product_search == []) or
+               (self.args.ext_product_search_dirs or
+                self.args.ext_product_search_dirs == [])):
             print(_(messages.SCAN_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

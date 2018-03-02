@@ -56,14 +56,14 @@ class ScanAddCommand(CliCommand):
                                  dest='disabled_optional_products',
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='DISABLE_OPTIONAL_PRODUCTS',
+                                 metavar='DISABLED_PRODUCT_LIST',
                                  help=_(messages.DISABLE_OPT_PRODUCTS_HELP),
                                  required=False)
         self.parser.add_argument('--enabled-extended-product-search',
                                  dest='enabled_extended_product_search',
                                  nargs='+',
                                  choices=scan.OPTIONAL_PRODUCTS,
-                                 metavar='ENABLED_EXTENDED_PRODUCT_SEARCH',
+                                 metavar='EXTENDED_PRODUCT_SEARCH_LIST',
                                  help=_(messages.SCAN_ENABLED_PRODUCT_HELP),
                                  required='--ext-product-search-dirs' in
                                  sys.argv)
