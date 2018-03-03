@@ -204,21 +204,23 @@ class ScanListItem extends React.Component {
 
     switch (_.get(item, 'most_recent.status')) {
       case 'completed':
-        return [
-          <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
-            <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
-              <Icon type="pf" name="spinner2" atria-label="Start" />
-            </Button>
-          </SimpleTooltip>,
-          <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
-            <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
-              Summary Report
-            </MenuItem>
-            <MenuItem eventKey="2" onClick={() => onDetailedDownload(_.get(item, 'most_recent.report_id'))}>
-              Detailed Report
-            </MenuItem>
-          </DropdownButton>
-        ];
+        return (
+          <React.Fragment>
+            <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
+              <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
+                <Icon type="pf" name="spinner2" atria-label="Start" />
+              </Button>
+            </SimpleTooltip>
+            <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
+              <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
+                Summary Report
+              </MenuItem>
+              <MenuItem eventKey="2" onClick={() => onDetailedDownload(_.get(item, 'most_recent.report_id'))}>
+                Detailed Report
+              </MenuItem>
+            </DropdownButton>
+          </React.Fragment>
+        );
       case 'failed':
       case 'canceled':
         return (
@@ -231,18 +233,20 @@ class ScanListItem extends React.Component {
       case 'created':
       case 'pending':
       case 'running':
-        return [
-          <SimpleTooltip key="pauseButton" id="pauseTip" tooltip="Pause Scan">
-            <Button onClick={() => onPause(item)} bsStyle="link">
-              <Icon type="fa" name="pause" atria-label="Pause" />
-            </Button>
-          </SimpleTooltip>,
-          <SimpleTooltip key="stop" id="stopTip" tooltip="Cancel Scan">
-            <Button onClick={() => onCancel(item)} bsStyle="link">
-              <Icon type="fa" name="stop" atria-label="Stop" />
-            </Button>
-          </SimpleTooltip>
-        ];
+        return (
+          <React.Fragment>
+            <SimpleTooltip key="pauseButton" id="pauseTip" tooltip="Pause Scan">
+              <Button onClick={() => onPause(item)} bsStyle="link">
+                <Icon type="fa" name="pause" atria-label="Pause" />
+              </Button>
+            </SimpleTooltip>
+            <SimpleTooltip key="stop" id="stopTip" tooltip="Cancel Scan">
+              <Button onClick={() => onCancel(item)} bsStyle="link">
+                <Icon type="fa" name="stop" atria-label="Stop" />
+              </Button>
+            </SimpleTooltip>
+          </React.Fragment>
+        );
       case 'paused':
         return (
           <SimpleTooltip id="resumeTip" tooltip="Resume Scan">

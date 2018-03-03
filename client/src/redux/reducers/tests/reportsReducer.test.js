@@ -4,7 +4,15 @@ import reportsReducer from '../reportsReducer';
 const initialState = {
   persist: {},
 
-  search: {
+  deployments: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    reports: []
+  },
+
+  details: {
     error: false,
     errorMessage: '',
     pending: false,
@@ -18,9 +26,9 @@ describe('ReportsReducer', function() {
     expect(reportsReducer(undefined, {})).toEqual(initialState);
   });
 
-  it('should handle GET_REPORTS_REJECTED', () => {
+  it('should handle GET_REPORT_DEPLOYMENTS_REJECTED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORTS_REJECTED,
+      type: reportsTypes.GET_REPORT_DEPLOYMENTS_REJECTED,
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -33,26 +41,58 @@ describe('ReportsReducer', function() {
     };
 
     let resultState = reportsReducer(undefined, dispatched);
-    expect(resultState.search.error).toBeTruthy();
-    expect(resultState.search.errorMessage).toEqual('GET ERROR');
+    expect(resultState.deployments.error).toBeTruthy();
+    expect(resultState.deployments.errorMessage).toEqual('GET ERROR');
 
     expect(resultState.persist).toEqual(initialState.persist);
   });
 
-  it('should handle GET_REPORTS_PENDING', () => {
+  it('should handle GET_REPORT_DETAILS_REJECTED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORTS_PENDING
+      type: reportsTypes.GET_REPORT_DETAILS_REJECTED,
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          request: {
+            responseText: 'GET ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+    expect(resultState.details.error).toBeTruthy();
+    expect(resultState.details.errorMessage).toEqual('GET ERROR');
+
+    expect(resultState.persist).toEqual(initialState.persist);
+  });
+
+  it('should handle GET_REPORT_DEPLOYMENTS_PENDING', () => {
+    let dispatched = {
+      type: reportsTypes.GET_REPORT_DEPLOYMENTS_PENDING
     };
 
     let resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.search.pending).toBeTruthy();
+    expect(resultState.deployments.pending).toBeTruthy();
     expect(resultState.persist).toEqual(initialState.persist);
   });
 
-  it('should handle GET_REPORTS_FULFILLED', () => {
+  it('should handle GET_REPORT_DETAILS_PENDING', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORTS_FULFILLED,
+      type: reportsTypes.GET_REPORT_DETAILS_PENDING
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+
+    expect(resultState.details.pending).toBeTruthy();
+    expect(resultState.persist).toEqual(initialState.persist);
+  });
+
+  it('should handle GET_REPORT_DEPLOYMENTS_FULFILLED', () => {
+    let dispatched = {
+      type: reportsTypes.GET_REPORT_DEPLOYMENTS_FULFILLED,
       payload: {
         data: [
           {
@@ -77,8 +117,41 @@ describe('ReportsReducer', function() {
 
     let resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.search.fulfilled).toBeTruthy();
-    expect(resultState.search.reports).toHaveLength(4);
+    expect(resultState.deployments.fulfilled).toBeTruthy();
+    expect(resultState.deployments.reports).toHaveLength(4);
+
+    expect(resultState.persist).toEqual(initialState.persist);
+  });
+
+  it('should handle GET_REPORT_DETAILS_FULFILLED', () => {
+    let dispatched = {
+      type: reportsTypes.GET_REPORT_DETAILS_FULFILLED,
+      payload: {
+        data: [
+          {
+            name: '1',
+            id: 1
+          },
+          {
+            name: '2',
+            id: 2
+          },
+          {
+            name: '3',
+            id: 3
+          },
+          {
+            name: '4',
+            id: 4
+          }
+        ]
+      }
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+
+    expect(resultState.details.fulfilled).toBeTruthy();
+    expect(resultState.details.reports).toHaveLength(4);
 
     expect(resultState.persist).toEqual(initialState.persist);
   });

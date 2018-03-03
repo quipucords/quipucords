@@ -11,28 +11,6 @@ class ScansService {
     });
   }
 
-  static startScan(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_START.replace('{0}', id);
-
-    return axios({
-      method: 'post',
-      url: apiPath,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
-    });
-  }
-
-  static cancelScan(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_CANCEL.replace('{0}', id);
-
-    return axios({
-      method: 'put',
-      url: apiPath,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
-    });
-  }
-
   static getScan(id) {
     return this.getScans(id);
   }
@@ -44,23 +22,80 @@ class ScansService {
     });
   }
 
-  static getScanResults(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESULTS.replace('{0}', id);
-
+  static updateScan(id, data = {}) {
     return axios({
-      url: apiPath
+      method: 'put',
+      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      data: data
     });
   }
 
-  static getScanJobs(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_JOBS.replace('{0}', id);
+  static updatePartialScan(id, data = {}) {
+    return axios({
+      method: 'patch',
+      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static deleteScan(id) {
+    return axios({
+      method: 'delete',
+      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static startScan(id) {
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id);
+
+    return axios({
+      method: 'post',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static getScanJobs(id, query = {}) {
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id);
+    return axios({
+      url: apiPath,
+      params: query
+    });
+  }
+
+  static getScanJob(id) {
+    return axios({
+      url: `${process.env.REACT_APP_SCAN_JOBS_SERVICE}${id}`
+    });
+  }
+
+  static getScanResults(id) {
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_RESULTS.replace('{0}', id);
+
     return axios({
       url: apiPath
     });
   }
 
   static pauseScan(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_PAUSE.replace('{0}', id);
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id);
+
+    return axios({
+      method: 'put',
+      url: apiPath,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static cancelScan(id) {
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id);
 
     return axios({
       method: 'put',
@@ -71,7 +106,7 @@ class ScansService {
   }
 
   static restartScan(id) {
-    let apiPath = process.env.REACT_APP_SCANS_SERVICE_RESTART.replace('{0}', id);
+    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id);
 
     return axios({
       method: 'put',

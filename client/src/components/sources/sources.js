@@ -73,7 +73,7 @@ class Sources extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Started new scan <strong>{_.get(results, 'data.name')}</strong>.
+            Created new scan <strong>{_.get(results, 'data.name')}</strong>.
           </span>
         )
       });
