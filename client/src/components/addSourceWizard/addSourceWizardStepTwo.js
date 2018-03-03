@@ -76,7 +76,7 @@ class AddSourceWizardStepTwo extends React.Component {
     }
 
     let udpatedSource;
-    if (nextProps.source !== _.get(this.state, 'source')) {
+    if (!_.isEqual(nextProps.source, _.get(this.state, 'source'))) {
       udpatedSource = {
         source: _.get(nextProps, 'source', {}),
         sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE, ''),
@@ -85,7 +85,7 @@ class AddSourceWizardStepTwo extends React.Component {
         hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
         port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
         satelliteVersion: _.get(nextProps.source, apiTypes.API_SOURCE_SAT_VERSION, ''),
-        sslProtocol: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_PORT, ''),
+        sslProtocol: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_PROTOCOL, ''),
         sslCertVerify: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_CERT, ''),
         disableSsl: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_DISABLE, ''),
         singleHostPort: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length

@@ -5,7 +5,7 @@ const API_SOURCE_PORT = 'port';
 const API_SOURCE_CREDENTIALS = 'credentials';
 const API_SOURCE_SAT_VERSION = 'satellite_version';
 const API_SOURCE_SSL_CERT = 'ssl_cert_verify';
-const API_SOURCE_SSL_PORT = 'ssl_protocol';
+const API_SOURCE_SSL_PROTOCOL = 'ssl_protocol';
 const API_SOURCE_SSL_DISABLE = 'disable_ssl';
 
 export {
@@ -16,6 +16,6 @@ export {
   API_SOURCE_SAT_VERSION,
   API_SOURCE_SSL_CERT,
   API_SOURCE_SSL_DISABLE,
-  API_SOURCE_SSL_PORT,
+  API_SOURCE_SSL_PROTOCOL,
   API_SOURCE_TYPE
 };
