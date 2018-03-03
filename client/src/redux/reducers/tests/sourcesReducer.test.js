@@ -18,6 +18,7 @@ const initialState = {
     error: false,
     errorMessage: '',
     pending: false,
+    fulfilled: false,
     sourceId: '',
     delete: false
   }

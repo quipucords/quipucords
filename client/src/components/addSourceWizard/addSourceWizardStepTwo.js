@@ -75,19 +75,31 @@ class AddSourceWizardStepTwo extends React.Component {
       remappedCredentials = credentials.map(val => val.id);
     }
 
+    let udpatedSource;
+    if (nextProps.source !== _.get(this.state, 'source')) {
+      udpatedSource = {
+        source: _.get(nextProps, 'source', {}),
+        sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE, ''),
+        sourceName: _.get(nextProps.source, apiTypes.API_SOURCE_NAME, ''),
+        multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
+        hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
+        port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
+        satelliteVersion: _.get(nextProps.source, apiTypes.API_SOURCE_SAT_VERSION, ''),
+        sslProtocol: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_PORT, ''),
+        sslCertVerify: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_CERT, ''),
+        disableSsl: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_DISABLE, ''),
+        singleHostPort: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length
+          ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}:${nextProps.source[apiTypes.API_SOURCE_PORT]}`
+          : ''
+      };
+    } else {
+      udpatedSource = {};
+    }
+
     return {
-      source: nextProps.source || {},
-      sourceType: nextProps.source[apiTypes.API_SOURCE_TYPE] || '',
-      sourceName: nextProps.source[apiTypes.API_SOURCE_NAME] || '',
-      multiHostDisplay: (nextProps.source[apiTypes.API_SOURCE_HOSTS] || []).join(',\n') || '',
-      hosts: nextProps.source[apiTypes.API_SOURCE_HOSTS] || [],
       credentials: remappedCredentials,
-      port: nextProps.source[apiTypes.API_SOURCE_PORT] || '',
-      satelliteVersion: nextProps.source[apiTypes.API_SOURCE_SAT_VERSION] || '',
-      sslProtocol: nextProps.source[apiTypes.API_SOURCE_SSL_PROT] || '',
-      sslCertVerify: nextProps.source[apiTypes.API_SOURCE_SSL_CERT] || '',
-      disableSsl: nextProps.source[apiTypes.API_SOURCE_SSL_DISABLE] || '',
-      allCredentials: nextProps.allCredentials || []
+      allCredentials: nextProps.allCredentials || [],
+      ...udpatedSource
     };
   }
 
