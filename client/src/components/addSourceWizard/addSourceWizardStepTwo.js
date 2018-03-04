@@ -15,10 +15,6 @@ class AddSourceWizardStepTwo extends React.Component {
     super(props);
 
     this.initialState = {
-      source: {},
-      stepOneValid: false,
-
-      sourceType: '',
       sourceName: '',
       sourceNameError: null,
       multiHostDisplay: '',
@@ -29,15 +25,7 @@ class AddSourceWizardStepTwo extends React.Component {
       port: '',
       portError: null,
       singleHostPort: '',
-      singleHostPortError: null,
-      satelliteVersion: '',
-      satelliteVersionError: null,
-      sslProtocol: '',
-      sslProtocolError: null,
-      sslCertVerify: '',
-      sslCertVerifyError: null,
-      disableSsl: '',
-      disableSslError: null
+      singleHostPortError: null
     };
 
     this.state = { ...this.initialState, ...this.initializeState(props) };
@@ -76,15 +64,10 @@ class AddSourceWizardStepTwo extends React.Component {
       let credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
 
       return {
-        sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE, ''),
         sourceName: _.get(nextProps.source, apiTypes.API_SOURCE_NAME, ''),
         multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
         hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
         port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
-        satelliteVersion: _.get(nextProps.source, apiTypes.API_SOURCE_SAT_VERSION, ''),
-        sslProtocol: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_PROTOCOL, ''),
-        sslCertVerify: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_CERT, ''),
-        disableSsl: _.get(nextProps.source, apiTypes.API_SOURCE_SSL_DISABLE, ''),
         singleHostPort: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length
           ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}:${nextProps.source[apiTypes.API_SOURCE_PORT]}`
           : '',
@@ -97,7 +80,6 @@ class AddSourceWizardStepTwo extends React.Component {
 
   validateStep() {
     const {
-      sourceType,
       sourceName,
       sourceNameError,
       hosts,
@@ -105,11 +87,7 @@ class AddSourceWizardStepTwo extends React.Component {
       port,
       portError,
       credentials,
-      credentialsError,
-      satelliteVersion,
-      sslProtocol,
-      sslCertVerify,
-      disableSsl
+      credentialsError
     } = this.state;
     const { source } = this.props;
 
@@ -123,13 +101,8 @@ class AddSourceWizardStepTwo extends React.Component {
       !credentialsError
     ) {
       let updatedSource = { id: source.id };
-      _.set(updatedSource, apiTypes.API_SOURCE_TYPE, sourceType);
       _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
       _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
-      _.set(updatedSource, apiTypes.API_SOURCE_SAT_VERSION, satelliteVersion);
-      _.set(updatedSource, apiTypes.API_SOURCE_SSL_PROTOCOL, sslProtocol);
-      _.set(updatedSource, apiTypes.API_SOURCE_SSL_CERT, sslCertVerify);
-      _.set(updatedSource, apiTypes.API_SOURCE_SSL_DISABLE, disableSsl);
       _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials);
       if (port !== '') {
         updatedSource[apiTypes.API_SOURCE_PORT] = port;
@@ -137,7 +110,7 @@ class AddSourceWizardStepTwo extends React.Component {
 
       Store.dispatch({
         type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO,
-        source: updatedSource
+        source: _.merge({}, source, updatedSource)
       });
     }
   }
@@ -169,7 +142,10 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   onChangeCredential(event, value) {
-    const { sourceType, credentials } = this.state;
+    const { credentials } = this.state;
+    const { source } = this.props;
+
+    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
     let submitCreds = [];
 
     if (sourceType === 'vcenter' || sourceType === 'satellite') {
@@ -191,7 +167,9 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   onClickCredential() {
-    const { sourceType } = this.state;
+    const { source } = this.props;
+
+    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
 
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
@@ -292,15 +270,10 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   renderHosts() {
-    const {
-      sourceType,
-      hostsError,
-      port,
-      portError,
-      multiHostDisplay,
-      singleHostPort,
-      singleHostPortError
-    } = this.state;
+    const { hostsError, port, portError, multiHostDisplay, singleHostPort, singleHostPortError } = this.state;
+    const { source } = this.props;
+
+    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
 
     switch (sourceType) {
       case 'network':
@@ -351,8 +324,10 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   renderCredentials() {
-    const { sourceType, credentials, credentialsError } = this.state;
-    const { allCredentials } = this.props;
+    const { credentials, credentialsError } = this.state;
+    const { source, allCredentials } = this.props;
+
+    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
 
     const hasSingleCredential = sourceType === 'vcenter' || sourceType === 'satellite';
 
