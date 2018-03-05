@@ -1,11 +1,80 @@
 import axios from 'axios';
+import moment from 'moment';
 
 class ReportsService {
-  static getReports(query = {}) {
+  static downloadCSV(data = '', fileName = 'report.csv') {
+    return new Promise((resolve, reject) => {
+      try {
+        const blob = new Blob([data], { type: 'text/csv' });
+
+        if (window.navigator && window.navigator.msSaveBlob) {
+          window.navigator.msSaveBlob(blob, fileName);
+          resolve({ fileName: fileName, data: data });
+        } else {
+          let anchorTag = window.document.createElement('a');
+
+          anchorTag.href = window.URL.createObjectURL(blob);
+          anchorTag.style.display = 'none';
+          anchorTag.download = fileName;
+
+          window.document.body.appendChild(anchorTag);
+
+          anchorTag.click();
+
+          setTimeout(() => {
+            window.document.body.removeChild(anchorTag);
+            window.URL.revokeObjectURL(blob);
+            resolve({ fileName: fileName, data: data });
+          }, 250);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  static getReportDetails(id, query = {}) {
+    let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DETAILS.replace('{0}', id);
+
     return axios({
-      url: `${process.env.REACT_APP_REPORTS_SERVICE}`,
+      url: apiPath,
       params: query
     });
+  }
+
+  static getReportDetailsCsv(id) {
+    return this.getReportDetails(id, { format: 'csv' }).then(
+      success => {
+        const date = moment(success.headers.date).format('YYYYMMDD_HHmmss');
+
+        return this.downloadCSV(success.data, `report_${id}_details_${date}.csv`);
+      },
+      error => {
+        return error;
+      }
+    );
+  }
+
+  static getReportDeployments(id, query = {}) {
+    let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DEPLOYMENTS.replace('{0}', id);
+
+    return axios({
+      url: apiPath,
+      params: query
+    });
+  }
+
+  static getReportDeploymentsCsv(id, query = {}) {
+    return this.getReportDeployments(id, Object.assign(query, { format: 'csv' })).then(
+      success => {
+        const date = moment(success.headers.date).format('YYYYMMDD_HHmmss');
+
+        return this.downloadCSV(success.data, `report_${id}_deployments_${date}.csv`);
+      },
+      error => {
+        return error;
+      }
+    );
   }
 }
 

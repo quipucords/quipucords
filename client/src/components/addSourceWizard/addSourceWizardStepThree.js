@@ -1,23 +1,49 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { apiTypes } from '../../constants';
+import { Spinner } from 'patternfly-react';
 import { connect } from 'react-redux';
 
-const AddSourceWizardStepThree = ({ source }) => {
-  return (
-    <div>
-      <p>Searching {source[apiTypes.API_SOURCE_TYPE]} for hosts...</p>
-      <p>You can dismiss this and receive a notification when the search is complete.</p>
-    </div>
-  );
+const AddSourceWizardStepThree = ({ view }) => {
+  if (view.error) {
+    return (
+      <div className="wizard-pf-complete blank-slate-pf">
+        <div className="wizard-pf-success-icon">
+          <span className="pficon pficon-error-circle-o" />
+        </div>
+        <h3 className="blank-slate-pf-main-action">Error {view.add ? 'Creating' : 'Updating'} Source</h3>
+        <p className="blank-slate-pf-secondary-action">{view.errorMessage}</p>
+      </div>
+    );
+  } else if (!view.fulfilled) {
+    return (
+      <div className="wizard-pf-process blank-slate-pf">
+        <Spinner loading size="lg" className="blank-slate-pf-icon" />
+        <h3 className="blank-slate-pf-main-action">{view.add ? 'Creating' : 'Updating'} Source...</h3>
+        <p className="blank-slate-pf-secondary-action">
+          Please wait while source is being {view.add ? 'created' : 'updated'}.
+        </p>
+      </div>
+    );
+  } else {
+    return (
+      <div className="wizard-pf-complete blank-slate-pf">
+        <div className="wizard-pf-success-icon">
+          <span className="glyphicon glyphicon-ok-circle" />
+        </div>
+        <h3 className="blank-slate-pf-main-action">
+          Source <strong>{view.source.name}</strong> has been {view.add ? 'created' : 'updated'}.
+        </h3>
+      </div>
+    );
+  }
 };
 
 AddSourceWizardStepThree.propTypes = {
-  source: PropTypes.object
+  view: PropTypes.object
 };
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.addSourceWizard.view);
+  return Object.assign({}, { view: state.addSourceWizard.view });
 };
 
 export default connect(mapStateToProps)(AddSourceWizardStepThree);
