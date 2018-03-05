@@ -19,6 +19,7 @@ const initialState = {
     error: false,
     errorMessage: '',
     pending: false,
+    fulfilled: false,
     sourceId: '',
     delete: false
   }
@@ -80,6 +81,34 @@ const sourcesReducer = function(state = initialState, action) {
         {
           error: action.error,
           errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.DELETE_SOURCE_PENDING:
+    case sourcesTypes.DELETE_SOURCES_PENDING:
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case sourcesTypes.DELETE_SOURCE_FULFILLED:
+    case sourcesTypes.DELETE_SOURCES_FULFILLED:
+      return helpers.setStateProp(
+        'update',
+        {
+          fulfilled: true,
           delete: true
         },
         {
