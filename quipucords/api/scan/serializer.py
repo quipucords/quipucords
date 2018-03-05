@@ -235,29 +235,37 @@ class ScanSerializer(NotEmptySerializer):
                 old_extended_search = \
                     old_options.enabled_extended_product_search
                 # set the defaults
-                real_extended_search = {'jboss_eap': False,
-                                        'jboss_brms': False,
-                                        'jboss_fuse': False}
-                real_optional_products = {'jboss_eap': True,
-                                          'jboss_brms': True,
-                                          'jboss_fuse': True}
+                real_extended_search = \
+                    {ScanOptions.JBOSS_EAP:
+                     ExtendedProductSearchOptions.EXT_JBOSS_EAP,
+                     ScanOptions.JBOSS_BRMS:
+                     ExtendedProductSearchOptions.EXT_JBOSS_BRMS,
+                     ScanOptions.JBOSS_FUSE:
+                     ExtendedProductSearchOptions.EXT_JBOSS_FUSE}
+                real_optional_products = \
+                    {ScanOptions.JBOSS_EAP:
+                     DisabledOptionalProductsOptions.OPT_JBOSS_EAP,
+                     ScanOptions.JBOSS_BRMS:
+                     DisabledOptionalProductsOptions.OPT_JBOSS_BRMS,
+                     ScanOptions.JBOSS_FUSE:
+                     DisabledOptionalProductsOptions.OPT_JBOSS_FUSE}
                 # update defaults with old options if they exist
                 if old_extended_search:
-                    real_extended_search['jboss_eap'] = \
+                    real_extended_search[ScanOptions.JBOSS_EAP] = \
                         old_extended_search.jboss_eap
-                    real_extended_search['jboss_brms'] = \
+                    real_extended_search[ScanOptions.JBOSS_BRMS] = \
                         old_extended_search.jboss_brms
-                    real_extended_search['jboss_fuse'] = \
+                    real_extended_search[ScanOptions.JBOSS_FUSE] = \
                         old_extended_search.jboss_fuse
                     if old_extended_search.search_directories:
                         real_extended_search['search_directories'] = \
                             old_extended_search.search_directories
                 if old_optional_products:
-                    real_optional_products['jboss_eap'] = \
+                    real_optional_products[ScanOptions.JBOSS_EAP] = \
                         old_optional_products.jboss_eap
-                    real_optional_products['jboss_brms'] = \
+                    real_optional_products[ScanOptions.JBOSS_BRMS] = \
                         old_optional_products.jboss_brms
-                    real_optional_products['jboss_fuse'] = \
+                    real_optional_products[ScanOptions.JBOSS_FUSE] = \
                         old_optional_products.jboss_fuse
                 # grab the new options
                 optional_products = options.pop(
@@ -266,20 +274,26 @@ class ScanSerializer(NotEmptySerializer):
                     'enabled_extended_product_search', None)
                 if extended_search:
                     # Grab the new extended search options
-                    jboss_eap_ext = extended_search.pop('jboss_eap', None)
-                    jboss_fuse_ext = extended_search.pop('jboss_fuse', None)
-                    jboss_brms_ext = extended_search.pop('jboss_brms', None)
+                    jboss_eap_ext = \
+                        extended_search.pop(ScanOptions.JBOSS_EAP, None)
+                    jboss_fuse_ext = \
+                        extended_search.pop(ScanOptions.JBOSS_FUSE, None)
+                    jboss_brms_ext = \
+                        extended_search.pop(ScanOptions.JBOSS_BRMS, None)
                     search_directories = extended_search.pop(
                         'search_directories', None)
 
                     # for each extended search option, set if provided
                     # else retain the old option
                     if jboss_eap_ext is not None:
-                        real_extended_search['jboss_eap'] = jboss_eap_ext
+                        real_extended_search[ScanOptions.JBOSS_EAP] = \
+                            jboss_eap_ext
                     if jboss_brms_ext is not None:
-                        real_extended_search['jboss_brms'] = jboss_brms_ext
+                        real_extended_search[ScanOptions.JBOSS_BRMS] = \
+                            jboss_brms_ext
                     if jboss_fuse_ext is not None:
-                        real_extended_search['jboss_fuse'] = jboss_fuse_ext
+                        real_extended_search[ScanOptions.JBOSS_FUSE] = \
+                            jboss_fuse_ext
                     if search_directories is not None:
                         real_extended_search['search_directories'] = \
                             search_directories
@@ -292,16 +306,22 @@ class ScanSerializer(NotEmptySerializer):
                     extended_search = old_extended_search
 
                 if optional_products:
-                    jboss_eap = optional_products.pop('jboss_eap', None)
-                    jboss_fuse = optional_products.pop('jboss_fuse', None)
-                    jboss_brms = optional_products.pop('jboss_brms', None)
+                    jboss_eap = \
+                        optional_products.pop(ScanOptions.JBOSS_EAP, None)
+                    jboss_fuse = \
+                        optional_products.pop(ScanOptions.JBOSS_FUSE, None)
+                    jboss_brms = \
+                        optional_products.pop(ScanOptions.JBOSS_BRMS, None)
 
                     if jboss_eap is not None:
-                        real_optional_products['jboss_eap'] = jboss_eap
+                        real_optional_products[ScanOptions.JBOSS_EAP] = \
+                            jboss_eap
                     if jboss_brms is not None:
-                        real_optional_products['jboss_brms'] = jboss_brms
+                        real_optional_products[ScanOptions.JBOSS_BRMS] = \
+                            jboss_brms
                     if jboss_fuse is not None:
-                        real_optional_products['jboss_fuse'] = jboss_fuse
+                        real_optional_products[ScanOptions.JBOSS_FUSE] = \
+                            jboss_fuse
                     optional_products = \
                         DisabledOptionalProductsOptions.objects.create(
                             **real_optional_products)
