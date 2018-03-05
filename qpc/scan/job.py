@@ -61,6 +61,9 @@ class ScanJobCommand(CliCommand):
     def _validate_args(self):
         """Validate the scan job arguments."""
         CliCommand._validate_args(self)
+        if self.args.id and self.args.name:
+            self.parser.print_usage()
+            sys.exit(1)
         if self.args.id and self.args.status:
             print(_(messages.SCAN_JOB_ID_STATUS))
             self.parser.print_usage()

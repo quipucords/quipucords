@@ -4,17 +4,22 @@
   set_fact:
     internal_host_started_processing_role: "connection"
 
-- name: add connection.host to dictionary
+- name: set connection_host
   set_fact:
     connection_host: "{{ ansible_host }}"
   ignore_errors: yes
 
-- name: add connection.port to dictionary
+- name: set connection_port
   set_fact:
     connection_port: "{{ ansible_ssh_port }}"
   ignore_errors: yes
 
-- name: add connection.uuid to dictionary
+- name: set connection_uuid
   set_fact:
     connection_uuid: "{{ ansible_host | to_uuid }}"
+  ignore_errors: yes
+
+- name: set connection_timestamp
+  set_fact:
+    connection_timestamp: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
   ignore_errors: yes
