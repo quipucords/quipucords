@@ -649,6 +649,18 @@ def _process_network_fact(source, fact):
                                 fingerprint,
                                 fact_value=system_creation_date.date())
 
+    if fact.get('connection_timestamp'):
+        try:
+            last_checkin = datetime.strptime(fact['connection_timestamp'],
+                                             '%Y%m%d%H%M%S')
+            add_fact_to_fingerprint(source, 'connection_timestamp',
+                                    fact, 'system_last_checkin_date',
+                                    fingerprint,
+                                    fact_value=last_checkin.date())
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['connection_timestamp'], date_err)
+
     # Determine if running on VM or bare metal
     virt_what_type = fact.get('virt_what_type')
     virt_type = fact.get('virt_type')
@@ -727,6 +739,19 @@ def _process_vcenter_fact(source, fact):
     # VCenter specific facts
     add_fact_to_fingerprint(source, 'vm.state', fact, 'vm_state', fingerprint)
     add_fact_to_fingerprint(source, 'vm.uuid', fact, 'vm_uuid', fingerprint)
+
+    if fact.get('vm.last_check_in'):
+        try:
+            last_checkin = datetime.strptime(fact['vm.last_check_in'],
+                                             '%Y-%m-%d %H:%M:%S')
+            add_fact_to_fingerprint(source, 'vm.last_check_in',
+                                    fact, 'system_last_checkin_date',
+                                    fingerprint,
+                                    fact_value=last_checkin.date())
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         fact['vm.last_check_in'], date_err)
+
     add_fact_to_fingerprint(source, 'vm.memory_size',
                             fact, 'vm_memory_size', fingerprint)
     add_fact_to_fingerprint(source, 'vm.dns_name', fact,
@@ -815,6 +840,19 @@ def _process_satellite_fact(source, fact):
                                     fact_value=dt_obj.date())
         except ValueError as date_err:
             logger.error('Could not parse date %s: %s', reg_time, date_err)
+
+    last_checkin = fact.get('last_checkin_time')
+    if last_checkin:
+        try:
+            last_checkin = strip_suffix(last_checkin, ' UTC')
+            dt_obj = datetime.strptime(last_checkin, '%Y-%m-%d %H:%M:%S')
+            add_fact_to_fingerprint(source, 'last_checkin_time',
+                                    fact, 'system_last_checkin_date',
+                                    fingerprint,
+                                    fact_value=dt_obj.date())
+        except ValueError as date_err:
+            logger.error('Could not parse date %s: %s',
+                         last_checkin, date_err)
 
     add_entitlements_to_fingerprint(source, 'entitlements',
                                     fact, fingerprint)
