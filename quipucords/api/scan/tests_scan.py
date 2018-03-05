@@ -343,7 +343,8 @@ class ScanTest(TestCase):
              'systems_count': 2,
              'systems_scanned': 1,
              'systems_failed': 1,
-             'status': 'pending'})
+             'status': 'pending',
+             'status_details': {'job_status_message': 'Job is pending.'}})
 
     def test_delete(self):
         """Delete a scan."""
