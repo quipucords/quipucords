@@ -252,7 +252,6 @@ class ScanSerializer(NotEmptySerializer):
                     if old_extended_search.search_directories:
                         real_extended_search['search_directories'] = \
                             old_extended_search.search_directories
-
                 if old_optional_products:
                     real_optional_products['jboss_eap'] = \
                         old_optional_products.jboss_eap
@@ -260,7 +259,6 @@ class ScanSerializer(NotEmptySerializer):
                         old_optional_products.jboss_brms
                     real_optional_products['jboss_fuse'] = \
                         old_optional_products.jboss_fuse
-
                 # grab the new options
                 optional_products = options.pop(
                     'disabled_optional_products', None)
