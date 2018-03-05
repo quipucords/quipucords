@@ -153,14 +153,21 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
     'search.'
 
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
+REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
 REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
     'Scan Job %s does not exist.'
-REPORT_NO_REPORT_FOR_SJ = \
+REPORT_NO_SUMMARY_REPORT_FOR_SJ = \
     'No report summary available for scan job %s.'
+REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID = \
+    'No report summary available for report id %s.'
+REPORT_NO_DETAIL_REPORT_FOR_SJ = \
+    'No report detail available for scan job %s.'
+REPORT_NO_DETAIL_REPORT_FOR_REPORT_ID = \
+    'No report detail available for report id %s.'
 REPORT_OUTPUT_CANNOT_BE_EMPTY = '%s cannot be empty string.'
 REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
