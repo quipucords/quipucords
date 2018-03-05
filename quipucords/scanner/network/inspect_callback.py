@@ -208,12 +208,5 @@ class InspectResultCallback(CallbackBase):
         self.scan_task.log_message(
             message, log_level=logging.ERROR)
 
-        sys_result = SystemInspectionResult(
-            name=unreachable_host,
-            status=SystemInspectionResult.UNREACHABLE)
-        sys_result.save()
-        self.scan_task.inspection_result.systems.add(sys_result)
-        self.scan_task.inspection_result.save()
-
-        self.scan_task.increment_stats(
-            unreachable_host, increment_sys_failed=True)
+        self._finalize_host(
+            unreachable_host, SystemInspectionResult.UNREACHABLE)

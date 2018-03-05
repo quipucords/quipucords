@@ -61,6 +61,7 @@ class SystemFingerprint(models.Model):
     cpu_core_count = models.PositiveIntegerField(unique=False, null=True)
 
     system_creation_date = models.DateField(null=True)
+    system_last_checkin_date = models.DateField(null=True)
 
     virtualized_type = models.CharField(max_length=64, unique=False, null=True)
     virtualized_num_guests = models.PositiveIntegerField(
