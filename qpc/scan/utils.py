@@ -111,15 +111,28 @@ def get_enabled_products(enabled_ext_product_search,
     products
     """
     enabled_products = {}
-    enabled_default = {scan.JBOSS_FUSE: False,
-                       scan.JBOSS_EAP: False,
-                       scan.JBOSS_BRMS: False,
-                       'search_directories': []}
-    # if someone wants to reset products or directories, we grab default vals
-    if ext_product_search_dirs == [] or enabled_ext_product_search == []:
+    # if both the extended products and extended product dirs are [],
+    # do a reset of all
+    if enabled_ext_product_search == [] and ext_product_search_dirs == []:
+        enabled_default = {scan.JBOSS_FUSE: False,
+                           scan.JBOSS_EAP: False,
+                           scan.JBOSS_BRMS: False,
+                           'search_directories': []}
+        return enabled_default
+    if ext_product_search_dirs == []:
+        enabled_default = {'search_directories': []}
+        # if just the dirs are reset, check if products are provided
         if enabled_ext_product_search:
             for product in enabled_ext_product_search:
                 enabled_default[product] = True
+        return enabled_default
+    if enabled_ext_product_search == []:
+        enabled_default = {scan.JBOSS_FUSE: False,
+                           scan.JBOSS_EAP: False,
+                           scan.JBOSS_BRMS: False}
+        # if just the products are reset, check if dirs are provided
+        if ext_product_search_dirs:
+            enabled_default['search_directories'] = ext_product_search_dirs
         return enabled_default
     # else we grab the provided products
     elif enabled_ext_product_search:

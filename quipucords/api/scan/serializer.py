@@ -234,16 +234,18 @@ class ScanSerializer(NotEmptySerializer):
                 old_optional_products = old_options.disabled_optional_products
                 old_extended_search = \
                     old_options.enabled_extended_product_search
-                old_jboss_eap_ext = False
-                old_jboss_brms_ext = False
-                old_jboss_fuse_ext = False
-                old_search_directories = None
+                # set the defaults
+                real_extended_search = {'jboss_eap': False,
+                                        'jboss_brms': False,
+                                        'jboss_fuse': False}
+                # update defaults with old options if they exist
                 if old_extended_search:
-                    old_jboss_eap_ext = old_extended_search.jboss_eap
-                    old_jboss_brms_ext = old_extended_search.jboss_brms
-                    old_jboss_fuse_ext = old_extended_search.jboss_fuse
-                    old_search_directories = \
-                        old_extended_search.search_directories
+                    real_extended_search['jboss_eap'] = old_extended_search.jboss_eap
+                    real_extended_search['jboss_brms'] = old_extended_search.jboss_brms
+                    real_extended_search['jboss_fuse'] = old_extended_search.jboss_fuse
+                    if old_extended_search.search_directories:
+                        real_extended_search['search_directories'] = old_extended_search.search_directories
+
                 # grab the new options
                 optional_products = options.pop(
                     'disabled_optional_products', None)
@@ -257,28 +259,17 @@ class ScanSerializer(NotEmptySerializer):
                     search_directories = extended_search.pop(
                         'search_directories', None)
 
-                    real_extended_search = {}
                     # for each extended search option, set if provided
-                    # else set to the old option
+                    # else retain the old option
                     if jboss_eap_ext is not None:
                         real_extended_search['jboss_eap'] = jboss_eap_ext
-                    else:
-                        real_extended_search['jboss_eap'] = old_jboss_eap_ext
                     if jboss_brms_ext is not None:
                         real_extended_search['jboss_brms'] = jboss_brms_ext
-                    else:
-                        real_extended_search['jboss_brms'] = old_jboss_brms_ext
                     if jboss_fuse_ext is not None:
                         real_extended_search['jboss_fuse'] = jboss_fuse_ext
-                    else:
-                        real_extended_search['jboss_fuse'] = old_jboss_fuse_ext
                     if search_directories is not None:
                         real_extended_search['search_directories'] = \
                             search_directories
-                    else:
-                        if old_search_directories:
-                            real_extended_search['search_directories'] = \
-                                old_search_directories
                     extended_search = \
                         ExtendedProductSearchOptions.objects.create(
                             **real_extended_search)
