@@ -27,9 +27,12 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ExtendedProductSearchOptions(models.Model):
     """The extended production search options of a scan."""
 
-    jboss_eap = models.BooleanField(null=False, default=False)
-    jboss_fuse = models.BooleanField(null=False, default=False)
-    jboss_brms = models.BooleanField(null=False, default=False)
+    EXT_JBOSS_EAP = False
+    EXT_JBOSS_FUSE = False
+    EXT_JBOSS_BRMS = False
+    jboss_eap = models.BooleanField(null=False, default=EXT_JBOSS_EAP)
+    jboss_fuse = models.BooleanField(null=False, default=EXT_JBOSS_FUSE)
+    jboss_brms = models.BooleanField(null=False, default=EXT_JBOSS_BRMS)
     search_directories = models.TextField(null=True)
 
     def __str__(self):
@@ -55,9 +58,12 @@ class ExtendedProductSearchOptions(models.Model):
 class DisabledOptionalProductsOptions(models.Model):
     """The disable optional products options of a scan."""
 
-    jboss_eap = models.BooleanField(null=False, default=True)
-    jboss_fuse = models.BooleanField(null=False, default=True)
-    jboss_brms = models.BooleanField(null=False, default=True)
+    OPT_JBOSS_EAP = True
+    OPT_JBOSS_FUSE = True
+    OPT_JBOSS_BRMS = True
+    jboss_eap = models.BooleanField(null=False, default=OPT_JBOSS_EAP)
+    jboss_fuse = models.BooleanField(null=False, default=OPT_JBOSS_FUSE)
+    jboss_brms = models.BooleanField(null=False, default=OPT_JBOSS_BRMS)
 
     def __str__(self):
         """Convert to string."""
@@ -118,12 +124,18 @@ class ScanOptions(models.Model):
 
         :returns: a dictionary representing extra vars
         """
-        return {ScanOptions.JBOSS_EAP: True,
-                ScanOptions.JBOSS_FUSE: True,
-                ScanOptions.JBOSS_BRMS: True,
-                ScanOptions.JBOSS_EAP_EXT: False,
-                ScanOptions.JBOSS_FUSE_EXT: False,
-                ScanOptions.JBOSS_BRMS_EXT: False}
+        return {ScanOptions.JBOSS_EAP:
+                DisabledOptionalProductsOptions.OPT_JBOSS_EAP,
+                ScanOptions.JBOSS_FUSE:
+                DisabledOptionalProductsOptions.OPT_JBOSS_FUSE,
+                ScanOptions.JBOSS_BRMS:
+                DisabledOptionalProductsOptions.OPT_JBOSS_BRMS,
+                ScanOptions.JBOSS_EAP_EXT:
+                ExtendedProductSearchOptions.EXT_JBOSS_EAP,
+                ScanOptions.JBOSS_FUSE_EXT:
+                ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
+                ScanOptions.JBOSS_BRMS_EXT:
+                ExtendedProductSearchOptions.EXT_JBOSS_BRMS}
 
     def get_extra_vars(self):
         """Construct a dictionary based on the disabled products.

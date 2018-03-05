@@ -323,6 +323,93 @@ class ScanTest(TestCase):
         self.assertEqual(response_json.get('name'), 'test2')
         self.assertFalse(response_json.get('options').get('jboss_eap'))
 
+    def test_partial_update_retains(self):
+        """Test partial update retains unprovided info."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'disabled_optional_products':
+                                      {'jboss_eap': True,
+                                       'jboss_fuse': True,
+                                       'jboss_brms': True}}}
+        initial = self.create_expect_201(data_discovery)
+
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        data = {'name': 'test2',
+                'options': {'enabled_extended_product_search':
+                            {'jboss_eap': False,
+                             'jboss_fuse': False,
+                             'jboss_brms': True,
+                             'search_directories': ['/foo/bar/']}}}
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        options = {'disabled_optional_products':
+                   {'jboss_eap': True,
+                    'jboss_fuse': True,
+                    'jboss_brms': True},
+                   'max_concurrency': 50,
+                   'enabled_extended_product_search':
+                   {'jboss_eap': False,
+                    'jboss_fuse': False,
+                    'jboss_brms': True,
+                    'search_directories': ['/foo/bar/']}}
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertEqual(response_json.get('options'), options)
+
+    def test_partial_update_enabled(self):
+        """Test partial update retains unprovided info."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT,
+                          'options': {'enabled_extended_product_search':
+                                      {'jboss_eap': False,
+                                       'jboss_fuse': False,
+                                       'jboss_brms': True}}}
+        initial = self.create_expect_201(data_discovery)
+
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        data = {'name': 'test2',
+                'options': {'enabled_extended_product_search':
+                            {'search_directories': ['/foo/bar/']}}}
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        options = {'max_concurrency': 50,
+                   'enabled_extended_product_search':
+                   {'jboss_eap': False,
+                    'jboss_fuse': False,
+                    'jboss_brms': True,
+                    'search_directories': ['/foo/bar/']}}
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertEqual(response_json.get('options'), options)
+
     def test_expand_scan(self):
         """Test view expand_scan."""
         scan_job, scan_task = create_scan_job(
