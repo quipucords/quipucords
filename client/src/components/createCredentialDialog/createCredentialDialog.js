@@ -314,7 +314,12 @@ class CreateCredentialDialog extends React.Component {
           {this.renderFormLabel('Become Method')}
           <Grid.Col sm={7}>
             <div className="form-split-button">
-              <SplitButton className="form-control" bsStyle="default" title={becomeMethod} id={helpers.generateId('become-method-button')}>
+              <SplitButton
+                className="form-control"
+                bsStyle="default"
+                title={becomeMethod}
+                id={helpers.generateId('become-method-button')}
+              >
                 {this.becomeMethods.map((nextMethod, index) => (
                   <MenuItem key={index} eventKey={`become${index}`} onClick={() => this.setBecomeMethod(nextMethod)}>
                     {nextMethod}
