@@ -41,10 +41,13 @@ class ReportSummaryCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             report.REPORT_URI, [codes.ok])
-        self.parser.add_argument('--id', dest='scan_job_id',
-                                 metavar='SCAN_JOB_ID',
-                                 help=_(messages.REPORT_SCAN_JOB_ID_HELP),
-                                 required=True)
+        id_group = self.parser.add_mutually_exclusive_group(required=True)
+        id_group.add_argument('--scan-job', dest='scan_job_id',
+                              metavar='SCAN_JOB_ID',
+                              help=_(messages.REPORT_SCAN_JOB_ID_HELP))
+        id_group.add_argument('--report', dest='report_id',
+                              metavar='REPORT_ID',
+                              help=_(messages.REPORT_REPORT_ID_HELP))
 
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--json', dest='output_json', action='store_true',
@@ -70,26 +73,32 @@ class ReportSummaryCommand(CliCommand):
             print(error)
             sys.exit(1)
 
-        # Lookup scan job id
-        response = request(parser=self.parser, method=GET,
-                           path='%s%s' % (scan.SCAN_JOB_URI,
-                                          self.args.scan_job_id),
-                           payload=None)
-        if response.status_code == codes.ok:  # pylint: disable=no-member
-            json_data = response.json()
-            self.report_id = json_data.get('report_id')
-            if self.report_id:
-                self.req_path = '%s%s%s' % (
-                    self.req_path, self.report_id,
-                    report.DEPLOYMENTS_PATH_SUFFIX)
+        if self.args.report_id is None:
+            # Lookup scan job id
+            response = request(parser=self.parser, method=GET,
+                               path='%s%s' % (scan.SCAN_JOB_URI,
+                                              self.args.scan_job_id),
+                               payload=None)
+            if response.status_code == codes.ok:  # pylint: disable=no-member
+                json_data = response.json()
+                self.report_id = json_data.get('report_id')
+                if self.report_id:
+                    self.req_path = '%s%s%s' % (
+                        self.req_path, self.report_id,
+                        report.DEPLOYMENTS_PATH_SUFFIX)
+                else:
+                    print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+                            self.args.scan_job_id))
+                    sys.exit(1)
             else:
-                print(_(messages.REPORT_NO_REPORT_FOR_SJ %
+                print(_(messages.REPORT_SJ_DOES_NOT_EXIST %
                         self.args.scan_job_id))
                 sys.exit(1)
         else:
-            print(_(messages.REPORT_SJ_DOES_NOT_EXIST %
-                    self.args.scan_job_id))
-            sys.exit(1)
+            self.report_id = self.args.report_id
+            self.req_path = '%s%s%s' % (
+                self.req_path, self.report_id,
+                report.DEPLOYMENTS_PATH_SUFFIX)
 
     def _handle_response_success(self):
         file_content = None
@@ -108,6 +117,10 @@ class ReportSummaryCommand(CliCommand):
             print(err_msg)
 
     def _handle_response_error(self):
-        print(_(messages.REPORT_NO_REPORT_FOR_SJ %
-                self.args.scan_job_id))
+        if self.args.report_id is None:
+            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+                    self.args.scan_job_id))
+        else:
+            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID %
+                    self.args.report_id))
         sys.exit(1)
