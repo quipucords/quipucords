@@ -240,11 +240,15 @@ class ScanSerializer(NotEmptySerializer):
                                         'jboss_fuse': False}
                 # update defaults with old options if they exist
                 if old_extended_search:
-                    real_extended_search['jboss_eap'] = old_extended_search.jboss_eap
-                    real_extended_search['jboss_brms'] = old_extended_search.jboss_brms
-                    real_extended_search['jboss_fuse'] = old_extended_search.jboss_fuse
+                    real_extended_search['jboss_eap'] = \
+                        old_extended_search.jboss_eap
+                    real_extended_search['jboss_brms'] = \
+                        old_extended_search.jboss_brms
+                    real_extended_search['jboss_fuse'] = \
+                        old_extended_search.jboss_fuse
                     if old_extended_search.search_directories:
-                        real_extended_search['search_directories'] = old_extended_search.search_directories
+                        real_extended_search['search_directories'] = \
+                            old_extended_search.search_directories
 
                 # grab the new options
                 optional_products = options.pop(
