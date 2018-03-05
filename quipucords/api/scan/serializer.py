@@ -238,6 +238,9 @@ class ScanSerializer(NotEmptySerializer):
                 real_extended_search = {'jboss_eap': False,
                                         'jboss_brms': False,
                                         'jboss_fuse': False}
+                real_optional_products = {'jboss_eap': True,
+                                          'jboss_brms': True,
+                                          'jboss_fuse': True}
                 # update defaults with old options if they exist
                 if old_extended_search:
                     real_extended_search['jboss_eap'] = \
@@ -249,6 +252,14 @@ class ScanSerializer(NotEmptySerializer):
                     if old_extended_search.search_directories:
                         real_extended_search['search_directories'] = \
                             old_extended_search.search_directories
+
+                if old_optional_products:
+                    real_optional_products['jboss_eap'] = \
+                        old_optional_products.jboss_eap
+                    real_optional_products['jboss_brms'] = \
+                        old_optional_products.jboss_brms
+                    real_optional_products['jboss_fuse'] = \
+                        old_optional_products.jboss_fuse
 
                 # grab the new options
                 optional_products = options.pop(
@@ -283,9 +294,19 @@ class ScanSerializer(NotEmptySerializer):
                     extended_search = old_extended_search
 
                 if optional_products:
+                    jboss_eap = optional_products.pop('jboss_eap', None)
+                    jboss_fuse = optional_products.pop('jboss_fuse', None)
+                    jboss_brms = optional_products.pop('jboss_brms', None)
+
+                    if jboss_eap is not None:
+                        real_optional_products['jboss_eap'] = jboss_eap
+                    if jboss_brms is not None:
+                        real_optional_products['jboss_brms'] = jboss_brms
+                    if jboss_fuse is not None:
+                        real_optional_products['jboss_fuse'] = jboss_fuse
                     optional_products = \
                         DisabledOptionalProductsOptions.objects.create(
-                            **optional_products)
+                            **real_optional_products)
                     optional_products.save()
                 else:
                     optional_products = old_optional_products
