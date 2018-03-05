@@ -111,14 +111,28 @@ def get_enabled_products(enabled_ext_product_search,
     products
     """
     enabled_products = {}
-    enabled_default = {scan.JBOSS_FUSE: False,
-                       scan.JBOSS_EAP: False,
-                       scan.JBOSS_BRMS: False}
-    # if someone wants to reset products or directories, we grab default vals
-    if ext_product_search_dirs == [] or enabled_ext_product_search == []:
+    # if both the extended products and extended product dirs are [],
+    # do a reset of all
+    if enabled_ext_product_search == [] and ext_product_search_dirs == []:
+        enabled_default = {scan.JBOSS_FUSE: False,
+                           scan.JBOSS_EAP: False,
+                           scan.JBOSS_BRMS: False,
+                           'search_directories': []}
+        return enabled_default
+    if ext_product_search_dirs == []:
+        enabled_default = {'search_directories': []}
+        # if just the dirs are reset, check if products are provided
         if enabled_ext_product_search:
             for product in enabled_ext_product_search:
                 enabled_default[product] = True
+        return enabled_default
+    if enabled_ext_product_search == []:
+        enabled_default = {scan.JBOSS_FUSE: False,
+                           scan.JBOSS_EAP: False,
+                           scan.JBOSS_BRMS: False}
+        # if just the products are reset, check if dirs are provided
+        if ext_product_search_dirs:
+            enabled_default['search_directories'] = ext_product_search_dirs
         return enabled_default
     # else we grab the provided products
     elif enabled_ext_product_search:
@@ -166,10 +180,12 @@ def build_scan_payload(args, sources, disabled_optional_products,
                 {'disabled_optional_products': disabled_optional_products}
         else:
             options['disabled_optional_products'] = disabled_optional_products
+    # pylint: disable=too-many-boolean-expressions
     if (hasattr(args, 'enabled_ext_product_search') or
             (hasattr(args, 'ext-product-search-dirs'))) and \
             (args.enabled_ext_product_search or
              args.enabled_ext_product_search == [] or
+             args.ext_product_search_dirs or
              args.ext_product_search_dirs == []):
         if options is None:
             options = {'enabled_extended_product_search':
