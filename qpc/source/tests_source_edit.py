@@ -177,11 +177,11 @@ class SourceEditCliTests(unittest.TestCase):
                                  messages.SOURCE_UPDATED % 'source1' + '\n')
 
     def test_edit_source_no_val(self):
-        """Testing the edit source command with source doesn't exist."""
+        """Testing the edit source command with a server error."""
         source_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json={'count': 0})
+            mocker.get(url_get_source, status_code=500, json=None)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
                              cred=['credential1'], port=22)
@@ -189,7 +189,7 @@ class SourceEditCliTests(unittest.TestCase):
                 with redirect_stdout(source_out):
                     aec.main(args)
                     self.assertEqual(source_out.getvalue(),
-                                     'Source "source1" does not exist\n')
+                                     messages.SERVER_INTERNAL_ERROR)
 
     def test_edit_source_cred_nf(self):
         """Testing the edit source command where cred is not found."""

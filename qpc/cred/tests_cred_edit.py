@@ -215,11 +215,8 @@ class CredentialEditCliTests(unittest.TestCase):
         """Testing the edit credential command server error occurs."""
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
-        results = [{'id': 1, 'name': 'cred1', 'username': 'root',
-                    'password': '********'}]
-        data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get, status_code=500, json=data)
+            mocker.get(url_get, status_code=500, json=None)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, become_password=None)
@@ -227,7 +224,7 @@ class CredentialEditCliTests(unittest.TestCase):
                 with redirect_stdout(cred_out):
                     aec.main(args)
                     self.assertEqual(cred_out.getvalue(),
-                                     'Credential "cred1" does not exist\n')
+                                     messages.SERVER_INTERNAL_ERROR)
 
     def test_edit_sat_cred(self):
         """Testing the edit credential command successfully."""

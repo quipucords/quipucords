@@ -37,8 +37,8 @@ except AttributeError:
     exception_class = ValueError
 
 
-def handle_token_errors(response):
-    """Handle token errors.
+def handle_general_errors(response):
+    """Handle general errors.
 
     :param response: The response object.
     :returns: The response object.
@@ -60,6 +60,10 @@ def handle_token_errors(response):
         handle_error_response(response)
         log.error(_(messages.SERVER_LOGIN_REQUIRED))
         log.error('$ qpc server login')
+        sys.exit(1)
+    elif response.status_code == 500:
+        handle_error_response(response)
+        log.error(_(messages.SERVER_INTERNAL_ERROR))
         sys.exit(1)
 
     return response
@@ -154,15 +158,15 @@ def request(method, path, params=None, payload=None,
 
     try:
         if method == POST:
-            result = handle_token_errors(post(url, payload, req_headers))
+            result = handle_general_errors(post(url, payload, req_headers))
         elif method == GET:
-            result = handle_token_errors(get(url, params, req_headers))
+            result = handle_general_errors(get(url, params, req_headers))
         elif method == PATCH:
-            result = handle_token_errors(patch(url, payload, req_headers))
+            result = handle_general_errors(patch(url, payload, req_headers))
         elif method == DELETE:
-            result = handle_token_errors(delete(url, req_headers))
+            result = handle_general_errors(delete(url, req_headers))
         elif method == PUT:
-            result = handle_token_errors(put(url, payload, req_headers))
+            result = handle_general_errors(put(url, payload, req_headers))
         else:
             log.error('Unsupported request method %s', method)
             parser.print_help()
