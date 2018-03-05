@@ -94,25 +94,19 @@ class ScanAddCliTests(unittest.TestCase):
                                      CONNECTION_ERROR_MSG)
 
     def test_add_scan_bad_resp(self):
-        """Testing the add scan command successfully."""
+        """Testing the add scan command with a 500."""
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        url_post = get_server_location() + SCAN_URI
-        results = [{'id': 1,
-                    'name': 'scan1',
-                    'sources': ['source1'],
-                    'max-concurrency': 50}]
-        source_data = {'count': 1, 'results': results}
+        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json=source_data)
-            mocker.post(url_post, status_code=201, json={'id': 1})
+            mocker.get(url_get_source, status_code=500, json=results)
             ssc = ScanAddCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=50)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
-                    self.assertTrue('Source "source1" does not exist'
-                                    in scan_out.getvalue())
+                    self.assertEqual(scan_out.getvalue(),
+                                     messages.SERVER_INTERNAL_ERROR)
 
     def test_add_scan(self):
         """Testing the add scan command successfully."""

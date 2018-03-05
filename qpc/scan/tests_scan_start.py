@@ -61,9 +61,6 @@ class ScanStartCliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 with redirect_stdout(scan_out):
                     ssc.main(args)
-                    ssc.main(args)
-                    print('\n\nscanouttt')
-                    print(scan_out.getvalue())
                     self.assertTrue('Scan "scan_none" does not exist.'
                                     in scan_out.getvalue())
 
@@ -107,3 +104,18 @@ class ScanStartCliTests(unittest.TestCase):
                     ssc.main(args)
                     self.assertTrue('Scan "scan2" does not exist'
                                     in scan_out.getvalue())
+
+    def test_start_scan_bad_resp(self):
+        """Testing the start scan command with a 500 error."""
+        scan_out = StringIO()
+        url_get_scan = get_server_location() + SCAN_URI
+        results = ['Error 500']
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_scan, status_code=500, json=results)
+            ssc = ScanStartCommand(SUBPARSER)
+            args = Namespace(name='scan1')
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(scan_out):
+                    ssc.main(args)
+                    self.assertEqual(scan_out.getvalue(),
+                                     messages.SERVER_INTERNAL_ERROR)
