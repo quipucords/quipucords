@@ -142,6 +142,7 @@ def get_job_queryset_query_set(scan, query_params):
 
 def expand_scan(json_scan):
     """Expand the scan object's sources."""
+    # pylint: disable=too-many-locals
     source_ids = json_scan.get(SOURCES_KEY, [])
     slim_sources = Source.objects.filter(
         pk__in=source_ids).values('id', 'name', 'source_type')
@@ -165,6 +166,7 @@ def expand_scan(json_scan):
         systems_scanned = systems_scanned
         systems_failed = systems_failed
         job_status = latest_job.status
+        job_status_message = latest_job.status_message
 
         most_recent = {
             'id': latest_job.id,
@@ -182,8 +184,18 @@ def expand_scan(json_scan):
             most_recent['systems_scanned'] = systems_scanned
         if systems_failed is not None:
             most_recent['systems_failed'] = systems_failed
+        if job_status_message is not None:
+            most_recent['status_details'] = {
+                'job_status_message': job_status_message}
         if job_status is not None:
             most_recent['status'] = job_status
+            if job_status == ScanTask.FAILED:
+                failed_tasks = latest_job.tasks.all().order_by(
+                    'sequence_number')
+                status_details = most_recent['status_details']
+                for task in failed_tasks:
+                    task_key = 'task_%s_status_message' % task.id
+                    status_details[task_key] = task.status_message
 
         json_scan[MOST_RECENT] = most_recent
 
