@@ -6,11 +6,8 @@ import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
-import { addSourceWizardSteps } from './addSourceWizardConstants';
+import { addSourceWizardSteps, editSourceWizardSteps } from './addSourceWizardConstants';
 import { addSource, updateSource } from '../../redux/actions/sourcesActions';
-import AddSourceWizardStepOne from './addSourceWizardStepOne';
-import AddSourceWizardStepTwo from './addSourceWizardStepTwo';
-import AddSourceWizardStepThree from './addSourceWizardStepThree';
 
 class AddSourceWizard extends React.Component {
   constructor(props) {
@@ -18,15 +15,8 @@ class AddSourceWizard extends React.Component {
 
     this.initialState = {
       activeStepIndex: 0,
-      show: false,
-      add: false,
-      edit: false,
-      source: {},
       stepOneValid: false,
-      stepTwoValid: false,
-      fulfilled: false,
-      error: false,
-      errorMessage: ''
+      stepTwoValid: false
     };
 
     this.state = { ...this.initialState };
@@ -42,11 +32,7 @@ class AddSourceWizard extends React.Component {
     if (nextProps.stepOneValid || nextProps.stepTwoValid) {
       this.setState({
         stepOneValid: nextProps.stepOneValid || false,
-        stepTwoValid: nextProps.stepTwoValid || false,
-        source: nextProps.source,
-        fulfilled: nextProps.fulfilled,
-        error: nextProps.error,
-        errorMessage: nextProps.errorMessage
+        stepTwoValid: nextProps.stepTwoValid || false
       });
     }
   }
@@ -60,7 +46,7 @@ class AddSourceWizard extends React.Component {
   }
 
   onCancel() {
-    const { fulfilled, error } = this.state;
+    const { fulfilled, error } = this.props;
 
     const closeWizard = () => {
       Store.dispatch({
@@ -93,7 +79,8 @@ class AddSourceWizard extends React.Component {
 
   onNext() {
     const { activeStepIndex } = this.state;
-    const numberSteps = addSourceWizardSteps.length;
+    const { edit } = this.props;
+    const numberSteps = edit ? editSourceWizardSteps.length : addSourceWizardSteps.length;
 
     if (activeStepIndex < numberSteps - 1) {
       this.setState({ activeStepIndex: activeStepIndex + 1 });
@@ -109,13 +96,20 @@ class AddSourceWizard extends React.Component {
   }
 
   onSubmit(event) {
-    const { addSource, updateSource } = this.props;
-    const { stepOneValid, stepTwoValid, source, edit } = this.state;
+    const { addSource, updateSource, source, edit } = this.props;
+    const { stepOneValid, stepTwoValid } = this.state;
 
     if (stepOneValid && stepTwoValid) {
       if (edit) {
-        updateSource(source.id, source).finally(() => {
-          this.setState({ activeStepIndex: 2 });
+        const update = {
+          name: source.name,
+          hosts: source.hosts,
+          port: source.port,
+          credentials: source.credentials,
+          options: source.options
+        };
+        updateSource(source.id, update).finally(() => {
+          this.setState({ activeStepIndex: 1 });
         });
       } else {
         addSource(source).finally(() => {
@@ -127,7 +121,8 @@ class AddSourceWizard extends React.Component {
 
   renderWizardSteps() {
     const { activeStepIndex } = this.state;
-    const wizardSteps = addSourceWizardSteps;
+    const { edit } = this.props;
+    const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
     const activeStep = wizardSteps[activeStepIndex];
 
     return wizardSteps.map((step, stepIndex) => {
@@ -147,9 +142,9 @@ class AddSourceWizard extends React.Component {
 
   // ToDo: Final wizard step needs additional spinner animation, copy/error messaging for submit failures.
   render() {
-    const { show } = this.props;
+    const { show, edit } = this.props;
     const { activeStepIndex, stepOneValid, stepTwoValid } = this.state;
-    const wizardSteps = addSourceWizardSteps;
+    const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
 
     return (
       <React.Fragment>
@@ -160,7 +155,7 @@ class AddSourceWizard extends React.Component {
               <button className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
                 <Icon type="pf" name="close" />
               </button>
-              <Modal.Title>Add Source</Modal.Title>
+              <Modal.Title>{edit ? 'Edit' : 'Add'} Source</Modal.Title>
             </Modal.Header>
             <Modal.Body className="wizard-pf-body clearfix">
               <Wizard.Steps steps={this.renderWizardSteps()} />
@@ -169,9 +164,7 @@ class AddSourceWizard extends React.Component {
                   {wizardSteps.map((step, stepIndex) => {
                     return (
                       <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
-                        {stepIndex === 0 && <AddSourceWizardStepOne />}
-                        {stepIndex === 1 && <AddSourceWizardStepTwo />}
-                        {stepIndex === 2 && <AddSourceWizardStepThree />}
+                        {wizardSteps[stepIndex].page}
                       </Wizard.Contents>
                     );
                   })}
@@ -179,23 +172,32 @@ class AddSourceWizard extends React.Component {
               </Wizard.Row>
             </Modal.Body>
             <Modal.Footer className="wizard-pf-footer">
-              <Button bsStyle="default" className="btn-cancel" disabled={activeStepIndex === 2} onClick={this.onCancel}>
+              <Button
+                bsStyle="default"
+                className="btn-cancel"
+                disabled={activeStepIndex === wizardSteps.length - 1}
+                onClick={this.onCancel}
+              >
                 Cancel
               </Button>
-              <Button bsStyle="default" disabled={activeStepIndex === 0 || activeStepIndex === 2} onClick={this.onBack}>
+              <Button
+                bsStyle="default"
+                disabled={activeStepIndex === 0 || activeStepIndex === wizardSteps.length - 1}
+                onClick={this.onBack}
+              >
                 <Icon type="fa" name="angle-left" />Back
               </Button>
-              {activeStepIndex === 0 && (
+              {activeStepIndex < wizardSteps.length - 2 && (
                 <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
                   Next<Icon type="fa" name="angle-right" />
                 </Button>
               )}
-              {activeStepIndex === 1 && (
+              {activeStepIndex === wizardSteps.length - 2 && (
                 <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onSubmit}>
                   Save<Icon type="fa" name="angle-right" />
                 </Button>
               )}
-              {activeStepIndex === 2 && (
+              {activeStepIndex === wizardSteps.length - 1 && (
                 <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onCancel}>
                   Close
                 </Button>
@@ -212,12 +214,12 @@ AddSourceWizard.propTypes = {
   addSource: PropTypes.func,
   updateSource: PropTypes.func,
   show: PropTypes.bool.isRequired,
+  edit: PropTypes.bool,
   source: PropTypes.object,
   stepOneValid: PropTypes.bool,
   stepTwoValid: PropTypes.bool,
   fulfilled: PropTypes.bool,
-  error: PropTypes.bool,
-  errorMessage: PropTypes.string
+  error: PropTypes.bool
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

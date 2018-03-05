@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Form, Radio } from 'patternfly-react';
 import Store from '../../redux/store';
@@ -12,31 +13,38 @@ class AddSourceWizardStepOne extends React.Component {
     super(props);
 
     this.initialState = {
-      source: {},
-      stepOneValid: false,
       sourceType: '',
       sourceTypeError: null
     };
 
-    this.state = { ...this.initialState, ...this.resetInitialState(props) };
+    this.state = { ...this.initialState, ...this.initializeState(props) };
 
     helpers.bindMethods(this, ['onChangeSourceType']);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.source && !this.props.source) {
+      this.setState(this.initializeState(nextProps));
+    }
   }
 
   componentDidMount() {
     this.validateStep();
   }
 
-  resetInitialState(nextProps) {
-    return {
-      source: nextProps.source || {},
-      stepOneValid: true,
-      sourceType: nextProps.source[apiTypes.API_SOURCE_TYPE] || 'network'
-    };
+  initializeState(nextProps) {
+    if (nextProps.source) {
+      return {
+        sourceType: _.get(nextProps.source, 'apiTypes.API_SOURCE_TYPE', 'network')
+      };
+    }
+
+    return {};
   }
 
   validateStep() {
-    const { sourceType, source } = this.state;
+    const { sourceType } = this.state;
+    const { source } = this.props;
 
     if (sourceType !== '') {
       Store.dispatch({
@@ -91,6 +99,10 @@ class AddSourceWizardStepOne extends React.Component {
     );
   }
 }
+
+AddSourceWizardStepOne.propTypes = {
+  source: PropTypes.object
+};
 
 const mapStateToProps = function(state) {
   return Object.assign({}, state.addSourceWizard.view);

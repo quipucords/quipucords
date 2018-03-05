@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
-import { getSources } from '../../redux/actions/sourcesActions';
+import { getSources, deleteSource } from '../../redux/actions/sourcesActions';
 import { addScan } from '../../redux/actions/scansActions';
 import {
   sourcesTypes,
@@ -34,7 +34,7 @@ class Sources extends React.Component {
       'scanSources',
       'itemSelectChange',
       'editSource',
-      'deleteSource',
+      'handleDeleteSource',
       'hideScanDialog',
       'createScan',
       'refresh',
@@ -53,9 +53,36 @@ class Sources extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const { viewOptions, updated, deleted } = this.props;
+
     // Check for changes resulting in a fetch
-    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
+    if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
       this.props.getSources(helpers.createViewQueryObject(nextProps.viewOptions));
+    }
+
+    if ((nextProps.updated && !updated) || (nextProps.deleted && !deleted)) {
+      this.refresh();
+    }
+  }
+
+  notifyDeleteStatus(item, error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Deleted source <strong>{_.get(item, 'name')}</strong>.
+          </span>
+        )
+      });
     }
   }
 
@@ -73,7 +100,7 @@ class Sources extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Started new scan <strong>{_.get(results, 'data.name')}</strong>.
+            Created new scan <strong>{_.get(results, 'data.name')}</strong>.
           </span>
         )
       });
@@ -128,19 +155,19 @@ class Sources extends React.Component {
   }
 
   doDeleteSource(item) {
+    const { deleteSource } = this.props;
+
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
     });
 
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: item.name,
-      message: 'Deleting sources is not yet implemented'
-    });
+    deleteSource(item.id).then(
+      response => this.notifyDeleteStatus(item, false, response.value),
+      error => this.notifyDeleteStatus(item, true, error.message)
+    );
   }
 
-  deleteSource(item) {
+  handleDeleteSource(item) {
     let heading = (
       <span>
         Are you sure you want to delete the source <strong>{item.name}</strong>?
@@ -173,7 +200,7 @@ class Sources extends React.Component {
   }
 
   refresh() {
-    this.props.getSources();
+    this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
   }
 
   clearFilters() {
@@ -229,7 +256,7 @@ class Sources extends React.Component {
               key={index}
               onItemSelectChange={this.itemSelectChange}
               onEdit={this.editSource}
-              onDelete={this.deleteSource}
+              onDelete={this.handleDeleteSource}
               onScan={this.scanSource}
             />
           ))}
@@ -304,24 +331,33 @@ class Sources extends React.Component {
 
 Sources.propTypes = {
   getSources: PropTypes.func,
+  deleteSource: PropTypes.func,
   addScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   sources: PropTypes.array,
   selectedSources: PropTypes.array,
-  viewOptions: PropTypes.object
+  viewOptions: PropTypes.object,
+  updated: PropTypes.bool,
+  deleted: PropTypes.bool
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getSources: queryObj => dispatch(getSources(queryObj)),
+  deleteSource: id => dispatch(deleteSource(id)),
   addScan: data => dispatch(addScan(data))
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.sources.view, state.sources.persist, {
-    viewOptions: state.viewOptions[viewTypes.SOURCES_VIEW]
-  });
+  return Object.assign(
+    {},
+    state.sources.view,
+    state.sources.persist,
+    { viewOptions: state.viewOptions[viewTypes.SOURCES_VIEW] },
+    { updated: state.addSourceWizard.view.fulfilled },
+    { deleted: state.sources.update.fulfilled }
+  );
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sources);

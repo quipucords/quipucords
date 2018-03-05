@@ -81,7 +81,6 @@ describe('AddSourceWizardReducer', function() {
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('ADD ERROR');
-    expect(resultState.view.add).toBeTruthy();
   });
 
   it('should handle UPDATE_SOURCE_REJECTED', () => {
@@ -102,7 +101,6 @@ describe('AddSourceWizardReducer', function() {
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('UPDATE ERROR');
-    expect(resultState.view.edit).toBeTruthy();
   });
 
   it('should handle UPDATE_SOURCE_FULFILLED', () => {

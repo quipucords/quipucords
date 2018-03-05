@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
 import { getScans, startScan, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
+import { getReportDeploymentsCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
 import { sourcesTypes, toastNotificationTypes, viewToolbarTypes, viewTypes } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
@@ -61,8 +62,9 @@ class Scans extends React.Component {
     }
   }
 
-  notifyActionStatus(actionText, error, results) {
+  notifyActionStatus(scan, actionText, error, results) {
     const { getScans, viewOptions } = this.props;
+
     if (error) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
@@ -76,10 +78,11 @@ class Scans extends React.Component {
         alertType: 'success',
         message: (
           <span>
-            Scan <strong>{_.get(results, 'data.name')}</strong> {actionText}.
+            Scan <strong>{scan.name}</strong> {actionText}.
           </span>
         )
       });
+
       getScans(
         helpers.createViewQueryObject(viewOptions, {
           scan_type: 'inspect'
@@ -88,30 +91,41 @@ class Scans extends React.Component {
     }
   }
 
+  notifyDownloadStatus(error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: results
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: <span>Report downloaded.</span>
+      });
+    }
+  }
+
   downloadSummaryReport(reportId) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Downloading summary reports is not yet implemented'
-    });
+    this.props
+      .getReportDeploymentsCsv(reportId)
+      .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
   }
 
   downloadDetailedReport(reportId) {
-    Store.dispatch({
-      type: toastNotificationTypes.TOAST_ADD,
-      alertType: 'error',
-      header: 'NYI',
-      message: 'Downloading detailed reports is not yet implemented'
-    });
+    this.props
+      .getReportDetailsCsv(reportId)
+      .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
   }
 
   doStartScan(item) {
     this.props
       .startScan(item.id)
       .then(
-        response => this.notifyActionStatus('started', false, response.value),
-        error => this.notifyActionStatus('started', true, error.message)
+        response => this.notifyActionStatus(item, 'started', false, response.value),
+        error => this.notifyActionStatus(item, 'started', true, error.message)
       );
   }
 
@@ -119,8 +133,8 @@ class Scans extends React.Component {
     this.props
       .pauseScan(item.id)
       .then(
-        response => this.notifyActionStatus('paused', false, response.value),
-        error => this.notifyActionStatus('paused', true, error.message)
+        response => this.notifyActionStatus(item, 'paused', false, response.value),
+        error => this.notifyActionStatus(item, 'paused', true, error.message)
       );
   }
 
@@ -128,8 +142,8 @@ class Scans extends React.Component {
     this.props
       .restartScan(item.id)
       .then(
-        response => this.notifyActionStatus('resumed', false, response.value),
-        error => this.notifyActionStatus('resumed', true, error.message)
+        response => this.notifyActionStatus(item, 'resumed', false, response.value),
+        error => this.notifyActionStatus(item, 'resumed', true, error.message)
       );
   }
 
@@ -137,8 +151,8 @@ class Scans extends React.Component {
     this.props
       .cancelScan(item.id)
       .then(
-        response => this.notifyActionStatus('canceled', false, response.value),
-        error => this.notifyActionStatus('canceled', true, error.message)
+        response => this.notifyActionStatus(item, 'canceled', false, response.value),
+        error => this.notifyActionStatus(item, 'canceled', true, error.message)
       );
   }
 
@@ -269,6 +283,8 @@ Scans.propTypes = {
   pauseScan: PropTypes.func,
   cancelScan: PropTypes.func,
   restartScan: PropTypes.func,
+  getReportDeploymentsCsv: PropTypes.func,
+  getReportDetailsCsv: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -281,7 +297,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   startScan: id => dispatch(startScan(id)),
   pauseScan: id => dispatch(pauseScan(id)),
   restartScan: id => dispatch(restartScan(id)),
-  cancelScan: id => dispatch(cancelScan(id))
+  cancelScan: id => dispatch(cancelScan(id)),
+  getReportDeploymentsCsv: (id, query) => dispatch(getReportDeploymentsCsv(id, query)),
+  getReportDetailsCsv: id => dispatch(getReportDetailsCsv(id))
 });
 
 const mapStateToProps = function(state) {

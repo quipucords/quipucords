@@ -1,6 +1,13 @@
 import { scansTypes } from '../constants';
 import scansService from '../../services/scansService';
 
+const addScan = data => dispatch => {
+  return dispatch({
+    type: scansTypes.ADD_SCAN,
+    payload: scansService.addScan(data)
+  });
+};
+
 const getScan = id => dispatch => {
   return dispatch({
     type: scansTypes.GET_SCAN,
@@ -15,24 +22,24 @@ const getScans = (query = {}) => dispatch => {
   });
 };
 
-const getScanResults = id => dispatch => {
+const updateScan = (id, data) => dispatch => {
   return dispatch({
-    type: scansTypes.GET_SCAN_RESULTS,
-    payload: scansService.getScanResults(id)
+    type: scansTypes.UPDATE_SCAN,
+    payload: scansService.updateScan(id, data)
   });
 };
 
-const getScanJobs = id => dispatch => {
+const updatePartialScan = (id, data) => dispatch => {
   return dispatch({
-    type: scansTypes.GET_SCAN_JOBS,
-    payload: scansService.getScanJobs(id)
+    type: scansTypes.UPDATE_SCAN,
+    payload: scansService.updatePartialScan(id, data)
   });
 };
 
-const addScan = data => dispatch => {
+const deleteScan = id => dispatch => {
   return dispatch({
-    type: scansTypes.ADD_SCAN,
-    payload: scansService.addScan(data)
+    type: scansTypes.DELETE_SCAN,
+    payload: scansService.deleteScan(id)
   });
 };
 
@@ -43,10 +50,24 @@ const startScan = id => dispatch => {
   });
 };
 
-const cancelScan = id => dispatch => {
+const getScanJobs = (id, query) => dispatch => {
   return dispatch({
-    type: scansTypes.CANCEL_SCAN,
-    payload: scansService.cancelScan(id)
+    type: scansTypes.GET_SCAN_JOBS,
+    payload: scansService.getScanJobs(id, query)
+  });
+};
+
+const getScanJob = id => dispatch => {
+  return dispatch({
+    type: scansTypes.GET_SCAN_JOB,
+    payload: scansService.getScanJob(id)
+  });
+};
+
+const getScanResults = id => dispatch => {
+  return dispatch({
+    type: scansTypes.GET_SCAN_RESULTS,
+    payload: scansService.getScanResults(id)
   });
 };
 
@@ -57,6 +78,13 @@ const pauseScan = id => dispatch => {
   });
 };
 
+const cancelScan = id => dispatch => {
+  return dispatch({
+    type: scansTypes.CANCEL_SCAN,
+    payload: scansService.cancelScan(id)
+  });
+};
+
 const restartScan = id => dispatch => {
   return dispatch({
     type: scansTypes.RESTART_SCAN,
@@ -64,4 +92,18 @@ const restartScan = id => dispatch => {
   });
 };
 
-export { getScan, getScans, getScanResults, getScanJobs, addScan, startScan, cancelScan, pauseScan, restartScan };
+export {
+  addScan,
+  getScan,
+  getScans,
+  updateScan,
+  updatePartialScan,
+  deleteScan,
+  startScan,
+  getScanJobs,
+  getScanJob,
+  getScanResults,
+  pauseScan,
+  cancelScan,
+  restartScan
+};

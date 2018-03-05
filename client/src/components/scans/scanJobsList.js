@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { Dropdown, EmptyState, Grid, Icon, MenuItem, Modal } from 'patternfly-react';
 import * as moment from 'moment/moment';
+import helpers from '../../common/helpers';
 
 class ScanJobsList extends React.Component {
   renderJob(job) {
@@ -59,8 +60,8 @@ class ScanJobsList extends React.Component {
           {job.systems_scanned > 0 ? job.systems_scanned : '0'}
         </Grid.Col>
         <Grid.Col xs={3} sm={2} smPush={5}>
-          {job.status !== 'completed' && (
-            <Dropdown className="pull-right" pullRight>
+          {job.status === 'completed' && (
+            <Dropdown id={helpers.generateId()} className="pull-right" pullRight>
               <Dropdown.Toggle useAnchor>
                 <Icon type="fa" name="download" />
               </Dropdown.Toggle>

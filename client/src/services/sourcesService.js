@@ -14,7 +14,7 @@ class SourcesService {
   static deleteSource(id) {
     return axios({
       method: 'delete',
-      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
+      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
@@ -38,7 +38,7 @@ class SourcesService {
   static updateSource(id, data = {}) {
     return axios({
       method: 'put',
-      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
+      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       data: data

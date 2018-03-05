@@ -18,6 +18,7 @@ class CreateCredentialDialog extends React.Component {
   constructor() {
     super();
 
+    // ToDo: evaluate "sudo" as the default for becomeMethod
     this.initialState = {
       credentialName: '',
       credentialType: '',
@@ -313,7 +314,12 @@ class CreateCredentialDialog extends React.Component {
           {this.renderFormLabel('Become Method')}
           <Grid.Col sm={7}>
             <div className="form-split-button">
-              <SplitButton className="form-control" bsStyle="default" title={becomeMethod} id="become-method-button">
+              <SplitButton
+                className="form-control"
+                bsStyle="default"
+                title={becomeMethod}
+                id={helpers.generateId('become-method-button')}
+              >
                 {this.becomeMethods.map((nextMethod, index) => (
                   <MenuItem key={index} eventKey={`become${index}`} onClick={() => this.setBecomeMethod(nextMethod)}>
                     {nextMethod}
@@ -426,7 +432,7 @@ class CreateCredentialDialog extends React.Component {
                     className="form-control"
                     bsStyle="default"
                     title={helpers.authorizationTypeString(authorizationType)}
-                    id="auth-type-button"
+                    id={helpers.generateId('auth-type-button')}
                   >
                     <MenuItem eventKey="1" onClick={() => this.setAuthType('usernamePassword')}>
                       {helpers.authorizationTypeString('usernamePassword')}

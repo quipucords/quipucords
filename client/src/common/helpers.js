@@ -30,7 +30,7 @@ const sourceTypeIcon = sourceType => {
     case 'satellite':
       return { type: 'pf', name: 'satellite' };
     default:
-      return { type: '', name: '' };
+      return { type: 'pf', name: '' };
   }
 };
 
@@ -52,7 +52,7 @@ const scanTypeIcon = scanType => {
     case 'inspect':
       return { type: 'fa', name: 'search' };
     default:
-      return { type: '', name: '' };
+      return { type: 'pf', name: '' };
   }
 };
 
