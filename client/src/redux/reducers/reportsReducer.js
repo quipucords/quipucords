@@ -31,7 +31,7 @@ const reportsReducer = function(state = initialState, action) {
         'deployments',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -45,7 +45,7 @@ const reportsReducer = function(state = initialState, action) {
         'details',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,

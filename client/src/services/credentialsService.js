@@ -14,7 +14,7 @@ class CredentialsService {
   static deleteCredential(id) {
     return axios({
       method: 'delete',
-      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });

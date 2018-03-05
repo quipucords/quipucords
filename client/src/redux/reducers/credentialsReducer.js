@@ -133,7 +133,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
           pending: false,
           add: true
         },
@@ -149,7 +149,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
           delete: true,
           pending: false
         },
@@ -164,7 +164,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
           pending: false,
           edit: true
         },
@@ -180,7 +180,7 @@ const credentialsReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -193,7 +193,9 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true
+          pending: true,
+          error: false,
+          fulfilled: false
         },
         {
           state,
@@ -208,6 +210,7 @@ const credentialsReducer = function(state = initialState, action) {
         {
           pending: true,
           delete: true,
+          error: false,
           fulfilled: false
         },
         {
@@ -220,7 +223,9 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'update',
         {
-          pending: true
+          pending: true,
+          error: false,
+          fulfilled: false
         },
         {
           state,

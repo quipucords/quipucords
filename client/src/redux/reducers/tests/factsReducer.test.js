@@ -25,8 +25,8 @@ describe('factsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }

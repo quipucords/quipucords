@@ -56,8 +56,8 @@ describe('SourcesReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'DELETE ERROR'
+          data: {
+            detail: 'DELETE ERROR'
           }
         }
       }
@@ -80,8 +80,8 @@ describe('SourcesReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }

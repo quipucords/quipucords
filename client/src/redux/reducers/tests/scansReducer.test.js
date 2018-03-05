@@ -61,8 +61,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }
@@ -142,8 +142,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }
@@ -209,8 +209,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET JOBS ERROR'
+          data: {
+            detail: 'GET JOBS ERROR'
           }
         }
       }
@@ -314,8 +314,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET RESULTS ERROR'
+          data: {
+            detail: 'GET RESULTS ERROR'
           }
         }
       }
@@ -428,8 +428,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'ADD ERROR'
+          data: {
+            detail: 'ADD ERROR'
           }
         }
       }
@@ -502,8 +502,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'START ERROR'
+          data: {
+            detail: 'START ERROR'
           }
         }
       }
@@ -576,8 +576,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'CANCEL ERROR'
+          data: {
+            detail: 'CANCEL ERROR'
           }
         }
       }
@@ -650,8 +650,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'PAUSE ERROR'
+          data: {
+            detail: 'PAUSE ERROR'
           }
         }
       }
@@ -724,8 +724,8 @@ describe('scansReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'RESTART ERROR'
+          data: {
+            detail: 'RESTART ERROR'
           }
         }
       }

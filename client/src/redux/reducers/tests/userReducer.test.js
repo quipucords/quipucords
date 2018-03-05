@@ -32,8 +32,8 @@ describe('userReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'USER INFO ERROR'
+          data: {
+            detail: 'USER INFO ERROR'
           }
         }
       }
@@ -83,8 +83,8 @@ describe('userReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'USER AUTH ERROR'
+          data: {
+            detail: 'USER AUTH ERROR'
           }
         }
       }
@@ -134,8 +134,8 @@ describe('userReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'USER LOGOUT ERROR'
+          data: {
+            detail: 'USER LOGOUT ERROR'
           }
         }
       }
