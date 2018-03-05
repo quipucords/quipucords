@@ -273,11 +273,8 @@ class ScanSerializer(NotEmptySerializer):
                     else:
                         real_extended_search['jboss_fuse'] = old_jboss_fuse_ext
                     if search_directories is not None:
-                        # If search directories = /reset/the/dir/
-                        # we don't add search_directories to the {}
-                        if search_directories != '["/reset/the/dir/"]':
-                            real_extended_search['search_directories'] = \
-                                search_directories
+                        real_extended_search['search_directories'] = \
+                            search_directories
                     else:
                         if old_search_directories:
                             real_extended_search['search_directories'] = \

@@ -114,7 +114,7 @@ def get_enabled_products(enabled_ext_product_search,
     enabled_default = {scan.JBOSS_FUSE: False,
                        scan.JBOSS_EAP: False,
                        scan.JBOSS_BRMS: False,
-                       'search_directories': ['/reset/the/dir/']}
+                       'search_directories': []}
     # if someone wants to reset products or directories, we grab default vals
     if ext_product_search_dirs == [] or enabled_ext_product_search == []:
         if enabled_ext_product_search:
