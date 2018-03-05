@@ -11,6 +11,7 @@
 """ScanTask used for vcenter inspection task."""
 import logging
 import json
+from datetime import datetime
 from django.db import transaction
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 from api.models import (ScanTask,
@@ -109,6 +110,8 @@ class InspectTaskRunner(ScanTaskRunner):
         if config.memorySizeMB is not None:
             vm_mem = int(config.memorySizeMB / 1024)
 
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
         # Need to obtain DNS Name
         facts = {'vm.name': vm_name,  # Name
                  'vm.state': summary.runtime.powerState,  # State
@@ -126,6 +129,9 @@ class InspectTaskRunner(ScanTaskRunner):
                  'vm.host.cpu_count': host_cpu_count,  # Host CPU Count
                  'vm.datacenter': data_center,  # Data Center
                  'vm.cluster': cluster}  # Cluster
+
+        if summary.runtime.powerState == 'poweredOn':
+            facts['vm.last_check_in'] = now
 
         logger.debug('system %s facts=%s', vm_name, facts)
 

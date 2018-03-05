@@ -160,7 +160,7 @@ class SatelliteFive(SatelliteInterface):
             details[UUID] = uuid
             details[NAME] = host_name
             details[HOSTNAME] = hostname
-            details[LAST_CHECKIN_TIME] = last_checkin
+            details[LAST_CHECKIN_TIME] = str(last_checkin)
             details[REGISTRATION_TIME] = str(registration_date)
             details[ARCHITECTURE] = arch
             details[KERNEL] = kernel

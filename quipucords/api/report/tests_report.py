@@ -272,7 +272,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['report'][0].keys()), 35)
+        self.assertEqual(len(report['report'][0].keys()), 36)
 
     def test_get_fact_collection_filter_report(self):
         """Get a specific group count report with filter."""
@@ -376,11 +376,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
-        print(report)
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nbios_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,infrastructure_type,ip_addresses,jboss brms,jboss eap,jboss fuse,mac_addresses,name,os_name,os_release,os_version,subscription_manager_id,system_creation_date,virtualized_is_guest,virtualized_num_guests,virtualized_num_running_guests,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_cpu_cores,vm_host_cpu_threads,vm_host_socket_count,vm_memory_size,vm_state,vm_uuid\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,2017-07-18,True,1,1,vmware,,,,,,,,,,\r\n\r\n'  # noqa
+        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nbios_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,infrastructure_type,ip_addresses,jboss brms,jboss eap,jboss fuse,mac_addresses,name,os_name,os_release,os_version,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_is_guest,virtualized_num_guests,virtualized_num_running_guests,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_cpu_cores,vm_host_cpu_threads,vm_host_socket_count,vm_memory_size,vm_state,vm_uuid\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,2017-07-18,,True,1,1,vmware,,,,,,,,,,\r\n,2,1,2,False,1,2,virtualized,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,2017-07-18,,True,1,1,vmware,,,,,,,,,,\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
 
     def test_csv_renderer_only_name(self):
