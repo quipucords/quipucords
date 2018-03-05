@@ -270,7 +270,7 @@ class SourceEditCliTests(unittest.TestCase):
         scan_out = StringIO()
         url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_scan, status_code=500, json={'count': 0})
+            mocker.get(url_get_scan, status_code=500, json=None)
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,
@@ -281,4 +281,4 @@ class SourceEditCliTests(unittest.TestCase):
                 with redirect_stdout(scan_out):
                     aec.main(args)
                     self.assertEqual(scan_out.getvalue(),
-                                     messages.SCAN_DOES_NOT_EXIST % 'scan1')
+                                     messages.SERVER_INTERNAL_ERROR)
