@@ -54,10 +54,9 @@ class ConnectResultStore(object):
             hosts.extend(expand_hostpattern(host))
         self._remaining_hosts = set(hosts)
 
-        if scan_task.systems_count is None:
-            scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
-                                   sys_count=len(hosts), sys_scanned=0,
-                                   sys_failed=0)
+        scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
+                               sys_count=len(hosts), sys_scanned=0,
+                               sys_failed=0)
 
     @transaction.atomic
     def record_result(self, name, credential, status):
