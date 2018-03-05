@@ -97,9 +97,8 @@ class ScanAddCliTests(unittest.TestCase):
         """Testing the add scan command with a 500."""
         scan_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json=results)
+            mocker.get(url_get_source, status_code=500, json=None)
             ssc = ScanAddCommand(SUBPARSER)
             args = Namespace(sources=['source1'], max_concurrency=50)
             with self.assertRaises(SystemExit):

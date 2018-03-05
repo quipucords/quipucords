@@ -109,9 +109,8 @@ class ScanStartCliTests(unittest.TestCase):
         """Testing the start scan command with a 500 error."""
         scan_out = StringIO()
         url_get_scan = get_server_location() + SCAN_URI
-        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_scan, status_code=500, json=results)
+            mocker.get(url_get_scan, status_code=500, json=None)
             ssc = ScanStartCommand(SUBPARSER)
             args = Namespace(name='scan1')
             with self.assertRaises(SystemExit):

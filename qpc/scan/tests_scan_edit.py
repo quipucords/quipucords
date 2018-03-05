@@ -269,9 +269,8 @@ class SourceEditCliTests(unittest.TestCase):
         """Testing the edit scan command with a scan that doesn't exist."""
         scan_out = StringIO()
         url_get_scan = get_server_location() + SCAN_URI + '?name=scan1'
-        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_scan, status_code=500, json=results)
+            mocker.get(url_get_scan, status_code=500, json=None)
             aec = ScanEditCommand(SUBPARSER)
             args = Namespace(name='scan1', sources=['source1'],
                              max_concurrency=50,

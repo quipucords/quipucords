@@ -215,9 +215,8 @@ class CredentialEditCliTests(unittest.TestCase):
         """Testing the edit credential command server error occurs."""
         cred_out = StringIO()
         url_get = get_server_location() + CREDENTIAL_URI
-        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get, status_code=500, json=results)
+            mocker.get(url_get, status_code=500, json=None)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, become_password=None)

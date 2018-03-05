@@ -180,9 +180,8 @@ class SourceEditCliTests(unittest.TestCase):
         """Testing the edit source command with a server error."""
         source_out = StringIO()
         url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
-        results = ['Error 500']
         with requests_mock.Mocker() as mocker:
-            mocker.get(url_get_source, status_code=500, json=results)
+            mocker.get(url_get_source, status_code=500, json=None)
             aec = SourceEditCommand(SUBPARSER)
             args = Namespace(name='source1', hosts=['1.2.3.4'],
                              cred=['credential1'], port=22)
