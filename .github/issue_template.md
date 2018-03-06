@@ -1,11 +1,8 @@
-# Opening a new issue
-___
-
 ## Specify type:
 - Bug
 - Enhancement
 
-### Bug severity (if applicable):
+### Priority:
 - Blocker
 - High
 - Medium
@@ -15,16 +12,19 @@ ___
 ## Description:
 Provide a description of the issue being raised.
 
-## Acceptance Criteria: 
-_(for enhancements)_
+___
 
-- [ ] Verify that CLI users can start a network scan
-- [ ] Verify that CLI users can pause a network scan
-- [ ] Verify that CLI users can restart a paused network scan
+## Acceptance Criteria:
+
+- [ ] Verify that users can X Y Z
+- [ ] Verify that an expected error is encountered when a user does A B C
 
 ___
 
 ## Bug Report
+
+### Version Information:
+CLI Server Version or commit information.
 
 ### Expected behavior:
 Describe the expected behavior for the program.
