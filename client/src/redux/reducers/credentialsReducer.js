@@ -4,7 +4,8 @@ import { credentialsTypes } from '../constants';
 
 const initialState = {
   persist: {
-    selectedCredentials: []
+    selectedCredentials: [],
+    expandedCredentials: []
   },
 
   view: {
@@ -35,13 +36,9 @@ const selectedIndex = function(state, credential) {
   });
 };
 
-// Update the selected state of each credential
-const selectedCredentials = function(state, credentials) {
-  return credentials.map(nextCredential => {
-    return {
-      ...nextCredential,
-      selected: selectedIndex(state, nextCredential) !== -1
-    };
+const expandedIndex = function(state, credential) {
+  return _.findIndex(state.persist.expandedCredentials, nextSelected => {
+    return nextSelected.id === _.get(credential, 'id');
   });
 };
 
@@ -79,6 +76,37 @@ const credentialsReducer = function(state = initialState, action) {
             ...state.persist.selectedCredentials.slice(0, index),
             ...state.persist.selectedCredentials.slice(index + 1)
           ]
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
+    case credentialsTypes.EXPAND_CREDENTIAL:
+      const expandIndex = expandedIndex(state, action.credential);
+      let newExpansions;
+
+      if (expandIndex === -1) {
+        newExpansions = [...state.persist.expandedCredentials];
+      } else {
+        newExpansions = [
+          ...state.persist.expandedCredentials.slice(0, expandIndex),
+          ...state.persist.expandedCredentials.slice(expandIndex + 1)
+        ];
+      }
+
+      if (action.expandType) {
+        newExpansions.push({
+          id: action.credential.id,
+          expandType: action.expandType
+        });
+      }
+
+      return helpers.setStateProp(
+        'persist',
+        {
+          expandedCredentials: newExpansions
         },
         {
           state,
@@ -303,7 +331,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          credentials: selectedCredentials(state, _.get(action, 'payload.data.results', [])),
+          credentials: _.get(action, 'payload.data.results', []),
           fulfilled: true
         },
         {
@@ -316,7 +344,7 @@ const credentialsReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          credentials: selectedCredentials(state, _.get(action, 'payload.data.results', [])),
+          credentials: _.get(action, 'payload.data.results', []),
           pending: false
         },
         {

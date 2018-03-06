@@ -3,7 +3,8 @@ import credentialsReducer from '../credentialsReducer';
 
 const initialState = {
   persist: {
-    selectedCredentials: []
+    selectedCredentials: [],
+    expandedCredentials: []
   },
 
   view: {

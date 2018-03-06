@@ -98,7 +98,7 @@ class Scans extends React.Component {
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: results
+        message: helpers.getErrorMessageFromResults(results)
       });
     } else {
       Store.dispatch({
