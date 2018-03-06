@@ -830,23 +830,16 @@ def _process_satellite_fact(source, fact):
                             'virtualized_type', fingerprint)
 
     is_virtualized = fact.get('is_virtualized')
+    infrastructure_type = None
     if is_virtualized:
         infrastructure_type = 'virtualized'
-    else:
-        infrastructure_type = 'unknown'
-    add_fact_to_fingerprint(source, 'is_virtualized', fact,
-                            'infrastructure_type', fingerprint,
-                            fact_value=infrastructure_type)
-
-    virtualized_is_guest = \
-        fact.get('virt_type') and \
-        fact.get('virtual_host') != fact.get('hostname')
-    if virtualized_is_guest:
-        infrastructure_type = 'virtualized'
-    elif virtualized_is_guest is False:
+    elif is_virtualized is False:
         infrastructure_type = 'bare metal'
-    else:
-        infrastructure_type = 'unknown'
+    if infrastructure_type:
+        add_fact_to_fingerprint(source, 'is_virtualized', fact,
+                                'infrastructure_type', fingerprint,
+                                fact_value=infrastructure_type)
+
     add_fact_to_fingerprint(source,
                             'virt_type/virtual_host/hostname', fact,
                             'infrastructure_type', fingerprint,
