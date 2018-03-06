@@ -71,3 +71,12 @@
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'have_java and jboss_eap'
+
+# This is similar to the previous command, but works even when the EAP
+# installation is broken.
+- name: run.jar manifest
+  raw: unzip -p "{{ item }}"/jboss-as/bin/run.jar META-INF/MANIFEST.MF
+  register: eap5_home_run_jar_manifest
+  ignore_errors: yes
+  with_items: "{{ eap5_home_candidates }}"
+  when: 'jboss_eap'
