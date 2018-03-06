@@ -131,7 +131,7 @@ class SatelliteFiveTest(TestCase):
         virt = {1: {'id': 1, 'num_virtual_guests': 3}}
         details = self.api.host_details(host_id=1, host_name='sys1',
                                         last_checkin='', virtual_hosts=virt,
-                                        virtual_guests={})
+                                        virtual_guests={}, physical_hosts=[])
         self.assertEqual(details, expected)
 
     @patch('xmlrpc.client.ServerProxy')
@@ -163,7 +163,8 @@ class SatelliteFiveTest(TestCase):
         virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
         details = self.api.host_details(host_id=1, host_name='sys1',
                                         last_checkin='', virtual_hosts=virt,
-                                        virtual_guests={1: 2})
+                                        virtual_guests={1: 2},
+                                        physical_hosts=[])
         self.assertEqual(details, expected)
 
     def test_host_details_skip(self):
@@ -179,7 +180,8 @@ class SatelliteFiveTest(TestCase):
         virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
         detail = self.api.host_details(host_id=1, host_name='sys1',
                                        last_checkin='', virtual_hosts=virt,
-                                       virtual_guests={1: 2})
+                                       virtual_guests={1: 2},
+                                       physical_hosts=[])
         self.assertEqual(len(inspect_result.systems.all()), 1)
         self.assertEqual(detail, {})
 
@@ -192,7 +194,8 @@ class SatelliteFiveTest(TestCase):
         details = self.api.host_details(host_id=1, host_name='sys1',
                                         last_checkin='',
                                         virtual_hosts=virt,
-                                        virtual_guests={1: 2})
+                                        virtual_guests={1: 2},
+                                        physical_hosts=[])
         inspect_result = self.scan_task.inspection_result
         self.assertEqual(len(inspect_result.systems.all()), 1)
         sys_result = inspect_result.systems.all().first()
@@ -228,7 +231,7 @@ class SatelliteFiveTest(TestCase):
 
     @patch('xmlrpc.client.ServerProxy')
     def test_virtual_hosts(self, mock_serverproxy):
-        """Test the virtual_hosts method with an error."""
+        """Test the virtual_hosts method."""
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'
         client.auth.logout.return_value = 'key'
@@ -245,6 +248,25 @@ class SatelliteFiveTest(TestCase):
         self.assertEqual(virtual_guests, virt_guest)
 
     @patch('xmlrpc.client.ServerProxy')
+    def test_physical_hosts_with_err(self, mock_serverproxy):
+        """Test the phyiscal_hosts method with an error."""
+        client = mock_serverproxy.return_value
+        client.auth.login.side_effect = mock_xml_fault
+        with self.assertRaises(SatelliteException):
+            self.api.physical_hosts()
+
+    @patch('xmlrpc.client.ServerProxy')
+    def test_physical_hosts(self, mock_serverproxy):
+        """Test the physical_hosts method."""
+        client = mock_serverproxy.return_value
+        client.auth.login.return_value = 'key'
+        client.auth.logout.return_value = 'key'
+        hosts = [{'id': 1, 'name': 'host1'}]
+        client.system.list_physical_systems.return_value = hosts
+        phyiscal_hosts = self.api.physical_hosts()
+        self.assertEqual(phyiscal_hosts, [1])
+
+    @patch('xmlrpc.client.ServerProxy')
     def test_hosts_facts_with_err(self, mock_serverproxy):
         """Test the hosts_facts method with an error."""
         client = mock_serverproxy.return_value
@@ -255,7 +277,7 @@ class SatelliteFiveTest(TestCase):
     @patch('xmlrpc.client.ServerProxy')
     def test_hosts_facts(self, mock_serverproxy):
         """Test the hosts_facts method."""
-        detail_return_value = {}
+        detail_value = {}
         systems = [{'id': 1, 'name': 'sys1'}]
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'
@@ -263,9 +285,14 @@ class SatelliteFiveTest(TestCase):
         client.system.list_user_systems.return_value = systems
         hosts_return_value = ({}, {})
         with patch.object(SatelliteFive, 'virtual_hosts',
-                          return_value=hosts_return_value) as mock_hosts:
-            with patch.object(SatelliteFive, 'host_details',
-                              return_value=detail_return_value) as mock_detail:
-                self.api.hosts_facts()
-                mock_hosts.assert_called_once_with()
-                mock_detail.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
+                          return_value=hosts_return_value) as mock_vhosts:
+            with patch.object(SatelliteFive, 'physical_hosts',
+                              return_value=[]) as mock_physical:
+                with patch.object(SatelliteFive,
+                                  'host_details',
+                                  return_value=detail_value) as mock_detail:
+                    self.api.hosts_facts()
+                    mock_vhosts.assert_called_once_with()
+                    mock_physical.assert_called_once_with()
+                    mock_detail.assert_called_once_with(ANY, ANY, ANY,
+                                                        ANY, ANY, ANY)

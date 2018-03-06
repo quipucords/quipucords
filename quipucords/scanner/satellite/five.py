@@ -96,7 +96,7 @@ class SatelliteFive(SatelliteInterface):
     # pylint: disable=too-many-arguments, too-many-locals, too-many-statements
     # pylint: disable=too-many-branches
     def host_details(self, host_id, host_name, last_checkin,
-                     virtual_hosts, virtual_guests):
+                     virtual_hosts, virtual_guests, physical_hosts):
         """Obtain the details for a given host id and name.
 
         :param host_id: The identifier of the host
@@ -104,6 +104,7 @@ class SatelliteFive(SatelliteInterface):
         :param last_checkin: The date of last checkin
         :param virtual_hosts: A dictionary of virtual host data
         :param virtual_guests: A dictionary of guest to host data
+        :param physical_hosts: A list of phyiscal host ids
         :returns: dictionary of host details
         """
         if self.inspect_scan_task is None:
@@ -170,6 +171,9 @@ class SatelliteFive(SatelliteInterface):
             details[ENTITLEMENTS] = entitlements
             details[IP_ADDRESSES] = ip_addresses
             details[MAC_ADDRESSES] = mac_addresses
+
+            if host_id in physical_hosts:
+                details[IS_VIRT] = False
 
             if virtual_hosts.get(host_id):
                 virtual_host = virtual_hosts.get(host_id)
@@ -261,6 +265,26 @@ class SatelliteFive(SatelliteInterface):
 
         return(virtual_hosts, virtual_guests)
 
+    def physical_hosts(self):
+        """Obtain the physical host data.
+
+        :returns: list of phyiscal host ids
+        """
+        physical_hosts = []
+        client, user, password = utils.get_sat5_client(self.connect_scan_task)
+        try:
+            key = client.auth.login(user, password)
+            physical_systems = client.system.list_physical_systems(key)
+            for system in physical_systems:
+                host_id = system.get(ID)
+                if host_id:
+                    physical_hosts.append(host_id)
+            client.auth.logout(key)
+        except xmlrpc.client.Fault as xml_error:
+            raise SatelliteException(str(xml_error))
+
+        return physical_hosts
+
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
         if self.inspect_scan_task is None:
@@ -279,10 +303,10 @@ class SatelliteFive(SatelliteInterface):
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
             raise SatelliteException(str(xml_error))
-
         virtual_hosts, virtual_guests = self.virtual_hosts()
+        physical_hosts = self.physical_hosts()
 
         for host in hosts:
             last_checkin = str(host.get(LAST_CHECKIN, ''))
             self.host_details(host.get(ID), host.get(NAME), last_checkin,
-                              virtual_hosts, virtual_guests)
+                              virtual_hosts, virtual_guests, physical_hosts)
