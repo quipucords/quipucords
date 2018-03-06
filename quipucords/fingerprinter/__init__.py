@@ -639,12 +639,6 @@ def _process_network_fact(source, fact):
                             fact, 'subscription_manager_id', fingerprint)
 
     # System information
-    add_fact_to_fingerprint(source, 'cpu_core_per_socket',
-                            fact, 'cpu_core_per_socket', fingerprint)
-    add_fact_to_fingerprint(source, 'cpu_siblings',
-                            fact, 'cpu_siblings', fingerprint)
-    add_fact_to_fingerprint(source, 'cpu_hyperthreading',
-                            fact, 'cpu_hyperthreading', fingerprint)
     add_fact_to_fingerprint(source, 'cpu_socket_count',
                             fact, 'cpu_socket_count', fingerprint)
     add_fact_to_fingerprint(source, 'cpu_core_count',
@@ -717,11 +711,6 @@ def _process_network_fact(source, fact):
     # Determine if VM facts
     add_fact_to_fingerprint(source, 'virt_type', fact,
                             'virtualized_type', fingerprint)
-    add_fact_to_fingerprint(source, 'virt_num_guests',
-                            fact, 'virtualized_num_guests', fingerprint)
-    add_fact_to_fingerprint(source, 'virt_num_running_guests',
-                            fact, 'virtualized_num_running_guests',
-                            fingerprint)
 
     add_entitlements_to_fingerprint(source, 'subman_consumed',
                                     fact, fingerprint)
@@ -773,16 +762,10 @@ def _process_vcenter_fact(source, fact):
             logger.error('Could not parse date %s: %s',
                          fact['vm.last_check_in'], date_err)
 
-    add_fact_to_fingerprint(source, 'vm.memory_size',
-                            fact, 'vm_memory_size', fingerprint)
     add_fact_to_fingerprint(source, 'vm.dns_name', fact,
                             'vm_dns_name', fingerprint)
     add_fact_to_fingerprint(source, 'vm.host.name',
                             fact, 'vm_host', fingerprint)
-    add_fact_to_fingerprint(source, 'vm.host.cpu_cores',
-                            fact, 'vm_host_cpu_cores', fingerprint)
-    add_fact_to_fingerprint(source, 'vm.host.cpu_threads',
-                            fact, 'vm_host_cpu_threads', fingerprint)
     add_fact_to_fingerprint(source, 'vm.host.cpu_count',
                             fact, 'vm_host_socket_count', fingerprint)
     add_fact_to_fingerprint(source, 'vm.datacenter',

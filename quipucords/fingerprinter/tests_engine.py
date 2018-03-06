@@ -57,9 +57,6 @@ class EngineTest(TestCase):
             connection_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
             connection_host='1.2.3.4',
             connection_port=22,
-            cpu_core_per_socket=1,
-            cpu_siblings=1,
-            cpu_hyperthreading=False,
             cpu_socket_count=2,
             cpu_core_count=2,
             date_anaconda_log='2017-06-17',
@@ -108,12 +105,6 @@ class EngineTest(TestCase):
             fact['uname_hostname'] = connection_host
         if connection_port:
             fact['connection_port'] = connection_port
-        if cpu_core_per_socket:
-            fact['cpu_core_per_socket'] = cpu_core_per_socket
-        if cpu_siblings:
-            fact['cpu_siblings'] = cpu_siblings
-        if cpu_hyperthreading is not None:
-            fact['cpu_hyperthreading'] = cpu_hyperthreading
         if cpu_socket_count:
             fact['cpu_socket_count'] = cpu_socket_count
         if cpu_core_count:
@@ -148,11 +139,8 @@ class EngineTest(TestCase):
             vm_name='TestMachine',
             vm_state='On',
             vm_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
-            vm_memory_size=1024,
             vm_dns_name='site.com',
             vm_host_name='1.2.3.4',
-            vm_host_cpu_cores=2,
-            vm_host_cpu_threads=4,
             vm_host_cpu_count=8,
             vm_datacenter='NY',
             vm_cluster='23sd'):
@@ -183,16 +171,10 @@ class EngineTest(TestCase):
             fact['vm.state'] = vm_state
         if vm_uuid:
             fact['vm.uuid'] = vm_uuid
-        if vm_memory_size:
-            fact['vm.memory_size'] = vm_memory_size
         if vm_dns_name:
             fact['vm.dns_name'] = vm_dns_name
         if vm_host_name:
             fact['vm.host.name'] = vm_host_name
-        if vm_host_cpu_cores:
-            fact['vm.host.cpu_cores'] = vm_host_cpu_cores
-        if vm_host_cpu_threads:
-            fact['vm.host.cpu_threads'] = vm_host_cpu_threads
         if vm_host_cpu_count:
             fact['vm.host.cpu_count'] = vm_host_cpu_count
         if vm_datacenter:
@@ -288,12 +270,6 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('subman_virt_uuid'),
                          fingerprint.get('subscription_manager_id'))
 
-        self.assertEqual(fact.get('cpu_core_per_socket'),
-                         fingerprint.get('cpu_core_per_socket'))
-        self.assertEqual(fact.get('cpu_siblings'),
-                         fingerprint.get('cpu_siblings'))
-        self.assertEqual(fact.get('cpu_hyperthreading'),
-                         fingerprint.get('cpu_hyperthreading'))
         self.assertEqual(fact.get('cpu_socket_count'),
                          fingerprint.get('cpu_socket_count'))
         self.assertEqual(fact.get('cpu_core_count'),
@@ -308,10 +284,6 @@ class EngineTest(TestCase):
 
         self.assertEqual(fact.get('virt_type'),
                          fingerprint.get('virtualized_type'))
-        self.assertEqual(fact.get('virt_num_guests'),
-                         fingerprint.get('virtualized_num_guests'))
-        self.assertEqual(fact.get('virt_num_running_guests'),
-                         fingerprint.get('virtualized_num_running_guests'))
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -330,17 +302,11 @@ class EngineTest(TestCase):
                          fingerprint.get('vm_state'))
 
         self.assertEqual(fact.get('vm.uuid'), fingerprint.get('vm_uuid'))
-        self.assertEqual(fact.get('vm.memory_size'),
-                         fingerprint.get('vm_memory_size'))
 
         self.assertEqual(fact.get('vm.dns_name'),
                          fingerprint.get('vm_dns_name'))
         self.assertEqual(fact.get('vm.host.name'),
                          fingerprint.get('vm_host'))
-        self.assertEqual(fact.get('vm.host.cpu_cores'),
-                         fingerprint.get('vm_host_cpu_cores'))
-        self.assertEqual(fact.get('vm.host.cpu_threads'),
-                         fingerprint.get('vm_host_cpu_threads'))
 
         self.assertEqual(fact.get('vm.host.cpu_count'),
                          fingerprint.get('vm_host_socket_count'))
@@ -640,10 +606,7 @@ class EngineTest(TestCase):
 
         self.assertIsNone(nfingerprint.get('vm_state'))
         self.assertIsNone(nfingerprint.get('vm_uuid'))
-        self.assertIsNone(nfingerprint.get('vm_memory_size'))
         self.assertIsNone(nfingerprint.get('vm_dns_name'))
-        self.assertIsNone(nfingerprint.get('vm_host_cpu_cores'))
-        self.assertIsNone(nfingerprint.get('vm_host_cpu_threads'))
         self.assertIsNone(nfingerprint.get('vm_host_socket_count'))
         self.assertIsNone(nfingerprint.get('vm_datacenter'))
         self.assertIsNone(nfingerprint.get('vm_cluster'))
@@ -652,9 +615,6 @@ class EngineTest(TestCase):
         self.assertIsNone(vfingerprint.get('os_version'))
         self.assertIsNone(vfingerprint.get('bios_uuid'))
         self.assertIsNone(vfingerprint.get('subscription_manager_id'))
-        self.assertIsNone(vfingerprint.get('cpu_core_per_socket'))
-        self.assertIsNone(vfingerprint.get('cpu_siblings'))
-        self.assertIsNone(vfingerprint.get('cpu_hyperthreading'))
         self.assertIsNone(vfingerprint.get('cpu_socket_count'))
         self.assertIsNone(vfingerprint.get('cpu_core_count'))
 
@@ -662,10 +622,7 @@ class EngineTest(TestCase):
 
         self.assertIsNotNone(new_fingerprint.get('vm_state'))
         self.assertIsNotNone(new_fingerprint.get('vm_uuid'))
-        self.assertIsNotNone(new_fingerprint.get('vm_memory_size'))
         self.assertIsNotNone(new_fingerprint.get('vm_dns_name'))
-        self.assertIsNotNone(new_fingerprint.get('vm_host_cpu_cores'))
-        self.assertIsNotNone(new_fingerprint.get('vm_host_cpu_threads'))
         self.assertIsNotNone(new_fingerprint.get('vm_host_socket_count'))
         self.assertIsNotNone(new_fingerprint.get('vm_datacenter'))
         self.assertIsNotNone(new_fingerprint.get('vm_cluster'))
@@ -675,9 +632,6 @@ class EngineTest(TestCase):
         self.assertIsNotNone(new_fingerprint.get('os_version'))
         self.assertIsNotNone(new_fingerprint.get('bios_uuid'))
         self.assertIsNotNone(new_fingerprint.get('subscription_manager_id'))
-        self.assertIsNotNone(new_fingerprint.get('cpu_core_per_socket'))
-        self.assertIsNotNone(new_fingerprint.get('cpu_siblings'))
-        self.assertIsNotNone(new_fingerprint.get('cpu_hyperthreading'))
         self.assertIsNotNone(new_fingerprint.get('cpu_socket_count'))
         self.assertIsNotNone(new_fingerprint.get('cpu_core_count'))
 
