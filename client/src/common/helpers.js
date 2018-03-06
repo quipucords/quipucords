@@ -171,55 +171,23 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 
 const getErrorMessageFromResults = results => {
   let responseData = _.get(results, 'response.data', results.message);
-  let message = '';
 
   if (responseData instanceof String) {
     return responseData;
   }
 
-  if (responseData.forEach !== undefined) {
-    _.forEach(responseData, errCase => {
-      if (message !== '') {
-        message += '\n';
+  const getMessages = messageObject => {
+    return _.map(messageObject, next => {
+      if (_.isString(next)) {
+        return next;
       }
-      message += `Error: ${errCase}`;
+      if (_.isArray(next)) {
+        return getMessages(next);
+      }
     });
-    return message;
-  }
+  };
 
-  const keys = _.keys(responseData);
-  const hasDetails = keys.find(key => {
-    return key === 'non_field_errors' || key === 'detail' || key === 'options';
-  });
-
-  _.forEach(keys, key => {
-    let errorContext = 'Error';
-    if (key !== 'non_field_errors' && key !== 'detail' && key !== 'options') {
-      errorContext = key;
-    }
-    if (responseData[key] instanceof String) {
-      if (message !== '') {
-        message += '\n';
-      }
-      message += `${errorContext}: ${responseData[key]}`;
-    } else if (responseData[key].forEach !== undefined) {
-      if (errorContext !== key || !hasDetails) {
-        _.forEach(responseData[key], errCase => {
-          if (message !== '') {
-            message += '\n';
-          }
-          message += `${errorContext}: ${errCase}`;
-        });
-      }
-    } else {
-      if (message !== '') {
-        message += '\n';
-      }
-      message += `${errorContext}: ${responseData[key]}`;
-    }
-  });
-
-  return message || results.message;
+  return _.join(getMessages(responseData), '\n');
 };
 
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
