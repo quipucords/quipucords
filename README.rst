@@ -12,10 +12,10 @@
     :alt: Documentation Status
     :scale: 100%
     :target: https://quipucords.readthedocs.io/en/latest/?badge=latest
-.. image:: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/status_image/last_build.png
+.. image:: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/package/qpc/status_image/last_build.png
     :alt: CLI RPM Build Status
     :scale: 100%
-    :target: https://copr.fedorainfracloud.org/coprs/chambridge/qpc/package/qpc/
+    :target: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/
 
 quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment
 ===================================================================================================================
@@ -60,16 +60,16 @@ quipucords is delivered with an RPM command line tool and a server container ima
 
 Command Line
 ^^^^^^^^^^^^
-qpc is available for `download <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_ from the Fedora COPR.
+qpc is available for `download <https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/>`_ from the Fedora COPR.
 
 1. Enable the EPEL repo for the server. You can find the appropriate architecture and version on the `EPEL wiki <https://fedoraproject.org/wiki/EPEL>`_::
 
     rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
-2. Add the COPR repo to your server. You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/chambridge/qpc/>`_::
+2. Add the COPR repo to your server. You can find the appropriate architecture and version on the `COPR qpc page <https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/>`_::
 
-    wget -O /etc/yum.repos.d/chambridge-qpc-epel-7.repo \
-    https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/epel-7/chambridge-qpc-epel-7.repo
+    wget -O /etc/yum.repos.d/group_quipucords-qpc-epel-7.repo \
+    https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo
 
 3. Install the qpc package::
 
