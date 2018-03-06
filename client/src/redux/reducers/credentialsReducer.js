@@ -133,7 +133,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
+          errorMessage: helpers.getErrorMessageFromResults(action.payload),
           pending: false,
           add: true
         },
@@ -149,7 +149,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
+          errorMessage: helpers.getErrorMessageFromResults(action.payload),
           delete: true,
           pending: false
         },
@@ -164,7 +164,7 @@ const credentialsReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
+          errorMessage: helpers.getErrorMessageFromResults(action.payload),
           pending: false,
           edit: true
         },
@@ -180,7 +180,7 @@ const credentialsReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,

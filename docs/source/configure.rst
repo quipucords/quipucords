@@ -16,17 +16,17 @@ The following steps guide you through those choices.
 1. Accept or change the default exposed server port to use for HTTPS communication. By default, the server exposes port 443, which is the standard HTTPS port. You can choose to use that port or remap the port to be used on your server.
 
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
-   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the followng option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
+   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of thse three options.
+2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
-   \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``:
+   \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
-    ``# mkdir -p ~/quipucords``
+    # mkdir -p ~/quipucords
 
-   \b. Change to that home directory. For example:
+   \b. Change to that home directory. For example::
 
-    ``# cd ~/quipucords``
+    # cd ~/quipucords
 
    \c. Create subdirectories to house the SSH keys, (``~/quipucords/sshkeys``), database (``~/quipucords/data``), and log output (``~/quipucords/log``). For example::
 
@@ -50,7 +50,7 @@ These commands start the server on port ``443`` and map the ``sshkeys``, ``data`
 
 To view the status of the server after it is running, enter the following command::
 
-  # docker ps
+  # sudo docker ps
 
 Changing the Default Password for the Quipucords Server
 -------------------------------------------------------
@@ -80,24 +80,24 @@ The ``qpc server config`` command takes the following options:
 - The ``--host`` option is required. If you are using the qpc command line tool on the same system where the server is running, you can supply the loopback address ``127.0.0.1`` as the value. Otherwise, supply the IP address for your Quipucords server.
 - The ``--port`` option is optional. The default value for this option is ``443``. If you decided to remap the Quipucords default exposed server port to another port, the port option is required. You must supply the port option and the remapped value in the command, for example, ``--port 8443``.
 
-For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool:
+For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool::
 
-  ``# qpc server config --host 127.0.0.1``
+  # qpc server config --host 127.0.0.1
 
-However, if you are configuring the command line tool on a system that is remote from the server, the Quipucords server is running on the IP address 192.0.2.0, and the port is remapped to 8443, you would enter the following command to configure the qpc command line tool:
+However, if you are configuring the command line tool on a system that is remote from the server, the Quipucords server is running on the IP address 192.0.2.0, and the port is remapped to 8443, you would enter the following command to configure the qpc command line tool::
 
-  ``# qpc server config --host 192.0.2.0 --port 8443``
+  # qpc server config --host 192.0.2.0 --port 8443
 
 .. _login:
 
-Logging in to and Logging out of the qpc Command Line Interface
----------------------------------------------------------------
-After the connection between the qpc command line tool and the Quipcords server is configured on the system where you want to use the qpc command line interface, you can log in to the interface and begin using it to run qpc commands.
+Logging in to the Quipucords Server
+-----------------------------------
+After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run qpc commands.
 
-To log in to the qpc command line interface, enter the following command:
+1. To log in to the server, enter the following command::
 
-  ``# qpc server login``
+  # qpc server login
 
-The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server. To log out of the server, enter the following command:
+2. Enter the server user name and password at the prompts.
 
-  ``# qpc server logout``
+The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server, and expires daily.
