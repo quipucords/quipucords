@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { reportsTypes } from '../constants';
 
@@ -31,7 +30,7 @@ const reportsReducer = function(state = initialState, action) {
         'deployments',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -45,7 +44,7 @@ const reportsReducer = function(state = initialState, action) {
         'details',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
