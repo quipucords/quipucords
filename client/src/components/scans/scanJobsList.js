@@ -9,44 +9,14 @@ import helpers from '../../common/helpers';
 class ScanJobsList extends React.Component {
   renderJob(job) {
     const { onSummaryDownload, onDetailedDownload } = this.props;
-    let scanDescription = '';
+    let scanDescription = helpers.scanStatusString(job.status);
 
-    let icon = null;
     let scanTime = _.get(job, 'end_time');
+    let statusIconInfo = helpers.scanStatusIcon(job.status);
+    let icon = <Icon className="scan-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />;
 
-    switch (job.status) {
-      case 'completed':
-        scanDescription = 'Complete';
-        icon = <Icon className="scan-job-status-icon" type="pf" name="ok" />;
-        break;
-      case 'failed':
-        scanDescription = 'Failed';
-        icon = <Icon className="scan-job-status-icon" type="pf" name="error-circle-o" />;
-        break;
-      case 'canceled':
-        scanDescription = 'Canceled';
-        icon = <Icon className="scan-job-status-icon" type="pf" name="error-circle-o" />;
-        break;
-      case 'created':
-        scanDescription = 'Created';
-        icon = <Icon className="scan-job-status-icon invisible" type="fa" name="spinner" />;
-        break;
-      case 'pending':
-        scanDescription = 'Pending';
-        icon = <Icon className="scan-job-status-icon invisible" type="fa" name="spinner" />;
-        scanTime = _.get(job, 'start_time');
-        break;
-      case 'running':
-        scanDescription = 'In Progress';
-        icon = <Icon className="scan-job-status-icon fa-spin" type="fa" name="spinner" />;
-        scanTime = _.get(job, 'start_time');
-        break;
-      case 'paused':
-        scanDescription = 'Paused';
-        icon = <Icon className="scan-job-status-icon" type="pf" name="warning-triangle-o" />;
-        break;
-      default:
-        return null;
+    if (job.status === 'pending' || job.status === 'running') {
+      scanTime = _.get(job, 'start_time');
     }
 
     return (

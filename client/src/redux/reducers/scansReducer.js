@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { scansTypes } from '../constants';
 
@@ -59,7 +58,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -103,7 +102,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -147,7 +146,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -191,7 +190,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -236,7 +235,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           add: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -295,7 +294,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           start: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -340,7 +339,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           cancel: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -385,7 +384,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           pause: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
@@ -430,7 +429,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           restart: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
