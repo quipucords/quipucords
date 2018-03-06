@@ -43,6 +43,20 @@
   > .container-fluid {
     width: 100%;
   }
+
+  .toolbar-pf {
+    .refresh-button.btn-link {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+
+    .last-refresh-time {
+      font-size: $font-size-small;
+      margin-left: 5px;
+      position: relative;
+      top: -1px;
+    }
+  }
 }
 
 // List container should scroll

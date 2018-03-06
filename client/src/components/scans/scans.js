@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
+import { Alert, Button, EmptyState, ListView, Modal } from 'patternfly-react';
 
 import { getScans, startScan, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
 import { getReportDeploymentsCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
@@ -23,6 +23,7 @@ class Scans extends React.Component {
     super();
 
     helpers.bindMethods(this, [
+      'doUpdate',
       'downloadSummaryReport',
       'downloadDetailedReport',
       'doPauseScan',
@@ -35,8 +36,11 @@ class Scans extends React.Component {
     ]);
 
     this.state = {
-      selectedItems: []
+      lastRefresh: null
     };
+
+    this.pollingInterval = null;
+    this.mounted = false;
   }
 
   componentDidMount() {
@@ -45,13 +49,15 @@ class Scans extends React.Component {
         scan_type: 'inspect'
       })
     );
+    this.mounted = true;
+  }
+
+  componentWillUnmount() {
+    this.stopPolling();
+    this.mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scans && nextProps.scans !== this.props.scans) {
-      this.setState({ selectedItems: [] });
-    }
-
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
       this.props.getScans(
@@ -59,6 +65,28 @@ class Scans extends React.Component {
           scan_type: 'inspect'
         })
       );
+    }
+
+    if (nextProps.fulfilled && !this.props.fulfilled) {
+      this.setState({ lastRefresh: Date.now() });
+      this.startPolling();
+    }
+  }
+
+  doUpdate() {
+    this.forceUpdate();
+  }
+
+  startPolling() {
+    if (!this.pollingInterval && this.mounted) {
+      this.pollingInterval = setInterval(this.doUpdate, 3000);
+    }
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
   }
 
@@ -173,16 +201,6 @@ class Scans extends React.Component {
     });
   }
 
-  renderScanActions() {
-    return (
-      <div className="form-group">
-        <Button onClick={this.refresh} bsStyle="success">
-          <Icon type="fa" name="refresh" />
-        </Button>
-      </div>
-    );
-  }
-
   renderPendingMessage() {
     const { pending } = this.props;
 
@@ -235,6 +253,7 @@ class Scans extends React.Component {
 
   render() {
     const { error, errorMessage, scans, viewOptions } = this.props;
+    const { lastRefresh } = this.state;
 
     if (error) {
       return (
@@ -255,7 +274,8 @@ class Scans extends React.Component {
               viewType={viewTypes.SCANS_VIEW}
               filterFields={ScanFilterFields}
               sortFields={ScanSortFields}
-              actions={this.renderScanActions()}
+              onRefresh={this.refresh}
+              lastRefresh={lastRefresh}
               itemsType="Scan"
               itemsTypePlural="Scans"
               {...viewOptions}
@@ -285,6 +305,7 @@ Scans.propTypes = {
   restartScan: PropTypes.func,
   getReportDeploymentsCsv: PropTypes.func,
   getReportDetailsCsv: PropTypes.func,
+  fulfilled: PropTypes.bool,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
