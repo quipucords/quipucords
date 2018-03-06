@@ -43,7 +43,7 @@ class SourceListItem extends React.Component {
             })
             .catch(error => {
               item.scanResultsPending = false;
-              item.scanResultsError = _.get(error.payload, 'response.request.responseText', error.payload.message);
+              item.scanResultsError = _.get(error.payload, 'response.data.detail', error.payload.message);
             })
             .finally(() => {
               item.scanResultsPending = false;

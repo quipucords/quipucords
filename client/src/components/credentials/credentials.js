@@ -75,7 +75,7 @@ class Credentials extends React.Component {
       this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
     }
 
-    if (this.props.update.delete) {
+    if (_.get(nextProps, 'update.delete')) {
       if (nextProps.update.fulfilled && !this.props.update.fulfilled) {
         Store.dispatch({
           type: toastNotificationTypes.TOAST_ADD,
@@ -103,7 +103,7 @@ class Credentials extends React.Component {
           header: 'Error',
           message: (
             <span>
-              Error removing credential <strong>{this.deletingCredential}</strong>
+              Error removing credential <strong>{this.deletingCredential.name}</strong>
               <p>{nextProps.update.errorMessage}</p>
             </span>
           )

@@ -93,7 +93,7 @@ function addSourceWizardReducer(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -106,7 +106,7 @@ function addSourceWizardReducer(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
