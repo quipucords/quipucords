@@ -43,7 +43,7 @@ class ScanListItem extends React.Component {
             })
             .catch(error => {
               item.scanResultsPending = false;
-              item.scanResultsError = _.get(error.payload, 'response.data.detail', error.payload.message);
+              item.scanResultsError = helpers.getErrorMessageFromResults(error.payload);
             })
             .finally(() => {
               item.scanResultsPending = false;
@@ -62,7 +62,7 @@ class ScanListItem extends React.Component {
             })
             .catch(error => {
               item.scanJobsPending = false;
-              item.scanJobsError = _.get(error.payload, 'response.data.detail', error.payload.message);
+              item.scanJobsError = helpers.getErrorMessageFromResults(error.payload);
             })
             .finally(() => {
               item.scanJobsPending = false;
@@ -83,56 +83,28 @@ class ScanListItem extends React.Component {
   renderDescription() {
     const { item } = this.props;
 
-    let scanDescription = '';
-
-    let icon = null;
     let scanTime = _.get(item, 'most_recent.end_time');
+    let scanStatus = _.get(item, 'most_recent.status');
+    let statusIconInfo = helpers.scanStatusIcon(scanStatus);
+    let icon = statusIconInfo ? (
+      <Icon className="scan-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />
+    ) : null;
 
-    switch (_.get(item, 'most_recent.status')) {
-      case 'completed':
-        scanDescription = 'Last Scanned';
-        icon = <Icon className="scan-status-icon" type="pf" name="ok" />;
-        break;
-      case 'failed':
-        scanDescription = 'Scan Failed';
-        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
-        break;
-      case 'canceled':
-        scanDescription = 'Scan Canceled';
-        icon = <Icon className="scan-status-icon" type="pf" name="error-circle-o" />;
-        break;
-      case 'created':
-        scanDescription = 'Scan Created';
-        icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
-        break;
-      case 'pending':
-        scanDescription = 'Scan Pending';
-        icon = <Icon className="scan-status-icon invisible" type="fa" name="spinner" />;
-        scanTime = _.get(item, 'most_recent.start_time');
-        break;
-      case 'running':
-        scanDescription = 'Scan in Progress';
-        icon = <Icon className="scan-status-icon fa-spin" type="fa" name="spinner" />;
-        scanTime = _.get(item, 'most_recent.start_time');
-        break;
-      case 'paused':
-        scanDescription = 'Scan Paused';
-        icon = <Icon className="scan-status-icon" type="pf" name="warning-triangle-o" />;
-        break;
-      default:
-        return null;
+    if (scanStatus === 'pending' || scanStatus === 'running') {
+      scanTime = _.get(item, 'most_recent.start_time');
     }
 
     return (
       <div className="scan-description">
         {icon}
         <div className="scan-status-text">
-          <div>{scanDescription}</div>
+          <div>{_.get(item, 'most_recent.status_details.job_status_message', 'Scan created')}</div>
           <div className="text-muted">
-            {moment
-              .utc(scanTime)
-              .utcOffset(moment().utcOffset())
-              .fromNow()}
+            {scanTime &&
+              moment
+                .utc(scanTime)
+                .utcOffset(moment().utcOffset())
+                .fromNow()}
           </div>
         </div>
       </div>
