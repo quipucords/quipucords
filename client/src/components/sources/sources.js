@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
+import { Alert, Button, EmptyState, ListView, Modal } from 'patternfly-react';
 
 import { getSources, deleteSource } from '../../redux/actions/sourcesActions';
 import {
@@ -29,6 +29,7 @@ class Sources extends React.Component {
     super();
 
     helpers.bindMethods(this, [
+      'doUpdate',
       'scanSource',
       'scanSources',
       'itemSelectChange',
@@ -42,16 +43,26 @@ class Sources extends React.Component {
     this.state = {
       scanDialogShown: false,
       multiSourceScan: false,
-      currentScanSource: null
+      currentScanSource: null,
+      lastRefresh: null
     };
+
+    this.pollingInterval = null;
+    this.mounted = false;
   }
 
   componentDidMount() {
     this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
+    this.mounted = true;
+  }
+
+  componentWillUnmount() {
+    this.stopPolling();
+    this.mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
-    const { viewOptions, updated, deleted } = this.props;
+    const { viewOptions, updated, deleted, fulfilled } = this.props;
 
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
@@ -60,6 +71,28 @@ class Sources extends React.Component {
 
     if ((nextProps.updated && !updated) || (nextProps.deleted && !deleted)) {
       this.refresh();
+    }
+
+    if (nextProps.fulfilled && !fulfilled) {
+      this.setState({ lastRefresh: Date.now() });
+      this.startPolling();
+    }
+  }
+
+  doUpdate() {
+    this.forceUpdate();
+  }
+
+  startPolling() {
+    if (!this.pollingInterval && this.mounted) {
+      this.pollingInterval = setInterval(this.doUpdate, 3000);
+    }
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
   }
 
@@ -190,9 +223,6 @@ class Sources extends React.Component {
         <Button disabled={!selectedSources || selectedSources.length === 0} onClick={this.scanSources}>
           Scan
         </Button>
-        <Button onClick={this.refresh} bsStyle="success">
-          <Icon type="fa" name="refresh" />
-        </Button>
       </div>
     );
   }
@@ -248,7 +278,7 @@ class Sources extends React.Component {
 
   render() {
     const { error, errorMessage, sources, selectedSources, viewOptions } = this.props;
-    const { scanDialogShown, multiSourceScan, currentScanSource } = this.state;
+    const { scanDialogShown, multiSourceScan, currentScanSource, lastRefresh } = this.state;
 
     if (error) {
       return (
@@ -269,6 +299,8 @@ class Sources extends React.Component {
               viewType={viewTypes.SOURCES_VIEW}
               filterFields={SourceFilterFields}
               sortFields={SourceSortFields}
+              onRefresh={this.refresh}
+              lastRefresh={lastRefresh}
               actions={this.renderSourceActions()}
               itemsType="Source"
               itemsTypePlural="Sources"
@@ -305,7 +337,9 @@ Sources.propTypes = {
   pending: PropTypes.bool,
   sources: PropTypes.array,
   selectedSources: PropTypes.array,
+  lastRefresh: PropTypes.object,
   viewOptions: PropTypes.object,
+  fulfilled: PropTypes.bool,
   updated: PropTypes.bool,
   deleted: PropTypes.bool
 };

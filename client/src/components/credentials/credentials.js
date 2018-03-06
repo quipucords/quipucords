@@ -3,18 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import {
-  Alert,
-  Button,
-  DropdownButton,
-  EmptyState,
-  Form,
-  Grid,
-  Icon,
-  ListView,
-  MenuItem,
-  Modal
-} from 'patternfly-react';
+import { Alert, Button, DropdownButton, EmptyState, Form, Grid, ListView, MenuItem, Modal } from 'patternfly-react';
 
 import { getCredentials, deleteCredential } from '../../redux/actions/credentialsActions';
 import {
@@ -41,6 +30,7 @@ class Credentials extends React.Component {
     super();
 
     helpers.bindMethods(this, [
+      'doUpdate',
       'addCredential',
       'deleteCredentials',
       'itemSelectChange',
@@ -52,13 +42,26 @@ class Credentials extends React.Component {
 
     this.credentialsToDelete = [];
     this.deletingCredential = null;
+
+    this.state = {
+      lastRefresh: null
+    };
+
+    this.pollingInterval = null;
+    this.mounted = false;
   }
 
   componentDidMount() {
     this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
+    this.mounted = true;
   }
 
-  componentWillReceiveProps(nextProps, nextState) {
+  componentWillUnmount() {
+    this.stopPolling();
+    this.mounted = false;
+  }
+
+  componentWillReceiveProps(nextProps) {
     if (nextProps.credentials !== this.props.credentials) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
@@ -68,6 +71,11 @@ class Credentials extends React.Component {
           credential.auth_type = 'usernamePassword';
         }
       });
+
+      if (nextProps.fulfilled && !this.props.fulfilled) {
+        this.setState({ lastRefresh: Date.now() });
+        this.startPolling();
+      }
     }
 
     // Check for changes resulting in a fetch
@@ -111,6 +119,23 @@ class Credentials extends React.Component {
 
         this.deleteNextCredential();
       }
+    }
+  }
+
+  doUpdate() {
+    this.forceUpdate();
+  }
+
+  startPolling() {
+    if (!this.pollingInterval && this.mounted) {
+      this.pollingInterval = setInterval(this.doUpdate, 3000);
+    }
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
   }
 
@@ -257,9 +282,6 @@ class Credentials extends React.Component {
         <Button disabled={!selectedCredentials || selectedCredentials.length === 0} onClick={this.deleteCredentials}>
           Delete
         </Button>
-        <Button onClick={this.refresh} bsStyle="success">
-          <Icon type="fa" name="refresh" />
-        </Button>
       </div>
     );
   }
@@ -314,6 +336,7 @@ class Credentials extends React.Component {
 
   render() {
     const { error, errorMessage, credentials, selectedCredentials, viewOptions } = this.props;
+    const { lastRefresh } = this.state;
 
     if (error) {
       return (
@@ -334,6 +357,8 @@ class Credentials extends React.Component {
               viewType={viewTypes.CREDENTIALS_VIEW}
               filterFields={CredentialFilterFields}
               sortFields={CredentialSortFields}
+              onRefresh={this.refresh}
+              lastRefresh={lastRefresh}
               actions={this.renderCredentialActions()}
               itemsType="Credential"
               itemsTypePlural="Credentials"
@@ -362,6 +387,7 @@ class Credentials extends React.Component {
 Credentials.propTypes = {
   getCredentials: PropTypes.func,
   deleteCredential: PropTypes.func,
+  fulfilled: PropTypes.bool,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,

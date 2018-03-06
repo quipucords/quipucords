@@ -1,8 +1,9 @@
 import _ from 'lodash';
+import * as moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
+import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
@@ -208,6 +209,25 @@ class ViewToolbar extends React.Component {
     return null;
   }
 
+  renderRefresh() {
+    const { onRefresh, lastRefresh } = this.props;
+
+    return (
+      <div className="form-group">
+        <Button onClick={onRefresh} bsStyle="link" className="refresh-button">
+          <Icon type="fa" name="refresh" />
+          <span className="last-refresh-time">
+            Refreshed{' '}
+            {moment
+              .utc(lastRefresh)
+              .utcOffset(moment().utcOffset())
+              .fromNow()}
+          </span>
+        </Button>
+      </div>
+    );
+  }
+
   renderCounts() {
     const { totalCount, selectedCount, itemsType, itemsTypePlural } = this.props;
 
@@ -251,6 +271,7 @@ class ViewToolbar extends React.Component {
       <Toolbar>
         {this.renderFilter()}
         {this.renderSort()}
+        {this.renderRefresh()}
         <Toolbar.RightContent>{actions}</Toolbar.RightContent>
         <Toolbar.Results>
           {this.renderActiveFilters()}
@@ -267,6 +288,8 @@ ViewToolbar.propTypes = {
   selectedCount: PropTypes.number,
   filterFields: PropTypes.array,
   sortFields: PropTypes.array,
+  onRefresh: PropTypes.func,
+  lastRefresh: PropTypes.number,
   actions: PropTypes.node,
   itemsType: PropTypes.string,
   itemsTypePlural: PropTypes.string,
