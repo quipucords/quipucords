@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, Icon, ListView, Modal } from 'patternfly-react';
 
 import { getSources, deleteSource } from '../../redux/actions/sourcesActions';
-import { addScan } from '../../redux/actions/scansActions';
 import {
   sourcesTypes,
   toastNotificationTypes,
@@ -65,23 +64,27 @@ class Sources extends React.Component {
   }
 
   notifyDeleteStatus(item, error, results) {
-    if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'error',
-        header: 'Error',
-        message: _.get(results, 'response.data.detail', results.message)
-      });
-    } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'success',
-        message: (
-          <span>
-            Deleted source <strong>{_.get(item, 'name')}</strong>.
-          </span>
-        )
-      });
+    try {
+      if (error) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'error',
+          header: 'Error',
+          message: helpers.getErrorMessageFromResults(results)
+        });
+      } else {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'success',
+          message: (
+            <span>
+              Deleted source <strong>{_.get(item, 'name')}</strong>.
+            </span>
+          )
+        });
+      }
+    } catch (e) {
+      console.dir(e);
     }
   }
 
@@ -297,7 +300,6 @@ class Sources extends React.Component {
 Sources.propTypes = {
   getSources: PropTypes.func,
   deleteSource: PropTypes.func,
-  addScan: PropTypes.func,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
@@ -310,8 +312,7 @@ Sources.propTypes = {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   getSources: queryObj => dispatch(getSources(queryObj)),
-  deleteSource: id => dispatch(deleteSource(id)),
-  addScan: data => dispatch(addScan(data))
+  deleteSource: id => dispatch(deleteSource(id))
 });
 
 const mapStateToProps = function(state) {

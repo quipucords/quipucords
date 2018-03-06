@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 const bindMethods = (context, methods) => {
   methods.forEach(method => {
     context[method] = context[method].bind(context);
@@ -77,6 +79,24 @@ const scanStatusString = scanStatus => {
   }
 };
 
+const scanStatusIcon = scanStatus => {
+  switch (scanStatus) {
+    case 'completed':
+      return { type: 'pf', name: 'ok' };
+    case 'failed':
+    case 'canceled':
+      return { type: 'pf', name: 'error-circle-o' };
+    case 'created':
+    case 'pending':
+    case 'running':
+      return { type: 'fa', name: 'spinner' };
+    case 'paused':
+      return { type: 'pf', name: 'warning-triangle-o' };
+    default:
+      return null;
+  }
+};
+
 const authorizationTypeString = authorizationType => {
   switch (authorizationType) {
     case 'usernamePassword':
@@ -149,6 +169,27 @@ const createViewQueryObject = (viewOptions, queryObj) => {
   return queryObject;
 };
 
+const getErrorMessageFromResults = results => {
+  let responseData = _.get(results, 'response.data', results.message);
+
+  if (responseData instanceof String) {
+    return responseData;
+  }
+
+  const getMessages = messageObject => {
+    return _.map(messageObject, next => {
+      if (_.isString(next)) {
+        return next;
+      }
+      if (_.isArray(next)) {
+        return getMessages(next);
+      }
+    });
+  };
+
+  return _.join(getMessages(responseData), '\n');
+};
+
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
 const normalizeCount = (count, modulus = 100) => {
   return Math.abs(count) % modulus;
@@ -163,10 +204,12 @@ export const helpers = {
   scanTypeString,
   scanStatusString,
   scanTypeIcon,
+  scanStatusIcon,
   authorizationTypeString,
   setStateProp,
   viewPropsChanged,
   createViewQueryObject,
+  getErrorMessageFromResults,
   DEV_MODE,
   normalizeCount
 };

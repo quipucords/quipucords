@@ -80,7 +80,7 @@ const sourcesReducer = function(state = initialState, action) {
         'update',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
+          errorMessage: helpers.getErrorMessageFromResults(action.payload),
           delete: true
         },
         {
@@ -122,7 +122,7 @@ const sourcesReducer = function(state = initialState, action) {
         'view',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
         },
         {
           state,
