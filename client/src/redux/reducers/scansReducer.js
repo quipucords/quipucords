@@ -59,7 +59,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -103,7 +103,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -147,7 +147,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -191,7 +191,7 @@ const scansReducer = function(state = initialState, action) {
         {
           pending: false,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -236,7 +236,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           add: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -273,6 +273,20 @@ const scansReducer = function(state = initialState, action) {
         }
       );
 
+    case scansTypes.ADD_SCAN_RESET_STATUS:
+      return helpers.setStateProp(
+        'action',
+        {
+          error: false,
+          errorMessage: '',
+          fulfilled: false
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
     // Error/Rejected
     case scansTypes.START_SCAN_REJECTED:
       return helpers.setStateProp(
@@ -281,7 +295,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           start: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -326,7 +340,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           cancel: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -371,7 +385,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           pause: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -416,7 +430,7 @@ const scansReducer = function(state = initialState, action) {
           pending: false,
           restart: true,
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,

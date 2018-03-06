@@ -110,8 +110,8 @@ describe('CredentialsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'ADD ERROR'
+          data: {
+            detail: 'ADD ERROR'
           }
         }
       }
@@ -135,8 +135,8 @@ describe('CredentialsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'DELETE ERROR'
+          data: {
+            detail: 'DELETE ERROR'
           }
         }
       }
@@ -160,8 +160,8 @@ describe('CredentialsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'UPDATE ERROR'
+          data: {
+            detail: 'UPDATE ERROR'
           }
         }
       }
@@ -185,8 +185,8 @@ describe('CredentialsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }
@@ -331,214 +331,4 @@ describe('CredentialsReducer', function() {
     resultState = credentialsReducer(resultState, dispatched);
     expect(resultState.persist.selectedCredentials).toHaveLength(2);
   });
-
-  /*
-    // Error/Rejected
-    case credentialsTypes.ADD_CREDENTIAL_REJECTED:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          pending: false
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.DELETE_CREDENTIAL_REJECTED:
-    case credentialsTypes.DELETE_CREDENTIALS_REJECTED:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          delete: true,
-          pending: false
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.UPDATE_CREDENTIAL_REJECTED:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
-          pending: false
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.GET_CREDENTIAL_REJECTED:
-    case credentialsTypes.GET_CREDENTIALS_REJECTED:
-      return helpers.setStateProp(
-        'view',
-        {
-          error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    // Loading/Pending
-    case credentialsTypes.ADD_CREDENTIAL_PENDING:
-      return helpers.setStateProp(
-        'update',
-        {
-          pending: true
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.DELETE_CREDENTIAL_PENDING:
-    case credentialsTypes.DELETE_CREDENTIALS_PENDING:
-      return helpers.setStateProp(
-        'update',
-        {
-          pending: true,
-          delete: true,
-          fulfilled: false
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.UPDATE_CREDENTIAL_PENDING:
-      return helpers.setStateProp(
-        'update',
-        {
-          pending: true
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.GET_CREDENTIAL_PENDING:
-    case credentialsTypes.GET_CREDENTIALS_PENDING:
-      return helpers.setStateProp(
-        'view',
-        {
-          pending: true,
-          credentials: state.view.credentials
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    // Success/Fulfilled
-    case credentialsTypes.ADD_CREDENTIAL_FULFILLED:
-      return helpers.setStateProp(
-        'update',
-        {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.DELETE_CREDENTIAL_FULFILLED:
-    case credentialsTypes.DELETE_CREDENTIALS_FULFILLED:
-      return helpers.setStateProp(
-        'update',
-        {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          delete: true,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.UPDATE_CREDENTIAL_FULFILLED:
-      return helpers.setStateProp(
-        'update',
-        {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.GET_CREDENTIAL_FULFILLED:
-    case credentialsTypes.GET_CREDENTIALS_FULFILLED:
-      // Get resulting credentials and update the selected state of each
-      const credentials = _.get(action, 'payload.data.results', []).map(nextCredential => {
-        return {
-          ...nextCredential,
-          selected: selectedIndex(state, nextCredential) !== -1
-        };
-      });
-      return helpers.setStateProp(
-        'view',
-        {
-          credentials: credentials,
-          fulfilled: true
-        },
-        {
-          state,
-          initialState
-        }
-      );
-
-    case credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS:
-      return helpers.setStateProp(
-        'update',
-        {
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          initialState,
-          reset: false
-        }
-      );
-  */
 });

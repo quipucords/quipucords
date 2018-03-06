@@ -70,8 +70,8 @@ describe('AddSourceWizardReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'ADD ERROR'
+          data: {
+            detail: 'ADD ERROR'
           }
         }
       }
@@ -90,8 +90,8 @@ describe('AddSourceWizardReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'UPDATE ERROR'
+          data: {
+            detail: 'UPDATE ERROR'
           }
         }
       }

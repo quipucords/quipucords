@@ -29,7 +29,7 @@ export default function userReducer(state = initialState, action) {
         'user',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message)
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message)
         },
         {
           state,
@@ -70,7 +70,7 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
           wasLoggedIn: state.session.wasLoggedIn
         },
         {
@@ -115,7 +115,7 @@ export default function userReducer(state = initialState, action) {
         'session',
         {
           error: action.error,
-          errorMessage: _.get(action.payload, 'response.request.responseText', action.payload.message),
+          errorMessage: _.get(action.payload, 'response.data.detail', action.payload.message),
           wasLoggedIn: state.session.wasLoggedIn
         },
         {

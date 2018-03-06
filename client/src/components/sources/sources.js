@@ -22,7 +22,7 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import SourcesEmptyState from './sourcesEmptyState';
 import SourceListItem from './sourceListItem';
-import { CreateScanDialog } from './createScanDialog';
+import CreateScanDialog from './createScanDialog';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
@@ -36,7 +36,6 @@ class Sources extends React.Component {
       'editSource',
       'handleDeleteSource',
       'hideScanDialog',
-      'createScan',
       'refresh',
       'showAddSourceWizard'
     ]);
@@ -71,7 +70,7 @@ class Sources extends React.Component {
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: results
+        message: _.get(results, 'response.data.detail', results.message)
       });
     } else {
       Store.dispatch({
@@ -83,29 +82,6 @@ class Sources extends React.Component {
           </span>
         )
       });
-    }
-  }
-
-  notifyCreateScanStatus(error, results) {
-    if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'error',
-        header: 'Error',
-        message: results
-      });
-    } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'success',
-        message: (
-          <span>
-            Created new scan <strong>{_.get(results, 'data.name')}</strong>.
-          </span>
-        )
-      });
-      this.hideScanDialog();
-      this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
     }
   }
 
@@ -143,8 +119,12 @@ class Sources extends React.Component {
     this.setState({ scanDialogShown: true, multiSourceScan: true });
   }
 
-  hideScanDialog() {
+  hideScanDialog(updated) {
     this.setState({ scanDialogShown: false });
+
+    if (updated) {
+      this.refresh();
+    }
   }
 
   itemSelectChange(item) {
@@ -163,7 +143,7 @@ class Sources extends React.Component {
 
     deleteSource(item.id).then(
       response => this.notifyDeleteStatus(item, false, response.value),
-      error => this.notifyDeleteStatus(item, true, error.message)
+      error => this.notifyDeleteStatus(item, true, error)
     );
   }
 
@@ -183,20 +163,6 @@ class Sources extends React.Component {
       confirmButtonText: 'Delete',
       onConfirm: onConfirm
     });
-  }
-
-  createScan(scanName, sources) {
-    const { addScan } = this.props;
-
-    let data = {
-      name: scanName,
-      sources: sources.map(item => item.id)
-    };
-
-    addScan(data).then(
-      response => this.notifyCreateScanStatus(false, response.value),
-      error => this.notifyCreateScanStatus(true, error.message)
-    );
   }
 
   refresh() {
@@ -313,8 +279,7 @@ class Sources extends React.Component {
           <CreateScanDialog
             show={scanDialogShown}
             sources={multiSourceScan ? selectedSources : [currentScanSource]}
-            onCancel={this.hideScanDialog}
-            onScan={this.createScan}
+            onClose={this.hideScanDialog}
           />
         </React.Fragment>
       );

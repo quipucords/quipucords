@@ -45,7 +45,7 @@ class EngineTest(TestCase):
             report_id=1,
             source_id=1,
             source_type=Source.NETWORK_SOURCE_TYPE,
-            cpu_count=2,
+            cpu_count=1,
             etc_release_name='RHEL',
             etc_release_version='7.4 (Maipo)',
             etc_release_release='RHEL 7.4 (Maipo)',
@@ -464,11 +464,24 @@ class EngineTest(TestCase):
             self._create_vcenter_fingerprint(vm_uuid='match'),
             self._create_vcenter_fingerprint(vm_uuid='2')]
 
+        n_cpu_count = nfingerprints[0]['cpu_count']
+        v_cpu_count = vfingerprints[0]['cpu_count']
+        self.assertNotEqual(n_cpu_count, v_cpu_count)
+
+        reverse_priority_keys = {'cpu_count'}
         _, result_fingerprints = _merge_fingerprints_from_source_types(
             NETWORK_VCENTER_MERGE_KEYS,
-            nfingerprints, vfingerprints)
-
+            nfingerprints,
+            vfingerprints,
+            reverse_priority_keys=reverse_priority_keys)
         self.assertEqual(len(result_fingerprints), 3)
+
+        for result_fingerprint in result_fingerprints:
+            if result_fingerprint.get('vm_uuid') == 'match':
+                self.assertEqual(result_fingerprint.get(
+                    'cpu_count'), v_cpu_count)
+                self.assertNotEqual(
+                    result_fingerprint.get('cpu_count'), n_cpu_count)
 
     def test_merge_matching_fingerprints(self):
         """Test merge of two lists of fingerprints."""

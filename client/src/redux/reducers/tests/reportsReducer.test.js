@@ -33,8 +33,8 @@ describe('ReportsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }
@@ -54,8 +54,8 @@ describe('ReportsReducer', function() {
       payload: {
         message: 'BACKUP MESSAGE',
         response: {
-          request: {
-            responseText: 'GET ERROR'
+          data: {
+            detail: 'GET ERROR'
           }
         }
       }
