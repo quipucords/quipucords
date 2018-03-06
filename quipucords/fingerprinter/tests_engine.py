@@ -305,7 +305,6 @@ class EngineTest(TestCase):
 
         self.assertEqual(fact_date, fingerprint.get('system_creation_date'))
         self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
-        self.assertTrue(fingerprint.get('virtualized_is_guest'))
 
         self.assertEqual(fact.get('virt_type'),
                          fingerprint.get('virtualized_type'))
@@ -367,7 +366,6 @@ class EngineTest(TestCase):
             'subscription_manager_id'))
 
         self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
-        self.assertTrue(fingerprint.get('virtualized_is_guest'))
 
         self.assertEqual(fact.get('cores'), fingerprint.get('cpu_core_count'))
         self.assertEqual(fact.get('num_sockets'),

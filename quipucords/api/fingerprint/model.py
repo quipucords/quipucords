@@ -42,7 +42,6 @@ class SystemFingerprint(models.Model):
 
     infrastructure_type = models.CharField(
         max_length=10, choices=INFRASTRUCTURE_TYPE, default='unknown')
-    virtualized_is_guest = models.NullBooleanField()
 
     mac_addresses = models.TextField(unique=False, null=True)
     ip_addresses = models.TextField(unique=False, null=True)
@@ -103,7 +102,6 @@ class SystemFingerprint(models.Model):
             'cpu_core_count:{}, '\
             'system_creation_date:{}, '\
             'infrastructure_type:{}, '\
-            'virtualized_is_guest:{}, '\
             'virtualized_type:{}, '\
             'virtualized_num_guests:{}, '\
             'virtualized_num_running_guests:{}, '\
@@ -135,7 +133,6 @@ class SystemFingerprint(models.Model):
                                   self.cpu_core_count,
                                   self.system_creation_date,
                                   self.infrastructure_type,
-                                  self.virtualized_is_guest,
                                   self.virtualized_type,
                                   self.virtualized_num_guests,
                                   self.virtualized_num_running_guests,
