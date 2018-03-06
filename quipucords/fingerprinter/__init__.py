@@ -715,11 +715,6 @@ def _process_network_fact(source, fact):
             fingerprint, fact_value='unknown')
 
     # Determine if VM facts
-    add_fact_to_fingerprint(
-        source, 'virt_virt/virt-guest', fact, 'virtualized_is_guest',
-        fingerprint, fact_value=bool(
-            fact.get('virt_virt') == 'virt-guest'))
-
     add_fact_to_fingerprint(source, 'virt_type', fact,
                             'virtualized_type', fingerprint)
     add_fact_to_fingerprint(source, 'virt_num_guests',
@@ -755,10 +750,6 @@ def _process_vcenter_fact(source, fact):
     add_fact_to_fingerprint(source, 'vcenter_source', fact,
                             'infrastructure_type', fingerprint,
                             fact_value='virtualized')
-    add_fact_to_fingerprint(source, 'vcenter_source', fact,
-                            'virtualized_is_guest', fingerprint,
-                            fact_value=True)
-
     add_fact_to_fingerprint(source, 'vm.mac_addresses',
                             fact, 'mac_addresses', fingerprint)
     add_fact_to_fingerprint(source, 'vm.ip_addresses',
@@ -839,21 +830,15 @@ def _process_satellite_fact(source, fact):
                             'virtualized_type', fingerprint)
 
     is_virtualized = fact.get('is_virtualized')
+    infrastructure_type = None
     if is_virtualized:
         infrastructure_type = 'virtualized'
-    else:
-        infrastructure_type = 'unknown'
-    add_fact_to_fingerprint(source, 'is_virtualized', fact,
-                            'infrastructure_type', fingerprint,
-                            fact_value=infrastructure_type)
-
-    virtualized_is_guest = bool(
-        fact.get('virt_type') and
-        fact.get('virtual_host') != fact.get('hostname'))
-    add_fact_to_fingerprint(source, 'virt_type/virtual_host/hostname', fact,
-                            'virtualized_is_guest', fingerprint,
-                            fact_value=virtualized_is_guest)
-
+    elif is_virtualized is False:
+        infrastructure_type = 'bare metal'
+    if infrastructure_type:
+        add_fact_to_fingerprint(source, 'is_virtualized', fact,
+                                'infrastructure_type', fingerprint,
+                                fact_value=infrastructure_type)
     # Satellite specific facts
     add_fact_to_fingerprint(source, 'cores', fact,
                             'cpu_core_count', fingerprint)
