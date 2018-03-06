@@ -181,11 +181,13 @@ def _process_sources(fact_collection):
     logger.debug('Number merged network/satellite before: %d',
                  number_network_satellite_before)
     logger.debug('Number vcenter before: %d', number_vcenter_before)
+    reverse_priority_keys = {'cpu_count'}
     number_network_vcenter_merged, all_fingerprints = \
         _merge_fingerprints_from_source_types(
             NETWORK_VCENTER_MERGE_KEYS,
             all_fingerprints,
-            vcenter_fingerprints)
+            vcenter_fingerprints,
+            reverse_priority_keys=reverse_priority_keys)
     number_after = len(all_fingerprints)
     logger.debug('Number fingerprints merged together: %d',
                  number_network_vcenter_merged)
@@ -229,14 +231,20 @@ def _process_source(report_id, source):
     return fingerprints
 
 
-def _merge_fingerprints_from_source_types(merge_keys_list, base_list,
-                                          merge_list):
+def _merge_fingerprints_from_source_types(merge_keys_list,
+                                          base_list,
+                                          merge_list,
+                                          reverse_priority_keys=None):
     """Merge fingerprints from multiple sources.
 
     :param base_list: base list
     :param merge_list: fact to process
     :returns: int indicating number merged and
     list of all fingerprints wihtout duplicates
+    :param reverse_priority_keys: Set of keys in to_merge_fingerprint
+    that should reverse the priority.  In other words, the value
+    of to_merge_fingerprint should be used instead of the
+    priority_fingerprint value.
     """
     number_merged = 0
 
@@ -253,7 +261,8 @@ def _merge_fingerprints_from_source_types(merge_keys_list, base_list,
     to_merge = merge_list[:]
     for key_tuple in merge_keys_list:
         key_merged_count, result, to_merge = _merge_matching_fingerprints(
-            key_tuple[0], result, key_tuple[1], to_merge)
+            key_tuple[0], result, key_tuple[1], to_merge,
+            reverse_priority_keys=reverse_priority_keys)
         number_merged += key_merged_count
 
     # Add remaining as they didn't match anything (no merge)
@@ -261,8 +270,11 @@ def _merge_fingerprints_from_source_types(merge_keys_list, base_list,
     return number_merged, result
 
 
-def _merge_matching_fingerprints(base_key, base_list,
-                                 candidate_key, candidate_list):
+def _merge_matching_fingerprints(base_key,
+                                 base_list,
+                                 candidate_key,
+                                 candidate_list,
+                                 reverse_priority_keys=None):
     """Given keys and two lists, merge on key equality.
 
     Given two lists of fingerprints, match on provided keys and merge
@@ -274,6 +286,10 @@ def _merge_matching_fingerprints(base_key, base_list,
     :param candidate_list: list of dict objects
     :returns: int indicating number merged and
     fingerprint produced from fact
+    :param reverse_priority_keys: Set of keys in to_merge_fingerprint
+    that should reverse the priority.  In other words, the value
+    of to_merge_fingerprint should be used instead of the
+    priority_fingerprint value.
     """
     # pylint: disable=too-many-locals,consider-iterating-dictionary
     base_dict, base_no_key = _create_index_for_fingerprints(
@@ -295,7 +311,9 @@ def _merge_matching_fingerprints(base_key, base_list,
         if base_value:
             # candidate_index_key == base_key so merge
             merged_value = _merge_fingerprint(
-                base_value, candidate_fingerprint)
+                base_value,
+                candidate_fingerprint,
+                reverse_priority_keys=reverse_priority_keys)
             number_merged += 1
 
             # Add merged value to key
@@ -409,7 +427,9 @@ def _create_index_for_fingerprints(id_key,
 
 
 # pylint: disable=too-many-branches
-def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
+def _merge_fingerprint(priority_fingerprint,
+                       to_merge_fingerprint,
+                       reverse_priority_keys=None):
     """Merge two fingerprints.
 
     The priority_fingerprint values are always used.  The
@@ -419,11 +439,21 @@ def _merge_fingerprint(priority_fingerprint, to_merge_fingerprint):
     both have the same attribute.
     :param to_merge_fingerprint: Fingerprint whose values are used
     when attributes are not in priority_fingerprint
+    :param reverse_priority_keys: Set of keys in to_merge_fingerprint
+    that should reverse the priority.  In other words, the value
+    of to_merge_fingerprint should be used instead of the
+    priority_fingerprint value.
     """
     priority_keys = set(priority_fingerprint.keys())
     to_merge_keys = set(to_merge_fingerprint.keys())
 
-    keys_to_add_list = list(to_merge_keys - priority_keys)
+    # Merge keys from to_merge into priority.  These
+    # are keys not in priority or have a reverse priority.
+    keys_to_add_list = to_merge_keys - priority_keys
+    if reverse_priority_keys is not None and \
+            isinstance(reverse_priority_keys, set):
+        keys_to_add_list = keys_to_add_list | reverse_priority_keys
+    keys_to_add_list = list(keys_to_add_list)
     if META_DATA_KEY in keys_to_add_list:
         keys_to_add_list.remove(META_DATA_KEY)
 
