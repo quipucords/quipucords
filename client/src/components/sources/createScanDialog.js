@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -7,14 +6,14 @@ import { Alert, Modal, Button, Form, Grid, Icon } from 'patternfly-react';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
-import { addScan } from '../../redux/actions/scansActions';
+import { addScan, startScan } from '../../redux/actions/scansActions';
 import { scansTypes, toastNotificationTypes } from '../../redux/constants';
 
 class CreateScanDialog extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['updateScanName', 'createScan']);
+    helpers.bindMethods(this, ['updateScanName', 'createScan', 'startChange']);
     this.state = {
       scanName: '',
       validScanName: false
@@ -28,22 +27,64 @@ class CreateScanDialog extends React.Component {
         type: scansTypes.ADD_SCAN_RESET_STATUS
       });
     }
-    if (
-      this.props.show &&
-      _.get(nextProps, 'action.add') &&
-      _.get(nextProps, 'action.fulfilled') &&
-      !_.get(this.props, 'action.fulfilled')
-    ) {
+  }
+
+  notifyStartStatus(error, results) {
+    const { onClose } = this.props;
+    const { scanName } = this.state;
+
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: helpers.getErrorMessageFromResults(results)
+      });
+    } else {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'success',
         message: (
           <span>
-            Created new scan <strong>{this.state.scanName}</strong>.
+            Started scan <strong>{scanName}</strong>.
           </span>
         )
       });
-      this.props.onClose(true);
+    }
+    onClose(true);
+  }
+
+  startNewScan(newScan) {
+    const { startScan } = this.props;
+
+    startScan(newScan.id).then(
+      response => this.notifyStartStatus(false, response.value),
+      error => this.notifyStartStatus(true, error)
+    );
+  }
+
+  notifyAddStatus(error, results) {
+    const { scanName } = this.state;
+
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: helpers.getErrorMessageFromResults(results)
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Added scan <strong>{scanName}</strong>.
+          </span>
+        )
+      });
+
+      this.startNewScan(results.data);
     }
   }
 
@@ -56,7 +97,14 @@ class CreateScanDialog extends React.Component {
       sources: sources.map(item => item.id)
     };
 
-    addScan(data);
+    addScan(data).then(
+      response => this.notifyAddStatus(false, response.value),
+      error => this.notifyAddStatus(true, error)
+    );
+  }
+
+  startChange(value) {
+    this.setState({ start: value });
   }
 
   validateScanName(scanName) {
@@ -170,6 +218,7 @@ class CreateScanDialog extends React.Component {
 
 CreateScanDialog.propTypes = {
   addScan: PropTypes.func,
+  startScan: PropTypes.func,
   show: PropTypes.bool.isRequired,
   sources: PropTypes.array,
   onClose: PropTypes.func,
@@ -179,7 +228,8 @@ CreateScanDialog.propTypes = {
 export { CreateScanDialog };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  addScan: data => dispatch(addScan(data))
+  addScan: data => dispatch(addScan(data)),
+  startScan: data => dispatch(startScan(data))
 });
 
 const mapStateToProps = function(state) {

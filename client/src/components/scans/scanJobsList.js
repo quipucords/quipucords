@@ -13,7 +13,7 @@ class ScanJobsList extends React.Component {
 
     let scanTime = _.get(job, 'end_time');
     let statusIconInfo = helpers.scanStatusIcon(job.status);
-    let icon = <Icon className="scan-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />;
+    let icon = <Icon className="scan-job-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />;
 
     if (job.status === 'pending' || job.status === 'running') {
       scanTime = _.get(job, 'start_time');
