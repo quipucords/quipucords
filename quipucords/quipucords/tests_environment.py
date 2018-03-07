@@ -38,12 +38,12 @@ class EnvironmentTest(TestCase):
     @patch('platform.uname')
     def test_platform_info(self, mock_platform):
         """Test the platform_info method."""
-        expected = OrderedDict({'os': 'Red Hat', 'version': '7.4'})
         platform_record = namedtuple('Platform', ['os', 'version'])
         a_plat = platform_record('Red Hat', '7.4')
         mock_platform.return_value = a_plat
         result = environment.platform_info()
-        self.assertEqual(result, expected)
+        self.assertEqual(result['os'], 'Red Hat')
+        self.assertEqual(result['version'], '7.4')
 
     @patch('sys.version')
     def test_python_version(self, mock_sys_ver):
