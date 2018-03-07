@@ -125,7 +125,7 @@ class Scans extends React.Component {
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: results
+        message: helpers.getErrorMessageFromResults(results)
       });
     } else {
       Store.dispatch({
@@ -153,7 +153,7 @@ class Scans extends React.Component {
       .startScan(item.id)
       .then(
         response => this.notifyActionStatus(item, 'started', false, response.value),
-        error => this.notifyActionStatus(item, 'started', true, error.message)
+        error => this.notifyActionStatus(item, 'started', true, error)
       );
   }
 
@@ -162,7 +162,7 @@ class Scans extends React.Component {
       .pauseScan(item.id)
       .then(
         response => this.notifyActionStatus(item, 'paused', false, response.value),
-        error => this.notifyActionStatus(item, 'paused', true, error.message)
+        error => this.notifyActionStatus(item, 'paused', true, error)
       );
   }
 
@@ -171,7 +171,7 @@ class Scans extends React.Component {
       .restartScan(item.id)
       .then(
         response => this.notifyActionStatus(item, 'resumed', false, response.value),
-        error => this.notifyActionStatus(item, 'resumed', true, error.message)
+        error => this.notifyActionStatus(item, 'resumed', true, error)
       );
   }
 
@@ -180,7 +180,7 @@ class Scans extends React.Component {
       .cancelScan(item.id)
       .then(
         response => this.notifyActionStatus(item, 'canceled', false, response.value),
-        error => this.notifyActionStatus(item, 'canceled', true, error.message)
+        error => this.notifyActionStatus(item, 'canceled', true, error)
       );
   }
 
