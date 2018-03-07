@@ -49,7 +49,6 @@ class SystemFingerprint(models.Model):
     cpu_count = models.PositiveIntegerField(unique=False, null=True)
 
     architecture = models.CharField(max_length=64, unique=False, null=True)
-    subman_consumed = models.TextField(unique=False, null=True)
 
     # Network scan facts
     bios_uuid = models.CharField(max_length=36, unique=False, null=True)
@@ -140,7 +139,6 @@ class SystemFingerprint(models.Model):
                                   self.redhat_packages_certs,
                                   self.redhat_packages_gpg_num_redhat_packages,
                                   self.architecture,
-                                  self.subman_consumed,
                                   self.sources,
                                   self.metadata) + '}'
 

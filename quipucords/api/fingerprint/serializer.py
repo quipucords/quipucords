@@ -73,7 +73,7 @@ class FingerprintSerializer(ModelSerializer):
     cpu_count = IntegerField(required=False, min_value=0)
 
     architecture = CharField(required=False, max_length=64)
-    subman_consumed = CustomJSONField(required=False)
+
     # Network scan facts
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)

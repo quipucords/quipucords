@@ -150,7 +150,7 @@ class ReportCSVRenderer(renderers.BaseRenderer):
         csv_writer.writerow(['Report:'])
         headers = csv_helper.generate_headers(
             systems_list,
-            exclude={'id', 'report_id', 'metadata', 'entitlements'})
+            exclude={'id', 'report_id', 'metadata'})
         if SOURCES_KEY in headers:
             headers += self.source_headers
             headers = sorted(list(set(headers)))
@@ -169,6 +169,10 @@ class ReportCSVRenderer(renderers.BaseRenderer):
                 if header in self.source_headers:
                     if sources_info is not None:
                         fact_value = sources_info.get(header)
+                elif header == 'entitlements':
+                    fact_value = system.get(header)
+                    for entitlement in fact_value:
+                        entitlement.pop('metadata')
                 else:
                     fact_value = system.get(header)
                 row.append(csv_helper.serialize_value(header, fact_value))
