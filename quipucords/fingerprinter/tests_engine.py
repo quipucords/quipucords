@@ -464,14 +464,16 @@ class EngineTest(TestCase):
             }
 
         }
+        nsources = [1]
         nfingerprint_to_merge = {
             'id': 1, 'os_release': 'RHEL 7', 'bios_uuid': 'match',
-            'metadata': nmetadata}
+            'metadata': nmetadata, 'sources': nsources}
         nfingerprint_no_match = {
             'id': 2, 'os_release': 'RHEL 7', 'bios_uuid': '2345',
-            'metadata': nmetadata}
+            'metadata': nmetadata, 'sources': nsources}
         nfingerprint_no_key = {
-            'id': 3, 'os_release': 'RHEL 6', 'metadata': nmetadata}
+            'id': 3, 'os_release': 'RHEL 6', 'metadata': nmetadata,
+            'sources': nsources}
         nfingerprints = [
             nfingerprint_to_merge,
             nfingerprint_no_match,
@@ -491,14 +493,16 @@ class EngineTest(TestCase):
             }
 
         }
+        vsources = [2]
         vfingerprint_to_merge = {
             'id': 5, 'os_release': 'Windows 7', 'vm_uuid': 'match',
-            'metadata': vmetadata}
+            'metadata': vmetadata, 'sources': vsources}
         vfingerprint_no_match = {
             'id': 6, 'os_release': 'RHEL 7', 'vm_uuid': '9876',
-            'metadata': vmetadata}
+            'metadata': vmetadata, 'sources': vsources}
         vfingerprint_no_key = {
-            'id': 7, 'os_release': 'RHEL 6', 'metadata': vmetadata}
+            'id': 7, 'os_release': 'RHEL 6', 'metadata': vmetadata,
+            'sources': vsources}
         vfingerprints = [
             vfingerprint_to_merge,
             vfingerprint_no_match,
@@ -519,6 +523,8 @@ class EngineTest(TestCase):
 
         # assert network os_release had priority
         self.assertEqual(nfingerprint_to_merge.get('os_release'), 'RHEL 7')
+        self.assertListEqual(nfingerprint_to_merge.get(
+            'sources'), nsources + vsources)
 
         # assert those that didn't match, don't have VM properties
         self.assertIsNone(nfingerprint_no_match.get('vm_uuid'))
