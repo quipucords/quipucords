@@ -21,6 +21,11 @@ from api.common.util import CSVHelper
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+NETWORK_DETECTION_KEY = 'detection-network'
+VCENTER_DETECTION_KEY = 'detection-vcenter'
+SATELLITE_DETECTION_KEY = 'detection-satellite'
+SOURCES_KEY = 'sources'
+
 
 class FactCollectionCSVRenderer(renderers.BaseRenderer):
     """Class to render detailed report as CSV."""
@@ -110,10 +115,6 @@ class ReportCSVRenderer(renderers.BaseRenderer):
     """Class to render Deployment report as CSV."""
 
     # pylint: disable=too-few-public-methods
-    NETWORK_DETECTION_KEY = 'detection-network'
-    VCENTER_DETECTION_KEY = 'detection-vcenter'
-    SATELLITE_DETECTION_KEY = 'detection-satellite'
-    SOURCES_KEY = 'sources'
     source_headers = {NETWORK_DETECTION_KEY,
                       VCENTER_DETECTION_KEY,
                       SATELLITE_DETECTION_KEY,
@@ -150,7 +151,7 @@ class ReportCSVRenderer(renderers.BaseRenderer):
         headers = csv_helper.generate_headers(
             systems_list,
             exclude={'id', 'report_id', 'metadata', 'entitlements'})
-        if self.SOURCES_KEY in headers:
+        if SOURCES_KEY in headers:
             headers += self.source_headers
             headers = sorted(list(set(headers)))
 
@@ -158,7 +159,7 @@ class ReportCSVRenderer(renderers.BaseRenderer):
         csv_writer.writerow(headers)
         for system in systems_list:
             row = []
-            system_sources = system.get(self.SOURCES_KEY)
+            system_sources = system.get(SOURCES_KEY)
             if system_sources is not None:
                 sources_info = self._compute_source_info(system_sources)
             else:
@@ -181,17 +182,17 @@ class ReportCSVRenderer(renderers.BaseRenderer):
     def _compute_source_info(self, sources):
         """Detect scan source types."""
         result = {
-            self.NETWORK_DETECTION_KEY: False,
-            self.VCENTER_DETECTION_KEY: False,
-            self.SATELLITE_DETECTION_KEY: False,
-            self.SOURCES_KEY: []
+            NETWORK_DETECTION_KEY: False,
+            VCENTER_DETECTION_KEY: False,
+            SATELLITE_DETECTION_KEY: False,
+            SOURCES_KEY: []
         }
         for source in sources:
             if source.get('source_type') == Source.NETWORK_SOURCE_TYPE:
-                result[self.NETWORK_DETECTION_KEY] = True
+                result[NETWORK_DETECTION_KEY] = True
             elif source.get('source_type') == Source.VCENTER_SOURCE_TYPE:
-                result[self.VCENTER_DETECTION_KEY] = True
+                result[VCENTER_DETECTION_KEY] = True
             elif source.get('source_type') == Source.SATELLITE_SOURCE_TYPE:
-                result[self.SATELLITE_DETECTION_KEY] = True
-            result[self.SOURCES_KEY].append(source.get('name'))
+                result[SATELLITE_DETECTION_KEY] = True
+            result[SOURCES_KEY].append(source.get('name'))
         return result

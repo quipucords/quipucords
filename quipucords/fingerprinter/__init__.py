@@ -251,7 +251,7 @@ def _process_source(report_id, source):
 
         if fingerprint is not None:
             fingerprint['report_id'] = report_id
-            fingerprint[SOURCES_KEY] = [int(source_id)]
+            fingerprint[SOURCES_KEY] = [source_id]
             fingerprints.append(fingerprint)
 
     return fingerprints
