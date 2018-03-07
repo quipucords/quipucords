@@ -8,6 +8,8 @@ import { connect } from 'react-redux';
 import { Button, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
+import Store from '../../redux/store';
+import { scansTypes } from '../../redux/constants';
 
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
@@ -23,14 +25,31 @@ class ScanListItem extends React.Component {
     helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
   }
 
+  expandType() {
+    const { item, expandedScans } = this.props;
+
+    return _.get(
+      _.find(expandedScans, nextExpanded => {
+        return nextExpanded.id === item.id;
+      }),
+      'expandType'
+    );
+  }
+
   toggleExpand(expandType) {
     const { item } = this.props;
 
-    if (expandType === item.expandType) {
-      item.expanded = !item.expanded;
+    if (expandType === this.expandType()) {
+      Store.dispatch({
+        type: scansTypes.EXPAND_SCAN,
+        scan: item
+      });
     } else {
-      item.expanded = true;
-      item.expandType = expandType;
+      Store.dispatch({
+        type: scansTypes.EXPAND_SCAN,
+        scan: item,
+        expandType: expandType
+      });
       if (expandType === 'systemsScanned' || expandType === 'systemsFailed') {
         if (!item.scanResults) {
           item.scanResultsPending = true;
@@ -71,13 +90,14 @@ class ScanListItem extends React.Component {
         }
       }
     }
-    this.forceUpdate();
   }
 
   closeExpand() {
     const { item } = this.props;
-    item.expanded = false;
-    this.forceUpdate();
+    Store.dispatch({
+      type: scansTypes.EXPAND_SCAN,
+      scan: item
+    });
   }
 
   renderDescription() {
@@ -114,6 +134,7 @@ class ScanListItem extends React.Component {
   renderStatusItems() {
     const { item } = this.props;
 
+    let expandType = this.expandType();
     let sourcesCount = item.sources ? item.sources.length : 0;
     let prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
     let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
@@ -127,7 +148,7 @@ class ScanListItem extends React.Component {
         emptyText="0 Successful"
         tipSingular="Successful System"
         tipPlural="Successful Systems"
-        expanded={item.expanded && item.expandType === 'systemsScanned'}
+        expanded={expandType === 'systemsScanned'}
         expandType="systemsScanned"
         toggleExpand={this.toggleExpand}
         iconType="pf"
@@ -140,7 +161,7 @@ class ScanListItem extends React.Component {
         emptyText="0 Failed"
         tipSingular="Failed System"
         tipPlural="Failed Systems"
-        expanded={item.expanded && item.expandType === 'systemsFailed'}
+        expanded={expandType === 'systemsFailed'}
         expandType="systemsFailed"
         toggleExpand={this.toggleExpand}
         iconType="pf"
@@ -153,7 +174,7 @@ class ScanListItem extends React.Component {
         emptyText="0 Sources"
         tipSingular="Source"
         tipPlural="Sources"
-        expanded={item.expanded && item.expandType === 'sources'}
+        expanded={expandType === 'sources'}
         expandType="sources"
         toggleExpand={this.toggleExpand}
       />,
@@ -164,7 +185,7 @@ class ScanListItem extends React.Component {
         emptyText="0 Previous"
         tipSingular="Previous"
         tipPlural="Previous"
-        expanded={item.expanded && item.expandType === 'jobs'}
+        expanded={expandType === 'jobs'}
         expandType="jobs"
         toggleExpand={this.toggleExpand}
       />
@@ -241,7 +262,7 @@ class ScanListItem extends React.Component {
   renderExpansionContents() {
     const { item, onSummaryDownload, onDetailedDownload } = this.props;
 
-    switch (item.expandType) {
+    switch (this.expandType()) {
       case 'systemsScanned':
         return <ScanHostsList scan={item} status="success" />;
       case 'systemsFailed':
@@ -275,7 +296,7 @@ class ScanListItem extends React.Component {
         description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
-        compoundExpanded={item.expanded}
+        compoundExpanded={this.expandType() !== undefined}
         onCloseCompoundExpand={this.closeExpand}
       >
         {this.renderExpansionContents()}
@@ -293,11 +314,12 @@ ScanListItem.propTypes = {
   onStart: PropTypes.func,
   onResume: PropTypes.func,
   getScanResults: PropTypes.func,
-  getScanJobs: PropTypes.func
+  getScanJobs: PropTypes.func,
+  expandedScans: PropTypes.array
 };
 
 const mapStateToProps = function(state) {
-  return {};
+  return Object.assign(state.scans.persist);
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

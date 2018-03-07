@@ -21,6 +21,11 @@ from api.common.util import CSVHelper
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+NETWORK_DETECTION_KEY = 'detection-network'
+VCENTER_DETECTION_KEY = 'detection-vcenter'
+SATELLITE_DETECTION_KEY = 'detection-satellite'
+SOURCES_KEY = 'sources'
+
 
 class FactCollectionCSVRenderer(renderers.BaseRenderer):
     """Class to render detailed report as CSV."""
@@ -110,6 +115,11 @@ class ReportCSVRenderer(renderers.BaseRenderer):
     """Class to render Deployment report as CSV."""
 
     # pylint: disable=too-few-public-methods
+    source_headers = {NETWORK_DETECTION_KEY,
+                      VCENTER_DETECTION_KEY,
+                      SATELLITE_DETECTION_KEY,
+                      SOURCES_KEY}
+
     media_type = 'text/csv'
     format = 'csv'
 
@@ -138,15 +148,29 @@ class ReportCSVRenderer(renderers.BaseRenderer):
         if not systems_list:
             return None
         csv_writer.writerow(['Report:'])
-
         headers = csv_helper.generate_headers(
-            systems_list, exclude=set([
-                'id', 'report_id', 'metadata', 'entitlements']))
+            systems_list,
+            exclude={'id', 'report_id', 'metadata', 'entitlements'})
+        if SOURCES_KEY in headers:
+            headers += self.source_headers
+            headers = sorted(list(set(headers)))
+
+        # Add source heaaders
         csv_writer.writerow(headers)
         for system in systems_list:
             row = []
+            system_sources = system.get(SOURCES_KEY)
+            if system_sources is not None:
+                sources_info = self._compute_source_info(system_sources)
+            else:
+                sources_info = None
             for header in headers:
-                fact_value = system.get(header)
+                fact_value = None
+                if header in self.source_headers:
+                    if sources_info is not None:
+                        fact_value = sources_info.get(header)
+                else:
+                    fact_value = system.get(header)
                 row.append(csv_helper.serialize_value(header, fact_value))
             csv_writer.writerow(row)
 
@@ -154,3 +178,22 @@ class ReportCSVRenderer(renderers.BaseRenderer):
 
         csv_content = report_buffer.getvalue()
         return csv_content
+
+    @staticmethod
+    def _compute_source_info(sources):
+        """Detect scan source types."""
+        result = {
+            NETWORK_DETECTION_KEY: False,
+            VCENTER_DETECTION_KEY: False,
+            SATELLITE_DETECTION_KEY: False,
+            SOURCES_KEY: []
+        }
+        for source in sources:
+            if source.get('source_type') == Source.NETWORK_SOURCE_TYPE:
+                result[NETWORK_DETECTION_KEY] = True
+            elif source.get('source_type') == Source.VCENTER_SOURCE_TYPE:
+                result[VCENTER_DETECTION_KEY] = True
+            elif source.get('source_type') == Source.SATELLITE_SOURCE_TYPE:
+                result[SATELLITE_DETECTION_KEY] = True
+            result[SOURCES_KEY].append(source.get('name'))
+        return result

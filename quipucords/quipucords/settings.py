@@ -294,6 +294,10 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
+        'quipucords.environment': {
+            'handlers': LOGGING_HANDLERS,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
+        },
     },
 }
 

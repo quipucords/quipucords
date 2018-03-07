@@ -2,7 +2,9 @@ import { scansTypes } from '../../constants/index';
 import scansReducer from '../scansReducer';
 
 const initialState = {
-  persist: {},
+  persist: {
+    expandedScans: []
+  },
 
   view: {
     error: false,

@@ -102,11 +102,13 @@ class FingerprintSerializer(ModelSerializer):
     subman_consumed = CustomJSONField(required=False)
     redhat_is_redhat = NullBooleanField(required=False)
     redhat_packages_certs = CharField(required=False, max_length=128)
+    # pylint: disable=invalid-name
     redhat_packages_gpg_num_redhat_packages = IntegerField(
         required=False, min_value=0)
     architecture = CharField(required=False, max_length=64)
 
     metadata = CustomJSONField(required=True)
+    sources = CustomJSONField(required=True)
 
     class Meta:
         """Meta class for FingerprintSerializer."""

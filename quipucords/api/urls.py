@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -21,7 +21,8 @@ from api.views import (CredentialViewSet,
                        ScanJobViewSet,
                        UserViewSet,
                        details,
-                       deployments)
+                       deployments,
+                       status)
 
 
 ROUTER = SimpleRouter()
@@ -57,6 +58,10 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^token/', views.obtain_expiring_auth_token)
+]
+
+urlpatterns += [
+    url(r'^status/$', status, name='server-status'),
 ]
 
 urlpatterns += ROUTER.urls

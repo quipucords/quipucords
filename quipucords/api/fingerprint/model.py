@@ -74,11 +74,13 @@ class SystemFingerprint(models.Model):
     subman_consumed = models.TextField(unique=False, null=True)
     redhat_is_redhat = models.NullBooleanField()
     redhat_packages_certs = models.TextField(unique=False, null=True)
+    # pylint: disable=invalid-name
     redhat_packages_gpg_num_redhat_packages = models.PositiveIntegerField(
         unique=False, null=True)
     architecture = models.CharField(max_length=64, unique=False, null=True)
 
     metadata = models.TextField(unique=False, null=False)
+    sources = models.TextField(unique=False, null=False)
 
     def __str__(self):
         """Convert to string."""
@@ -110,6 +112,7 @@ class SystemFingerprint(models.Model):
             'redhat_packages_certs:{}, '\
             'redhat_packages_gpg_num_redhat_packages:{}, '\
             'architecture:{}, '\
+            'sources:{}, '\
             'metadata:{} '.format(self.id,
                                   self.report_id.id,
                                   self.name,
@@ -138,6 +141,7 @@ class SystemFingerprint(models.Model):
                                   self.redhat_packages_certs,
                                   self.redhat_packages_gpg_num_redhat_packages,
                                   self.architecture,
+                                  self.sources,
                                   self.metadata) + '}'
 
 
