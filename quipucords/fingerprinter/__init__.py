@@ -15,7 +15,8 @@ import logging
 import uuid
 from datetime import datetime
 import django.dispatch
-from api.models import FactCollection, Source, Product
+from api.models import (FactCollection, Source,
+                        Product, SystemFingerprint)
 from api.serializers import FingerprintSerializer
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
@@ -723,7 +724,7 @@ def _process_network_fact(source, fact):
         if virt_what_type == 'bare metal':
             add_fact_to_fingerprint(
                 source, 'virt_what_type', fact, 'infrastructure_type',
-                fingerprint, fact_value='bare_metal')
+                fingerprint, fact_value=SystemFingerprint.BARE_METAL)
         elif virt_type:
             add_fact_to_fingerprint(
                 source, 'virt_type', fact, 'infrastructure_type',
@@ -848,7 +849,7 @@ def _process_satellite_fact(source, fact):
     if is_virtualized:
         infrastructure_type = 'virtualized'
     elif is_virtualized is False:
-        infrastructure_type = 'bare metal'
+        infrastructure_type = SystemFingerprint.BARE_METAL
     if infrastructure_type:
         add_fact_to_fingerprint(source, 'is_virtualized', fact,
                                 'infrastructure_type', fingerprint,

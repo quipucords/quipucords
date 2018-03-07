@@ -18,6 +18,7 @@ from api.fact.model import FactCollection
 class SystemFingerprint(models.Model):
     """Represents system fingerprint."""
 
+    BARE_METAL = 'bare_metal'
     SOURCE_TYPE = (
         ('network', 'Ansible'),
         ('vcenter', 'VCenter'),
@@ -25,7 +26,7 @@ class SystemFingerprint(models.Model):
     )
 
     INFRASTRUCTURE_TYPE = (
-        ('bare_metal', 'Bare Metal'),
+        (BARE_METAL, 'Bare Metal'),
         ('virtualized', 'Virtualized'),
         ('unknown', 'Unknown')
     )
