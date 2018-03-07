@@ -105,7 +105,7 @@ class FingerprintSerializer(ModelSerializer):
     redhat_is_redhat = NullBooleanField(required=False)
     redhat_packages_certs = CharField(required=False, max_length=128)
     # pylint: disable=invalid-name
-    redhat_packages_gpg_num_redhat_packages = IntegerField(
+    redhat_packages_gpg_num_rh_packages = IntegerField(
         required=False, min_value=0)
 
     metadata = CustomJSONField(required=True)
