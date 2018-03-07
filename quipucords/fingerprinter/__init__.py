@@ -848,7 +848,7 @@ def _process_satellite_fact(source, fact):
     if is_virtualized:
         infrastructure_type = 'virtualized'
     elif is_virtualized is False:
-        infrastructure_type = 'bare metal'
+        infrastructure_type = 'bare_metal'
     if infrastructure_type:
         add_fact_to_fingerprint(source, 'is_virtualized', fact,
                                 'infrastructure_type', fingerprint,
