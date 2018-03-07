@@ -85,10 +85,22 @@ class App extends React.Component {
     const { aboutShown } = this.state;
 
     if (session.error) {
+      let loginMessage;
+
+      if (!session.loggedIn) {
+        loginMessage = (
+          <React.Fragment>
+            Please <a href="/login">login</a> to continue.
+          </React.Fragment>
+        );
+      }
+
       return (
         <EmptyState className="full-page-blank-slate">
           <Alert type="error">
-            <span>Login error: {session.errorMessage}</span>
+            <span>
+              Login error: {session.errorMessage.replace(/\.$/, '')}. {loginMessage}
+            </span>
           </Alert>
         </EmptyState>
       );
@@ -121,6 +133,21 @@ class App extends React.Component {
 
     if (!session.loggedIn && session.wasLoggedIn) {
       window.location = '/logout';
+    }
+
+    if (!session.loggedIn) {
+      return (
+        <div className="layout-pf layout-pf-fixed">
+          <nav className="navbar navbar-pf-vertical">
+            <div className="navbar-header">
+              <span className="navbar-brand">
+                <img className="navbar-brand-name" src={productTitle} alt="" />
+              </span>
+            </div>
+          </nav>
+          <div>{this.renderContent()}</div>
+        </div>
+      );
     }
 
     return (
