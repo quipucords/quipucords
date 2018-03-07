@@ -16,7 +16,6 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         CharField,
                                         ChoiceField,
                                         DateField,
-                                        NullBooleanField,
                                         ModelSerializer)
 from api.models import (SystemFingerprint,
                         FactCollection,
@@ -76,29 +75,20 @@ class FingerprintSerializer(ModelSerializer):
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
 
-    cpu_core_per_socket = IntegerField(required=False, min_value=0)
-    cpu_siblings = IntegerField(required=False, min_value=0)
-    cpu_hyperthreading = NullBooleanField(required=False)
     cpu_socket_count = IntegerField(required=False, min_value=0)
     cpu_core_count = IntegerField(required=False, min_value=0)
 
     system_creation_date = DateField(required=False)
 
     virtualized_type = CharField(required=False, max_length=64)
-    virtualized_num_guests = IntegerField(required=False, min_value=0)
-    virtualized_num_running_guests = IntegerField(required=False, min_value=0)
 
     # VCenter scan facts
     vm_state = CharField(required=False, max_length=24)
     vm_uuid = CharField(required=False, max_length=36)
-    vm_memory_size = IntegerField(required=False, min_value=0)
     vm_dns_name = CharField(required=False, max_length=128)
 
     vm_host = CharField(required=False, max_length=128)
     vm_host_socket_count = IntegerField(required=False, min_value=0)
-    vm_host_cpu_cores = IntegerField(required=False, min_value=0)
-
-    vm_host_cpu_threads = IntegerField(required=False, min_value=0)
 
     vm_cluster = CharField(required=False, max_length=128)
     vm_datacenter = CharField(required=False, max_length=128)
