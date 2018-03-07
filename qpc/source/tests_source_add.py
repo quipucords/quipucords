@@ -240,8 +240,7 @@ class SourceAddCliTests(unittest.TestCase):
             mocker.post(post_source_url, status_code=201)
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
-                             hosts=['1.2.3.4'], type='vcenter',
-                             satellite_version='6.2')
+                             hosts=['1.2.3.4'], type='satellite')
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
@@ -260,7 +259,7 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'], type='vcenter',
-                             satellite_version='6.2', ssl_cert_verify='False')
+                             ssl_cert_verify='False')
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),

@@ -21,6 +21,15 @@ from api.models import (ScanTask,
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+SATELLITE_VERSION_5 = '5'
+SATELLITE_VERSION_6 = '6'
+
+
+class SatelliteAuthException(Exception):
+    """Exception for Satellite Authentication interaction."""
+
+    pass
+
 
 class SatelliteException(Exception):
     """Exception for Satellite interaction."""

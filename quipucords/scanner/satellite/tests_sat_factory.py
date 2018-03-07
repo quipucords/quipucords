@@ -11,11 +11,12 @@
 """Test the satellite factory."""
 
 from django.test import TestCase
-from api.models import (Credential, Source, ScanTask,
-                        SourceOptions)
+from api.models import (Credential, Source, ScanTask)
 from scanner.satellite.factory import create
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
 from scanner.satellite.five import SatelliteFive
+from scanner.satellite.api import (SATELLITE_VERSION_5,
+                                   SATELLITE_VERSION_6)
 from scanner.test_util import create_scan_job
 
 
@@ -59,7 +60,7 @@ class SatelliteFactoryTest(TestCase):
 
     def test_create_sat5(self):
         """Test the method to create a Sat 5 interface."""
-        satellite_version = SourceOptions.SATELLITE_VERSION_5
+        satellite_version = SATELLITE_VERSION_5
         api_version = 1
         api = create(satellite_version, api_version,
                      self.scan_task)
@@ -67,7 +68,7 @@ class SatelliteFactoryTest(TestCase):
 
     def test_create_sat6_v1(self):
         """Test the method to create a Sat 6 interface."""
-        satellite_version = SourceOptions.SATELLITE_VERSION_62
+        satellite_version = SATELLITE_VERSION_6
         api_version = 1
         api = create(satellite_version, api_version,
                      self.scan_task)
@@ -75,7 +76,7 @@ class SatelliteFactoryTest(TestCase):
 
     def test_create_sat6_v2(self):
         """Test the method to create a Sat 6 interface."""
-        satellite_version = SourceOptions.SATELLITE_VERSION_62
+        satellite_version = SATELLITE_VERSION_6
         api_version = 2
         api = create(satellite_version, api_version,
                      self.scan_task)
@@ -83,7 +84,7 @@ class SatelliteFactoryTest(TestCase):
 
     def test_create_sat6_unknown(self):
         """Test the method to create a Sat 6 interface."""
-        satellite_version = SourceOptions.SATELLITE_VERSION_62
+        satellite_version = SATELLITE_VERSION_6
         api_version = 9
         api = create(satellite_version, api_version,
                      self.scan_task)

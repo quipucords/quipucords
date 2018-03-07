@@ -66,7 +66,6 @@ SOURCE_HOSTS_HELP = 'IP ranges to scan. Run the "man qpc" command for more '\
 SOURCE_CREDS_HELP = 'Credentials to associate with a source.'
 SOURCE_PORT_HELP = 'Port to use for connection for the scan; '\
     'network default is 22, vcenter default is 443.'
-SOURCE_SAT_VER_HELP = 'Specify the version of Satellite (for example, "6.2").'
 SOURCE_SSL_CERT_HELP = 'If true, the SSL certificate will'\
     ' be verified when making requests to the source, otherwise no '\
     'verification will occur.'

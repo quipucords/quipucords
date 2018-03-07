@@ -203,7 +203,7 @@ Creating and Editing Sources
 
 To create a source, supply the type of source with the ``type`` option, one or more host names or IP addresses to connect to with the ``--hosts`` option, and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for the ``hosts`` and ``cred`` options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]** **[--satellite-version=** *version* **]** **[--ssl-cert-verify=** *{True,False}* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *{True,False}* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]** **[--ssl-cert-verify=** *{True,False}* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *{True,False}* **]**
 
 ``--name=name``
 
@@ -247,10 +247,6 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
   Optional. Sets a port to be used for the scan. This value supports connection and inspection on a non-standard port. By default, a network scan runs on port 22 and a vcenter or satellite scan runs on port 443.
 
-``--satellite-version=satellite_version``
-
-  Optional. Sets the version of the Satellite server to be used for the scan. The value must be ``6.2`` or ``6.3``.
-
 ``--ssl-cert-verify={True,False}``
 
   Optional. Determines whether SSL certificate validation will be performed for the scan.
@@ -267,7 +263,7 @@ The information in a source might change as the structure of the network changes
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--port=** *port* **]** **[--satellite_version=** *version* **]** **[--ssl-cert-verify=** *{True,False}* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *{True,False}* **]**
+**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--port=** *port* **]** **[--ssl-cert-verify=** *{True,False}* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *{True,False}* **]**
 
 For example, if a source contains a value of ``server1creds`` for the ``--cred`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
 

@@ -13,7 +13,7 @@ from requests import exceptions
 from api.models import (ScanTask)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import SatelliteException, SatelliteAuthException
 from scanner.satellite.factory import create
 
 
@@ -38,20 +38,10 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     # pylint: disable=too-many-return-statements
     def run(self):
-        """Scan network range ang attempt connections."""
-        satellite_version = None
-        options = self.source.options
-        if options:
-            satellite_version = options.satellite_version
-
-        if satellite_version is None:
-            error_message = 'Satellite version is unknown. '
-            error_message += 'Connect scan failed for %s.' % self.scan_task
-            return error_message, ScanTask.FAILED
-
+        """Scan Satellite for system connection data."""
         try:
-            status_code, api_version = utils.status(self.scan_task,
-                                                    satellite_version)
+            status_code, api_version, satellite_version = \
+                utils.status(self.scan_task)
             if status_code == 200:
                 api = create(satellite_version, api_version,
                              self.scan_task)
@@ -59,29 +49,34 @@ class ConnectTaskRunner(ScanTaskRunner):
                     error_message = 'Satellite version %s with '\
                         'api version %s is not supported.\n' %\
                         (satellite_version, api_version)
-                    error_message += 'Connect scan failed for %s.' % \
-                        self.scan_task
+                    error_message += 'Connect scan failed for %s. ' % \
+                        self.source.name
                     return error_message, ScanTask.FAILED
                 api.host_count()
                 api.hosts()
             else:
-                error_message = 'Connect scan failed for %s.' % self.scan_task
+                error_message = 'Connect scan failed for source %s.' \
+                    % self.source.name
                 return error_message, ScanTask.FAILED
+        except SatelliteAuthException as auth_error:
+            error_message = 'Satellite error encountered: %s. ' % auth_error
+            error_message += 'Connect scan failed for source %s.' \
+                % self.source.name
+            return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s\n' % sat_error
-            error_message += 'Connect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % sat_error
+            error_message += 'Connect scan failed for source %s.' \
+                % self.source.name
             return error_message, ScanTask.FAILED
         except exceptions.ConnectionError as conn_error:
-            error_message = 'Satellite error encountered: %s\n' % conn_error
-            error_message += 'Connect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % conn_error
+            error_message += 'Connect scan failed for source %s.' \
+                % self.source.name
             return error_message, ScanTask.FAILED
         except TimeoutError as timeout_error:
-            error_message = 'Satellite error encountered: %s\n' % timeout_error
-            error_message += 'Connect scan failed for %s.' % self.scan_task
-            return error_message, ScanTask.FAILED
-        except Exception as unknown_error:  # pylint: disable=broad-except
-            error_message = 'Satellite error encountered: %s\n' % unknown_error
-            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % timeout_error
+            error_message += 'Connect scan failed for source %s.' \
+                % self.source.name
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED
