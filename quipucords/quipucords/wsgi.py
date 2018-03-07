@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -27,4 +27,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'quipucords.settings')
 application = get_wsgi_application()
 
 from scanner.manager import SCAN_MANAGER  # noqa: E402 pylint: disable=C0413
+from . import environment  # noqa: E402 pylint: disable=C0413
+environment.startup()
 SCAN_MANAGER.start()
