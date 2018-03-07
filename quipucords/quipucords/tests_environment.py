@@ -11,7 +11,7 @@
 """Test the environment utility."""
 
 from collections import namedtuple, OrderedDict
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from . import environment
 
@@ -69,4 +69,4 @@ class EnvironmentTest(TestCase):
     def test_startup(self, mock_logger):  # pylint: disable=no-self-use
         """Test the startup method."""
         environment.startup()
-        mock_logger.assert_called()
+        mock_logger.assert_called_with(ANY, ANY)
