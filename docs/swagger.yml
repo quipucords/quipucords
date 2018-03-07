@@ -845,7 +845,42 @@ paths:
           description: "logged out"
         401:
           description: "Unauthorized"
+  /status/:
+    get:
+      tags:
+        - "Status"
+      summary: "Provides endpoint for server status"
+      description: "Server status and setup information."
+      operationId: "serverStatus"
+      responses:
+        200:
+          description: "Server status"
+          schema:
+            $ref: "#/definitions/ServerStatus"
 definitions:
+  ServerStatus:
+    type: "object"
+    properties:
+      api_version:
+        type: "integer"
+        format: "int64"
+        description: "API version number"
+      build:
+        type: "string"
+        description: "The build number"
+      server_address:
+        type: "string"
+        description: "The ip and port information"
+      python:
+        type: "string"
+        description: "The python string version"
+      modules:
+        type: "object"
+        description: "name/version string pairs describing the modules on the server"
+      platform:
+        type: "object"
+        description: "name/value string pairs describing the server"
+
   DeletionError:
     type: "object"
     required:

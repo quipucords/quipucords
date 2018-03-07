@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -13,3 +13,5 @@
 # pylint: disable=invalid-name
 """Configuration for the api app."""
 default_app_config = 'api.apps.ApiConfig'
+
+API_VERSION = 1
