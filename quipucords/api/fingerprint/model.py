@@ -70,6 +70,14 @@ class SystemFingerprint(models.Model):
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
 
+    # Additional facts
+    subman_consumed = models.TextField(unique=False, null=True)
+    redhat_is_redhat = models.NullBooleanField()
+    redhat_packages_certs = models.TextField(unique=False, null=True)
+    redhat_packages_gpg_num_redhat_packages = models.PositiveIntegerField(
+        unique=False, null=True)
+    architecture = models.CharField(max_length=64, unique=False, null=True)
+
     metadata = models.TextField(unique=False, null=False)
 
     def __str__(self):
@@ -85,6 +93,7 @@ class SystemFingerprint(models.Model):
             'cpu_count:{}, '\
             'bios_uuid:{}, '\
             'subscription_manager_id:{}, '\
+            'subman_consumed:{}, '\
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'system_creation_date:{}, '\
@@ -97,6 +106,10 @@ class SystemFingerprint(models.Model):
             'vm_host_socket_count:{}, '\
             'vm_datacenter:{}, '\
             'vm_cluster:{}, '\
+            'redhat_is_redhat:{}, '\
+            'redhat_packages_certs:{}, '\
+            'redhat_packages_gpg_num_redhat_packages:{}, '\
+            'architecture:{}, '\
             'metadata:{} '.format(self.id,
                                   self.report_id.id,
                                   self.name,
@@ -108,6 +121,7 @@ class SystemFingerprint(models.Model):
                                   self.cpu_count,
                                   self.bios_uuid,
                                   self.subscription_manager_id,
+                                  self.subman_consumed,
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.system_creation_date,
@@ -120,6 +134,10 @@ class SystemFingerprint(models.Model):
                                   self.vm_host_socket_count,
                                   self.vm_datacenter,
                                   self.vm_cluster,
+                                  self.redhat_is_redhat,
+                                  self.redhat_packages_certs,
+                                  self.redhat_packages_gpg_num_redhat_packages,
+                                  self.architecture,
                                   self.metadata) + '}'
 
 

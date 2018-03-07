@@ -608,6 +608,16 @@ def _process_network_fact(source, fact):
     # Common facts
     add_fact_to_fingerprint(source, 'uname_hostname',
                             fact, 'name', fingerprint)
+    add_fact_to_fingerprint(source, 'redhat_packages_gpg_is_redhat',
+                            fact, 'redhat_is_redhat', fingerprint)
+    add_fact_to_fingerprint(source, 'redhat_packages_gpg_num_rh_packages',
+                            fact,
+                            'redhat_packages_gpg_num_redhat_packages',
+                            fingerprint)
+    add_fact_to_fingerprint(source, 'redhat_packages_certs', fact,
+                            'redhat_packages_certs', fingerprint)
+    add_fact_to_fingerprint(source, 'uname_processor', fact,
+                            'architecture', fingerprint)
 
     # Set OS information
     add_fact_to_fingerprint(source, 'etc_release_name',
@@ -637,6 +647,8 @@ def _process_network_fact(source, fact):
     # Set subscription manager id
     add_fact_to_fingerprint(source, 'subman_virt_uuid',
                             fact, 'subscription_manager_id', fingerprint)
+    add_fact_to_fingerprint(source, 'subman_consumed', fact,
+                            'subman_consumed', fingerprint)
 
     # System information
     add_fact_to_fingerprint(source, 'cpu_socket_count',
@@ -805,6 +817,11 @@ def _process_satellite_fact(source, fact):
                             'ip_addresses', fingerprint)
 
     add_fact_to_fingerprint(source, 'cores', fact, 'cpu_count', fingerprint)
+
+    add_fact_to_fingerprint(source, 'redhat_packages_certs', fact,
+                            'redhat_packages_certs', fingerprint)
+    add_fact_to_fingerprint(source, 'architecture', fact,
+                            'architecture', fingerprint)
 
     # Common network/satellite
     add_fact_to_fingerprint(source, 'uuid', fact,
