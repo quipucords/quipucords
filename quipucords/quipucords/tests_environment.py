@@ -10,7 +10,7 @@
 #
 """Test the environment utility."""
 
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 from unittest.mock import patch, Mock, ANY
 from django.test import TestCase
 from . import environment
