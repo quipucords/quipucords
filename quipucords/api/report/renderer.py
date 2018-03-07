@@ -179,7 +179,8 @@ class ReportCSVRenderer(renderers.BaseRenderer):
         csv_content = report_buffer.getvalue()
         return csv_content
 
-    def _compute_source_info(self, sources):
+    @staticmethod
+    def _compute_source_info(sources):
         """Detect scan source types."""
         result = {
             NETWORK_DETECTION_KEY: False,
