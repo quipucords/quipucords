@@ -32,7 +32,6 @@ class Sources extends React.Component {
       'doUpdate',
       'scanSource',
       'scanSources',
-      'itemSelectChange',
       'editSource',
       'handleDeleteSource',
       'hideScanDialog',
@@ -121,15 +120,6 @@ class Sources extends React.Component {
     }
   }
 
-  itemSelected(item) {
-    const { selectedSources } = this.props;
-    return (
-      selectedSources.find(nextSelected => {
-        return nextSelected.id === _.get(item, 'id');
-      }) !== undefined
-    );
-  }
-
   showAddSourceWizard() {
     Store.dispatch({
       type: sourcesTypes.CREATE_SOURCE_SHOW
@@ -161,13 +151,6 @@ class Sources extends React.Component {
     if (updated) {
       this.refresh();
     }
-  }
-
-  itemSelectChange(item) {
-    Store.dispatch({
-      type: this.itemSelected(item) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
-      source: item
-    });
   }
 
   doDeleteSource(item) {
@@ -251,9 +234,7 @@ class Sources extends React.Component {
           {items.map((item, index) => (
             <SourceListItem
               item={item}
-              selected={this.itemSelected(item)}
               key={index}
-              onItemSelectChange={this.itemSelectChange}
               onEdit={this.editSource}
               onDelete={this.handleDeleteSource}
               onScan={this.scanSource}

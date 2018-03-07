@@ -21,7 +21,7 @@ import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import CredentialsEmptyState from './credentialsEmptyState';
-import { CredentialListItem } from './credentialListItem';
+import CredentialListItem from './credentialListItem';
 import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 import { CredentialFilterFields, CredentialSortFields } from './crendentialConstants';
 
@@ -33,7 +33,6 @@ class Credentials extends React.Component {
       'doUpdate',
       'addCredential',
       'deleteCredentials',
-      'itemSelectChange',
       'editCredential',
       'deleteCredential',
       'addSource',
@@ -62,7 +61,7 @@ class Credentials extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.credentials !== this.props.credentials) {
+    if (!_.isEqual(nextProps.credentials, this.props.credentials)) {
       // Reset selection state though we may want to keep selections over refreshes...
       nextProps.credentials.forEach(credential => {
         if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
@@ -214,13 +213,6 @@ class Credentials extends React.Component {
     });
   }
 
-  itemSelectChange(item) {
-    Store.dispatch({
-      type: this.itemSelected(item) ? credentialsTypes.DESELECT_CREDENTIAL : credentialsTypes.SELECT_CREDENTIAL,
-      credential: item
-    });
-  }
-
   editCredential(item) {
     Store.dispatch({
       type: credentialsTypes.EDIT_CREDENTIAL_SHOW,
@@ -308,14 +300,7 @@ class Credentials extends React.Component {
       return (
         <ListView className="quipicords-list-view">
           {items.map((item, index) => (
-            <CredentialListItem
-              item={item}
-              selected={this.itemSelected(item)}
-              key={index}
-              onItemSelectChange={this.itemSelectChange}
-              onEdit={this.editCredential}
-              onDelete={this.deleteCredential}
-            />
+            <CredentialListItem item={item} key={index} onEdit={this.editCredential} onDelete={this.deleteCredential} />
           ))}
         </ListView>
       );

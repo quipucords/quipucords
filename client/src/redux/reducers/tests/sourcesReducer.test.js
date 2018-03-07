@@ -3,7 +3,8 @@ import sourcesReducer from '../sourcesReducer';
 
 const initialState = {
   persist: {
-    selectedSources: []
+    selectedSources: [],
+    expandedSources: []
   },
 
   view: {

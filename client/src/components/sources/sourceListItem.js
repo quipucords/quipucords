@@ -8,6 +8,8 @@ import PropTypes from 'prop-types';
 import { Popover, OverlayTrigger, ListView, Button, Checkbox, Icon } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
+import Store from '../../redux/store';
+import { sourcesTypes } from '../../redux/constants';
 import { getScanResults } from '../../redux/actions/scansActions';
 
 import { SourceCredentialsList } from './sourceCredentialsList';
@@ -19,18 +21,51 @@ class SourceListItem extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
+    helpers.bindMethods(this, ['itemSelectChange', 'toggleExpand', 'closeExpand']);
+  }
+
+  expandType() {
+    const { item, expandedSources } = this.props;
+
+    return _.get(
+      _.find(expandedSources, nextExpanded => {
+        return nextExpanded.id === item.id;
+      }),
+      'expandType'
+    );
+  }
+
+  isSelected(item, selectedSources) {
+    return (
+      _.find(selectedSources, nextSelected => {
+        return nextSelected.id === item.id;
+      }) !== undefined
+    );
+  }
+
+  itemSelectChange() {
+    const { item, selectedSources } = this.props;
+
+    Store.dispatch({
+      type: this.isSelected(item, selectedSources) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
+      source: item
+    });
   }
 
   toggleExpand(expandType) {
     const { item } = this.props;
 
-    if (expandType === item.expandType) {
-      item.expanded = !item.expanded;
+    if (expandType === this.expandType()) {
+      Store.dispatch({
+        type: sourcesTypes.EXPAND_SOURCE,
+        source: item
+      });
     } else {
-      item.expanded = true;
-      item.expandType = expandType;
-
+      Store.dispatch({
+        type: sourcesTypes.EXPAND_SOURCE,
+        source: item,
+        expandType: expandType
+      });
       if (expandType === 'okHosts' || expandType === 'failedHosts') {
         if (!item.scanResults) {
           item.scanResultsPending = true;
@@ -52,13 +87,14 @@ class SourceListItem extends React.Component {
         }
       }
     }
-    this.forceUpdate();
   }
 
   closeExpand() {
     const { item } = this.props;
-    item.expanded = false;
-    this.forceUpdate();
+    Store.dispatch({
+      type: sourcesTypes.EXPAND_SOURCE,
+      source: item
+    });
   }
 
   renderSourceType() {
@@ -98,6 +134,7 @@ class SourceListItem extends React.Component {
   renderStatusItems() {
     const { item } = this.props;
 
+    let expandType = this.expandType();
     let credentialCount = _.size(_.get(item, 'credentials', []));
     let okHostCount = _.get(item, 'connection.systems_scanned', 0);
     let failedHostCount = _.get(item, 'connection.systems_failed', 0);
@@ -115,7 +152,7 @@ class SourceListItem extends React.Component {
         emptyText="0 Credentials"
         tipSingular="Credential"
         tipPlural="Credentials"
-        expanded={item.expanded && item.expandType === 'credentials'}
+        expanded={expandType === 'credentials'}
         expandType="credentials"
         toggleExpand={this.toggleExpand}
         iconType="fa"
@@ -128,7 +165,7 @@ class SourceListItem extends React.Component {
         emptyText="0 Successful"
         tipSingular="Successful Authentication"
         tipPlural="Successful Authentications"
-        expanded={item.expanded && item.expandType === 'okHosts'}
+        expanded={expandType === 'okHosts'}
         expandType="okHosts"
         toggleExpand={this.toggleExpand}
         iconType="pf"
@@ -141,7 +178,7 @@ class SourceListItem extends React.Component {
         emptyText="0 Failed"
         tipSingular="Failed Authentication"
         tipPlural="Failed Authentications"
-        expanded={item.expanded && item.expandType === 'failedHosts'}
+        expanded={expandType === 'failedHosts'}
         expandType="failedHosts"
         toggleExpand={this.toggleExpand}
         iconType="pf"
@@ -153,7 +190,7 @@ class SourceListItem extends React.Component {
   renderExpansionContents() {
     const { item } = this.props;
 
-    switch (item.expandType) {
+    switch (this.expandType()) {
       case 'okHosts':
         return <SourceHostList source={item} status="success" />;
       case 'failedHosts':
@@ -260,7 +297,8 @@ class SourceListItem extends React.Component {
     );
   }
   render() {
-    const { item, selected, onItemSelectChange } = this.props;
+    const { item, selectedSources } = this.props;
+    const selected = this.isSelected(item, selectedSources);
 
     const classes = cx({
       'list-view-pf-top-align': true,
@@ -272,13 +310,13 @@ class SourceListItem extends React.Component {
         key={item.id}
         stacked
         className={classes}
-        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={e => onItemSelectChange(item)} />}
+        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={this.renderSourceType()}
         description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand
-        compoundExpanded={item.expanded}
+        compoundExpanded={this.expandType() !== undefined}
         onCloseCompoundExpand={this.closeExpand}
       >
         {this.renderExpansionContents()}
@@ -289,16 +327,16 @@ class SourceListItem extends React.Component {
 
 SourceListItem.propTypes = {
   item: PropTypes.object,
-  selected: PropTypes.bool,
-  onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onScan: PropTypes.func,
-  getScanResults: PropTypes.func
+  getScanResults: PropTypes.func,
+  selectedSources: PropTypes.array,
+  expandedSources: PropTypes.array
 };
 
 const mapStateToProps = function(state) {
-  return {};
+  return Object.assign(state.sources.persist);
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

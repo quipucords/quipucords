@@ -1,33 +1,74 @@
+import _ from 'lodash';
 import React from 'react';
+import { connect } from 'react-redux';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import Store from '../../redux/store';
+import { credentialsTypes } from '../../redux/constants';
 
 class CredentialListItem extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
+    helpers.bindMethods(this, ['itemSelectChange', 'toggleExpand', 'closeExpand']);
+  }
+
+  expandType() {
+    const { item, expandedCredentials } = this.props;
+
+    return _.get(
+      _.find(expandedCredentials, nextExpanded => {
+        return nextExpanded.id === item.id;
+      }),
+      'expandType'
+    );
+  }
+
+  isSelected() {
+    const { item, selectedCredentials } = this.props;
+
+    return (
+      _.find(selectedCredentials, nextSelected => {
+        return nextSelected.id === item.id;
+      }) !== undefined
+    );
+  }
+
+  itemSelectChange() {
+    const { item } = this.props;
+
+    Store.dispatch({
+      type: this.isSelected() ? credentialsTypes.DESELECT_CREDENTIAL : credentialsTypes.SELECT_CREDENTIAL,
+      credential: item
+    });
   }
 
   toggleExpand(expandType) {
     const { item } = this.props;
 
-    if (expandType === item.expandType) {
-      item.expanded = !item.expanded;
+    if (expandType === this.expandType()) {
+      Store.dispatch({
+        type: credentialsTypes.EXPAND_CREDENTIAL,
+        credential: item
+      });
     } else {
-      item.expanded = true;
-      item.expandType = expandType;
+      Store.dispatch({
+        type: credentialsTypes.EXPAND_CREDENTIAL,
+        credential: item,
+        expandType: expandType
+      });
     }
-    this.forceUpdate();
   }
 
   closeExpand() {
     const { item } = this.props;
-    item.expanded = false;
-    this.forceUpdate();
+    Store.dispatch({
+      type: credentialsTypes.EXPAND_CREDENTIAL,
+      credential: item
+    });
   }
 
   renderActions() {
@@ -70,7 +111,7 @@ class CredentialListItem extends React.Component {
         className={'list-view-info-item-icon-count ' + (sourceCount === 0 ? 'invisible' : '')}
       >
         <ListView.Expand
-          expanded={item.expanded && item.expandType === 'sources'}
+          expanded={this.expandType() === 'sources'}
           toggleExpanded={() => {
             this.toggleExpand('sources');
           }}
@@ -83,9 +124,9 @@ class CredentialListItem extends React.Component {
   }
 
   renderExpansionContents() {
-    const { item } = this.props;
+    const { item, expandedCredentials } = this.props;
 
-    switch (item.expandType) {
+    switch (this.expandType(item, expandedCredentials)) {
       case 'sources':
         item.sources &&
           item.sources.sort((item1, item2) => {
@@ -121,10 +162,9 @@ class CredentialListItem extends React.Component {
   }
 
   render() {
-    const { item, selected, onItemSelectChange } = this.props;
-
-    let sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
-
+    const { item } = this.props;
+    const selected = this.isSelected();
+    const sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
     const classes = cx({
       'quipucords-credential-list-item': true,
       active: selected
@@ -134,7 +174,7 @@ class CredentialListItem extends React.Component {
       <ListView.Item
         key={item.id}
         className={classes}
-        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={e => onItemSelectChange(item)} />}
+        checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={
           <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
@@ -149,7 +189,7 @@ class CredentialListItem extends React.Component {
         }
         additionalInfo={this.renderStatusItems()}
         compoundExpand
-        compoundExpanded={item.expanded}
+        compoundExpanded={this.expandType() !== undefined}
         onCloseCompoundExpand={this.closeExpand}
       >
         {this.renderExpansionContents()}
@@ -160,10 +200,14 @@ class CredentialListItem extends React.Component {
 
 CredentialListItem.propTypes = {
   item: PropTypes.object,
-  selected: PropTypes.bool,
-  onItemSelectChange: PropTypes.func,
   onEdit: PropTypes.func,
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
+  selectedCredentials: PropTypes.array,
+  expandedCredentials: PropTypes.array
 };
 
-export { CredentialListItem };
+const mapStateToProps = function(state) {
+  return Object.assign(state.credentials.persist);
+};
+
+export default connect(mapStateToProps)(CredentialListItem);

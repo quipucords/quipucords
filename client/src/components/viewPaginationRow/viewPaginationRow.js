@@ -92,6 +92,7 @@ class ViewPaginationRow extends React.Component {
         pagination={rowPagination}
         amountOfPages={totalPages}
         pageSizeDropUp={false}
+        pageInputValue={currentPage}
         itemCount={totalCount}
         itemsStart={itemsStart}
         itemsEnd={itemsEnd}
