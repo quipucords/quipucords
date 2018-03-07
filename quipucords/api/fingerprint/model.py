@@ -48,6 +48,9 @@ class SystemFingerprint(models.Model):
 
     cpu_count = models.PositiveIntegerField(unique=False, null=True)
 
+    architecture = models.CharField(max_length=64, unique=False, null=True)
+    subman_consumed = models.TextField(unique=False, null=True)
+
     # Network scan facts
     bios_uuid = models.CharField(max_length=36, unique=False, null=True)
     subscription_manager_id = models.CharField(
@@ -70,14 +73,12 @@ class SystemFingerprint(models.Model):
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
 
-    # Additional facts
-    subman_consumed = models.TextField(unique=False, null=True)
+    # Red Hat facts
     redhat_is_redhat = models.NullBooleanField()
     redhat_packages_certs = models.TextField(unique=False, null=True)
     # pylint: disable=invalid-name
     redhat_packages_gpg_num_redhat_packages = models.PositiveIntegerField(
         unique=False, null=True)
-    architecture = models.CharField(max_length=64, unique=False, null=True)
 
     metadata = models.TextField(unique=False, null=False)
     sources = models.TextField(unique=False, null=False)
@@ -95,7 +96,6 @@ class SystemFingerprint(models.Model):
             'cpu_count:{}, '\
             'bios_uuid:{}, '\
             'subscription_manager_id:{}, '\
-            'subman_consumed:{}, '\
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'system_creation_date:{}, '\
@@ -124,7 +124,6 @@ class SystemFingerprint(models.Model):
                                   self.cpu_count,
                                   self.bios_uuid,
                                   self.subscription_manager_id,
-                                  self.subman_consumed,
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.system_creation_date,
@@ -141,6 +140,7 @@ class SystemFingerprint(models.Model):
                                   self.redhat_packages_certs,
                                   self.redhat_packages_gpg_num_redhat_packages,
                                   self.architecture,
+                                  self.subman_consumed,
                                   self.sources,
                                   self.metadata) + '}'
 

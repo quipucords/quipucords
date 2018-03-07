@@ -72,6 +72,8 @@ class FingerprintSerializer(ModelSerializer):
 
     cpu_count = IntegerField(required=False, min_value=0)
 
+    architecture = CharField(required=False, max_length=64)
+    subman_consumed = CustomJSONField(required=False)
     # Network scan facts
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
@@ -99,13 +101,12 @@ class FingerprintSerializer(ModelSerializer):
                                          allow_null=True,
                                          required=False)
 
-    subman_consumed = CustomJSONField(required=False)
+    # Red Hat facts
     redhat_is_redhat = NullBooleanField(required=False)
     redhat_packages_certs = CharField(required=False, max_length=128)
     # pylint: disable=invalid-name
     redhat_packages_gpg_num_redhat_packages = IntegerField(
         required=False, min_value=0)
-    architecture = CharField(required=False, max_length=64)
 
     metadata = CustomJSONField(required=True)
     sources = CustomJSONField(required=True)

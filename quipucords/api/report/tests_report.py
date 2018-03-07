@@ -272,7 +272,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['report'][0].keys()), 33)
+        self.assertEqual(len(report['report'][0].keys()), 32)
 
     def test_get_fact_collection_filter_report(self):
         """Get a specific group count report with filter."""
