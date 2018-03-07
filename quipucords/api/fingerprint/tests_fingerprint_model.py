@@ -29,7 +29,8 @@ class FingerprintModelTest(TestCase):
     def test_empty_fingerprint(self):
         """Create an empty fingerprint."""
         fingerprint_dict = {'report_id': self.fact_collection.id,
-                            'metadata': {}}
+                            'metadata': {},
+                            'sources': []}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -47,7 +48,8 @@ class FingerprintModelTest(TestCase):
                         'metadata': {}}
         fingerprint_dict = {'report_id': self.fact_collection.id,
                             'metadata': {},
-                            'products': [product_dict]}
+                            'products': [product_dict],
+                            'sources': []}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -63,7 +65,8 @@ class FingerprintModelTest(TestCase):
                         'metadata': {}}
         fingerprint_dict = {'report_id': self.fact_collection.id,
                             'metadata': {},
-                            'products': [product_dict]}
+                            'products': [product_dict],
+                            'sources': []}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -79,7 +82,8 @@ class FingerprintModelTest(TestCase):
                             'metadata': {}}
         fingerprint_dict = {'report_id': self.fact_collection.id,
                             'metadata': {},
-                            'entitlements': [entitlement_dict]}
+                            'entitlements': [entitlement_dict],
+                            'sources': []}
 
         serializer = FingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()

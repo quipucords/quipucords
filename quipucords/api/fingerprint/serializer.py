@@ -99,6 +99,7 @@ class FingerprintSerializer(ModelSerializer):
                                          required=False)
 
     metadata = CustomJSONField(required=True)
+    sources = CustomJSONField(required=True)
 
     class Meta:
         """Meta class for FingerprintSerializer."""
