@@ -81,6 +81,7 @@ class SystemFingerprint(models.Model):
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
 
     metadata = models.TextField(unique=False, null=False)
+    sources = models.TextField(unique=False, null=False)
 
     def __str__(self):
         """Convert to string."""
@@ -115,6 +116,7 @@ class SystemFingerprint(models.Model):
             'vm_host_socket_count:{}, '\
             'vm_datacenter:{}, '\
             'vm_cluster:{}, '\
+            'sources:{}, '\
             'metadata:{} '.format(self.id,
                                   self.report_id.id,
                                   self.name,
@@ -146,6 +148,7 @@ class SystemFingerprint(models.Model):
                                   self.vm_host_socket_count,
                                   self.vm_datacenter,
                                   self.vm_cluster,
+                                  self.sources,
                                   self.metadata) + '}'
 
 

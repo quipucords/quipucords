@@ -49,6 +49,7 @@ ENTITLEMENTS_KEY = 'entitlements'
 PRODUCTS_KEY = 'products'
 NAME_KEY = 'name'
 PRESENCE_KEY = 'presence'
+SOURCES_KEY = 'sources'
 
 
 def process_fact_collection(sender, instance, **kwargs):
@@ -60,7 +61,7 @@ def process_fact_collection(sender, instance, **kwargs):
     :returns: None
     """
     # pylint: disable=unused-argument
-    logger.info('Fingerprint engine (FC=%d) - start processing',
+    logger.info('Fingerprint engine (report id=%d) - start processing',
                 instance.id)
 
     # Invoke ENGINE to create fingerprints from facts
@@ -78,7 +79,7 @@ def process_fact_collection(sender, instance, **kwargs):
             logger.error('Invalid fingerprint: %s', fingerprint_dict)
             logger.error('Fingerprint errors: %s', serializer.errors)
 
-    logger.info('Fingerprint engine (FC=%d) - end processing '
+    logger.info('Fingerprint engine (report id=%d) - end processing '
                 '(valid fingerprints=%d, invalid fingerprints=%d)',
                 instance.id,
                 number_valid,
@@ -197,7 +198,30 @@ def _process_sources(fact_collection):
     logger.debug('Total merged count decreased by %d\n',
                  (number_network_satellite_before +
                   number_vcenter_before - number_after))
+
+    _post_process_merged_fingerprints(all_fingerprints)
     return all_fingerprints
+
+
+def _post_process_merged_fingerprints(fingerprints):
+    """Normalize cross source fingerprint values.
+
+    This is required when values need cross source complex
+    logic.
+    :param fingerprints: final list of fingerprints
+    associated with facts.
+    """
+    for fingerprint in fingerprints:
+        expanded_sources = []
+        for source_id in fingerprint[SOURCES_KEY]:
+            source_object = Source.objects.filter(id=source_id).first()
+            expanded_source = {
+                'id': source_object.id,
+                'source_type': source_object.source_type,
+                'name': source_object.name
+            }
+            expanded_sources.append(expanded_source)
+        fingerprint[SOURCES_KEY] = expanded_sources
 
 
 def _process_source(report_id, source):
@@ -213,6 +237,7 @@ def _process_source(report_id, source):
     fingerprints = []
     for fact in source['facts']:
         fingerprint = None
+        source_id = source['source_id']
         source_type = source['source_type']
         if source_type == Source.NETWORK_SOURCE_TYPE:
             fingerprint = _process_network_fact(source, fact)
@@ -226,6 +251,7 @@ def _process_source(report_id, source):
 
         if fingerprint is not None:
             fingerprint['report_id'] = report_id
+            fingerprint[SOURCES_KEY] = [int(source_id)]
             fingerprints.append(fingerprint)
 
     return fingerprints
@@ -463,6 +489,11 @@ def _merge_fingerprint(priority_fingerprint,
             priority_fingerprint[META_DATA_KEY][fact_key] = \
                 to_merge_fingerprint[META_DATA_KEY][fact_key]
             priority_fingerprint[fact_key] = to_merge_fact
+
+    # merge sources
+    merged_sources = set(priority_fingerprint[SOURCES_KEY]) | \
+        set(to_merge_fingerprint[SOURCES_KEY])
+    priority_fingerprint[SOURCES_KEY] = list(merged_sources)
 
     if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
         if ENTITLEMENTS_KEY not in priority_fingerprint:
