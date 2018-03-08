@@ -85,13 +85,13 @@ def get_optional_products(disabled_optional_products):
     products
     """
     disabled_products = {}
-    disabled_default = {scan.JBOSS_FUSE: True,
-                        scan.JBOSS_EAP: True,
-                        scan.JBOSS_BRMS: True}
+    disabled_default = {scan.JBOSS_FUSE: False,
+                        scan.JBOSS_EAP: False,
+                        scan.JBOSS_BRMS: False}
 
     if disabled_optional_products:
         for product in disabled_optional_products:
-            disabled_products[product] = False
+            disabled_products[product] = True
     elif disabled_optional_products == []:
         return disabled_default
     else:
