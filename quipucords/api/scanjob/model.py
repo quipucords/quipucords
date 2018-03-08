@@ -15,7 +15,7 @@ These models are used in the REST definitions.
 from datetime import datetime
 import logging
 from django.utils.translation import ugettext as _
-from django.db import (models, transaction)
+from django.db import (models, transaction, OperationalError)
 from django.db.models import Q
 from api.source.model import Source
 from api.scan.model import Scan, ScanOptions
@@ -194,8 +194,32 @@ class ScanJob(models.Model):
                             self.start_time).total_seconds()
         return elapsed_time
 
-    @transaction.atomic
+    def safe_state_change(self, method_name, message=None):
+        """Update state in protected clause."""
+        # django.db.utils.OperationalError: database is locked
+        try:
+            method = getattr(self, method_name)
+            if method_name == '_fail':
+                method(message)
+            else:
+                method()
+        except OperationalError:
+            # try one more time
+            method = getattr(self, method_name)
+            if method_name == '_fail':
+                method(message)
+            else:
+                method()
+
     def queue(self):
+        """Queue the job to run.
+
+        Change job state from CREATED TO PENDING.
+        """
+        self.safe_state_change('_queue')
+
+    @transaction.atomic
+    def _queue(self):
         """Queue the job to run.
 
         Change job state from CREATED TO PENDING.
@@ -291,8 +315,15 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def start(self):
+        """Start a job.
+
+        Change job state from PENDING TO RUNNING.
+        """
+        self.safe_state_change('_start')
+
+    @transaction.atomic
+    def _start(self):
         """Start a job.
 
         Change job state from PENDING TO RUNNING.
@@ -309,8 +340,18 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def restart(self):
+        """Restart a job.
+
+        Change job state from PENDING, PAUSED OR RUNNING
+        TO RUNNING status. Handles job that need to be run,
+        jobs that were running and the server quick, and
+        paused jobs.
+        """
+        self.safe_state_change('_restart')
+
+    @transaction.atomic
+    def _restart(self):
         """Restart a job.
 
         Change job state from PENDING, PAUSED OR RUNNING
@@ -336,8 +377,15 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def pause(self):
+        """Pause a job.
+
+        Change job state from PENDING/RUNNING TO PAUSED.
+        """
+        self.safe_state_change('_pause')
+
+    @transaction.atomic
+    def _pause(self):
         """Pause a job.
 
         Change job state from PENDING/RUNNING TO PAUSED.
@@ -362,8 +410,16 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def cancel(self):
+        """Cancel a job.
+
+        Change job state from CREATED, PENDING, RUNNING, or
+        PAUSED to CANCELED.
+        """
+        self.safe_state_change('_cancel')
+
+    @transaction.atomic
+    def _cancel(self):
         """Cancel a job.
 
         Change job state from CREATED, PENDING, RUNNING, or
@@ -393,8 +449,15 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def complete(self):
+        """Complete a job.
+
+        Change job state from RUNNING TO COMPLETE.
+        """
+        self.safe_state_change('_complete')
+
+    @transaction.atomic
+    def _complete(self):
         """Complete a job.
 
         Change job state from RUNNING TO COMPLETE.
@@ -412,8 +475,16 @@ class ScanJob(models.Model):
         self._log_stats('COMPLETION STATS.')
         self.log_current_status()
 
-    @transaction.atomic
     def fail(self, message):
+        """Fail a job.
+
+        Change job state from RUNNING TO COMPLETE.
+        :param message: The error message associated with failure
+        """
+        self.safe_state_change('_fail', message)
+
+    @transaction.atomic
+    def _fail(self, message):
         """Fail a job.
 
         Change job state from RUNNING TO COMPLETE.
