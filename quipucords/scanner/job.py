@@ -75,6 +75,18 @@ class ScanJobRunner(Process):
             try:
                 status_message, task_status = runner.run()
             except Exception as error:
+                failed_task = runner.scan_task
+                context_message = 'Unexpected failure occurs.'
+                context_message += 'See context below.\n'
+                context_message += 'SCAN JOB: %s\n' % self.scan_job
+                context_message += 'TASK: %s\n' % failed_task
+                context_message += 'SOURCE: %s\n' % failed_task.source
+                creds = [str(cred)
+                         for cred in failed_task.source.credentials.all()]
+                context_message += 'CREDENTIALS: [%s]' % creds
+                failed_task.log_message(
+                    context_message, log_level=logging.ERROR)
+
                 message = 'FATAL ERROR. %s' % str(error)
                 self.scan_job.fail(message)
                 raise error
