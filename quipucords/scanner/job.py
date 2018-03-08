@@ -76,7 +76,7 @@ class ScanJobRunner(Process):
                 status_message, task_status = runner.run()
             except Exception as error:
                 failed_task = runner.scan_task
-                context_message = 'Unexpected failure occured.'
+                context_message = 'Unexpected failure occurred.'
                 context_message += 'See context below.\n'
                 context_message += 'SCAN JOB: %s\n' % self.scan_job
                 context_message += 'TASK: %s\n' % failed_task
