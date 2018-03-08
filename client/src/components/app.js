@@ -9,6 +9,7 @@ import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 
 import { routes } from '../routes';
 import { authorizeUser, getUser, logoutUser } from '../redux/actions/userActions';
+import { getStatus } from '../redux/actions/statusActions';
 import helpers from '../common/helpers';
 
 import About from './about/about';
@@ -32,6 +33,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.props.authorizeUser();
+    this.props.getStatus();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -81,7 +83,7 @@ class App extends React.Component {
   }
 
   renderContent() {
-    const { session, user } = this.props;
+    const { session, user, status } = this.props;
     const { aboutShown } = this.state;
 
     if (session.error) {
@@ -122,7 +124,7 @@ class App extends React.Component {
         <Content />
         <ToastNotificationsList key="toastList" />
         <ConfirmationModal key="confirmationModal" />
-        <About user={user} shown={aboutShown} onClose={this.closeAbout} />
+        <About user={user} status={status} shown={aboutShown} onClose={this.closeAbout} />
         <AddSourceWizard />
       </React.Fragment>
     );
@@ -169,9 +171,11 @@ class App extends React.Component {
 App.propTypes = {
   authorizeUser: PropTypes.func,
   getUser: PropTypes.func,
+  getStatus: PropTypes.func,
   logoutUser: PropTypes.func,
   session: PropTypes.object,
   user: PropTypes.object,
+  status: PropTypes.object,
   location: PropTypes.object,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired
@@ -181,13 +185,15 @@ App.propTypes = {
 const mapDispatchToProps = (dispatch, ownProps) => ({
   authorizeUser: () => dispatch(authorizeUser()),
   getUser: () => dispatch(getUser()),
-  logoutUser: () => dispatch(logoutUser())
+  logoutUser: () => dispatch(logoutUser()),
+  getStatus: () => dispatch(getStatus())
 });
 
 function mapStateToProps(state, ownProps) {
   return {
     session: state.user.session,
-    user: state.user.user
+    user: state.user.user,
+    status: state.status.currentStatus
   };
 }
 

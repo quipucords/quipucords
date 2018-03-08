@@ -133,12 +133,6 @@ class ProcessRunJarManifest(process.Processor):
             for line in item['stdout_lines']:
                 match = cls.VERSION_REGEXP.match(line)
                 if match:
-                    raw_version = match.group(2)
-                    if raw_version in VERSION_CLASSIFICATIONS:
-                        results[directory] = VERSION_CLASSIFICATIONS[
-                            raw_version]
-                    else:
-                        results[directory] = 'Unknown EAP version: {0}'.format(
-                            raw_version)
+                    results[directory] = match.group(2)
 
         return results

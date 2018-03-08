@@ -13,14 +13,14 @@
 
 import logging
 from api.models import Product, Source
-from fingerprinter.utils import (product_entitlement_found,
-                                 generate_raw_fact_members)
+from fingerprinter.utils import product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+NAME = 'name'
 PRODUCT = 'JBoss EAP'
-PRESENCE_KEY = 'presence'
-VERSION_KEY = 'version'
+PRESENCE = 'presence'
+VERSION = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
 META_DATA_KEY = 'metadata'
 JBOSS_EAP_RUNNING_PATHS = 'jboss_eap_running_paths'
@@ -36,10 +36,9 @@ JBOSS_EAP_JAR_VER = 'jboss_eap_jar_ver'
 JBOSS_EAP_RUN_JAR_VER = 'jboss_eap_run_jar_ver'
 EAP5_HOME_VERSION_TXT = 'eap5_home_version_txt'
 EAP5_HOME_README_HTML = 'eap5_home_readme_html'
+EAP5_HOME_RUN_JAR_MANIFEST = 'eap5_home_run_jar_manifest'
 SUBMAN_CONSUMED = 'subman_consumed'
 ENTITLEMENTS = 'entitlements'
-
-EAP5 = 'EAP 5'
 
 EAP_CLASSIFICATIONS = {
     'JBoss_4_0_0': 'JBossAS-4',
@@ -100,7 +99,119 @@ EAP_CLASSIFICATIONS = {
 }
 
 
-# pylint: disable=too-many-locals, too-many-statements
+def classify_jar_versions(jar_versions):
+    """Classify raw jar versions.
+
+    :param jar_versions: an iterable of EAP jar version tuples.
+    :returns: a set of classifications, or Unknown-Release for unknown strings.
+    """
+    versions = set()
+
+    if not jar_versions:
+        return versions
+
+    for version_data in jar_versions:
+        version = version_data.get(VERSION)
+        unknown_release = 'Unknown-Release: ' + version
+        versions.add(EAP_CLASSIFICATIONS.get(version,
+                                             unknown_release))
+    return versions
+
+
+def versions_eap_presence(jar_versions):
+    """Test whether jar_versions includes an EAP version."""
+    if not jar_versions:
+        return Product.UNKNOWN
+
+    for version in jar_versions.values():
+        if EAP_CLASSIFICATIONS.get(version, '').startswith('EAP'):
+            return Product.PRESENT
+
+    return Product.UNKNOWN
+
+
+# classify_versions is different than classify_jar_versions above
+# because the jar_versions expects a list of dictionaries with keys
+# 'version' and 'date', whereas this just expects a list of version
+# strings.
+def classify_versions(versions):
+    """Classify the version strings in versions."""
+    classes = set()
+
+    for version in versions.values():
+        if version in EAP_CLASSIFICATIONS:
+            classes.add(EAP_CLASSIFICATIONS[version])
+        else:
+            classes.add('Unknown-Release: ' + version)
+
+    return classes
+
+
+def find_eap_entitlement(entitlements):
+    """Look for JBoss EAP entitlements in a dict of entitlements."""
+    if not entitlements:
+        return Product.ABSENT
+
+    if product_entitlement_found(entitlements, PRODUCT):
+        return Product.POTENTIAL
+
+    return Product.UNKNOWN
+
+
+# Each fact can tell us the presence, version, or both of
+# EAP. (Version without presence happens when we detect Wildfly. That
+# leads to PRESENCE False and Version 'Wildfly-10' or something like
+# that.) For each fact, PRESENCE and VERSION are functions that are
+# applied to the fact's value and return presence or version
+# information respectively. PRESENCE can also be a literal presence
+# value and VERSION can be a literal set, as a convenience.
+FACTS = [
+    {NAME: JBOSS_EAP_RUNNING_PATHS, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_JBOSS_USER, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_COMMON_FILES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_PROCESSES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_PACKAGES, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_SYSTEMCTL_FILES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_CHKCONFIG, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_EAP_HOME, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_JAR_VER,
+     PRESENCE: Product.PRESENT,
+     VERSION: classify_jar_versions},
+    {NAME: JBOSS_EAP_RUN_JAR_VER,
+     PRESENCE: Product.PRESENT,
+     VERSION: classify_jar_versions},
+    {NAME: EAP5_HOME_VERSION_TXT, PRESENCE: Product.PRESENT},
+    {NAME: EAP5_HOME_README_HTML, PRESENCE: Product.PRESENT},
+    {NAME: EAP5_HOME_RUN_JAR_MANIFEST,
+     PRESENCE: versions_eap_presence,
+     VERSION: classify_versions},
+    {NAME: SUBMAN_CONSUMED, PRESENCE: find_eap_entitlement},
+    {NAME: ENTITLEMENTS, PRESENCE: find_eap_entitlement}
+]
+
+
+def call_or_value(obj, argument):
+    """Either call a function or return a literal value."""
+    if callable(obj):
+        return obj(argument)
+
+    return obj
+
+
+PRESENCE_ORDER = [Product.UNKNOWN, Product.ABSENT,
+                  Product.POTENTIAL, Product.PRESENT]
+
+
+# pylint: disable=invalid-name
+def presence_ge(a, b):
+    """Compare two presence values, like >= for numbers.
+
+    :returns: True if a is as or more "sure" of presence than b, False if not.
+    """
+    return PRESENCE_ORDER.index(a) >= PRESENCE_ORDER.index(b)
+
+
 def detect_jboss_eap(source, facts):
     """Detect if JBoss EAP is present based on system facts.
 
@@ -108,23 +219,6 @@ def detect_jboss_eap(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    running_paths = facts.get(JBOSS_EAP_RUNNING_PATHS)
-    jboss_user = facts.get(JBOSS_EAP_JBOSS_USER)
-    common_files = facts.get(JBOSS_EAP_COMMON_FILES)
-    eap_processes = facts.get(JBOSS_EAP_PROCESSES)
-    packages = facts.get(JBOSS_EAP_PACKAGES)
-    modules_jar = facts.get(JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR)
-    systemctl_files = facts.get(JBOSS_EAP_SYSTEMCTL_FILES)
-    chkconfig = facts.get(JBOSS_EAP_CHKCONFIG)
-    eap_home = facts.get(JBOSS_EAP_EAP_HOME)
-    eap_jar_versions = facts.get(JBOSS_EAP_JAR_VER, [])
-    eap_run_jar_versions = facts.get(JBOSS_EAP_RUN_JAR_VER, [])
-    eap5_home_version_txt = facts.get(EAP5_HOME_VERSION_TXT)
-    eap5_home_readme_html = facts.get(EAP5_HOME_README_HTML)
-    subman_consumed = facts.get(SUBMAN_CONSUMED, [])
-    entitlements = facts.get(ENTITLEMENTS, [])
-    eap_jar_versions += eap_run_jar_versions
-
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
         source_name = source_object.name
@@ -137,60 +231,42 @@ def detect_jboss_eap(source, facts):
         'source_type': source['source_type'],
     }
     product_dict = {'name': PRODUCT}
-    raw_facts = None
 
-    # pylint: disable=too-many-boolean-expressions
-    if (running_paths or
-            packages or
-            modules_jar or
-            eap_home or
-            eap_jar_versions or
-            eap5_home_version_txt or
-            eap5_home_readme_html):
+    presence = Product.ABSENT  # Default to ABSENT to match previous behavior.
+    versions = set()  # Set of EAP or WildFly versions present.
+    raw_facts = []  # List of facts that contributed to presence.
 
-        raw_facts_dict = {JBOSS_EAP_RUNNING_PATHS: running_paths,
-                          JBOSS_EAP_PACKAGES: packages,
-                          JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR: modules_jar,
-                          JBOSS_EAP_EAP_HOME: eap_home,
-                          JBOSS_EAP_JAR_VER: eap_jar_versions,
-                          JBOSS_EAP_RUN_JAR_VER: eap_run_jar_versions,
-                          EAP5_HOME_VERSION_TXT: eap5_home_version_txt,
-                          EAP5_HOME_README_HTML: eap5_home_readme_html}
-        raw_facts = generate_raw_fact_members(raw_facts_dict)
-        product_dict[PRESENCE_KEY] = Product.PRESENT
+    for fact_dict in FACTS:
+        fact = fact_dict[NAME]
+        fact_value = facts.get(fact)
+        if not fact_value:
+            continue
+        if PRESENCE in fact_dict:
+            new_presence = call_or_value(fact_dict[PRESENCE], fact_value)
+            if not presence_ge(presence, new_presence):
+                # presence is being upgraded. Replace old presence
+                # with new presence, and adjust raw facts list.
+                presence = new_presence
+                raw_facts = [fact]
+            elif presence == new_presence and presence != Product.UNKNOWN:
+                # presence matches, which means facts is more evidence
+                # in support of our current presence value.
+                raw_facts.append(fact)
+            # If fact only supports a less-sure conclusion than the
+            # one we already have, then we ignore it.
+        if VERSION in fact_dict:
+            new_versions = call_or_value(fact_dict[VERSION], fact_value)
+            versions.update(new_versions)
 
-        versions = set()
-        if eap_jar_versions:
-            for version_data in eap_jar_versions:
-                version = version_data.get(VERSION_KEY)
-                unknown_release = 'Unknown-Release: ' + version
-                versions.add(EAP_CLASSIFICATIONS.get(version,
-                                                     unknown_release))
-        if eap5_home_version_txt or eap5_home_readme_html:
-            versions.add(EAP5)
-        if versions:
-            product_dict[VERSION_KEY] = list(versions)
-    elif (jboss_user or
-          common_files or
-          eap_processes or
-          systemctl_files or
-          chkconfig):
-        raw_facts_dict = {JBOSS_EAP_JBOSS_USER: jboss_user,
-                          JBOSS_EAP_COMMON_FILES: common_files,
-                          JBOSS_EAP_PROCESSES: eap_processes,
-                          JBOSS_EAP_SYSTEMCTL_FILES: systemctl_files,
-                          JBOSS_EAP_CHKCONFIG: chkconfig}
-        raw_facts = generate_raw_fact_members(raw_facts_dict)
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-    elif product_entitlement_found(subman_consumed, PRODUCT):
-        raw_facts = SUBMAN_CONSUMED
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-    elif product_entitlement_found(entitlements, PRODUCT):
-        raw_facts = ENTITLEMENTS
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
+    product_dict[PRESENCE] = presence
+    if versions:
+        product_dict[VERSION] = list(versions)
+
+    if raw_facts:
+        metadata[RAW_FACT_KEY] = '/'.join(raw_facts)
     else:
-        product_dict[PRESENCE_KEY] = Product.ABSENT
+        metadata[RAW_FACT_KEY] = None
 
-    metadata[RAW_FACT_KEY] = raw_facts
     product_dict[META_DATA_KEY] = metadata
+
     return product_dict

@@ -10,6 +10,7 @@ import toastNotificationsReducer from './toastNotificationsReducer';
 import confirmationModalReducer from './confirmationModalReducer';
 import viewOptionsReducer from './viewOptionsReducer';
 import userReducer from './userReducer';
+import statusReducer from './statusReducer';
 
 const reducers = {
   addSourceWizard: addSourceWizardReducer,
@@ -21,7 +22,8 @@ const reducers = {
   toastNotifications: toastNotificationsReducer,
   confirmationModal: confirmationModalReducer,
   viewOptions: viewOptionsReducer,
-  user: userReducer
+  user: userReducer,
+  status: statusReducer
 };
 
 const reduxReducers = combineReducers(reducers);
