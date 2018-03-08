@@ -109,7 +109,7 @@ class AddSourceWizardStepTwo extends React.Component {
 
       _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
       _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
-      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value)));
+      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value, 10)));
 
       if (port !== '') {
         updatedSource[apiTypes.API_SOURCE_PORT] = port;

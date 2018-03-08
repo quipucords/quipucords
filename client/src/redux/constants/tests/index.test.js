@@ -1,19 +1,20 @@
-import reduxTypes from './';
-import * as confirmationModalTypes from './confirmationModalConstants';
-import * as credentialsTypes from './credentialsConstants';
-import * as factsTypes from './factsConstants';
-import * as reportsTypes from './reportsConstants';
-import * as scansTypes from './scansConstants';
-import * as sourcesTypes from './sourcesConstants';
-import * as toastNotificationTypes from './toasNotificationConstants';
-import * as userTypes from './userConstants';
-import * as viewTypes from './viewConstants';
-import * as viewPaginationTypes from './viewPaginationConstants';
-import * as viewToolbarTypes from './viewToolbarConstants';
+import reduxTypes from '..';
+import * as confirmationModalTypes from '../confirmationModalConstants';
+import * as credentialsTypes from '../credentialsConstants';
+import * as factsTypes from '../factsConstants';
+import * as reportsTypes from '../reportsConstants';
+import * as scansTypes from '../scansConstants';
+import * as sourcesTypes from '../sourcesConstants';
+import * as statusTypes from '../statusConstants';
+import * as toastNotificationTypes from '../toasNotificationConstants';
+import * as userTypes from '../userConstants';
+import * as viewTypes from '../viewConstants';
+import * as viewPaginationTypes from '../viewPaginationConstants';
+import * as viewToolbarTypes from '../viewToolbarConstants';
 
 describe('reduxTypes', function() {
   it('should export the same number of name-spaced types as imported', () => {
-    expect(Object.keys(reduxTypes)).toHaveLength(11);
+    expect(Object.keys(reduxTypes)).toHaveLength(12);
   });
 
   it('should return types that are defined', () => {
@@ -27,6 +28,7 @@ describe('reduxTypes', function() {
     expect(reduxTypes.reports).toEqual(reportsTypes);
     expect(reduxTypes.scans).toEqual(scansTypes);
     expect(reduxTypes.sources).toEqual(sourcesTypes);
+    expect(reduxTypes.status).toEqual(statusTypes);
     expect(reduxTypes.toastNotifications).toEqual(toastNotificationTypes);
     expect(reduxTypes.user).toEqual(userTypes);
     expect(reduxTypes.view).toEqual(viewTypes);
