@@ -17,6 +17,7 @@ from fingerprinter.utils import product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+NAME = 'name'
 PRODUCT = 'JBoss EAP'
 PRESENCE = 'presence'
 VERSION = 'version'
@@ -164,30 +165,30 @@ def find_eap_entitlement(entitlements):
 # applied to the fact's value and return presence or version
 # information respectively. PRESENCE can also be a literal presence
 # value and VERSION can be a literal set, as a convenience.
-FACTS = {
-    JBOSS_EAP_RUNNING_PATHS: {PRESENCE: Product.PRESENT},
-    JBOSS_EAP_JBOSS_USER: {PRESENCE: Product.POTENTIAL},
-    JBOSS_EAP_COMMON_FILES: {PRESENCE: Product.POTENTIAL},
-    JBOSS_EAP_PROCESSES: {PRESENCE: Product.POTENTIAL},
-    JBOSS_EAP_PACKAGES: {PRESENCE: Product.PRESENT},
-    JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR: {PRESENCE: Product.PRESENT},
-    JBOSS_EAP_SYSTEMCTL_FILES: {PRESENCE: Product.POTENTIAL},
-    JBOSS_EAP_CHKCONFIG: {PRESENCE: Product.POTENTIAL},
-    JBOSS_EAP_EAP_HOME: {PRESENCE: Product.PRESENT},
-    JBOSS_EAP_JAR_VER: {
-        PRESENCE: Product.PRESENT,
-        VERSION: classify_jar_versions},
-    JBOSS_EAP_RUN_JAR_VER: {
-        PRESENCE: Product.PRESENT,
-        VERSION: classify_jar_versions},
-    EAP5_HOME_VERSION_TXT: {PRESENCE: Product.PRESENT},
-    EAP5_HOME_README_HTML: {PRESENCE: Product.PRESENT},
-    EAP5_HOME_RUN_JAR_MANIFEST: {
-        PRESENCE: versions_eap_presence,
-        VERSION: classify_versions},
-    SUBMAN_CONSUMED: {PRESENCE: find_eap_entitlement},
-    ENTITLEMENTS: {PRESENCE: find_eap_entitlement}
-}
+FACTS = [
+    {NAME: JBOSS_EAP_RUNNING_PATHS, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_JBOSS_USER, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_COMMON_FILES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_PROCESSES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_PACKAGES, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_SYSTEMCTL_FILES, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_CHKCONFIG, PRESENCE: Product.POTENTIAL},
+    {NAME: JBOSS_EAP_EAP_HOME, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_JAR_VER,
+     PRESENCE: Product.PRESENT,
+     VERSION: classify_jar_versions},
+    {NAME: JBOSS_EAP_RUN_JAR_VER,
+     PRESENCE: Product.PRESENT,
+     VERSION: classify_jar_versions},
+    {NAME: EAP5_HOME_VERSION_TXT, PRESENCE: Product.PRESENT},
+    {NAME: EAP5_HOME_README_HTML, PRESENCE: Product.PRESENT},
+    {NAME: EAP5_HOME_RUN_JAR_MANIFEST,
+     PRESENCE: versions_eap_presence,
+     VERSION: classify_versions},
+    {NAME: SUBMAN_CONSUMED, PRESENCE: find_eap_entitlement},
+    {NAME: ENTITLEMENTS, PRESENCE: find_eap_entitlement}
+]
 
 
 def call_or_value(obj, argument):
@@ -235,12 +236,13 @@ def detect_jboss_eap(source, facts):
     versions = set()  # Set of EAP or WildFly versions present.
     raw_facts = []  # List of facts that contributed to presence.
 
-    for fact, actions in FACTS.items():
+    for fact_dict in FACTS:
+        fact = fact_dict[NAME]
         fact_value = facts.get(fact)
         if not fact_value:
             continue
-        if PRESENCE in actions:
-            new_presence = call_or_value(actions[PRESENCE], fact_value)
+        if PRESENCE in fact_dict:
+            new_presence = call_or_value(fact_dict[PRESENCE], fact_value)
             if not presence_ge(presence, new_presence):
                 # presence is being upgraded. Replace old presence
                 # with new presence, and adjust raw facts list.
@@ -252,8 +254,8 @@ def detect_jboss_eap(source, facts):
                 raw_facts.append(fact)
             # If fact only supports a less-sure conclusion than the
             # one we already have, then we ignore it.
-        if VERSION in actions:
-            new_versions = call_or_value(actions[VERSION], fact_value)
+        if VERSION in fact_dict:
+            new_versions = call_or_value(fact_dict[VERSION], fact_value)
             versions.update(new_versions)
 
     product_dict[PRESENCE] = presence
