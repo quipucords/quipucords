@@ -24,18 +24,18 @@ const AddSourceWizardStepThree = ({ view }) => {
         </p>
       </div>
     );
-  } else {
-    return (
-      <div className="wizard-pf-complete blank-slate-pf">
-        <div className="wizard-pf-success-icon">
-          <span className="glyphicon glyphicon-ok-circle" />
-        </div>
-        <h3 className="blank-slate-pf-main-action">
-          Source <strong>{view.source.name}</strong> has been {view.add ? 'created' : 'updated'}.
-        </h3>
-      </div>
-    );
   }
+
+  return (
+    <div className="wizard-pf-complete blank-slate-pf">
+      <div className="wizard-pf-success-icon">
+        <span className="glyphicon glyphicon-ok-circle" />
+      </div>
+      <h3 className="blank-slate-pf-main-action">
+        Source <strong>{view.source.name}</strong> has been {view.add ? 'created' : 'updated'}.
+      </h3>
+    </div>
+  );
 };
 
 AddSourceWizardStepThree.propTypes = {

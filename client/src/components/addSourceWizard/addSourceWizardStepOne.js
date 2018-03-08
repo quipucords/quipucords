@@ -35,7 +35,7 @@ class AddSourceWizardStepOne extends React.Component {
   initializeState(nextProps) {
     if (nextProps.source) {
       return {
-        sourceType: _.get(nextProps.source, 'apiTypes.API_SOURCE_TYPE', 'network')
+        sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE, 'network')
       };
     }
 

@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { SplitButton, MenuItem, Checkbox, Button, Icon, Form } from 'patternfly-react';
+import { MenuItem, Button, Icon, Form, Grid } from 'patternfly-react';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
+import DropdownSelect from './addSourceWizardDropdownSelect';
 import { addSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
 import { sourcesTypes, credentialsTypes } from '../../redux/constants';
@@ -44,9 +45,9 @@ class AddSourceWizardStepTwo extends React.Component {
     if (nextProps.source && !this.props.source) {
       this.setState(this.initializeState(nextProps));
     } else if (
-      _.get(nextProps, `source.${apiTypes.API_SOURCE_TYPE}`) !== _.get(this.props, `source.${apiTypes.API_SOURCE_TYPE}`)
+      _.get(nextProps.source, apiTypes.API_SOURCE_TYPE) !== _.get(this.props.source, apiTypes.API_SOURCE_TYPE)
     ) {
-      this.setState({ sourceType: _.get(nextProps, `source.${apiTypes.API_SOURCE_TYPE}`) });
+      this.setState({ sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE) });
     }
   }
 
@@ -55,22 +56,26 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   credentialInfo(id) {
-    const { allCredentials } = this.props;
-    return _.find(allCredentials, { id: id }) || {};
+    return _.find(this.props.allCredentials, { id: id }) || {};
   }
 
   initializeState(nextProps) {
     if (nextProps.source) {
-      let credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
+      const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
+      let singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT);
+      let singleHostPort = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS);
+
+      if (_.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
+        singlePort = singlePort ? `:${singlePort}` : '';
+        singleHostPort = singleHostPort ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}${singlePort}` : '';
+      }
 
       return {
         sourceName: _.get(nextProps.source, apiTypes.API_SOURCE_NAME, ''),
         multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
         hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
         port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
-        singleHostPort: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length
-          ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}:${nextProps.source[apiTypes.API_SOURCE_PORT]}`
-          : '',
+        singleHostPort: singleHostPort,
         credentials: credentials.map(val => val.id)
       };
     }
@@ -100,10 +105,12 @@ class AddSourceWizardStepTwo extends React.Component {
       credentials.length &&
       !credentialsError
     ) {
-      let updatedSource = { id: source.id };
+      let updatedSource = {};
+
       _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
       _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
-      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials);
+      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value)));
+
       if (port !== '') {
         updatedSource[apiTypes.API_SOURCE_PORT] = port;
       }
@@ -169,11 +176,9 @@ class AddSourceWizardStepTwo extends React.Component {
   onClickCredential() {
     const { source } = this.props;
 
-    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
-
     Store.dispatch({
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: sourceType === 'import' ? 'network' : sourceType
+      credentialType: _.get(source, apiTypes.API_SOURCE_TYPE)
     });
   }
 
@@ -295,7 +300,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="port"
                 type="text"
                 value={port}
-                placeholder="Enter a port"
+                placeholder="Default port :22"
                 onChange={this.onChangePort}
               />
             </FieldGroup>
@@ -311,7 +316,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="hosts"
                 type="text"
                 value={singleHostPort}
-                placeholder="Enter an IP address:port"
+                placeholder="Enter an IP address (default port :443)"
                 onChange={this.onChangeHost}
               />
             </FieldGroup>
@@ -327,19 +332,18 @@ class AddSourceWizardStepTwo extends React.Component {
     const { credentials, credentialsError } = this.state;
     const { source, allCredentials } = this.props;
 
-    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
-
+    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
     const hasSingleCredential = sourceType === 'vcenter' || sourceType === 'satellite';
 
     const availableCredentials = allCredentials.filter(credential => {
       return credential.cred_type === sourceType;
     });
+
     let titleAddSelect;
     let title;
 
     if (credentials.length) {
-      const selectedCredNames = credentials.map(credential => this.credentialInfo(credential).name);
-      title = selectedCredNames.join(', ');
+      title = credentials.map(credential => this.credentialInfo(credential).name).join(', ');
     }
 
     if (!title || !credentials.length) {
@@ -350,28 +354,38 @@ class AddSourceWizardStepTwo extends React.Component {
     return (
       <FieldGroup label={'Credentials'} error={credentialsError} errorMessage={credentialsError}>
         <Form.InputGroup>
-          <div className="form-split-button">
-            <SplitButton
-              className="form-control"
-              bsStyle="default"
+          <div className="quipucords-dropdownselect">
+            <DropdownSelect
+              title={title}
               id="credential-select"
               disabled={!availableCredentials.length}
-              title={title}
+              className="form-control"
+              multiselect={!hasSingleCredential}
             >
               {availableCredentials.length &&
                 availableCredentials.map((value, index) => {
                   return (
-                    <MenuItem key={value.id} eventKey={index} onClick={e => this.onChangeCredential(e, value)}>
+                    <MenuItem
+                      key={value.id}
+                      eventKey={index}
+                      className={{ 'quipucords-dropdownselect-menuitem-selected': credentials.indexOf(value.id) > -1 }}
+                      onSelect={e => this.onChangeCredential(e, value)}
+                    >
                       {!hasSingleCredential && (
-                        <Checkbox inline readOnly value={value.id} checked={credentials.indexOf(value.id) > -1}>
-                          {value.name}
-                        </Checkbox>
+                        <Grid.Row className="quipucords-dropdownselect-menuitem">
+                          <Grid.Col xs={10} className="quipucords-dropdownselect-menuitemname">
+                            {value.name}
+                          </Grid.Col>
+                          <Grid.Col xs={2} className="quipucords-dropdownselect-menuitemcheck">
+                            {credentials.indexOf(value.id) > -1 && <Icon type="fa" name="check" />}
+                          </Grid.Col>
+                        </Grid.Row>
                       )}
                       {hasSingleCredential && value.name}
                     </MenuItem>
                   );
                 })}
-            </SplitButton>
+            </DropdownSelect>
           </div>
           <Form.InputGroup.Button>
             <Button onClick={this.onClickCredential} title="Add a credential">
