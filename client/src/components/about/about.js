@@ -8,7 +8,8 @@ import { AboutModal } from 'patternfly-react';
 import logo from '../../styles/images/Red_Hat_logo.svg';
 import productTitle from '../../styles/images/title.svg';
 
-const About = ({ user, shown, onClose }) => {
+const About = ({ user, status, shown, onClose }) => {
+  const versionText = `${_.get(status, 'api_version', 'unknown')} (Build: ${_.get(status, 'build', 'unknown')})`;
   return (
     <AboutModal
       key="aboutModal"
@@ -20,7 +21,7 @@ const About = ({ user, shown, onClose }) => {
       trademarkText="Copyright (c) 2018 Red Hat Inc."
     >
       <AboutModal.Versions>
-        <AboutModal.VersionItem label="Sonar Version" versionText="0.1" />
+        <AboutModal.VersionItem label="Version" versionText={versionText} />
         <AboutModal.VersionItem label="Username" versionText={_.get(user, 'currentUser.username', '')} />
         <AboutModal.VersionItem
           label="Browser Version"
@@ -34,6 +35,7 @@ const About = ({ user, shown, onClose }) => {
 
 About.propTypes = {
   user: PropTypes.object,
+  status: PropTypes.object,
   shown: PropTypes.bool,
   onClose: PropTypes.func
 };
