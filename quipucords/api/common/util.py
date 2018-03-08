@@ -144,7 +144,7 @@ class CSVHelper:
             return self.ANSIBLE_ERROR_MESSAGE
 
         result = '{'
-        value_string = '%s:%s,'
+        value_string = '%s:%s;'
         for key, value in fact_dict.items():
             if isinstance(value, list):
                 result += value_string % (key,

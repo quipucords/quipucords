@@ -53,7 +53,7 @@ class CommonUtilTest(TestCase):
         test_python['key1'] = 'value1'
         test_python['key2'] = 'value2'
         value = self.csv_helper.serialize_value('header', test_python)
-        self.assertEqual(value, '{key1:value1,key2:value2}')
+        self.assertEqual(value, '{key1:value1;key2:value2}')
 
     def test_csv_serialize_list_2_values(self):
         """Test csv helper with 2 item list."""
@@ -69,7 +69,7 @@ class CommonUtilTest(TestCase):
         test_python['dict'] = {'nkey': 'nvalue'}
         test_python['list'] = ['a']
         value = self.csv_helper.serialize_value('header', test_python)
-        self.assertEqual(value, '{key:value,dict:{nkey:nvalue},list:[a]}')
+        self.assertEqual(value, '{key:value;dict:{nkey:nvalue};list:[a]}')
 
     def test_csv_serialize_list_nested(self):
         """Test csv helper with list containing nested list/dict."""
