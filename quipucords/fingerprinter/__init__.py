@@ -52,6 +52,14 @@ NAME_KEY = 'name'
 PRESENCE_KEY = 'presence'
 SOURCES_KEY = 'sources'
 
+# keys are in reverse order of accuracy (last most accurate)
+# (date_key, date_pattern)
+RAW_DATE_KEYS = [('date_yum_history', '%Y-%m-%d'),
+                 ('date_filesystem_create', '%Y-%m-%d'),
+                 ('date_anaconda_log', '%Y-%m-%d'),
+                 ('registration_time', '%Y-%m-%d %H:%M:%S'),
+                 ('date_machine_id', '%Y-%m-%d')]
+
 
 def process_fact_collection(sender, instance, **kwargs):
     """Process the fact collection.
@@ -223,6 +231,36 @@ def _post_process_merged_fingerprints(fingerprints):
             }
             expanded_sources.append(expanded_source)
         fingerprint[SOURCES_KEY] = expanded_sources
+        _compute_system_creation_time(fingerprint)
+
+
+def _compute_system_creation_time(fingerprint):
+    """Normalize cross source fingerprint values.
+
+    This is required when values need cross source complex
+    logic.
+    :param fingerprints: final list of fingerprints
+    associated with facts.
+    """
+    # keys are in reverse order of accuracy (last most accurate)
+    system_creation_date = None
+    system_creation_date_metadata = None
+    for date_key, date_pattern in RAW_DATE_KEYS:
+        date_value = fingerprint.pop(date_key, None)
+        if date_value is not None:
+            try:
+                system_creation_date = datetime.strptime(
+                    date_value, date_pattern)
+                system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
+                    date_key, None)
+            except ValueError as date_err:
+                logger.error('Could not parse date %s: %s',
+                             date_value, date_err)
+
+    if system_creation_date is not None:
+        fingerprint['system_creation_date'] = system_creation_date.date()
+        fingerprint[META_DATA_KEY]['system_creation_date'] = \
+            system_creation_date_metadata
 
 
 def _process_source(report_id, source):
@@ -689,33 +727,14 @@ def _process_network_fact(source, fact):
                             fact, 'cpu_core_count', fingerprint)
 
     # Determine system_creation_date
-    system_creation_date = None
-    raw_fact_key = None
-    if fact.get('date_anaconda_log'):
-        raw_fact_key = 'date_anaconda_log'
-        try:
-            system_creation_date = datetime.strptime(
-                fact['date_anaconda_log'], '%Y-%m-%d')
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s',
-                         fact['date_anaconda_log'], date_err)
-
-    if system_creation_date and fact.get('date_yum_history'):
-        try:
-            date_yum_history = datetime.strptime(
-                fact['date_yum_history'], '%Y-%m-%d')
-            if date_yum_history < system_creation_date:
-                raw_fact_key = 'date_yum_history'
-                system_creation_date = date_yum_history
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s',
-                         fact['date_yum_history'], date_err)
-
-    if system_creation_date:
-        add_fact_to_fingerprint(source, raw_fact_key, fact,
-                                'system_creation_date',
-                                fingerprint,
-                                fact_value=system_creation_date.date())
+    add_fact_to_fingerprint(source, 'date_machine_id',
+                            fact, 'date_machine_id', fingerprint)
+    add_fact_to_fingerprint(source, 'date_anaconda_log',
+                            fact, 'date_anaconda_log', fingerprint)
+    add_fact_to_fingerprint(source, 'date_filesystem_create',
+                            fact, 'date_filesystem_create', fingerprint)
+    add_fact_to_fingerprint(source, 'date_yum_history',
+                            fact, 'date_yum_history', fingerprint)
 
     if fact.get('connection_timestamp'):
         try:
@@ -876,16 +895,13 @@ def _process_satellite_fact(source, fact):
     add_fact_to_fingerprint(source, 'num_sockets', fact,
                             'cpu_socket_count', fingerprint)
 
+    # Raw fact for system_creation_date
     reg_time = fact.get('registration_time')
     if reg_time:
-        try:
-            reg_time = strip_suffix(reg_time, ' UTC')
-            dt_obj = datetime.strptime(reg_time, '%Y-%m-%d %H:%M:%S')
-            add_fact_to_fingerprint(source, 'registration_time', fact,
-                                    'system_creation_date', fingerprint,
-                                    fact_value=dt_obj.date())
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s', reg_time, date_err)
+        reg_time = strip_suffix(reg_time, ' UTC')
+        add_fact_to_fingerprint(source, 'registration_time', fact,
+                                'registration_time', fingerprint,
+                                fact_value=reg_time)
 
     last_checkin = fact.get('last_checkin_time')
     if last_checkin:

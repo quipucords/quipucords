@@ -15,7 +15,9 @@ from datetime import datetime
 from django.test import TestCase
 from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            NETWORK_VCENTER_MERGE_KEYS,
+                           NETWORK_SATELLITE_MERGE_KEYS,
                            _process_source,
+                           _compute_system_creation_time,
                            _remove_duplicate_fingerprints,
                            _merge_fingerprint,
                            _create_index_for_fingerprints,
@@ -59,8 +61,10 @@ class EngineTest(TestCase):
             connection_port=22,
             cpu_socket_count=2,
             cpu_core_count=2,
-            date_anaconda_log='2017-06-17',
             date_yum_history='2017-07-18',
+            date_filesystem_create='2017-06-17',
+            date_anaconda_log='2017-05-17',
+            date_machine_id='2017-04-17',
             virt_virt='virt-guest',
             virt_type='vmware',
             virt_num_guests=1,
@@ -117,6 +121,10 @@ class EngineTest(TestCase):
             fact['date_anaconda_log'] = date_anaconda_log
         if date_yum_history:
             fact['date_yum_history'] = date_yum_history
+        if date_filesystem_create:
+            fact['date_filesystem_create'] = date_filesystem_create
+        if date_machine_id:
+            fact['date_machine_id'] = date_machine_id
         if virt_virt:
             fact['virt_virt'] = virt_virt
         if virt_type:
@@ -213,6 +221,7 @@ class EngineTest(TestCase):
             mac_addresses=None,
             ip_addresses=None,
             cores=32,
+            registration_time='2017-03-18',
             uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
             virt_type='lxc',
             is_virtualized=True,
@@ -244,6 +253,9 @@ class EngineTest(TestCase):
             fact['mac_addresses'] = mac_addresses
         else:
             fact['mac_addresses'] = ['MAC1', 'MAC2']
+
+        if registration_time:
+            fact['registration_time'] = registration_time
 
         if cores:
             fact['cores'] = cores
@@ -294,11 +306,14 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('cpu_core_count'),
                          fingerprint.get('cpu_core_count'))
 
-        fact_date = datetime.strptime(
-            fact.get('date_anaconda_log'), '%Y-%m-%d')
-        fact_date = fact_date.date()
-
-        self.assertEqual(fact_date, fingerprint.get('system_creation_date'))
+        self.assertEqual(fact.get('date_anaconda_log'),
+                         fingerprint.get('date_anaconda_log'))
+        self.assertEqual(fact.get('date_yum_history'),
+                         fingerprint.get('date_yum_history'))
+        self.assertEqual(fact.get('date_machine_id'),
+                         fingerprint.get('date_machine_id'))
+        self.assertEqual(fact.get('date_filesystem_create'),
+                         fingerprint.get('date_filesystem_create'))
         self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
 
         self.assertEqual(fact.get('virt_type'),
@@ -358,6 +373,8 @@ class EngineTest(TestCase):
                          fingerprint.get('ip_addresses'))
         self.assertEqual(fact.get('mac_addresses'),
                          fingerprint.get('mac_addresses'))
+        self.assertEqual(fact.get('registration_time'), fingerprint.get(
+            'registration_time'))
         self.assertEqual(fact.get('uuid'), fingerprint.get(
             'subscription_manager_id'))
 
@@ -406,7 +423,7 @@ class EngineTest(TestCase):
         sfingerprints = _process_source(s_fact_collection['id'],
                                         source)
         sfingerprint = sfingerprints[0]
-        self._validate_vcenter_result(sfingerprint, vfact)
+        self._validate_satellite_result(sfingerprint, vfact)
         return sfingerprint
 
     ################################################################
@@ -700,3 +717,33 @@ class EngineTest(TestCase):
         self.assertEqual(
             result['metadata']['infrastructure_type']['source_name'],
             'source1')
+
+    ################################################################
+    # Test post processing
+    ################################################################
+    def test_compute_system_creation_time(self):
+        """Test merge of two lists of fingerprints."""
+        nfingerprints = [self._create_network_fingerprint(
+            ifconfig_mac_addresses=['1'],
+            date_machine_id='2018-3-7')]
+        sfingerprints = [
+            self._create_satellite_fingerprint(mac_addresses=['1'])]
+
+        _, result_fingerprints = _merge_fingerprints_from_source_types(
+            NETWORK_SATELLITE_MERGE_KEYS,
+            nfingerprints,
+            sfingerprints)
+        self.assertEqual(len(result_fingerprints), 1)
+        fp = result_fingerprints[0]
+        fp['date_yum_history'] = '2018-1-7'
+        fp['date_filesystem_create'] = None
+        fp['date_anaconda_log'] = '201837'
+        fp['registration_time'] = '2018-4-7 12:45:02'
+        fp['date_machine_id'] = None
+        _compute_system_creation_time(fp)
+        test_date = datetime.strptime(
+            '2018-4-7', '%Y-%m-%d').date()
+
+        self.assertEqual(fp['system_creation_date'], test_date)
+        metadata = fp['metadata']['system_creation_date']['raw_fact_key']
+        self.assertEqual('registration_time', metadata)
