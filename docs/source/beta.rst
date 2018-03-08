@@ -2,7 +2,7 @@
 Quipucords User Guide
 =====================
 
-This version of the *Quipucords User Guide* is provided as a preview during the pilot phase of Project Sonar. This guide is under development and is subject to substantial change. Because one of the goals of the pilot phase is to gather feedback on the documentation and workflows, you are encouraged to provide feedback about potential improvements to this information. Submit your feedback to the Project Sonar support contacts that are provided in your pilot phase kickoff materials (*more specific contact info when the pilot contact email address is available...*).
+This version of the *Quipucords User Guide* is provided as a preview during the pilot phase of Project Sonar. This guide is under development and is subject to substantial change. Because one of the goals of the pilot phase is to gather feedback on the documentation and workflows, you are encouraged to provide feedback about potential improvements to this information. Submit your feedback to the Project Sonar support contact email address, <sonar-pilot@redhat.com>.
 
 About Quipucords
 ----------------
@@ -298,7 +298,7 @@ However, if you are configuring the command line tool on a system that is remote
 
 Logging in to the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run qpc commands.
+After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log in to the server and begin using the command line interface to run qpc commands.
 
 1. To log in to the server, enter the following command::
 
@@ -534,3 +534,15 @@ When you log in to the server, the command retrieves a token that is used for au
 To log out of the server, enter the following command::
 
   # qpc server logout
+
+Contacting Project Sonar Pilot Support
+--------------------------------------
+The Project Sonar team relies on your feedback during this pilot to improve the quality and usability of Quipucords. For issues, questions, and suggestions for improvements that are related to the Project Sonar pilot, contact the pilot support team at <sonar-pilot@redhat.com>.
+
+When you contact the pilot support team about an issue that you encounter while using Quipucords, you might then be asked to provide certain information that can help to resolve that issue. This information might include IT environment information such as the operating system and version for the machine or machines that are running the Quipucords server and command line interface, information about Quipucords usage such as the task that you are trying to perform and the detailed scan report of the scan that was running as you encountered the issue (if applicable), or Quipucords log information, among other requests.
+
+To provide the detailed report for a scan, follow the steps in `Viewing the Scan Report`_ to generate that report.
+
+To provide log information, access the log file locations for the Quipucords server and command line interface. If you followed the recommended Quipucords server configuration options in `Selecting the Quipucords Server Configuration Options`_, the server log files are located in the path ``~/quipucords/log``. The command line interface log file is ``~/.local/share/qpc/qpc.log``.
+
+After you generate the information that is required to assist with problem resolution, submit the information to the pilot support team according to the instructions that they provide.
