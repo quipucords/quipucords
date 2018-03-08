@@ -160,6 +160,13 @@ class ScanOptions(models.Model):
                     disable_products.jboss_eap)
             extra_vars[self.JBOSS_FUSE] = not disable_products.jboss_fuse
             extra_vars[self.JBOSS_BRMS] = not disable_products.jboss_brms
+        else:
+            extra_vars[self.JBOSS_EAP] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_EAP
+            extra_vars[self.JBOSS_FUSE] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_FUSE
+            extra_vars[self.JBOSS_BRMS] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_BRMS
 
         # Scan for EAP if fuse or brms are in scan
         extended_search = self.enabled_extended_product_search

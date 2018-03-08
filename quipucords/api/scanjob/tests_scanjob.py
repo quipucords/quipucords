@@ -794,9 +794,9 @@ class ScanJobTest(TestCase):
                                       scan_options=scan_options)
         extra_vars = scan_job.options.get_extra_vars()
 
-        expected_vars = {'jboss_eap': False,
-                         'jboss_fuse': False,
-                         'jboss_brms': False,
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
                          'jboss_brms_ext': False}
