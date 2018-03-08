@@ -14,6 +14,7 @@ import helpers from '../common/helpers';
 
 import About from './about/about';
 import AddSourceWizard from './addSourceWizard/addSourceWizard';
+import CreateCredentialDialog from './createCredentialDialog/createCredentialDialog';
 import Content from './content/content';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
@@ -126,6 +127,7 @@ class App extends React.Component {
         <ConfirmationModal key="confirmationModal" />
         <About user={user} status={status} shown={aboutShown} onClose={this.closeAbout} />
         <AddSourceWizard />
+        <CreateCredentialDialog />
       </React.Fragment>
     );
   }

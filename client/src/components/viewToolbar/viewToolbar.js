@@ -1,15 +1,15 @@
 import _ from 'lodash';
-import * as moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Button, Filter, Icon, Sort, Toolbar } from 'patternfly-react';
+import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 
 import { viewToolbarTypes } from '../../redux/constants';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import RefreshTimeButton from '../refreshTimeButton/refreshTimeButton';
 
 class ViewToolbar extends React.Component {
   constructor() {
@@ -221,16 +221,7 @@ class ViewToolbar extends React.Component {
 
     return (
       <div className="form-group">
-        <Button onClick={onRefresh} bsStyle="link" className="refresh-button">
-          <Icon type="fa" name="refresh" />
-          <span className="last-refresh-time">
-            Refreshed{' '}
-            {moment
-              .utc(lastRefresh)
-              .utcOffset(moment().utcOffset())
-              .fromNow()}
-          </span>
-        </Button>
+        <RefreshTimeButton onRefresh={onRefresh} lastRefresh={lastRefresh} />
       </div>
     );
   }

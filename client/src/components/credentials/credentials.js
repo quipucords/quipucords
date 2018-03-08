@@ -22,7 +22,6 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 
 import CredentialsEmptyState from './credentialsEmptyState';
 import CredentialListItem from './credentialListItem';
-import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 import { CredentialFilterFields, CredentialSortFields } from './crendentialConstants';
 
 class Credentials extends React.Component {
@@ -30,7 +29,6 @@ class Credentials extends React.Component {
     super();
 
     helpers.bindMethods(this, [
-      'doUpdate',
       'addCredential',
       'deleteCredentials',
       'editCredential',
@@ -45,19 +43,10 @@ class Credentials extends React.Component {
     this.state = {
       lastRefresh: null
     };
-
-    this.pollingInterval = null;
-    this.mounted = false;
   }
 
   componentDidMount() {
     this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
-    this.mounted = true;
-  }
-
-  componentWillUnmount() {
-    this.stopPolling();
-    this.mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -73,7 +62,6 @@ class Credentials extends React.Component {
 
       if (nextProps.fulfilled && !this.props.fulfilled) {
         this.setState({ lastRefresh: Date.now() });
-        this.startPolling();
       }
     }
 
@@ -119,32 +107,6 @@ class Credentials extends React.Component {
         this.deleteNextCredential();
       }
     }
-  }
-
-  doUpdate() {
-    this.forceUpdate();
-  }
-
-  startPolling() {
-    if (!this.pollingInterval && this.mounted) {
-      this.pollingInterval = setInterval(this.doUpdate, 3000);
-    }
-  }
-
-  stopPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
-  }
-
-  itemSelected(item) {
-    const { selectedCredentials } = this.props;
-    return (
-      selectedCredentials.find(nextSelected => {
-        return nextSelected.id === _.get(item, 'id');
-      }) !== undefined
-    );
   }
 
   addCredential(credentialType) {
@@ -354,7 +316,6 @@ class Credentials extends React.Component {
             <div className="quipucords-list-container">{this.renderCredentialsList(credentials)}</div>
           </div>
           {this.renderPendingMessage()}
-          <CreateCredentialDialog />
         </React.Fragment>
       );
     }
@@ -363,7 +324,6 @@ class Credentials extends React.Component {
       <React.Fragment>
         {this.renderPendingMessage()}
         <CredentialsEmptyState onAddCredential={this.addCredential} onAddSource={this.addSource} />,
-        <CreateCredentialDialog />
       </React.Fragment>
     );
   }

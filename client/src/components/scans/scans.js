@@ -23,7 +23,6 @@ class Scans extends React.Component {
     super();
 
     helpers.bindMethods(this, [
-      'doUpdate',
       'downloadSummaryReport',
       'downloadDetailedReport',
       'doPauseScan',
@@ -38,9 +37,6 @@ class Scans extends React.Component {
     this.state = {
       lastRefresh: null
     };
-
-    this.pollingInterval = null;
-    this.mounted = false;
   }
 
   componentDidMount() {
@@ -49,12 +45,6 @@ class Scans extends React.Component {
         scan_type: 'inspect'
       })
     );
-    this.mounted = true;
-  }
-
-  componentWillUnmount() {
-    this.stopPolling();
-    this.mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -69,24 +59,6 @@ class Scans extends React.Component {
 
     if (nextProps.fulfilled && !this.props.fulfilled) {
       this.setState({ lastRefresh: Date.now() });
-      this.startPolling();
-    }
-  }
-
-  doUpdate() {
-    this.forceUpdate();
-  }
-
-  startPolling() {
-    if (!this.pollingInterval && this.mounted) {
-      this.pollingInterval = setInterval(this.doUpdate, 3000);
-    }
-  }
-
-  stopPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
     }
   }
 

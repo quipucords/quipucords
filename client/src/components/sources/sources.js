@@ -29,7 +29,6 @@ class Sources extends React.Component {
     super();
 
     helpers.bindMethods(this, [
-      'doUpdate',
       'scanSource',
       'scanSources',
       'editSource',
@@ -45,19 +44,10 @@ class Sources extends React.Component {
       currentScanSource: null,
       lastRefresh: null
     };
-
-    this.pollingInterval = null;
-    this.mounted = false;
   }
 
   componentDidMount() {
     this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
-    this.mounted = true;
-  }
-
-  componentWillUnmount() {
-    this.stopPolling();
-    this.mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -74,24 +64,6 @@ class Sources extends React.Component {
 
     if (nextProps.fulfilled && !fulfilled) {
       this.setState({ lastRefresh: Date.now() });
-      this.startPolling();
-    }
-  }
-
-  doUpdate() {
-    this.forceUpdate();
-  }
-
-  startPolling() {
-    if (!this.pollingInterval && this.mounted) {
-      this.pollingInterval = setInterval(this.doUpdate, 3000);
-    }
-  }
-
-  stopPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
     }
   }
 
