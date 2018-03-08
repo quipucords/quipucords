@@ -683,7 +683,7 @@ def _process_network_fact(source, fact):
 
     # Red Hat facts
     add_fact_to_fingerprint(source, 'redhat_packages_gpg_num_rh_packages',
-                            fact, 'redhat_packages_count',
+                            fact, 'redhat_package_count',
                             fingerprint)
     add_fact_to_fingerprint(source, 'redhat_packages_certs', fact,
                             'redhat_certs', fingerprint)

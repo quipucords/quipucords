@@ -77,7 +77,7 @@ class SystemFingerprint(models.Model):
     is_redhat = models.NullBooleanField()
     redhat_certs = models.TextField(unique=False, null=True)
     # pylint: disable=invalid-name
-    redhat_packages_count = models.PositiveIntegerField(
+    redhat_package_count = models.PositiveIntegerField(
         unique=False, null=True)
 
     metadata = models.TextField(unique=False, null=False)
@@ -110,7 +110,7 @@ class SystemFingerprint(models.Model):
             'vm_cluster:{}, '\
             'is_redhat:{}, '\
             'redhat_certs:{}, '\
-            'redhat_packages_count:{}, '\
+            'redhat_package_count:{}, '\
             'architecture:{}, '\
             'sources:{}, '\
             'metadata:{} '.format(self.id,
@@ -138,7 +138,7 @@ class SystemFingerprint(models.Model):
                                   self.vm_cluster,
                                   self.is_redhat,
                                   self.redhat_certs,
-                                  self.redhat_packages_count,
+                                  self.redhat_package_count,
                                   self.architecture,
                                   self.sources,
                                   self.metadata) + '}'

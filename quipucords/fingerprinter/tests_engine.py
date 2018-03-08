@@ -72,7 +72,7 @@ class EngineTest(TestCase):
             virt_what_type='vt',
             is_redhat='true',
             redhat_certs='fake certs',
-            redhat_packages_count=100,
+            redhat_package_count=100,
             architecture='x86_64'):
         """Create an in memory FactCollection for tests."""
         # pylint: disable=too-many-statements
@@ -139,9 +139,9 @@ class EngineTest(TestCase):
             fact['redhat_packages_gpg_is_redhat'] = is_redhat
         if redhat_certs:
             fact['redhat_packages_certs'] = redhat_certs
-        if redhat_packages_count:
+        if redhat_package_count:
             fact['redhat_packages_gpg_num_rh_packages'] = \
-                redhat_packages_count
+                redhat_package_count
         if architecture:
             fact['uname_processor'] = architecture
 
@@ -326,7 +326,7 @@ class EngineTest(TestCase):
                          fingerprint.get('is_redhat'))
         self.assertEqual(fact.get('redhat_packages_gpg_num_rh_packages'),
                          fingerprint.get(
-                             'redhat_packages_count'))
+                             'redhat_package_count'))
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
