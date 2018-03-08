@@ -15,6 +15,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         IntegerField,
                                         CharField,
                                         ChoiceField,
+                                        NullBooleanField,
                                         DateField,
                                         ModelSerializer)
 from api.models import (SystemFingerprint,
@@ -71,6 +72,8 @@ class FingerprintSerializer(ModelSerializer):
 
     cpu_count = IntegerField(required=False, min_value=0)
 
+    architecture = CharField(required=False, max_length=64)
+
     # Network scan facts
     bios_uuid = CharField(required=False, max_length=36)
     subscription_manager_id = CharField(required=False, max_length=36)
@@ -97,6 +100,13 @@ class FingerprintSerializer(ModelSerializer):
     entitlements = EntitlementSerializer(many=True,
                                          allow_null=True,
                                          required=False)
+
+    # Red Hat facts
+    is_redhat = NullBooleanField(required=False)
+    redhat_certs = CharField(required=False, max_length=128)
+    # pylint: disable=invalid-name
+    redhat_package_count = IntegerField(
+        required=False, min_value=0)
 
     metadata = CustomJSONField(required=True)
     sources = CustomJSONField(required=True)

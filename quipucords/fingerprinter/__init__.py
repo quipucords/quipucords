@@ -678,6 +678,17 @@ def _process_network_fact(source, fact):
     # Common facts
     add_fact_to_fingerprint(source, 'uname_hostname',
                             fact, 'name', fingerprint)
+    add_fact_to_fingerprint(source, 'uname_processor', fact,
+                            'architecture', fingerprint)
+
+    # Red Hat facts
+    add_fact_to_fingerprint(source, 'redhat_packages_gpg_num_rh_packages',
+                            fact, 'redhat_package_count',
+                            fingerprint)
+    add_fact_to_fingerprint(source, 'redhat_packages_certs', fact,
+                            'redhat_certs', fingerprint)
+    add_fact_to_fingerprint(source, 'redhat_packages_gpg_is_redhat',
+                            fact, 'is_redhat', fingerprint)
 
     # Set OS information
     add_fact_to_fingerprint(source, 'etc_release_name',
@@ -796,6 +807,8 @@ def _process_vcenter_fact(source, fact):
                             fact, 'ip_addresses', fingerprint)
     add_fact_to_fingerprint(source, 'vm.cpu_count',
                             fact, 'cpu_count', fingerprint)
+    add_fact_to_fingerprint(source, 'uname_processor', fact,
+                            'architecture', fingerprint)
 
     # VCenter specific facts
     add_fact_to_fingerprint(source, 'vm.state', fact, 'vm_state', fingerprint)
@@ -856,6 +869,8 @@ def _process_satellite_fact(source, fact):
                             'ip_addresses', fingerprint)
 
     add_fact_to_fingerprint(source, 'cores', fact, 'cpu_count', fingerprint)
+    add_fact_to_fingerprint(source, 'architecture', fact,
+                            'architecture', fingerprint)
 
     # Common network/satellite
     add_fact_to_fingerprint(source, 'uuid', fact,

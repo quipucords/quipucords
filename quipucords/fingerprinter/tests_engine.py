@@ -69,7 +69,11 @@ class EngineTest(TestCase):
             virt_type='vmware',
             virt_num_guests=1,
             virt_num_running_guests=1,
-            virt_what_type='vt'):
+            virt_what_type='vt',
+            is_redhat='true',
+            redhat_certs='fake certs',
+            redhat_package_count=100,
+            architecture='x86_64'):
         """Create an in memory FactCollection for tests."""
         # pylint: disable=too-many-statements
         fact = {}
@@ -131,6 +135,15 @@ class EngineTest(TestCase):
             fact['virt_num_running_guests'] = virt_num_running_guests
         if virt_what_type:
             fact['virt_what_type'] = virt_what_type
+        if is_redhat:
+            fact['redhat_packages_gpg_is_redhat'] = is_redhat
+        if redhat_certs:
+            fact['redhat_packages_certs'] = redhat_certs
+        if redhat_package_count:
+            fact['redhat_packages_gpg_num_rh_packages'] = \
+                redhat_package_count
+        if architecture:
+            fact['uname_processor'] = architecture
 
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
@@ -151,7 +164,8 @@ class EngineTest(TestCase):
             vm_host_name='1.2.3.4',
             vm_host_cpu_count=8,
             vm_datacenter='NY',
-            vm_cluster='23sd'):
+            vm_cluster='23sd',
+            architecture='x86_64'):
         """Create an in memory FactCollection for tests."""
         fact = {}
         if source_id:
@@ -189,6 +203,8 @@ class EngineTest(TestCase):
             fact['vm.datacenter'] = vm_datacenter
         if vm_cluster:
             fact['vm.cluster'] = vm_cluster
+        if architecture:
+            fact['uname_processor'] = architecture
 
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
@@ -211,7 +227,8 @@ class EngineTest(TestCase):
             is_virtualized=True,
             virtual_host='9.3.4.6',
             num_sockets=8,
-            entitlements=SAT_ENTITLEMENTS):
+            entitlements=SAT_ENTITLEMENTS,
+            architecture='x86_64'):
         """Create an in memory FactCollection for tests."""
         fact = {}
         if source_id:
@@ -254,6 +271,8 @@ class EngineTest(TestCase):
             fact['num_sockets'] = num_sockets
         if entitlements:
             fact['entitlements'] = entitlements
+        if architecture:
+            fact['architecture'] = architecture
 
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
@@ -299,6 +318,15 @@ class EngineTest(TestCase):
 
         self.assertEqual(fact.get('virt_type'),
                          fingerprint.get('virtualized_type'))
+        self.assertEqual(fact.get('uname_processor'),
+                         fingerprint.get('architecture'))
+        self.assertEqual(fact.get('redhat_packages_certs'),
+                         fingerprint.get('redhat_certs'))
+        self.assertEqual(fact.get('redhat_packages_gpg_is_redhat'),
+                         fingerprint.get('is_redhat'))
+        self.assertEqual(fact.get('redhat_packages_gpg_num_rh_packages'),
+                         fingerprint.get(
+                             'redhat_package_count'))
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -329,6 +357,8 @@ class EngineTest(TestCase):
                          fingerprint.get('vm_datacenter'))
         self.assertEqual(fact.get('vm.cluster'),
                          fingerprint.get('vm_cluster'))
+        self.assertEqual(fact.get('uname_processor'),
+                         fingerprint.get('architecture'))
 
     def _validate_satellite_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -353,6 +383,8 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('cores'), fingerprint.get('cpu_core_count'))
         self.assertEqual(fact.get('num_sockets'),
                          fingerprint.get('cpu_socket_count'))
+        self.assertEqual(fact.get('architecture'),
+                         fingerprint.get('architecture'))
 
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""

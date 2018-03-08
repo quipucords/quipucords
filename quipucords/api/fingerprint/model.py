@@ -49,6 +49,8 @@ class SystemFingerprint(models.Model):
 
     cpu_count = models.PositiveIntegerField(unique=False, null=True)
 
+    architecture = models.CharField(max_length=64, unique=False, null=True)
+
     # Network scan facts
     bios_uuid = models.CharField(max_length=36, unique=False, null=True)
     subscription_manager_id = models.CharField(
@@ -70,6 +72,13 @@ class SystemFingerprint(models.Model):
     vm_host_socket_count = models.PositiveIntegerField(unique=False, null=True)
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
+
+    # Red Hat facts
+    is_redhat = models.NullBooleanField()
+    redhat_certs = models.TextField(unique=False, null=True)
+    # pylint: disable=invalid-name
+    redhat_package_count = models.PositiveIntegerField(
+        unique=False, null=True)
 
     metadata = models.TextField(unique=False, null=False)
     sources = models.TextField(unique=False, null=False)
@@ -99,6 +108,10 @@ class SystemFingerprint(models.Model):
             'vm_host_socket_count:{}, '\
             'vm_datacenter:{}, '\
             'vm_cluster:{}, '\
+            'is_redhat:{}, '\
+            'redhat_certs:{}, '\
+            'redhat_package_count:{}, '\
+            'architecture:{}, '\
             'sources:{}, '\
             'metadata:{} '.format(self.id,
                                   self.report_id.id,
@@ -123,6 +136,10 @@ class SystemFingerprint(models.Model):
                                   self.vm_host_socket_count,
                                   self.vm_datacenter,
                                   self.vm_cluster,
+                                  self.is_redhat,
+                                  self.redhat_certs,
+                                  self.redhat_package_count,
+                                  self.architecture,
                                   self.sources,
                                   self.metadata) + '}'
 
