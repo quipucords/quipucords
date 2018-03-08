@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { MenuItem, Button, Icon, Form, Grid } from 'patternfly-react';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
-import DropdownSelect from './addSourceWizardDropdownSelect';
+import DropdownSelect from '../dropdownSelect/dropdownSelect';
 import { addSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
 import { sourcesTypes, credentialsTypes } from '../../redux/constants';
@@ -62,8 +62,8 @@ class AddSourceWizardStepTwo extends React.Component {
   initializeState(nextProps) {
     if (nextProps.source) {
       const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
-      let singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT);
-      let singleHostPort = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS);
+      let singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT, '');
+      let singleHostPort = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, '');
 
       if (_.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
         singlePort = singlePort ? `:${singlePort}` : '';
