@@ -64,8 +64,20 @@ class Credential(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, type:%s}' %\
-            (self.id, self.name, self.cred_type)
+        return '{ id:%s,'\
+            'name:%s, '\
+            'type:%s, '\
+            'username:%s, '\
+            'ssh_keyfile:%s, '\
+            'become_method:%s, '\
+            'become_user:%s}' %\
+            (self.id,
+             self.name,
+             self.cred_type,
+             self.username,
+             self.ssh_keyfile,
+             self.become_method,
+             self.become_user)
 
     @staticmethod
     def is_encrypted(field):
