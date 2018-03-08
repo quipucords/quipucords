@@ -55,8 +55,6 @@ class CredentialsField(PrimaryKeyRelatedField):
 class SourceOptionsSerializer(NotEmptySerializer):
     """Serializer for the SourceOptions model."""
 
-    satellite_version = ValidStringChoiceField(
-        required=False, choices=SourceOptions.SATELLITE_VERSION_CHOICES)
     ssl_protocol = ValidStringChoiceField(
         required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES)
     ssl_cert_verify = NullBooleanField(required=False)
@@ -66,8 +64,7 @@ class SourceOptionsSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = SourceOptions
-        fields = ['satellite_version',
-                  'ssl_protocol',
+        fields = ['ssl_protocol',
                   'ssl_cert_verify',
                   'disable_ssl']
 
@@ -168,9 +165,6 @@ class SourceSerializer(NotEmptySerializer):
 
         if options:
             if source_type == Source.SATELLITE_SOURCE_TYPE:
-                if not options.get('satellite_version'):
-                    options['satellite_version'] = \
-                        SourceOptions.SATELLITE_VERSION_62
                 if options.get('ssl_cert_verify') is None:
                     options['ssl_cert_verify'] = True
             if (source_type == Source.VCENTER_SOURCE_TYPE and
@@ -182,13 +176,11 @@ class SourceSerializer(NotEmptySerializer):
             source.options = options
         elif not options and source_type == Source.SATELLITE_SOURCE_TYPE:
             options = SourceOptions()
-            options.satellite_version = SourceOptions.SATELLITE_VERSION_62
             options.ssl_cert_verify = True
             options.save()
             source.options = options
         elif not options and source_type == Source.VCENTER_SOURCE_TYPE:
             options = SourceOptions()
-            options.satellite_version = None
             options.ssl_cert_verify = True
             options.save()
             source.options = options
@@ -302,12 +294,9 @@ class SourceSerializer(NotEmptySerializer):
         :param options: the passed in options
         :param instance_options: the existing options
         """
-        satellite_version = options.pop('satellite_version', None)
         ssl_protocol = options.pop('ssl_protocol', None)
         ssl_cert_verify = options.pop('ssl_cert_verify', None)
         disable_ssl = options.pop('disable_ssl', None)
-        if satellite_version is not None:
-            instance_options.satellite_version = satellite_version
         if ssl_protocol is not None:
             instance_options.ssl_protocol = ssl_protocol
         if ssl_cert_verify is not None:

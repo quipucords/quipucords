@@ -64,11 +64,6 @@ class SourceAddCommand(CliCommand):
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP),
                                  required=False)
-        self.parser.add_argument('--satellite-version',
-                                 dest='satellite_version',
-                                 choices=source.VALID_SAT_CHOICES,
-                                 help=_(messages.SOURCE_SAT_VER_HELP),
-                                 required=False)
         self.parser.add_argument('--ssl-cert-verify',
                                  dest='ssl_cert_verify',
                                  choices=source.BOOLEAN_CHOICES,

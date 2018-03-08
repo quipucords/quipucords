@@ -20,7 +20,10 @@ from scanner.satellite.utils import (get_credential, get_connect_data,
                                      construct_url, execute_request,
                                      status, data_map, get_sat5_client,
                                      _status5)
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import (SatelliteException,
+                                   SatelliteAuthException,
+                                   SATELLITE_VERSION_5,
+                                   SATELLITE_VERSION_6)
 from scanner.test_util import create_scan_job
 
 
@@ -97,15 +100,13 @@ class SatelliteUtilsTest(TestCase):
             self.assertEqual(response.json(), jsonresult)
 
     @patch('scanner.satellite.utils._status5',
-           return_value=(200, SourceOptions.SATELLITE_VERSION_5))
+           return_value=(200, SATELLITE_VERSION_5, SATELLITE_VERSION_5))
     def test_status_sat5(self, mock_status5):
         """Test a patched status request to Satellite 5 server."""
-        satellite_version = SourceOptions.SATELLITE_VERSION_5
-        status_code, api_version = status(self.scan_task,
-                                          satellite_version)
-
+        status_code, api_version, satellite_version = status(self.scan_task)
         self.assertEqual(status_code, 200)
-        self.assertEqual(api_version, SourceOptions.SATELLITE_VERSION_5)
+        self.assertEqual(api_version, SATELLITE_VERSION_5)
+        self.assertEqual(satellite_version, SATELLITE_VERSION_5)
         mock_status5.assert_called_once_with(ANY)
 
     @patch('xmlrpc.client.ServerProxy')
@@ -114,9 +115,10 @@ class SatelliteUtilsTest(TestCase):
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'
         client.auth.logout.return_value = 'key'
-        status_code, api_version = _status5(self.scan_task)
+        status_code, api_version, satellite_version = _status5(self.scan_task)
         self.assertEqual(status_code, 200)
-        self.assertEqual(api_version, SourceOptions.SATELLITE_VERSION_5)
+        self.assertEqual(api_version, SATELLITE_VERSION_5)
+        self.assertEqual(satellite_version, SATELLITE_VERSION_5)
 
     @patch('xmlrpc.client.ServerProxy')
     def test_status5_xmlfault(self, mock_serverproxy):
@@ -127,33 +129,35 @@ class SatelliteUtilsTest(TestCase):
             _status5(self.scan_task)
             mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
 
-    def test_status(self):
+    @patch('xmlrpc.client.ServerProxy')
+    def test_status(self, mock_serverproxy):
         """Test a successful status request to Satellite server."""
+        client = mock_serverproxy.return_value
+        client.auth.login.side_effect = mock_xml_fault
         with requests_mock.Mocker() as mocker:
             status_url = 'https://{sat_host}:{port}/api/status'
             url = construct_url(status_url, '1.2.3.4')
             jsonresult = {'api_version': 2}
             mocker.get(url, status_code=200, json=jsonresult)
-            satellite_version = SourceOptions.SATELLITE_VERSION_62
-            status_code, api_version = status(self.scan_task,
-                                              satellite_version)
-
+            status_code, api_version, satellite_version = \
+                status(self.scan_task)
             self.assertEqual(status_code, 200)
             self.assertEqual(api_version, 2)
+            self.assertEqual(satellite_version, SATELLITE_VERSION_6)
 
-    def test_status_error(self):
+    @patch('xmlrpc.client.ServerProxy')
+    def test_status_error(self, mock_serverproxy):
         """Test a error status request to Satellite server."""
+        client = mock_serverproxy.return_value
+        client.auth.login.side_effect = mock_xml_fault
         with requests_mock.Mocker() as mocker:
             status_url = 'https://{sat_host}:{port}/api/status'
             url = construct_url(status_url, '1.2.3.4')
             jsonresult = {'api_version': 2}
             mocker.get(url, status_code=401, json=jsonresult)
-            satellite_version = SourceOptions.SATELLITE_VERSION_62
-            status_code, api_version = status(self.scan_task,
-                                              satellite_version)
-
-            self.assertEqual(status_code, 401)
-            self.assertEqual(api_version, None)
+            with self.assertRaises(SatelliteAuthException):
+                status(self.scan_task)
+                mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
 
     def test_data_map(self):
         """Test a mapping of data from a response dictionary."""
