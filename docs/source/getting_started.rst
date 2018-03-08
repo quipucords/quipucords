@@ -109,13 +109,13 @@ To create a satellite source, use the following steps:
 
    # qpc cred add --type satellite --name satellite_admin --username admin --password
 
-2. Create at least one satellite source that specifies the host name or IP address of the Satellite server, one satellite credential to be used for the scan, and the version of the Satellite server (supported version values are ``5``, ``6.2``, ``6.3``)::
+2. Create at least one satellite source that specifies the host name or IP address of the Satellite server, one satellite credential to be used for the scan::
 
-   # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name --satellite-version sat_ver
+   # qpc source add --type satellite --name source_name --hosts host_name --cred cred_name
 
-   For example, for a satellite source where the source name is ``mysatellite6``, the Satellite server is located at the ``192.0.2.15`` IP address, the satellite credential for that server is ``satellite_admin``, and the version of the Satellite server is ``6.2``, you would enter the following command::
+   For example, for a satellite source where the source name is ``mysatellite6``, the Satellite server is located at the ``192.0.2.15`` IP address, and the satellite credential for that server is ``satellite_admin``, you would enter the following command::
 
-   # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin --satellite-version 6.2
+   # qpc source add --type satellite --name mysatellite6 --hosts 192.0.2.15 --cred satellite_admin
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the Satellite server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The Satellite server does not support disabling SSL, so the ``--disable-ssl`` option has no effect.
 

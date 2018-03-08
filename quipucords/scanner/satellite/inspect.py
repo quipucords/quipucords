@@ -13,7 +13,7 @@ from requests import exceptions
 from api.models import (ScanTask)
 from scanner.task import ScanTaskRunner
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import SatelliteException, SatelliteAuthException
 from scanner.satellite.factory import create
 
 
@@ -46,44 +46,41 @@ class InspectTaskRunner(ScanTaskRunner):
                 (self.connect_scan_task.id)
             return error_message, ScanTask.FAILED
 
-        satellite_version = None
-        options = self.source.options
-        if options:
-            satellite_version = options.satellite_version
-
-        if satellite_version is None:
-            error_message = 'Satellite version is unknown. '
-            error_message += 'Connect scan failed for %s.' % self.scan_task
-            return error_message, ScanTask.FAILED
-
         try:
-            status_code, api_version = utils.status(self.scan_task,
-                                                    satellite_version)
+            status_code, api_version, satellite_version = \
+                utils.status(self.scan_task)
             if status_code == 200:
                 api = create(satellite_version, api_version,
                              self.scan_task)
                 if not api:
                     error_message = 'Satellite version %s with '\
-                        'api version %s is not supported.\n' %\
+                        'api version %s is not supported. ' %\
                         (satellite_version, api_version)
-                    error_message += 'Inspect scan failed for %s.' % \
-                        (self.scan_task)
+                    error_message += 'Inspect scan failed for source %s.' % \
+                        (self.source.name)
                     return error_message, ScanTask.FAILED
                 api.hosts_facts()
             else:
-                error_message = 'Inspect scan failed for %s.' % self.scan_task
+                error_message = 'Inspect scan failed for source %s.' \
+                    % self.source.name
                 return error_message, ScanTask.FAILED
+        except SatelliteAuthException as auth_error:
+            error_message = 'Satellite error encountered: %s. ' % auth_error
+            error_message += 'Inspect scan failed for source %s.' \
+                % self.source.name
+            return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s\n' % sat_error
-            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % sat_error
+            error_message += 'Inspect scan failed for source %s.' \
+                % self.source.name
             return error_message, ScanTask.FAILED
         except exceptions.ConnectionError as conn_error:
-            error_message = 'Satellite error encountered: %s\n' % conn_error
-            error_message += 'Inspect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % conn_error
+            error_message += 'Inspect scan failed for %s.' % self.source.name
             return error_message, ScanTask.FAILED
         except TimeoutError as timeout_error:
-            error_message = 'Satellite error encountered: %s\n' % timeout_error
-            error_message += 'Connect scan failed for %s.' % self.scan_task
+            error_message = 'Satellite error encountered: %s. ' % timeout_error
+            error_message += 'Inspect scan failed for %s.' % self.source.name
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

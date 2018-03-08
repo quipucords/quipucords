@@ -1207,13 +1207,6 @@ definitions:
   SourceOptions:
     type: "object"
     properties:
-      satellite_version:
-        type: "string"
-        description: "The version of the Satellite server."
-        enum:
-          - "5"
-          - "6.2"
-          - "6.3"
       ssl_cert_verify:
         type: "boolean"
         description: "If false disable SSL certificate verification."

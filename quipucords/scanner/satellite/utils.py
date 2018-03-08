@@ -14,9 +14,10 @@ import logging
 import ssl
 import xmlrpc.client
 import requests
+from rest_framework import status as codes
 from api.vault import decrypt_data_as_unicode
-from api.models import SourceOptions
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import SATELLITE_VERSION_5, SATELLITE_VERSION_6
+from scanner.satellite.api import SatelliteException, SatelliteAuthException
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -110,15 +111,18 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     return response, url
 
 
-def status(scan_task, satellite_version):
+def status(scan_task):
     """Check Satellite status to get api_version and connectivity.
 
     :param scan_task: The scan task
-    :param satellite_version: The version of satellite
-    :returns: tuple (status_code, api_version or None)
+    :returns: tuple (status_code, api_version or None, satellite_version)
     """
-    if satellite_version == SourceOptions.SATELLITE_VERSION_5:
+    try:
         return _status5(scan_task)
+    except SatelliteException as sat_error:
+        logger.error('Failure attempting Satellite 5'
+                     ' status check for task %s with error: %s.',
+                     scan_task.id, sat_error)
 
     return _status6(scan_task)
 
@@ -134,11 +138,17 @@ def _status5(scan_task):
         key = client.auth.login(user, password)
         client.auth.logout(key)
     except xmlrpc.client.Fault as xml_error:
-        raise SatelliteException(str(xml_error))
+        invalid_auth = 'Either the password or username is incorrect.'
+        if invalid_auth in str(xml_error):
+            raise SatelliteAuthException(str(xml_error))
+        else:
+            raise SatelliteException(str(xml_error))
+    except xmlrpc.client.ProtocolError as protocol_error:
+        raise SatelliteException(str(protocol_error))
 
-    api_version = SourceOptions.SATELLITE_VERSION_5
-    status_code = requests.codes.ok  # pylint: disable=no-member
-    return (status_code, api_version)
+    api_version = SATELLITE_VERSION_5
+    status_code = codes.HTTP_200_OK  # pylint: disable=no-member
+    return (status_code, api_version, SATELLITE_VERSION_5)
 
 
 def _status6(scan_task):
@@ -151,13 +161,19 @@ def _status6(scan_task):
     response, url = execute_request(scan_task, status_url)
     status_code = response.status_code
     api_version = None
-    if status_code == requests.codes.ok:  # pylint: disable=no-member
+
+    if status_code == codes.HTTP_200_OK:
         status_data = response.json()
         api_version = status_data.get('api_version')
+    elif status_code == codes.HTTP_401_UNAUTHORIZED:
+        err_msg = 'Unable to authenticate against ' + url
+        raise SatelliteAuthException(err_msg)
     else:
-        logger.error('Failure while obtaining Satellite status %s for %s. %s',
-                     url, scan_task, response.json())
-    return (status_code, api_version)
+        err_msg = 'Failure while attempting Satellite 6'
+        ' status check at {} for task {} with status code {}.'.format(
+            url, scan_task.id, status_code)
+        raise SatelliteException(err_msg)
+    return (status_code, api_version, SATELLITE_VERSION_6)
 
 
 def data_map(mapping_dict, data):
