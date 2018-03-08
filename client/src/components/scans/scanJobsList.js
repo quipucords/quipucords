@@ -61,9 +61,8 @@ class ScanJobsList extends React.Component {
   }
 
   render() {
-    const { scan } = this.props;
-
-    if (scan.scanJobsPending === true) {
+    const { scan, scanJobs, scanJobsPending, scanJobsError } = this.props;
+    if (scanJobsPending === true) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -74,7 +73,7 @@ class ScanJobsList extends React.Component {
       );
     }
 
-    if (scan.scanJobsError) {
+    if (scanJobsError) {
       return (
         <EmptyState>
           <EmptyState.Icon name="error-circle-o" />
@@ -86,9 +85,10 @@ class ScanJobsList extends React.Component {
 
     return (
       <Grid fluid>
-        {_.get(scan, 'scanJobs', []).map(job => {
-          return job.id !== _.get(scan, 'most_recent.id') ? this.renderJob(job) : null;
-        })}
+        {scanJobs &&
+          scanJobs.map(job => {
+            return job.id !== _.get(scan, 'most_recent.id') ? this.renderJob(job) : null;
+          })}
       </Grid>
     );
   }
@@ -96,6 +96,9 @@ class ScanJobsList extends React.Component {
 
 ScanJobsList.propTypes = {
   scan: PropTypes.object,
+  scanJobs: PropTypes.array,
+  scanJobsError: PropTypes.string,
+  scanJobsPending: PropTypes.bool,
   onSummaryDownload: PropTypes.func,
   onDetailedDownload: PropTypes.func
 };

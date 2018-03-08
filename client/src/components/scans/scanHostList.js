@@ -6,9 +6,9 @@ import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
 
 class ScansHostList extends React.Component {
   render() {
-    const { status, scan } = this.props;
+    const { status, scanResults, scanResultsPending, scanResultsError } = this.props;
 
-    if (scan.scanResultsPending === true) {
+    if (scanResultsPending === true) {
       return (
         <Modal bsSize="lg" backdrop={false} show animation={false}>
           <Modal.Body>
@@ -19,17 +19,17 @@ class ScansHostList extends React.Component {
       );
     }
 
-    if (scan.scanResultsError) {
+    if (scanResultsError) {
       return (
         <EmptyState>
           <EmptyState.Icon name="error-circle-o" />
           <EmptyState.Title>Error retrieving scan results</EmptyState.Title>
-          <EmptyState.info>{scan.scanResultsError}</EmptyState.info>
+          <EmptyState.info>{scanResultsError}</EmptyState.info>
         </EmptyState>
       );
     }
 
-    let connectionResults = _.get(scan, 'scanResults.connection_results', []);
+    let connectionResults = _.get(scanResults, 'connection_results', []);
 
     let displayHosts = [];
     _.forEach(connectionResults.task_results, taskResult => {
@@ -71,7 +71,9 @@ class ScansHostList extends React.Component {
 }
 
 ScansHostList.propTypes = {
-  scan: PropTypes.object,
+  scanResults: PropTypes.object,
+  scanResultsError: PropTypes.string,
+  scanResultsPending: PropTypes.bool,
   status: PropTypes.string
 };
 

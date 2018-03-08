@@ -22,6 +22,19 @@ class SourceListItem extends React.Component {
     super();
 
     helpers.bindMethods(this, ['itemSelectChange', 'toggleExpand', 'closeExpand']);
+
+    this.state = {
+      scanResultsPending: false,
+      scanResultsError: null,
+      scanResults: null
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Check for changes resulting in a fetch
+    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
+      this.loadExpandData(this.expandType());
+    }
   }
 
   expandType() {
@@ -52,6 +65,31 @@ class SourceListItem extends React.Component {
     });
   }
 
+  loadExpandData(expandType) {
+    const { item } = this.props;
+
+    if (expandType === 'okHosts' || expandType === 'failedHosts') {
+      this.setState({
+        scanResultsPending: true,
+        scanResultsError: null
+      });
+      this.props
+        .getScanResults(item.connection.id)
+        .then(results => {
+          this.setState({
+            scanResultsPending: false,
+            scanResults: _.get(results.value, 'data')
+          });
+        })
+        .catch(error => {
+          this.setState({
+            scanResultsPending: false,
+            scanResultsError: helpers.getErrorMessageFromResults(error.payload)
+          });
+        });
+    }
+  }
+
   toggleExpand(expandType) {
     const { item } = this.props;
 
@@ -66,26 +104,7 @@ class SourceListItem extends React.Component {
         source: item,
         expandType: expandType
       });
-      if (expandType === 'okHosts' || expandType === 'failedHosts') {
-        if (!item.scanResults) {
-          item.scanResultsPending = true;
-          item.scanResultsError = null;
-          this.props
-            .getScanResults(item.connection.id)
-            .then(results => {
-              item.scanResultsPending = false;
-              item.scanResults = _.get(results.value, 'data');
-            })
-            .catch(error => {
-              item.scanResultsPending = false;
-              item.scanResultsError = helpers.getErrorMessageFromResults(error.payload);
-            })
-            .finally(() => {
-              item.scanResultsPending = false;
-              this.forceUpdate();
-            });
-        }
-      }
+      this.loadExpandData(expandType);
     }
   }
 
@@ -189,12 +208,20 @@ class SourceListItem extends React.Component {
 
   renderExpansionContents() {
     const { item } = this.props;
+    const { scanResults, scanResultsError, scanResultsPending } = this.state;
 
     switch (this.expandType()) {
       case 'okHosts':
         return <SourceHostList source={item} status="success" />;
       case 'failedHosts':
-        return <SourceHostList source={item} status="failed" />;
+        return (
+          <SourceHostList
+            scanResults={scanResults}
+            scanResultsError={scanResultsError}
+            scanResultsPending={scanResultsPending}
+            status="failed"
+          />
+        );
       case 'credentials':
         return <SourceCredentialsList source={item} />;
       default:
@@ -327,6 +354,7 @@ class SourceListItem extends React.Component {
 
 SourceListItem.propTypes = {
   item: PropTypes.object,
+  lastRefresh: PropTypes.number,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onScan: PropTypes.func,

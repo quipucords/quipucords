@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Icon } from 'patternfly-react';
@@ -22,7 +23,7 @@ class SourceCredentialsList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.source !== this.props.source) {
+    if (!_.isEqual(nextProps.source, _.get(this.props, 'source'))) {
       const { source } = this.nextProps;
       let credentials = [...source.credentials];
 

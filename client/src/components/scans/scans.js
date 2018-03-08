@@ -191,6 +191,8 @@ class Scans extends React.Component {
   }
 
   renderScansList(items) {
+    const { lastRefresh } = this.state;
+
     if (_.size(items)) {
       return (
         <ListView className="quipicords-list-view">
@@ -198,6 +200,7 @@ class Scans extends React.Component {
             <ScanListItem
               item={item}
               key={index}
+              lastRefresh={lastRefresh}
               onSummaryDownload={this.downloadSummaryReport}
               onDetailedDownload={this.downloadDetailedReport}
               onStart={this.doStartScan}

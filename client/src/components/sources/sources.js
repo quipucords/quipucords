@@ -200,6 +200,8 @@ class Sources extends React.Component {
   }
 
   renderSourcesList(items) {
+    const { lastRefresh } = this.state;
+
     if (_.size(items)) {
       return (
         <ListView className="quipicords-list-view">
@@ -207,6 +209,7 @@ class Sources extends React.Component {
             <SourceListItem
               item={item}
               key={index}
+              lastRefresh={lastRefresh}
               onEdit={this.editSource}
               onDelete={this.handleDeleteSource}
               onScan={this.scanSource}

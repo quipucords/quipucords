@@ -23,6 +23,22 @@ class ScanListItem extends React.Component {
     super();
 
     helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
+
+    this.state = {
+      scanResultsPending: false,
+      scanResultsError: null,
+      scanResults: null,
+      scanJobsPending: false,
+      scanJobsError: null,
+      scanJobs: null
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Check for changes resulting in a fetch
+    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
+      this.loadExpandData(this.expandType());
+    }
   }
 
   expandType() {
@@ -34,6 +50,56 @@ class ScanListItem extends React.Component {
       }),
       'expandType'
     );
+  }
+
+  loadExpandData(expandType) {
+    const { item } = this.props;
+
+    switch (expandType) {
+      case 'systemsScanned':
+      case 'systemsFailed':
+        this.setState({
+          scanResultsPending: true,
+          scanResultsError: null
+        });
+        this.props
+          .getScanResults(item.id)
+          .then(results => {
+            this.setState({
+              scanResultsPending: false,
+              scanResults: _.get(results.value, 'data')
+            });
+          })
+          .catch(error => {
+            this.setState({
+              scanResultsPending: true,
+              scanResultsError: helpers.getErrorMessageFromResults(error.payload)
+            });
+          });
+        break;
+      case 'jobs':
+        this.setState({
+          scanJobsPending: true,
+          scanJobsError: null
+        });
+        this.props
+          .getScanJobs(item.id)
+          .then(results => {
+            this.setState({
+              scanJobsPending: false,
+              scanJobs: _.get(results.value, 'data.results')
+            });
+          })
+          .catch(error => {
+            this.setState({
+              scanJobsPending: false,
+              scanJobsError: helpers.getErrorMessageFromResults(error.payload)
+            });
+          });
+        break;
+      default:
+        break;
+    }
   }
 
   toggleExpand(expandType) {
@@ -50,45 +116,7 @@ class ScanListItem extends React.Component {
         scan: item,
         expandType: expandType
       });
-      if (expandType === 'systemsScanned' || expandType === 'systemsFailed') {
-        if (!item.scanResults) {
-          item.scanResultsPending = true;
-          item.scanResultsError = null;
-          this.props
-            .getScanResults(item.id)
-            .then(results => {
-              item.scanResultsPending = false;
-              item.scanResults = _.get(results.value, 'data');
-            })
-            .catch(error => {
-              item.scanResultsPending = false;
-              item.scanResultsError = helpers.getErrorMessageFromResults(error.payload);
-            })
-            .finally(() => {
-              item.scanResultsPending = false;
-              this.forceUpdate();
-            });
-        }
-      } else if (expandType === 'jobs') {
-        if (!item.scanJobs) {
-          item.scanJobsPending = true;
-          item.scanJobsError = null;
-          this.props
-            .getScanJobs(item.id)
-            .then(results => {
-              item.scanJobsPending = false;
-              item.scanJobs = _.get(results.value, 'data.results');
-            })
-            .catch(error => {
-              item.scanJobsPending = false;
-              item.scanJobsError = helpers.getErrorMessageFromResults(error.payload);
-            })
-            .finally(() => {
-              item.scanJobsPending = false;
-              this.forceUpdate();
-            });
-        }
-      }
+      this.loadExpandData(expandType);
     }
   }
 
@@ -261,17 +289,39 @@ class ScanListItem extends React.Component {
 
   renderExpansionContents() {
     const { item, onSummaryDownload, onDetailedDownload } = this.props;
+    const { scanJobs, scanJobsError, scanJobsPending, scanResults, scanResultsError, scanResultsPending } = this.state;
 
     switch (this.expandType()) {
       case 'systemsScanned':
-        return <ScanHostsList scan={item} status="success" />;
+        return (
+          <ScanHostsList
+            scanResults={scanResults}
+            scanResultsError={scanResultsError}
+            scanResultsPending={scanResultsPending}
+            status="success"
+          />
+        );
       case 'systemsFailed':
-        return <ScanHostsList scan={item} status="failed" />;
+        return (
+          <ScanHostsList
+            scanResults={scanResults}
+            scanResultsError={scanResultsError}
+            scanResultsPending={scanResultsPending}
+            status="failed"
+          />
+        );
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'jobs':
         return (
-          <ScanJobsList scan={item} onSummaryDownload={onSummaryDownload} onDetailedDownload={onDetailedDownload} />
+          <ScanJobsList
+            scan={item}
+            scanJobs={scanJobs}
+            scanJobsError={scanJobsError}
+            scanJobsPending={scanJobsPending}
+            onSummaryDownload={onSummaryDownload}
+            onDetailedDownload={onDetailedDownload}
+          />
         );
       default:
         return null;
@@ -307,6 +357,7 @@ class ScanListItem extends React.Component {
 
 ScanListItem.propTypes = {
   item: PropTypes.object,
+  lastRefresh: PropTypes.number,
   onSummaryDownload: PropTypes.func,
   onDetailedDownload: PropTypes.func,
   onPause: PropTypes.func,

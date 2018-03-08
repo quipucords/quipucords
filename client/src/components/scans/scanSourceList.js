@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Icon } from 'patternfly-react';
@@ -27,7 +28,7 @@ class ScanSourceList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.scan !== this.props.scan) {
+    if (!_.isEqual(_.get(nextProps, 'scan'), _.get(this.props, 'scan'))) {
       const { scan } = this.nextProps;
       let sources = [...scan.sources];
 
