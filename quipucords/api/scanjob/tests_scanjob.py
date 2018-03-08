@@ -871,9 +871,9 @@ class ScanJobTest(TestCase):
         extended = ExtendedProductSearchOptions()
         extended.save()
         disabled = DisabledOptionalProductsOptions(
-            jboss_eap=False,
-            jboss_fuse=False,
-            jboss_brms=True)
+            jboss_eap=True,
+            jboss_fuse=True,
+            jboss_brms=False)
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,
@@ -897,9 +897,9 @@ class ScanJobTest(TestCase):
         extended = ExtendedProductSearchOptions()
         extended.save()
         disabled = DisabledOptionalProductsOptions(
-            jboss_eap=False,
-            jboss_fuse=False,
-            jboss_brms=False)
+            jboss_eap=True,
+            jboss_fuse=True,
+            jboss_brms=True)
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,

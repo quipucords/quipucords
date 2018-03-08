@@ -58,9 +58,9 @@ class ExtendedProductSearchOptions(models.Model):
 class DisabledOptionalProductsOptions(models.Model):
     """The disable optional products options of a scan."""
 
-    OPT_JBOSS_EAP = True
-    OPT_JBOSS_FUSE = True
-    OPT_JBOSS_BRMS = True
+    OPT_JBOSS_EAP = False
+    OPT_JBOSS_FUSE = False
+    OPT_JBOSS_BRMS = False
     jboss_eap = models.BooleanField(null=False, default=OPT_JBOSS_EAP)
     jboss_fuse = models.BooleanField(null=False, default=OPT_JBOSS_FUSE)
     jboss_brms = models.BooleanField(null=False, default=OPT_JBOSS_BRMS)
@@ -149,13 +149,24 @@ class ScanOptions(models.Model):
         extra_vars = self.get_default_extra_vars()
         # pylint: disable=no-member
         disable_products = self.disabled_optional_products
+        # when making the disabled products dictionary we have to
+        # consider that the roles see True as 'search for product'
+        # therefore, we must flip the values from the user to format
+        # the extra vars correctly for the role
         if disable_products is not None:
             extra_vars[self.JBOSS_EAP] = \
-                disable_products.jboss_brms or \
-                disable_products.jboss_fuse or \
-                disable_products.jboss_eap
-            extra_vars[self.JBOSS_FUSE] = disable_products.jboss_fuse
-            extra_vars[self.JBOSS_BRMS] = disable_products.jboss_brms
+                not(disable_products.jboss_brms and
+                    disable_products.jboss_fuse and
+                    disable_products.jboss_eap)
+            extra_vars[self.JBOSS_FUSE] = not disable_products.jboss_fuse
+            extra_vars[self.JBOSS_BRMS] = not disable_products.jboss_brms
+        else:
+            extra_vars[self.JBOSS_EAP] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_EAP
+            extra_vars[self.JBOSS_FUSE] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_FUSE
+            extra_vars[self.JBOSS_BRMS] = \
+                not DisabledOptionalProductsOptions.OPT_JBOSS_BRMS
 
         # Scan for EAP if fuse or brms are in scan
         extended_search = self.enabled_extended_product_search
