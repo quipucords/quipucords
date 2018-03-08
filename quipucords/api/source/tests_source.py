@@ -966,7 +966,7 @@ class SourceTest(TestCase):
                 'source_type': Source.SATELLITE_SOURCE_TYPE,
                 'hosts': ['1.2.3.4'],
                 'credentials': [self.sat_cred_for_upload],
-                'options': {'satellite_version': '6.2'}}
+                'options': {'ssl_cert_verify': False}}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
 
@@ -978,15 +978,6 @@ class SourceTest(TestCase):
              'hosts': ['1.2.3.4'],
              'credentials': [self.sat_cred_for_upload,
                              self.net_cred_for_upload]})
-
-    def test_sat_bad_version(self):
-        """A sat source must have valid version option."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'source_type': Source.SATELLITE_SOURCE_TYPE,
-             'hosts': ['1.2.3.4'],
-             'credentials': [self.sat_cred_for_upload],
-             'options': {'satellite_version': '1.0'}})
 
     def test_sat_req_host(self):
         """A satellite source must have a host."""
@@ -1068,8 +1059,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected = {'id': 1, 'name': 'source', 'source_type': 'satellite',
                     'port': 22, 'hosts': ['1.2.3.4'],
-                    'options': {'satellite_version': '6.2',
-                                'ssl_cert_verify': False},
+                    'options': {'ssl_cert_verify': False},
                     'credentials': [{'id': 3, 'name': 'sat_cred1'}]}
         self.assertEqual(response.json(), expected)
 

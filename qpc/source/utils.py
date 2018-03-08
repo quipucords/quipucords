@@ -67,11 +67,6 @@ def build_source_payload(args, add_none=True):
         req_payload['credentials'] = args.credentials
     elif add_none:
         req_payload['credentials'] = None
-    if hasattr(args, 'satellite_version') and args.satellite_version:
-        if options is None:
-            options = {'satellite_version': args.satellite_version}
-        else:
-            options['satellite_version'] = args.satellite_version
     if (hasattr(args, 'ssl_cert_verify') and
             args.ssl_cert_verify is not None):
         ssl_cert_verify = args.ssl_cert_verify.lower() == 'true'

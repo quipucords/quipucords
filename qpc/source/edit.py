@@ -56,11 +56,6 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP))
-        self.parser.add_argument('--satellite-version',
-                                 dest='satellite_version',
-                                 choices=source.VALID_SAT_CHOICES,
-                                 help=_(messages.SOURCE_SAT_VER_HELP),
-                                 required=False)
         self.parser.add_argument('--ssl-cert-verify',
                                  dest='ssl_cert_verify',
                                  choices=['True', 'False'],
@@ -82,7 +77,7 @@ class SourceEditCommand(CliCommand):
         CliCommand._validate_args(self)
 
         if not(self.args.hosts or self.args.cred or self.args.port or
-               self.args.satellite_version or self.args.ssl_cert_verify):
+               self.args.ssl_cert_verify):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

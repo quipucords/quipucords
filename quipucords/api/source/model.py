@@ -22,13 +22,6 @@ from api.credential.model import Credential
 class SourceOptions(models.Model):
     """The source options allows configuration of a sources."""
 
-    SATELLITE_VERSION_5 = '5'
-    SATELLITE_VERSION_62 = '6.2'
-    SATELLITE_VERSION_63 = '6.3'
-    SATELLITE_VERSION_CHOICES = ((SATELLITE_VERSION_62, SATELLITE_VERSION_62),
-                                 (SATELLITE_VERSION_63, SATELLITE_VERSION_63),
-                                 (SATELLITE_VERSION_5, SATELLITE_VERSION_5))
-
     SSL_PROTOCOL_SSLv23 = 'SSLv23'
     SSL_PROTOCOL_TLSv1 = 'TLSv1'
     SSL_PROTOCOL_TLSv1_1 = 'TLSv1_1'
@@ -42,12 +35,6 @@ class SourceOptions(models.Model):
                             SSL_PROTOCOL_TLSv1: ssl.PROTOCOL_TLSv1,
                             SSL_PROTOCOL_TLSv1_1: ssl.PROTOCOL_TLSv1_1,
                             SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2}
-
-    satellite_version = models.CharField(
-        max_length=10,
-        choices=SATELLITE_VERSION_CHOICES,
-        null=True
-    )
 
     ssl_protocol = models.CharField(
         max_length=10,
@@ -67,9 +54,9 @@ class SourceOptions(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, satellite_version:%s, ssl_protocol:%s,'\
+        return '{ id:%s, ssl_protocol:%s,'\
             'ssl_cert_verify:%s, disable_ssl:%s}' %\
-            (self.id, self.satellite_version, self.ssl_protocol,
+            (self.id, self.ssl_protocol,
              self.ssl_cert_verify, self.disable_ssl)
 
 
