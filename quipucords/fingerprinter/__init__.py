@@ -683,13 +683,12 @@ def _process_network_fact(source, fact):
 
     # Red Hat facts
     add_fact_to_fingerprint(source, 'redhat_packages_gpg_num_rh_packages',
-                            fact,
-                            'redhat_packages_gpg_num_rh_packages',
+                            fact, 'redhat_packages_count',
                             fingerprint)
     add_fact_to_fingerprint(source, 'redhat_packages_certs', fact,
-                            'redhat_packages_certs', fingerprint)
+                            'redhat_certs', fingerprint)
     add_fact_to_fingerprint(source, 'redhat_packages_gpg_is_redhat',
-                            fact, 'redhat_is_redhat', fingerprint)
+                            fact, 'is_redhat', fingerprint)
 
     # Set OS information
     add_fact_to_fingerprint(source, 'etc_release_name',

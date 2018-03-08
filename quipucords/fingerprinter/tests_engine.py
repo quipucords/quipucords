@@ -70,9 +70,9 @@ class EngineTest(TestCase):
             virt_num_guests=1,
             virt_num_running_guests=1,
             virt_what_type='vt',
-            redhat_is_redhat=True,
-            redhat_packages_certs='fake certs',
-            redhat_packages_gpg_num_rh_packages=100,
+            is_redhat='true',
+            redhat_certs='fake certs',
+            redhat_packages_count=100,
             architecture='x86_64'):
         """Create an in memory FactCollection for tests."""
         # pylint: disable=too-many-statements
@@ -135,13 +135,13 @@ class EngineTest(TestCase):
             fact['virt_num_running_guests'] = virt_num_running_guests
         if virt_what_type:
             fact['virt_what_type'] = virt_what_type
-        if redhat_is_redhat:
-            fact['redhat_packages_gpg_is_redhat'] = redhat_is_redhat
-        if redhat_packages_certs:
-            fact['redhat_packages_certs'] = redhat_packages_certs
-        if redhat_packages_gpg_num_rh_packages:
+        if is_redhat:
+            fact['redhat_packages_gpg_is_redhat'] = is_redhat
+        if redhat_certs:
+            fact['redhat_packages_certs'] = redhat_certs
+        if redhat_packages_count:
             fact['redhat_packages_gpg_num_rh_packages'] = \
-                redhat_packages_gpg_num_rh_packages
+                redhat_packages_count
         if architecture:
             fact['uname_processor'] = architecture
 
@@ -321,12 +321,12 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('uname_processor'),
                          fingerprint.get('architecture'))
         self.assertEqual(fact.get('redhat_packages_certs'),
-                         fingerprint.get('redhat_packages_certs'))
+                         fingerprint.get('redhat_certs'))
         self.assertEqual(fact.get('redhat_packages_gpg_is_redhat'),
-                         fingerprint.get('redhat_is_redhat'))
+                         fingerprint.get('is_redhat'))
         self.assertEqual(fact.get('redhat_packages_gpg_num_rh_packages'),
                          fingerprint.get(
-                             'redhat_packages_gpg_num_rh_packages'))
+                             'redhat_packages_count'))
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
