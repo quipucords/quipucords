@@ -318,7 +318,8 @@ A scan defines a collection of network information, including the sources to sca
 Creating and Editing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Use the ``qpc scan add`` command to create scan objects with one or more sources. This command creates a scan object that references the supplied sources and contains any options supplied by the user.
-**qpc scan add --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **[--disabled-optional-products=** *products_list* **]**
+
+**qpc scan add --name** *name* **--sources=** *source_list* **[--max-concurrency=** *concurrency* **]** **[--disabled-optional-products=** *products_list* **]** **[--enabled-ext-product-search=** *products_list* **]** **[--ext-product-search-dirs=** *search_dirs_list* **]**
 
 ``--sources=source_list``
 
