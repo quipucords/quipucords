@@ -323,7 +323,12 @@ class CreateCredentialDialog extends React.Component {
                 multiselect={false}
               >
                 {this.becomeMethods.map((nextMethod, index) => (
-                  <MenuItem key={index} eventKey={`become${index}`} onClick={() => this.setBecomeMethod(nextMethod)}>
+                  <MenuItem
+                    key={index}
+                    className={{ 'quipucords-dropdownselect-menuitem-selected': nextMethod === becomeMethod }}
+                    eventKey={`become${index}`}
+                    onClick={() => this.setBecomeMethod(nextMethod)}
+                  >
                     {nextMethod}
                   </MenuItem>
                 ))}
@@ -435,10 +440,22 @@ class CreateCredentialDialog extends React.Component {
                     className="form-control"
                     multiselect={false}
                   >
-                    <MenuItem key="usernamePassword" eventKey="1" onClick={() => this.setAuthType('usernamePassword')}>
+                    <MenuItem
+                      key="usernamePassword"
+                      className={{
+                        'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
+                      }}
+                      eventKey="1"
+                      onClick={() => this.setAuthType('usernamePassword')}
+                    >
                       {helpers.authorizationTypeString('usernamePassword')}
                     </MenuItem>
-                    <MenuItem key="sshKey" eventKey="2" onClick={() => this.setAuthType('sshKey')}>
+                    <MenuItem
+                      key="sshKey"
+                      className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
+                      eventKey="2"
+                      onClick={() => this.setAuthType('sshKey')}
+                    >
                       {helpers.authorizationTypeString('sshKey')}
                     </MenuItem>
                   </DropdownSelect>
