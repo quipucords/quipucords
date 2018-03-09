@@ -212,10 +212,18 @@ class SourceListItem extends React.Component {
 
     switch (this.expandType()) {
       case 'okHosts':
-        return <SourceHostList source={item} status="success" />;
+        return (
+          <SourceHostList
+            scanResults={scanResults}
+            scanResultsError={scanResultsError}
+            scanResultsPending={scanResultsPending}
+            status="success"
+          />
+        );
       case 'failedHosts':
         return (
           <SourceHostList
+            scan={item}
             scanResults={scanResults}
             scanResultsError={scanResultsError}
             scanResultsPending={scanResultsPending}

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
 
-const SourceHostList = ({ status, scanResults, scanResultsPending, scanResultsError }) => {
+const SourceHostList = ({ scanResults, scanResultsError, scanResultsPending, status }) => {
   if (scanResultsPending === true) {
     return (
       <Modal bsSize="lg" backdrop={false} show animation={false}>
@@ -29,11 +29,13 @@ const SourceHostList = ({ status, scanResults, scanResultsPending, scanResultsEr
   let connectionResults = _.get(scanResults, 'connection_results', []);
 
   let displayHosts = [];
-  _.forEach(connectionResults.task_results, taskResult => {
-    _.forEach(taskResult.systems, system => {
-      if (system.status === status) {
-        displayHosts.push(system);
-      }
+  _.forEach(connectionResults, connectionResult => {
+    _.forEach(connectionResult.task_results, taskResult => {
+      _.forEach(taskResult.systems, system => {
+        if (system.status === status) {
+          displayHosts.push(system);
+        }
+      });
     });
   });
 
