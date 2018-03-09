@@ -462,32 +462,6 @@ class TestScanList(TestCase):
         self.test2.sources.add(self.source)
         self.test2.save()
 
-    def test_list(self):
-        """List all scan objects."""
-        url = reverse('scan-list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1, 'name':
-                     'test1',
-                     'sources': [{'id': 1,
-                                  'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': 'inspect'},
-                    {'id': 2, 'name':
-                     'test2',
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': 'connect'}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
-
-    def test_list_by_scanjob_end_time(self):
-        """List all scan objects, ordered by ScanJob start time."""
         # self.test1 will not have a most_recent_scanjob, self.test2
         # will.
         job = ScanJob(
@@ -498,11 +472,6 @@ class TestScanList(TestCase):
 
         self.test2.most_recent_scanjob = job
         self.test2.save()
-
-        url = reverse('scan-list')
-        response = self.client.get(url, {'ordering':
-                                         'most_recent_scanjob__start_time'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results1 = [{'id': 1,
                      'name': 'test1',
@@ -522,10 +491,23 @@ class TestScanList(TestCase):
                                   'name': 'source1',
                                   'source_type': 'network'}],
                      'scan_type': 'connect'}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(
-            response.json(),
-            expected)
+        self.expected = {'count': 2,
+                         'next': None,
+                         'previous': None,
+                         'results': results1}
+
+    def test_list(self):
+        """List all scan objects."""
+        url = reverse('scan-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), self.expected)
+
+    def test_list_by_scanjob_end_time(self):
+        """List all scan objects, ordered by ScanJob start time."""
+
+        url = reverse('scan-list')
+        response = self.client.get(url, {'ordering':
+                                         'most_recent_scanjob__start_time'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), self.expected)
