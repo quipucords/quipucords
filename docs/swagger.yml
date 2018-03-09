@@ -1365,24 +1365,30 @@ definitions:
       jboss_eap:
         type: "boolean"
         description: "The setting for JBoss EAP"
+        default: false
       jboss_fuse:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+        default: false
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+        default: false
   ExtendedSearchProducts:
     type: "object"
     properties:
       jboss_eap:
         type: "boolean"
         description: "The setting for JBoss EAP"
+        default: false
       jboss_fuse:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+        default: false
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+        default: false
       search_directories:
         type: "array"
         items:
