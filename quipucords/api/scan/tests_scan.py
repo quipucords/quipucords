@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import (Credential,
                         Scan,
-                        ScanOptions,
                         ScanJob,
                         Source,
                         ScanTask)
@@ -489,7 +488,6 @@ class TestScanList(TestCase):
 
     def test_list_by_scanjob_end_time(self):
         """List all scan objects, ordered by ScanJob start time."""
-
         # self.test1 will not have a most_recent_scanjob, self.test2
         # will.
         job = ScanJob(
