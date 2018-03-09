@@ -9,6 +9,7 @@ import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 
 import { viewToolbarTypes } from '../../redux/constants';
+import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 
 class ViewToolbar extends React.Component {
   constructor() {
@@ -174,16 +175,20 @@ class ViewToolbar extends React.Component {
   renderFilter() {
     const { filterType, filterFields } = this.props;
 
-    return (
-      <Filter>
-        <Filter.TypeSelector
-          filterTypes={filterFields}
-          currentFilterType={filterType}
-          onFilterTypeSelected={this.selectFilterType}
-        />
-        {this.renderFilterInput()}
-      </Filter>
-    );
+    if (_.size(filterFields)) {
+      return (
+        <Filter>
+          <Filter.TypeSelector
+            filterTypes={filterFields}
+            currentFilterType={filterType}
+            onFilterTypeSelected={this.selectFilterType}
+          />
+          {this.renderFilterInput()}
+        </Filter>
+      );
+    }
+
+    return null;
   }
 
   renderSort() {
@@ -197,11 +202,13 @@ class ViewToolbar extends React.Component {
             currentSortType={sortType}
             onSortTypeSelected={this.updateCurrentSortType}
           />
-          <Sort.DirectionSelector
-            isNumeric={sortType.isNumeric}
-            isAscending={sortAscending}
-            onClick={() => this.toggleCurrentSortDirection()}
-          />
+          <SimpleTooltip id="sortTip" tooltip={`Sort by ${sortType.title}`}>
+            <Sort.DirectionSelector
+              isNumeric={sortType.isNumeric}
+              isAscending={sortAscending}
+              onClick={() => this.toggleCurrentSortDirection()}
+            />
+          </SimpleTooltip>
         </Sort>
       );
     }
