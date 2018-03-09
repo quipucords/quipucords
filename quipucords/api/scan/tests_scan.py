@@ -16,6 +16,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import (Credential,
                         Scan,
+                        ScanOptions,
                         ScanJob,
                         Source,
                         ScanTask)
