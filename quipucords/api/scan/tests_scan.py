@@ -505,7 +505,6 @@ class TestScanList(TestCase):
 
     def test_list_by_scanjob_end_time(self):
         """List all scan objects, ordered by ScanJob start time."""
-
         url = reverse('scan-list')
         response = self.client.get(url, {'ordering':
                                          'most_recent_scanjob__start_time'})
