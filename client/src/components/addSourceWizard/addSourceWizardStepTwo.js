@@ -204,9 +204,9 @@ class AddSourceWizardStepTwo extends React.Component {
       _.each(value, host => {
         if (
           host !== '' &&
-          !new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\d{1,3}\\/\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\])$').test(
-            host
-          )
+          !new RegExp(
+            '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31))$'
+          ).test(host)
         ) {
           validation = 'You must enter a valid IP address';
           return false;
