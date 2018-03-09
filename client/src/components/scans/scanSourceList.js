@@ -14,9 +14,21 @@ class ScanSourceList extends React.Component {
   }
 
   componentDidMount() {
-    const { scan } = this.props;
-    let sources = [...scan.sources];
+    this.sortSources(_.get(this.props, 'scan'));
+  }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.scan !== this.props.scan) {
+      this.sortSources(_.get(nextProps, 'scan'));
+    }
+  }
+
+  sortSources(scan) {
+    if (!scan) {
+      return;
+    }
+
+    let sources = [...scan.sources];
     sources.sort((item1, item2) => {
       let cmp = item1.source_type.localeCompare(item2.source_type);
       if (cmp === 0) {
@@ -25,22 +37,6 @@ class ScanSourceList extends React.Component {
       return cmp;
     });
     this.setState({ sources: sources });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(_.get(nextProps, 'scan'), _.get(this.props, 'scan'))) {
-      const { scan } = this.nextProps;
-      let sources = [...scan.sources];
-
-      sources.sort((item1, item2) => {
-        let cmp = item1.source_type.localeCompare(item2.source_type);
-        if (cmp === 0) {
-          cmp = item1.name.localeCompare(item2.name);
-        }
-        return cmp;
-      });
-      this.setState({ sources: sources });
-    }
   }
 
   renderSourceIcon(source) {

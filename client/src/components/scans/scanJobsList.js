@@ -6,9 +6,8 @@ import { Dropdown, EmptyState, Grid, Icon, MenuItem, Modal } from 'patternfly-re
 import * as moment from 'moment/moment';
 import helpers from '../../common/helpers';
 
-class ScanJobsList extends React.Component {
-  renderJob(job) {
-    const { onSummaryDownload, onDetailedDownload } = this.props;
+const ScanJobsList = ({ scan, scanJobs, scanJobsPending, scanJobsError, onSummaryDownload, onDetailedDownload }) => {
+  const renderJob = job => {
     let scanDescription = helpers.scanStatusString(job.status);
 
     let scanTime = _.get(job, 'end_time');
@@ -58,41 +57,38 @@ class ScanJobsList extends React.Component {
         </Grid.Col>
       </Grid.Row>
     );
-  }
+  };
 
-  render() {
-    const { scan, scanJobs, scanJobsPending, scanJobsError } = this.props;
-    if (scanJobsPending === true) {
-      return (
-        <Modal bsSize="lg" backdrop={false} show animation={false}>
-          <Modal.Body>
-            <div className="spinner spinner-xl" />
-            <div className="text-center">Loading scan jobs...</div>
-          </Modal.Body>
-        </Modal>
-      );
-    }
-
-    if (scanJobsError) {
-      return (
-        <EmptyState>
-          <EmptyState.Icon name="error-circle-o" />
-          <EmptyState.Title>Error retrieving scan jobs</EmptyState.Title>
-          <EmptyState.info>{scan.scanJobsError}</EmptyState.info>
-        </EmptyState>
-      );
-    }
-
+  if (scanJobsPending === true) {
     return (
-      <Grid fluid>
-        {scanJobs &&
-          scanJobs.map(job => {
-            return job.id !== _.get(scan, 'most_recent.id') ? this.renderJob(job) : null;
-          })}
-      </Grid>
+      <Modal bsSize="lg" backdrop={false} show animation={false}>
+        <Modal.Body>
+          <div className="spinner spinner-xl" />
+          <div className="text-center">Loading scan jobs...</div>
+        </Modal.Body>
+      </Modal>
     );
   }
-}
+
+  if (scanJobsError) {
+    return (
+      <EmptyState>
+        <EmptyState.Icon name="error-circle-o" />
+        <EmptyState.Title>Error retrieving scan jobs</EmptyState.Title>
+        <EmptyState.info>{scan.scanJobsError}</EmptyState.info>
+      </EmptyState>
+    );
+  }
+
+  return (
+    <Grid fluid>
+      {scanJobs &&
+        scanJobs.map(job => {
+          return job.id !== _.get(scan, 'most_recent.id') ? renderJob(job) : null;
+        })}
+    </Grid>
+  );
+};
 
 ScanJobsList.propTypes = {
   scan: PropTypes.object,
