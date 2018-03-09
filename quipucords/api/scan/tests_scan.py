@@ -449,7 +449,7 @@ class TestScanList(TestCase):
         self.source.credentials.add(self.cred)
         self.source.save()
 
-       self.test1 = Scan(
+        self.test1 = Scan(
             name='test1',
             scan_type=ScanTask.SCAN_TYPE_INSPECT)
         self.test1.save()
