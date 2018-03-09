@@ -29,12 +29,10 @@ class AddSourceWizard extends React.Component {
       this.resetInitialState(nextProps);
     }
 
-    if (nextProps.stepOneValid || nextProps.stepTwoValid) {
-      this.setState({
-        stepOneValid: nextProps.stepOneValid || false,
-        stepTwoValid: nextProps.stepTwoValid || false
-      });
-    }
+    this.setState({
+      stepOneValid: nextProps.stepOneValid || false,
+      stepTwoValid: nextProps.stepTwoValid || false
+    });
   }
 
   resetInitialState(nextProps) {
@@ -140,7 +138,6 @@ class AddSourceWizard extends React.Component {
     });
   }
 
-  // ToDo: Final wizard step needs additional spinner animation, copy/error messaging for submit failures.
   render() {
     const { show, edit } = this.props;
     const { activeStepIndex, stepOneValid, stepTwoValid } = this.state;
@@ -228,7 +225,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.addSourceWizard.view);
+  return { ...state.addSourceWizard.view };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddSourceWizard);

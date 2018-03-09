@@ -87,6 +87,18 @@ function addSourceWizardReducer(state = initialState, action) {
         }
       );
 
+    case sourcesTypes.INVALID_SOURCE_WIZARD_STEPTWO:
+      return helpers.setStateProp(
+        'view',
+        {
+          stepTwoValid: false
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
     // Error/Rejected
     case sourcesTypes.ADD_SOURCE_REJECTED:
       return helpers.setStateProp(

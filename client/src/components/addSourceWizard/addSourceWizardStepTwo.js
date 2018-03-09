@@ -25,11 +25,10 @@ class AddSourceWizardStepTwo extends React.Component {
       credentialsError: null,
       port: '',
       portError: null,
-      singleHostPort: '',
-      singleHostPortError: null
+      singleHostPortDisplay: ''
     };
 
-    this.state = { ...this.initialState, ...this.initializeState(props) };
+    this.state = { ...this.initialState };
 
     helpers.bindMethods(this, [
       'onChangeSourceName',
@@ -42,32 +41,36 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.source && !this.props.source) {
-      this.setState(this.initializeState(nextProps));
-    } else if (
-      _.get(nextProps.source, apiTypes.API_SOURCE_TYPE) !== _.get(this.props.source, apiTypes.API_SOURCE_TYPE)
+    if (
+      _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]) !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])
     ) {
-      this.setState({ sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE) });
+      this.setState({ ...this.initialState }, () => {
+        this.invalidateStep();
+      });
     }
   }
 
   componentDidMount() {
-    this.props.getWizardCredentials();
-  }
-
-  credentialInfo(id) {
-    return _.find(this.props.allCredentials, { id: id }) || {};
+    this.setState({ ...this.initializeState(this.props) }, () => {
+      this.props.getWizardCredentials();
+      this.validateStep();
+    });
   }
 
   initializeState(nextProps) {
     if (nextProps.source) {
       const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
-      let singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT, '');
-      let singleHostPort = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, '');
+      let singlePort;
+      let singleHostPortDisplay;
 
-      if (_.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
+      if (nextProps.source.sourceType !== 'network' && _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
+        singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT, '');
+        singleHostPortDisplay = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, '');
+
         singlePort = singlePort ? `:${singlePort}` : '';
-        singleHostPort = singleHostPort ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}${singlePort}` : '';
+        singleHostPortDisplay = singleHostPortDisplay
+          ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}${singlePort}`
+          : '';
       }
 
       return {
@@ -75,12 +78,18 @@ class AddSourceWizardStepTwo extends React.Component {
         multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
         hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
         port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
-        singleHostPort: singleHostPort,
+        singleHostPortDisplay: singleHostPortDisplay || '',
         credentials: credentials.map(val => val.id)
       };
     }
 
     return {};
+  }
+
+  invalidateStep() {
+    Store.dispatch({
+      type: sourcesTypes.INVALID_SOURCE_WIZARD_STEPTWO
+    });
   }
 
   validateStep() {
@@ -112,13 +121,15 @@ class AddSourceWizardStepTwo extends React.Component {
       _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value, 10)));
 
       if (port !== '') {
-        updatedSource[apiTypes.API_SOURCE_PORT] = port;
+        _.set(updatedSource, apiTypes.API_SOURCE_PORT, port);
       }
 
       Store.dispatch({
         type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO,
-        source: _.merge({}, source, updatedSource)
+        source: Object.assign({ ...source }, updatedSource)
       });
+    } else {
+      this.invalidateStep();
     }
   }
 
@@ -138,6 +149,10 @@ class AddSourceWizardStepTwo extends React.Component {
       },
       () => this.validateStep()
     );
+  }
+
+  credentialInfo(id) {
+    return _.find(this.props.allCredentials, { id: id }) || {};
   }
 
   validateCredentials(value) {
@@ -187,7 +202,12 @@ class AddSourceWizardStepTwo extends React.Component {
 
     if (value.length) {
       _.each(value, host => {
-        if (host !== '' && !new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(host)) {
+        if (
+          host !== '' &&
+          !new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\d{1,3}\\/\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\])$').test(
+            host
+          )
+        ) {
           validation = 'You must enter a valid IP address';
           return false;
         }
@@ -198,7 +218,7 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   validateHost(value) {
-    if (!new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|[\\d:\\[\\]\\/]+)$').test(value)) {
+    if (!new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(value)) {
       return 'You must enter an IP address';
     }
 
@@ -213,8 +233,27 @@ class AddSourceWizardStepTwo extends React.Component {
     return null;
   }
 
-  onChangePort(event) {
-    const value = event.target.value;
+  onChangePort(targetValue) {
+    const { source } = this.props;
+    let value = targetValue;
+    let defaultPort;
+
+    switch (_.get(source, apiTypes.API_SOURCE_TYPE)) {
+      case 'network':
+        defaultPort = 22;
+        break;
+      case 'satellite':
+      case 'vcenter':
+        defaultPort = 443;
+        break;
+      default:
+        defaultPort = '';
+        break;
+    }
+
+    if (value === '') {
+      value = defaultPort;
+    }
 
     this.setState(
       {
@@ -231,7 +270,6 @@ class AddSourceWizardStepTwo extends React.Component {
     let port;
     let hostPort;
     let validateHost;
-    let validatePort;
 
     if (value !== '') {
       hostPort = value.split(':');
@@ -240,16 +278,13 @@ class AddSourceWizardStepTwo extends React.Component {
     }
 
     validateHost = this.validateHost(host);
-    validatePort = port ? this.validatePort(port) : null;
+    this.onChangePort(port || '');
 
     this.setState(
       {
-        singleHostPort: value,
-        singleHostPortError: validateHost || validatePort || null,
+        singleHostPortDisplay: value,
         hosts: host,
-        hostsError: validateHost,
-        port: port || '',
-        portError: validatePort
+        hostsError: validateHost
       },
       () => this.validateStep()
     );
@@ -275,7 +310,7 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   renderHosts() {
-    const { hostsError, port, portError, multiHostDisplay, singleHostPort, singleHostPortError } = this.state;
+    const { hostsError, port, portError, multiHostDisplay, singleHostPortDisplay } = this.state;
     const { source } = this.props;
 
     let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
@@ -301,7 +336,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 type="text"
                 value={port}
                 placeholder="Default port :22"
-                onChange={this.onChangePort}
+                onChange={e => this.onChangePort(e.target.value)}
               />
             </FieldGroup>
           </React.Fragment>
@@ -311,11 +346,15 @@ class AddSourceWizardStepTwo extends React.Component {
       case 'satellite':
         return (
           <React.Fragment>
-            <FieldGroup label={'IP Address:Port'} error={singleHostPortError} errorMessage={singleHostPortError}>
+            <FieldGroup
+              label={'IP Address:Port'}
+              error={hostsError || portError}
+              errorMessage={hostsError || portError}
+            >
               <Form.FormControl
                 name="hosts"
                 type="text"
-                value={singleHostPort}
+                value={singleHostPortDisplay}
                 placeholder="Enter an IP address (default port :443)"
                 onChange={this.onChangeHost}
               />
@@ -430,7 +469,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.addSourceWizard.view);
+  return { ...state.addSourceWizard.view };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddSourceWizardStepTwo);
