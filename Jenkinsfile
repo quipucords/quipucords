@@ -34,9 +34,24 @@ node('f25-os') {
     stage('Build Docker Image') {
         sh "ls -lta"
         sh "cat Dockerfile"
-        sh "sudo docker -D build . -t quipucords:latest"
+
+        sh "git rev-parse HEAD > GIT_COMMIT"
+        sh 'cat GIT_COMMIT'
+        def commitHash = readFile('GIT_COMMIT').trim()
+
+        sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t quipucords:latest"
         sh "sudo docker tag quipucords:latest $DOCKER_REGISTRY/quipucords/quipucords:latest"
         sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
+
+        def tarfile = "quipucords.latest." + commitHash + ".tar"
+        def targzfile = tarfile + ".gz"
+        sh "sudo docker save -o $tarfile quipucords:latest"
+        sh "sudo chmod 755 $tarfile"
+        sh "sudo gzip -f --best $tarfile"
+        sh "sudo chmod 755 $targzfile"
+
+        archive targzfile
+
     }
 }

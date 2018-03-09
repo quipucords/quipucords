@@ -51,6 +51,8 @@ COPY . /app/
 WORKDIR /app
 
 # Set production environment
+ARG BUILD_COMMIT=master
+ENV QUIPUCORDS_COMMIT=$BUILD_COMMIT
 ENV PRODUCTION=True
 ENV DJANGO_SECRET_PATH=/var/data/secret.txt
 ENV DJANGO_DB_PATH=/var/data/
