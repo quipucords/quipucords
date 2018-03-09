@@ -17,29 +17,21 @@ class AddSourceWizardStepOne extends React.Component {
       sourceTypeError: null
     };
 
-    this.state = { ...this.initialState, ...this.initializeState(props) };
+    this.state = { ...this.initialState };
 
     helpers.bindMethods(this, ['onChangeSourceType']);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.source && !this.props.source) {
-      this.setState(this.initializeState(nextProps));
-    }
-  }
-
   componentDidMount() {
-    this.validateStep();
+    this.setState({ ...this.initializeState(this.props) }, () => {
+      this.validateStep();
+    });
   }
 
   initializeState(nextProps) {
-    if (nextProps.source) {
-      return {
-        sourceType: _.get(nextProps.source, apiTypes.API_SOURCE_TYPE, 'network')
-      };
-    }
-
-    return {};
+    return {
+      sourceType: _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE], 'network')
+    };
   }
 
   validateStep() {
@@ -105,7 +97,7 @@ AddSourceWizardStepOne.propTypes = {
 };
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.addSourceWizard.view);
+  return { ...state.addSourceWizard.view };
 };
 
 export default connect(mapStateToProps)(AddSourceWizardStepOne);
