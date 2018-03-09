@@ -201,6 +201,9 @@ class Scan(models.Model):
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
 
+    most_recent_scanjob = models.ForeignKey(
+        'api.ScanJob', null=True, on_delete=models.SET_NULL, related_name='+')
+
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\

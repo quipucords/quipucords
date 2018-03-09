@@ -15,6 +15,9 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from api.models import (Credential,
+                        Scan,
+                        ScanOptions,
+                        ScanJob,
                         Source,
                         ScanTask)
 from api.scan.view import (expand_scan)
@@ -174,38 +177,6 @@ class ScanTest(TestCase):
              {'disabled_optional_products':
               {'non_field_errors':
                ['Invalid data. Expected a dictionary, but got str.']}}})
-
-    def test_list(self):
-        """List all scan objects."""
-        data_default = {'name': 'test1',
-                        'sources': [self.source.id]}
-        data_discovery = {'name': 'test2',
-                          'sources': [self.source.id],
-                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
-        self.create_expect_201(data_default)
-        self.create_expect_201(data_discovery)
-
-        url = reverse('scan-list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        content = response.json()
-        results1 = [{'id': 1, 'name':
-                     'test1',
-                     'sources': [{'id': 1,
-                                  'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': 'inspect'},
-                    {'id': 2, 'name':
-                     'test2',
-                     'sources': [{'id': 1, 'name': 'source1',
-                                  'source_type': 'network'}],
-                     'scan_type': 'connect'}]
-        expected = {'count': 2,
-                    'next': None,
-                    'previous': None,
-                    'results': results1}
-        self.assertEqual(content, expected)
 
     def test_filtered_list(self):
         """List filtered Scan objects."""
@@ -448,3 +419,115 @@ class ScanTest(TestCase):
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_204_NO_CONTENT)
+
+
+class TestScanList(TestCase):
+    """Tests for the List method.
+
+    These are separate from the other Scan tests because they have
+    more setup than the others.
+    """
+
+    maxDiff = None
+
+    def setUp(self):
+        """Create test setup."""
+        self.cred = Credential.objects.create(
+            name='cred1',
+            username='username',
+            password='password',
+            become_password=None,
+            ssh_keyfile=None)
+        self.cred.save()
+        self.cred_for_upload = self.cred.id
+
+        self.source = Source(
+            name='source1',
+            source_type='network',
+            port=22)
+        self.source.save()
+        self.source.credentials.add(self.cred)
+        self.source.save()
+
+       self.test1 = Scan(
+            name='test1',
+            scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        self.test1.save()
+        self.test1.sources.add(self.source)
+        self.test1.save()
+
+        self.test2 = Scan(
+            name='test2',
+            scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        self.test2.save()
+        self.test2.sources.add(self.source)
+        self.test2.save()
+
+    def test_list(self):
+        """List all scan objects."""
+        url = reverse('scan-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        content = response.json()
+        results1 = [{'id': 1, 'name':
+                     'test1',
+                     'sources': [{'id': 1,
+                                  'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': 'inspect'},
+                    {'id': 2, 'name':
+                     'test2',
+                     'sources': [{'id': 1, 'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': 'connect'}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
+        self.assertEqual(content, expected)
+
+    def test_list_by_scanjob_end_time(self):
+        """List all scan objects, ordered by ScanJob start time."""
+
+        # self.test1 will not have a most_recent_scanjob, self.test2
+        # will.
+        job = ScanJob(
+            scan=self.test2)
+        job.save()
+        job.sources.add(self.source)
+        job.save()
+
+        self.test2.most_recent_scanjob = job
+        self.test2.save()
+
+        url = reverse('scan-list')
+        response = self.client.get(url, {'ordering':
+                                         'most_recent_scanjob__start_time'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results1 = [{'id': 1,
+                     'name': 'test1',
+                     'sources': [{'id': 1,
+                                  'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': 'inspect'},
+                    {'id': 2,
+                     'jobs': [{'id': 1}],
+                     'most_recent': {'id': 1,
+                                     'status': 'created',
+                                     'status_details':
+                                     {'job_status_message':
+                                      'Job is created.'}},
+                     'name': 'test2',
+                     'sources': [{'id': 1,
+                                  'name': 'source1',
+                                  'source_type': 'network'}],
+                     'scan_type': 'connect'}]
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': results1}
+        self.assertEqual(
+            response.json(),
+            expected)
