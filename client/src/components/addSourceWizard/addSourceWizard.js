@@ -4,7 +4,6 @@ import { Modal, Button, Icon, Wizard } from 'patternfly-react';
 import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
 import Store from '../../redux/store';
-import CreateCredentialDialog from '../createCredentialDialog/createCredentialDialog';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
 import { addSourceWizardSteps, editSourceWizardSteps } from './addSourceWizardConstants';
 import { addSource, updateSource } from '../../redux/actions/sourcesActions';
@@ -145,7 +144,6 @@ class AddSourceWizard extends React.Component {
 
     return (
       <React.Fragment>
-        <CreateCredentialDialog />
         <Modal show={show} onHide={this.onCancel} dialogClassName="modal-dialog modal-lg wizard-pf quipucords-wizard">
           <Wizard>
             <Modal.Header>

@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Modal, Alert, Button, Icon, Form, Grid, SplitButton, MenuItem } from 'patternfly-react';
+import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
@@ -13,6 +13,8 @@ import {
   getWizardCredentials,
   updateCredential
 } from '../../redux/actions/credentialsActions';
+
+import DropdownSelect from '../dropdownSelect/dropdownSelect';
 
 class CreateCredentialDialog extends React.Component {
   constructor() {
@@ -313,19 +315,24 @@ class CreateCredentialDialog extends React.Component {
         <Form.FormGroup>
           {this.renderFormLabel('Become Method')}
           <Grid.Col sm={7}>
-            <div className="form-split-button">
-              <SplitButton
-                className="form-control"
-                bsStyle="default"
+            <div className="quipucords-dropdownselect">
+              <DropdownSelect
                 title={becomeMethod}
-                id={helpers.generateId('become-method-button')}
+                id="become-method-select"
+                className="form-control"
+                multiselect={false}
               >
                 {this.becomeMethods.map((nextMethod, index) => (
-                  <MenuItem key={index} eventKey={`become${index}`} onClick={() => this.setBecomeMethod(nextMethod)}>
+                  <MenuItem
+                    key={index}
+                    className={{ 'quipucords-dropdownselect-menuitem-selected': nextMethod === becomeMethod }}
+                    eventKey={`become${index}`}
+                    onClick={() => this.setBecomeMethod(nextMethod)}
+                  >
                     {nextMethod}
                   </MenuItem>
                 ))}
-              </SplitButton>
+              </DropdownSelect>
             </div>
           </Grid.Col>
         </Form.FormGroup>
@@ -415,8 +422,7 @@ class CreateCredentialDialog extends React.Component {
                 <Form.FormControl
                   type="text"
                   className="quipucords-form-control"
-                  readOnly={edit}
-                  placeholder="Enter the new credential name"
+                  placeholder="Enter the credential name"
                   autoFocus={!edit}
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
@@ -427,20 +433,32 @@ class CreateCredentialDialog extends React.Component {
             <Form.FormGroup>
               {this.renderFormLabel('Authentication Type')}
               <Grid.Col sm={7}>
-                <div className="form-split-button">
-                  <SplitButton
-                    className="form-control"
-                    bsStyle="default"
+                <div className="quipucords-dropdownselect">
+                  <DropdownSelect
                     title={helpers.authorizationTypeString(authorizationType)}
-                    id={helpers.generateId('auth-type-button')}
+                    id="auth-type-select"
+                    className="form-control"
+                    multiselect={false}
                   >
-                    <MenuItem eventKey="1" onClick={() => this.setAuthType('usernamePassword')}>
+                    <MenuItem
+                      key="usernamePassword"
+                      className={{
+                        'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
+                      }}
+                      eventKey="1"
+                      onClick={() => this.setAuthType('usernamePassword')}
+                    >
                       {helpers.authorizationTypeString('usernamePassword')}
                     </MenuItem>
-                    <MenuItem eventKey="2" onClick={() => this.setAuthType('sshKey')}>
+                    <MenuItem
+                      key="sshKey"
+                      className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
+                      eventKey="2"
+                      onClick={() => this.setAuthType('sshKey')}
+                    >
                       {helpers.authorizationTypeString('sshKey')}
                     </MenuItem>
-                  </SplitButton>
+                  </DropdownSelect>
                 </div>
               </Grid.Col>
             </Form.FormGroup>
