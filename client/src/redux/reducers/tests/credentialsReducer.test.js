@@ -1,3 +1,4 @@
+import helpers from '../../../common/helpers';
 import { credentialsTypes } from '../../constants/index';
 import credentialsReducer from '../credentialsReducer';
 
@@ -77,7 +78,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle ADD_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.ADD_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.ADD_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -101,7 +102,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle DELETE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.DELETE_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.DELETE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -125,7 +126,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle UPDATE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.UPDATE_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.UPDATE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -149,7 +150,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.GET_CREDENTIALS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -171,7 +172,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_PENDING', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_PENDING
+      type: helpers.pendingAction(credentialsTypes.GET_CREDENTIALS)
     };
 
     let resultState = credentialsReducer(undefined, dispatched);
@@ -183,7 +184,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_FULFILLED', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_FULFILLED,
+      type: helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS),
       payload: {
         data: {
           results: [

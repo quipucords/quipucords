@@ -24,8 +24,8 @@ const initialState = {
 const sourcesReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case sourcesTypes.DELETE_SOURCE_REJECTED:
-    case sourcesTypes.DELETE_SOURCES_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.rejectedAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -39,8 +39,8 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.DELETE_SOURCE_PENDING:
-    case sourcesTypes.DELETE_SOURCES_PENDING:
+    case helpers.pendingAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.pendingAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -53,8 +53,8 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.DELETE_SOURCE_FULFILLED:
-    case sourcesTypes.DELETE_SOURCES_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.fulfilledAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -67,7 +67,7 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.GET_SOURCES_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.GET_SOURCES):
       return helpers.setStateProp(
         'view',
         {
@@ -81,7 +81,7 @@ const sourcesReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case sourcesTypes.GET_SOURCES_PENDING:
+    case helpers.pendingAction(sourcesTypes.GET_SOURCES):
       return helpers.setStateProp(
         'view',
         {
@@ -95,7 +95,7 @@ const sourcesReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case sourcesTypes.GET_SOURCES_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.GET_SOURCES):
       // Get resulting sources and update the selected state of each
       const sources = _.get(action, 'payload.data.results', []);
       return helpers.setStateProp(

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import helpers from '../../common/helpers';
 import {
   viewTypes,
   viewPaginationTypes,
@@ -187,18 +188,18 @@ export default function viewOptionsReducer(state = initialState, action) {
       });
       return Object.assign({}, state, updateState);
 
-    case credentialsTypes.GET_CREDENTIAL_FULFILLED:
-    case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIAL):
+    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS):
       updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
-    case sourcesTypes.GET_SOURCE_FULFILLED:
-    case sourcesTypes.GET_SOURCES_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.GET_SOURCE):
+    case helpers.fulfilledAction(sourcesTypes.GET_SOURCES):
       updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
-    case scansTypes.GET_SCAN_FULFILLED:
-    case scansTypes.GET_SCANS_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.GET_SCAN):
+    case helpers.fulfilledAction(scansTypes.GET_SCANS):
       updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 

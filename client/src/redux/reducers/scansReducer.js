@@ -50,7 +50,7 @@ const initialState = {
 const scansReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case scansTypes.GET_SCANS_REJECTED:
+    case helpers.rejectedAction(scansTypes.GET_SCANS):
       return helpers.setStateProp(
         'view',
         {
@@ -65,7 +65,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.GET_SCANS_PENDING:
+    case helpers.pendingAction(scansTypes.GET_SCANS):
       return helpers.setStateProp(
         'view',
         {
@@ -79,7 +79,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.GET_SCANS_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.GET_SCANS):
       return helpers.setStateProp(
         'view',
         {
@@ -94,7 +94,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.GET_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.GET_SCAN):
       return helpers.setStateProp(
         'detail',
         {
@@ -109,7 +109,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.GET_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.GET_SCAN):
       return helpers.setStateProp(
         'detail',
         {
@@ -123,7 +123,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.GET_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.GET_SCAN):
       return helpers.setStateProp(
         'detail',
         {
@@ -138,7 +138,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.GET_SCAN_RESULTS_REJECTED:
+    case helpers.rejectedAction(scansTypes.GET_SCAN_RESULTS):
       return helpers.setStateProp(
         'results',
         {
@@ -153,7 +153,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.GET_SCAN_RESULTS_PENDING:
+    case helpers.pendingAction(scansTypes.GET_SCAN_RESULTS):
       return helpers.setStateProp(
         'results',
         {
@@ -167,7 +167,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.GET_SCAN_RESULTS_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.GET_SCAN_RESULTS):
       return helpers.setStateProp(
         'results',
         {
@@ -182,7 +182,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.GET_SCAN_JOBS_REJECTED:
+    case helpers.rejectedAction(scansTypes.GET_SCAN_JOBS):
       return helpers.setStateProp(
         'jobs',
         {
@@ -197,7 +197,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.GET_SCAN_JOBS_PENDING:
+    case helpers.pendingAction(scansTypes.GET_SCAN_JOBS):
       return helpers.setStateProp(
         'jobs',
         {
@@ -211,7 +211,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.GET_SCAN_JOBS_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.GET_SCAN_JOBS):
       return helpers.setStateProp(
         'jobs',
         {
@@ -226,7 +226,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.ADD_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.ADD_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -242,7 +242,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.ADD_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.ADD_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -256,7 +256,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.ADD_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.ADD_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -270,7 +270,7 @@ const scansReducer = function(state = initialState, action) {
         }
       );
 
-    case scansTypes.ADD_SCAN_RESET_STATUS:
+    case scansTypes.RESET_SCAN_ADD_STATUS:
       return helpers.setStateProp(
         'action',
         {
@@ -285,7 +285,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.START_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.START_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -301,7 +301,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.START_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.START_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -315,7 +315,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.START_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.START_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -330,7 +330,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.CANCEL_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.CANCEL_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -346,7 +346,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.CANCEL_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.CANCEL_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -360,7 +360,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.CANCEL_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.CANCEL_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -375,7 +375,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.PAUSE_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.PAUSE_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -391,7 +391,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.PAUSE_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.PAUSE_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -405,7 +405,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.PAUSE_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.PAUSE_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -420,7 +420,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case scansTypes.RESTART_SCAN_REJECTED:
+    case helpers.rejectedAction(scansTypes.RESTART_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -436,7 +436,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case scansTypes.RESTART_SCAN_PENDING:
+    case helpers.pendingAction(scansTypes.RESTART_SCAN):
       return helpers.setStateProp(
         'action',
         {
@@ -450,7 +450,7 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case scansTypes.RESTART_SCAN_FULFILLED:
+    case helpers.fulfilledAction(scansTypes.RESTART_SCAN):
       return helpers.setStateProp(
         'action',
         {

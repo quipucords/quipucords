@@ -69,7 +69,7 @@ const credentialsReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case credentialsTypes.ADD_CREDENTIAL_REJECTED:
+    case helpers.rejectedAction(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -84,8 +84,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.DELETE_CREDENTIAL_REJECTED:
-    case credentialsTypes.DELETE_CREDENTIALS_REJECTED:
+    case helpers.rejectedAction(credentialsTypes.DELETE_CREDENTIAL):
+    case helpers.rejectedAction(credentialsTypes.DELETE_CREDENTIALS):
       return helpers.setStateProp(
         'update',
         {
@@ -100,7 +100,7 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.UPDATE_CREDENTIAL_REJECTED:
+    case helpers.rejectedAction(credentialsTypes.UPDATE_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -115,8 +115,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.GET_CREDENTIAL_REJECTED:
-    case credentialsTypes.GET_CREDENTIALS_REJECTED:
+    case helpers.rejectedAction(credentialsTypes.GET_CREDENTIAL):
+    case helpers.rejectedAction(credentialsTypes.GET_CREDENTIALS):
       return helpers.setStateProp(
         'view',
         {
@@ -130,7 +130,7 @@ const credentialsReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case credentialsTypes.ADD_CREDENTIAL_PENDING:
+    case helpers.pendingAction(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -144,8 +144,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.DELETE_CREDENTIAL_PENDING:
-    case credentialsTypes.DELETE_CREDENTIALS_PENDING:
+    case helpers.pendingAction(credentialsTypes.DELETE_CREDENTIAL):
+    case helpers.pendingAction(credentialsTypes.DELETE_CREDENTIALS):
       return helpers.setStateProp(
         'update',
         {
@@ -160,7 +160,7 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.UPDATE_CREDENTIAL_PENDING:
+    case helpers.pendingAction(credentialsTypes.UPDATE_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -174,8 +174,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.GET_CREDENTIAL_PENDING:
-    case credentialsTypes.GET_CREDENTIALS_PENDING:
+    case helpers.pendingAction(credentialsTypes.GET_CREDENTIAL):
+    case helpers.pendingAction(credentialsTypes.GET_CREDENTIALS):
       return helpers.setStateProp(
         'view',
         {
@@ -189,7 +189,7 @@ const credentialsReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case credentialsTypes.ADD_CREDENTIAL_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -205,8 +205,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.DELETE_CREDENTIAL_FULFILLED:
-    case credentialsTypes.DELETE_CREDENTIALS_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.DELETE_CREDENTIAL):
+    case helpers.fulfilledAction(credentialsTypes.DELETE_CREDENTIALS):
       return helpers.setStateProp(
         'update',
         {
@@ -223,7 +223,7 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.UPDATE_CREDENTIAL_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.UPDATE_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
@@ -239,8 +239,8 @@ const credentialsReducer = function(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.GET_CREDENTIAL_FULFILLED:
-    case credentialsTypes.GET_CREDENTIALS_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIAL):
+    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS):
       return helpers.setStateProp(
         'view',
         {
@@ -250,19 +250,6 @@ const credentialsReducer = function(state = initialState, action) {
         {
           state,
           initialState
-        }
-      );
-
-    case credentialsTypes.GET_WIZARD_CREDENTIALS_FULFILLED:
-      return helpers.setStateProp(
-        'view',
-        {
-          credentials: _.get(action, 'payload.data.results', []),
-          pending: false
-        },
-        {
-          state,
-          reset: false
         }
       );
 

@@ -1,3 +1,4 @@
+import helpers from '../../../common/helpers';
 import { scansTypes } from '../../constants/index';
 import scansReducer from '../scansReducer';
 
@@ -54,7 +55,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCANS_REJECTED,
+      type: helpers.rejectedAction(scansTypes.GET_SCANS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -79,7 +80,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_PENDING', () => {
     let dispatched = {
-      type: scansTypes.GET_SCANS_PENDING
+      type: helpers.pendingAction(scansTypes.GET_SCANS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -94,7 +95,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCANS_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.GET_SCANS),
       payload: {
         data: {
           results: [
@@ -132,7 +133,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.GET_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -157,7 +158,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.GET_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -172,7 +173,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.GET_SCAN),
       payload: {
         data: {
           results: {
@@ -196,7 +197,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_JOBS_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_JOBS_REJECTED,
+      type: helpers.rejectedAction(scansTypes.GET_SCAN_JOBS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -221,7 +222,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_JOBS_PENDING', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_JOBS_PENDING
+      type: helpers.pendingAction(scansTypes.GET_SCAN_JOBS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -277,7 +278,7 @@ describe('scansReducer', function() {
     ];
 
     let dispatched = {
-      type: scansTypes.GET_SCAN_JOBS_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.GET_SCAN_JOBS),
       payload: {
         data: {
           results: mockResults
@@ -298,7 +299,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_RESULTS_REJECTED,
+      type: helpers.rejectedAction(scansTypes.GET_SCAN_RESULTS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -323,7 +324,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_PENDING', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_RESULTS_PENDING
+      type: helpers.pendingAction(scansTypes.GET_SCAN_RESULTS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -338,7 +339,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.GET_SCAN_RESULTS_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.GET_SCAN_RESULTS),
       payload: {
         data: {
           results: {
@@ -409,7 +410,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.ADD_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.ADD_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -439,7 +440,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.ADD_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.ADD_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -459,7 +460,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.ADD_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.ADD_SCAN),
       payload: {}
     };
 
@@ -480,7 +481,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.START_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.START_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -510,7 +511,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.START_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.START_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -530,7 +531,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.START_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.START_SCAN),
       payload: {}
     };
 
@@ -551,7 +552,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.CANCEL_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.CANCEL_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -581,7 +582,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.CANCEL_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.CANCEL_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -601,7 +602,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.CANCEL_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.CANCEL_SCAN),
       payload: {}
     };
 
@@ -622,7 +623,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.PAUSE_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.PAUSE_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -652,7 +653,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.PAUSE_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.PAUSE_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -672,7 +673,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.PAUSE_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.PAUSE_SCAN),
       payload: {}
     };
 
@@ -693,7 +694,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_REJECTED', () => {
     let dispatched = {
-      type: scansTypes.RESTART_SCAN_REJECTED,
+      type: helpers.rejectedAction(scansTypes.RESTART_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -723,7 +724,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_PENDING', () => {
     let dispatched = {
-      type: scansTypes.RESTART_SCAN_PENDING
+      type: helpers.pendingAction(scansTypes.RESTART_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -743,7 +744,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: scansTypes.RESTART_SCAN_FULFILLED,
+      type: helpers.fulfilledAction(scansTypes.RESTART_SCAN),
       payload: {}
     };
 
