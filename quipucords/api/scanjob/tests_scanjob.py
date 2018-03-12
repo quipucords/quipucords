@@ -340,6 +340,60 @@ class ScanJobTest(TestCase):
                                             'source_type': 'network'}}]}
         self.assertEqual(json_response, expected)
 
+    def test_connection_failed_success(self):
+        """Get ScanJob connection results for a failed and successful system."""
+        # pylint: disable=no-member
+        self.source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        self.source2.save()
+        self.source2.credentials.add(self.cred)
+        self.sources = [self.source, self.source2]
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create a connection system result
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result2 = SystemConnectionResult(name='Bar',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .FAILED)
+        sys_result.save()
+        sys_result2.save()
+        conn_result = scan_task.prerequisites.first().connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.systems.add(sys_result2)
+        conn_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Bar',
+                         'status': 'failed',
+                         'credential': {'id': 1,
+                                        'name': 'cred1'},
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'}},
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'credential': {'id': 1,
+                                        'name': 'cred1'},
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'}}]}
+
+        self.assertEqual(json_response, expected)
+
     def test_connection_not_found(self):
         """Get ScanJob connection results with 404."""
         # pylint: disable=no-member
