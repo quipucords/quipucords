@@ -2,10 +2,6 @@ import { scansTypes } from '../../constants/index';
 import scansReducer from '../scansReducer';
 
 const initialState = {
-  persist: {
-    expandedScans: []
-  },
-
   view: {
     error: false,
     errorMessage: '',
@@ -75,7 +71,6 @@ describe('scansReducer', function() {
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('GET ERROR');
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -91,7 +86,6 @@ describe('scansReducer', function() {
 
     expect(resultState.view.pending).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -130,7 +124,6 @@ describe('scansReducer', function() {
     expect(resultState.view.fulfilled).toBeTruthy();
     expect(resultState.view.scans).toHaveLength(4);
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -156,7 +149,6 @@ describe('scansReducer', function() {
     expect(resultState.detail.error).toBeTruthy();
     expect(resultState.detail.errorMessage).toEqual('GET ERROR');
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -172,7 +164,6 @@ describe('scansReducer', function() {
 
     expect(resultState.detail.pending).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -197,7 +188,6 @@ describe('scansReducer', function() {
     expect(resultState.detail.fulfilled).toBeTruthy();
     expect(resultState.detail.scan.id).toEqual(1);
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.jobs).toEqual(initialState.jobs);
@@ -223,7 +213,6 @@ describe('scansReducer', function() {
     expect(resultState.jobs.error).toBeTruthy();
     expect(resultState.jobs.errorMessage).toEqual('GET JOBS ERROR');
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.results).toEqual(initialState.results);
@@ -239,7 +228,6 @@ describe('scansReducer', function() {
 
     expect(resultState.jobs.pending).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.results).toEqual(initialState.results);
@@ -302,7 +290,6 @@ describe('scansReducer', function() {
     expect(resultState.jobs.fulfilled).toBeTruthy();
     expect(resultState.jobs.jobs).toEqual(mockResults);
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.results).toEqual(initialState.results);
@@ -328,7 +315,6 @@ describe('scansReducer', function() {
     expect(resultState.results.error).toBeTruthy();
     expect(resultState.results.errorMessage).toEqual('GET RESULTS ERROR');
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.detail).toEqual(initialState.detail);
@@ -344,7 +330,6 @@ describe('scansReducer', function() {
 
     expect(resultState.results.pending).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.detail).toEqual(initialState.detail);
@@ -416,7 +401,6 @@ describe('scansReducer', function() {
     expect(resultState.results.fulfilled).toBeTruthy();
     expect(resultState.results.results.connection_results[0].task_results[0].source.id).toEqual(0);
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
     expect(resultState.detail).toEqual(initialState.detail);
@@ -447,7 +431,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -468,7 +451,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -490,7 +472,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -521,7 +502,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -542,7 +522,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -564,7 +543,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -595,7 +573,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -616,7 +593,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -638,7 +614,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -669,7 +644,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -690,7 +664,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -712,7 +685,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeTruthy();
     expect(resultState.action.restart).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -743,7 +715,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -764,7 +735,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
@@ -786,7 +756,6 @@ describe('scansReducer', function() {
     expect(resultState.action.pause).toBeFalsy();
     expect(resultState.action.restart).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);

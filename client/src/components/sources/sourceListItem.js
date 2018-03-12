@@ -9,7 +9,7 @@ import { Popover, OverlayTrigger, ListView, Button, Checkbox, Icon } from 'patte
 
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
-import { sourcesTypes } from '../../redux/constants';
+import { viewTypes } from '../../redux/constants';
 import { getScanResults } from '../../redux/actions/scansActions';
 
 import { SourceCredentialsList } from './sourceCredentialsList';
@@ -60,8 +60,9 @@ class SourceListItem extends React.Component {
     const { item, selectedSources } = this.props;
 
     Store.dispatch({
-      type: this.isSelected(item, selectedSources) ? sourcesTypes.DESELECT_SOURCE : sourcesTypes.SELECT_SOURCE,
-      source: item
+      type: this.isSelected(item, selectedSources) ? viewTypes.DESELECT_ITEM : viewTypes.SELECT_ITEM,
+      viewType: viewTypes.SOURCES_VIEW,
+      item: item
     });
   }
 
@@ -95,13 +96,15 @@ class SourceListItem extends React.Component {
 
     if (expandType === this.expandType()) {
       Store.dispatch({
-        type: sourcesTypes.EXPAND_SOURCE,
-        source: item
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.SOURCES_VIEW,
+        item: item
       });
     } else {
       Store.dispatch({
-        type: sourcesTypes.EXPAND_SOURCE,
-        source: item,
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.SOURCES_VIEW,
+        item: item,
         expandType: expandType
       });
       this.loadExpandData(expandType);
@@ -111,8 +114,9 @@ class SourceListItem extends React.Component {
   closeExpand() {
     const { item } = this.props;
     Store.dispatch({
-      type: sourcesTypes.EXPAND_SOURCE,
-      source: item
+      type: viewTypes.EXPAND_ITEM,
+      viewType: viewTypes.SOURCES_VIEW,
+      item: item
     });
   }
 
@@ -372,7 +376,10 @@ SourceListItem.propTypes = {
 };
 
 const mapStateToProps = function(state) {
-  return Object.assign(state.sources.persist);
+  return Object.assign({
+    selectedSources: state.viewOptions[viewTypes.SOURCES_VIEW].selectedItems,
+    expandedSources: state.viewOptions[viewTypes.SOURCES_VIEW].expandedItems
+  });
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

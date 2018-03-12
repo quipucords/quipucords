@@ -3,11 +3,6 @@ import helpers from '../../common/helpers';
 import { credentialsTypes } from '../constants';
 
 const initialState = {
-  persist: {
-    selectedCredentials: [],
-    expandedCredentials: []
-  },
-
   view: {
     error: false,
     errorMessage: '',
@@ -30,90 +25,8 @@ const initialState = {
   }
 };
 
-const selectedIndex = function(state, credential) {
-  return _.findIndex(state.persist.selectedCredentials, nextSelected => {
-    return nextSelected.id === _.get(credential, 'id');
-  });
-};
-
-const expandedIndex = function(state, credential) {
-  return _.findIndex(state.persist.expandedCredentials, nextSelected => {
-    return nextSelected.id === _.get(credential, 'id');
-  });
-};
-
 const credentialsReducer = function(state = initialState, action) {
   switch (action.type) {
-    // Persist
-    case credentialsTypes.SELECT_CREDENTIAL:
-      // Do nothing if it is already selected
-      if (selectedIndex(state, action.credential) !== -1) {
-        return state;
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          selectedCredentials: [...state.persist.selectedCredentials, action.credential]
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.DESELECT_CREDENTIAL:
-      const index = selectedIndex(state, action.credential);
-      // Do nothing if it is not already selected
-      if (index === -1) {
-        return state;
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          selectedCredentials: [
-            ...state.persist.selectedCredentials.slice(0, index),
-            ...state.persist.selectedCredentials.slice(index + 1)
-          ]
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case credentialsTypes.EXPAND_CREDENTIAL:
-      const expandIndex = expandedIndex(state, action.credential);
-      let newExpansions;
-
-      if (expandIndex === -1) {
-        newExpansions = [...state.persist.expandedCredentials];
-      } else {
-        newExpansions = [
-          ...state.persist.expandedCredentials.slice(0, expandIndex),
-          ...state.persist.expandedCredentials.slice(expandIndex + 1)
-        ];
-      }
-
-      if (action.expandType) {
-        newExpansions.push({
-          id: action.credential.id,
-          expandType: action.expandType
-        });
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          expandedCredentials: newExpansions
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
     // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
       return helpers.setStateProp(

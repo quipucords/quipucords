@@ -1,12 +1,7 @@
-import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { scansTypes } from '../constants';
 
 const initialState = {
-  persist: {
-    expandedScans: []
-  },
-
   view: {
     error: false,
     errorMessage: '',
@@ -52,46 +47,8 @@ const initialState = {
   }
 };
 
-const expandedIndex = function(state, scan) {
-  return _.findIndex(state.persist.expandedScans, nextSelected => {
-    return nextSelected.id === _.get(scan, 'id');
-  });
-};
-
 const scansReducer = function(state = initialState, action) {
   switch (action.type) {
-    // Persist
-    case scansTypes.EXPAND_SCAN:
-      const expandIndex = expandedIndex(state, action.scan);
-      let newExpansions;
-
-      if (expandIndex === -1) {
-        newExpansions = [...state.persist.expandedScans];
-      } else {
-        newExpansions = [
-          ...state.persist.expandedScans.slice(0, expandIndex),
-          ...state.persist.expandedScans.slice(expandIndex + 1)
-        ];
-      }
-
-      if (action.expandType) {
-        newExpansions.push({
-          id: action.scan.id,
-          expandType: action.expandType
-        });
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          expandedScans: newExpansions
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
     // Error/Rejected
     case scansTypes.GET_SCANS_REJECTED:
       return helpers.setStateProp(

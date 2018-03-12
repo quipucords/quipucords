@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   viewTypes,
   viewPaginationTypes,
@@ -9,7 +10,7 @@ import {
 
 let initialState = {};
 
-initialState[viewTypes.SOURCES_VIEW] = {
+const INITAL_VIEW_STATE = {
   currentPage: 1,
   pageSize: 15,
   totalCount: 0,
@@ -19,34 +20,16 @@ initialState[viewTypes.SOURCES_VIEW] = {
   activeFilters: [],
   sortType: null,
   sortField: 'name',
-  sortAscending: true
-};
-initialState[viewTypes.SCANS_VIEW] = {
-  currentPage: 1,
-  pageSize: 15,
-  totalCount: 0,
-  totalPages: 0,
-  filterType: null,
-  filterValue: '',
-  activeFilters: [],
-  sortType: null,
-  sortField: 'name',
-  sortAscending: true
-};
-initialState[viewTypes.CREDENTIALS_VIEW] = {
-  currentPage: 1,
-  pageSize: 15,
-  totalCount: 0,
-  totalPages: 0,
-  filterType: null,
-  filterValue: '',
-  activeFilters: [],
-  sortType: null,
-  sortField: 'name',
-  sortAscending: true
+  sortAscending: true,
+  selectedItems: [],
+  expandedItems: []
 };
 
-export default function toolbarsReducer(state = initialState, action) {
+initialState[viewTypes.SOURCES_VIEW] = Object.assign(INITAL_VIEW_STATE);
+initialState[viewTypes.SCANS_VIEW] = Object.assign(INITAL_VIEW_STATE);
+initialState[viewTypes.CREDENTIALS_VIEW] = Object.assign(INITAL_VIEW_STATE);
+
+export default function viewOptionsReducer(state = initialState, action) {
   let updateState = {};
 
   let updatePageCounts = (viewType, itemsCount) => {
@@ -63,6 +46,18 @@ export default function toolbarsReducer(state = initialState, action) {
       totalCount: totalCount,
       totalPages: totalPages,
       currentPage: Math.min(state[viewType].currentPage, totalPages || 1)
+    });
+  };
+
+  const selectedIndex = function(state, item) {
+    return _.findIndex(state.selectedItems, nextSelected => {
+      return nextSelected.id === _.get(item, 'id');
+    });
+  };
+
+  const expandedIndex = function(state, item) {
+    return _.findIndex(state.expandedItems, nextExpanded => {
+      return nextExpanded.id === _.get(item, 'id');
     });
   };
 
@@ -205,6 +200,58 @@ export default function toolbarsReducer(state = initialState, action) {
     case scansTypes.GET_SCAN_FULFILLED:
     case scansTypes.GET_SCANS_FULFILLED:
       updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data.count);
+      return Object.assign({}, state, updateState);
+
+    case viewTypes.SELECT_ITEM:
+      // Do nothing if it is already selected
+      if (selectedIndex(state[action.viewType], action.item) !== -1) {
+        return state;
+      }
+
+      updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+        selectedItems: [...state[action.viewType].selectedItems, action.item]
+      });
+      return Object.assign({}, state, updateState);
+
+    case viewTypes.DESELECT_ITEM:
+      const foundIndex = selectedIndex(state[action.viewType], action.item);
+
+      // Do nothing if it is not already selected
+      if (foundIndex === -1) {
+        return state;
+      }
+
+      updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+        selectedItems: [
+          ...state[action.viewType].selectedItems.slice(0, foundIndex),
+          ...state[action.viewType].selectedItems.slice(foundIndex + 1)
+        ]
+      });
+      return Object.assign({}, state, updateState);
+
+    case viewTypes.EXPAND_ITEM:
+      const expandIndex = expandedIndex(state[action.viewType], action.item);
+      let newExpansions;
+
+      if (expandIndex === -1) {
+        newExpansions = [...state[action.viewType].expandedItems];
+      } else {
+        newExpansions = [
+          ...state[action.viewType].expandedItems.slice(0, expandIndex),
+          ...state[action.viewType].expandedItems.slice(expandIndex + 1)
+        ];
+      }
+
+      if (action.expandType) {
+        newExpansions.push({
+          id: action.item.id,
+          expandType: action.expandType
+        });
+      }
+
+      updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+        expandedItems: newExpansions
+      });
       return Object.assign({}, state, updateState);
 
     default:
