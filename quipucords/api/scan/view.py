@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 SOURCES_KEY = 'sources'
 MOST_RECENT = 'most_recent'
-JOBS_KEY = 'jobs'
+MOST_RECENT_SCANJOB_KEY = 'most_recent_scanjob'
 
 ##################################################
 # Independent jobs route
@@ -149,13 +149,9 @@ def expand_scan(json_scan):
     if slim_sources:
         json_scan[SOURCES_KEY] = slim_sources
 
-    scan_jobs = json_scan.get(JOBS_KEY)
-    latest_job = None
-    if bool(scan_jobs):
-        latest_job = scan_jobs[0]
-        latest_job = ScanJob.objects.filter(id=latest_job['id']).first()
-
-    if latest_job is not None:
+    most_recent_scanjob = json_scan.pop(MOST_RECENT_SCANJOB_KEY, None)
+    if most_recent_scanjob:
+        latest_job = ScanJob.objects.get(pk=most_recent_scanjob)
         systems_count, \
             systems_scanned, \
             systems_failed = latest_job.calculate_counts()
@@ -226,7 +222,8 @@ class ScanViewSet(ModelViewSet):
     serializer_class = ScanSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = ScanFilter
-    ordering_fields = ('id', 'name', 'scan_type')
+    ordering_fields = ('id', 'name', 'scan_type',
+                       'most_recent_scanjob__start_time')
     ordering = ('name',)
 
     # pylint: disable=unused-argument
