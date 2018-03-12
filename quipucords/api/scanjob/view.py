@@ -12,6 +12,7 @@
 
 import logging
 import os
+import operator
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
@@ -27,6 +28,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
+from api.common.pagination import StandardResultsSetPagination
 from api.models import (ScanTask, ScanJob, FactCollection)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
@@ -109,9 +111,10 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
             json_source.pop('hosts', None)
             json_source.pop('port', None)
             systems = expand_sys_conn_result(result)
-            json_job_conn_result_out = {'source': json_source,
-                                        'systems': systems}
-            json_job_conn_result_list.append(json_job_conn_result_out)
+            for sys in systems:
+                sys['source'] = json_source
+                json_job_conn_result_list.append(sys)
+        json_job_conn_result_list.sort(key=operator.itemgetter('status'))
         json_job_conn_result[RESULTS_KEY] = json_job_conn_result_list
 
 
@@ -206,6 +209,27 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             result['inspection_results'] = json_job_scan_result
         if result is not None:
             return Response(result)
+        return Response(status=404)
+
+    # pylint: disable=unused-argument,invalid-name,no-self-use
+    @detail_route(methods=['get'])
+    def connection(self, request, pk=None):
+        """Get the connection results of a scan job."""
+        try:
+            scan_job = get_object_or_404(self.queryset, pk=pk)
+            conn_result_queryset = scan_job.connection_results
+        except ValueError:
+            return Response(status=400)
+        if conn_result_queryset:
+            serializer = JobConnectionResultSerializer(conn_result_queryset)
+            json_job_conn_result = serializer.data
+            expand_conn_results(conn_result_queryset, json_job_conn_result)
+            paginator = StandardResultsSetPagination()
+            page = paginator.paginate_queryset(
+                json_job_conn_result[RESULTS_KEY], request)
+            if page is not None:
+                return paginator.get_paginated_response(
+                    json_job_conn_result[RESULTS_KEY])
         return Response(status=404)
 
     @detail_route(methods=['put'])

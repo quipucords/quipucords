@@ -287,23 +287,72 @@ class ScanJobTest(TestCase):
         json_response = response.json()
         self.assertIn('connection_results', json_response)
         self.assertIn('inspection_results', json_response)
+        expected = {
+            'connection_results':
+                {'task_results': [
+                    {'name': 'Foo',
+                     'status': 'success',
+                     'credential': {'id': 1, 'name': 'cred1'},
+                     'source': {'id': 1,
+                                'name': 'source1',
+                                'source_type': 'network'}}]},
+            'inspection_results':
+                {'task_results': [
+                    {'source': {'id': 1,
+                                'name': 'source1',
+                                'source_type': 'network'},
+                     'systems': [{'name': 'Foo',
+                                  'status': 'success',
+                                  'facts': [
+                                      {'name': 'fact_key',
+                                       'value': 'fact_value'}]}]}]}}
+        self.assertEqual(json_response, expected)
 
-        self.assertEqual(
-            json_response, {
-                'connection_results': {'task_results': [
-                    {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
-                     'systems':
-                     [{'name': 'Foo', 'credential':
-                       {'id': 1, 'name': 'cred1'},
-                       'status': 'success'}]}]},
-                'inspection_results': {'task_results': [
-                    {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
-                     'systems':
-                     [{'name': 'Foo', 'status': 'success',
-                       'facts': [
-                           {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
+    def test_connection(self):
+        """Get ScanJob connection results."""
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create a connection system result
+        sys_result = SystemConnectionResult(name='Foo',
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result = scan_task.prerequisites.first().connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'name': 'Foo',
+                                 'status': 'success',
+                                 'credential': {'id': 1,
+                                                'name': 'cred1'},
+                                 'source': {'id': 1,
+                                            'name': 'source1',
+                                            'source_type': 'network'}}]}
+        self.assertEqual(json_response, expected)
+
+    def test_connection_not_found(self):
+        """Get ScanJob connection results with 404."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='2') + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_connection_bad_request(self):
+        """Get ScanJob connection results with 400."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='t') + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_merge_empty_body(self):
         """Test merge with empty body."""
@@ -708,7 +757,7 @@ class ScanJobTest(TestCase):
         conn_results_json = {'task_results': [{}]}
         expand_conn_results(scan_job.connection_results, conn_results_json)
         self.assertEqual(
-            conn_results_json['task_results'][0]['systems'][0]['name'], 'Foo')
+            conn_results_json['task_results'][0]['name'], 'Foo')
 
     def test_expand_inspect_results(self):
         """Test view expand_inspect_results."""
