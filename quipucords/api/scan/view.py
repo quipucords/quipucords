@@ -223,7 +223,8 @@ class ScanViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = ScanFilter
     ordering_fields = ('id', 'name', 'scan_type',
-                       'most_recent_scanjob__start_time')
+                       'most_recent_scanjob__start_time',
+                       'most_recent_scanjob__status')
     ordering = ('name',)
 
     # pylint: disable=unused-argument
