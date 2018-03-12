@@ -32,7 +32,8 @@ from api.models import (Source,
                         ScanJob,
                         ScanTask)
 import api.messages as messages
-from api.common.util import is_int, is_boolean, convert_to_boolean
+from api.common.util import is_int, is_boolean, convert_to_boolean, \
+    expand_scanjob_with_times
 from api.signals.scanjob_signal import start_scan
 from api.source.util import expand_credential
 
@@ -48,23 +49,12 @@ def format_source(json_source):
     :returns: JSON data
     """
     expand_credential(json_source)
-    source_id = json_source.get('id')
-
-    scan_task_qs = ScanTask.objects.filter(
-        source__id=source_id,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT)
-    if scan_task_qs.count() > 0:
-        scan_task = scan_task_qs.latest('start_time')
-        scan_job = ScanJob.objects.filter(
-            tasks__id=scan_task.id).latest('start_time')
-        json_scan_job = {'id': scan_job.id,
-                         'start_time': scan_job.start_time,
-                         'end_time': scan_job.end_time,
-                         'status': scan_job.status,
-                         'systems_count': scan_task.systems_count,
-                         'systems_scanned': scan_task.systems_scanned,
-                         'systems_failed': scan_task.systems_failed}
+    conn_job_id = json_source.pop('most_recent_connect_scan', None)
+    if conn_job_id:
+        scan_job = ScanJob.objects.get(pk=conn_job_id)
+        json_scan_job = expand_scanjob_with_times(scan_job)
         json_source['connection'] = json_scan_job
+
     return json_source
 
 
@@ -94,7 +84,8 @@ class SourceViewSet(ModelViewSet):
     serializer_class = SourceSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = SourceFilter
-    ordering_fields = ('name', 'source_type')
+    ordering_fields = ('name', 'source_type',
+                       'most_recent_connect_scan__start_time')
     ordering = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument

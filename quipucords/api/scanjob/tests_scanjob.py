@@ -292,14 +292,16 @@ class ScanJobTest(TestCase):
             json_response, {
                 'connection_results': {'task_results': [
                     {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     {'id': 1, 'name': 'source1', 'source_type': 'network',
+                      'most_recent_connect_scan': 1},
                      'systems':
                      [{'name': 'Foo', 'credential':
                        {'id': 1, 'name': 'cred1'},
                        'status': 'success'}]}]},
                 'inspection_results': {'task_results': [
                     {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network'},
+                     {'id': 1, 'name': 'source1', 'source_type': 'network',
+                      'most_recent_connect_scan': 1},
                      'systems':
                      [{'name': 'Foo', 'status': 'success',
                        'facts': [

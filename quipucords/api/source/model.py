@@ -82,6 +82,9 @@ class Source(models.Model):
     credentials = models.ManyToManyField(Credential)
     hosts = models.TextField(unique=False, null=False)
 
+    most_recent_connect_scan = models.ForeignKey(
+        'api.ScanJob', null=True, on_delete=models.SET_NULL, related_name='+')
+
     def __str__(self):
         """Convert to string."""
         return '{ id:%s, '\
