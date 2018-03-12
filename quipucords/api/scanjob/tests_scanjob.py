@@ -341,15 +341,8 @@ class ScanJobTest(TestCase):
         self.assertEqual(json_response, expected)
 
     def test_connection_failed_success(self):
-        """Get ScanJob connection results for a failed and successful system."""
+        """Get ScanJob connection results for multiple systems."""
         # pylint: disable=no-member
-        self.source2 = Source(
-            name='source2',
-            source_type='network',
-            port=22)
-        self.source2.save()
-        self.source2.credentials.add(self.cred)
-        self.sources = [self.source, self.source2]
         scan_job, scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
@@ -359,9 +352,9 @@ class ScanJobTest(TestCase):
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result2 = SystemConnectionResult(name='Bar',
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .FAILED)
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
         sys_result.save()
         sys_result2.save()
         conn_result = scan_task.prerequisites.first().connection_result
