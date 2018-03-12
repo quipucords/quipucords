@@ -310,6 +310,9 @@ class ScanJob(models.Model):
 
                 count += 1
 
+        self.scan.most_recent_scanjob = self
+        self.scan.save()
+
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
