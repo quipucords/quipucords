@@ -86,6 +86,12 @@ class Sources extends React.Component {
             </span>
           )
         });
+        Store.dispatch({
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.SOURCES_VIEW,
+          item: item
+        });
+
       }
     } catch (e) {
       console.dir(e);

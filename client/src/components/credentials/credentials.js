@@ -84,8 +84,9 @@ class Credentials extends React.Component {
         this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
 
         Store.dispatch({
-          type: credentialsTypes.DESELECT_CREDENTIAL,
-          credential: this.deletingCredential
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.CREDENTIALS_VIEW,
+          item: this.deletingCredential
         });
 
         this.deleteNextCredential();

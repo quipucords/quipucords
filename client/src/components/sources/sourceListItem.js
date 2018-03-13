@@ -349,7 +349,7 @@ class SourceListItem extends React.Component {
         key={item.id}
         stacked
         className={classes}
-        checkboxInput={<Checkbox checked={selected} bsClass="" onClick={this.itemSelectChange} />}
+        checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={this.renderSourceType()}
         description={this.renderDescription()}
