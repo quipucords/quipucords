@@ -34,4 +34,4 @@ class ProcessIPAddresses(process.Processor):
                     if ip_line != '127.0.0.1':
                         result.append(ip_line)
                     break
-        return result
+        return list(set(result))
