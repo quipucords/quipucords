@@ -15,6 +15,8 @@ import os
 import logging
 from rest_framework.serializers import ValidationError
 
+from api.scantasks.model import ScanTask
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -180,3 +182,54 @@ class CSVHelper:
         if exclude and isinstance(exclude, set):
             headers = headers - exclude
         return sorted(list(headers))
+
+
+def expand_scanjob_with_times(scanjob):
+    """Expand a scanjob object into a JSON dict to send to the user.
+
+    :param scanjob: a ScanJob.
+
+    :returns: a JSON dict with some of the ScanJob's fields.
+    """
+    systems_count, \
+        systems_scanned, \
+        systems_failed = scanjob.calculate_counts()
+    report_id = scanjob.report_id
+    start_time = scanjob.start_time
+    end_time = scanjob.end_time
+    systems_count = systems_count
+    systems_scanned = systems_scanned
+    systems_failed = systems_failed
+    job_status = scanjob.status
+    job_status_message = scanjob.status_message
+
+    job_json = {
+        'id': scanjob.id,
+    }
+
+    if report_id is not None:
+        job_json['report_id'] = report_id
+    if start_time is not None:
+        job_json['start_time'] = start_time
+    if end_time is not None:
+        job_json['end_time'] = end_time
+    if systems_count is not None:
+        job_json['systems_count'] = systems_count
+    if systems_scanned is not None:
+        job_json['systems_scanned'] = systems_scanned
+    if systems_failed is not None:
+        job_json['systems_failed'] = systems_failed
+    if job_status_message is not None:
+        job_json['status_details'] = {
+            'job_status_message': job_status_message}
+    if job_status is not None:
+        job_json['status'] = job_status
+        if job_status == ScanTask.FAILED:
+            failed_tasks = scanjob.tasks.all().order_by(
+                'sequence_number')
+            status_details = job_json['status_details']
+            for task in failed_tasks:
+                task_key = 'task_%s_status_message' % task.id
+                status_details[task_key] = task.status_message
+
+    return job_json

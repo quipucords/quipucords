@@ -349,7 +349,7 @@ class ScanJobTest(TestCase):
         scan_job, scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        # Create a connection system result
+        # Create two connection system results one failure & one success
         sys_result = SystemConnectionResult(name='Foo',
                                             credential=self.cred,
                                             status=SystemConnectionResult

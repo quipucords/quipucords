@@ -31,7 +31,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 import api.messages as messages
-from api.common.util import is_int
+from api.common.util import is_int, expand_scanjob_with_times
 from api.common.pagination import StandardResultsSetPagination
 from api.models import (Scan, ScanTask, ScanJob, Source)
 from api.serializers import (ScanSerializer, ScanJobSerializer)
@@ -152,48 +152,7 @@ def expand_scan(json_scan):
     most_recent_scanjob = json_scan.pop(MOST_RECENT_SCANJOB_KEY, None)
     if most_recent_scanjob:
         latest_job = ScanJob.objects.get(pk=most_recent_scanjob)
-        systems_count, \
-            systems_scanned, \
-            systems_failed = latest_job.calculate_counts()
-        report_id = latest_job.report_id
-        start_time = latest_job.start_time
-        end_time = latest_job.end_time
-        systems_count = systems_count
-        systems_scanned = systems_scanned
-        systems_failed = systems_failed
-        job_status = latest_job.status
-        job_status_message = latest_job.status_message
-
-        most_recent = {
-            'id': latest_job.id,
-        }
-
-        if report_id is not None:
-            most_recent['report_id'] = report_id
-        if start_time is not None:
-            most_recent['start_time'] = start_time
-        if end_time is not None:
-            most_recent['end_time'] = end_time
-        if systems_count is not None:
-            most_recent['systems_count'] = systems_count
-        if systems_scanned is not None:
-            most_recent['systems_scanned'] = systems_scanned
-        if systems_failed is not None:
-            most_recent['systems_failed'] = systems_failed
-        if job_status_message is not None:
-            most_recent['status_details'] = {
-                'job_status_message': job_status_message}
-        if job_status is not None:
-            most_recent['status'] = job_status
-            if job_status == ScanTask.FAILED:
-                failed_tasks = latest_job.tasks.all().order_by(
-                    'sequence_number')
-                status_details = most_recent['status_details']
-                for task in failed_tasks:
-                    task_key = 'task_%s_status_message' % task.id
-                    status_details[task_key] = task.status_message
-
-        json_scan[MOST_RECENT] = most_recent
+        json_scan[MOST_RECENT] = expand_scanjob_with_times(latest_job)
 
     return json_scan
 
