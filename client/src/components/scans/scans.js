@@ -40,21 +40,13 @@ class Scans extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getScans(
-      helpers.createViewQueryObject(this.props.viewOptions, {
-        scan_type: 'inspect'
-      })
-    );
+    this.refresh();
   }
 
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
-      this.props.getScans(
-        helpers.createViewQueryObject(this.props.viewOptions, {
-          scan_type: 'inspect'
-        })
-      );
+      this.refresh(nextProps);
     }
 
     if (nextProps.fulfilled && !this.props.fulfilled) {
@@ -63,8 +55,6 @@ class Scans extends React.Component {
   }
 
   notifyActionStatus(scan, actionText, error, results) {
-    const { getScans, viewOptions } = this.props;
-
     if (error) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
@@ -83,11 +73,7 @@ class Scans extends React.Component {
         )
       });
 
-      getScans(
-        helpers.createViewQueryObject(viewOptions, {
-          scan_type: 'inspect'
-        })
-      );
+      this.refresh();
     }
   }
 
@@ -162,8 +148,11 @@ class Scans extends React.Component {
     });
   }
 
-  refresh() {
-    this.props.getScans({ scan_type: 'inspect' });
+  refresh(props) {
+    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
+    this.props.getScans(
+      helpers.createViewQueryObject(options, { scan_type: 'inspect' })
+    );
   }
 
   clearFilters() {
