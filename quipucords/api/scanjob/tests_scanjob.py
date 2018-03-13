@@ -292,7 +292,8 @@ class ScanJobTest(TestCase):
                 {'task_results': [
                     {'source': {'id': 1,
                                 'name': 'source1',
-                                'source_type': 'network'},
+                                'source_type': 'network',
+                                'most_recent_connect_scan': 1},
                      'systems': [
                          {'name': 'Foo',
                           'status': 'success',
@@ -302,7 +303,8 @@ class ScanJobTest(TestCase):
                 'task_results': [
                     {'source': {'id': 1,
                                 'name': 'source1',
-                                'source_type': 'network'},
+                                'source_type': 'network',
+                                'most_recent_connect_scan': 1},
                      'systems': [
                          {'name': 'Foo',
                           'status': 'success',
