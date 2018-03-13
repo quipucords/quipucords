@@ -9,10 +9,8 @@
 
 """Initial processing of the shell output from the cpu role."""
 
-import logging
 from scanner.network.processing import process
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 INET_PREFIXES = ['inet addr:', 'inet ']
 
@@ -32,9 +30,7 @@ class ProcessIPAddresses(process.Processor):
         for line in lines:
             for prefix in INET_PREFIXES:
                 if line.startswith(prefix):
-                    ip_line = line[len(prefix):]
-                    ip_line = ip_line.split()
-                    ip_line = ip_line[0]
+                    ip_line = line[len(prefix):].split()[0]
                     if ip_line != '127.0.0.1':
                         result.append(ip_line)
                     break
