@@ -12,7 +12,6 @@
 
 import logging
 import os
-import operator
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
@@ -111,10 +110,9 @@ def expand_conn_results(job_conn_result, json_job_conn_result):
             json_source.pop('hosts', None)
             json_source.pop('port', None)
             systems = expand_sys_conn_result(result)
-            for sys in systems:
-                sys['source'] = json_source
-                json_job_conn_result_list.append(sys)
-        json_job_conn_result_list.sort(key=operator.itemgetter('status'))
+            json_job_conn_result_out = {'source': json_source,
+                                        'systems': systems}
+            json_job_conn_result_list.append(json_job_conn_result_out)
         json_job_conn_result[RESULTS_KEY] = json_job_conn_result_list
 
 
@@ -211,25 +209,50 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return Response(result)
         return Response(status=404)
 
-    # pylint: disable=unused-argument,invalid-name,no-self-use
     @detail_route(methods=['get'])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
-            conn_result_queryset = scan_job.connection_results
+            all_tasks = scan_job.connection_results.task_results.all()
         except ValueError:
             return Response(status=400)
-        if conn_result_queryset:
-            serializer = JobConnectionResultSerializer(conn_result_queryset)
-            json_job_conn_result = serializer.data
-            expand_conn_results(conn_result_queryset, json_job_conn_result)
-            paginator = StandardResultsSetPagination()
-            page = paginator.paginate_queryset(
-                json_job_conn_result[RESULTS_KEY], request)
-            if page is not None:
-                return paginator.get_paginated_response(
-                    json_job_conn_result[RESULTS_KEY])
+
+        system_result_queryset = None
+        for task_result in all_tasks:
+            conn_task = ScanTask.objects.filter(
+                connection_result=task_result).first()
+            source = conn_task.source
+            if system_result_queryset is None:
+                system_result_queryset = task_result.systems.all()
+            else:
+                system_result_queryset = \
+                    system_result_queryset | task_result.systems.all()
+            for sys in system_result_queryset:
+                sys.source = source
+                sys.save()
+        # assign the paginator and order the queryset by status
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(
+            system_result_queryset.order_by('status'), request)
+
+        if page is not None:
+            serializer = SystemConnectionResultSerializer(page, many=True)
+            count = 0
+            for sys in page:
+                # expand the credential & source if they are not none
+                if sys.credential is not None:
+                    cred = sys.credential
+                    serializer.data[count]['credential'] = {'id': cred.id,
+                                                            'name': cred.name}
+                if sys.source is not None:
+                    source = sys.source
+                    serializer.data[count]['source'] = {'id': source.id,
+                                                        'name': source.name,
+                                                        'source_type':
+                                                            source.source_type}
+                count += 1
+            return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
     @detail_route(methods=['put'])

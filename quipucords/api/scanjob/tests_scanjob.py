@@ -290,22 +290,25 @@ class ScanJobTest(TestCase):
         expected = {
             'connection_results':
                 {'task_results': [
-                    {'name': 'Foo',
-                     'status': 'success',
-                     'credential': {'id': 1, 'name': 'cred1'},
-                     'source': {'id': 1,
-                                'name': 'source1',
-                                'source_type': 'network'}}]},
-            'inspection_results':
-                {'task_results': [
                     {'source': {'id': 1,
                                 'name': 'source1',
                                 'source_type': 'network'},
-                     'systems': [{'name': 'Foo',
-                                  'status': 'success',
-                                  'facts': [
-                                      {'name': 'fact_key',
-                                       'value': 'fact_value'}]}]}]}}
+                     'systems': [
+                         {'name': 'Foo',
+                          'status': 'success',
+                          'credential': {'id': 1,
+                                         'name': 'cred1'}}]}]},
+            'inspection_results': {
+                'task_results': [
+                    {'source': {'id': 1,
+                                'name': 'source1',
+                                'source_type': 'network'},
+                     'systems': [
+                         {'name': 'Foo',
+                          'status': 'success',
+                          'facts': [
+                              {'name': 'fact_key',
+                               'value': 'fact_value'}]}]}]}}
         self.assertEqual(json_response, expected)
 
     def test_connection(self):
@@ -804,7 +807,7 @@ class ScanJobTest(TestCase):
         conn_results_json = {'task_results': [{}]}
         expand_conn_results(scan_job.connection_results, conn_results_json)
         self.assertEqual(
-            conn_results_json['task_results'][0]['name'], 'Foo')
+            conn_results_json['task_results'][0]['systems'][0]['name'], 'Foo')
 
     def test_expand_inspect_results(self):
         """Test view expand_inspect_results."""
