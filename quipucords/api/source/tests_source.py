@@ -144,6 +144,8 @@ class SourceTest(TestCase):
         scan_job.end_time = end
         scan_job.status = ScanTask.COMPLETED
         scan_job.save()
+        source.most_recent_connect_scan = scan_job
+        source.save()
 
         serializer = SourceSerializer(source)
         json_source = serializer.data
@@ -154,11 +156,15 @@ class SourceTest(TestCase):
                     'port': 22,
                     'hosts': ['1.2.3.4'],
                     'connection': {'id': 1, 'start_time': start,
-                                   'end_time': end, 'status': 'completed',
+                                   'end_time': end,
                                    'systems_count': 10,
                                    'systems_scanned': 9,
-                                   'systems_failed': 1}}
+                                   'systems_failed': 1,
+                                   'status': 'completed',
+                                   'status_details':
+                                   {'job_status_message': 'Job is pending.'}}}
 
+        print('***', out)
         self.assertEqual(out, expected)
 
     #################################################

@@ -313,6 +313,10 @@ class ScanJob(models.Model):
         self.scan.most_recent_scanjob = self
         self.scan.save()
 
+        for source in self.sources.all():
+            source.most_recent_connect_scan = self
+            source.save()
+
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
