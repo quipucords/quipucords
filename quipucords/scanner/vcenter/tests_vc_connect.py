@@ -47,16 +47,16 @@ class ConnectTaskRunnerTest(TestCase):
             ssh_keyfile=None)
         self.cred.save()
 
-        source = Source(
+        self.source = Source(
             name='source1',
             port=22,
             hosts='["1.2.3.4"]')
 
-        source.save()
-        source.credentials.add(self.cred)
+        self.source.save()
+        self.source.credentials.add(self.cred)
 
         self.scan_job, self.scan_task = create_scan_job(
-            source, ScanTask.SCAN_TYPE_CONNECT)
+            self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create runner
         self.runner = ConnectTaskRunner(scan_job=self.scan_job,
@@ -70,7 +70,8 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the connection data method."""
         vm_names = ['vm1', 'vm2']
         # pylint: disable=protected-access
-        self.runner._store_connect_data(vm_names, self.cred)
+        self.runner._store_connect_data(vm_names, self.cred,
+                                        self.source)
         self.assertEqual(
             len(self.scan_job.connection_results.task_results.all()), 1)
 

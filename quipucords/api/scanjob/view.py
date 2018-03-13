@@ -28,7 +28,7 @@ from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
 from api.common.pagination import StandardResultsSetPagination
-from api.models import (ScanTask, ScanJob, FactCollection)
+from api.models import (ScanTask, ScanJob, FactCollection, Source, Credential)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
@@ -50,6 +50,24 @@ from fingerprinter import pfc_signal
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 RESULTS_KEY = 'task_results'
+
+
+def expand_system_connection(system):
+    """Expand the system connection results.
+
+    :param system: A dictionary for a conn system result.
+    """
+    if 'source' in system.keys():
+        source_id = system['source']
+        system['source'] = \
+            Source.objects.filter(id=source_id).values('id',
+                                                       'name',
+                                                       'source_type')[0]
+    if 'credential' in system.keys():
+        cred_id = system['credential']
+        system['credential'] = \
+            Credential.objects.filter(id=cred_id).values('id',
+                                                         'name')[0]
 
 
 def expand_sys_conn_result(conn_result):
@@ -220,17 +238,11 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
         system_result_queryset = None
         for task_result in all_tasks:
-            conn_task = ScanTask.objects.filter(
-                connection_result=task_result).first()
-            source = conn_task.source
             if system_result_queryset is None:
                 system_result_queryset = task_result.systems.all()
             else:
                 system_result_queryset = \
                     system_result_queryset | task_result.systems.all()
-            for sys in system_result_queryset:
-                sys.source = source
-                sys.save()
         # assign the paginator and order the queryset by status
         paginator = StandardResultsSetPagination()
         page = paginator.paginate_queryset(
@@ -238,20 +250,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
         if page is not None:
             serializer = SystemConnectionResultSerializer(page, many=True)
-            count = 0
-            for sys in page:
-                # expand the credential & source if they are not none
-                if sys.credential is not None:
-                    cred = sys.credential
-                    serializer.data[count]['credential'] = {'id': cred.id,
-                                                            'name': cred.name}
-                if sys.source is not None:
-                    source = sys.source
-                    serializer.data[count]['source'] = {'id': source.id,
-                                                        'name': source.name,
-                                                        'source_type':
-                                                            source.source_type}
-                count += 1
+            for system in serializer.data:
+                expand_system_connection(system)
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 

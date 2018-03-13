@@ -51,12 +51,12 @@ class MockResultStore(object):
         self.succeeded = []
         self.failed = []
 
-    def record_result(self, name, credential, status):
+    def record_result(self, name, source, credential, status):
         """Keep a list of succeeses and failures."""
         if status == SystemConnectionResult.SUCCESS:
-            self.succeeded.append((name, credential, status))
+            self.succeeded.append((name, source, credential, status))
         elif status == SystemConnectionResult.FAILED:
-            self.failed.append((name, credential, status))
+            self.failed.append((name, source, credential, status))
         else:
             raise ValueError()
 
@@ -89,14 +89,15 @@ class TestConnectResultCallback(unittest.TestCase):
         """Test the callback."""
         result_store = MockResultStore(['host1', 'host2', 'host3'])
         credential = Mock(name='credential')
-        callback = ConnectResultCallback(result_store, credential)
-
+        source = Mock(name='source')
+        callback = ConnectResultCallback(result_store, credential,
+                                         source)
         callback.v2_runner_on_ok(make_result('host1', 0))
         callback.v2_runner_on_ok(make_result('host2', 1))
         callback.v2_runner_on_ok(make_result('host3', None))
 
         self.assertEqual(result_store.succeeded,
-                         [('host1', credential, 'success')])
+                         [('host1', source, credential, 'success')])
         self.assertEqual(result_store.failed, [])
 
 
@@ -152,7 +153,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.assertEqual(result_store.scan_task.systems_scanned, 0)
         self.assertEqual(result_store.scan_task.systems_failed, 0)
 
-        result_store.record_result('1.2.3.4', self.cred,
+        result_store.record_result('1.2.3.4', self.source, self.cred,
                                    SystemConnectionResult.SUCCESS)
 
         self.assertEqual(result_store.remaining_hosts(), [])

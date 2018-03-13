@@ -59,10 +59,11 @@ class ConnectResultStore(object):
                                sys_failed=0)
 
     @transaction.atomic
-    def record_result(self, name, credential, status):
+    def record_result(self, name, source, credential, status):
         """Record a new result, either a connection success or a failure."""
         sys_result = SystemConnectionResult(
             name=name,
+            source=source,
             credential=credential,
             status=status)
         sys_result.save()
@@ -142,7 +143,8 @@ class ConnectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(message)
 
             cred_data = CredentialSerializer(credential).data
-            callback = ConnectResultCallback(result_store, credential)
+            callback = ConnectResultCallback(result_store, credential,
+                                             self.scan_task.source)
             try:
                 connect(remaining_hosts, callback, cred_data,
                         connection_port, forks=forks)
@@ -158,8 +160,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         for host in remaining_hosts:
             # We haven't connected to these hosts with any
             # credentials, so they have failed.
-            result_store.record_result(host, None,
-                                       SystemConnectionResult.FAILED)
+            result_store.record_result(host, self.scan_task.source,
+                                       None, SystemConnectionResult.FAILED)
 
         return None, ScanTask.COMPLETED
 

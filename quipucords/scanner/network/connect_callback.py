@@ -32,11 +32,12 @@ class ConnectResultCallback(CallbackBase):
     scan, as we scan it.
     """
 
-    def __init__(self, result_store, credential, display=None):
+    def __init__(self, result_store, credential, source, display=None):
         """Create result callback."""
         super().__init__(display=display)
         self.result_store = result_store
         self.credential = credential
+        self.source = source
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
@@ -44,6 +45,7 @@ class ConnectResultCallback(CallbackBase):
         task_result = result._result  # pylint: disable=protected-access
         if 'rc' in task_result and task_result['rc'] == 0:
             self.result_store.record_result(host,
+                                            self.source,
                                             self.credential,
                                             SystemConnectionResult.SUCCESS)
 

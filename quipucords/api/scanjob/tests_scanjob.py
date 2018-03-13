@@ -321,6 +321,7 @@ class ScanJobTest(TestCase):
 
         # Create a connection system result
         sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
                                             credential=self.cred,
                                             status=SystemConnectionResult
                                             .SUCCESS)
@@ -353,10 +354,12 @@ class ScanJobTest(TestCase):
 
         # Create two connection system results one failure & one success
         sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
                                             credential=self.cred,
                                             status=SystemConnectionResult
                                             .SUCCESS)
         sys_result2 = SystemConnectionResult(name='Bar',
+                                             source=self.source,
                                              credential=self.cred,
                                              status=SystemConnectionResult
                                              .FAILED)
