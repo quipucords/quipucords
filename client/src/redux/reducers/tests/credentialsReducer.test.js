@@ -1,12 +1,8 @@
+import helpers from '../../../common/helpers';
 import { credentialsTypes } from '../../constants/index';
 import credentialsReducer from '../credentialsReducer';
 
 const initialState = {
-  persist: {
-    selectedCredentials: [],
-    expandedCredentials: []
-  },
-
   view: {
     error: false,
     errorMessage: '',
@@ -34,26 +30,6 @@ describe('CredentialsReducer', function() {
     expect(credentialsReducer(undefined, {})).toEqual(initialState);
   });
 
-  it('should handle SELECT_CREDENTIAL and DESELECT_CREDENTIAL', () => {
-    let dispatched = {
-      type: credentialsTypes.SELECT_CREDENTIAL,
-      credential: { name: 'selected', id: 1 }
-    };
-
-    let resultState = credentialsReducer(undefined, dispatched);
-
-    expect(resultState.persist.selectedCredentials).toHaveLength(1);
-    expect(resultState.view).toEqual(initialState.view);
-    expect(resultState.update).toEqual(initialState.update);
-
-    dispatched.type = credentialsTypes.DESELECT_CREDENTIAL;
-    resultState = credentialsReducer(resultState, dispatched);
-
-    expect(resultState.persist.selectedCredentials).toHaveLength(0);
-    expect(resultState.view).toEqual(initialState.view);
-    expect(resultState.update).toEqual(initialState.update);
-  });
-
   it('should handle CREATE_CREDENTIAL_SHOW', () => {
     let dispatched = {
       type: credentialsTypes.CREATE_CREDENTIAL_SHOW
@@ -66,7 +42,6 @@ describe('CredentialsReducer', function() {
     expect(resultState.update.edit).toBeFalsy();
     expect(resultState.update.delete).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
 
     dispatched = {
@@ -75,7 +50,6 @@ describe('CredentialsReducer', function() {
     resultState = credentialsReducer(resultState, dispatched);
 
     expect(resultState.update.show).toBeFalsy();
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
   });
 
@@ -91,7 +65,6 @@ describe('CredentialsReducer', function() {
     expect(resultState.update.edit).toBeTruthy();
     expect(resultState.update.delete).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
 
     dispatched = {
@@ -100,13 +73,12 @@ describe('CredentialsReducer', function() {
     resultState = credentialsReducer(resultState, dispatched);
 
     expect(resultState.update.show).toBeFalsy();
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
   });
 
   it('should handle ADD_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.ADD_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.ADD_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -125,13 +97,12 @@ describe('CredentialsReducer', function() {
     expect(resultState.update.add).toBeTruthy();
     expect(resultState.update.pending).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
   });
 
   it('should handle DELETE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.DELETE_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.DELETE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -150,13 +121,12 @@ describe('CredentialsReducer', function() {
     expect(resultState.update.delete).toBeTruthy();
     expect(resultState.update.pending).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
   });
 
   it('should handle UPDATE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.UPDATE_CREDENTIAL_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.UPDATE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -175,13 +145,12 @@ describe('CredentialsReducer', function() {
     expect(resultState.update.edit).toBeTruthy();
     expect(resultState.update.pending).toBeFalsy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.view).toEqual(initialState.view);
   });
 
   it('should handle GET_CREDENTIALS_REJECTED', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_REJECTED,
+      type: helpers.rejectedAction(credentialsTypes.GET_CREDENTIALS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -198,26 +167,24 @@ describe('CredentialsReducer', function() {
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('GET ERROR');
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.update).toEqual(initialState.update);
   });
 
   it('should handle GET_CREDENTIALS_PENDING', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_PENDING
+      type: helpers.pendingAction(credentialsTypes.GET_CREDENTIALS)
     };
 
     let resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.view.pending).toBeTruthy();
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.update).toEqual(initialState.update);
   });
 
   it('should handle GET_CREDENTIALS_FULFILLED', () => {
     let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_FULFILLED,
+      type: helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS),
       payload: {
         data: {
           results: [
@@ -247,89 +214,6 @@ describe('CredentialsReducer', function() {
     expect(resultState.view.fulfilled).toBeTruthy();
     expect(resultState.view.credentials).toHaveLength(4);
 
-    expect(resultState.persist).toEqual(initialState.persist);
     expect(resultState.update).toEqual(initialState.update);
-  });
-
-  it('should maintain selections on new data', () => {
-    let dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_FULFILLED,
-      error: true,
-      payload: {
-        data: {
-          results: [
-            {
-              name: '1',
-              id: 1
-            },
-            {
-              name: '2',
-              id: 2
-            },
-            {
-              name: '3',
-              id: 3
-            },
-            {
-              name: '4',
-              id: 4
-            }
-          ]
-        }
-      }
-    };
-
-    let resultState = credentialsReducer(undefined, dispatched);
-
-    expect(resultState.view.fulfilled).toBeTruthy();
-    expect(resultState.view.credentials).toHaveLength(4);
-
-    dispatched = {
-      type: credentialsTypes.SELECT_CREDENTIAL,
-      credential: { name: '1', id: 1 }
-    };
-
-    resultState = credentialsReducer(resultState, dispatched);
-
-    expect(resultState.persist.selectedCredentials).toHaveLength(1);
-
-    dispatched = {
-      type: credentialsTypes.SELECT_CREDENTIAL,
-      credential: { name: '2', id: 2 }
-    };
-
-    resultState = credentialsReducer(resultState, dispatched);
-
-    expect(resultState.persist.selectedCredentials).toHaveLength(2);
-
-    dispatched = {
-      type: credentialsTypes.GET_CREDENTIALS_FULFILLED,
-      error: true,
-      payload: {
-        data: {
-          results: [
-            {
-              name: '1',
-              id: 1
-            },
-            {
-              name: '5',
-              id: 5
-            },
-            {
-              name: '6',
-              id: 6
-            },
-            {
-              name: '7',
-              id: 7
-            }
-          ]
-        }
-      }
-    };
-
-    resultState = credentialsReducer(resultState, dispatched);
-    expect(resultState.persist.selectedCredentials).toHaveLength(2);
   });
 });

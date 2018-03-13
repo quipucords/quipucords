@@ -100,7 +100,7 @@ function addSourceWizardReducer(state = initialState, action) {
       );
 
     // Error/Rejected
-    case sourcesTypes.ADD_SOURCE_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.ADD_SOURCE):
       return helpers.setStateProp(
         'view',
         {
@@ -113,7 +113,7 @@ function addSourceWizardReducer(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.UPDATE_SOURCE_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.UPDATE_SOURCE):
       return helpers.setStateProp(
         'view',
         {
@@ -127,8 +127,8 @@ function addSourceWizardReducer(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case sourcesTypes.UPDATE_SOURCE_FULFILLED:
-    case sourcesTypes.ADD_SOURCE_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.UPDATE_SOURCE):
+    case helpers.fulfilledAction(sourcesTypes.ADD_SOURCE):
       return helpers.setStateProp(
         'view',
         {
@@ -141,7 +141,7 @@ function addSourceWizardReducer(state = initialState, action) {
         }
       );
 
-    case credentialsTypes.GET_WIZARD_CREDENTIALS_FULFILLED:
+    case helpers.fulfilledAction(credentialsTypes.GET_WIZARD_CREDENTIALS):
       return helpers.setStateProp(
         'view',
         {

@@ -86,6 +86,12 @@ class Sources extends React.Component {
             </span>
           )
         });
+        Store.dispatch({
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.SOURCES_VIEW,
+          item: item
+        });
+
       }
     } catch (e) {
       console.dir(e);
@@ -168,14 +174,17 @@ class Sources extends React.Component {
   }
 
   renderSourceActions() {
-    const { selectedSources } = this.props;
+    const { viewOptions } = this.props;
 
     return (
       <div className="form-group">
         <Button bsStyle="primary" onClick={this.showAddSourceWizard}>
           Add
         </Button>
-        <Button disabled={!selectedSources || selectedSources.length === 0} onClick={this.scanSources}>
+        <Button
+          disabled={!viewOptions.selectedItems || viewOptions.selectedItems.length === 0}
+          onClick={this.scanSources}
+        >
           Scan
         </Button>
       </div>
@@ -233,7 +242,7 @@ class Sources extends React.Component {
   }
 
   render() {
-    const { error, errorMessage, sources, selectedSources, viewOptions } = this.props;
+    const { error, errorMessage, sources, viewOptions } = this.props;
     const { scanDialogShown, multiSourceScan, currentScanSource, lastRefresh } = this.state;
 
     if (error) {
@@ -260,7 +269,7 @@ class Sources extends React.Component {
               actions={this.renderSourceActions()}
               itemsType="Source"
               itemsTypePlural="Sources"
-              selectedCount={selectedSources.length}
+              selectedCount={viewOptions.selectedItems.length}
               {...viewOptions}
             />
             <ViewPaginationRow viewType={viewTypes.SOURCES_VIEW} {...viewOptions} />
@@ -269,7 +278,7 @@ class Sources extends React.Component {
           {this.renderPendingMessage()}
           <CreateScanDialog
             show={scanDialogShown}
-            sources={multiSourceScan ? selectedSources : [currentScanSource]}
+            sources={multiSourceScan ? viewOptions.selectedItems : [currentScanSource]}
             onClose={this.hideScanDialog}
           />
         </React.Fragment>
@@ -292,7 +301,6 @@ Sources.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   sources: PropTypes.array,
-  selectedSources: PropTypes.array,
   lastRefresh: PropTypes.object,
   viewOptions: PropTypes.object,
   fulfilled: PropTypes.bool,
@@ -309,7 +317,6 @@ const mapStateToProps = function(state) {
   return Object.assign(
     {},
     state.sources.view,
-    state.sources.persist,
     { viewOptions: state.viewOptions[viewTypes.SOURCES_VIEW] },
     { updated: state.addSourceWizard.view.fulfilled },
     { deleted: state.sources.update.fulfilled }

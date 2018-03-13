@@ -190,6 +190,18 @@ const getErrorMessageFromResults = results => {
   return _.join(getMessages(responseData), '\n');
 };
 
+const rejectedAction = base => {
+  return `${base}_REJECTED`;
+};
+
+const pendingAction = base => {
+  return `${base}_PENDING`;
+};
+
+const fulfilledAction = base => {
+  return `${base}_FULFILLED`;
+};
+
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
 const normalizeCount = (count, modulus = 100) => {
   return Math.abs(count) % modulus;
@@ -210,6 +222,9 @@ export const helpers = {
   viewPropsChanged,
   createViewQueryObject,
   getErrorMessageFromResults,
+  rejectedAction,
+  pendingAction,
+  fulfilledAction,
   DEV_MODE,
   normalizeCount
 };

@@ -7,7 +7,7 @@ import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
-import { credentialsTypes } from '../../redux/constants';
+import { viewTypes } from '../../redux/constants';
 
 class CredentialListItem extends React.Component {
   constructor() {
@@ -41,8 +41,9 @@ class CredentialListItem extends React.Component {
     const { item } = this.props;
 
     Store.dispatch({
-      type: this.isSelected() ? credentialsTypes.DESELECT_CREDENTIAL : credentialsTypes.SELECT_CREDENTIAL,
-      credential: item
+      type: this.isSelected() ? viewTypes.DESELECT_ITEM : viewTypes.SELECT_ITEM,
+      viewType: viewTypes.CREDENTIALS_VIEW,
+      item: item
     });
   }
 
@@ -51,13 +52,15 @@ class CredentialListItem extends React.Component {
 
     if (expandType === this.expandType()) {
       Store.dispatch({
-        type: credentialsTypes.EXPAND_CREDENTIAL,
-        credential: item
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.CREDENTIALS_VIEW,
+        item: item
       });
     } else {
       Store.dispatch({
-        type: credentialsTypes.EXPAND_CREDENTIAL,
-        credential: item,
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.CREDENTIALS_VIEW,
+        item: item,
         expandType: expandType
       });
     }
@@ -66,8 +69,9 @@ class CredentialListItem extends React.Component {
   closeExpand() {
     const { item } = this.props;
     Store.dispatch({
-      type: credentialsTypes.EXPAND_CREDENTIAL,
-      credential: item
+      type: viewTypes.EXPAND_ITEM,
+      viewType: viewTypes.CREDENTIALS_VIEW,
+      item: item
     });
   }
 
@@ -207,7 +211,10 @@ CredentialListItem.propTypes = {
 };
 
 const mapStateToProps = function(state) {
-  return Object.assign(state.credentials.persist);
+  return Object.assign({
+    selectedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].selectedItems,
+    expandedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].expandedItems
+  });
 };
 
 export default connect(mapStateToProps)(CredentialListItem);

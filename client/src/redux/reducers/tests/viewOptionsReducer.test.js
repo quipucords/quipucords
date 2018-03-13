@@ -13,7 +13,9 @@ describe('viewOptionsReducer', function() {
         activeFilters: [],
         sortType: null,
         sortField: 'name',
-        sortAscending: true
+        sortAscending: true,
+        selectedItems: [],
+        expandedItems: []
       },
       SCANS_VIEW: {
         currentPage: 1,
@@ -25,7 +27,9 @@ describe('viewOptionsReducer', function() {
         activeFilters: [],
         sortType: null,
         sortField: 'name',
-        sortAscending: true
+        sortAscending: true,
+        selectedItems: [],
+        expandedItems: []
       },
       CREDENTIALS_VIEW: {
         currentPage: 1,
@@ -37,7 +41,9 @@ describe('viewOptionsReducer', function() {
         activeFilters: [],
         sortType: null,
         sortField: 'name',
-        sortAscending: true
+        sortAscending: true,
+        selectedItems: [],
+        expandedItems: []
       }
     };
 

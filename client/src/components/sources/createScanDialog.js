@@ -24,7 +24,7 @@ class CreateScanDialog extends React.Component {
     if (nextProps.show && !this.props.show) {
       this.setState({ scanName: '', validScanName: false });
       Store.dispatch({
-        type: scansTypes.ADD_SCAN_RESET_STATUS
+        type: scansTypes.RESET_SCAN_ADD_STATUS
       });
     }
   }
@@ -130,7 +130,7 @@ class CreateScanDialog extends React.Component {
 
   errorDismissed() {
     Store.dispatch({
-      type: scansTypes.ADD_SCAN_RESET_STATUS
+      type: scansTypes.RESET_SCAN_ADD_STATUS
     });
   }
 

@@ -1,3 +1,4 @@
+import helpers from '../../../common/helpers';
 import { reportsTypes } from '../../constants/index';
 import reportsReducer from '../reportsReducer';
 
@@ -28,7 +29,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DEPLOYMENTS_REJECTED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DEPLOYMENTS_REJECTED,
+      type: helpers.rejectedAction(reportsTypes.GET_REPORT_DEPLOYMENTS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -49,7 +50,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DETAILS_REJECTED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DETAILS_REJECTED,
+      type: helpers.rejectedAction(reportsTypes.GET_REPORT_DETAILS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -70,7 +71,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DEPLOYMENTS_PENDING', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DEPLOYMENTS_PENDING
+      type: helpers.pendingAction(reportsTypes.GET_REPORT_DEPLOYMENTS)
     };
 
     let resultState = reportsReducer(undefined, dispatched);
@@ -81,7 +82,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DETAILS_PENDING', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DETAILS_PENDING
+      type: helpers.pendingAction(reportsTypes.GET_REPORT_DETAILS)
     };
 
     let resultState = reportsReducer(undefined, dispatched);
@@ -92,7 +93,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DEPLOYMENTS_FULFILLED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DEPLOYMENTS_FULFILLED,
+      type: helpers.fulfilledAction(reportsTypes.GET_REPORT_DEPLOYMENTS),
       payload: {
         data: [
           {
@@ -125,7 +126,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_DETAILS_FULFILLED', () => {
     let dispatched = {
-      type: reportsTypes.GET_REPORT_DETAILS_FULFILLED,
+      type: helpers.fulfilledAction(reportsTypes.GET_REPORT_DETAILS),
       payload: {
         data: [
           {

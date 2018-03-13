@@ -24,8 +24,8 @@ const initialState = {
 const reportsReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_REJECTED:
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_REJECTED:
+    case helpers.rejectedAction(reportsTypes.GET_REPORT_DEPLOYMENTS):
+    case helpers.rejectedAction(reportsTypes.GET_REPORT_DEPLOYMENTS_CSV):
       return helpers.setStateProp(
         'deployments',
         {
@@ -38,8 +38,8 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
-    case reportsTypes.GET_REPORT_DETAILS_REJECTED:
-    case reportsTypes.GET_REPORT_DETAILS_CSV_REJECTED:
+    case helpers.rejectedAction(reportsTypes.GET_REPORT_DETAILS):
+    case helpers.rejectedAction(reportsTypes.GET_REPORT_DETAILS_CSV):
       return helpers.setStateProp(
         'details',
         {
@@ -53,8 +53,8 @@ const reportsReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_PENDING:
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_PENDING:
+    case helpers.pendingAction(reportsTypes.GET_REPORT_DEPLOYMENTS):
+    case helpers.pendingAction(reportsTypes.GET_REPORT_DEPLOYMENTS_CSV):
       return helpers.setStateProp(
         'deployments',
         {
@@ -66,8 +66,8 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
-    case reportsTypes.GET_REPORT_DETAILS_PENDING:
-    case reportsTypes.GET_REPORT_DETAILS_CSV_PENDING:
+    case helpers.pendingAction(reportsTypes.GET_REPORT_DETAILS):
+    case helpers.pendingAction(reportsTypes.GET_REPORT_DETAILS_CSV):
       return helpers.setStateProp(
         'details',
         {
@@ -80,7 +80,7 @@ const reportsReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_FULFILLED:
+    case helpers.fulfilledAction(reportsTypes.GET_REPORT_DEPLOYMENTS):
       return helpers.setStateProp(
         'deployments',
         {
@@ -93,7 +93,7 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
-    case reportsTypes.GET_REPORT_DETAILS_FULFILLED:
+    case helpers.fulfilledAction(reportsTypes.GET_REPORT_DETAILS):
       return helpers.setStateProp(
         'details',
         {
@@ -106,7 +106,7 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
-    case reportsTypes.GET_REPORT_DEPLOYMENTS_CSV_FULFILLED:
+    case helpers.fulfilledAction(reportsTypes.GET_REPORT_DEPLOYMENTS_CSV):
       return helpers.setStateProp(
         'deployments',
         {
@@ -118,7 +118,7 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
-    case reportsTypes.GET_REPORT_DETAILS_CSV_FULFILLED:
+    case helpers.fulfilledAction(reportsTypes.GET_REPORT_DETAILS_CSV):
       return helpers.setStateProp(
         'details',
         {

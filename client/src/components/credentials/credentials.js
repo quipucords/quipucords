@@ -84,8 +84,9 @@ class Credentials extends React.Component {
         this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
 
         Store.dispatch({
-          type: credentialsTypes.DESELECT_CREDENTIAL,
-          credential: this.deletingCredential
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.CREDENTIALS_VIEW,
+          item: this.deletingCredential
         });
 
         this.deleteNextCredential();
@@ -136,17 +137,17 @@ class Credentials extends React.Component {
   }
 
   deleteCredentials() {
-    const { selectedCredentials } = this.props;
+    const { viewOptions } = this.props;
 
-    if (selectedCredentials.length === 1) {
-      this.deleteCredential(selectedCredentials[0]);
+    if (viewOptions.selectedItems.length === 1) {
+      this.deleteCredential(viewOptions.selectedItems[0]);
       return;
     }
 
     let heading = <span>Are you sure you want to delete the following credentials?</span>;
 
     let credentialsList = '';
-    selectedCredentials.forEach((item, index) => {
+    viewOptions.selectedItems.forEach((item, index) => {
       return (credentialsList += (index > 0 ? '\n' : '') + item.name);
     });
 
@@ -157,13 +158,13 @@ class Credentials extends React.Component {
           componentClass="textarea"
           type="textarea"
           readOnly
-          rows={selectedCredentials.length}
+          rows={viewOptions.selectedItems.length}
           value={credentialsList}
         />
       </Grid.Col>
     );
 
-    let onConfirm = () => this.doDeleteCredentials(selectedCredentials);
+    let onConfirm = () => this.doDeleteCredentials(viewOptions.selectedItems);
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
@@ -218,7 +219,7 @@ class Credentials extends React.Component {
   }
 
   renderCredentialActions() {
-    const { selectedCredentials } = this.props;
+    const { viewOptions } = this.props;
 
     return (
       <div className="form-group">
@@ -233,7 +234,10 @@ class Credentials extends React.Component {
             VCenter Credential
           </MenuItem>
         </DropdownButton>
-        <Button disabled={!selectedCredentials || selectedCredentials.length === 0} onClick={this.deleteCredentials}>
+        <Button
+          disabled={!viewOptions.selectedItems || viewOptions.selectedItems.length === 0}
+          onClick={this.deleteCredentials}
+        >
           Delete
         </Button>
       </div>
@@ -282,7 +286,7 @@ class Credentials extends React.Component {
   }
 
   render() {
-    const { error, errorMessage, credentials, selectedCredentials, viewOptions } = this.props;
+    const { error, errorMessage, credentials, viewOptions } = this.props;
     const { lastRefresh } = this.state;
 
     if (error) {
@@ -309,7 +313,7 @@ class Credentials extends React.Component {
               actions={this.renderCredentialActions()}
               itemsType="Credential"
               itemsTypePlural="Credentials"
-              selectedCount={selectedCredentials.length}
+              selectedCount={viewOptions.selectedItems.length}
               {...viewOptions}
             />
             <ViewPaginationRow viewType={viewTypes.CREDENTIALS_VIEW} {...viewOptions} />
@@ -337,7 +341,6 @@ Credentials.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   credentials: PropTypes.array,
-  selectedCredentials: PropTypes.array,
   viewOptions: PropTypes.object,
   update: PropTypes.object
 };
@@ -348,7 +351,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.credentials.view, state.credentials.persist, {
+  return Object.assign({}, state.credentials.view, {
     viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW],
     update: state.credentials.update
   });
