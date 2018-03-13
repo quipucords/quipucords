@@ -16,5 +16,6 @@ from . import brms
 from . import fuse
 from . import karaf
 from . import cpu
+from . import ifconfig
 from . import date
 from . import subman
