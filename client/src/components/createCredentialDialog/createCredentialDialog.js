@@ -364,7 +364,7 @@ class CreateCredentialDialog extends React.Component {
 
   errorDismissed() {
     Store.dispatch({
-      type: credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS
+      type: credentialsTypes.RESET_CREDENTIAL_UPDATE_STATUS
     });
   }
 

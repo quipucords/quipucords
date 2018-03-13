@@ -1,3 +1,4 @@
+import helpers from '../../../common/helpers';
 import { sourcesTypes } from '../../constants/index';
 import addSourceWizardReducer from '../addSourceWizardReducer';
 
@@ -65,7 +66,7 @@ describe('AddSourceWizardReducer', function() {
 
   it('should handle ADD_SOURCE_REJECTED', () => {
     let dispatched = {
-      type: sourcesTypes.ADD_SOURCE_REJECTED,
+      type: helpers.rejectedAction(sourcesTypes.ADD_SOURCE),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -85,7 +86,7 @@ describe('AddSourceWizardReducer', function() {
 
   it('should handle UPDATE_SOURCE_REJECTED', () => {
     let dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_REJECTED,
+      type: helpers.rejectedAction(sourcesTypes.UPDATE_SOURCE),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -105,7 +106,7 @@ describe('AddSourceWizardReducer', function() {
 
   it('should handle UPDATE_SOURCE_FULFILLED', () => {
     let dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_FULFILLED,
+      type: helpers.fulfilledAction(sourcesTypes.UPDATE_SOURCE),
       payload: {
         data: {
           name: 'string',
@@ -146,7 +147,7 @@ describe('AddSourceWizardReducer', function() {
 
   it('should handle ADD_SOURCE_FULFILLED', () => {
     let dispatched = {
-      type: sourcesTypes.ADD_SOURCE_FULFILLED,
+      type: helpers.fulfilledAction(sourcesTypes.ADD_SOURCE),
       payload: {
         data: {
           name: 'string',

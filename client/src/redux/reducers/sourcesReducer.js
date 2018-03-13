@@ -3,11 +3,6 @@ import helpers from '../../common/helpers';
 import { sourcesTypes } from '../constants';
 
 const initialState = {
-  persist: {
-    selectedSources: [],
-    expandedSources: []
-  },
-
   view: {
     error: false,
     errorMessage: '',
@@ -26,94 +21,11 @@ const initialState = {
   }
 };
 
-const selectedIndex = function(state, source) {
-  return _.findIndex(state.persist.selectedSources, nextSelected => {
-    return nextSelected.id === _.get(source, 'id');
-  });
-};
-
-const expandedIndex = function(state, source) {
-  return _.findIndex(state.persist.expandedSources, nextSelected => {
-    return nextSelected.id === _.get(source, 'id');
-  });
-};
-
 const sourcesReducer = function(state = initialState, action) {
   switch (action.type) {
-    // Persist
-    case sourcesTypes.SELECT_SOURCE:
-      // Do nothing if it is already selected
-      if (selectedIndex(state, action.source) !== -1) {
-        return state;
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          selectedSources: [...state.persist.selectedSources, action.source]
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case sourcesTypes.DESELECT_SOURCE:
-      const index = selectedIndex(state, action.source);
-
-      // Do nothing if it is not already selected
-      if (index === -1) {
-        return state;
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          selectedSources: [
-            ...state.persist.selectedSources.slice(0, index),
-            ...state.persist.selectedSources.slice(index + 1)
-          ]
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case sourcesTypes.EXPAND_SOURCE:
-      const expandIndex = expandedIndex(state, action.source);
-      let newExpansions;
-
-      if (expandIndex === -1) {
-        newExpansions = [...state.persist.expandedSources];
-      } else {
-        newExpansions = [
-          ...state.persist.expandedSources.slice(0, expandIndex),
-          ...state.persist.expandedSources.slice(expandIndex + 1)
-        ];
-      }
-
-      if (action.expandType) {
-        newExpansions.push({
-          id: action.source.id,
-          expandType: action.expandType
-        });
-      }
-
-      return helpers.setStateProp(
-        'persist',
-        {
-          expandedSources: newExpansions
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
     // Error/Rejected
-    case sourcesTypes.DELETE_SOURCE_REJECTED:
-    case sourcesTypes.DELETE_SOURCES_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.rejectedAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -127,8 +39,8 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.DELETE_SOURCE_PENDING:
-    case sourcesTypes.DELETE_SOURCES_PENDING:
+    case helpers.pendingAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.pendingAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -141,8 +53,8 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.DELETE_SOURCE_FULFILLED:
-    case sourcesTypes.DELETE_SOURCES_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.DELETE_SOURCE):
+    case helpers.fulfilledAction(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
         'update',
         {
@@ -155,7 +67,7 @@ const sourcesReducer = function(state = initialState, action) {
         }
       );
 
-    case sourcesTypes.GET_SOURCES_REJECTED:
+    case helpers.rejectedAction(sourcesTypes.GET_SOURCES):
       return helpers.setStateProp(
         'view',
         {
@@ -169,7 +81,7 @@ const sourcesReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case sourcesTypes.GET_SOURCES_PENDING:
+    case helpers.pendingAction(sourcesTypes.GET_SOURCES):
       return helpers.setStateProp(
         'view',
         {
@@ -183,14 +95,9 @@ const sourcesReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case sourcesTypes.GET_SOURCES_FULFILLED:
+    case helpers.fulfilledAction(sourcesTypes.GET_SOURCES):
       // Get resulting sources and update the selected state of each
-      const sources = _.get(action, 'payload.data.results', []).map(nextSource => {
-        return {
-          ...nextSource,
-          selected: selectedIndex(state, nextSource) !== -1
-        };
-      });
+      const sources = _.get(action, 'payload.data.results', []);
       return helpers.setStateProp(
         'view',
         {

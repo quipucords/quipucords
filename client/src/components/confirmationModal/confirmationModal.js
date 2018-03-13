@@ -50,8 +50,8 @@ class ConfirmationModal extends React.Component {
             {confirmIcon && <span className="confirm-modal-icon">{confirmIcon}</span>}
             <span className="confirm-modal-content">
               <span className="spacer" />
-              <p>{confirmHeading}</p>
-              <p>{confirmBody}</p>
+              <div className="confirm-modal-content-heading">{confirmHeading}</div>
+              <div>{confirmBody}</div>
               <span className="spacer" />
             </span>
           </div>

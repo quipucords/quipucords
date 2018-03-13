@@ -9,7 +9,7 @@ import { Button, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-rea
 
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
-import { scansTypes } from '../../redux/constants';
+import { viewTypes } from '../../redux/constants';
 
 import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import { ScanSourceList } from './scanSourceList';
@@ -107,13 +107,15 @@ class ScanListItem extends React.Component {
 
     if (expandType === this.expandType()) {
       Store.dispatch({
-        type: scansTypes.EXPAND_SCAN,
-        scan: item
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.SCANS_VIEW,
+        item: item
       });
     } else {
       Store.dispatch({
-        type: scansTypes.EXPAND_SCAN,
-        scan: item,
+        type: viewTypes.EXPAND_ITEM,
+        viewType: viewTypes.SCANS_VIEW,
+        item: item,
         expandType: expandType
       });
       this.loadExpandData(expandType);
@@ -123,8 +125,9 @@ class ScanListItem extends React.Component {
   closeExpand() {
     const { item } = this.props;
     Store.dispatch({
-      type: scansTypes.EXPAND_SCAN,
-      scan: item
+      type: viewTypes.EXPAND_ITEM,
+      viewType: viewTypes.SCANS_VIEW,
+      item: item
     });
   }
 
@@ -370,7 +373,9 @@ ScanListItem.propTypes = {
 };
 
 const mapStateToProps = function(state) {
-  return Object.assign(state.scans.persist);
+  return Object.assign({
+    expandedScans: state.viewOptions[viewTypes.SCANS_VIEW].expandedItems
+  });
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
