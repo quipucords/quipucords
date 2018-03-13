@@ -7,8 +7,6 @@ import Store from '../../redux/store';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
 import { addSourceWizardSteps, editSourceWizardSteps } from './addSourceWizardConstants';
 import { addSource, updateSource } from '../../redux/actions/sourcesActions';
-import { addScan, deleteScan, startScan } from '../../redux/actions/scansActions';
-import _ from 'lodash';
 
 class AddSourceWizard extends React.Component {
   constructor(props) {
@@ -94,34 +92,6 @@ class AddSourceWizard extends React.Component {
     }
   }
 
-  setupSourceConnectionScan(source) {
-    const { addScan, startScan, deleteScan } = this.props;
-    const connectionId = _.get(source, 'connection.id', '');
-
-    const addUpdateScan = () => {
-      const srcId = _.get(source, 'id', '');
-      const srcName = _.get(source, 'name');
-
-      if (typeof srcId === 'number') {
-        let data = {
-          // ToDo: evaluate against using something like a one-way hash
-          name: `Connection Scan ${srcName}`,
-          sources: [srcId]
-        };
-
-        return addScan(data).then(response => startScan(_.get(response, 'value.data.id')));
-      }
-
-      return Promise.reject(new Error('Connection scan id invalid.'));
-    };
-
-    if (typeof connectionId === 'number') {
-      return deleteScan(connectionId).then(() => addUpdateScan());
-    }
-
-    return addUpdateScan();
-  }
-
   onSubmit(event) {
     const { addSource, updateSource, source, edit } = this.props;
     const { stepOneValid, stepTwoValid } = this.state;
@@ -136,27 +106,13 @@ class AddSourceWizard extends React.Component {
           options: source.options
         };
 
-        updateSource(source.id, update)
-          .then(response => {
-            return this.setupSourceConnectionScan(_.get(response.value, 'data'));
-          })
-          .catch(error => {
-            console.warn(error);
-          })
-          .finally(() => {
-            this.setState({ activeStepIndex: 1 });
-          });
+        updateSource(source.id, update).finally(() => {
+          this.setState({ activeStepIndex: 1 });
+        });
       } else {
-        addSource(source)
-          .then(response => {
-            return this.setupSourceConnectionScan(_.get(response.value, 'data'));
-          })
-          .catch(error => {
-            console.warn(error);
-          })
-          .finally(() => {
-            this.setState({ activeStepIndex: 2 });
-          });
+        addSource(source, { scan: true }).finally(() => {
+          this.setState({ activeStepIndex: 2 });
+        });
       }
     }
   }
@@ -251,9 +207,6 @@ class AddSourceWizard extends React.Component {
 }
 
 AddSourceWizard.propTypes = {
-  addScan: PropTypes.func,
-  deleteScan: PropTypes.func,
-  startScan: PropTypes.func,
   addSource: PropTypes.func,
   updateSource: PropTypes.func,
   show: PropTypes.bool.isRequired,
@@ -266,10 +219,7 @@ AddSourceWizard.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  addScan: data => dispatch(addScan(data)),
-  deleteScan: id => dispatch(deleteScan(id)),
-  startScan: id => dispatch(startScan(id)),
-  addSource: data => dispatch(addSource(data)),
+  addSource: (data, query) => dispatch(addSource(data, query)),
   updateSource: (id, data) => dispatch(updateSource(id, data))
 });
 

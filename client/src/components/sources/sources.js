@@ -47,7 +47,7 @@ class Sources extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
+    this.refresh();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -55,7 +55,7 @@ class Sources extends React.Component {
 
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
-      this.props.getSources(helpers.createViewQueryObject(nextProps.viewOptions));
+      this.refresh(nextProps);
     }
 
     if ((nextProps.updated && !updated) || (nextProps.deleted && !deleted)) {
@@ -162,8 +162,9 @@ class Sources extends React.Component {
     });
   }
 
-  refresh() {
-    this.props.getSources(helpers.createViewQueryObject(this.props.viewOptions));
+  refresh(props) {
+    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
+    this.props.getSources(helpers.createViewQueryObject(options));
   }
 
   clearFilters() {

@@ -23,6 +23,11 @@ const SourceSortFields = [
     id: 'source_type',
     title: 'Source Type',
     isNumeric: false
+  },
+  {
+    id: 'most_recent_connect_scan__start_time',
+    title: 'Most Recent Connection Scan',
+    isNumeric: true
   }
 ];
 

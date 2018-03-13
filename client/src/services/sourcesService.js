@@ -1,13 +1,14 @@
 import axios from 'axios';
 
 class SourcesService {
-  static addSource(data = {}) {
+  static addSource(data = {}, query = {}) {
     return axios({
       method: 'post',
       url: process.env.REACT_APP_SOURCES_SERVICE,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      data: data
+      data: data,
+      params: query
     });
   }
 
