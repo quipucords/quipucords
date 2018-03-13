@@ -46,7 +46,7 @@ class Credentials extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
+    this.refresh();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -67,7 +67,7 @@ class Credentials extends React.Component {
 
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
-      this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
+      this.refresh(nextProps);
     }
 
     if (_.get(nextProps, 'update.delete')) {
@@ -81,7 +81,7 @@ class Credentials extends React.Component {
             </span>
           )
         });
-        this.props.getCredentials(helpers.createViewQueryObject(nextProps.viewOptions));
+        this.refresh(nextProps);
 
         Store.dispatch({
           type: viewTypes.DESELECT_ITEM,
@@ -207,8 +207,9 @@ class Credentials extends React.Component {
     });
   }
 
-  refresh() {
-    this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
+  refresh(props) {
+    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
+    this.props.getCredentials(helpers.createViewQueryObject(options));
   }
 
   clearFilters() {
