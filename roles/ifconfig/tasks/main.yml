@@ -22,13 +22,8 @@
   ignore_errors: yes
   when: '"stdout_lines" in internal_ifconfig_mac_addresses_cmd'
 
-- name: initialize ifconfig.ip-address
-  set_fact:
-    ifconfig_ip_addresses: "{{ None }}"
-  ignore_errors: yes
-
 - name: gather ifconfig.ip-address fact
-  raw: ifconfig -a | grep -Po 'inet \K[\d.]+' | grep -v '127.0.0.1'
+  raw: ifconfig -a
   register: internal_ifconfig_ip_addresses_cmd
   ignore_errors: yes
   become: yes
@@ -36,6 +31,6 @@
 
 - name: extract result value for ifconfig.ip-address
   set_fact:
-    ifconfig_ip_addresses: "{{  internal_ifconfig_ip_addresses_cmd['stdout_lines'] | default(None) }}"
+    ifconfig_ip_addresses: "{{  internal_ifconfig_ip_addresses_cmd | default(None) }}"
   ignore_errors: yes
   when: '"stdout_lines" in internal_ifconfig_ip_addresses_cmd'
