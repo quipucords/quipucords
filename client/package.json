@@ -30,7 +30,7 @@
     "build:asset-images": "mkdir -p public/assets/images && cp -R src/styles/images/* public/assets/images",
     "build:asset-css": "npm run build:css && mkdir -p public/assets/css && cp -R src/styles/css/* public/assets/css",
     "build:assets": "run-s build:asset-*",
-    "build:finish": "mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client",
+    "build:finish": "mkdir -p ../quipucords/client && cp -R ./build/* ../quipucords/client && mkdir -p ../quipucords/quipucords/templates/client && cp ../quipucords/client/index.html ../quipucords/quipucords/templates/client/index.html && rm ../quipucords/client/index.html",
     "build": "run-s -l build:clean build:assets build:ui build:finish",
     "start:css": "npm run build:css && node-sass --include-path ./src/styles $npm_package_sassDepIncludes src/styles/entitlements.scss -o src/styles/css --watch --recursive",
     "start:ui": "react-scripts start",

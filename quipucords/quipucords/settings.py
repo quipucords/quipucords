@@ -114,7 +114,7 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/client/index.html'
+LOGIN_REDIRECT_URL = '/client/'
 
 WSGI_APPLICATION = 'quipucords.wsgi.application'
 
