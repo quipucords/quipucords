@@ -19,6 +19,13 @@ const initialState = {
     pending: false,
     fulfilled: false,
     reports: []
+  },
+
+  merge: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false
   }
 };
 
@@ -155,5 +162,65 @@ describe('ReportsReducer', function() {
     expect(resultState.details.reports).toHaveLength(4);
 
     expect(resultState.persist).toEqual(initialState.persist);
+  });
+
+  it('should handle GET_MERGE_SCAN_RESULTS_REJECTED', () => {
+    let dispatched = {
+      type: helpers.rejectedAction(reportsTypes.GET_MERGE_SCAN_RESULTS),
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          data: {
+            detail: 'MERGE ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+
+    expect(resultState.merge.error).toBeTruthy();
+    expect(resultState.merge.errorMessage).toEqual('MERGE ERROR');
+    expect(resultState.merge.pending).toBeFalsy();
+    expect(resultState.merge.fulfilled).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.deployments).toEqual(initialState.deployments);
+    expect(resultState.details).toEqual(initialState.details);
+  });
+
+  it('should handle GET_MERGE_SCAN_RESULTS_PENDING', () => {
+    let dispatched = {
+      type: helpers.pendingAction(reportsTypes.GET_MERGE_SCAN_RESULTS)
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+
+    expect(resultState.merge.error).toBeFalsy();
+    expect(resultState.merge.errorMessage).toEqual('');
+    expect(resultState.merge.pending).toBeTruthy();
+    expect(resultState.merge.fulfilled).toBeFalsy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.deployments).toEqual(initialState.deployments);
+    expect(resultState.details).toEqual(initialState.details);
+  });
+
+  it('should handle GET_MERGE_SCAN_RESULTS_FULFILLED', () => {
+    let dispatched = {
+      type: helpers.fulfilledAction(reportsTypes.GET_MERGE_SCAN_RESULTS)
+    };
+
+    let resultState = reportsReducer(undefined, dispatched);
+
+    expect(resultState.merge.error).toBeFalsy();
+    expect(resultState.merge.errorMessage).toEqual('');
+    expect(resultState.merge.pending).toBeFalsy();
+    expect(resultState.merge.fulfilled).toBeTruthy();
+
+    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.deployments).toEqual(initialState.deployments);
+    expect(resultState.details).toEqual(initialState.details);
   });
 });

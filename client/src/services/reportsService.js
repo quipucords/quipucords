@@ -1,7 +1,12 @@
+import _ from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 
 class ReportsService {
+  static getTimeStampFromResults(results) {
+    return moment(_.get(results, 'headers.date', Date.now())).format('YYYYMMDD_HHmmss');
+  }
+
   static downloadCSV(data = '', fileName = 'report.csv') {
     return new Promise((resolve, reject) => {
       try {
@@ -43,16 +48,9 @@ class ReportsService {
   }
 
   static getReportDetailsCsv(id) {
-    return this.getReportDetails(id, { format: 'csv' }).then(
-      success => {
-        const date = moment(success.headers.date).format('YYYYMMDD_HHmmss');
-
-        return this.downloadCSV(success.data, `report_${id}_details_${date}.csv`);
-      },
-      error => {
-        return error;
-      }
-    );
+    return this.getReportDetails(id, { format: 'csv' }).then(success => {
+      return this.downloadCSV(success.data, `report_${id}_details_${this.getTimeStampFromResults(success)}.csv`);
+    });
   }
 
   static getReportDeployments(id, query = {}) {
@@ -65,16 +63,29 @@ class ReportsService {
   }
 
   static getReportDeploymentsCsv(id, query = {}) {
-    return this.getReportDeployments(id, Object.assign(query, { format: 'csv' })).then(
-      success => {
-        const date = moment(success.headers.date).format('YYYYMMDD_HHmmss');
+    return this.getReportDeployments(id, Object.assign(query, { format: 'csv' })).then(success => {
+      return this.downloadCSV(success.data, `report_${id}_deployments_${this.getTimeStampFromResults(success)}.csv`);
+    });
+  }
 
-        return this.downloadCSV(success.data, `report_${id}_deployments_${date}.csv`);
-      },
-      error => {
-        return error;
-      }
-    );
+  static getMergeScanResults(jobIds) {
+    let apiPath = process.env.REACT_APP_REPORTS_MERGED_JOBS;
+
+    return axios({
+      method: 'put',
+      url: apiPath,
+      data: { jobs: jobIds },
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static getMergeScanResultsCsv(jobIds) {
+    return this.getMergeScanResults(jobIds).then(success => {
+      return this.getReportDetails(success.data.id, { format: 'csv' }).then(success => {
+        return this.downloadCSV(success.data, `merged_report_${this.getTimeStampFromResults(success)}.csv`);
+      });
+    });
   }
 }
 

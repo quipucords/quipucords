@@ -18,6 +18,13 @@ const initialState = {
     pending: false,
     fulfilled: false,
     reports: []
+  },
+
+  merge: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false
   }
 };
 
@@ -52,6 +59,19 @@ const reportsReducer = function(state = initialState, action) {
         }
       );
 
+    case helpers.rejectedAction(reportsTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
+        {
+          error: action.error,
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
     // Loading/Pending
     case helpers.pendingAction(reportsTypes.GET_REPORT_DEPLOYMENTS):
     case helpers.pendingAction(reportsTypes.GET_REPORT_DEPLOYMENTS_CSV):
@@ -70,6 +90,18 @@ const reportsReducer = function(state = initialState, action) {
     case helpers.pendingAction(reportsTypes.GET_REPORT_DETAILS_CSV):
       return helpers.setStateProp(
         'details',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.pendingAction(reportsTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
         {
           pending: true
         },
@@ -121,6 +153,18 @@ const reportsReducer = function(state = initialState, action) {
     case helpers.fulfilledAction(reportsTypes.GET_REPORT_DETAILS_CSV):
       return helpers.setStateProp(
         'details',
+        {
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.fulfilledAction(reportsTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
         {
           fulfilled: true
         },

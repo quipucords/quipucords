@@ -45,6 +45,14 @@ const initialState = {
     cancel: false,
     pause: false,
     restart: false
+  },
+
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    delete: false
   }
 };
 
@@ -74,6 +82,7 @@ describe('scansReducer', function() {
 
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -89,6 +98,7 @@ describe('scansReducer', function() {
 
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -127,6 +137,7 @@ describe('scansReducer', function() {
 
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -152,6 +163,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -167,6 +179,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -191,6 +204,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.jobs).toEqual(initialState.jobs);
     expect(resultState.results).toEqual(initialState.results);
   });
@@ -216,6 +230,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -231,6 +246,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -293,6 +309,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -318,6 +335,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.jobs).toEqual(initialState.jobs);
   });
@@ -333,6 +351,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.jobs).toEqual(initialState.jobs);
   });
@@ -404,6 +423,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.detail).toEqual(initialState.detail);
     expect(resultState.jobs).toEqual(initialState.jobs);
   });
@@ -434,6 +454,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -454,6 +475,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -475,6 +497,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -505,6 +528,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -525,6 +549,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -546,6 +571,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -576,6 +602,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -596,6 +623,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -617,6 +645,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -647,6 +676,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -667,6 +697,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -688,6 +719,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -718,6 +750,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -738,6 +771,7 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
@@ -759,6 +793,77 @@ describe('scansReducer', function() {
 
     expect(resultState.view).toEqual(initialState.view);
     expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.update).toEqual(initialState.update);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle DELETE_SCAN_REJECTED', () => {
+    let dispatched = {
+      type: helpers.rejectedAction(scansTypes.DELETE_SCAN),
+      error: true,
+      payload: {
+        message: 'BACKUP MESSAGE',
+        response: {
+          data: {
+            detail: 'DELETE ERROR'
+          }
+        }
+      }
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.update.delete).toBeTruthy();
+    expect(resultState.update.error).toBeTruthy();
+    expect(resultState.update.errorMessage).toEqual('DELETE ERROR');
+    expect(resultState.update.fulfilled).toBeFalsy();
+    expect(resultState.update.pending).toBeFalsy();
+
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle DELETE_SCAN_PENDING', () => {
+    let dispatched = {
+      type: helpers.pendingAction(scansTypes.DELETE_SCAN)
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.update.delete).toBeTruthy();
+    expect(resultState.update.error).toBeFalsy();
+    expect(resultState.update.errorMessage).toEqual('');
+    expect(resultState.update.fulfilled).toBeFalsy();
+    expect(resultState.update.pending).toBeTruthy();
+
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.action).toEqual(initialState.action);
+    expect(resultState.results).toEqual(initialState.results);
+    expect(resultState.detail).toEqual(initialState.detail);
+  });
+
+  it('should handle DELETE_SCAN_FULFILLED', () => {
+    let dispatched = {
+      type: helpers.fulfilledAction(scansTypes.DELETE_SCAN),
+      payload: {}
+    };
+
+    let resultState = scansReducer(undefined, dispatched);
+
+    expect(resultState.update.delete).toBeTruthy();
+    expect(resultState.update.error).toBeFalsy();
+    expect(resultState.update.errorMessage).toEqual('');
+    expect(resultState.update.fulfilled).toBeTruthy();
+    expect(resultState.update.pending).toBeFalsy();
+
+    expect(resultState.view).toEqual(initialState.view);
+    expect(resultState.jobs).toEqual(initialState.jobs);
+    expect(resultState.action).toEqual(initialState.action);
     expect(resultState.results).toEqual(initialState.results);
     expect(resultState.detail).toEqual(initialState.detail);
   });
