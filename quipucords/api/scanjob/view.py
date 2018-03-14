@@ -62,12 +62,12 @@ def expand_system_connection(system):
         system['source'] = \
             Source.objects.filter(id=source_id).values('id',
                                                        'name',
-                                                       'source_type')[0]
+                                                       'source_type').first()
     if 'credential' in system.keys():
         cred_id = system['credential']
         system['credential'] = \
             Credential.objects.filter(id=cred_id).values('id',
-                                                         'name')[0]
+                                                         'name').first()
 
 
 def expand_sys_conn_result(conn_result):
