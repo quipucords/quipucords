@@ -48,6 +48,7 @@ class SatelliteInterface(object):
         else:
             self.connect_scan_task = scan_task.prerequisites.first()
             self.inspect_scan_task = scan_task
+        self.source = scan_task.source
 
     @transaction.atomic
     def record_conn_result(self, name, credential):
@@ -58,6 +59,7 @@ class SatelliteInterface(object):
         """
         sys_result = SystemConnectionResult(
             name=name,
+            source=self.source,
             credential=credential,
             status=SystemConnectionResult.SUCCESS)
         sys_result.save()

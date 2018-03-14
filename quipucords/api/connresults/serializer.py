@@ -27,7 +27,7 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = SystemConnectionResult
-        fields = ['name', 'credential', 'status']
+        fields = ['name', 'status', 'source', 'credential']
         qpc_allow_empty_fields = ['value']
 
 

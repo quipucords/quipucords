@@ -35,7 +35,7 @@ from api.scanjob.view import (expand_scanjob,
                               expand_sys_conn_result,
                               expand_conn_results,
                               expand_inspect_results)
-from scanner.test_util import create_scan_job
+from scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
 
 def dummy_start():
@@ -287,25 +287,354 @@ class ScanJobTest(TestCase):
         json_response = response.json()
         self.assertIn('connection_results', json_response)
         self.assertIn('inspection_results', json_response)
+        expected = {
+            'connection_results':
+                {'task_results': [
+                    {'source': {'id': 1,
+                                'name': 'source1',
+                                'source_type': 'network',
+                                'most_recent_connect_scan': 1},
+                     'systems': [
+                         {'name': 'Foo',
+                          'status': 'success',
+                          'credential': {'id': 1,
+                                         'name': 'cred1'}}]}]},
+            'inspection_results': {
+                'task_results': [
+                    {'source': {'id': 1,
+                                'name': 'source1',
+                                'source_type': 'network',
+                                'most_recent_connect_scan': 1},
+                     'systems': [
+                         {'name': 'Foo',
+                          'status': 'success',
+                          'facts': [
+                              {'name': 'fact_key',
+                               'value': 'fact_value'}]}]}]}}
+        self.assertEqual(json_response, expected)
 
-        self.assertEqual(
-            json_response, {
-                'connection_results': {'task_results': [
-                    {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network',
-                      'most_recent_connect_scan': 1},
-                     'systems':
-                     [{'name': 'Foo', 'credential':
-                       {'id': 1, 'name': 'cred1'},
-                       'status': 'success'}]}]},
-                'inspection_results': {'task_results': [
-                    {'source':
-                     {'id': 1, 'name': 'source1', 'source_type': 'network',
-                      'most_recent_connect_scan': 1},
-                     'systems':
-                     [{'name': 'Foo', 'status': 'success',
-                       'facts': [
-                           {'name': 'fact_key', 'value': 'fact_value'}]}]}]}})
+    def test_connection(self):
+        """Get ScanJob connection results."""
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create a connection system result
+        sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result.save()
+        conn_result = scan_task.prerequisites.first().connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'name': 'Foo',
+                                 'status': 'success',
+                                 'credential': {'id': 1,
+                                                'name': 'cred1'},
+                                 'source': {'id': 1,
+                                            'name': 'source1',
+                                            'source_type': 'network'}}]}
+        self.assertEqual(json_response, expected)
+
+    def test_connection_failed_success(self):
+        """Get ScanJob connection results for multiple systems."""
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create two connection system results one failure & one success
+        sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result2 = SystemConnectionResult(name='Bar',
+                                             source=self.source,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result.save()
+        sys_result2.save()
+        conn_result = scan_task.prerequisites.first().connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.systems.add(sys_result2)
+        conn_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Bar',
+                         'status': 'failed',
+                         'credential': {'id': 1,
+                                        'name': 'cred1'},
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'}},
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'credential': {'id': 1,
+                                        'name': 'cred1'},
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'}}]}
+
+        self.assertEqual(json_response, expected)
+
+    def test_connection_two_scan_tasks(self):
+        """Get ScanJob connection results for multiple tasks."""
+        # pylint: disable=no-member
+        # create a second source:
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.sources.add(source2)
+        scan_job.save()
+
+        # Create two connection system results one failure & one success
+        sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result2 = SystemConnectionResult(name='Bar',
+                                             source=self.source,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result3 = SystemConnectionResult(name='Woot',
+                                             source=source2,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result4 = SystemConnectionResult(name='Ness',
+                                             source=source2,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .SUCCESS)
+        sys_result.save()
+        sys_result2.save()
+        sys_result3.save()
+        sys_result4.save()
+        conn_result = scan_tasks[0].connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.systems.add(sys_result2)
+        conn_result.save()
+
+        conn_result2 = scan_tasks[1].connection_result
+        conn_result2.systems.add(sys_result3)
+        conn_result2.systems.add(sys_result4)
+        conn_result2.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 4,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Bar',
+                         'status': 'failed',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}},
+                        {'name': 'Woot',
+                         'status': 'failed',
+                         'source': {'id': 2,
+                                    'name': 'source2',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}},
+                        {'name': 'Foo', 'status': 'success',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}},
+                        {'name': 'Ness',
+                         'status': 'success',
+                         'source': {'id': 2,
+                                    'name': 'source2',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1, 'name': 'cred1'}}]}
+
+        self.assertEqual(json_response, expected)
+
+    def test_connection_paging(self):
+        """Test paging for scanjob connection results."""
+        # pylint: disable=no-member
+        # create a second source:
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.sources.add(source2)
+        scan_job.save()
+
+        # Create two connection system results one failure & one success
+        sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result2 = SystemConnectionResult(name='Bar',
+                                             source=self.source,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result3 = SystemConnectionResult(name='Woot',
+                                             source=source2,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result4 = SystemConnectionResult(name='Ness',
+                                             source=source2,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .SUCCESS)
+        sys_result.save()
+        sys_result2.save()
+        sys_result3.save()
+        sys_result4.save()
+        conn_result = scan_tasks[0].connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.systems.add(sys_result2)
+        conn_result.save()
+
+        conn_result2 = scan_tasks[1].connection_result
+        conn_result2.systems.add(sys_result3)
+        conn_result2.systems.add(sys_result4)
+        conn_result2.save()
+
+        url = \
+            reverse('scanjob-detail',
+                    args=(scan_job.id,)) + 'connection/?page_size=2'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 4,
+                    'next':
+                        'http://testserver/api/v1/' +
+                        'jobs/1/connection/?page=2&page_size=2',
+                    'previous': None,
+                    'results': [
+                        {'name': 'Bar',
+                         'status': 'failed',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}},
+                        {'name': 'Woot',
+                         'status': 'failed',
+                         'source': {'id': 2,
+                                    'name': 'source2',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}}]}
+
+        self.assertEqual(json_response, expected)
+
+    def test_connection_results_with_none(self):
+        """Test connection results with no results for one task."""
+        # pylint: disable=no-member
+        # create a second source:
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
+        scan_job.sources.add(source2)
+        scan_job.save()
+
+        # Create two connection system results one failure & one success
+        sys_result = SystemConnectionResult(name='Foo',
+                                            source=self.source,
+                                            credential=self.cred,
+                                            status=SystemConnectionResult
+                                            .SUCCESS)
+        sys_result2 = SystemConnectionResult(name='Bar',
+                                             source=self.source,
+                                             credential=self.cred,
+                                             status=SystemConnectionResult
+                                             .FAILED)
+        sys_result.save()
+        sys_result2.save()
+        conn_result = scan_tasks[0].connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.systems.add(sys_result2)
+        conn_result.save()
+
+        conn_result2 = scan_tasks[1].connection_result
+        conn_result2.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 2,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Bar',
+                         'status': 'failed',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}},
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'credential': {'id': 1,
+                                        'name': 'cred1'}}]}
+
+        self.assertEqual(json_response, expected)
+
+    def test_connection_not_found(self):
+        """Get ScanJob connection results with 404."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='2') + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_connection_bad_request(self):
+        """Get ScanJob connection results with 400."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='t') + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_merge_empty_body(self):
         """Test merge with empty body."""

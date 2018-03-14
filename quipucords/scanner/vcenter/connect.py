@@ -56,7 +56,7 @@ class ConnectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
-    def _store_connect_data(self, connected, credential):
+    def _store_connect_data(self, connected, credential, source):
         # Update the scan counts
         self.scan_task.update_stats(
             'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
@@ -64,7 +64,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         for system in connected:
             sys_result = SystemConnectionResult(
                 name=system, status=SystemConnectionResult.SUCCESS,
-                credential=credential)
+                credential=credential, source=source)
             sys_result.save()
             self.scan_task.connection_result.systems.add(sys_result)
             self.scan_task.increment_stats(
@@ -78,7 +78,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         credential = self.scan_task.source.credentials.all().first()
         try:
             connected = self.connect()
-            self._store_connect_data(connected, credential)
+            self._store_connect_data(connected, credential, source)
         except vim.fault.InvalidLogin as vm_error:
             error_message = 'Unable to connect to VCenter source, %s,'\
                 ' with supplied credential, %s.\n' % \

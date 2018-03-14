@@ -16,6 +16,7 @@ These models are used in the REST definitions
 from django.utils.translation import ugettext as _
 from django.db import models
 from api.credential.model import Credential
+from api.source.model import Source
 import api.messages as messages
 
 
@@ -32,12 +33,15 @@ class SystemConnectionResult(models.Model):
     credential = models.ForeignKey(Credential,
                                    on_delete=models.CASCADE,
                                    null=True)
+    source = models.ForeignKey(Source,
+                               on_delete=models.CASCADE,
+                               null=True)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, credential:%s, status:%s }' % \
-            (self.id, self.name, self.credential, self.status)
+        return '{ id:%s, name:%s, status:%s, source:%s, credential:%s }' % \
+            (self.id, self.name, self.status, self.source, self.credential)
 
     class Meta:
         """Metadata for model."""

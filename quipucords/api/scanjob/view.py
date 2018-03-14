@@ -27,7 +27,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
-from api.models import (ScanTask, ScanJob, FactCollection)
+from api.common.pagination import StandardResultsSetPagination
+from api.models import (ScanTask, ScanJob, FactCollection, Source, Credential)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
@@ -49,6 +50,24 @@ from fingerprinter import pfc_signal
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 RESULTS_KEY = 'task_results'
+
+
+def expand_system_connection(system):
+    """Expand the system connection results.
+
+    :param system: A dictionary for a conn system result.
+    """
+    if 'source' in system.keys():
+        source_id = system['source']
+        system['source'] = \
+            Source.objects.filter(id=source_id).values('id',
+                                                       'name',
+                                                       'source_type').first()
+    if 'credential' in system.keys():
+        cred_id = system['credential']
+        system['credential'] = \
+            Credential.objects.filter(id=cred_id).values('id',
+                                                         'name').first()
 
 
 def expand_sys_conn_result(conn_result):
@@ -206,6 +225,34 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             result['inspection_results'] = json_job_scan_result
         if result is not None:
             return Response(result)
+        return Response(status=404)
+
+    @detail_route(methods=['get'])
+    def connection(self, request, pk=None):
+        """Get the connection results of a scan job."""
+        try:
+            scan_job = get_object_or_404(self.queryset, pk=pk)
+            all_tasks = scan_job.connection_results.task_results.all()
+        except ValueError:
+            return Response(status=400)
+
+        system_result_queryset = None
+        for task_result in all_tasks:
+            if system_result_queryset is None:
+                system_result_queryset = task_result.systems.all()
+            else:
+                system_result_queryset = \
+                    system_result_queryset | task_result.systems.all()
+        # assign the paginator and order the queryset by status
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(
+            system_result_queryset.order_by('status'), request)
+
+        if page is not None:
+            serializer = SystemConnectionResultSerializer(page, many=True)
+            for system in serializer.data:
+                expand_system_connection(system)
+            return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
     @detail_route(methods=['put'])
