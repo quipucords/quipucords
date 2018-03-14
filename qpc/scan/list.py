@@ -44,11 +44,12 @@ class ScanListCommand(CliCommand):
                                  metavar='TYPE',
                                  help=_(messages.SCAN_TYPE_FILTER_HELP),
                                  required=False)
+        self.req_params = {}
 
     def _build_req_params(self):
         """Add filter by scan_type/state query param."""
         if 'type' in self.args and self.args.type:
-            self.req_params = {'scan_type': self.args.type}
+            self.req_params['scan_type'] = self.args.type
 
     def _handle_response_success(self):
         json_data = self.response.json()
