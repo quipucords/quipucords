@@ -20,7 +20,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
@@ -179,12 +179,13 @@ class ScanViewSet(ModelViewSet):
 
     queryset = Scan.objects.all()
     serializer_class = ScanSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
     filter_class = ScanFilter
     ordering_fields = ('id', 'name', 'scan_type',
                        'most_recent_scanjob__start_time',
                        'most_recent_scanjob__status')
     ordering = ('name',)
+    search_fields = ('name', 'sources__name')
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):

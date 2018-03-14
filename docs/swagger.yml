@@ -109,6 +109,10 @@ paths:
           in: "query"
           description: "Order the results with the field name; '-' means descending"
           type: "string"
+        - name: "search"
+          in: "query"
+          description: "Partial match search of credentials by name."
+          type: "string"
       responses:
         200:
           description: "Credential retrieved"
@@ -350,6 +354,10 @@ paths:
           in: "query"
           description: "Order the results with the field name; '-' means descending"
           type: "string"
+        - name: "search"
+          in: "query"
+          description: "Partial match search of sources by name or credential name."
+          type: "string"
       responses:
         200:
           description: "Sources retrieved"
@@ -488,6 +496,10 @@ paths:
         - name: "ordering"
           in: "query"
           description: "Order the results with the field name; '-' means descending"
+          type: "string"
+        - name: "search"
+          in: "query"
+          description: "Partial match search of scans by name or source name."
           type: "string"
       responses:
         200:

@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
@@ -98,10 +98,11 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
     filter_class = CredentialFilter
     ordering_fields = ('name', 'cred_type')
     ordering = ('name',)
+    search_fields = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""

@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
@@ -82,11 +82,12 @@ class SourceViewSet(ModelViewSet):
 
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
     filter_class = SourceFilter
     ordering_fields = ('name', 'source_type',
                        'most_recent_connect_scan__start_time')
     ordering = ('name',)
+    search_fields = ('name', 'credentials__name')
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the sources."""
