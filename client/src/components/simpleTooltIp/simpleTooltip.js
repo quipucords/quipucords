@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { OverlayTrigger, Tooltip } from 'patternfly-react';
 
-const SimpleTooltip = ({ children, tooltip, placement, trigger, delayShow, ...rest }) => {
+const SimpleTooltip = ({ children, tooltip, placement, trigger, delayShow, ...props }) => {
   return (
     <OverlayTrigger
-      overlay={<Tooltip {...rest}>{tooltip}</Tooltip>}
+      overlay={<Tooltip {...props}>{tooltip}</Tooltip>}
       placement={placement}
       trigger={trigger}
       delayShow={delayShow}
@@ -14,6 +14,7 @@ const SimpleTooltip = ({ children, tooltip, placement, trigger, delayShow, ...re
     </OverlayTrigger>
   );
 };
+
 SimpleTooltip.propTypes = {
   children: PropTypes.node,
   tooltip: PropTypes.node,
@@ -28,4 +29,4 @@ SimpleTooltip.defaultProps = {
   delayShow: 500
 };
 
-export { SimpleTooltip };
+export default SimpleTooltip;

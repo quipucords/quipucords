@@ -4,15 +4,12 @@ import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
 import { Button, Checkbox, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
-
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
-
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
-import { ScanSourceList } from './scanSourceList';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
+import ScanSourceList from './scanSourceList';
 import ScanHostsList from './scanHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';

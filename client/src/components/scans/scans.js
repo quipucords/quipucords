@@ -24,7 +24,7 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
 
 class Scans extends React.Component {
