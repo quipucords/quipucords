@@ -95,7 +95,7 @@ stageApi()
 
   if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
     echo "Starting staging API..."
-    docker run -d --rm -p $PORT:443 -v $DIR:/app/quipucords/client:cached --name $NAME $CONTAINER >/dev/null
+    docker run -d --rm -p $PORT:443 -v $DIR:/app/quipucords/client:cached -v $DIR:/app/quipucords/quipucords/templates/client:cached --name $NAME $CONTAINER >/dev/null
   fi
 
   if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
@@ -173,4 +173,3 @@ prodApi()
 
   echo ""
 }
-
