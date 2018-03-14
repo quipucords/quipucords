@@ -1,0 +1,13 @@
+---
+
+- name: Set is_rhel6
+  set_fact:
+    is_rhel6: "{{(ansible_distribution == 'RedHat') and (ansible_distribution_major_version == '6')}}"
+
+- name: Set is_rhel7
+  set_fact:
+    is_rhel7: "{{(ansible_distribution == 'RedHat') and (ansible_distribution_major_version == '7')}}"
+
+- name: Get local package directory
+  set_fact:
+    pkg_install_dir: "{{ ansible_env['PKG_DIR'] | default(ansible_env['PWD'] + '/packages/') }}"
