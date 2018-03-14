@@ -1,0 +1,81 @@
+---
+
+- name: Set server directory
+  set_fact:
+    server_install_dir: "{{ ansible_env['SERVER_DIR'] | default(ansible_env['HOME'] + '/quipucords') }}"
+
+- name: Set server port
+  set_fact:
+    server_port: "{{ ansible_env['SERVER_PORT'] | default('443') }}"
+
+- name: Set server image name
+  set_fact:
+    server_image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:latest') }}"
+
+- name: Set server name
+  set_fact:
+    server_name: "{{ ansible_env['SERVER_NAME'] | default('quipucords') }}"
+
+- name: Find installable local Quipucords server
+  find:
+    paths: "{{ pkg_install_dir }}"
+    patterns: 'quipucords*.tar.gz'
+  register: find_qpc_server_local_raw
+
+- name: Set find_qpc_server_local
+  set_fact:
+    find_qpc_server_local: "{{ find_qpc_server_local_raw['matched'] == 1 }}"
+  when: "find_qpc_server_local_raw is defined and 'matched' in find_qpc_server_local_raw"
+
+- name: Set find_qpc_server_local_path
+  set_fact:
+    find_qpc_server_local_path: "{{ find_qpc_server_local_raw['files'][0]['path'] }}"
+  when: find_qpc_server_local is defined and find_qpc_server_local
+
+- name: Obtain Quipucords server container image
+  get_url:
+    url: https://github.com/quipucords/quipucords/archive/v0.0.1a.tar.gz
+    dest: "{{ pkg_install_dir }}"
+    mode: 0644
+  ignore_errors: yes
+  when: not find_qpc_server_local
+
+- name: Find installable local Quipucords server
+  find:
+    paths: "{{ pkg_install_dir }}"
+    patterns: 'quipucords*.tar.gz'
+  register: find_qpc_server_local_raw
+
+- name: Set find_qpc_server_local
+  set_fact:
+    find_qpc_server_local: "{{ find_qpc_server_local_raw['matched'] == 1 }}"
+  when: "find_qpc_server_local_raw is defined and 'matched' in find_qpc_server_local_raw"
+
+- name: Set find_qpc_server_local_path
+  set_fact:
+    find_qpc_server_local_path: "{{ find_qpc_server_local_raw['files'][0]['path'] }}"
+  when: find_qpc_server_local is defined and find_qpc_server_local
+
+- name: Load Quipucords image into loca Docker registry
+  shell: docker load -i "{{find_qpc_server_local_path}}"
+  ignore_errors: yes
+
+- name: Make server home directory
+  shell: mkdir -p "{{server_install_dir}}"
+  ignore_errors: yes
+
+- name: Make server log directory
+  shell: mkdir -p "{{server_install_dir}}/log"
+  ignore_errors: yes
+
+- name: Make server data directory
+  shell: mkdir -p "{{server_install_dir}}/data"
+  ignore_errors: yes
+
+- name: Make server sshkeys directory
+  shell: mkdir -p "{{server_install_dir}}/sshkeys"
+  ignore_errors: yes
+
+- name: Start server
+  shell: docker run --name "{{ server_name }}" -d -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys -v "{{ server_install_dir }}"/data:/var/data -v "{{ server_install_dir }}"/log:/var/log -i "{{ server_image }}"
+  ignore_errors: yes

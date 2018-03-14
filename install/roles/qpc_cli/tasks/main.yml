@@ -1,0 +1,50 @@
+---
+
+- name: Find installable local QPC rpm
+  find:
+    paths: "{{ pkg_install_dir }}"
+    patterns: 'qpc*.rpm'
+  register: find_qpc_rpm_local_raw
+
+- name: Set find_qpc_rpm_local
+  set_fact:
+    find_qpc_rpm_local: "{{ find_qpc_rpm_local_raw['matched'] == 1 }}"
+  when: "find_qpc_rpm_local_raw is defined and 'matched' in find_qpc_rpm_local_raw"
+
+- name: Set find_qpc_rpm_local_path
+  set_fact:
+    find_qpc_rpm_local_path: "{{ find_qpc_rpm_local_raw['files'][0]['path'] }}"
+  when: find_qpc_rpm_local is defined and find_qpc_rpm_local
+
+- name: Install QPC from local path
+  shell: rpm -Uvh --force "{{find_qpc_rpm_local_path}}"
+  ignore_errors: yes
+  when: find_qpc_rpm_local
+
+- name: Add QPC repository
+  get_url:
+    url: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo
+    dest: /etc/yum.repos.d/group_quipucords-qpc-epel-7.repo
+    mode: 0644
+    force: yes
+  ignore_errors: yes
+  when: not find_qpc_server_local and is_rhel7
+
+- name: Add QPC repository
+  get_url:
+    url: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-6/group_quipucords-qpc-epel-6.repo
+    dest: /etc/yum.repos.d/group_quipucords-qpc-epel-6.repo
+    mode: 0644
+    force: yes
+  ignore_errors: yes
+  when: not find_qpc_server_local and is_rhel6
+
+- name: install the latest version of QPC
+  yum:
+    name: qpc
+    state: latest
+  when: not find_qpc_rpm_local
+
+- name: Configure QPC to talk to server
+  shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"
+  ignore_errors: yes

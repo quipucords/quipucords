@@ -1,0 +1,12 @@
+# Install playbook for Quipucords
+---
+
+- name: Install the Quipucords components
+  hosts: localhost
+  become: true
+  roles:
+    - prep
+    - epel
+    - docker
+    - qpc_server
+    - qpc_cli
