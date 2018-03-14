@@ -183,7 +183,7 @@ After Docker is installed, you can obtain and install the container image that e
 
 1. Download the server container image by entering the following command::
 
-    #  curl -k -O -sSL https://ftp.redhat.com/repo/container/quipucords.pilot.tar.gz
+    #  curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.1-pilot/quipucords.pilot.e9ccd8cc05e41ee555f768eb2692f785aaf7e942.tar.gz
 
 2. Load the container image into the local Docker registry by entering the following command:
 
