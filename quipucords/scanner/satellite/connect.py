@@ -44,7 +44,7 @@ class ConnectTaskRunner(ScanTaskRunner):
                 utils.status(self.scan_task)
             if status_code == 200:
                 api = create(satellite_version, api_version,
-                             self.scan_task)
+                             self.scan_job, self.scan_task)
                 if not api:
                     error_message = 'Satellite version %s with '\
                         'api version %s is not supported.\n' %\

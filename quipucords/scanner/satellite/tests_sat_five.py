@@ -55,7 +55,7 @@ class SatelliteFiveTest(TestCase):
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        self.api = SatelliteFive(self.scan_task)
+        self.api = SatelliteFive(self.scan_job, self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""

@@ -58,7 +58,7 @@ class SatelliteSixV1Test(TestCase):
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
-        self.api = SatelliteSixV1(self.scan_task)
+        self.api = SatelliteSixV1(self.scan_job, self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -405,7 +405,7 @@ class SatelliteSixV2Test(TestCase):
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT)
         self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
-        self.api = SatelliteSixV2(self.scan_task)
+        self.api = SatelliteSixV2(self.scan_job, self.scan_task)
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -638,10 +638,11 @@ class SatelliteSixV2Test(TestCase):
                    side_effect=mock_sat_exception) as mock_fields:
             detail = self.api.host_details(1, 'sys1')
             inspect_result = self.scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 1)
-            sys_result = inspect_result.systems.all().first()
-            self.assertEqual(sys_result.status, SystemInspectionResult.FAILED)
-            self.assertEqual(detail, {})
+            self.assertEqual(len(inspect_result.systems.all()), 0)
+            self.assertEqual(
+                detail, {'host_name': 'sys1',
+                         'details': {},
+                         'status': 'failed'})
             mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
 
     def test_host_details(self):
@@ -726,7 +727,10 @@ class SatelliteSixV2Test(TestCase):
             with patch('scanner.satellite.six.host_subscriptions',
                        return_value=subs_return_value) as mock_subs:
                 details = self.api.host_details(host_id=1, host_name='sys1')
-                self.assertEqual(details, expected)
+                self.assertEqual(
+                    details, {'host_name': 'sys1',
+                              'details': expected,
+                              'status': 'success'})
                 mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
                 mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY)
 
@@ -742,7 +746,7 @@ class SatelliteSixV2Test(TestCase):
         inspect_result.save()
         detail = self.api.host_details(1, 'sys1')
         self.assertEqual(len(inspect_result.systems.all()), 1)
-        self.assertEqual(detail, {})
+        self.assertEqual(detail, None)
 
     def test_hosts_facts_with_err(self):
         """Test the hosts_facts method."""
@@ -753,7 +757,11 @@ class SatelliteSixV2Test(TestCase):
             with self.assertRaises(SatelliteException):
                 self.api.hosts_facts()
 
-    def test_hosts_facts(self):
+    @patch('multiprocessing.pool.Pool.starmap', return_value=[
+        {'host_name': 'sys10',
+         'details': {},
+         'status': SystemInspectionResult.SUCCESS}])
+    def test_hosts_facts(self, mock_pool):
         """Test the hosts_facts method."""
         hosts_url = 'https://{sat_host}:{port}/api/v2/hosts'
         with requests_mock.Mocker() as mocker:
@@ -766,8 +774,6 @@ class SatelliteSixV2Test(TestCase):
                 'results': [{'id': 10, 'name': 'sys10'}]
                 }  # noqa
             mocker.get(url, status_code=200, json=jsonresult)
-            detail_return_value = {}
-            with patch.object(SatelliteSixV2, 'host_details',
-                              return_value=detail_return_value) as mock_detail:
-                self.api.hosts_facts()
-                mock_detail.assert_called_once_with(ANY, ANY)
+            self.api.hosts_facts()
+            inspect_result = self.scan_task.inspection_result
+            self.assertEqual(len(inspect_result.systems.all()), 1)
