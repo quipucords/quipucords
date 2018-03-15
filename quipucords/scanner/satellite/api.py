@@ -88,6 +88,7 @@ class SatelliteInterface(object):
         """
         sys_result = SystemInspectionResult(
             name=name,
+            source=self.source,
             status=status)
         sys_result.save()
 
