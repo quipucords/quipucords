@@ -10,7 +10,7 @@
 #
 """Test the satellite five interface."""
 
-from unittest.mock import patch, ANY
+from unittest.mock import patch
 import xmlrpc.client
 from django.test import TestCase
 from api.models import (Credential,
@@ -132,7 +132,9 @@ class SatelliteFiveTest(TestCase):
         details = self.api.host_details(host_id=1, host_name='sys1',
                                         last_checkin='', virtual_hosts=virt,
                                         virtual_guests={}, physical_hosts=[])
-        self.assertEqual(details, expected)
+        self.assertEqual(details, {'details': expected,
+                                   'host_name': 'sys1',
+                                   'status': 'success'})
 
     @patch('xmlrpc.client.ServerProxy')
     def test_host_details_virt_guest(self, mock_serverproxy):
@@ -165,7 +167,9 @@ class SatelliteFiveTest(TestCase):
                                         last_checkin='', virtual_hosts=virt,
                                         virtual_guests={1: 2},
                                         physical_hosts=[])
-        self.assertEqual(details, expected)
+        self.assertEqual(details, {'details': expected,
+                                   'host_name': 'sys1',
+                                   'status': 'success'})
 
     def test_host_details_skip(self):
         """Test host_details method for already captured data."""
@@ -183,7 +187,7 @@ class SatelliteFiveTest(TestCase):
                                        virtual_guests={1: 2},
                                        physical_hosts=[])
         self.assertEqual(len(inspect_result.systems.all()), 1)
-        self.assertEqual(detail, {})
+        self.assertEqual(detail, None)
 
     @patch('xmlrpc.client.ServerProxy')
     def test_host_details_with_err(self, mock_serverproxy):
@@ -197,10 +201,11 @@ class SatelliteFiveTest(TestCase):
                                         virtual_guests={1: 2},
                                         physical_hosts=[])
         inspect_result = self.scan_task.inspection_result
-        self.assertEqual(len(inspect_result.systems.all()), 1)
-        sys_result = inspect_result.systems.all().first()
-        self.assertEqual(sys_result.status, SystemInspectionResult.FAILED)
-        self.assertEqual(details, {})
+        self.assertEqual(len(inspect_result.systems.all()), 0)
+        self.assertEqual(
+            details, {'details': {},
+                      'host_name': 'sys1',
+                      'status': 'failed'})
 
     @patch('xmlrpc.client.ServerProxy')
     def test_virtual_guests_with_err(self, mock_serverproxy):
@@ -274,10 +279,14 @@ class SatelliteFiveTest(TestCase):
         with self.assertRaises(SatelliteException):
             self.api.hosts_facts()
 
+    @patch('multiprocessing.pool.Pool.starmap', return_value=[
+        {'host_name': 'sys10',
+         'details': {},
+         'status': SystemInspectionResult.SUCCESS}])
     @patch('xmlrpc.client.ServerProxy')
-    def test_hosts_facts(self, mock_serverproxy):
+    def test_hosts_facts(self, mock_serverproxy, mock_pool):
         """Test the hosts_facts method."""
-        detail_value = {}
+        # pylint: disable=unused-argument
         systems = [{'id': 1, 'name': 'sys1'}]
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'
@@ -288,11 +297,8 @@ class SatelliteFiveTest(TestCase):
                           return_value=hosts_return_value) as mock_vhosts:
             with patch.object(SatelliteFive, 'physical_hosts',
                               return_value=[]) as mock_physical:
-                with patch.object(SatelliteFive,
-                                  'host_details',
-                                  return_value=detail_value) as mock_detail:
-                    self.api.hosts_facts()
-                    mock_vhosts.assert_called_once_with()
-                    mock_physical.assert_called_once_with()
-                    mock_detail.assert_called_once_with(ANY, ANY, ANY,
-                                                        ANY, ANY, ANY)
+                self.api.hosts_facts()
+                inspect_result = self.scan_task.inspection_result
+                self.assertEqual(len(inspect_result.systems.all()), 1)
+                mock_vhosts.assert_called_once_with()
+                mock_physical.assert_called_once_with()
