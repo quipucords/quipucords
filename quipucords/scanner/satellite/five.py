@@ -11,6 +11,7 @@
 """Satellite 5 API handlers."""
 
 import logging
+from multiprocessing import Pool
 import xmlrpc.client
 from api.models import SystemInspectionResult
 from scanner.satellite.api import SatelliteInterface, SatelliteException
@@ -117,9 +118,12 @@ class SatelliteFive(SatelliteInterface):
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
                          host_name)
-            return details
+            return None
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         try:
+            message = 'REQUESTING HOST DETAILS: %s' % host_name
+            self.inspect_scan_task.log_message(message)
+
             key = client.auth.login(user, password)
             uuid = client.system.get_uuid(key, host_id)
             if uuid is None or uuid == '':
@@ -193,14 +197,17 @@ class SatelliteFive(SatelliteInterface):
 
             client.auth.logout(key)
 
-            self.record_inspect_result(host_name, details)
             logger.debug('host_id=%s, host_details=%s',
                          host_id, details)
+            return {'host_name': host_name,
+                    'details': details,
+                    'status': SystemInspectionResult.SUCCESS}
         except xmlrpc.client.Fault as xml_error:
             error_message = 'Satellite error encountered: %s\n' % xml_error
-            self.record_inspect_result(host_name, details,
-                                       status=SystemInspectionResult.FAILED)
             logger.error(error_message)
+            return {'host_name': host_name,
+                    'details': details,
+                    'status': SystemInspectionResult.FAILED}
 
         return details
 
@@ -297,16 +304,30 @@ class SatelliteFive(SatelliteInterface):
 
         hosts = []
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
-        try:
-            key = client.auth.login(user, password)
-            hosts = client.system.list_user_systems(key)
-            client.auth.logout(key)
-        except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
-        virtual_hosts, virtual_guests = self.virtual_hosts()
-        physical_hosts = self.physical_hosts()
+        with Pool(processes=self.max_concurrency) as pool:
+            try:
+                key = client.auth.login(user, password)
+                hosts = client.system.list_user_systems(key)
+                client.auth.logout(key)
+            except xmlrpc.client.Fault as xml_error:
+                raise SatelliteException(str(xml_error))
+            virtual_hosts, virtual_guests = self.virtual_hosts()
+            physical_hosts = self.physical_hosts()
 
-        for host in hosts:
-            last_checkin = str(host.get(LAST_CHECKIN, ''))
-            self.host_details(host.get(ID), host.get(NAME), last_checkin,
-                              virtual_hosts, virtual_guests, physical_hosts)
+            chunks = [hosts[i:i + self.max_concurrency]
+                      for i in range(0, len(hosts), self.max_concurrency)]
+            for chunk in chunks:
+                host_params = [(host.get(ID),
+                                host.get(NAME),
+                                str(host.get(LAST_CHECKIN, '')),
+                                virtual_hosts,
+                                virtual_guests,
+                                physical_hosts)
+                               for host in chunk]
+                results = pool.starmap(self.host_details, host_params)
+                for result in results:
+                    if result is not None:
+                        self.record_inspect_result(
+                            result.get('host_name'),
+                            result.get('details'),
+                            result.get('status'))
