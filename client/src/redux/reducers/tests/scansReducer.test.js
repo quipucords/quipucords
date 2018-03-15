@@ -60,6 +60,12 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false
+  },
+
+  merge_dialog: {
+    show: false,
+    scans: [],
+    details: false
   }
 };
 

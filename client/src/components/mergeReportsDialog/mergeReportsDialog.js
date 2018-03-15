@@ -7,7 +7,7 @@ import { Modal, Button, Icon } from 'patternfly-react';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
-import { toastNotificationTypes } from '../../redux/constants';
+import { scansTypes, toastNotificationTypes } from '../../redux/constants';
 import { mergeScans } from '../../redux/actions/scansActions';
 import { getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } from '../../redux/actions/reportsActions';
 
@@ -15,7 +15,13 @@ class MergeReportsDialog extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['mergeScanResults']);
+    helpers.bindMethods(this, ['mergeScanResults', 'onClose']);
+  }
+
+  onClose() {
+    Store.dispatch({
+      type: scansTypes.MERGE_SCAN_DIALOG_HIDE
+    });
   }
 
   getValidScans() {
@@ -37,8 +43,6 @@ class MergeReportsDialog extends React.Component {
   }
 
   notifyDownloadStatus(error, results) {
-    const { onClose } = this.props;
-
     if (error) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
@@ -54,7 +58,7 @@ class MergeReportsDialog extends React.Component {
       });
     }
 
-    onClose();
+    this.onClose();
   }
 
   mergeScanResults() {
@@ -118,12 +122,11 @@ class MergeReportsDialog extends React.Component {
   }
 
   renderButtons() {
-    const { onClose } = this.props;
     const validCount = _.size(this.getValidScans());
 
     if (validCount === 0) {
       return (
-        <Button bsStyle="primary" className="btn-cancel" onClick={onClose}>
+        <Button bsStyle="primary" className="btn-cancel" onClick={this.onClose}>
           Close
         </Button>
       );
@@ -131,7 +134,7 @@ class MergeReportsDialog extends React.Component {
 
     return (
       <React.Fragment>
-        <Button bsStyle="default" className="btn-cancel" onClick={onClose}>
+        <Button bsStyle="default" className="btn-cancel" onClick={this.onClose}>
           Cancel
         </Button>
         <Button bsStyle="primary" type="submit" onClick={this.mergeScanResults}>
@@ -142,7 +145,7 @@ class MergeReportsDialog extends React.Component {
   }
 
   render() {
-    const { show, scans, details, onClose } = this.props;
+    const { show, scans, details } = this.props;
 
     if (!scans || scans.length === 0 || !scans[0]) {
       return null;
@@ -174,9 +177,9 @@ class MergeReportsDialog extends React.Component {
     }
 
     return (
-      <Modal show={show} onHide={onClose}>
+      <Modal show={show} onHide={this.onClose}>
         <Modal.Header>
-          <button className="close" onClick={onClose} aria-hidden="true" aria-label="Close">
+          <button className="close" onClick={this.onClose} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
           <Modal.Title>{`${details ? 'Detailed' : 'Summary'} Merge Report`}</Modal.Title>
@@ -206,8 +209,7 @@ MergeReportsDialog.propTypes = {
   getMergedScanReportSummaryCsv: PropTypes.func,
   show: PropTypes.bool.isRequired,
   scans: PropTypes.array,
-  details: PropTypes.bool.isRequired,
-  onClose: PropTypes.func
+  details: PropTypes.bool.isRequired
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -216,4 +218,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   getMergedScanReportSummaryCsv: id => dispatch(getMergedScanReportSummaryCsv(id))
 });
 
-export default connect(helpers.noop, mapDispatchToProps)(MergeReportsDialog);
+const mapStateToProps = function(state) {
+  return {
+    ...state.scans.merge_dialog
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(MergeReportsDialog);
