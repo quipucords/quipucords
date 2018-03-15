@@ -1776,7 +1776,7 @@ definitions:
       value:
         type: "string"
         description: "The raw fact value"
-  SysInpectResultOut:
+  SysInspectResultOut:
     type: "object"
     required:
       - name
@@ -1810,7 +1810,7 @@ definitions:
       systems:
         type: "array"
         items:
-          $ref: "#/definitions/SysInpectResultOut"
+          $ref: "#/definitions/SysInspectResultOut"
         description: "The inspection result for each system."
   TaskInspectResultsOut:
     type: "object"
