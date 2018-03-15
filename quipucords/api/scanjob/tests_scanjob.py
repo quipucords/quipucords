@@ -630,50 +630,6 @@ class ScanJobTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_inspection_delete_source(self):
-        """Get ScanJob inspection results after source has been deleted."""
-        # pylint: disable=no-member
-        source2 = Source(
-            name='source2',
-            source_type='network',
-            port=22)
-        source2.save()
-        source2.credentials.add(self.cred)
-        scan_job, scan_task = create_scan_job(
-            source2, ScanTask.SCAN_TYPE_INSPECT)
-
-        # Create an inspection system result
-        inspect_sys_result = SystemInspectionResult(
-            name='Foo',
-            status=SystemConnectionResult.SUCCESS,
-            source=source2)
-        inspect_sys_result.save()
-
-        fact = RawFact(name='fact_key', value='"fact_value"')
-        fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        source2.delete()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
-
-        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        json_response = response.json()
-        expected = {'count': 1,
-                    'next': None,
-                    'previous': None,
-                    'results': [
-                        {'name': 'Foo',
-                         'status': 'success',
-                         'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
-        self.assertEqual(json_response, expected)
-
     def test_inspection_paging(self):
         """Test paging of ScanJob inspection results."""
         # pylint: disable=no-member

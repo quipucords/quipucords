@@ -731,6 +731,56 @@ paths:
             $ref: "#/definitions/ScanJobResultsOut"
         404:
           description: "Scan job results not found"
+  /jobs/{scan_job_id}/connection/:
+    get:
+      tags:
+        - "Scan Job"
+      summary: "Get the connection results of existing scan job"
+      description: "Get the connection results of a scan."
+      operationId: "getScanConnectionResults"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to retrieve connection results for"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job connection results retrieved"
+          schema:
+            $ref: "#/definitions/ScanJobConnectionResultsOut"
+        400:
+          description: "Invalid input"
+        404:
+          description: "Scan job connection results not found"
+  /jobs/{scan_job_id}/inspection/:
+    get:
+      tags:
+        - "Scan Job"
+      summary: "Get the inspection results of existing scan job"
+      description: "Get the inspection results of a scan."
+      operationId: "getScanInspectionResults"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "scan_job_id"
+        in: "path"
+        description: "ID of scan job to retrieve inspection results for"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Scan job inspection results retrieved"
+          schema:
+            $ref: "#/definitions/ScanJobInspectionResultsOut"
+        400:
+          description: "Invalid input"
+        404:
+          description: "Scan job inspection results not found"
   /jobs/{scan_job_id}/pause/:
     put:
       tags:
@@ -1666,6 +1716,7 @@ definitions:
     type: "object"
     required:
       - name
+      - source
       - credential
       - status
     properties:
@@ -1721,6 +1772,7 @@ definitions:
     type: "object"
     required:
       - name
+      - source
       - facts
       - status
     properties:
@@ -1772,11 +1824,31 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/TaskConnResultsOut"
-          description: "The task onnection results"
+          description: "The task connection results"
         inspection_results:
           type: "array"
           items:
             $ref: "#/definitions/TaskInspectResultsOut"
+          description: "The task inspection results"
+  ScanJobConnectionResultsOut:
+    type: "object"
+    required:
+      - connection_results
+    properties:
+        connection_results:
+          type: "array"
+          items:
+            $ref: "#/definitions/SysConnResultOut"
+          description: "The task connection results"
+  ScanJobInspectionResultsOut:
+    type: "object"
+    required:
+      - inspection_results
+    properties:
+        inspection_results:
+          type: "array"
+          items:
+            $ref: "#/definitions/SysInspectResultOut"
           description: "The task inspection results"
   User:
     type: "object"

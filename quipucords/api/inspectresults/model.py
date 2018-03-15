@@ -49,7 +49,7 @@ class SystemInspectionResult(models.Model):
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
     facts = models.ManyToManyField(RawFact)
     source = models.ForeignKey(Source,
-                               on_delete=models.SET_NULL,
+                               on_delete=models.CASCADE,
                                null=True)
 
     def __str__(self):
