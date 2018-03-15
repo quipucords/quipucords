@@ -91,7 +91,6 @@ class Sources extends React.Component {
           viewType: viewTypes.SOURCES_VIEW,
           item: item
         });
-
       }
     } catch (e) {
       console.dir(e);

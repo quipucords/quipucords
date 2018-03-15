@@ -2,7 +2,6 @@ import { sourcesTypes } from '../constants';
 import sourcesService from '../../services/sourcesService';
 
 const addSource = (data, query = {}) => dispatch => {
-  debugger;
   return dispatch({
     type: sourcesTypes.ADD_SOURCE,
     payload: sourcesService.addSource(data, query)

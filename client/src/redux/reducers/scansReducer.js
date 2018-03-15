@@ -44,6 +44,21 @@ const initialState = {
     cancel: false,
     pause: false,
     restart: false
+  },
+
+  update: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    delete: false
+  },
+
+  merge: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false
   }
 };
 
@@ -456,6 +471,84 @@ const scansReducer = function(state = initialState, action) {
         {
           restart: true,
           pending: false,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Error/Rejected
+    case helpers.rejectedAction(scansTypes.DELETE_SCAN):
+      return helpers.setStateProp(
+        'update',
+        {
+          error: action.error,
+          errorMessage: helpers.getErrorMessageFromResults(action.payload),
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.pendingAction(scansTypes.DELETE_SCAN):
+      return helpers.setStateProp(
+        'update',
+        {
+          pending: true,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.fulfilledAction(scansTypes.DELETE_SCAN):
+      return helpers.setStateProp(
+        'update',
+        {
+          fulfilled: true,
+          delete: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.rejectedAction(scansTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
+        {
+          error: action.error,
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.pendingAction(scansTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
+        {
+          pending: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.fulfilledAction(scansTypes.GET_MERGE_SCAN_RESULTS):
+      return helpers.setStateProp(
+        'merge',
+        {
           fulfilled: true
         },
         {
