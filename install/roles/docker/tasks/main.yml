@@ -52,7 +52,6 @@
 
 - name: Install Docker from local path
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
-  ignore_errors: yes
   when: not have_docker
 
 - name: Add Docker CE repository for Centos/RHEL 7 family
@@ -96,14 +95,12 @@
 
 - name: Install Docker from local path
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
-  ignore_errors: yes
   when: is_rhel6 and not have_docker
 
 - name: Start Docker
   service:
     name: docker
     state: started
-  ignore_errors: yes
 
 - name: Setup chkconfig to start docker
   shell: chkconfig docker on
