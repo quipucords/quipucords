@@ -11,3 +11,4 @@
 - name: Get local package directory
   set_fact:
     pkg_install_dir: "{{ ansible_env['PKG_DIR'] | default(ansible_env['PWD'] + '/packages/') }}"
+  when: pkg_install_dir is not defined
