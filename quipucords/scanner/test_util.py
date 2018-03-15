@@ -91,5 +91,8 @@ def create_scan_job_two_tasks(source,
 
     # grab the scan tasks
     scan_tasks = scan_job.tasks.all()
+    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
+        for task in scan_tasks:
+            task.complete()
 
     return scan_job, scan_tasks
