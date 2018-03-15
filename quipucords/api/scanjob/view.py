@@ -59,15 +59,21 @@ def expand_system_connection(system):
     """
     if 'source' in system.keys():
         source_id = system['source']
-        system['source'] = \
-            Source.objects.filter(id=source_id).values('id',
-                                                       'name',
-                                                       'source_type').first()
+        if source_id is None:
+            system['source'] = 'THIS SOURCE HAS BEEN DELETED'
+        else:
+            system['source'] = \
+                Source.objects.filter(id=source_id).values('id',
+                                                           'name',
+                                                           'source_type').first()
     if 'credential' in system.keys():
         cred_id = system['credential']
-        system['credential'] = \
-            Credential.objects.filter(id=cred_id).values('id',
-                                                         'name').first()
+        if cred_id is None:
+            system['credential'] = 'THIS CREDENTIAL HAS BEEN DELETED'
+        else:
+            system['credential'] = \
+                Credential.objects.filter(id=cred_id).values('id',
+                                                             'name').first()
 
 
 def expand_sys_conn_result(conn_result):
