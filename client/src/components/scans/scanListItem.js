@@ -5,7 +5,7 @@ import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Button, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
+import { Button, Checkbox, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
 
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
@@ -22,7 +22,7 @@ class ScanListItem extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['toggleExpand', 'closeExpand']);
+    helpers.bindMethods(this, ['toggleExpand', 'closeExpand', 'itemSelectChange']);
 
     this.state = {
       scanResultsPending: false,
@@ -126,6 +126,24 @@ class ScanListItem extends React.Component {
     const { item } = this.props;
     Store.dispatch({
       type: viewTypes.EXPAND_ITEM,
+      viewType: viewTypes.SCANS_VIEW,
+      item: item
+    });
+  }
+
+  isSelected(item, selectedSources) {
+    return (
+      _.find(selectedSources, nextSelected => {
+        return nextSelected.id === item.id;
+      }) !== undefined
+    );
+  }
+
+  itemSelectChange() {
+    const { item, selectedScans } = this.props;
+
+    Store.dispatch({
+      type: this.isSelected(item, selectedScans) ? viewTypes.DESELECT_ITEM : viewTypes.SELECT_ITEM,
       viewType: viewTypes.SCANS_VIEW,
       item: item
     });
@@ -332,18 +350,20 @@ class ScanListItem extends React.Component {
   }
 
   render() {
-    const { item } = this.props;
+    const { item, selectedScans } = this.props;
+    const selected = this.isSelected(item, selectedScans);
 
     const classes = cx({
       'quipucords-scan-list-item': true,
       'list-view-pf-top-align': true,
-      active: item.selected
+      active: selected
     });
 
     return (
       <ListView.Item
         key={item.id}
         className={classes}
+        checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={<strong>{item.name}</strong>}
         description={this.renderDescription()}
@@ -369,12 +389,14 @@ ScanListItem.propTypes = {
   onResume: PropTypes.func,
   getScanResults: PropTypes.func,
   getScanJobs: PropTypes.func,
+  selectedScans: PropTypes.array,
   expandedScans: PropTypes.array
 };
 
 const mapStateToProps = function(state) {
   return Object.assign({
-    expandedScans: state.viewOptions[viewTypes.SCANS_VIEW].expandedItems
+    expandedScans: state.viewOptions[viewTypes.SCANS_VIEW].expandedItems,
+    selectedScans: state.viewOptions[viewTypes.SCANS_VIEW].selectedItems
   });
 };
 

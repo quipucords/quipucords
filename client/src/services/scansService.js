@@ -51,20 +51,17 @@ class ScansService {
   }
 
   static startScan(id) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id);
-
     return axios({
       method: 'post',
-      url: apiPath,
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
   static getScanJobs(id, query = {}) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id);
     return axios({
-      url: apiPath,
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
       params: query
     });
   }
@@ -76,41 +73,43 @@ class ScansService {
   }
 
   static getScanResults(id) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_RESULTS.replace('{0}', id);
-
     return axios({
-      url: apiPath
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESULTS.replace('{0}', id)
     });
   }
 
   static pauseScan(id) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id);
-
     return axios({
       method: 'put',
-      url: apiPath,
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
   static cancelScan(id) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id);
-
     return axios({
       method: 'put',
-      url: apiPath,
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });
   }
 
   static restartScan(id) {
-    let apiPath = process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id);
-
     return axios({
       method: 'put',
-      url: apiPath,
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id),
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+    });
+  }
+
+  static mergeScans(data) {
+    return axios({
+      method: 'put',
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_MERGE,
+      data: data,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
     });

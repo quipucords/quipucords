@@ -25,3 +25,17 @@
     color: $color-pf-black;
   }
 }
+
+.merge-reports-body {
+  display: flex;
+
+  .merge-reports-icon {
+    font-size: 3em;
+    margin-right: 20px;
+    margin-top: -10px;
+  }
+
+  .merge-reports-heading {
+    margin-top: -2px;
+  }
+}

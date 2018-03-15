@@ -20,12 +20,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
 from django_filters.rest_framework import (DjangoFilterBackend,
-                                           FilterSet)
+                                           FilterSet,
+                                           CharFilter)
 from filters import mixins
 from api.filters import ListFilter
 from api.serializers import CredentialSerializer
@@ -78,12 +79,13 @@ class CredentialFilter(FilterSet):
     """Filter for host credentials by name."""
 
     name = ListFilter(name='name')
+    search_by_name = CharFilter(name='name', lookup_expr='contains')
 
     class Meta:
         """Metadata for filterset."""
 
         model = Credential
-        fields = ['name', 'cred_type']
+        fields = ['name', 'cred_type', 'search_by_name']
 
 
 # pylint: disable=too-many-ancestors
@@ -98,11 +100,10 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CredentialFilter
     ordering_fields = ('name', 'cred_type')
     ordering = ('name',)
-    search_fields = ('name',)
 
     def list(self, request):  # pylint: disable=unused-argument
         """List the host credentials."""
