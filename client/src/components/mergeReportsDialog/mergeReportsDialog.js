@@ -9,7 +9,7 @@ import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
 import { mergeScans } from '../../redux/actions/scansActions';
-import { getMergedScanReportDetailsCsv } from '../../redux/actions/reportsActions';
+import { getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } from '../../redux/actions/reportsActions';
 
 class MergeReportsDialog extends React.Component {
   constructor() {
@@ -58,16 +58,22 @@ class MergeReportsDialog extends React.Component {
   }
 
   mergeScanResults() {
-    const { scans, mergeScans, getMergedScanReportDetailsCsv } = this.props;
+    const { scans, mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
 
     const data = { jobs: this.getValidJobsId(scans) };
     mergeScans(data).then(
       response => {
-        console.dir(response);
-        getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
-          success => this.notifyDownloadStatus(false),
-          error => this.notifyDownloadStatus(true, error)
-        );
+        if (details) {
+          getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
+            success => this.notifyDownloadStatus(false),
+            error => this.notifyDownloadStatus(true, error)
+          );
+        } else {
+          getMergedScanReportSummaryCsv(_.get(response, 'value.data.id')).then(
+            success => this.notifyDownloadStatus(false),
+            error => this.notifyDownloadStatus(true, error)
+          );
+        }
       },
       error => this.notifyDownloadStatus(true, error)
     );
@@ -197,6 +203,7 @@ class MergeReportsDialog extends React.Component {
 MergeReportsDialog.propTypes = {
   mergeScans: PropTypes.func,
   getMergedScanReportDetailsCsv: PropTypes.func,
+  getMergedScanReportSummaryCsv: PropTypes.func,
   show: PropTypes.bool.isRequired,
   scans: PropTypes.array,
   details: PropTypes.bool.isRequired,
@@ -205,7 +212,8 @@ MergeReportsDialog.propTypes = {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   mergeScans: data => dispatch(mergeScans(data)),
-  getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id))
+  getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id)),
+  getMergedScanReportSummaryCsv: id => dispatch(getMergedScanReportSummaryCsv(id))
 });
 
 export default connect(helpers.noop, mapDispatchToProps)(MergeReportsDialog);

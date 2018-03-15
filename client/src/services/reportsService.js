@@ -69,7 +69,7 @@ class ReportsService {
   }
 
   static getMergedScanReportDetailsCsv(id) {
-    return this.getReportSummary(id, { format: 'csv' }).then(success => {
+    return this.getReportDetails(id, { format: 'csv' }).then(success => {
       return this.downloadCSV(success.data, `merged_report_details_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
