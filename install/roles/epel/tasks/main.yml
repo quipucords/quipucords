@@ -21,7 +21,6 @@
 - name: Check for EPEL rpm
   shell: rpm -qa | grep epel-release
   register: have_epel_rpm_raw
-  ignore_errors: yes
   when: have_rpm
 
 - name: Set have_epel_rpm
@@ -48,15 +47,12 @@
 
 - name: Install EPEL from local path
   shell: rpm -Uvh --force "{{find_epel_rpm_local_path}}"
-  ignore_errors: yes
   when: not have_epel_rpm
 
 - name: Install EPEL for RHEL 6 from internet
   shell: rpm -Uvh  --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
-  ignore_errors: yes
   when: is_rhel6 and not have_epel_rpm
 
 - name: Install EPEL for RHEL 7 from internet
   shell: rpm -Uvh --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  ignore_errors: yes
   when: is_rhel7 and not have_epel_rpm
