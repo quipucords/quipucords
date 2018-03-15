@@ -310,8 +310,9 @@ class ScanJob(models.Model):
 
                 count += 1
 
-        self.scan.most_recent_scanjob = self
-        self.scan.save()
+        if self.scan:
+            self.scan.most_recent_scanjob = self
+            self.scan.save()
 
         for source in self.sources.all():
             source.most_recent_connect_scan = self
