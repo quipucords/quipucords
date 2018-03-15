@@ -3,11 +3,17 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Alert, Button, EmptyState, ListView, Modal } from 'patternfly-react';
+import { Alert, Button, DropdownButton, EmptyState, Grid, Form, ListView, MenuItem, Modal } from 'patternfly-react';
 
-import { getScans, startScan, pauseScan, cancelScan, restartScan } from '../../redux/actions/scansActions';
-import { getReportDeploymentsCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
-import { sourcesTypes, toastNotificationTypes, viewToolbarTypes, viewTypes } from '../../redux/constants';
+import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } from '../../redux/actions/scansActions';
+import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
+import {
+  confirmationModalTypes,
+  sourcesTypes,
+  toastNotificationTypes,
+  viewToolbarTypes,
+  viewTypes
+} from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
 
@@ -17,6 +23,8 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
+import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
 
 class Scans extends React.Component {
   constructor() {
@@ -29,13 +37,24 @@ class Scans extends React.Component {
       'doCancelScan',
       'doStartScan',
       'doResumeScan',
+      'deleteScans',
+      'mergeScanResults',
       'addSource',
       'refresh',
-      'notifyActionStatus'
+      'notifyActionStatus',
+      'hideMergeDialog'
     ]);
 
+    // FUTURE: Deletions of scans is not currently desired. This is here in case it ever gets added.
+    //         Delete is fully functional by setting this.okToDelete to true.
+    this.okToDelete = false;
+    this.scansToDelete = [];
+    this.deletingScan = null;
+
     this.state = {
-      lastRefresh: null
+      lastRefresh: null,
+      mergeDialogShown: false,
+      mergeReportDetails: false
     };
   }
 
@@ -51,6 +70,45 @@ class Scans extends React.Component {
 
     if (nextProps.fulfilled && !this.props.fulfilled) {
       this.setState({ lastRefresh: Date.now() });
+    }
+
+    if (_.get(nextProps, 'update.delete')) {
+      if (nextProps.update.fulfilled && !this.props.update.fulfilled) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'success',
+          message: (
+            <span>
+              Scan <strong>{this.deletingScan.name}</strong> successfully deleted.
+            </span>
+          )
+        });
+        this.refresh();
+
+        Store.dispatch({
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.SCANS_VIEW,
+          item: this.deletingScan
+        });
+
+        this.deleteNextScan();
+      }
+
+      if (nextProps.update.error && !this.props.update.error) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'error',
+          header: 'Error',
+          message: (
+            <span>
+              Error removing scan <strong>{this.deletingScan.name}</strong>
+              <p>{nextProps.update.errorMessage}</p>
+            </span>
+          )
+        });
+
+        this.deleteNextScan();
+      }
     }
   }
 
@@ -96,7 +154,7 @@ class Scans extends React.Component {
 
   downloadSummaryReport(reportId) {
     this.props
-      .getReportDeploymentsCsv(reportId)
+      .getReportSummaryCsv(reportId)
       .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
   }
 
@@ -104,6 +162,10 @@ class Scans extends React.Component {
     this.props
       .getReportDetailsCsv(reportId)
       .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
+  }
+
+  mergeScanResults(details) {
+    this.setState({ mergeDialogShown: true, mergeReportDetails: details });
   }
 
   doStartScan(item) {
@@ -150,9 +212,90 @@ class Scans extends React.Component {
 
   refresh(props) {
     const options = _.get(props, 'viewOptions') || this.props.viewOptions;
-    this.props.getScans(
-      helpers.createViewQueryObject(options, { scan_type: 'inspect' })
+    this.props.getScans(helpers.createViewQueryObject(options, { scan_type: 'inspect' }));
+  }
+
+  deleteNextScan() {
+    const { deleteScan } = this.props;
+
+    if (this.scansToDelete.length > 0) {
+      this.deletingScan = this.scansToDelete.pop();
+      if (this.deletingScan) {
+        deleteScan(this.deletingScan.id);
+      }
+    }
+  }
+
+  doDeleteScans(items) {
+    this.scansToDelete = [...items];
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    this.deleteNextScan();
+  }
+
+  handleDeleteScan(item) {
+    let heading = (
+      <span>
+        Are you sure you want to delete the scan <strong>{item.name}</strong>?
+      </span>
     );
+
+    let onConfirm = () => this.doDeleteScans([item]);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Scan',
+      heading: heading,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
+    });
+  }
+
+  deleteScans() {
+    const { viewOptions } = this.props;
+
+    if (_.size(viewOptions.selectedItems) === 0) {
+      return;
+    }
+
+    if (_.size(viewOptions.selectedItems) === 1) {
+      this.handleDeleteScan(viewOptions.selectedItems[0]);
+      return;
+    }
+
+    let heading = <span>Are you sure you want to delete the following scans?</span>;
+
+    let scansList = '';
+    viewOptions.selectedItems.forEach((item, index) => {
+      return (scansList += (index > 0 ? '\n' : '') + item.name);
+    });
+
+    let body = (
+      <Grid.Col sm={12}>
+        <Form.FormControl
+          className="quipucords-form-control"
+          componentClass="textarea"
+          type="textarea"
+          readOnly
+          rows={viewOptions.selectedItems.length}
+          value={scansList}
+        />
+      </Grid.Col>
+    );
+
+    let onConfirm = () => this.doDeleteScans(viewOptions.selectedItems);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Scans',
+      heading: heading,
+      body: body,
+      confirmButtonText: 'Delete',
+      onConfirm: onConfirm
+    });
   }
 
   clearFilters() {
@@ -160,6 +303,10 @@ class Scans extends React.Component {
       type: viewToolbarTypes.CLEAR_FILTERS,
       viewType: viewTypes.SCANS_VIEW
     });
+  }
+
+  hideMergeDialog() {
+    this.setState({ mergeDialogShown: false });
   }
 
   renderPendingMessage() {
@@ -177,6 +324,42 @@ class Scans extends React.Component {
     }
 
     return null;
+  }
+
+  renderScansActions() {
+    const { viewOptions } = this.props;
+
+    let mergeAllowed = _.size(viewOptions.selectedItems) > 1;
+
+    // FUTURE: deletion is not currently enabled
+    let deleteAction = null;
+    if (this.okToDelete) {
+      deleteAction = (
+        <Button disabled={_.size(viewOptions.selectedItems) === 0} onClick={this.deleteScans}>
+          Delete
+        </Button>
+      );
+    }
+
+    return (
+      <div className="form-group">
+        <SimpleTooltip
+          key="mergeButtonTip"
+          id="mergeButtonTip"
+          tooltip="Merge selected scan results into a single report"
+        >
+          <DropdownButton key="mergeButton" title="Merge Report" id="merge-reports-dropdown" disabled={!mergeAllowed}>
+            <MenuItem eventKey="1" onClick={() => this.mergeScanResults(false)}>
+              Summary Report
+            </MenuItem>
+            <MenuItem eventKey="2" onClick={() => this.mergeScanResults(true)}>
+              Detailed Report
+            </MenuItem>
+          </DropdownButton>
+        </SimpleTooltip>
+        {deleteAction}
+      </div>
+    );
   }
 
   renderScansList(items) {
@@ -217,7 +400,7 @@ class Scans extends React.Component {
 
   render() {
     const { error, errorMessage, scans, viewOptions } = this.props;
-    const { lastRefresh } = this.state;
+    const { lastRefresh, mergeDialogShown, mergeReportDetails } = this.state;
 
     if (error) {
       return (
@@ -240,14 +423,22 @@ class Scans extends React.Component {
               sortFields={ScanSortFields}
               onRefresh={this.refresh}
               lastRefresh={lastRefresh}
+              actions={this.renderScansActions()}
               itemsType="Scan"
               itemsTypePlural="Scans"
+              selectedCount={viewOptions.selectedItems.length}
               {...viewOptions}
             />
             <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
             <div className="quipucords-list-container">{this.renderScansList(scans)}</div>
           </div>
           {this.renderPendingMessage()}
+          <MergeReportsDialog
+            show={mergeDialogShown}
+            scans={viewOptions.selectedItems}
+            details={mergeReportDetails}
+            onClose={this.hideMergeDialog}
+          />
         </React.Fragment>
       );
     }
@@ -267,14 +458,16 @@ Scans.propTypes = {
   pauseScan: PropTypes.func,
   cancelScan: PropTypes.func,
   restartScan: PropTypes.func,
-  getReportDeploymentsCsv: PropTypes.func,
+  deleteScan: PropTypes.func,
+  getReportSummaryCsv: PropTypes.func,
   getReportDetailsCsv: PropTypes.func,
   fulfilled: PropTypes.bool,
   error: PropTypes.bool,
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   scans: PropTypes.array,
-  viewOptions: PropTypes.object
+  viewOptions: PropTypes.object,
+  update: PropTypes.object
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -283,13 +476,15 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   pauseScan: id => dispatch(pauseScan(id)),
   restartScan: id => dispatch(restartScan(id)),
   cancelScan: id => dispatch(cancelScan(id)),
-  getReportDeploymentsCsv: (id, query) => dispatch(getReportDeploymentsCsv(id, query)),
+  deleteScan: id => dispatch(deleteScan(id)),
+  getReportSummaryCsv: (id, query) => dispatch(getReportSummaryCsv(id, query)),
   getReportDetailsCsv: id => dispatch(getReportDetailsCsv(id))
 });
 
 const mapStateToProps = function(state) {
   return Object.assign({}, state.scans.view, state.scans.persist, {
-    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW]
+    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW],
+    update: state.scans.update
   });
 };
 
