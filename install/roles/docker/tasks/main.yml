@@ -52,7 +52,6 @@
 
 - name: Install Docker from local path
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
-  # ignore_errors: yes
   when: not have_docker
 
 - name: Add Docker CE repository for Centos/RHEL 7 family
