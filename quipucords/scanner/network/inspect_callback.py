@@ -170,7 +170,7 @@ class InspectResultCallback(CallbackBase):
                 self.scan_task.increment_stats(host, increment_sys_failed=True)
 
         sys_result = SystemInspectionResult(
-            name=host, status=host_status)
+            name=host, status=host_status, source=self.scan_task.source)
         sys_result.save()
 
         self.scan_task.inspection_result.systems.add(sys_result)

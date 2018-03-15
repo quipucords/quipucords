@@ -28,7 +28,8 @@ from django.utils.translation import ugettext as _
 import api.messages as messages
 from api.common.util import is_int
 from api.common.pagination import StandardResultsSetPagination
-from api.models import (ScanTask, ScanJob, FactCollection, Source, Credential)
+from api.models import (ScanTask, ScanJob, FactCollection, Source,
+                        Credential, RawFact)
 from api.serializers import (ScanJobSerializer,
                              SourceSerializer,
                              JobConnectionResultSerializer,
@@ -68,6 +69,27 @@ def expand_system_connection(system):
         system['credential'] = \
             Credential.objects.filter(id=cred_id).values('id',
                                                          'name').first()
+
+
+def expand_system_inspection(system):
+    """Expand the system inspection results.
+
+    :param system: A dictionary for a inspection system result.
+    """
+    if 'source' in system.keys():
+        source_id = system['source']
+        system['source'] = \
+            Source.objects.filter(id=source_id).values('id',
+                                                       'name',
+                                                       'source_type').first()
+    if 'facts' in system.keys():
+        facts = []
+        fact_ids = system['facts']
+        for fact_id in fact_ids:
+            facts.append(RawFact.objects.filter(
+                id=fact_id).values('name',
+                                   'value').first())
+        system['facts'] = facts
 
 
 def expand_sys_conn_result(conn_result):
@@ -252,6 +274,31 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             serializer = SystemConnectionResultSerializer(page, many=True)
             for system in serializer.data:
                 expand_system_connection(system)
+            return paginator.get_paginated_response(serializer.data)
+        return Response(status=404)
+
+    @detail_route(methods=['get'])
+    def inspection(self, request, pk=None):
+        """Get the inspection results of a scan job."""
+        try:
+            scan_job = get_object_or_404(self.queryset, pk=pk)
+            all_tasks = scan_job.inspection_results.task_results.all()
+        except ValueError:
+            return Response(status=400)
+        system_inspection_queryset = None
+        for task_result in all_tasks:
+            if system_inspection_queryset is None:
+                system_inspection_queryset = task_result.systems.all()
+            else:
+                system_inspection_queryset = \
+                    system_inspection_queryset | task_result.systems.all()
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(
+            system_inspection_queryset.order_by('status'), request)
+        if page is not None:
+            serializer = SystemInspectionResultSerializer(page, many=True)
+            for system in serializer.data:
+                expand_system_inspection(system)
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 

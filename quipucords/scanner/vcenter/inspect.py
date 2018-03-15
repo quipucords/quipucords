@@ -136,7 +136,8 @@ class InspectTaskRunner(ScanTaskRunner):
         logger.debug('system %s facts=%s', vm_name, facts)
 
         sys_result = SystemInspectionResult(
-            name=vm_name, status=SystemInspectionResult.SUCCESS)
+            name=vm_name, status=SystemInspectionResult.SUCCESS,
+            source=self.scan_task.source)
         sys_result.save()
         for key, val in facts.items():
             if val is not None:

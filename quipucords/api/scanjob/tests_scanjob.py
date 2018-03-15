@@ -407,8 +407,6 @@ class ScanJobTest(TestCase):
         source2.credentials.add(self.cred)
         scan_job, scan_tasks = create_scan_job_two_tasks(
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.sources.add(source2)
-        scan_job.save()
 
         # Create two connection system results one failure & one success
         sys_result = SystemConnectionResult(name='Foo',
@@ -494,8 +492,6 @@ class ScanJobTest(TestCase):
         source2.credentials.add(self.cred)
         scan_job, scan_tasks = create_scan_job_two_tasks(
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.sources.add(source2)
-        scan_job.save()
 
         # Create two connection system results one failure & one success
         sys_result = SystemConnectionResult(name='Foo',
@@ -573,8 +569,6 @@ class ScanJobTest(TestCase):
         source2.credentials.add(self.cred)
         scan_job, scan_tasks = create_scan_job_two_tasks(
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
-        scan_job.sources.add(source2)
-        scan_job.save()
 
         # Create two connection system results one failure & one success
         sys_result = SystemConnectionResult(name='Foo',
@@ -633,6 +627,259 @@ class ScanJobTest(TestCase):
         """Get ScanJob connection results with 400."""
         # pylint: disable=no-member
         url = reverse('scanjob-detail', args='t') + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_inspection_delete_source(self):
+        """Get ScanJob inspection results after source has been deleted."""
+        # pylint: disable=no-member
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_task = create_scan_job(
+            source2, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=source2)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        source2.delete()
+
+        inspection_result = scan_task.inspection_result
+        inspection_result.systems.add(inspect_sys_result)
+        inspection_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]}]}
+        self.assertEqual(json_response, expected)
+
+    def test_inspection_paging(self):
+        """Test paging of ScanJob inspection results."""
+        # pylint: disable=no-member
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=self.source)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        inspect_sys_result2 = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=self.source)
+        inspect_sys_result2.save()
+
+        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2.save()
+        inspect_sys_result2.facts.add(fact)
+        inspect_sys_result2.save()
+
+        inspection_result = scan_task.inspection_result
+        inspection_result.systems.add(inspect_sys_result)
+        inspection_result.save()
+
+        inspection_result.systems.add(inspect_sys_result2)
+        inspection_result.save()
+
+        url = reverse('scanjob-detail',
+                      args=(scan_job.id,)) + 'inspection/?page_size=1'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 2,
+                    'next':
+                        'http://testserver/api/v1/jobs/1/inspection/'
+                        '?page=2&page_size=1',
+                    'previous': None,
+                    'results': [
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]}]}
+        self.assertEqual(json_response, expected)
+
+    def test_inspection_two_tasks(self):
+        """Tests inspection result ordering across tasks."""
+        # pylint: disable=too-many-locals
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=self.source)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        inspect_sys_result2 = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=self.source)
+        inspect_sys_result2.save()
+
+        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2.save()
+        inspect_sys_result2.facts.add(fact)
+        inspect_sys_result2.save()
+
+        inspect_sys_result3 = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.FAILED,
+            source=source2)
+        inspect_sys_result3.save()
+
+        inspect_sys_result4 = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.FAILED,
+            source=source2)
+        inspect_sys_result4.save()
+        inspection_result = scan_tasks[2].inspection_result
+        inspection_result.systems.add(inspect_sys_result)
+        inspection_result.systems.add(inspect_sys_result2)
+        inspection_result.save()
+
+        inspection_result2 = scan_tasks[3].inspection_result
+        inspection_result2.systems.add(inspect_sys_result3)
+        inspection_result2.systems.add(inspect_sys_result4)
+        inspection_result2.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 4,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Foo',
+                         'status': 'failed',
+                         'source': {'id': 2,
+                                    'name': 'source2',
+                                    'source_type': 'network'},
+                         'facts': []},
+                        {'name': 'Foo',
+                         'status': 'failed',
+                         'source': {'id': 2,
+                                    'name': 'source2',
+                                    'source_type': 'network'},
+                         'facts': []},
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]},
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]}]}
+        self.assertEqual(json_response, expected)
+
+    def test_inspection_results_with_none(self):
+        """Tests inspection results with none for one task."""
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.FAILED,
+            source=self.source)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        inspection_result = scan_tasks[2].inspection_result
+        inspection_result.systems.add(inspect_sys_result)
+        inspection_result.save()
+
+        inspection_result2 = scan_tasks[3].inspection_result
+        inspection_result2.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Foo',
+                         'status': 'failed',
+                         'source': {'id': 1,
+                                    'name': 'source1',
+                                    'source_type': 'network'},
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]}]}
+        self.assertEqual(json_response, expected)
+
+    def test_inspection_not_found(self):
+        """Get ScanJob connection results with 404."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='2') + 'inspection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_inspection_bad_request(self):
+        """Get ScanJob connection results with 400."""
+        # pylint: disable=no-member
+        url = reverse('scanjob-detail', args='t') + 'inspection/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

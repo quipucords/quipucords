@@ -15,6 +15,7 @@ These models are used in the REST definitions
 
 from django.utils.translation import ugettext as _
 from django.db import models
+from api.source.model import Source
 import api.messages as messages
 
 
@@ -47,11 +48,14 @@ class SystemInspectionResult(models.Model):
     name = models.CharField(max_length=1024)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
     facts = models.ManyToManyField(RawFact)
+    source = models.ForeignKey(Source,
+                               on_delete=models.SET_NULL,
+                               null=True)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, status:%s, facts:%s }' % \
-            (self.id, self.name, self.status, self.facts)
+        return '{ id:%s, name:%s, status:%s, facts:%s, source:%s }' % \
+            (self.id, self.name, self.status, self.facts, self.source)
 
     class Meta:
         """Metadata for model."""
