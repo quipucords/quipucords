@@ -20,7 +20,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
@@ -29,10 +29,13 @@ from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
+from django_filters.rest_framework import (DjangoFilterBackend,
+                                           FilterSet,
+                                           CharFilter)
 import api.messages as messages
 from api.common.util import is_int, expand_scanjob_with_times
 from api.common.pagination import StandardResultsSetPagination
+from api.filters import ListFilter
 from api.models import (Scan, ScanTask, ScanJob, Source)
 from api.serializers import (ScanSerializer, ScanJobSerializer)
 from api.scanjob.serializer import expand_scanjob
@@ -160,11 +163,17 @@ def expand_scan(json_scan):
 class ScanFilter(FilterSet):
     """Filter for sources by name."""
 
+    name = ListFilter(name='name')
+    search_by_name = CharFilter(name='name', lookup_expr='contains')
+    search_sources_by_name = CharFilter(name='sources__name',
+                                        lookup_expr='contains')
+
     class Meta:
         """Metadata for filterset."""
 
         model = Scan
-        fields = ['scan_type']
+        fields = ['name', 'scan_type',
+                  'search_by_name', 'search_sources_by_name']
 
 
 # pylint: disable=too-many-ancestors
@@ -179,13 +188,12 @@ class ScanViewSet(ModelViewSet):
 
     queryset = Scan.objects.all()
     serializer_class = ScanSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = ScanFilter
     ordering_fields = ('id', 'name', 'scan_type',
                        'most_recent_scanjob__start_time',
                        'most_recent_scanjob__status')
     ordering = ('name',)
-    search_fields = ('name', 'sources__name')
 
     # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
