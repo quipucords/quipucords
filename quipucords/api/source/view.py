@@ -127,7 +127,6 @@ class SourceViewSet(ModelViewSet):
 
         # Modify json for response
         json_source = response.data
-        format_source(json_source)
 
         # check to see if a connection scan was requested
         # through query parameter
@@ -145,6 +144,7 @@ class SourceViewSet(ModelViewSet):
                     # Add the source
                     scan_job.sources.add(source_id)
                     scan_job.save()
+                    json_source['most_recent_connect_scan'] = scan_job.id
 
                     # Start the scan
                     start_scan.send(sender=self.__class__, instance=scan_job)
@@ -153,6 +153,10 @@ class SourceViewSet(ModelViewSet):
                     'scan': [_(messages.SOURCE_CONNECTION_SCAN)]
                 }
                 raise ValidationError(error)
+
+        # format source after creating scan to populate connection
+        format_source(json_source)
+
         return response
 
     def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
