@@ -6,9 +6,11 @@ const bindMethods = (context, methods) => {
   });
 };
 
-const noop = Function.prototype;
+const devModeNormalizeCount = (count, modulus = 100) => Math.abs(count) % modulus;
 
 const generateId = prefix => `${prefix || 'generatedid'}-${Math.ceil(1e5 * Math.random())}`;
+
+const noop = Function.prototype;
 
 const sourceTypeString = sourceType => {
   switch (sourceType) {
@@ -190,27 +192,19 @@ const getErrorMessageFromResults = results => {
   return _.join(getMessages(responseData), '\n');
 };
 
-const rejectedAction = base => {
-  return `${base}_REJECTED`;
-};
-
-const pendingAction = base => {
-  return `${base}_PENDING`;
-};
-
-const fulfilledAction = base => {
-  return `${base}_FULFILLED`;
-};
-
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
-const normalizeCount = (count, modulus = 100) => {
-  return Math.abs(count) % modulus;
-};
+
+const fulfilledAction = base => `${base}_FULFILLED`;
+
+const pendingAction = base => `${base}_PENDING`;
+
+const rejectedAction = base => `${base}_REJECTED`;
 
 export const helpers = {
   bindMethods,
-  noop,
+  devModeNormalizeCount,
   generateId,
+  noop,
   sourceTypeString,
   sourceTypeIcon,
   scanTypeString,
@@ -222,11 +216,10 @@ export const helpers = {
   viewPropsChanged,
   createViewQueryObject,
   getErrorMessageFromResults,
-  rejectedAction,
-  pendingAction,
-  fulfilledAction,
   DEV_MODE,
-  normalizeCount
+  fulfilledAction,
+  pendingAction,
+  rejectedAction
 };
 
 export default helpers;
