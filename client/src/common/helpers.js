@@ -194,11 +194,11 @@ const getErrorMessageFromResults = results => {
 
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
 
-const fulfilledAction = base => `${base}_FULFILLED`;
+const FULFILLED_ACTION = base => `${base}_FULFILLED`;
 
-const pendingAction = base => `${base}_PENDING`;
+const PENDING_ACTION = base => `${base}_PENDING`;
 
-const rejectedAction = base => `${base}_REJECTED`;
+const REJECTED_ACTION = base => `${base}_REJECTED`;
 
 export const helpers = {
   bindMethods,
@@ -217,9 +217,9 @@ export const helpers = {
   createViewQueryObject,
   getErrorMessageFromResults,
   DEV_MODE,
-  fulfilledAction,
-  pendingAction,
-  rejectedAction
+  FULFILLED_ACTION,
+  PENDING_ACTION,
+  REJECTED_ACTION
 };
 
 export default helpers;

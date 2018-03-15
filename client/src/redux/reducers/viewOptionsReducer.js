@@ -199,18 +199,18 @@ export default function viewOptionsReducer(state = initialState, action) {
       });
       return Object.assign({}, state, updateState);
 
-    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIAL):
-    case helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS):
+    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIAL):
+    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS):
       updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
-    case helpers.fulfilledAction(sourcesTypes.GET_SOURCE):
-    case helpers.fulfilledAction(sourcesTypes.GET_SOURCES):
+    case helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCE):
+    case helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCES):
       updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
-    case helpers.fulfilledAction(scansTypes.GET_SCAN):
-    case helpers.fulfilledAction(scansTypes.GET_SCANS):
+    case helpers.FULFILLED_ACTION(scansTypes.GET_SCAN):
+    case helpers.FULFILLED_ACTION(scansTypes.GET_SCANS):
       updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data.count);
       return Object.assign({}, state, updateState);
 
