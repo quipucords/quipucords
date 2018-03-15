@@ -50,6 +50,31 @@
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
+- name: get README.txt from EAP_HOME candidates
+  raw: cat "{{ item }}"/README.txt 2>/dev/null
+  register: eap_home_readme_txt
+  ignore_errors: yes
+  with_items: "{{ eap_home_candidates }}"
+  when: 'jboss_eap'
+
+# The unzip and java -version tasks both get the same information, but
+# one works when the user has unzip installed and the other works when
+# the user has java. We have both to give ourselves more chances to
+# get the data we need.
+- name: get jboss-modules.jar MANIFEST.MF
+  raw: unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF
+  register: eap_home_jboss_modules_manifest
+  ignore_errors: yes
+  with_items: "{{ eap_home_candidates }}"
+  when: 'jboss_eap and have_unzip'
+
+- name: get jboss-modules.jar version
+  raw: java -jar "{{ item }}"/jboss-modules.jar -version
+  register: eap_home_jboss_modules_version
+  ignore_errors: yes
+  with_items: "{{ eap_home_candidates }}"
+  when: 'jboss_eap and have_java'
+
 # Look for fuse inside EAP_HOME directories
 
 - name: check JBoss bin directory

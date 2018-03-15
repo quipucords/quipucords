@@ -34,6 +34,10 @@ JBOSS_EAP_CHKCONFIG = 'jboss_eap_chkconfig'
 JBOSS_EAP_EAP_HOME = 'eap_home_ls'
 JBOSS_EAP_JAR_VER = 'jboss_eap_jar_ver'
 JBOSS_EAP_RUN_JAR_VER = 'jboss_eap_run_jar_ver'
+EAP_HOME_VERSION_TXT = 'eap_home_version_txt'
+EAP_HOME_README_TXT = 'eap_home_readme_txt'
+EAP_HOME_MODULES_MANIFEST = 'eap_home_jboss_modules_manifest'
+EAP_HOME_MODULES_VERSION = 'eap_home_jboss_modules_version'
 EAP5_HOME_VERSION_TXT = 'eap5_home_version_txt'
 EAP5_HOME_README_HTML = 'eap5_home_readme_html'
 EAP5_HOME_RUN_JAR_MANIFEST = 'eap5_home_run_jar_manifest'
@@ -158,6 +162,42 @@ def find_eap_entitlement(entitlements):
     return Product.UNKNOWN
 
 
+def process_version_txt(version):
+    """Get the EAP version from a version.txt string."""
+    return version.strip()
+
+
+IMPLEMENTATION_VERSION = 'Implementation-Version:'
+def is_eap_manifest_version(version):
+    """Check whether a manifest contains an EAP version string or not."""
+    for line in version.splitlines():
+        if IMPLEMENTATION_VERSION in line:
+            _, _, ver = line.partition(IMPLEMENTATION_VERSION)
+            return 'EAP' in EAP_CLASSIFICATIONS[ver.strip()]
+
+    return False
+
+
+def get_eap_manifest_version(version):
+    """Get the EAP version from a MANIFEST.MF string."""
+    for line in version.splitlines():
+        if IMPLEMENTATION_VERSION in line:
+            _, _, ver = line.partition(IMPLEMENTATION_VERSION)
+            return EAP_CLASSIFICATIONS[ver.strip()]
+
+
+def is_eap_jar_version(version):
+    """Check whether a 'jar -version' string contains an EAP version string."""
+    _, _, rest = version.partition('version')
+    return 'EAP' in EAP_CLASSIFICATIONS[rest.strip()]
+
+
+def get_eap_jar_version(version):
+    """Get the EAP version from a 'jar -version' string."""
+    _, _, rest = version.partition('version')
+    return EAP_CLASSIFICATIONS[rest.strip()]
+
+
 # Each fact can tell us the presence, version, or both of
 # EAP. (Version without presence happens when we detect Wildfly. That
 # leads to PRESENCE False and Version 'Wildfly-10' or something like
@@ -181,6 +221,18 @@ FACTS = [
     {NAME: JBOSS_EAP_RUN_JAR_VER,
      PRESENCE: Product.PRESENT,
      VERSION: classify_jar_versions},
+    {NAME: EAP_HOME_VERSION_TXT,
+     PRESENCE: Product.PRESENT,
+     VERSION: process_version_txt},
+    {NAME: EAP_HOME_README_TXT,
+     PRESENCE: Product.ABSENT,
+     VERSION: {"WildFly"}},
+    {NAME: EAP_HOME_MODULES_MANIFEST,
+     PRESENCE: is_eap_manifest_version,
+     VERSION: get_eap_manifest_version},
+    {NAME: EAP_HOME_MODULES_VERSION,
+     PRESENCE: is_eap_jar_version,
+     VERSION: get_eap_jar_version},
     {NAME: EAP5_HOME_VERSION_TXT, PRESENCE: Product.PRESENT},
     {NAME: EAP5_HOME_README_HTML, PRESENCE: Product.PRESENT},
     {NAME: EAP5_HOME_RUN_JAR_MANIFEST,
