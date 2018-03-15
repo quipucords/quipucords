@@ -14,6 +14,7 @@ import logging
 import json
 from django.db import transaction
 from api.models import (ScanTask,
+                        ScanOptions,
                         SystemConnectionResult,
                         SystemInspectionResult,
                         RawFact)
@@ -40,8 +41,14 @@ class SatelliteException(Exception):
 class SatelliteInterface(object):
     """Generic interface for dealing with Satellite."""
 
-    def __init__(self, scan_task):
+    def __init__(self, scan_job, scan_task):
         """Set context for interface."""
+        self.scan_job = scan_job
+        if scan_job.options is None:
+            self.max_concurrency = ScanOptions.get_default_forks()
+        else:
+            self.max_concurrency = scan_job.options.max_concurrency
+
         if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             self.connect_scan_task = scan_task
             self.inspect_scan_task = None
