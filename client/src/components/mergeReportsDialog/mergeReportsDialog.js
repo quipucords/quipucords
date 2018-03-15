@@ -8,7 +8,8 @@ import { Modal, Button, Icon } from 'patternfly-react';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
-import { getMergeScanReults } from '../../redux/actions/reportsActions';
+import { mergeScans } from '../../redux/actions/scansActions';
+import { getMergedScanReportDetailsCsv } from '../../redux/actions/reportsActions';
 
 class MergeReportsDialog extends React.Component {
   constructor() {
@@ -20,14 +21,14 @@ class MergeReportsDialog extends React.Component {
   getValidScans() {
     const { scans } = this.props;
     return _.filter(scans, scan => {
-      return _.get(scan, 'most_recent.id') && _.get(scan, 'most_recent.status') === 'completed';
+      return _.get(scan, 'most_recent.status') === 'completed';
     });
   }
 
   getInvalidScans() {
     const { scans } = this.props;
     return _.filter(scans, scan => {
-      return !_.get(scan, 'most_recent.id') || _.get(scan, 'most_recent.status') !== 'completed';
+      return _.get(scan, 'most_recent.status') !== 'completed';
     });
   }
 
@@ -57,12 +58,17 @@ class MergeReportsDialog extends React.Component {
   }
 
   mergeScanResults() {
-    const { scans, getMergeScanReults } = this.props;
+    const { scans, mergeScans, getMergedScanReportDetailsCsv } = this.props;
 
-    const jobIds = this.getValidJobsId(scans);
-
-    getMergeScanReults(jobIds).then(
-      response => this.notifyDownloadStatus(false),
+    const data = { jobs: this.getValidJobsId(scans) };
+    mergeScans(data).then(
+      response => {
+        console.dir(response);
+        getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
+          success => this.notifyDownloadStatus(false),
+          error => this.notifyDownloadStatus(true, error)
+        );
+      },
       error => this.notifyDownloadStatus(true, error)
     );
   }
@@ -179,14 +185,16 @@ class MergeReportsDialog extends React.Component {
 }
 
 MergeReportsDialog.propTypes = {
-  getMergeScanReults: PropTypes.func,
+  mergeScans: PropTypes.func,
+  getMergedScanReportDetailsCsv: PropTypes.func,
   show: PropTypes.bool.isRequired,
   scans: PropTypes.array,
   onClose: PropTypes.func
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getMergeScanReults: (jobIds, reportName) => dispatch(getMergeScanReults(jobIds, reportName))
+  mergeScans: data => dispatch(mergeScans(data)),
+  getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id))
 });
 
 const mapStateToProps = function(state) {

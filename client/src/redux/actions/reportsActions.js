@@ -1,39 +1,53 @@
 import { reportsTypes } from '../constants';
 import reportsService from '../../services/reportsService';
 
-const getReportDeployments = (id, query) => dispatch => {
+const getReportSummary = (id, query) => dispatch => {
   return dispatch({
-    type: reportsTypes.GET_REPORT_DEPLOYMENTS,
-    payload: reportsService.getReportDeployments(id, query)
+    type: reportsTypes.GET_REPORT,
+    payload: reportsService.getReportSummary(id, query)
   });
 };
 
-const getReportDeploymentsCsv = (id, query) => dispatch => {
+const getReportSummaryCsv = (id, query) => dispatch => {
   return dispatch({
-    type: reportsTypes.GET_REPORT_DEPLOYMENTS_CSV,
-    payload: reportsService.getReportDeploymentsCsv(id, query)
+    type: reportsTypes.GET_REPORT,
+    payload: reportsService.getReportSummaryCsv(id, query)
   });
 };
 
 const getReportDetails = id => dispatch => {
   return dispatch({
-    type: reportsTypes.GET_REPORT_DETAILS,
+    type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportDetails(id)
   });
 };
 
 const getReportDetailsCsv = id => dispatch => {
   return dispatch({
-    type: reportsTypes.GET_REPORT_DETAILS_CSV,
+    type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportDetailsCsv(id)
   });
 };
 
-const getMergeScanReults = (jobIds, reportName) => dispatch => {
+const getMergedScanReportSummaryCsv = id => dispatch => {
   return dispatch({
-    type: reportsTypes.GET_MERGE_SCAN_RESULTS,
-    payload: reportsService.getMergeScanResultsCsv(jobIds, reportName)
+    type: reportsTypes.GET_REPORT,
+    payload: reportsService.getMergedScanReporSummaryCsv(id)
   });
 };
 
-export { getReportDeployments, getReportDeploymentsCsv, getReportDetails, getReportDetailsCsv, getMergeScanReults };
+const getMergedScanReportDetailsCsv = id => dispatch => {
+  return dispatch({
+    type: reportsTypes.GET_REPORT,
+    payload: reportsService.getMergedScanReportDetailsCsv(id)
+  });
+};
+
+export {
+  getReportSummary,
+  getReportSummaryCsv,
+  getReportDetails,
+  getReportDetailsCsv,
+  getMergedScanReportSummaryCsv,
+  getMergedScanReportDetailsCsv
+};

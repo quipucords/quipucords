@@ -53,7 +53,7 @@ class ReportsService {
     });
   }
 
-  static getReportDeployments(id, query = {}) {
+  static getReportSummary(id, query = {}) {
     let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DEPLOYMENTS.replace('{0}', id);
 
     return axios({
@@ -62,29 +62,20 @@ class ReportsService {
     });
   }
 
-  static getReportDeploymentsCsv(id, query = {}) {
-    return this.getReportDeployments(id, Object.assign(query, { format: 'csv' })).then(success => {
-      return this.downloadCSV(success.data, `report_${id}_deployments_${this.getTimeStampFromResults(success)}.csv`);
+  static getReportSummaryCsv(id, query = {}) {
+    return this.getReportSummary(id, Object.assign(query, { format: 'csv' })).then(success => {
+      return this.downloadCSV(success.data, `report_${id}_summary_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
 
-  static getMergeScanResults(jobIds) {
-    let apiPath = process.env.REACT_APP_REPORTS_MERGED_JOBS;
-
-    return axios({
-      method: 'put',
-      url: apiPath,
-      data: { jobs: jobIds },
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+  static getMergedScanReportDetailsCsv(id) {
+    return this.getReportSummary(id, { format: 'csv' }).then(success => {
+      return this.downloadCSV(success.data, `merged_report_details_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
-
-  static getMergeScanResultsCsv(jobIds) {
-    return this.getMergeScanResults(jobIds).then(success => {
-      return this.getReportDetails(success.data.id, { format: 'csv' }).then(success => {
-        return this.downloadCSV(success.data, `merged_report_${this.getTimeStampFromResults(success)}.csv`);
-      });
+  static getMergedScanReporSummaryCsv(id) {
+    return this.getReportSummary(id, { format: 'csv' }).then(success => {
+      return this.downloadCSV(success.data, `merged_report_summary_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
 }

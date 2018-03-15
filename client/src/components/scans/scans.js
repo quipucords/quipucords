@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, Grid, Form, ListView, Modal } from 'patternfly-react';
 
 import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } from '../../redux/actions/scansActions';
-import { getReportDeploymentsCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
+import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
 import {
   confirmationModalTypes,
   sourcesTypes,
@@ -150,7 +150,7 @@ class Scans extends React.Component {
 
   downloadSummaryReport(reportId) {
     this.props
-      .getReportDeploymentsCsv(reportId)
+      .getReportSummaryCsv(reportId)
       .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
   }
 
@@ -442,7 +442,7 @@ Scans.propTypes = {
   cancelScan: PropTypes.func,
   restartScan: PropTypes.func,
   deleteScan: PropTypes.func,
-  getReportDeploymentsCsv: PropTypes.func,
+  getReportSummaryCsv: PropTypes.func,
   getReportDetailsCsv: PropTypes.func,
   fulfilled: PropTypes.bool,
   error: PropTypes.bool,
@@ -460,7 +460,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   restartScan: id => dispatch(restartScan(id)),
   cancelScan: id => dispatch(cancelScan(id)),
   deleteScan: id => dispatch(deleteScan(id)),
-  getReportDeploymentsCsv: (id, query) => dispatch(getReportDeploymentsCsv(id, query)),
+  getReportSummaryCsv: (id, query) => dispatch(getReportSummaryCsv(id, query)),
   getReportDetailsCsv: id => dispatch(getReportDetailsCsv(id))
 });
 
