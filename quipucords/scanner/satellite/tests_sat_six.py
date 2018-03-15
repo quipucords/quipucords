@@ -16,7 +16,8 @@ from django.test import TestCase
 from api.models import (Credential,
                         Source,
                         ScanTask,
-                        SystemInspectionResult)
+                        SystemInspectionResult,
+                        ScanOptions)
 from scanner.satellite.utils import construct_url
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
@@ -763,6 +764,14 @@ class SatelliteSixV2Test(TestCase):
          'status': SystemInspectionResult.SUCCESS}])
     def test_hosts_facts(self, mock_pool):
         """Test the hosts_facts method."""
+        scan_options = ScanOptions(max_concurrency=10)
+        scan_options.save()
+        scan_job, scan_task = create_scan_job(
+            self.source, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test_62',
+            scan_options=scan_options)
+        scan_task.update_stats('TEST_SAT.', sys_scanned=0)
+        api = SatelliteSixV2(scan_job, scan_task)
         hosts_url = 'https://{sat_host}:{port}/api/v2/hosts'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host='1.2.3.4')
@@ -774,6 +783,6 @@ class SatelliteSixV2Test(TestCase):
                 'results': [{'id': 10, 'name': 'sys10'}]
                 }  # noqa
             mocker.get(url, status_code=200, json=jsonresult)
-            self.api.hosts_facts()
-            inspect_result = self.scan_task.inspection_result
+            api.hosts_facts()
+            inspect_result = scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 1)
