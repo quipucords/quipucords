@@ -42,7 +42,7 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = SystemInspectionResult
-        fields = ['name', 'status', 'facts']
+        fields = ['name', 'status', 'source', 'facts']
         qpc_allow_empty_fields = ['facts']
 
 
