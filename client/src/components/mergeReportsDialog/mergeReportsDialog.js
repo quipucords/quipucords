@@ -136,7 +136,7 @@ class MergeReportsDialog extends React.Component {
   }
 
   render() {
-    const { show, scans, onClose } = this.props;
+    const { show, scans, details, onClose } = this.props;
 
     if (!scans || scans.length === 0 || !scans[0]) {
       return null;
@@ -146,12 +146,23 @@ class MergeReportsDialog extends React.Component {
 
     let icon;
     let heading;
+    let footer = <span>Once the scan reports are merged, the results will be downloaded to your local machine.</span>;
+
     if (validCount < 2) {
       icon = <Icon type="pf" name="error-circle-o" />;
-      heading = 'This action is invalid. You must select at least two scans with successful most recent scans.';
+      heading = (
+        <h3 className="merge-reports-heading">
+          This action is invalid. You must select at least two scans with successful most recent scans.
+        </h3>
+      );
+      footer = null;
     } else if (invalidCount > 0) {
       icon = <Icon type="pf" name="warning-triangle-o" />;
-      heading = 'Warning, only the selected scans with successful most recent scans will be included in the report.';
+      heading = (
+        <h3 className="merge-reports-heading">
+          Warning, only the selected scans with successful most recent scans will be included in the report.
+        </h3>
+      );
     } else {
       icon = <Icon type="pf" name="info" />;
     }
@@ -162,18 +173,17 @@ class MergeReportsDialog extends React.Component {
           <button className="close" onClick={onClose} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
-          <Modal.Title>Merge Reports</Modal.Title>
+          <Modal.Title>{`${details ? 'Detailed' : 'Summary'} Merge Report`}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="merge-reports-body">
             <span className="merge-reports-icon">{icon}</span>
             <span>
-              <div className="merge-reports-heading">
-                <span>{heading}</span>
-              </div>
+              {heading}
               <div>
                 {this.renderValidScans()}
                 {this.renderInvalidScans()}
+                {footer}
               </div>
             </span>
           </div>
@@ -189,6 +199,7 @@ MergeReportsDialog.propTypes = {
   getMergedScanReportDetailsCsv: PropTypes.func,
   show: PropTypes.bool.isRequired,
   scans: PropTypes.array,
+  details: PropTypes.bool.isRequired,
   onClose: PropTypes.func
 };
 
@@ -197,8 +208,4 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id))
 });
 
-const mapStateToProps = function(state) {
-  return {};
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(MergeReportsDialog);
+export default connect(helpers.noop, mapDispatchToProps)(MergeReportsDialog);

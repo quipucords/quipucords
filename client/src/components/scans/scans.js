@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Alert, Button, EmptyState, Grid, Form, ListView, Modal } from 'patternfly-react';
+import { Alert, Button, DropdownButton, EmptyState, Grid, Form, ListView, MenuItem, Modal } from 'patternfly-react';
 
 import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } from '../../redux/actions/scansActions';
 import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
@@ -23,6 +23,7 @@ import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
 import SourcesEmptyState from '../sources/sourcesEmptyState';
 import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
+import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
 import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
 
 class Scans extends React.Component {
@@ -44,13 +45,16 @@ class Scans extends React.Component {
       'hideMergeDialog'
     ]);
 
+    // FUTURE: Deletions of scans is not currently desired. This is here in case it ever gets added.
+    //         Delete is fully functional by setting this.okToDelete to true.
     this.okToDelete = false;
     this.scansToDelete = [];
     this.deletingScan = null;
 
     this.state = {
       lastRefresh: null,
-      mergeDialogShown: false
+      mergeDialogShown: false,
+      mergeReportDetails: false
     };
   }
 
@@ -160,8 +164,8 @@ class Scans extends React.Component {
       .then(response => this.notifyDownloadStatus(false), error => this.notifyDownloadStatus(true, error.message));
   }
 
-  mergeScanResults() {
-    this.setState({ mergeDialogShown: true });
+  mergeScanResults(details) {
+    this.setState({ mergeDialogShown: true, mergeReportDetails: details });
   }
 
   doStartScan(item) {
@@ -327,6 +331,7 @@ class Scans extends React.Component {
 
     let mergeAllowed = _.size(viewOptions.selectedItems) > 1;
 
+    // FUTURE: deletion is not currently enabled
     let deleteAction = null;
     if (this.okToDelete) {
       deleteAction = (
@@ -338,9 +343,20 @@ class Scans extends React.Component {
 
     return (
       <div className="form-group">
-        <Button disabled={!mergeAllowed} onClick={this.mergeScanResults}>
-          Merge Reports
-        </Button>
+        <SimpleTooltip
+          key="mergeButtonTip"
+          id="mergeButtonTip"
+          tooltip="Merge selected scan results into a single report"
+        >
+          <DropdownButton key="mergeButton" title="Merge Report" id="merge-reports-dropdown" disabled={!mergeAllowed}>
+            <MenuItem eventKey="1" onClick={() => this.mergeScanResults(false)}>
+              Summary Report
+            </MenuItem>
+            <MenuItem eventKey="2" onClick={() => this.mergeScanResults(true)}>
+              Detailed Report
+            </MenuItem>
+          </DropdownButton>
+        </SimpleTooltip>
         {deleteAction}
       </div>
     );
@@ -384,7 +400,7 @@ class Scans extends React.Component {
 
   render() {
     const { error, errorMessage, scans, viewOptions } = this.props;
-    const { lastRefresh, mergeDialogShown } = this.state;
+    const { lastRefresh, mergeDialogShown, mergeReportDetails } = this.state;
 
     if (error) {
       return (
@@ -420,6 +436,7 @@ class Scans extends React.Component {
           <MergeReportsDialog
             show={mergeDialogShown}
             scans={viewOptions.selectedItems}
+            details={mergeReportDetails}
             onClose={this.hideMergeDialog}
           />
         </React.Fragment>
