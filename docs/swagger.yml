@@ -716,29 +716,6 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         404:
           description: "Scan job not found"
-  /jobs/{scan_job_id}/results/:
-    get:
-      tags:
-        - "Scan Job"
-      summary: "Get the results of existing scan job"
-      description: "Get the results of a scan."
-      operationId: "getScanResults"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "scan_job_id"
-        in: "path"
-        description: "ID of scan job to retrieve results for"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Scan job results retrieved"
-          schema:
-            $ref: "#/definitions/ScanJobResultsOut"
-        404:
-          description: "Scan job results not found"
   /jobs/{scan_job_id}/connection/:
     get:
       tags:
@@ -1748,17 +1725,6 @@ definitions:
         items:
           $ref: "#/definitions/SysConnResultOut"
         description: "The connection result for each system."
-  TaskConnResultsOut:
-    type: "object"
-    required:
-      - source
-      - systems
-    properties:
-      task_results:
-        type: "array"
-        items:
-          $ref: "#/definitions/ConnResultsOut"
-        description: "The connection result for tasks."
   RawFactsOut:
     type: "object"
     required:
@@ -1809,26 +1775,6 @@ definitions:
         items:
           $ref: "#/definitions/SysInspectResultOut"
         description: "The inspection result for each system."
-  TaskInspectResultsOut:
-    type: "object"
-    required:
-      - task_results
-    properties:
-      task_results:
-        type: "array"
-        items:
-          $ref: "#/definitions/InspectResultsOut"
-        description: "The inspection results for tasks."
-  ScanJobResultsOut:
-    type: "object"
-    required:
-      - connection_results
-      - inspection_results
-    properties:
-        connection_results:
-          $ref: "#/definitions/TaskConnResultsOut"
-        inspection_results:
-          $ref: "#/definitions/TaskInspectResultsOut"
   ScanJobConnectionResultsOut:
     allOf:
       - $ref: "#/definitions/ListPagination"
