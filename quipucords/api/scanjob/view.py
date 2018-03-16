@@ -266,20 +266,24 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @list_route(methods=['put'])
     def merge(self, request):
         """Merge jobs."""
+        error = {
+            'jobs': []
+        }
         jobs = self.validate_merge_jobs(request.data)
         sources = []
         for job in jobs:
             inspect_tasks = job.tasks.filter(
                 scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by(
                     'sequence_number')
+            if not inspect_tasks:
+                message = (messages.SJ_MERGE_JOB_NO_TASKS % job.id)
+                error.get('jobs').append(message)
+                raise ValidationError(error)
             sources += build_sources_from_tasks(inspect_tasks.all())
 
         fact_collection_json = {'sources': sources}
         has_errors, validation_result = validate_fact_collection_json(
             fact_collection_json)
-        error = {
-            'jobs': []
-        }
         if has_errors:
             message = _(messages.SJ_MERGE_JOB_NO_RESULTS % validation_result)
             error.get('jobs').append(message)
