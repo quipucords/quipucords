@@ -1077,8 +1077,7 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_response = response.json()
-        validation_result = {'sources': 'Required. May not be null or empty.'}
-        error_message = messages.SJ_MERGE_JOB_NO_RESULTS % validation_result
+        error_message = messages.SJ_MERGE_JOB_NO_TASKS % scan_job1.id
         self.assertEqual(
             json_response, {'jobs': [error_message]})
 

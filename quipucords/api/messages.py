@@ -118,7 +118,8 @@ SJ_MERGE_JOB_NOT_COMPLETE = 'Not all scan job are completed.'\
     '  Only completed scan jobs may be merged. Incomplete scan jobs: %s'
 SJ_MERGE_JOB_NO_RESULTS = 'The specified set of jobs'\
     ' produced invalid fact collection.  Error: %s'
-SJ_MERGE_JOB_NO_TASKS = 'Merge cannot be completed. Source for job with id=%d has been deleted.'
+SJ_MERGE_JOB_NO_TASKS = 'Merge cannot be completed. Source for job with '\
+    'id=%d has been deleted.'
 
 
 # Scan Manager/Signal
