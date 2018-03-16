@@ -59,6 +59,12 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false
+  },
+
+  merge_dialog: {
+    show: false,
+    scans: [],
+    details: false
   }
 };
 
@@ -550,6 +556,32 @@ const scansReducer = function(state = initialState, action) {
         'merge',
         {
           fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case scansTypes.MERGE_SCAN_DIALOG_SHOW:
+      return helpers.setStateProp(
+        'merge_dialog',
+        {
+          show: true,
+          scans: action.scans,
+          details: action.details
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case scansTypes.MERGE_SCAN_DIALOG_HIDE:
+      return helpers.setStateProp(
+        'merge_dialog',
+        {
+          show: false
         },
         {
           state,

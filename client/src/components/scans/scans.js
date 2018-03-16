@@ -9,6 +9,7 @@ import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } f
 import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
 import {
   confirmationModalTypes,
+  scansTypes,
   sourcesTypes,
   toastNotificationTypes,
   viewToolbarTypes,
@@ -41,8 +42,7 @@ class Scans extends React.Component {
       'mergeScanResults',
       'addSource',
       'refresh',
-      'notifyActionStatus',
-      'hideMergeDialog'
+      'notifyActionStatus'
     ]);
 
     // FUTURE: Deletions of scans is not currently desired. This is here in case it ever gets added.
@@ -52,9 +52,7 @@ class Scans extends React.Component {
     this.deletingScan = null;
 
     this.state = {
-      lastRefresh: null,
-      mergeDialogShown: false,
-      mergeReportDetails: false
+      lastRefresh: null
     };
   }
 
@@ -165,7 +163,14 @@ class Scans extends React.Component {
   }
 
   mergeScanResults(details) {
-    this.setState({ mergeDialogShown: true, mergeReportDetails: details });
+    const { viewOptions } = this.props;
+
+    Store.dispatch({
+      type: scansTypes.MERGE_SCAN_DIALOG_SHOW,
+      show: true,
+      scans: viewOptions.selectedItems,
+      details: details
+    });
   }
 
   doStartScan(item) {
@@ -305,10 +310,6 @@ class Scans extends React.Component {
     });
   }
 
-  hideMergeDialog() {
-    this.setState({ mergeDialogShown: false });
-  }
-
   renderPendingMessage() {
     const { pending } = this.props;
 
@@ -400,7 +401,7 @@ class Scans extends React.Component {
 
   render() {
     const { error, errorMessage, scans, viewOptions } = this.props;
-    const { lastRefresh, mergeDialogShown, mergeReportDetails } = this.state;
+    const { lastRefresh } = this.state;
 
     if (error) {
       return (
@@ -433,12 +434,7 @@ class Scans extends React.Component {
             <div className="quipucords-list-container">{this.renderScansList(scans)}</div>
           </div>
           {this.renderPendingMessage()}
-          <MergeReportsDialog
-            show={mergeDialogShown}
-            scans={viewOptions.selectedItems}
-            details={mergeReportDetails}
-            onClose={this.hideMergeDialog}
-          />
+          <MergeReportsDialog />
         </React.Fragment>
       );
     }
