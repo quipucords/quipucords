@@ -3,7 +3,6 @@
 
 - name: Install the Quipucords components
   hosts: localhost
-  become: true
   roles:
     - prep
     - epel

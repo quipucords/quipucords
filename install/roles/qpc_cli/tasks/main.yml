@@ -10,6 +10,67 @@
     install_cli: true
   when: install_cli is not defined
 
+- name: Set qpc repo url for RHEL/CentOS 7
+  set_fact:
+    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo') }}"
+  when:
+    - qpc_repo_url is not defined
+    - is_rhel_centos_7
+
+- name: Set qpc repo file for RHEL/CentOS 7
+  set_fact:
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-epel-7.repo') }}"
+  when:
+    - qpc_repo_file is not defined
+    - is_rhel_centos_7
+
+- name: Set qpc repo url for RHEL/CentOS 6
+  set_fact:
+    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-6/group_quipucords-qpc-epel-6.repo') }}"
+  when:
+    - qpc_repo_url is not defined
+    - is_rhel_centos_6
+
+- name: Set qpc repo file for RHEL/CentOS 6
+  set_fact:
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-epel-6.repo') }}"
+  when:
+    - qpc_repo_file is not defined
+    - is_rhel_centos_6
+
+- name: Set qpc repo url for Fedora 26
+  set_fact:
+    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-26/group_quipucords-qpc-fedora-26.repo') }}"
+  when:
+    - qpc_repo_url is not defined
+    - is_fedora_26
+
+- name: Set qpc repo file for Fedora 26
+  set_fact:
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-26.repo') }}"
+  when:
+    - qpc_repo_file is not defined
+    - is_fedora_26
+
+- name: Set qpc repo url for Fedora 27
+  set_fact:
+    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-27/group_quipucords-qpc-fedora-27.repo') }}"
+  when:
+    - qpc_repo_url is not defined
+    - is_fedora_27
+
+- name: Set qpc repo file for Fedora 27
+  set_fact:
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-27.repo') }}"
+  when:
+    - qpc_repo_file is not defined
+    - is_fedora_27
+
+- name: Set qpc version
+  set_fact:
+    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc') }}"
+  when: qpc_version is not defined
+
 - name: Find installable local QPC rpm
   find:
     paths: "{{ pkg_install_dir }}"
@@ -32,34 +93,25 @@
 
 - name: Install QPC from local path
   shell: rpm -Uvh --force "{{find_qpc_rpm_local_path}}"
+  become: true
   when: find_qpc_rpm_local
 
-- name: Add QPC repository
+- name: Add QPC repository for RHEL/CentOS 7
   get_url:
-    url: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo
-    dest: /etc/yum.repos.d/group_quipucords-qpc-epel-7.repo
+    url: "{{ qpc_repo_url }}"
+    dest: /etc/yum.repos.d/"{{ qpc_repo_file }}"
     mode: 0644
     force: yes
+  become: true
   when:
     - install_cli
     - not find_qpc_rpm_local
-    - is_rhel7
-
-- name: Add QPC repository
-  get_url:
-    url: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-6/group_quipucords-qpc-epel-6.repo
-    dest: /etc/yum.repos.d/group_quipucords-qpc-epel-6.repo
-    mode: 0644
-    force: yes
-  when:
-    - install_cli
-    - not find_qpc_rpm_local
-    - is_rhel6
 
 - name: Install the latest version of QPC
   yum:
-    name: qpc
-    state: latest
+    name: "{{ qpc_version }}"
+    state: present
+  become: true
   when:
     - install_cli
     - not find_qpc_rpm_local
