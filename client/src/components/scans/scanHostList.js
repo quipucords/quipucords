@@ -3,6 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EmptyState, Grid, Icon } from 'patternfly-react';
+import helpers from '../../common/helpers';
 
 const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsError }) => {
   if (scanResultsPending === true) {
@@ -24,16 +25,24 @@ const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsErr
     );
   }
 
-  let connectionResults = _.get(scanResults, 'connection_results', []);
-
+  let results = _.get(scanResults, 'results', []);
   let displayHosts = [];
-  _.forEach(connectionResults.task_results, taskResult => {
-    _.forEach(taskResult.systems, system => {
-      if (system.status === status) {
-        displayHosts.push(system);
-      }
-    });
+  _.forEach(results, result => {
+    if (result.status === status) {
+      displayHosts.push(result);
+    }
   });
+
+  if (_.size(displayHosts) === 0) {
+    return (
+      <EmptyState>
+        <EmptyState.Icon name="warning-triangle-o" />
+        <EmptyState.Title>
+          {`${helpers.scanStatusString(status)} systems were not available, please refresh.`}
+        </EmptyState.Title>
+      </EmptyState>
+    );
+  }
 
   displayHosts.sort((item1, item2) => {
     return item1.name.localeCompare(item2.name);
@@ -50,14 +59,6 @@ const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsErr
                 &nbsp; {host.name}
               </span>
             </Grid.Col>
-            {host.status === 'success' && (
-              <Grid.Col xs={6} sm={4}>
-                <span>
-                  <Icon type="fa" name="id-card" />
-                  &nbsp; {host.credential.name}
-                </span>
-              </Grid.Col>
-            )}
           </Grid.Row>
         ))}
     </Grid>

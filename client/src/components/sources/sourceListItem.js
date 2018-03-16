@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
-import { getScanResults } from '../../redux/actions/scansActions';
+import { getConnectionScanResults } from '../../redux/actions/scansActions';
 import SourceCredentialsList from './sourceCredentialsList';
 import SourceHostList from './sourceHostList';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
@@ -67,12 +67,24 @@ class SourceListItem extends React.Component {
     const { item } = this.props;
 
     if (expandType === 'okHosts' || expandType === 'failedHosts') {
+      let okHostCount = _.get(item, 'connection.source_systems_scanned', 0);
+      let failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
+
+      if ((expandType === 'okHosts' && okHostCount === 0) || (expandType === 'failedHosts' && failedHostCount === 0)) {
+        Store.dispatch({
+          type: viewTypes.EXPAND_ITEM,
+          viewType: viewTypes.SOURCES_VIEW,
+          item: item
+        });
+        return;
+      }
+
       this.setState({
         scanResultsPending: true,
         scanResultsError: null
       });
       this.props
-        .getScanResults(item.connection.id)
+        .getConnectionScanResults(item.connection.id)
         .then(results => {
           this.setState({
             scanResultsPending: false,
@@ -82,7 +94,7 @@ class SourceListItem extends React.Component {
         .catch(error => {
           this.setState({
             scanResultsPending: false,
-            scanResultsError: helpers.getErrorMessageFromResults(error.payload)
+            scanResultsError: helpers.getErrorMessageFromResults(error)
           });
         });
     }
@@ -155,8 +167,8 @@ class SourceListItem extends React.Component {
 
     const expandType = this.expandType();
     const credentialCount = _.size(_.get(item, 'credentials', []));
-    let okHostCount = _.get(item, 'connection.systems_scanned', 0);
-    let failedHostCount = _.get(item, 'connection.systems_failed', 0);
+    let okHostCount = _.get(item, 'connection.source_systems_scanned', 0);
+    let failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
 
     if (helpers.DEV_MODE) {
       okHostCount = helpers.devModeNormalizeCount(okHostCount);
@@ -367,7 +379,7 @@ SourceListItem.propTypes = {
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onScan: PropTypes.func,
-  getScanResults: PropTypes.func,
+  getConnectionScanResults: PropTypes.func,
   selectedSources: PropTypes.array,
   expandedSources: PropTypes.array
 };
@@ -380,7 +392,7 @@ const mapStateToProps = function(state) {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScanResults: id => dispatch(getScanResults(id))
+  getConnectionScanResults: id => dispatch(getConnectionScanResults(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(SourceListItem);

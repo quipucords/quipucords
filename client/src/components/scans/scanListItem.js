@@ -13,7 +13,7 @@ import ScanSourceList from './scanSourceList';
 import ScanHostsList from './scanHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
-import { getScanResults, getScanJobs } from '../../redux/actions/scansActions';
+import { getInspectionScanResults, getScanJobs } from '../../redux/actions/scansActions';
 
 class ScanListItem extends React.Component {
   constructor() {
@@ -55,12 +55,26 @@ class ScanListItem extends React.Component {
     switch (expandType) {
       case 'systemsScanned':
       case 'systemsFailed':
+        let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+        let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
+        if (
+          (expandType === 'systemsScanned' && successHosts === 0) ||
+          (expandType === 'systemsFailed' && failedHosts === 0)
+        ) {
+          Store.dispatch({
+            type: viewTypes.EXPAND_ITEM,
+            viewType: viewTypes.SCANS_VIEW,
+            item: item
+          });
+          return;
+        }
+
         this.setState({
           scanResultsPending: true,
           scanResultsError: null
         });
         this.props
-          .getScanResults(item.most_recent.id)
+          .getInspectionScanResults(item.most_recent.id)
           .then(results => {
             this.setState({
               scanResultsPending: false,
@@ -70,7 +84,7 @@ class ScanListItem extends React.Component {
           .catch(error => {
             this.setState({
               scanResultsPending: true,
-              scanResultsError: helpers.getErrorMessageFromResults(error.payload)
+              scanResultsError: helpers.getErrorMessageFromResults(error)
             });
           });
         break;
@@ -90,7 +104,7 @@ class ScanListItem extends React.Component {
           .catch(error => {
             this.setState({
               scanJobsPending: false,
-              scanJobsError: helpers.getErrorMessageFromResults(error.payload)
+              scanJobsError: helpers.getErrorMessageFromResults(error)
             });
           });
         break;
@@ -385,7 +399,7 @@ ScanListItem.propTypes = {
   onCancel: PropTypes.func,
   onStart: PropTypes.func,
   onResume: PropTypes.func,
-  getScanResults: PropTypes.func,
+  getInspectionScanResults: PropTypes.func,
   getScanJobs: PropTypes.func,
   selectedScans: PropTypes.array,
   expandedScans: PropTypes.array
@@ -399,7 +413,7 @@ const mapStateToProps = function(state) {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScanResults: id => dispatch(getScanResults(id)),
+  getInspectionScanResults: id => dispatch(getInspectionScanResults(id)),
   getScanJobs: id => dispatch(getScanJobs(id))
 });
 
