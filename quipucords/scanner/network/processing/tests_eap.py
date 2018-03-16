@@ -173,7 +173,7 @@ class TestProcessEapHomeLs(unittest.TestCase):
              'dir3': []})
 
 
-class TestProcessEapHomeCat(unittest.TestCase):
+class TestProcessEapHomeVersionTxt(unittest.TestCase):
     """Test scanning the contents of $EAP_HOME/version.txt."""
 
     cat_result = (
@@ -182,7 +182,7 @@ class TestProcessEapHomeCat(unittest.TestCase):
     def test_three_dirs(self):
         """A directory can have three outcomes."""
         self.assertEqual(
-            eap.ProcessEapHomeCat.process(
+            eap.ProcessEapHomeVersionTxt.process(
                 ansible_results([
                     # dir1: cat was successful, stdout has 'Red Hat' in it.
                     {'item': 'dir1', 'stdout': self.cat_result},
@@ -190,9 +190,9 @@ class TestProcessEapHomeCat(unittest.TestCase):
                     {'item': 'dir2', 'rc': 1, 'stdout': self.cat_result},
                     # dir3: cat was successful, output does not have 'Red Hat'.
                     {'item': 'dir3', 'stdout': 'foo'}])),
-            {'dir1': True,
+            {'dir1': self.cat_result,
              'dir2': False,
-             'dir3': False})
+             'dir3': 'foo'})
 
 
 class TestProcessJbossEapInitFiles(unittest.TestCase):
