@@ -46,10 +46,11 @@ def build_sources_from_tasks(tasks):
         task_facts = inspect_task.get_facts()
         if task_facts:
             source = inspect_task.source
-            source_dict = {'source_id': source.id,
-                           'source_type': source.source_type,
-                           'facts': task_facts}
-            sources.append(source_dict)
+            if source is not None:
+                source_dict = {'source_id': source.id,
+                               'source_type': source.source_type,
+                               'facts': task_facts}
+                sources.append(source_dict)
     return sources
 
 

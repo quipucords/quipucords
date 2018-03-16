@@ -43,7 +43,7 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
 
         model = SystemInspectionResult
         fields = ['name', 'status', 'source', 'facts']
-        qpc_allow_empty_fields = ['facts']
+        qpc_allow_empty_fields = ['facts', 'source']
 
 
 class TaskInspectionResultSerializer(NotEmptySerializer):

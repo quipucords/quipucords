@@ -716,29 +716,6 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         404:
           description: "Scan job not found"
-  /jobs/{scan_job_id}/results/:
-    get:
-      tags:
-        - "Scan Job"
-      summary: "Get the results of existing scan job"
-      description: "Get the results of a scan."
-      operationId: "getScanResults"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "scan_job_id"
-        in: "path"
-        description: "ID of scan job to retrieve results for"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Scan job results retrieved"
-          schema:
-            $ref: "#/definitions/ScanJobResultsOut"
-        404:
-          description: "Scan job results not found"
   /jobs/{scan_job_id}/connection/:
     get:
       tags:
@@ -1367,7 +1344,7 @@ definitions:
           options:
             $ref: "#/definitions/SourceOptions"
           connection:
-            $ref: "#/definitions/ScanJobDetails"
+            $ref: "#/definitions/SourceMostRecentConnectionJob"
   SourcePagination:
     allOf:
       - $ref: "#/definitions/ListPagination"
@@ -1551,12 +1528,16 @@ definitions:
         options:
           $ref: "#/definitions/ScanOptions"
 
-  ScanJobDetails:
+  SourceMostRecentConnectionJob:
     type: "object"
     properties:
       id:
         type: "integer"
         format: "int64"
+      report_id:
+        type: "integer"
+        format: "int64"
+        example: 3
       start_time:
         type: "string"
         format: "date-time"
@@ -1574,18 +1555,42 @@ definitions:
           - canceled
           - failed
           - completed
+      status_details:
+        type: "object"
+        properties:
+          job_status_message:
+            type: "string"
+            example: "Job is complete."
       systems_count:
         type: "integer"
         format: "int64"
         description: "The total number of systems to be scanned in the source."
+        example: 10
       systems_scanned:
         type: "integer"
         format: "int64"
         description: "The total number of systems that have been scanned in the source."
+        example: 8
       systems_failed:
         type: "integer"
         format: "int64"
         description: "The total number of systems that failed during the scan of the source."
+        example: 2
+      source_systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the source."
+        example: 5
+      source_systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that have been scanned in the source."
+        example: 4
+      source_systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that failed during the scan of the source."
+        example: 1
   ScanJobOut:
     allOf:
       - $ref: "#/definitions/ScanJob"
@@ -1702,6 +1707,12 @@ definitions:
           - canceled
           - failed
           - completed
+      status_details:
+        type: "object"
+        properties:
+          job_status_message:
+            type: "string"
+            example: "Job is complete."
   JobMin:
     type: "object"
     required:
@@ -1748,17 +1759,6 @@ definitions:
         items:
           $ref: "#/definitions/SysConnResultOut"
         description: "The connection result for each system."
-  TaskConnResultsOut:
-    type: "object"
-    required:
-      - source
-      - systems
-    properties:
-      task_results:
-        type: "array"
-        items:
-          $ref: "#/definitions/ConnResultsOut"
-        description: "The connection result for tasks."
   RawFactsOut:
     type: "object"
     required:
@@ -1809,26 +1809,6 @@ definitions:
         items:
           $ref: "#/definitions/SysInspectResultOut"
         description: "The inspection result for each system."
-  TaskInspectResultsOut:
-    type: "object"
-    required:
-      - task_results
-    properties:
-      task_results:
-        type: "array"
-        items:
-          $ref: "#/definitions/InspectResultsOut"
-        description: "The inspection results for tasks."
-  ScanJobResultsOut:
-    type: "object"
-    required:
-      - connection_results
-      - inspection_results
-    properties:
-        connection_results:
-          $ref: "#/definitions/TaskConnResultsOut"
-        inspection_results:
-          $ref: "#/definitions/TaskInspectResultsOut"
   ScanJobConnectionResultsOut:
     allOf:
       - $ref: "#/definitions/ListPagination"

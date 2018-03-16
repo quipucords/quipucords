@@ -21,7 +21,7 @@ describe('factsReducer', function() {
 
   it('should handle ADD_FACTS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(factsTypes.ADD_FACTS),
+      type: helpers.REJECTED_ACTION(factsTypes.ADD_FACTS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -42,7 +42,7 @@ describe('factsReducer', function() {
 
   it('should handle ADD_FACTS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(factsTypes.ADD_FACTS)
+      type: helpers.PENDING_ACTION(factsTypes.ADD_FACTS)
     };
 
     let resultState = factsReducer(undefined, dispatched);
@@ -53,7 +53,7 @@ describe('factsReducer', function() {
 
   it('should handle ADD_FACTS_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(factsTypes.ADD_FACTS),
+      type: helpers.FULFILLED_ACTION(factsTypes.ADD_FACTS),
       payload: {
         data: [
           {
