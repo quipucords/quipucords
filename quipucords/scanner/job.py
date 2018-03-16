@@ -74,6 +74,7 @@ class ScanJobRunner(Process):
             # run runner
             try:
                 status_message, task_status = runner.run()
+            # pylint: disable=broad-except
             except Exception as error:
                 failed_task = runner.scan_task
                 context_message = 'Unexpected failure occurred.'
@@ -89,7 +90,8 @@ class ScanJobRunner(Process):
 
                 message = 'FATAL ERROR. %s' % str(error)
                 self.scan_job.fail(message)
-                raise error
+                task_status = ScanTask.FAILED
+                status_message = message
 
             # Save Task status
             if task_status == ScanTask.FAILED:
