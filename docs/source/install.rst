@@ -1,6 +1,6 @@
 Installing Quipucords
 =====================
-Quipucords is delivered in two parts, a command line tool as an RPM package and a server as a container image. The following instructions describe how to install the parts of Quipucords using an scripted installation or step by step commands.
+Quipucords is delivered in two parts, a command line tool as an RPM package and a server as a container image. The following instructions describe how to install the parts of Quipucords using a scripted installation or step by step commands.
 
 Scripted Installation
 ----------------------
@@ -8,7 +8,7 @@ The scripted installation utilizes Ansible to install the command line and conta
 
 Installing the Ansible Prerequisite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Follow the `Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_ to prepare the your system to install the software.
+Follow the `Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_ to prepare the system to install the software.
 
 Obtaining the Installer
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +64,7 @@ In order to install the command line you will need the following items, see `Ins
 
     # cd install/
 
-2. Create a directory, default is ``packages``, to install downloaded packages from with the following command::
+2. Create a directory ``packages`` to install downloaded packages from with the following command::
 
     # mkdir packages
 
