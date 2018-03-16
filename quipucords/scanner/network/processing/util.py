@@ -176,5 +176,5 @@ class StdoutPassthroughProcessor(process.Processor):
         :returns: a dictionary mapping each item name to the item's
         stdout if the item's 'rc' is zero, or False otherwise.
         """
-        return { item['item']: item['stdout'] if item['rc'] == 0 else False
-                 for item in output['results'] }
+        return {item['item']: item['stdout'] if item['rc'] == 0 else False
+                for item in output['results']}

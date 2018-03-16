@@ -181,6 +181,8 @@ def process_version_txt(version_dict):
 
 
 IMPLEMENTATION_VERSION = 'Implementation-Version:'
+
+
 def is_eap_manifest_version(manifest_dict):
     """Check whether a manifest contains an EAP version string or not."""
     for _, manifest in manifest_dict.items():
