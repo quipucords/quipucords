@@ -132,9 +132,9 @@ describe('AddSourceWizardReducer', function() {
             start_time: '2018-02-21T19:04:18.820Z',
             end_time: '2018-02-21T19:04:18.820Z',
             status: 'created',
-            systems_count: 0,
-            systems_scanned: 0,
-            systems_failed: 0
+            source_systems_count: 0,
+            source_systems_scanned: 0,
+            source_systems_failed: 0
           }
         }
       }

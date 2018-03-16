@@ -18,7 +18,15 @@ const initialState = {
     scan: {}
   },
 
-  results: {
+  connectionResults: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    results: []
+  },
+
+  inspectionResults: {
     error: false,
     errorMessage: '',
     pending: false,
@@ -159,9 +167,9 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Error/Rejected
-    case helpers.REJECTED_ACTION(scansTypes.GET_SCAN_RESULTS):
+    case helpers.REJECTED_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS):
       return helpers.setStateProp(
-        'results',
+        'connectionResults',
         {
           pending: false,
           error: action.error,
@@ -174,12 +182,12 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case helpers.PENDING_ACTION(scansTypes.GET_SCAN_RESULTS):
+    case helpers.PENDING_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS):
       return helpers.setStateProp(
-        'results',
+        'connectionResults',
         {
           pending: true,
-          results: state.results.results
+          results: state.connectionResults.results
         },
         {
           state,
@@ -188,9 +196,53 @@ const scansReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_RESULTS):
+    case helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS):
       return helpers.setStateProp(
-        'results',
+        'connectionResults',
+        {
+          results: action.payload.data.results,
+          pending: false,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Error/Rejected
+    case helpers.REJECTED_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS):
+      return helpers.setStateProp(
+        'inspectionResults',
+        {
+          pending: false,
+          error: action.error,
+          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Loading/Pending
+    case helpers.PENDING_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS):
+      return helpers.setStateProp(
+        'inspectionResults',
+        {
+          pending: true,
+          results: state.inspectionResults.results
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    // Success/Fulfilled
+    case helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS):
+      return helpers.setStateProp(
+        'inspectionResults',
         {
           results: action.payload.data.results,
           pending: false,

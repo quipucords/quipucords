@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite connection task."""
+import socket
 from requests import exceptions
 from api.models import (ScanTask)
 from scanner.task import ScanTaskRunner
@@ -77,6 +78,11 @@ class ConnectTaskRunner(ScanTaskRunner):
             error_message = 'Satellite error encountered: %s. ' % timeout_error
             error_message += 'Connect scan failed for source %s.' \
                 % self.source.name
+            return error_message, ScanTask.FAILED
+        except socket.gaierror as socket_error:
+            error_message = 'Satellite error encountered: %s. ' % socket_error
+            error_message += 'Connect scan failed for source %s.' \
+                             % self.source.name
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

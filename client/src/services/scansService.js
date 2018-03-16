@@ -72,9 +72,15 @@ class ScansService {
     });
   }
 
-  static getScanResults(id) {
+  static getConnectionScanResults(id) {
     return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESULTS.replace('{0}', id)
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id)
+    });
+  }
+
+  static getInspectionScanResults(id) {
+    return axios({
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id)
     });
   }
 

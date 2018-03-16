@@ -25,16 +25,11 @@ const SourceHostList = ({ source, scanResults, scanResultsError, scanResultsPend
     );
   }
 
-  let connectionResults = _.get(scanResults, 'connection_results', []);
-
+  let results = _.get(scanResults, 'results', []);
   let displayHosts = [];
-  _.forEach(connectionResults.task_results, taskResult => {
-    if (_.get(taskResult, 'source.id') === source.id) {
-      _.forEach(taskResult.systems, system => {
-        if (system.status === status) {
-          displayHosts.push(system);
-        }
-      });
+  _.forEach(results, result => {
+    if (result.status === status && _.get(result, 'source.id') === source.id) {
+      displayHosts.push(result);
     }
   });
 
