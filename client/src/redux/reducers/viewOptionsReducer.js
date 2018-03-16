@@ -81,18 +81,29 @@ export default function viewOptionsReducer(state = initialState, action) {
       return Object.assign({}, state, updateState);
 
     case viewToolbarTypes.ADD_FILTER:
-      // Don't rea-add the same filter
-      let filterExists = state[action.viewType].activeFilters.find(filter => {
-        return action.filter.field === filter.field && action.filter.value === filter.value;
-      });
-      if (filterExists) {
+      let currentFilter = state[action.viewType].activeFilters.find(filter => action.filter.field === filter.field);
+
+      if (!currentFilter) {
+        updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+          activeFilters: [...state[action.viewType].activeFilters, action.filter],
+          currentPage: 1
+        });
+      } else if (currentFilter.value === action.filter.value) {
+        // Do nothing if an existing filter has the same value
         return state;
+      } else {
+        // replace the existing filter
+        let index = state[action.viewType].activeFilters.indexOf(currentFilter);
+        updateState[action.viewType] = Object.assign({}, state[action.viewType], {
+          activeFilters: [
+            ...state[action.viewType].activeFilters.slice(0, index),
+            action.filter,
+            ...state[action.viewType].activeFilters.slice(index + 1)
+          ],
+          currentPage: 1
+        });
       }
 
-      updateState[action.viewType] = Object.assign({}, state[action.viewType], {
-        activeFilters: [...state[action.viewType].activeFilters, action.filter],
-        currentPage: 1
-      });
       return Object.assign({}, state, updateState);
 
     case viewToolbarTypes.REMOVE_FILTER:
