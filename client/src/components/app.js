@@ -1,17 +1,13 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-
 import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
-
+import _ from 'lodash';
 import { routes } from '../routes';
 import { authorizeUser, getUser, logoutUser } from '../redux/actions/userActions';
 import { getStatus } from '../redux/actions/statusActions';
 import helpers from '../common/helpers';
-
 import About from './about/about';
 import AddSourceWizard from './addSourceWizard/addSourceWizard';
 import CreateCredentialDialog from './createCredentialDialog/createCredentialDialog';
@@ -19,16 +15,17 @@ import Content from './content/content';
 import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
 import MastheadOptions from './mastheadOptions/mastheadOptions';
-
 import productTitle from '../styles/images/title.svg';
 
 class App extends React.Component {
   constructor() {
     super();
+
     this.menu = routes();
     this.state = {
       aboutShown: false
     };
+
     helpers.bindMethods(this, ['showAbout', 'closeAbout']);
   }
 
@@ -59,7 +56,7 @@ class App extends React.Component {
   renderMenuItems() {
     const { location } = this.props;
 
-    let activeItem = this.menu.find(item => _.startsWith(location.pathname, item.to));
+    const activeItem = this.menu.find(item => _.startsWith(location.pathname, item.to));
 
     return this.menu.map(item => {
       return (
@@ -191,12 +188,12 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   getStatus: () => dispatch(getStatus())
 });
 
-function mapStateToProps(state, ownProps) {
+const mapStateToProps = function(state) {
   return {
     session: state.user.session,
     user: state.user.user,
     status: state.status.currentStatus
   };
-}
+};
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

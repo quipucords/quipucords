@@ -22,28 +22,67 @@
 
 - name: Set server url
   set_fact:
-    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/0.0.1-pilot/quipucords.pilot.e9ccd8cc05e41ee555f768eb2692f785aaf7e942.tar.gz') }}"
+    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/1.0.0/quipucords.latest.tar.gz') }}"
   when: server_url is not defined
 
-- name: Set server image name
+- name: Set server image and tag name
   set_fact:
-    server_image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:latest') }}"
-  when: server_image is not defined
+    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:latest') }}"
+  when: server_image_and_tag is not defined
+
+- name: Split server image and tag name
+  set_fact:
+    image_and_tag: "{{ server_image_and_tag.split(':') }}"
+  when: server_image_and_tag is defined
+
+- name: Set container image and tag name
+  set_fact:
+    image: "{{ image_and_tag[0] }}"
+    tag: "{{ image_and_tag[1] }}"
+  when: image_and_tag is defined
 
 - name: Set server name
   set_fact:
     server_name: "{{ ansible_env['SERVER_NAME'] | default('quipucords') }}"
   when: server_name is not defined
 
+- name: Defaulting selinux_on to false
+  set_fact:
+    selinux_on: false
+
+- name: Get selinux_on setting from ansible
+  set_fact:
+    selinux_on: true
+  when: ansible_selinux is defined and ansible_selinux != False and ansible_selinux.status == 'enabled'
+
+- name: Default directory mounting to empty string
+  set_fact:
+    dir_mount_selinux: ""
+
+- name: Set dir_mount_selinux to add ":z" if selinux_on is true
+  set_fact:
+    dir_mount_selinux: ":z"
+  when: selinux_on
+
 - name: Check for server image presence
-  shell: docker images -q "{{ server_image }}"
+  shell: docker images | grep "{{ image }}" | grep "{{ tag }}"
+  become: true
   register: docker_image_raw
+  ignore_errors: yes
   when: install_server
 
-- name: Set docker_image_present
+- name: Set docker_image_present false
+  set_fact:
+    docker_image_present: false
+  when:
+    - docker_image_raw.rc != 0
+
+- name: Set docker_image_present true
   set_fact:
     docker_image_present: "{{ docker_image_raw['stdout_lines']|length > 0 }}"
-  when: "'stdout_lines' in docker_image_raw"
+  when:
+    - docker_image_raw.rc == 0
+    - "'stdout_lines' in docker_image_raw"
 
 - name: Find installable local Quipucords server
   find:
@@ -97,6 +136,7 @@
 
 - name: Load Quipucords image into local Docker registry
   shell: docker load -i "{{find_qpc_server_local_path}}"
+  become: true
   when:
     - install_server
     - not docker_image_present
@@ -119,7 +159,9 @@
 
 - name: Check for server already running
   shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
+  become: true
   register: docker_ps_raw
+  ignore_errors: yes
   when: install_server
 
 - name: Set docker_server_running
@@ -128,7 +170,8 @@
   when: "'stdout_lines' in docker_ps_raw"
 
 - name: Start server
-  shell: docker run --name "{{ server_name }}" -d -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys -v "{{ server_install_dir }}"/data:/var/data -v "{{ server_install_dir }}"/log:/var/log -i "{{ server_image }}"
+  shell: docker run --name "{{ server_name }}" -d -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  become: true
   when:
     - install_server
     - not docker_server_running

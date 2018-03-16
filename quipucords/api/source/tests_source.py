@@ -150,21 +150,10 @@ class SourceTest(TestCase):
         serializer = SourceSerializer(source)
         json_source = serializer.data
         out = format_source(json_source)
-        expected = {'id': 1,
-                    'name': 'source1',
-                    'source_type': 'network',
-                    'port': 22,
-                    'hosts': ['1.2.3.4'],
-                    'connection': {'id': 1, 'start_time': start,
-                                   'end_time': end,
-                                   'systems_count': 10,
-                                   'systems_scanned': 9,
-                                   'systems_failed': 1,
-                                   'status': 'completed',
-                                   'status_details':
-                                   {'job_status_message': 'Job is pending.'}}}
 
-        print('***', out)
+        # pylint: disable=line-too-long
+        expected = {'id': 1, 'name': 'source1', 'source_type': 'network', 'port': 22, 'hosts': ['1.2.3.4'], 'connection': {'id': 1, 'start_time': start, 'end_time': end, 'systems_count': 10, 'systems_scanned': 9, 'systems_failed': 1, 'status_details': {'job_status_message': 'Job is pending.'}, 'status': 'completed', 'source_systems_count': 10, 'source_systems_scanned': 9, 'source_systems_failed': 1}}  # noqa
+
         self.assertEqual(out, expected)
 
     #################################################

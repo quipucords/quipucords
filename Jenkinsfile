@@ -44,14 +44,21 @@ node('f25-os') {
         sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
         sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
 
-        def tarfile = "quipucords.latest." + commitHash + ".tar"
+        def tarfile = "quipucords.latest.tar"
         def targzfile = tarfile + ".gz"
         sh "sudo docker save -o $tarfile quipucords:latest"
         sh "sudo chmod 755 $tarfile"
         sh "sudo gzip -f --best $tarfile"
         sh "sudo chmod 755 $targzfile"
 
+        def install_tar = "quipucords.install.tar"
+        def install_targzfile = install_tar + ".gz"
+        sh "sudo chmod 755 $install_tar"
+        sh "sudo gzip -f --best $install_tar"
+        sh "sudo chmod 755 $install_targzfile"
+
         archive targzfile
+        archive install_targzfile
 
     }
 }

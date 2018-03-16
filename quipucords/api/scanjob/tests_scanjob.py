@@ -31,10 +31,7 @@ from api.models import (Credential,
                         SystemConnectionResult,
                         SystemInspectionResult,
                         RawFact)
-from api.scanjob.view import (expand_scanjob,
-                              expand_sys_conn_result,
-                              expand_conn_results,
-                              expand_inspect_results)
+from api.scanjob.view import (expand_scanjob)
 from scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
 
@@ -248,70 +245,6 @@ class ScanJobTest(TestCase):
         url = reverse('scanjob-detail', args=('string',))
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_details(self):
-        """Get ScanJob result details by primary key."""
-        # pylint: disable=no-member
-        scan_job, scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT)
-
-        # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-        conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
-
-        # Create an inspection system result
-        sys_result = SystemInspectionResult(name='Foo',
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-
-        fact = RawFact(name='fact_key', value='"fact_value"')
-        fact.save()
-        sys_result.facts.add(fact)
-        sys_result.save()
-
-        inspect_result = scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        scan_job.save()
-
-        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'results/'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        json_response = response.json()
-        self.assertIn('connection_results', json_response)
-        self.assertIn('inspection_results', json_response)
-        expected = {
-            'connection_results':
-                {'task_results': [
-                    {'source': {'id': 1,
-                                'name': 'source1',
-                                'source_type': 'network',
-                                'most_recent_connect_scan': 1},
-                     'systems': [
-                         {'name': 'Foo',
-                          'status': 'success',
-                          'credential': {'id': 1,
-                                         'name': 'cred1'}}]}]},
-            'inspection_results': {
-                'task_results': [
-                    {'source': {'id': 1,
-                                'name': 'source1',
-                                'source_type': 'network',
-                                'most_recent_connect_scan': 1},
-                     'systems': [
-                         {'name': 'Foo',
-                          'status': 'success',
-                          'facts': [
-                              {'name': 'fact_key',
-                               'value': 'fact_value'}]}]}]}}
-        self.assertEqual(json_response, expected)
 
     def test_connection(self):
         """Get ScanJob connection results."""
@@ -616,6 +549,52 @@ class ScanJobTest(TestCase):
 
         self.assertEqual(json_response, expected)
 
+    def test_connection_delete_source_and_cred(self):
+        """Get ScanJob connection results after source & cred are deleted."""
+        # pylint: disable=no-member
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        cred2 = Credential.objects.create(
+            name='cred2',
+            username='username',
+            password='password',
+            become_password=None,
+            ssh_keyfile=None)
+        source2.credentials.add(cred2)
+        scan_job, scan_task = create_scan_job(
+            source2, ScanTask.SCAN_TYPE_CONNECT)
+
+        # Create a connection system result
+        sys_result = SystemConnectionResult(name='Woot',
+                                            source=source2,
+                                            credential=cred2,
+                                            status=SystemConnectionResult
+                                            .FAILED)
+        sys_result.save()
+        source2.delete()
+        cred2.delete()
+
+        conn_result = scan_task.connection_result
+        conn_result.systems.add(sys_result)
+        conn_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Woot',
+                         'status': 'failed',
+                         'source': 'Deleted',
+                         'credential': 'Deleted'}]}
+        self.assertEqual(json_response, expected)
+
     def test_connection_not_found(self):
         """Get ScanJob connection results with 404."""
         # pylint: disable=no-member
@@ -825,6 +804,51 @@ class ScanJobTest(TestCase):
                                     'value': '"fact_value"'}]}]}
         self.assertEqual(json_response, expected)
 
+    def test_inspection_delete_source(self):
+        """Get ScanJob inspection results after source has been deleted."""
+        # pylint: disable=no-member
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job, scan_task = create_scan_job(
+            source2, ScanTask.SCAN_TYPE_INSPECT)
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            source=source2)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        source2.delete()
+
+        inspection_result = scan_task.inspection_result
+        inspection_result.systems.add(inspect_sys_result)
+        inspection_result.save()
+
+        url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [
+                        {'name': 'Foo',
+                         'status': 'success',
+                         'source': 'Deleted',
+                         'facts': [{'name': 'fact_key',
+                                    'value': '"fact_value"'}]}]}
+        self.assertEqual(json_response, expected)
+
     def test_inspection_not_found(self):
         """Get ScanJob connection results with 404."""
         # pylint: disable=no-member
@@ -977,6 +1001,83 @@ class ScanJobTest(TestCase):
         json_response = response.json()
         validation_result = {'sources': 'Required. May not be null or empty.'}
         error_message = messages.SJ_MERGE_JOB_NO_RESULTS % validation_result
+        self.assertEqual(
+            json_response, {'jobs': [error_message]})
+
+    def test_merge_jobs_deleted_source(self):
+        """Test merge jobs success."""
+        # pylint: disable=no-member, too-many-locals
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        source2.credentials.add(self.cred)
+        scan_job1, scan_task1 = create_scan_job(
+            source2, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test1')
+
+        scan_job2, scan_task2 = create_scan_job(
+            source2, ScanTask.SCAN_TYPE_INSPECT,
+            scan_name='test2')
+
+        # Create a connection system result
+        connect_sys_result = SystemConnectionResult(
+            name='Foo',
+            credential=self.cred,
+            source=source2,
+            status=SystemConnectionResult
+            .SUCCESS)
+        connect_sys_result.save()
+
+        # Create an inspection system result
+        inspect_sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemInspectionResult
+            .SUCCESS)
+        inspect_sys_result.save()
+
+        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact.save()
+        inspect_sys_result.facts.add(fact)
+        inspect_sys_result.save()
+
+        conn_result = scan_task1.prerequisites.first().connection_result
+        conn_result.systems.add(connect_sys_result)
+        conn_result.save()
+
+        inspect_result = scan_task1.inspection_result
+        inspect_result.systems.add(inspect_sys_result)
+        inspect_result.save()
+        scan_task1.status = ScanTask.COMPLETED
+        scan_task1.save()
+
+        conn_result = scan_task2.prerequisites.first().connection_result
+        conn_result.systems.add(connect_sys_result)
+        conn_result.save()
+
+        inspect_result = scan_task2.inspection_result
+        inspect_result.systems.add(inspect_sys_result)
+        inspect_result.save()
+        scan_task1.status = ScanTask.COMPLETED
+        scan_task1.save()
+
+        scan_job1.status = ScanTask.COMPLETED
+        scan_job1.save()
+
+        scan_job2.status = ScanTask.COMPLETED
+        source2.delete()
+        scan_job2.save()
+
+        url = reverse('scanjob-merge')
+        data = {'jobs': [scan_job1.id, scan_job2.id]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        error_message = messages.SJ_MERGE_JOB_NO_TASKS % scan_job1.id
         self.assertEqual(
             json_response, {'jobs': [error_message]})
 
@@ -1205,73 +1306,6 @@ class ScanJobTest(TestCase):
         self.assertEqual(json_scan.get('systems_count'), 2)
         self.assertEqual(json_scan.get('systems_failed'), 1)
         self.assertEqual(json_scan.get('systems_scanned'), 1)
-
-    def test_expand_sys_conn_result(self):
-        """Test view expand_sys_conn_result."""
-        # pylint: disable=no-member
-        _, scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_CONNECT)
-
-        sys_result = SystemConnectionResult(name='Foo',
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-        conn_result = scan_task.connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
-
-        result = expand_sys_conn_result(conn_result)
-        self.assertEqual(result[0]['credential']['name'], 'cred1')
-
-    def test_expand_conn_results(self):
-        """Test view expand_conn_results."""
-        # pylint: disable=no-member
-        scan_job, scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_CONNECT)
-
-        sys_result = SystemConnectionResult(name='Foo',
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-        conn_result = scan_task.connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
-
-        conn_results_json = {'task_results': [{}]}
-        expand_conn_results(scan_job.connection_results, conn_results_json)
-        self.assertEqual(
-            conn_results_json['task_results'][0]['systems'][0]['name'], 'Foo')
-
-    def test_expand_inspect_results(self):
-        """Test view expand_inspect_results."""
-        # pylint: disable=no-member
-        scan_job, scan_task = create_scan_job(self.source,
-                                              ScanTask.SCAN_TYPE_INSPECT)
-
-        sys_result = SystemInspectionResult(name='Foo',
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-
-        fact = RawFact(name='foo', value='"value"')
-        fact.save()
-
-        sys_result.facts.add(fact)
-        sys_result.save()
-
-        inspect_result = scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-
-        inspect_results_json = {'task_results': [{}]}
-        expand_inspect_results(
-            scan_job.inspection_results, inspect_results_json)
-        self.assertEqual(
-            inspect_results_json['task_results'][0]['systems'][0]
-            ['facts'][0]['name'],
-            'foo')
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""

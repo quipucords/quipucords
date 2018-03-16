@@ -1,6 +1,6 @@
 const CredentialFilterFields = [
   {
-    id: 'name',
+    id: 'search_by_name',
     title: 'Name',
     placeholder: 'Filter by Name',
     filterType: 'text'

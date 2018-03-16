@@ -1,6 +1,18 @@
 import { helpers } from '../../common/helpers';
 const SourceFilterFields = [
   {
+    id: 'search_by_name',
+    title: 'Name',
+    placeholder: 'Filter by Name',
+    filterType: 'text'
+  },
+  {
+    id: 'search_credentials_by_name',
+    title: 'Credential',
+    placeholder: 'Filter by Credential Name',
+    filterType: 'text'
+  },
+  {
     id: 'source_type',
     title: 'Source Type',
     placeholder: 'Filter by Source Type',

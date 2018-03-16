@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
 import { Alert, Modal, Button, Form, Grid, Icon } from 'patternfly-react';
-
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { addScan, startScan } from '../../redux/actions/scansActions';
@@ -14,6 +12,7 @@ class CreateScanDialog extends React.Component {
     super();
 
     helpers.bindMethods(this, ['updateScanName', 'createScan', 'startChange']);
+
     this.state = {
       scanName: '',
       validScanName: false
@@ -143,9 +142,9 @@ class CreateScanDialog extends React.Component {
           <strong>Error</strong> {action.errorMessage}
         </Alert>
       );
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   render() {
@@ -224,8 +223,6 @@ CreateScanDialog.propTypes = {
   onClose: PropTypes.func,
   action: PropTypes.object
 };
-
-export { CreateScanDialog };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   addScan: data => dispatch(addScan(data)),
