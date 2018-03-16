@@ -120,9 +120,13 @@ def status(scan_task):
     try:
         return _status5(scan_task)
     except SatelliteException as sat_error:
-        logger.error('Failure attempting Satellite 5'
-                     ' status check for task %s with error: %s.',
-                     scan_task.id, sat_error)
+        message = 'Satellite 5 status check failed with error:' \
+            ' %s.' % sat_error
+        scan_task.log_message(message, log_level=logging.ERROR)
+    except xmlrpc.client.ProtocolError:
+        message = 'Satellite 5 status check endpoint not found. '\
+            'Attempting Satellite 6.'
+        scan_task.log_message(message)
 
     return _status6(scan_task)
 
@@ -144,6 +148,8 @@ def _status5(scan_task):
         else:
             raise SatelliteException(str(xml_error))
     except xmlrpc.client.ProtocolError as protocol_error:
+        if protocol_error.errcode == codes.HTTP_404_NOT_FOUND:
+            raise protocol_error
         raise SatelliteException(str(protocol_error))
 
     api_version = SATELLITE_VERSION_5
