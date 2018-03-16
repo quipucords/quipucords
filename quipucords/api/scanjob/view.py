@@ -54,7 +54,7 @@ def expand_source(system):
     if 'source' in system.keys():
         source_id = system['source']
         if source_id is None:
-            system['source'] = 'Deleted'
+            system['source'] = 'deleted'
         else:
             system['source'] = \
                 Source.objects.filter(
@@ -71,12 +71,9 @@ def expand_system_connection(system):
     expand_source(system)
     if 'credential' in system.keys():
         cred_id = system['credential']
-        if cred_id is None:
-            system['credential'] = 'Deleted'
-        else:
-            system['credential'] = \
-                Credential.objects.filter(id=cred_id).values('id',
-                                                             'name').first()
+        system['credential'] = \
+            Credential.objects.filter(id=cred_id).values('id',
+                                                         'name').first()
 
 
 def expand_system_inspection(system):
