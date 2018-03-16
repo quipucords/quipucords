@@ -308,6 +308,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     def validate_merge_jobs(self, data):
         """Validate merge jobs."""
+        # pylint: disable=no-self-use
         error = {
             'jobs': []
         }
