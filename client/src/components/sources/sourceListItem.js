@@ -159,8 +159,8 @@ class SourceListItem extends React.Component {
     let failedHostCount = _.get(item, 'connection.systems_failed', 0);
 
     if (helpers.DEV_MODE) {
-      okHostCount = helpers.normalizeCount(okHostCount);
-      failedHostCount = helpers.normalizeCount(failedHostCount);
+      okHostCount = helpers.devModeNormalizeCount(okHostCount);
+      failedHostCount = helpers.devModeNormalizeCount(failedHostCount);
     }
 
     return [
