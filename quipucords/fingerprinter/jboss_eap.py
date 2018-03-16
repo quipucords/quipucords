@@ -162,40 +162,67 @@ def find_eap_entitlement(entitlements):
     return Product.UNKNOWN
 
 
-def process_version_txt(version):
+def any_value_true(obj):
+    """Check whether any value in a dictionary is true."""
+    if any(obj.values()):
+        return Product.PRESENT
+
+    return Product.ABSENT
+
+
+def process_version_txt(version_dict):
     """Get the EAP version from a version.txt string."""
-    return version.strip()
+    versions = set()
+    for _, version in version_dict.items():
+        if version:
+            versions.add(version.strip())
+
+    return versions
 
 
 IMPLEMENTATION_VERSION = 'Implementation-Version:'
-def is_eap_manifest_version(version):
+def is_eap_manifest_version(manifest_dict):
     """Check whether a manifest contains an EAP version string or not."""
-    for line in version.splitlines():
-        if IMPLEMENTATION_VERSION in line:
-            _, _, ver = line.partition(IMPLEMENTATION_VERSION)
-            return 'EAP' in EAP_CLASSIFICATIONS[ver.strip()]
+    for _, manifest in manifest_dict.items():
+        for line in manifest.splitlines():
+            if IMPLEMENTATION_VERSION in line:
+                _, _, ver = line.partition(IMPLEMENTATION_VERSION)
+                if 'EAP' in EAP_CLASSIFICATIONS[ver.strip()]:
+                    return Product.PRESENT
 
-    return False
+    return Product.ABSENT
 
 
-def get_eap_manifest_version(version):
+def get_eap_manifest_version(manifest_dict):
     """Get the EAP version from a MANIFEST.MF string."""
-    for line in version.splitlines():
-        if IMPLEMENTATION_VERSION in line:
-            _, _, ver = line.partition(IMPLEMENTATION_VERSION)
-            return EAP_CLASSIFICATIONS[ver.strip()]
+    versions = set()
+    for _, manifest in manifest_dict.items():
+        for line in manifest.splitlines():
+            if IMPLEMENTATION_VERSION in line:
+                _, _, ver = line.partition(IMPLEMENTATION_VERSION)
+                versions.add(EAP_CLASSIFICATIONS[ver.strip()])
+
+    return versions
 
 
-def is_eap_jar_version(version):
+def is_eap_jar_version(version_dict):
     """Check whether a 'jar -version' string contains an EAP version string."""
-    _, _, rest = version.partition('version')
-    return 'EAP' in EAP_CLASSIFICATIONS[rest.strip()]
+    for _, version in version_dict.items():
+        _, _, rest = version.partition('version')
+        if 'EAP' in EAP_CLASSIFICATIONS[rest.strip()]:
+            return Product.PRESENT
+
+    return Product.ABSENT
 
 
-def get_eap_jar_version(version):
+def get_eap_jar_version(version_dict):
     """Get the EAP version from a 'jar -version' string."""
-    _, _, rest = version.partition('version')
-    return EAP_CLASSIFICATIONS[rest.strip()]
+    versions = set()
+    for _, version in version_dict.items():
+        _, _, rest = version.partition('version')
+        versions.add(EAP_CLASSIFICATIONS[rest.strip()])
+
+    return versions
 
 
 # Each fact can tell us the presence, version, or both of
@@ -214,7 +241,8 @@ FACTS = [
     {NAME: JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR, PRESENCE: Product.PRESENT},
     {NAME: JBOSS_EAP_SYSTEMCTL_FILES, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_CHKCONFIG, PRESENCE: Product.POTENTIAL},
-    {NAME: JBOSS_EAP_EAP_HOME, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_EAP_HOME,
+     PRESENCE: any_value_true},
     {NAME: JBOSS_EAP_JAR_VER,
      PRESENCE: Product.PRESENT,
      VERSION: classify_jar_versions},
@@ -225,8 +253,7 @@ FACTS = [
      PRESENCE: Product.PRESENT,
      VERSION: process_version_txt},
     {NAME: EAP_HOME_README_TXT,
-     PRESENCE: Product.ABSENT,
-     VERSION: {"WildFly"}},
+     PRESENCE: Product.ABSENT},
     {NAME: EAP_HOME_MODULES_MANIFEST,
      PRESENCE: is_eap_manifest_version,
      VERSION: get_eap_manifest_version},
