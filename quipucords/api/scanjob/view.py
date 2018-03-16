@@ -49,22 +49,34 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 RESULTS_KEY = 'task_results'
 
 
+def expand_source(system):
+    """Expand the json source."""
+    if 'source' in system.keys():
+        source_id = system['source']
+        if source_id is None:
+            system['source'] = 'Deleted'
+        else:
+            system['source'] = \
+                Source.objects.filter(
+                    id=source_id).values('id',
+                                         'name',
+                                         'source_type').first()
+
+
 def expand_system_connection(system):
     """Expand the system connection results.
 
     :param system: A dictionary for a conn system result.
     """
-    if 'source' in system.keys():
-        source_id = system['source']
-        system['source'] = \
-            Source.objects.filter(id=source_id).values('id',
-                                                       'name',
-                                                       'source_type').first()
+    expand_source(system)
     if 'credential' in system.keys():
         cred_id = system['credential']
-        system['credential'] = \
-            Credential.objects.filter(id=cred_id).values('id',
-                                                         'name').first()
+        if cred_id is None:
+            system['credential'] = 'Deleted'
+        else:
+            system['credential'] = \
+                Credential.objects.filter(id=cred_id).values('id',
+                                                             'name').first()
 
 
 def expand_system_inspection(system):
@@ -72,12 +84,7 @@ def expand_system_inspection(system):
 
     :param system: A dictionary for a inspection system result.
     """
-    if 'source' in system.keys():
-        source_id = system['source']
-        system['source'] = \
-            Source.objects.filter(id=source_id).values('id',
-                                                       'name',
-                                                       'source_type').first()
+    expand_source(system)
     if 'facts' in system.keys():
         facts = []
         fact_ids = system['facts']
@@ -259,20 +266,24 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @list_route(methods=['put'])
     def merge(self, request):
         """Merge jobs."""
+        error = {
+            'jobs': []
+        }
         jobs = self.validate_merge_jobs(request.data)
         sources = []
         for job in jobs:
             inspect_tasks = job.tasks.filter(
                 scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by(
                     'sequence_number')
+            if not inspect_tasks:
+                message = (messages.SJ_MERGE_JOB_NO_TASKS % job.id)
+                error.get('jobs').append(message)
+                raise ValidationError(error)
             sources += build_sources_from_tasks(inspect_tasks.all())
 
         fact_collection_json = {'sources': sources}
         has_errors, validation_result = validate_fact_collection_json(
             fact_collection_json)
-        error = {
-            'jobs': []
-        }
         if has_errors:
             message = _(messages.SJ_MERGE_JOB_NO_RESULTS % validation_result)
             error.get('jobs').append(message)

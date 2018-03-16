@@ -31,10 +31,10 @@ class SystemConnectionResult(models.Model):
 
     name = models.TextField()
     credential = models.ForeignKey(Credential,
-                                   on_delete=models.CASCADE,
+                                   on_delete=models.SET_NULL,
                                    null=True)
     source = models.ForeignKey(Source,
-                               on_delete=models.CASCADE,
+                               on_delete=models.SET_NULL,
                                null=True)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
 
