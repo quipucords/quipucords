@@ -60,7 +60,7 @@ class ScanListItem extends React.Component {
           scanResultsError: null
         });
         this.props
-          .getScanResults(item.id)
+          .getScanResults(item.most_recent.id)
           .then(results => {
             this.setState({
               scanResultsPending: false,

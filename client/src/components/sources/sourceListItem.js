@@ -214,6 +214,7 @@ class SourceListItem extends React.Component {
       case 'okHosts':
         return (
           <SourceHostList
+            source={item}
             scanResults={scanResults}
             scanResultsError={scanResultsError}
             scanResultsPending={scanResultsPending}
@@ -223,7 +224,7 @@ class SourceListItem extends React.Component {
       case 'failedHosts':
         return (
           <SourceHostList
-            scan={item}
+            source={item}
             scanResults={scanResults}
             scanResultsError={scanResultsError}
             scanResultsPending={scanResultsPending}
