@@ -64,10 +64,17 @@ const getScanJob = id => dispatch => {
   });
 };
 
-const getScanResults = id => dispatch => {
+const getConnectionScanResults = id => dispatch => {
   return dispatch({
-    type: scansTypes.GET_SCAN_RESULTS,
-    payload: scansService.getScanResults(id)
+    type: scansTypes.GET_SCAN_CONNECTION_RESULTS,
+    payload: scansService.getConnectionScanResults(id)
+  });
+};
+
+const getInspectionScanResults = id => dispatch => {
+  return dispatch({
+    type: scansTypes.GET_SCAN_INSPECTION_RESULTS,
+    payload: scansService.getInspectionScanResults(id)
   });
 };
 
@@ -109,7 +116,8 @@ export {
   startScan,
   getScanJobs,
   getScanJob,
-  getScanResults,
+  getConnectionScanResults,
+  getInspectionScanResults,
   pauseScan,
   cancelScan,
   restartScan,

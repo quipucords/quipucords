@@ -62,6 +62,8 @@ const scanTypeIcon = scanType => {
 
 const scanStatusString = scanStatus => {
   switch (scanStatus) {
+    case 'success':
+      return 'Successful';
     case 'completed':
       return 'Completed';
     case 'failed':
@@ -77,6 +79,7 @@ const scanStatusString = scanStatus => {
     case 'canceled':
       return 'Canceled';
     default:
+      console.error('Unknown status: ' + scanStatus);
       return '';
   }
 };
@@ -84,6 +87,7 @@ const scanStatusString = scanStatus => {
 const scanStatusIcon = scanStatus => {
   switch (scanStatus) {
     case 'completed':
+    case 'success':
       return { type: 'pf', name: 'ok', classNames: [] };
     case 'failed':
     case 'canceled':
@@ -95,7 +99,8 @@ const scanStatusIcon = scanStatus => {
     case 'paused':
       return { type: 'pf', name: 'warning-triangle-o', classNames: [] };
     default:
-      return {};
+      console.error('Unknown status: ' + scanStatus);
+      return { type: 'pf', name: 'unknown', classNames: [] };
   }
 };
 
