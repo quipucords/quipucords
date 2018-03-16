@@ -1,9 +1,7 @@
-import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { ToastNotificationList, TimedToastNotification } from 'patternfly-react';
-
+import { connect } from 'react-redux';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
@@ -68,11 +66,8 @@ ToastNotificationsList.propTypes = {
   paused: PropTypes.bool
 };
 
-function mapStateToProps(state, ownProps) {
-  return {
-    toasts: state.toastNotifications.toasts,
-    paused: state.toastNotifications.paused
-  };
-}
+const mapStateToProps = function(state) {
+  return { ...state.toastNotifications };
+};
 
 export default connect(mapStateToProps)(ToastNotificationsList);

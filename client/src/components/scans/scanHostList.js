@@ -2,17 +2,15 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
+import { EmptyState, Grid, Icon } from 'patternfly-react';
 
 const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsError }) => {
   if (scanResultsPending === true) {
     return (
-      <Modal bsSize="lg" backdrop={false} show animation={false}>
-        <Modal.Body>
-          <div className="spinner spinner-xl" />
-          <div className="text-center">Loading scan results...</div>
-        </Modal.Body>
-      </Modal>
+      <EmptyState>
+        <EmptyState.Icon name="spinner spinner-xl" />
+        <EmptyState.Title>Loading scan results...</EmptyState.Title>
+      </EmptyState>
     );
   }
 
@@ -21,7 +19,7 @@ const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsErr
       <EmptyState>
         <EmptyState.Icon name="error-circle-o" />
         <EmptyState.Title>Error retrieving scan results</EmptyState.Title>
-        <EmptyState.info>{scanResultsError}</EmptyState.info>
+        <EmptyState.Info>{scanResultsError}</EmptyState.Info>
       </EmptyState>
     );
   }

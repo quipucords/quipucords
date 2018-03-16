@@ -107,6 +107,29 @@
         }
       }
     }
+    // Within an expansion area, make blank slate become a single line, no background, no borders
+    .blank-slate-pf {
+      background: transparent;
+      border: none;
+      padding: 10px 20px;
+      .blank-slate-pf-icon {
+        font-size: 22px;
+        line-height: 22px;
+        float: left;
+      }
+      .blank-slate-pf-title {
+        font-size: 12px;
+        line-height: 22px;
+        text-align: left;
+        margin-top: 0;
+        margin-left: 10px;
+        float: left;
+      }
+      .blank-slate-pf-info {
+        float: left;
+        margin-left: 10px;
+      }
+    }
   }
 }
 

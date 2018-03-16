@@ -24,8 +24,7 @@ class SourceCredentialsList extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (!_.isEqual(nextProps.source, _.get(this.props, 'source'))) {
-      const { source } = this.nextProps;
-      let credentials = [...source.credentials];
+      let credentials = [...nextProps.source.credentials];
 
       credentials.sort((item1, item2) => {
         return item1.name.localeCompare(item2.name);

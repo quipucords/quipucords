@@ -28,7 +28,7 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
 
         model = SystemConnectionResult
         fields = ['name', 'status', 'source', 'credential']
-        qpc_allow_empty_fields = ['value']
+        qpc_allow_empty_fields = ['value', 'source', 'credential']
 
 
 class TaskConnectionResultSerializer(NotEmptySerializer):
