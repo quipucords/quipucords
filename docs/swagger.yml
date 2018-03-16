@@ -1829,15 +1829,9 @@ definitions:
       - inspection_results
     properties:
         connection_results:
-          type: "array"
-          items:
-            $ref: "#/definitions/TaskConnResultsOut"
-          description: "The task connection results"
+          $ref: "#/definitions/TaskConnResultsOut"
         inspection_results:
-          type: "array"
-          items:
-            $ref: "#/definitions/TaskInspectResultsOut"
-          description: "The task inspection results"
+          $ref: "#/definitions/TaskInspectResultsOut"
   ScanJobConnectionResultsOut:
     type: "object"
     required:
