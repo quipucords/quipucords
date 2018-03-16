@@ -2,7 +2,8 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
+import { EmptyState, Grid, Icon } from 'patternfly-react';
+import helpers from '../../common/helpers';
 
 const SourceHostList = ({ source, scanResults, scanResultsError, scanResultsPending, status }) => {
   if (scanResultsPending === true) {
@@ -38,13 +39,12 @@ const SourceHostList = ({ source, scanResults, scanResultsError, scanResultsPend
   });
 
   if (_.size(displayHosts) === 0) {
-    const message = `${
-      status === 'success' ? 'Successful' : 'Failed'
-    } authentications were not available, please refresh.`;
     return (
       <EmptyState>
         <EmptyState.Icon name="warning-triangle-o" />
-        <EmptyState.Title>{message}</EmptyState.Title>
+        <EmptyState.Title>
+          {`${helpers.scanStatusString(status)} authentications were not available, please refresh.`}
+        </EmptyState.Title>
       </EmptyState>
     );
   }

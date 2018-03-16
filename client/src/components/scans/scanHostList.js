@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
+import { EmptyState, Grid, Icon } from 'patternfly-react';
 
 const ScansHostList = ({ status, scanResults, scanResultsPending, scanResultsError }) => {
   if (scanResultsPending === true) {

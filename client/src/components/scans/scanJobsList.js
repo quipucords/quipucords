@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { Dropdown, EmptyState, Grid, Icon, MenuItem, Modal } from 'patternfly-react';
+import { Dropdown, EmptyState, Grid, Icon, MenuItem } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment/moment';
 import helpers from '../../common/helpers';
