@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { Dropdown, EmptyState, Grid, Icon, MenuItem, Modal } from 'patternfly-react';
+import { Dropdown, EmptyState, Grid, Icon, MenuItem } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment/moment';
 import helpers from '../../common/helpers';
@@ -62,12 +62,10 @@ const ScanJobsList = ({ scan, scanJobs, scanJobsPending, scanJobsError, onSummar
 
   if (scanJobsPending === true) {
     return (
-      <Modal bsSize="lg" backdrop={false} show animation={false}>
-        <Modal.Body>
-          <div className="spinner spinner-xl" />
-          <div className="text-center">Loading scan jobs...</div>
-        </Modal.Body>
-      </Modal>
+      <EmptyState>
+        <EmptyState.Icon name="spinner spinner-xl" />
+        <EmptyState.Title>Loading scan jobs...</EmptyState.Title>
+      </EmptyState>
     );
   }
 
@@ -76,7 +74,7 @@ const ScanJobsList = ({ scan, scanJobs, scanJobsPending, scanJobsError, onSummar
       <EmptyState>
         <EmptyState.Icon name="error-circle-o" />
         <EmptyState.Title>Error retrieving scan jobs</EmptyState.Title>
-        <EmptyState.info>{scan.scanJobsError}</EmptyState.info>
+        <EmptyState.Info>{scan.scanJobsError}</EmptyState.Info>
       </EmptyState>
     );
   }

@@ -17,7 +17,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(reportsTypes.GET_REPORT),
+      type: helpers.REJECTED_ACTION(reportsTypes.GET_REPORT),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -41,7 +41,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(reportsTypes.GET_REPORT)
+      type: helpers.PENDING_ACTION(reportsTypes.GET_REPORT)
     };
 
     let resultState = reportsReducer(undefined, dispatched);
@@ -55,7 +55,7 @@ describe('ReportsReducer', function() {
 
   it('should handle GET_REPORT_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(reportsTypes.GET_REPORT),
+      type: helpers.FULFILLED_ACTION(reportsTypes.GET_REPORT),
       payload: {
         data: [
           {

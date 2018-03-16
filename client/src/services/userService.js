@@ -4,7 +4,6 @@ import { helpers } from '../common/helpers';
 
 class UserService {
   static authorizeUser() {
-    // ToDo: ReEvaluate placement of this spoof for auth. Also consider using a helper function.
     if (helpers.DEV_MODE) {
       cookies.set(process.env.REACT_APP_AUTH_TOKEN, 'spoof');
       console.warn('Warning: Loading spoof auth token.');

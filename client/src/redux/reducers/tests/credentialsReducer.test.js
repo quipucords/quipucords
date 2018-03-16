@@ -78,7 +78,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle ADD_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(credentialsTypes.ADD_CREDENTIAL),
+      type: helpers.REJECTED_ACTION(credentialsTypes.ADD_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -102,7 +102,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle DELETE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(credentialsTypes.DELETE_CREDENTIAL),
+      type: helpers.REJECTED_ACTION(credentialsTypes.DELETE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -126,7 +126,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle UPDATE_CREDENTIAL_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(credentialsTypes.UPDATE_CREDENTIAL),
+      type: helpers.REJECTED_ACTION(credentialsTypes.UPDATE_CREDENTIAL),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -150,7 +150,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(credentialsTypes.GET_CREDENTIALS),
+      type: helpers.REJECTED_ACTION(credentialsTypes.GET_CREDENTIALS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -172,7 +172,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(credentialsTypes.GET_CREDENTIALS)
+      type: helpers.PENDING_ACTION(credentialsTypes.GET_CREDENTIALS)
     };
 
     let resultState = credentialsReducer(undefined, dispatched);
@@ -184,7 +184,7 @@ describe('CredentialsReducer', function() {
 
   it('should handle GET_CREDENTIALS_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(credentialsTypes.GET_CREDENTIALS),
+      type: helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS),
       payload: {
         data: {
           results: [
