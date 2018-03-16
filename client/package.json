@@ -17,6 +17,7 @@
   },
   "sassDepIncludes": "--include-path node_modules/patternfly/dist/sass --include-path node_modules/bootstrap-sass/assets/stylesheets --include-path node_modules/font-awesome-sass/assets/stylesheets",
   "scripts": {
+    "api:clean": "npm run api:dev -- -u; npm run api:stage -- -uc; npm run api:prod -- -uc",
     "api:dev": "sh ./scripts/api.sh -p 4000 -f \"$(pwd)/../docs/swagger.yml\"",
     "api:stage": "sh ./scripts/api.sh -p 4001 -t stage -d \"$(pwd)/build\"",
     "api:prod": "sh ./scripts/api.sh -p 443 -t prod",

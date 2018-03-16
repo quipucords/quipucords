@@ -9,6 +9,7 @@
 /src/styles/css
 
 # misc
+/.container
 .DS_Store
 .env.local
 .env.development.local
