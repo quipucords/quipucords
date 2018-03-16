@@ -12,20 +12,20 @@ const initialState = {
 export default function statusReducer(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case helpers.rejectedAction(statusTypes.STATUS_INFO):
+    case helpers.REJECTED_ACTION(statusTypes.STATUS_INFO):
       return Object.assign({}, initialState, {
         error: action.error,
         errorMessage: helpers.getErrorMessageFromResults(action.payload)
       });
 
     // Loading/Pending
-    case helpers.pendingAction(statusTypes.STATUS_INFO):
+    case helpers.PENDING_ACTION(statusTypes.STATUS_INFO):
       return Object.assign({}, initialState, {
         pending: true
       });
 
     // Success/Fulfilled
-    case helpers.fulfilledAction(statusTypes.STATUS_INFO):
+    case helpers.FULFILLED_ACTION(statusTypes.STATUS_INFO):
       return Object.assign({}, initialState, {
         currentStatus: action.payload.data,
         fulfilled: true

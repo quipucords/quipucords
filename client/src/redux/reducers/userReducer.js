@@ -23,7 +23,7 @@ const initialState = {
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case helpers.rejectedAction(userTypes.USER_INFO):
+    case helpers.REJECTED_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
         {
@@ -37,7 +37,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Loading/Pending
-    case helpers.pendingAction(userTypes.USER_INFO):
+    case helpers.PENDING_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
         {
@@ -50,7 +50,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case helpers.fulfilledAction(userTypes.USER_INFO):
+    case helpers.FULFILLED_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
         {
@@ -64,7 +64,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Error/Rejected
-    case helpers.rejectedAction(userTypes.USER_AUTH):
+    case helpers.REJECTED_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
         {
@@ -79,7 +79,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Loading/Pending
-    case helpers.pendingAction(userTypes.USER_AUTH):
+    case helpers.PENDING_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
         {
@@ -93,7 +93,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case helpers.fulfilledAction(userTypes.USER_AUTH):
+    case helpers.FULFILLED_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
         {
@@ -109,7 +109,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Error/Rejected
-    case helpers.rejectedAction(userTypes.USER_LOGOUT):
+    case helpers.REJECTED_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',
         {
@@ -124,7 +124,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Loading/Pending
-    case helpers.pendingAction(userTypes.USER_LOGOUT):
+    case helpers.PENDING_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',
         {
@@ -138,7 +138,7 @@ export default function userReducer(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case helpers.fulfilledAction(userTypes.USER_LOGOUT):
+    case helpers.FULFILLED_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',
         {

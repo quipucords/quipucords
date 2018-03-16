@@ -28,7 +28,7 @@ describe('SourcesReducer', function() {
 
   it('should handle DELETE_SOURCE_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(sourcesTypes.DELETE_SOURCE),
+      type: helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCE),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -51,7 +51,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(sourcesTypes.GET_SOURCES),
+      type: helpers.REJECTED_ACTION(sourcesTypes.GET_SOURCES),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -73,7 +73,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(sourcesTypes.GET_SOURCES)
+      type: helpers.PENDING_ACTION(sourcesTypes.GET_SOURCES)
     };
 
     let resultState = sourcesReducer(undefined, dispatched);
@@ -85,7 +85,7 @@ describe('SourcesReducer', function() {
 
   it('should handle GET_SOURCES_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(sourcesTypes.GET_SOURCES),
+      type: helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCES),
       payload: {
         data: {
           results: [
