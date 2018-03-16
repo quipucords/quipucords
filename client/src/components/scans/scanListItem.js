@@ -1,18 +1,15 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import cx from 'classnames';
+import { connect } from 'react-redux';
+import { Button, Checkbox, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment';
-import React from 'react';
-import cx from 'classnames';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-
-import { Button, Checkbox, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
-
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
-
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
-import { ScanSourceList } from './scanSourceList';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
+import ScanSourceList from './scanSourceList';
 import ScanHostsList from './scanHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
@@ -151,13 +148,14 @@ class ScanListItem extends React.Component {
 
   renderDescription() {
     const { item } = this.props;
+    const scanStatus = _.get(item, 'most_recent.status');
+    const statusIconInfo = helpers.scanStatusIcon(scanStatus);
+    const classes = cx('scan-status-icon', ...statusIconInfo.classNames);
+    const icon = statusIconInfo ? (
+      <Icon className={classes} type={statusIconInfo.type} name={statusIconInfo.name} />
+    ) : null;
 
     let scanTime = _.get(item, 'most_recent.end_time');
-    let scanStatus = _.get(item, 'most_recent.status');
-    let statusIconInfo = helpers.scanStatusIcon(scanStatus);
-    let icon = statusIconInfo ? (
-      <Icon className="scan-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />
-    ) : null;
 
     if (scanStatus === 'pending' || scanStatus === 'running') {
       scanTime = _.get(item, 'most_recent.start_time');
@@ -250,7 +248,7 @@ class ScanListItem extends React.Component {
           <React.Fragment>
             <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
               <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
-                <Icon type="pf" name="spinner2" atria-label="Start" />
+                <Icon type="pf" name="spinner2" aria-label="Start" />
               </Button>
             </SimpleTooltip>
             <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
@@ -268,7 +266,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="restartTip" tooltip="Retry Scan">
             <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
-              <Icon type="pf" name="spinner2" atria-label="Start" />
+              <Icon type="pf" name="spinner2" aria-label="Start" />
             </Button>
           </SimpleTooltip>
         );
@@ -279,12 +277,12 @@ class ScanListItem extends React.Component {
           <React.Fragment>
             <SimpleTooltip key="pauseButton" id="pauseTip" tooltip="Pause Scan">
               <Button onClick={() => onPause(item)} bsStyle="link">
-                <Icon type="fa" name="pause" atria-label="Pause" />
+                <Icon type="fa" name="pause" aria-label="Pause" />
               </Button>
             </SimpleTooltip>
             <SimpleTooltip key="stop" id="stopTip" tooltip="Cancel Scan">
               <Button onClick={() => onCancel(item)} bsStyle="link">
-                <Icon type="fa" name="stop" atria-label="Stop" />
+                <Icon type="fa" name="stop" aria-label="Stop" />
               </Button>
             </SimpleTooltip>
           </React.Fragment>
@@ -293,7 +291,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="resumeTip" tooltip="Resume Scan">
             <Button key="resumeButton" onClick={() => onResume(item)} bsStyle="link">
-              <Icon type="fa" name="play" atria-label="Resume" />
+              <Icon type="fa" name="play" aria-label="Resume" />
             </Button>
           </SimpleTooltip>
         );
@@ -301,7 +299,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="startTip" tooltip="Start Scan">
             <Button onClick={() => onStart(item)} bsStyle="link">
-              <Icon type="fa" name="play" atria-label="Start" />
+              <Icon type="fa" name="play" aria-label="Start" />
             </Button>
           </SimpleTooltip>
         );

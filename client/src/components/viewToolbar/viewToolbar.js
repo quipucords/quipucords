@@ -8,7 +8,7 @@ import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 
 import { viewToolbarTypes } from '../../redux/constants';
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import RefreshTimeButton from '../refreshTimeButton/refreshTimeButton';
 
 class ViewToolbar extends React.Component {

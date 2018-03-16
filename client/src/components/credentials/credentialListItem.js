@@ -5,7 +5,7 @@ import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 

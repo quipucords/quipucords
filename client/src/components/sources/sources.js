@@ -86,6 +86,7 @@ class Sources extends React.Component {
             </span>
           )
         });
+
         Store.dispatch({
           type: viewTypes.DESELECT_ITEM,
           viewType: viewTypes.SOURCES_VIEW,
@@ -93,7 +94,7 @@ class Sources extends React.Component {
         });
       }
     } catch (e) {
-      console.dir(e);
+      console.warn(e);
     }
   }
 

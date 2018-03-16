@@ -82,18 +82,18 @@ const scanStatusString = scanStatus => {
 const scanStatusIcon = scanStatus => {
   switch (scanStatus) {
     case 'completed':
-      return { type: 'pf', name: 'ok' };
+      return { type: 'pf', name: 'ok', classNames: [] };
     case 'failed':
     case 'canceled':
-      return { type: 'pf', name: 'error-circle-o' };
+      return { type: 'pf', name: 'error-circle-o', classNames: [] };
     case 'created':
     case 'pending':
     case 'running':
-      return { type: 'fa', name: 'spinner' };
+      return { type: 'fa', name: 'spinner', classNames: ['fa-spin'] };
     case 'paused':
-      return { type: 'pf', name: 'warning-triangle-o' };
+      return { type: 'pf', name: 'warning-triangle-o', classNames: [] };
     default:
-      return null;
+      return {};
   }
 };
 
