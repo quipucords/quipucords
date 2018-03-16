@@ -135,12 +135,12 @@ class SourceListItem extends React.Component {
       <span>
         <SimpleTooltip id="editTip" tooltip="Edit">
           <Button onClick={() => onEdit(item)} bsStyle="link" key="editButton">
-            <Icon type="pf" name="edit" atria-label="Edit" />
+            <Icon type="pf" name="edit" aria-label="Edit" />
           </Button>
         </SimpleTooltip>
         <SimpleTooltip id="deleteTip" tooltip="Delete">
           <Button onClick={() => onDelete(item)} bsStyle="link" key="removeButton">
-            <Icon type="pf" name="delete" atria-label="Delete" />
+            <Icon type="pf" name="delete" aria-label="Delete" />
           </Button>
         </SimpleTooltip>
         <Button onClick={() => onScan(item)} key="scanButton">

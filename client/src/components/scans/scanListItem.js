@@ -247,7 +247,7 @@ class ScanListItem extends React.Component {
           <React.Fragment>
             <SimpleTooltip key="startTip" id="startTip" tooltip="Run Scan">
               <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
-                <Icon type="pf" name="spinner2" atria-label="Start" />
+                <Icon type="pf" name="spinner2" aria-label="Start" />
               </Button>
             </SimpleTooltip>
             <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
@@ -265,7 +265,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="restartTip" tooltip="Retry Scan">
             <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
-              <Icon type="pf" name="spinner2" atria-label="Start" />
+              <Icon type="pf" name="spinner2" aria-label="Start" />
             </Button>
           </SimpleTooltip>
         );
@@ -276,12 +276,12 @@ class ScanListItem extends React.Component {
           <React.Fragment>
             <SimpleTooltip key="pauseButton" id="pauseTip" tooltip="Pause Scan">
               <Button onClick={() => onPause(item)} bsStyle="link">
-                <Icon type="fa" name="pause" atria-label="Pause" />
+                <Icon type="fa" name="pause" aria-label="Pause" />
               </Button>
             </SimpleTooltip>
             <SimpleTooltip key="stop" id="stopTip" tooltip="Cancel Scan">
               <Button onClick={() => onCancel(item)} bsStyle="link">
-                <Icon type="fa" name="stop" atria-label="Stop" />
+                <Icon type="fa" name="stop" aria-label="Stop" />
               </Button>
             </SimpleTooltip>
           </React.Fragment>
@@ -290,7 +290,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="resumeTip" tooltip="Resume Scan">
             <Button key="resumeButton" onClick={() => onResume(item)} bsStyle="link">
-              <Icon type="fa" name="play" atria-label="Resume" />
+              <Icon type="fa" name="play" aria-label="Resume" />
             </Button>
           </SimpleTooltip>
         );
@@ -298,7 +298,7 @@ class ScanListItem extends React.Component {
         return (
           <SimpleTooltip id="startTip" tooltip="Start Scan">
             <Button onClick={() => onStart(item)} bsStyle="link">
-              <Icon type="fa" name="play" atria-label="Start" />
+              <Icon type="fa" name="play" aria-label="Start" />
             </Button>
           </SimpleTooltip>
         );
