@@ -4,15 +4,13 @@ import PropTypes from 'prop-types';
 
 import { EmptyState, Grid, Icon, Modal } from 'patternfly-react';
 
-const SourceHostList = ({ scanResults, scanResultsError, scanResultsPending, status }) => {
+const SourceHostList = ({ source, scanResults, scanResultsError, scanResultsPending, status }) => {
   if (scanResultsPending === true) {
     return (
-      <Modal bsSize="lg" backdrop={false} show animation={false}>
-        <Modal.Body>
-          <div className="spinner spinner-xl" />
-          <div className="text-center">Loading scan results...</div>
-        </Modal.Body>
-      </Modal>
+      <EmptyState>
+        <EmptyState.Icon name="spinner spinner-xl" />
+        <EmptyState.Title>Loading scan results...</EmptyState.Title>
+      </EmptyState>
     );
   }
 
@@ -21,7 +19,7 @@ const SourceHostList = ({ scanResults, scanResultsError, scanResultsPending, sta
       <EmptyState>
         <EmptyState.Icon name="error-circle-o" />
         <EmptyState.Title>Error retrieving scan results</EmptyState.Title>
-        <EmptyState.info>{scanResultsError}</EmptyState.info>
+        <EmptyState.Info>{scanResultsError}</EmptyState.Info>
       </EmptyState>
     );
   }
@@ -30,12 +28,26 @@ const SourceHostList = ({ scanResults, scanResultsError, scanResultsPending, sta
 
   let displayHosts = [];
   _.forEach(connectionResults.task_results, taskResult => {
-    _.forEach(taskResult.systems, system => {
-      if (system.status === status) {
-        displayHosts.push(system);
-      }
-    });
+    if (_.get(taskResult, 'source.id') === source.id) {
+      _.forEach(taskResult.systems, system => {
+        if (system.status === status) {
+          displayHosts.push(system);
+        }
+      });
+    }
   });
+
+  if (_.size(displayHosts) === 0) {
+    const message = `${
+      status === 'success' ? 'Successful' : 'Failed'
+    } authentications were not available, please refresh.`;
+    return (
+      <EmptyState>
+        <EmptyState.Icon name="warning-triangle-o" />
+        <EmptyState.Title>{message}</EmptyState.Title>
+      </EmptyState>
+    );
+  }
 
   displayHosts.sort((item1, item2) => {
     return item1.name.localeCompare(item2.name);
@@ -67,6 +79,7 @@ const SourceHostList = ({ scanResults, scanResultsError, scanResultsPending, sta
 };
 
 SourceHostList.propTypes = {
+  source: PropTypes.object,
   scanResults: PropTypes.object,
   scanResultsError: PropTypes.string,
   scanResultsPending: PropTypes.bool,
