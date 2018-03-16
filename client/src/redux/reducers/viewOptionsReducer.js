@@ -81,10 +81,7 @@ export default function viewOptionsReducer(state = initialState, action) {
       return Object.assign({}, state, updateState);
 
     case viewToolbarTypes.ADD_FILTER:
-      let currentFilter = state[action.viewType].activeFilters.find(filter => {
-        return action.filter.field === filter.field;
-      });
-      console.dir(currentFilter);
+      let currentFilter = state[action.viewType].activeFilters.find(filter => action.filter.field === filter.field);
 
       if (!currentFilter) {
         updateState[action.viewType] = Object.assign({}, state[action.viewType], {
@@ -100,8 +97,8 @@ export default function viewOptionsReducer(state = initialState, action) {
         updateState[action.viewType] = Object.assign({}, state[action.viewType], {
           activeFilters: [
             ...state[action.viewType].activeFilters.slice(0, index),
-            ...state[action.viewType].activeFilters.slice(index + 1),
-            action.filter
+            action.filter,
+            ...state[action.viewType].activeFilters.slice(index + 1)
           ],
           currentPage: 1
         });
