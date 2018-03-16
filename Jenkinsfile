@@ -52,7 +52,7 @@ node('f25-os') {
         sh "sudo chmod 755 $targzfile"
 
         def install_tar = "quipucords.install.tar"
-        def install_targzfile = tarfile + ".gz"
+        def install_targzfile = install_tar + ".gz"
         sh "sudo chmod 755 $install_tar"
         sh "sudo gzip -f --best $install_tar"
         sh "sudo chmod 755 $install_targzfile"
