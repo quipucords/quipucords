@@ -591,8 +591,7 @@ class ScanJobTest(TestCase):
                     'results': [
                         {'name': 'Woot',
                          'status': 'failed',
-                         'source': 'Deleted',
-                         'credential': 'Deleted'}]}
+                         'source': 'deleted'}]}
         self.assertEqual(json_response, expected)
 
     def test_connection_not_found(self):
@@ -844,7 +843,7 @@ class ScanJobTest(TestCase):
                     'results': [
                         {'name': 'Foo',
                          'status': 'success',
-                         'source': 'Deleted',
+                         'source': 'deleted',
                          'facts': [{'name': 'fact_key',
                                     'value': '"fact_value"'}]}]}
         self.assertEqual(json_response, expected)
