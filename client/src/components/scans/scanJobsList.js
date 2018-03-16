@@ -1,18 +1,19 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import cx from 'classnames';
 import { Dropdown, EmptyState, Grid, Icon, MenuItem, Modal } from 'patternfly-react';
+import _ from 'lodash';
 import * as moment from 'moment/moment';
 import helpers from '../../common/helpers';
 
 const ScanJobsList = ({ scan, scanJobs, scanJobsPending, scanJobsError, onSummaryDownload, onDetailedDownload }) => {
   const renderJob = job => {
-    let scanDescription = helpers.scanStatusString(job.status);
+    const scanDescription = helpers.scanStatusString(job.status);
+    const statusIconInfo = helpers.scanStatusIcon(job.status);
+    const classes = cx('scan-job-status-icon', ...statusIconInfo.classNames);
+    const icon = <Icon className={classes} type={statusIconInfo.type} name={statusIconInfo.name} />;
 
     let scanTime = _.get(job, 'end_time');
-    let statusIconInfo = helpers.scanStatusIcon(job.status);
-    let icon = <Icon className="scan-job-status-icon" type={statusIconInfo.type} name={statusIconInfo.name} />;
 
     if (job.status === 'pending' || job.status === 'running') {
       scanTime = _.get(job, 'start_time');
