@@ -1,10 +1,8 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
 import { Modal, Button, Icon } from 'patternfly-react';
-
+import _ from 'lodash';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { scansTypes, toastNotificationTypes } from '../../redux/constants';
@@ -137,7 +135,7 @@ class MergeReportsDialog extends React.Component {
         <Button bsStyle="default" className="btn-cancel" onClick={this.onClose}>
           Cancel
         </Button>
-        <Button bsStyle="primary" type="submit" onClick={this.mergeScanResults}>
+        <Button bsStyle="primary" type="submit" disabled={validCount < 2} onClick={this.mergeScanResults}>
           Merge
         </Button>
       </React.Fragment>
