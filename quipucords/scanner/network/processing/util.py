@@ -156,3 +156,25 @@ class StdoutSearchProcessor(process.Processor):
                 results[item_name] = cls.SEARCH_STRING in item['stdout']
 
         return results
+
+
+class StdoutPassthroughProcessor(process.Processor):
+    """Pass through stdout to the fingerprinter, or False on error.
+
+    Used for the output of 'cat some-file', where some-file might not
+    exist. Works for with-items tasks.
+    """
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a dictionary mapping each item name to the item's
+        stdout if the item's 'rc' is zero, or False otherwise.
+        """
+        return {item['item']: item['stdout'] if item['rc'] == 0 else False
+                for item in output['results']}

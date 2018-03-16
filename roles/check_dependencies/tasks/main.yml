@@ -126,3 +126,14 @@
   set_fact:
     internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
+
+# Not internal for the same reason as have_java.
+- name: gather internal_have_unzip_cmd
+  raw: command -v unzip
+  register: internal_have_unzip_cmd
+  ignore_errors: yes
+
+- name: set have_unzip
+  set_fact:
+    have_unzip: "{{ internal_have_unzip_cmd.get('rc') == 0 }}"
+  ignore_errors: yes

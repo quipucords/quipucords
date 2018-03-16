@@ -145,32 +145,6 @@ class ProcessJbossEapLocate(process.Processor):
         return output['stdout_lines']
 
 
-class InitLineFinder(process.Processor):
-    """Process the output of an init system.
-
-    For both chkconfig and systemctl list-unit-files, we look for
-    lines where the first (whitespace-delineated) element contains
-    'jboss' or 'eap'.
-    """
-
-    KEY = None
-
-    @staticmethod
-    def process(output):
-        """Find lines where the first element contains 'jboss' or 'eap'."""
-        matches = []
-
-        for line in output['stdout_lines']:
-            if not line:
-                continue
-
-            start = line.split()[0]
-            if 'jboss' in start or 'eap' in start:
-                matches.append(line.strip())
-
-        return matches
-
-
 class ProcessJbossEapChkconfig(util.InitLineFinder):
     """Process the output of 'chkconfig'."""
 
@@ -179,7 +153,7 @@ class ProcessJbossEapChkconfig(util.InitLineFinder):
     KEYWORDS = ['jboss', 'eap']
 
 
-class ProcessJbossEapSystemctl(InitLineFinder):
+class ProcessJbossEapSystemctl(util.InitLineFinder):
     """Process the output of 'systemctl list-unit-files'."""
 
     DEPS = ['have_systemctl']
@@ -196,11 +170,29 @@ class ProcessEapHomeLs(util.IndicatorFileFinder):
                        'modules', 'jboss-modules.jar', 'version.txt']
 
 
-class ProcessEapHomeCat(util.StdoutSearchProcessor):
+class ProcessEapHomeVersionTxt(util.StdoutPassthroughProcessor):
     """Process the output of 'cat .../version.txt'."""
 
     KEY = 'eap_home_version_txt'
-    SEARCH_STRING = 'Red Hat'
+
+
+class ProcessEapHomeReadmeTxt(util.StdoutSearchProcessor):
+    """Process the output of 'cat .../README.txt'."""
+
+    KEY = 'eap_home_readme_txt'
+    SEARCH_STRING = 'Welcome to WildFly'
+
+
+class ProcessJbossModulesManifestMf(util.StdoutPassthroughProcessor):
+    """Process the jboss-modules.jar MANIFEST.MF file's contents."""
+
+    KEY = 'eap_home_jboss_modules_manifest'
+
+
+class ProcessJbossModulesVersion(util.StdoutPassthroughProcessor):
+    """Process the output of 'java -jar jboss-modules.jar -version'."""
+
+    KEY = 'eap_home_jboss_modules_version'
 
 
 class ProcessEapHomeBinForFuse(util.IndicatorFileFinder):
