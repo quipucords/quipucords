@@ -28,7 +28,7 @@ describe('userReducer', function() {
 
   it('should handle USER_INFO_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(userTypes.USER_INFO),
+      type: helpers.REJECTED_ACTION(userTypes.USER_INFO),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -49,7 +49,7 @@ describe('userReducer', function() {
 
   it('should handle USER_INFO_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(userTypes.USER_INFO)
+      type: helpers.PENDING_ACTION(userTypes.USER_INFO)
     };
 
     let resultState = userReducer(undefined, dispatched);
@@ -60,7 +60,7 @@ describe('userReducer', function() {
 
   it('should handle USER_INFO_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(userTypes.USER_INFO),
+      type: helpers.FULFILLED_ACTION(userTypes.USER_INFO),
       payload: {
         data: {
           userName: 'admin',
@@ -79,7 +79,7 @@ describe('userReducer', function() {
 
   it('should handle USER_AUTH_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(userTypes.USER_AUTH),
+      type: helpers.REJECTED_ACTION(userTypes.USER_AUTH),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -100,7 +100,7 @@ describe('userReducer', function() {
 
   it('should handle USER_AUTH_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(userTypes.USER_AUTH)
+      type: helpers.PENDING_ACTION(userTypes.USER_AUTH)
     };
 
     let resultState = userReducer(undefined, dispatched);
@@ -111,7 +111,7 @@ describe('userReducer', function() {
 
   it('should handle USER_AUTH_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(userTypes.USER_AUTH),
+      type: helpers.FULFILLED_ACTION(userTypes.USER_AUTH),
       payload: {
         authToken: 'spoof'
       }
@@ -130,7 +130,7 @@ describe('userReducer', function() {
 
   it('should handle USER_LOGOUT_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(userTypes.USER_LOGOUT),
+      type: helpers.REJECTED_ACTION(userTypes.USER_LOGOUT),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -151,7 +151,7 @@ describe('userReducer', function() {
 
   it('should handle USER_LOGOUT_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(userTypes.USER_LOGOUT)
+      type: helpers.PENDING_ACTION(userTypes.USER_LOGOUT)
     };
 
     let resultState = userReducer(undefined, dispatched);
@@ -162,7 +162,7 @@ describe('userReducer', function() {
 
   it('should handle USER_LOGOUT_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(userTypes.USER_AUTH),
+      type: helpers.FULFILLED_ACTION(userTypes.USER_AUTH),
       payload: {
         authToken: 'spoof'
       }
@@ -177,7 +177,7 @@ describe('userReducer', function() {
     expect(resultState.session.authToken).toEqual('spoof');
 
     dispatched = {
-      type: helpers.fulfilledAction(userTypes.USER_LOGOUT)
+      type: helpers.FULFILLED_ACTION(userTypes.USER_LOGOUT)
     };
 
     resultState = userReducer(resultState, dispatched);

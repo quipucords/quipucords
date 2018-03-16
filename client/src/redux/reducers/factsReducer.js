@@ -16,7 +16,7 @@ const initialState = {
 const factsReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
-    case helpers.rejectedAction(factsTypes.ADD_FACTS):
+    case helpers.REJECTED_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',
         {
@@ -30,7 +30,7 @@ const factsReducer = function(state = initialState, action) {
       );
 
     // Loading/Pending
-    case helpers.pendingAction(factsTypes.ADD_FACTS):
+    case helpers.PENDING_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',
         {
@@ -43,7 +43,7 @@ const factsReducer = function(state = initialState, action) {
       );
 
     // Success/Fulfilled
-    case helpers.fulfilledAction(factsTypes.ADD_FACTS):
+    case helpers.FULFILLED_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',
         {

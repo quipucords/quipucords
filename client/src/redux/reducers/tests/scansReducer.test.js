@@ -76,7 +76,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.GET_SCANS),
+      type: helpers.REJECTED_ACTION(scansTypes.GET_SCANS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -102,7 +102,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.GET_SCANS)
+      type: helpers.PENDING_ACTION(scansTypes.GET_SCANS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -118,7 +118,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCANS_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.GET_SCANS),
+      type: helpers.FULFILLED_ACTION(scansTypes.GET_SCANS),
       payload: {
         data: {
           results: [
@@ -157,7 +157,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.GET_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -183,7 +183,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.GET_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.GET_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -199,7 +199,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.GET_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN),
       payload: {
         data: {
           results: {
@@ -224,7 +224,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_JOBS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.GET_SCAN_JOBS),
+      type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN_JOBS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -250,7 +250,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_JOBS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.GET_SCAN_JOBS)
+      type: helpers.PENDING_ACTION(scansTypes.GET_SCAN_JOBS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -307,7 +307,7 @@ describe('scansReducer', function() {
     ];
 
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.GET_SCAN_JOBS),
+      type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_JOBS),
       payload: {
         data: {
           results: mockResults
@@ -329,7 +329,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.GET_SCAN_RESULTS),
+      type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN_RESULTS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -355,7 +355,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.GET_SCAN_RESULTS)
+      type: helpers.PENDING_ACTION(scansTypes.GET_SCAN_RESULTS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -371,7 +371,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_SCAN_RESULTS_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.GET_SCAN_RESULTS),
+      type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_RESULTS),
       payload: {
         data: {
           results: {
@@ -443,7 +443,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.ADD_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.ADD_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -474,7 +474,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.ADD_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.ADD_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -495,7 +495,7 @@ describe('scansReducer', function() {
 
   it('should handle ADD_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.ADD_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.ADD_SCAN),
       payload: {}
     };
 
@@ -517,7 +517,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.START_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.START_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -548,7 +548,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.START_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.START_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -569,7 +569,7 @@ describe('scansReducer', function() {
 
   it('should handle START_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.START_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.START_SCAN),
       payload: {}
     };
 
@@ -591,7 +591,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.CANCEL_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.CANCEL_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -622,7 +622,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.CANCEL_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.CANCEL_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -643,7 +643,7 @@ describe('scansReducer', function() {
 
   it('should handle CANCEL_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.CANCEL_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.CANCEL_SCAN),
       payload: {}
     };
 
@@ -665,7 +665,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.PAUSE_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.PAUSE_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -696,7 +696,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.PAUSE_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.PAUSE_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -717,7 +717,7 @@ describe('scansReducer', function() {
 
   it('should handle PAUSE_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.PAUSE_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.PAUSE_SCAN),
       payload: {}
     };
 
@@ -739,7 +739,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.RESTART_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.RESTART_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -770,7 +770,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.RESTART_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.RESTART_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -791,7 +791,7 @@ describe('scansReducer', function() {
 
   it('should handle RESTART_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.RESTART_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.RESTART_SCAN),
       payload: {}
     };
 
@@ -813,7 +813,7 @@ describe('scansReducer', function() {
 
   it('should handle DELETE_SCAN_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.DELETE_SCAN),
+      type: helpers.REJECTED_ACTION(scansTypes.DELETE_SCAN),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -842,7 +842,7 @@ describe('scansReducer', function() {
 
   it('should handle DELETE_SCAN_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.DELETE_SCAN)
+      type: helpers.PENDING_ACTION(scansTypes.DELETE_SCAN)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -862,7 +862,7 @@ describe('scansReducer', function() {
 
   it('should handle DELETE_SCAN_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.DELETE_SCAN),
+      type: helpers.FULFILLED_ACTION(scansTypes.DELETE_SCAN),
       payload: {}
     };
 
@@ -883,7 +883,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_MERGE_SCAN_RESULTS_REJECTED', () => {
     let dispatched = {
-      type: helpers.rejectedAction(scansTypes.GET_MERGE_SCAN_RESULTS),
+      type: helpers.REJECTED_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS),
       error: true,
       payload: {
         message: 'BACKUP MESSAGE',
@@ -909,7 +909,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_MERGE_SCAN_RESULTS_PENDING', () => {
     let dispatched = {
-      type: helpers.pendingAction(scansTypes.GET_MERGE_SCAN_RESULTS)
+      type: helpers.PENDING_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
@@ -926,7 +926,7 @@ describe('scansReducer', function() {
 
   it('should handle GET_MERGE_SCAN_RESULTS_FULFILLED', () => {
     let dispatched = {
-      type: helpers.fulfilledAction(scansTypes.GET_MERGE_SCAN_RESULTS)
+      type: helpers.FULFILLED_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS)
     };
 
     let resultState = scansReducer(undefined, dispatched);
