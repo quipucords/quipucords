@@ -31,12 +31,8 @@ from api.common.pagination import StandardResultsSetPagination
 from api.models import (ScanTask, ScanJob, FactCollection, Source,
                         Credential, RawFact)
 from api.serializers import (ScanJobSerializer,
-                             SourceSerializer,
-                             JobConnectionResultSerializer,
                              SystemConnectionResultSerializer,
-                             JobInspectionResultSerializer,
                              SystemInspectionResultSerializer,
-                             RawFactSerializer,
                              FactCollectionSerializer)
 from api.scanjob.serializer import expand_scanjob
 from api.signals.scanjob_signal import (pause_scan,
@@ -65,6 +61,7 @@ def expand_source(system):
                     id=source_id).values('id',
                                          'name',
                                          'source_type').first()
+
 
 def expand_system_connection(system):
     """Expand the system connection results.
@@ -98,94 +95,6 @@ def expand_system_inspection(system):
         system['facts'] = facts
 
 
-def expand_sys_conn_result(conn_result):
-    """Expand the system connection results.
-
-    Take collection of system connection result ids and pull objects from db.
-    Return the user a json representation of these values.
-    """
-    result = []
-    for system_result in conn_result.systems.all():
-        serializer = SystemConnectionResultSerializer(system_result)
-        json_sys_result = serializer.data
-        if system_result.credential is not None:
-            cred = system_result.credential
-            json_cred = {'id': cred.id, 'name': cred.name}
-            json_sys_result['credential'] = json_cred
-        result.append(json_sys_result)
-    return result
-
-
-def expand_sys_inspect_results(inspect_result):
-    """Expand the system inspection results.
-
-    Take collection of system inspection result ids and pull objects from db.
-    Return the user a json representation of these values.
-    """
-    result = []
-    for system_result in inspect_result.systems.all():
-        serializer = SystemInspectionResultSerializer(system_result)
-        json_sys_result = serializer.data
-        if system_result.facts is not None:
-            facts = system_result.facts.all()
-            json_facts = []
-            for fact in facts:
-                fact_serializer = RawFactSerializer(fact)
-                json_fact = fact_serializer.data
-                json_facts.append(json_fact)
-            json_sys_result['facts'] = json_facts
-        result.append(json_sys_result)
-    return result
-
-
-def expand_conn_results(job_conn_result, json_job_conn_result):
-    """Expand the connection results.
-
-    Take collection of json_job_conn_result ids and pull objects from db.
-    create slim dictionary version of rows of key/value to return to user.
-    """
-    if json_job_conn_result is not None and\
-            json_job_conn_result.get(RESULTS_KEY):
-        json_job_conn_result_list = []
-        for result in job_conn_result.task_results.all():
-            conn_task = ScanTask.objects.filter(
-                connection_result=result).first()
-            source_serializer = SourceSerializer(conn_task.source)
-            json_source = source_serializer.data
-            json_source.pop('credentials', None)
-            json_source.pop('hosts', None)
-            json_source.pop('port', None)
-            systems = expand_sys_conn_result(result)
-            json_job_conn_result_out = {'source': json_source,
-                                        'systems': systems}
-            json_job_conn_result_list.append(json_job_conn_result_out)
-        json_job_conn_result[RESULTS_KEY] = json_job_conn_result_list
-
-
-def expand_inspect_results(job_inspect_result, json_job_inspect_result):
-    """Expand the inspection results.
-
-    Take collection of json_job_inspect_result ids and pull objects from db.
-    create slim dictionary version of rows of key/value to return to user.
-    """
-    if json_job_inspect_result is not None and\
-            json_job_inspect_result.get(RESULTS_KEY):
-        json_job_inspect_result_list = []
-        for result in job_inspect_result.task_results.all():
-            inspect_task = ScanTask.objects.filter(
-                inspection_result=result).first()
-            source_serializer = SourceSerializer(inspect_task.source)
-            json_source = source_serializer.data
-            json_source.pop('credentials', None)
-            json_source.pop('hosts', None)
-            json_source.pop('port', None)
-            systems = expand_sys_inspect_results(result)
-            json_job_inspect_result_out = {'source': json_source,
-                                           'systems': systems}
-            json_job_inspect_result_list.append(json_job_inspect_result_out)
-        json_job_inspect_result[RESULTS_KEY] = json_job_inspect_result_list
-
-
 class ScanJobFilter(FilterSet):
     """Filter for sources by name."""
 
@@ -214,7 +123,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
     ordering = ('id',)
 
-    # pylint: disable=unused-argument, arguments-differ
+    # pylint: disable=unused-argument, arguments-differ,invalid-name
     def retrieve(self, request, pk=None):
         """Get a scan job."""
         if not pk or (pk and not is_int(pk)):
@@ -228,32 +137,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan)
-
-    # pylint: disable=unused-argument,invalid-name,no-self-use
-    @detail_route(methods=['get'])
-    def results(self, request, pk=None):
-        """Get the results of a scan job."""
-        result = None
-        scan_job = get_object_or_404(self.queryset, pk=pk)
-        job_conn_result = scan_job.connection_results
-        job_scan_result = scan_job.inspection_results
-        if job_conn_result:
-            serializer = JobConnectionResultSerializer(job_conn_result)
-            json_job_conn_result = serializer.data
-            expand_conn_results(job_conn_result, json_job_conn_result)
-            if result is None:
-                result = {}
-            result['connection_results'] = json_job_conn_result
-        if job_scan_result:
-            serializer = JobInspectionResultSerializer(job_scan_result)
-            json_job_scan_result = serializer.data
-            expand_inspect_results(job_scan_result, json_job_scan_result)
-            if result is None:
-                result = {}
-            result['inspection_results'] = json_job_scan_result
-        if result is not None:
-            return Response(result)
-        return Response(status=404)
 
     @detail_route(methods=['get'])
     def connection(self, request, pk=None):
@@ -432,6 +315,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     def validate_merge_jobs(self, data):
         """Validate merge jobs."""
+        # pylint: disable=no-self-use
         error = {
             'jobs': []
         }

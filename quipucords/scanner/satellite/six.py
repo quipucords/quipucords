@@ -403,23 +403,28 @@ class SatelliteSixV1(SatelliteInterface):
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
                          host_name)
-            return details
+            return None
 
         try:
+            message = 'REQUESTING HOST DETAILS: %s' % host_name
+            self.inspect_scan_task.log_message(message)
             details.update(host_fields(self.inspect_scan_task, 1,
                                        HOSTS_FIELDS_V1_URL,
                                        org_id, host_id))
             details.update(host_subscriptions(self.inspect_scan_task,
                                               HOSTS_SUBS_V1_URL,
                                               org_id, host_id))
-            self.record_inspect_result(host_name, details)
             logger.debug('host_id=%s, host_details=%s',
                          host_id, details)
+            return {'host_name': host_name,
+                    'details': details,
+                    'status': SystemInspectionResult.SUCCESS}
         except SatelliteException as sat_error:
             error_message = 'Satellite error encountered: %s\n' % sat_error
-            self.record_inspect_result(host_name, details,
-                                       status=SystemInspectionResult.FAILED)
             logger.error(error_message)
+            return {'host_name': host_name,
+                    'details': details,
+                    'status': SystemInspectionResult.FAILED}
         return details
 
     def hosts_facts(self):
@@ -432,27 +437,41 @@ class SatelliteSixV1(SatelliteInterface):
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
 
-        orgs = self.get_orgs()
-        for org_id in orgs:
-            jsonresult = {}
-            page = 0
-            per_page = 100
-            while (page == 0 or int(jsonresult.get(PER_PAGE, 0)) ==
-                   len(jsonresult.get(RESULTS, []))):
-                page += 1
-                params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                response, url = utils.execute_request(self.inspect_scan_task,
-                                                      url=HOSTS_V1_URL,
-                                                      org_id=org_id,
-                                                      query_params=params)
-                # pylint: disable=no-member
-                if response.status_code != requests.codes.ok:
-                    raise SatelliteException('Invalid response code %s'
-                                             ' for url: %s' %
-                                             (response.status_code, url))
-                jsonresult = response.json()
-                for host in jsonresult.get(RESULTS, []):
-                    self.host_details(org_id, host.get(ID), host.get(NAME))
+        with Pool(processes=self.max_concurrency) as pool:
+            orgs = self.get_orgs()
+            for org_id in orgs:
+                jsonresult = {}
+                page = 0
+                per_page = 100
+                while (page == 0 or int(jsonresult.get(PER_PAGE, 0)) ==
+                       len(jsonresult.get(RESULTS, []))):
+                    page += 1
+                    params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
+                    response, url = \
+                        utils.execute_request(self.inspect_scan_task,
+                                              url=HOSTS_V1_URL,
+                                              org_id=org_id,
+                                              query_params=params)
+                    # pylint: disable=no-member
+                    if response.status_code != requests.codes.ok:
+                        raise SatelliteException('Invalid response code %s'
+                                                 ' for url: %s' %
+                                                 (response.status_code, url))
+                    jsonresult = response.json()
+                    hosts = jsonresult.get(RESULTS, [])
+                    chunks = [hosts[i:i + self.max_concurrency]
+                              for i in range(0, len(hosts),
+                                             self.max_concurrency)]
+                    for chunk in chunks:
+                        host_params = [(host.get(ID), host.get(NAME))
+                                       for host in chunk]
+                        results = pool.starmap(self.host_details, host_params)
+                        for result in results:
+                            if result is not None:
+                                self.record_inspect_result(
+                                    result.get('host_name'),
+                                    result.get('details'),
+                                    result.get('status'))
 
 
 class SatelliteSixV2(SatelliteInterface):

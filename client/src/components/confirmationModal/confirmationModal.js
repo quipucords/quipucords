@@ -1,9 +1,7 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { Modal, Button, Icon } from 'patternfly-react';
-
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { confirmationModalTypes } from '../../redux/constants';
@@ -26,16 +24,7 @@ class ConfirmationModal extends React.Component {
   }
 
   render() {
-    const {
-      show,
-      confirmTitle,
-      confirmHeading,
-      confirmBody,
-      confirmIcon,
-      confirmButtonText,
-      cancelButtonText,
-      onConfirm
-    } = this.props;
+    const { show, title, heading, body, icon, confirmButtonText, cancelButtonText, onConfirm } = this.props;
 
     return (
       <Modal show={show} onHide={this.cancel}>
@@ -43,15 +32,15 @@ class ConfirmationModal extends React.Component {
           <button className="close" onClick={this.cancel} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
-          <Modal.Title>{confirmTitle}</Modal.Title>
+          <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="confirm-modal-body">
-            {confirmIcon && <span className="confirm-modal-icon">{confirmIcon}</span>}
+            {icon && <span className="confirm-modal-icon">{icon}</span>}
             <span className="confirm-modal-content">
               <span className="spacer" />
-              <div className="confirm-modal-content-heading">{confirmHeading}</div>
-              <div>{confirmBody}</div>
+              <div className="confirm-modal-content-heading">{heading}</div>
+              <div>{body}</div>
               <span className="spacer" />
             </span>
           </div>
@@ -71,35 +60,26 @@ class ConfirmationModal extends React.Component {
 
 ConfirmationModal.propTypes = {
   show: PropTypes.bool.isRequired,
-  confirmTitle: PropTypes.string,
-  confirmHeading: PropTypes.node,
-  confirmIcon: PropTypes.node,
-  confirmBody: PropTypes.node,
+  title: PropTypes.string,
+  heading: PropTypes.node,
+  icon: PropTypes.node,
+  body: PropTypes.node,
   confirmButtonText: PropTypes.string,
   cancelButtonText: PropTypes.string,
   onConfirm: PropTypes.func,
   onCancel: PropTypes.func
 };
+
 ConfirmationModal.defaultProps = {
-  confirmTitle: 'Confirm',
-  confirmHeading: null,
-  confirmBody: null,
-  confirmIcon: <Icon type="pf" name="warning-triangle-o" />,
+  title: 'Confirm',
+  heading: null,
+  body: null,
+  icon: <Icon type="pf" name="warning-triangle-o" />,
   confirmButtonText: 'Confirm'
 };
 
-function mapStateToProps(state, ownProps) {
-  return {
-    show: state.confirmationModal.show,
-    confirmTitle: state.confirmationModal.title,
-    confirmHeading: state.confirmationModal.heading,
-    confirmIcon: state.confirmationModal.icon,
-    confirmBody: state.confirmationModal.body,
-    confirmButtonText: state.confirmationModal.confirmButtonText,
-    cancelButtonText: state.confirmationModal.cancelButtonText,
-    onConfirm: state.confirmationModal.onConfirm,
-    onCancel: state.confirmationModal.onCancel
-  };
-}
+const mapStateToProps = function(state) {
+  return { ...state.confirmationModal };
+};
 
 export default connect(mapStateToProps)(ConfirmationModal);

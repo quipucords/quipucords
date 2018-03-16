@@ -71,7 +71,7 @@ class TaskInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         return '{ ' + 'id:{}, '\
-            'source:{}, '\
+            'systems:{}, '\
             .format(self.id,
                     self.systems) + ' }'
 

@@ -58,4 +58,4 @@ SourceCredentialsList.propTypes = {
   source: PropTypes.object
 };
 
-export { SourceCredentialsList };
+export default SourceCredentialsList;

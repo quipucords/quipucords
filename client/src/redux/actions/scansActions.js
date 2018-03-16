@@ -50,7 +50,7 @@ const startScan = id => dispatch => {
   });
 };
 
-const getScanJobs = (id, query) => dispatch => {
+const getScanJobs = (id, query = {}) => dispatch => {
   return dispatch({
     type: scansTypes.GET_SCAN_JOBS,
     payload: scansService.getScanJobs(id, query)

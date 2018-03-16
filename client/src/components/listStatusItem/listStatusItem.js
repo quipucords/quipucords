@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, ListView } from 'patternfly-react';
-
-import { SimpleTooltip } from '../simpleTooltIp/simpleTooltip';
+import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 
 const ListStatusItem = ({
   id,

@@ -69,4 +69,4 @@ ScanSourceList.propTypes = {
   scan: PropTypes.object
 };
 
-export { ScanSourceList };
+export default ScanSourceList;
