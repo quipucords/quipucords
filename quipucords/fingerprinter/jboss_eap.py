@@ -73,6 +73,8 @@ EAP_CLASSIFICATIONS = {
     '1.5.0.Final': 'WildFly-10',
     '1.5.1.Final': 'WildFly-10',
     '1.5.2.Final': 'WildFly-10',
+    '1.6.1.Final': 'WildFly-11',
+    '1.7.0.Final': 'WildFly-12',
     'JBPAPP_4_2_0_GA': 'EAP-4.2',
     'JBPAPP_4_2_0_GA_C': 'EAP-4.2',
     'JBPAPP_4_3_0_GA': 'EAP-4.3',
@@ -95,7 +97,8 @@ EAP_CLASSIFICATIONS = {
     '1.3.7.Final-redhat-1': 'EAP-6.4',
     '1.4.4.Final-redhat-1': 'EAP-7.0',
     '1.5.1.Final-redhat-1': 'EAP-7.0',
-    '1.5.4.Final-redhat-1': 'EAP-7.0'
+    '1.5.4.Final-redhat-1': 'EAP-7.0',
+    '1.6.0.Final-redhat-1': 'EAP-7.1'
 }
 
 
