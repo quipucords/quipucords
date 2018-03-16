@@ -1138,13 +1138,6 @@ definitions:
       name:
         type: "string"
         description: "The name of the credential"
-      cred_type:
-        type: "string"
-        description: "The type of the credential"
-        enum:
-          - network
-          - vcenter
-          - satellite
   CredentialOut:
     allOf:
       - $ref: "#/definitions/Credential"
@@ -1733,6 +1726,8 @@ definitions:
         description: "The name of the system (ip, hostname, etc.)"
       credential:
         $ref: "#/definitions/CredentialMin"
+      source:
+        $ref: "#/definitions/SourceMin"
       status:
         type: "string"
         description: "The status of the system connection."
@@ -1780,18 +1775,13 @@ definitions:
     type: "object"
     required:
       - name
+      - status
       - source
       - facts
-      - status
     properties:
       name:
         type: "string"
         description: "The name of the system (ip, hostname, etc.)"
-      facts:
-        type: "array"
-        items:
-          $ref: "#/definitions/RawFactsOut"
-        description: "The raw facts collected from the system."
       status:
         type: "string"
         description: "The status of the system inspection."
@@ -1799,6 +1789,13 @@ definitions:
           - success
           - unreachable
           - failed
+      source:
+        $ref: "#/definitions/SourceMin"
+      facts:
+        type: "array"
+        items:
+          $ref: "#/definitions/RawFactsOut"
+        description: "The raw facts collected from the system."
   InspectResultsOut:
     type: "object"
     required:
@@ -1833,25 +1830,29 @@ definitions:
         inspection_results:
           $ref: "#/definitions/TaskInspectResultsOut"
   ScanJobConnectionResultsOut:
-    type: "object"
-    required:
-      - connection_results
-    properties:
-        connection_results:
-          type: "array"
-          items:
-            $ref: "#/definitions/SysConnResultOut"
-          description: "The task connection results"
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+            results:
+              type: "array"
+              items:
+                $ref: "#/definitions/SysConnResultOut"
+              description: "The task connection results"
   ScanJobInspectionResultsOut:
-    type: "object"
-    required:
-      - inspection_results
-    properties:
-        inspection_results:
-          type: "array"
-          items:
-            $ref: "#/definitions/SysInspectResultOut"
-          description: "The task inspection results"
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+            results:
+              type: "array"
+              items:
+                $ref: "#/definitions/SysInspectResultOut"
+              description: "The task inspection results"
   User:
     type: "object"
     required:
