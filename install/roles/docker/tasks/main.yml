@@ -22,16 +22,33 @@
   yum:
     name: yum-utils
     state: present
+  become: true
 
 - name: Install device-mapper-persistent-data
   yum:
     name: device-mapper-persistent-data
     state: present
+  become: true
 
 - name: Install lvm2
   yum:
     name: lvm2
     state: present
+  become: true
+
+- name: Install libcgroup
+  yum:
+    name: libcgroup
+    state: present
+  become: true
+  when: is_rhel_centos_6
+
+- name: Install xz
+  yum:
+    name: xz
+    state: present
+  become: true
+  when: is_rhel_centos_6
 
 - name: Find installable local epel rpm
   find:
@@ -43,16 +60,23 @@
 - name: Set find_docker_rpm_local
   set_fact:
     find_docker_rpm_local: "{{ find_docker_rpm_local_raw['matched'] == 1 }}"
-  when: "find_docker_rpm_local_raw is defined and 'matched' in find_docker_rpm_local_raw"
+  when:
+    - find_docker_rpm_local_raw is defined
+    - "'matched' in find_docker_rpm_local_raw"
 
 - name: Set find_docker_rpm_local_path
   set_fact:
     find_docker_rpm_local_path: "{{ find_docker_rpm_local_raw['files'][0]['path'] }}"
-  when: find_docker_rpm_local is defined and find_docker_rpm_local
+  when:
+    - find_docker_rpm_local is defined
+    - find_docker_rpm_local
 
 - name: Install Docker from local path
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
-  when: not have_docker
+  become: true
+  when:
+    - not have_docker
+    - find_docker_rpm_local
 
 - name: Add Docker CE repository for Centos/RHEL 7 family
   yum_repository:
@@ -61,48 +85,85 @@
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
     gpgkey: https://download.docker.com/linux/centos/gpg
     gpgcheck: yes
-  when: is_rhel7 and not have_docker and not find_docker_rpm_local
+  become: true
+  when:
+    - is_rhel_centos_7
+    - not have_docker
+    - not find_docker_rpm_local
+
+- name: Add Docker CE repository for Fedora 26/27
+  yum_repository:
+    name: docker-ce
+    description: Docker CE repo
+    baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+    gpgkey: https://download.docker.com/linux/fedora/gpg
+    gpgcheck: yes
+  become: true
+  when:
+    - is_fedora_26_27
+    - not have_docker
+    - not find_docker_rpm_local
 
 - name: Install the latest version of docker-ce
   yum:
     name: docker-ce
     state: latest
-  when: not have_docker and not find_docker_rpm_local
+  become: true
+  when:
+    - is_rhel_centos_7
+    - not have_docker
+    - not find_docker_rpm_local
 
 - name: Obtain Docker Engine for Centos/RHEL 6 family
   get_url:
-    url: https://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
+    url: http://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
     dest: "{{ pkg_install_dir }}"
     mode: 0644
-  when: is_rhel6 and not have_docker and not find_docker_rpm_local
+  when:
+    - is_rhel_centos_6
+    - not have_docker
+    - not find_docker_rpm_local
 
 - name: Find installable local epel rpm
   find:
     paths: "{{ pkg_install_dir }}"
     patterns: 'docker*.rpm'
   register: find_docker_rpm_local_raw
-  when: is_rhel6 and not have_docker
+  when:
+    - is_rhel_centos_6
+    - not have_docker
 
 - name: Set find_docker_rpm_local
   set_fact:
     find_docker_rpm_local: "{{ find_docker_rpm_local_raw['matched'] == 1 }}"
-  when: "find_docker_rpm_local_raw is defined and 'matched' in find_docker_rpm_local_raw"
+  when:
+    - find_docker_rpm_local_raw is defined
+    - "'matched' in find_docker_rpm_local_raw"
 
 - name: Set find_docker_rpm_local_path
   set_fact:
     find_docker_rpm_local_path: "{{ find_docker_rpm_local_raw['files'][0]['path'] }}"
-  when: find_docker_rpm_local is defined and find_docker_rpm_local
+  when:
+    - find_docker_rpm_local is defined
+    - find_docker_rpm_local
 
 - name: Install Docker from local path
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
-  when: is_rhel6 and not have_docker
+  become: true
+  when:
+    - is_rhel_centos_6
+    - not have_docker
 
 - name: Start Docker
   service:
     name: docker
     state: started
+  become: true
 
 - name: Setup chkconfig to start docker
   shell: chkconfig docker on
+  become: true
   ignore_errors: yes
-  when: is_rhel6 and have_chkconfig
+  when:
+    - is_rhel_centos_6
+    - have_chkconfig
