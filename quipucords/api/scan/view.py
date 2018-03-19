@@ -164,9 +164,12 @@ class ScanFilter(FilterSet):
     """Filter for sources by name."""
 
     name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name', lookup_expr='contains')
+    search_by_name = CharFilter(name='name',
+                                lookup_expr='contains',
+                                distinct=True)
     search_sources_by_name = CharFilter(name='sources__name',
-                                        lookup_expr='contains')
+                                        lookup_expr='contains',
+                                        distinct=True)
 
     class Meta:
         """Metadata for filterset."""
