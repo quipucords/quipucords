@@ -192,7 +192,8 @@ def is_eap_manifest_version(manifest_dict):
         for line in manifest.splitlines():
             if IMPLEMENTATION_VERSION in line:
                 _, _, ver = line.partition(IMPLEMENTATION_VERSION)
-                if 'EAP' in EAP_CLASSIFICATIONS[ver.strip()]:
+                classification = EAP_CLASSIFICATIONS.get(ver.strip())
+                if classification and 'EAP' in classification:
                     return Product.PRESENT
 
     return Product.ABSENT
@@ -205,7 +206,9 @@ def get_eap_manifest_version(manifest_dict):
         for line in manifest.splitlines():
             if IMPLEMENTATION_VERSION in line:
                 _, _, ver = line.partition(IMPLEMENTATION_VERSION)
-                versions.add(EAP_CLASSIFICATIONS[ver.strip()])
+                classification = EAP_CLASSIFICATIONS.get(ver.strip())
+                if classification:
+                    versions.add(classification)
 
     return versions
 
@@ -214,7 +217,8 @@ def is_eap_jar_version(version_dict):
     """Check whether a 'jar -version' string contains an EAP version string."""
     for _, version in version_dict.items():
         _, _, rest = version.partition('version')
-        if 'EAP' in EAP_CLASSIFICATIONS[rest.strip()]:
+        classification = EAP_CLASSIFICATIONS.get(rest.strip())
+        if classification and 'EAP' in classification:
             return Product.PRESENT
 
     return Product.ABSENT
@@ -225,7 +229,9 @@ def get_eap_jar_version(version_dict):
     versions = set()
     for _, version in version_dict.items():
         _, _, rest = version.partition('version')
-        versions.add(EAP_CLASSIFICATIONS[rest.strip()])
+        classification = EAP_CLASSIFICATIONS.get(rest.strip())
+        if classification:
+            versions.add(classification)
 
     return versions
 
