@@ -22,12 +22,12 @@
 
 - name: Set server url
   set_fact:
-    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/1.0.0/quipucords.latest.tar.gz') }}"
+    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/1.0.0/quipucords.1.0.0.tar.gz') }}"
   when: server_url is not defined
 
 - name: Set server image and tag name
   set_fact:
-    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:latest') }}"
+    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:1.0.0') }}"
   when: server_image_and_tag is not defined
 
 - name: Split server image and tag name
