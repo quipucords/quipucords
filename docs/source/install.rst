@@ -151,7 +151,7 @@ Installing the Docker Prerequisite
 The instructions for installing Docker vary according to your system configuration.
 
 Installing Docker on Red Hat Enterprise Linux 7 or CentOS 7
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can install Docker in different ways, depending on your needs:
 
 - You can set up the Docker repositories and then install from them. This choice is the recommended approach because it simplifies the installation and upgrade tasks.
@@ -199,7 +199,7 @@ After you install Docker, you must start it and verify that it is running.
 After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or CentOS 7, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
 
 Installing Docker on Red Hat Enterprise Linux 6.6+ or CentOS 6.6+
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To install Docker on Red Hat Enterprise Linux 6.6+ or CentOS 6.6+, you must have kernel 2.6.32-431 or later installed.
 
 To check the current kernel release, open a terminal session and use the ``uname`` command to display the kernel release information, as shown in the following example::
@@ -263,7 +263,7 @@ After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6+
 
 
 Installing Docker on Fedora 26 or Fedora 27
-"""""""""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can install Docker in different ways, depending on your needs:
 
 - You can set up the Docker repositories and then install from them. This choice is the recommended approach because it simplifies the installation and upgrade tasks.
