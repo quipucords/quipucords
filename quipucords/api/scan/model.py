@@ -219,4 +219,4 @@ class Scan(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
+        verbose_name_plural = _(messages.PLURAL_SCANS_MSG)

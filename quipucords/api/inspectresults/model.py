@@ -33,7 +33,7 @@ class RawFact(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
+        verbose_name_plural = _(messages.PLURAL_RAW_FACT_MSG)
 
 
 class SystemInspectionResult(models.Model):
@@ -60,7 +60,7 @@ class SystemInspectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
+        verbose_name_plural = _(messages.PLURAL_SYS_INSPECT_RESULTS_MSG)
 
 
 class TaskInspectionResult(models.Model):
@@ -78,7 +78,7 @@ class TaskInspectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
+        verbose_name_plural = _(messages.PLURAL_TASK_INSPECT_RESULTS_MSG)
 
 
 class JobInspectionResult(models.Model):
@@ -93,4 +93,4 @@ class JobInspectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_SCAN_RESULTS_MSG)
+        verbose_name_plural = _(messages.PLURAL_JOB_INSPECT_RESULTS_MSG)
