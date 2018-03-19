@@ -26,4 +26,5 @@ Quipucords requires two types of data to access IT resources and run the inspect
    install
    configure
    getting_started
+   deduplication
    man
