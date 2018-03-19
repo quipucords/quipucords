@@ -86,9 +86,10 @@ SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
 SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
 SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST = \
     'search_directories must be a JSON array of valid paths'
+PLURAL_SCANS_MSG = 'Scans'
 
 # scan jobs messages
-PLURAL_SCAN_JOBS_MSG = 'Scan Jobs'
+PLURAL_SCAN_JOBS_MSG = 'Scan jobs'
 SJ_REQ_SOURCES = 'Scan job must have one or more sources.'
 SJ_SCAN_IDS_INV = 'Scan identifiers must be integer values.'
 SJ_SOURCE_IDS_INV = 'Source identifiers must be integer values.'
@@ -126,7 +127,7 @@ SJ_MERGE_JOB_NO_TASKS = 'Merge cannot be completed. Source for job with '\
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
 
 # scan task messages
-PLURAL_SCAN_TASKS_MSG = 'Scan Tasks'
+PLURAL_SCAN_TASKS_MSG = 'Scan tasks'
 ST_STATUS_MSG_RUNNING = 'Task is running.'
 ST_STATUS_MSG_RESTARTED = 'Task was restarted.'
 ST_STATUS_MSG_PENDING = 'Task is pending.'
@@ -136,9 +137,13 @@ ST_STATUS_MSG_COMPLETED = 'Task is complete.'
 ST_REQ_SOURCE = 'Scan task must have a source.'
 
 # scan results messages
-PLURAL_SCAN_RESULTS_MSG = 'Scan Results'
-PLURAL_KEY_VALUES_MSG = 'Result Key Values'
-PLURAL_RESULTS_MSG = 'Results'
+PLURAL_JOB_CONN_RESULTS_MSG = 'Job connection results'
+PLURAL_TASK_CONN_RESULTS_MSG = 'Task connection results'
+PLURAL_SYS_CONN_RESULTS_MSG = 'System connection results'
+PLURAL_JOB_INSPECT_RESULTS_MSG = 'Job inspection results'
+PLURAL_TASK_INSPECT_RESULTS_MSG = 'Task inspection results'
+PLURAL_SYS_INSPECT_RESULTS_MSG = 'System inspection results'
+PLURAL_RAW_FACT_MSG = 'Raw facts'
 
 NO_PAUSE = 'Scan cannot be paused. ' \
     'The scan must be running for it to be paused.'
