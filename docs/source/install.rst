@@ -50,12 +50,12 @@ Installing with Downloaded Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You must first gather the necessary packages.
 
-In order to install the server you will need the following items, see `Installing the Quipucords Server Container Image`_ for download locations for specific operating systems:
+In order to install the server you will need the following items, see `Installing the Quipucords Server Container Image <install.html#container>`_ for download locations for specific operating systems:
 
 - Docker package
 - Server container image
 
-In order to install the command line you will need the following items, see `Installing the Quipucords Command Line Tool`_ for download locations for specific operating systems:
+In order to install the command line you will need the following items, see `Installing the Quipucords Command Line Tool <install.html#commandline>`_ for download locations for specific operating systems:
 
 - EPEL package
 - QPC package
@@ -88,9 +88,9 @@ The installer allows for various options. Each of the options can be passed with
 
 Options:
  - **install_server**
-    - ``true | false`` - Defaults to true, supply ``false` to skip installing the server
+    - ``true | false`` - Defaults to true, supply ``false`` to skip installing the server
  - **install_cli**
-    - ``true | false`` - Defaults to true, supply ``false` to skip installing the command line
+    - ``true | false`` - Defaults to true, supply ``false`` to skip installing the command line
  - **pkg_install_dir**
     - ``fully-quailified path`` - Defaults to ``<installer>/packages/``
  - **server_install_dir**
@@ -99,6 +99,8 @@ Options:
     - ``port number`` - Defaults to 443
  - **server_name**
     - ``name`` - Defaults to ``quipucords``
+
+.. _commandline:
 
 Installing the Quipucords Command Line Tool
 -------------------------------------------
@@ -194,7 +196,7 @@ After you install Docker, you must start it and verify that it is running.
 
     # sudo docker run hello-world
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or CentOS 7, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image`_.
+After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or CentOS 7, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
 
 Installing Docker on Red Hat Enterprise Linux 6.6+ or CentOS 6.6+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -257,7 +259,7 @@ This command displays output similar to the following truncated example. The fir
 
     # sudo chkconfig docker on
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6+ or CentOS 6.6+, you can continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image`_.
+After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6+ or CentOS 6.6+, you can continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
 
 
 Installing Docker on Fedora 26 or Fedora 27
@@ -306,8 +308,9 @@ After you install Docker, you must start it and verify that it is running.
 
     # sudo docker run hello-world
 
-After you complete the steps to install Docker for Fedora 26 or Fedora 27, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image`_.
+After you complete the steps to install Docker for Fedora 26 or Fedora 27, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image  <install.html#container>`_.
 
+.. _container:
 
 Installing the Quipucords Server Container Image
 ------------------------------------------------
