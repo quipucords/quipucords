@@ -1,6 +1,63 @@
+System Fingerprints
+===================
+A system fingerprint is composed of a set of system facts, products, entitlements, sources, and a metadata. For illustration a sample is included. ::
+
+    {
+        "os_release": "Red Hat Enterprise Linux Atomic Host 7.4",
+        "products": [
+            {
+                "name": "JBoss EAP",
+                "version": null,
+                "presence": "absent",
+                "metadata": {
+                    "source_id": 5,
+                    "source_name": "S62Source",
+                    "source_type": "satellite",
+                    "raw_fact_key": null
+                }
+            }
+        ],
+        "entitlements": [
+            {
+                "name": "Satellite Tools 6.3",
+                "entitlement_id": 54,
+                "metadata": {
+                    "source_id": 5,
+                    "source_name": "S62Source",
+                    "source_type": "satellite",
+                    "raw_fact_key": "entitlements"
+                }
+            }
+        ],
+        "metadata": {
+            "os_release": {
+                "source_id": 5,
+                "source_name": "S62Source",
+                "source_type": "satellite",
+                "raw_fact_key": "os_release"
+            }
+        },
+        "sources": [
+            {
+                "id": 5,
+                "source_type": "satellite",
+                "name": "S62Source"
+            }
+        ]
+    }
+
+A scan produces system facts.  As an example, the ``os_release`` describes the operation system and release used by the system.  For each system fact, there is a corresponding entry in the metadata object that identifies the original source of the system fact.
+
+Each fingerprint contains an entitlement list.  The entitlement has a name, id, and metadata describing the original source.  In the example previous example, the system has the ``Satellite Tools 6.3`` entitlement.
+
+A system fingerprint has a list of products.  A product has a name, version, presence, and metadata field.  The system above has JBoss EAP installed.
+
+Last, each system fingerprint has a list of sources which contained this system.  A system may be contained in more than one source.
+
+
 System Deduplication and Merging
-================================
-Quipucords is used to inspect and gather information about your IT infrastructure. System information can be gathered using the following types of sources:
+===================
+Quipucords is used to inspect and gather information about your IT infrastructure.  System information can be gathered using the following types of sources:
 
 - network
 - vcenter
