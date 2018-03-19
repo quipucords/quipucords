@@ -36,6 +36,24 @@ class ProductEAPTest(TestCase):
                         'raw_fact_key': 'eap_home_ls/jboss_eap_jar_ver'}}
         self.assertEqual(product, expected)
 
+    def test_detect_wildfly_present(self):
+        """Test the detect_jboss_eap method with wildfly."""
+        source = {'source_id': 1, 'source_type': 'network'}
+        facts = {'eap_home_ls': {'opt/eap6/': ['jboss-modules.jar']},
+                 'jboss_eap_jar_ver': [
+                     {'version': '1.6.1.Final',
+                      'date': '2018-01-18'}]}
+        product = detect_jboss_eap(source, facts)
+        expected = {'name': 'WildFly',
+                    'presence': 'present',
+                    'version': ['WildFly-11'],
+                    'metadata': {
+                        'source_id': 1,
+                        'source_name': None,
+                        'source_type': 'network',
+                        'raw_fact_key': 'eap_home_ls/jboss_eap_jar_ver'}}
+        self.assertEqual(product, expected)
+
     # pylint: disable=C0103
     def test_detect_jboss_eap_potential_common(self):
         """Test the detect_jboss_eap method."""
