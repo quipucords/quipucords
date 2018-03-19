@@ -22,7 +22,7 @@ help:
 	@echo "  server-init    to run server initializion steps"
 	@echo "  serve          to run the server"
 	@echo "  manpage        to build the manpage"
-	@echo "  manpage-html   to build the manpage"
+	@echo "  html           to build the docs"
 
 all: build lint test-coverage
 
@@ -85,14 +85,6 @@ manpage:
 	pandoc docs/source/man.rst \
 	  --standalone -t man -o build/qpc.1 \
 	  --variable=section:1 \
-	  --variable=date:'November 14, 2017' \
-	  --variable=footer:'version 0.0.1' \
-	  --variable=header:'QPC Command Line Guide'
-
-manpage-html:
-	@mkdir -p build
-	pandoc docs/source/man.rst \
-	  --standalone -t html -o build/qpc.html \
-	  --variable=section:1 \
-	  --variable=footer:'version 0.0.1' \
+	  --variable=date:'March 18, 2018' \
+	  --variable=footer:'version 0.0.41' \
 	  --variable=header:'QPC Command Line Guide'
