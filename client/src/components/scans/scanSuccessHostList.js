@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import { EmptyState, Grid, Icon, Pager } from 'patternfly-react';
 import helpers from '../../common/helpers';
-import { getConnectionScanResults } from '../../redux/actions/scansActions';
+import { connect } from 'react-redux';
+import { getInspectionScanResults } from '../../redux/actions/scansActions';
 
-class SourceHostList extends React.Component {
+class ScanSuccessHostList extends React.Component {
   constructor() {
     super();
 
@@ -45,7 +45,7 @@ class SourceHostList extends React.Component {
   }
 
   refresh(page) {
-    const { source, status } = this.props;
+    const { scan, getInspectionScanResults } = this.props;
 
     this.setState({
       scanResultsPending: true,
@@ -57,12 +57,11 @@ class SourceHostList extends React.Component {
       page: page === undefined ? this.state.page : page,
       page_size: 100,
       ordering: 'name',
-      status: status
+      status: 'success'
     };
 
-    if (_.get(source, 'connection.id')) {
-      this.props
-        .getConnectionScanResults(source.connection.id, queryObject)
+    if (_.get(scan, 'most_recent.id')) {
+      getInspectionScanResults(scan.most_recent.id, queryObject)
         .then(results => {
           this.setState({
             scanResultsPending: false,
@@ -83,9 +82,7 @@ class SourceHostList extends React.Component {
   }
 
   render() {
-    const { source, status } = this.props;
-    const { scanResults, scanResultsError, scanResultsPending, disableNext, disablePrevious } = this.state;
-
+    const { scanResults, scanResultsPending, scanResultsError, disableNext, disablePrevious } = this.state;
     if (scanResultsPending === true) {
       return (
         <EmptyState>
@@ -108,7 +105,7 @@ class SourceHostList extends React.Component {
     let results = _.get(scanResults, 'results', []);
     let displayHosts = [];
     _.forEach(results, result => {
-      if (result.status === status && _.get(result, 'source.id') === source.id) {
+      if (result.status === 'success') {
         displayHosts.push(result);
       }
     });
@@ -118,7 +115,7 @@ class SourceHostList extends React.Component {
         <EmptyState>
           <EmptyState.Icon name="warning-triangle-o" />
           <EmptyState.Title>
-            {`${helpers.scanStatusString(status)} authentications were not available, please refresh.`}
+            {`${helpers.scanStatusString('success')} systems were not available, please refresh.`}
           </EmptyState.Title>
         </EmptyState>
       );
@@ -145,18 +142,10 @@ class SourceHostList extends React.Component {
               <Grid.Row key={index}>
                 <Grid.Col xs={6} sm={4}>
                   <span>
-                    <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+                    <Icon type="pf" name="ok" />
                     &nbsp; {host.name}
                   </span>
                 </Grid.Col>
-                {host.status === 'success' && (
-                  <Grid.Col xs={6} sm={4}>
-                    <span>
-                      <Icon type="fa" name="id-card" />
-                      &nbsp; {host.credential.name}
-                    </span>
-                  </Grid.Col>
-                )}
               </Grid.Row>
             ))}
         </Grid>
@@ -165,11 +154,10 @@ class SourceHostList extends React.Component {
   }
 }
 
-SourceHostList.propTypes = {
-  source: PropTypes.object,
+ScanSuccessHostList.propTypes = {
+  scan: PropTypes.object,
   lastRefresh: PropTypes.number,
-  status: PropTypes.string,
-  getConnectionScanResults: PropTypes.func
+  getInspectionScanResults: PropTypes.func
 };
 
 const mapStateToProps = function(state) {
@@ -177,7 +165,7 @@ const mapStateToProps = function(state) {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getConnectionScanResults: (id, query) => dispatch(getConnectionScanResults(id, query))
+  getInspectionScanResults: (id, query) => dispatch(getInspectionScanResults(id, query))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(SourceHostList);
+export default connect(mapStateToProps, mapDispatchToProps)(ScanSuccessHostList);

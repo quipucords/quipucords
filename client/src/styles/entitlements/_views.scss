@@ -107,6 +107,21 @@
         }
       }
     }
+
+    .pager {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .host-list {
+      overflow-y: auto;
+      max-height: 300px;
+      border: solid 1px $list-view-active-border;
+      margin-right: 20px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
     // Within an expansion area, make blank slate become a single line, no background, no borders
     .blank-slate-pf {
       background: transparent;

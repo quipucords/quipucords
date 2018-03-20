@@ -10,10 +10,10 @@ import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ScanSourceList from './scanSourceList';
-import ScanHostsList from './scanHostList';
+import ScanFailedHostsList from './scanFailedHostList';
+import ScanSuccessHostList from './scanSuccessHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
-import { getInspectionScanResults, getScanJobs } from '../../redux/actions/scansActions';
 
 class ScanListItem extends React.Component {
   constructor() {
@@ -34,7 +34,7 @@ class ScanListItem extends React.Component {
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
     if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
-      this.loadExpandData(this.expandType());
+      this.closeExandIfNoData(this.expandType());
     }
   }
 
@@ -49,67 +49,18 @@ class ScanListItem extends React.Component {
     );
   }
 
-  loadExpandData(expandType) {
+  closeExandIfNoData(expandType) {
     const { item } = this.props;
 
-    switch (expandType) {
-      case 'systemsScanned':
-      case 'systemsFailed':
-        let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
-        let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
-        if (
-          (expandType === 'systemsScanned' && successHosts === 0) ||
-          (expandType === 'systemsFailed' && failedHosts === 0)
-        ) {
-          Store.dispatch({
-            type: viewTypes.EXPAND_ITEM,
-            viewType: viewTypes.SCANS_VIEW,
-            item: item
-          });
-          return;
-        }
-
-        this.setState({
-          scanResultsPending: true,
-          scanResultsError: null
-        });
-        this.props
-          .getInspectionScanResults(item.most_recent.id)
-          .then(results => {
-            this.setState({
-              scanResultsPending: false,
-              scanResults: _.get(results.value, 'data')
-            });
-          })
-          .catch(error => {
-            this.setState({
-              scanResultsPending: true,
-              scanResultsError: helpers.getErrorMessageFromResults(error)
-            });
-          });
-        break;
-      case 'jobs':
-        this.setState({
-          scanJobsPending: true,
-          scanJobsError: null
-        });
-        this.props
-          .getScanJobs(item.id)
-          .then(results => {
-            this.setState({
-              scanJobsPending: false,
-              scanJobs: _.get(results.value, 'data.results')
-            });
-          })
-          .catch(error => {
-            this.setState({
-              scanJobsPending: false,
-              scanJobsError: helpers.getErrorMessageFromResults(error)
-            });
-          });
-        break;
-      default:
-        break;
+    let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+    let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
+    let prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+    if (
+      (expandType === 'systemsScanned' && successHosts === 0) ||
+      (expandType === 'systemsFailed' && failedHosts === 0) ||
+      (expandType === 'jobs' && prevCount === 0)
+    ) {
+      this.closeExpand();
     }
   }
 
@@ -129,7 +80,6 @@ class ScanListItem extends React.Component {
         item: item,
         expandType: expandType
       });
-      this.loadExpandData(expandType);
     }
   }
 
@@ -322,39 +272,18 @@ class ScanListItem extends React.Component {
 
   renderExpansionContents() {
     const { item, onSummaryDownload, onDetailedDownload } = this.props;
-    const { scanJobs, scanJobsError, scanJobsPending, scanResults, scanResultsError, scanResultsPending } = this.state;
+    const { lastRefresh } = this.state;
 
     switch (this.expandType()) {
       case 'systemsScanned':
-        return (
-          <ScanHostsList
-            scanResults={scanResults}
-            scanResultsError={scanResultsError}
-            scanResultsPending={scanResultsPending}
-            status="success"
-          />
-        );
+        return <ScanSuccessHostList scan={item} lastRefresh={lastRefresh} />;
       case 'systemsFailed':
-        return (
-          <ScanHostsList
-            scanResults={scanResults}
-            scanResultsError={scanResultsError}
-            scanResultsPending={scanResultsPending}
-            status="failed"
-          />
-        );
+        return <ScanFailedHostsList scan={item} lastRefresh={lastRefresh} />;
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'jobs':
         return (
-          <ScanJobsList
-            scan={item}
-            scanJobs={scanJobs}
-            scanJobsError={scanJobsError}
-            scanJobsPending={scanJobsPending}
-            onSummaryDownload={onSummaryDownload}
-            onDetailedDownload={onDetailedDownload}
-          />
+          <ScanJobsList scan={item} onSummaryDownload={onSummaryDownload} onDetailedDownload={onDetailedDownload} />
         );
       default:
         return null;
@@ -399,8 +328,6 @@ ScanListItem.propTypes = {
   onCancel: PropTypes.func,
   onStart: PropTypes.func,
   onResume: PropTypes.func,
-  getInspectionScanResults: PropTypes.func,
-  getScanJobs: PropTypes.func,
   selectedScans: PropTypes.array,
   expandedScans: PropTypes.array
 };
@@ -412,9 +339,4 @@ const mapStateToProps = function(state) {
   });
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  getInspectionScanResults: id => dispatch(getInspectionScanResults(id)),
-  getScanJobs: id => dispatch(getScanJobs(id))
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ScanListItem);
+export default connect(mapStateToProps)(ScanListItem);
