@@ -46,7 +46,7 @@ class SystemConnectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_KEY_VALUES_MSG)
+        verbose_name_plural = _(messages.PLURAL_SYS_CONN_RESULTS_MSG)
 
 
 class TaskConnectionResult(models.Model):
@@ -63,7 +63,7 @@ class TaskConnectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_RESULTS_MSG)
+        verbose_name_plural = _(messages.PLURAL_TASK_CONN_RESULTS_MSG)
 
 
 class JobConnectionResult(models.Model):
@@ -78,4 +78,4 @@ class JobConnectionResult(models.Model):
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_SCAN_RESULTS_MSG)
+        verbose_name_plural = _(messages.PLURAL_JOB_CONN_RESULTS_MSG)
