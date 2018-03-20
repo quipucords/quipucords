@@ -42,13 +42,21 @@ The ``qpc`` command has several subcommands that encompass the inspection and re
 
   ``qpc source add --name=sourcename1 --type=type --hosts server1.example.com server2.example.com --cred credname1 credname2``
 
+* Creating scans:
+
+  ``qpc scan add --name=scan1 --sources sourcename1 sourcename2``
+
 * Running a scan:
 
-  ``qpc scan start --sources sourcename1``
+  ``qpc scan start --name=scan1``
 
 * Working with scans:
 
-  ``qpc scan show --id=1``
+  ``qpc scan show --name=scan1``
+
+* Working with scan jobs:
+
+  ``qpc scan job --id=1``
 
 * Generating reports:
 
