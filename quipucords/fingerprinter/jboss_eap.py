@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 NAME = 'name'
 PRODUCT = 'JBoss EAP'
+PRODUCT_WILDFLY = 'WildFly'
 PRESENCE = 'presence'
 VERSION = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
@@ -347,6 +348,11 @@ def detect_jboss_eap(source, facts):
         if VERSION in fact_dict:
             new_versions = call_or_value(fact_dict[VERSION], fact_value)
             versions.update(new_versions)
+            wildfly_versions = [
+                version for version in new_versions
+                if version.lower().startswith('wildfly')]
+            if wildfly_versions:
+                product_dict['name'] = PRODUCT_WILDFLY
 
     product_dict[PRESENCE] = presence
     if versions:
