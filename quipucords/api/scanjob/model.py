@@ -137,16 +137,49 @@ class ScanJob(models.Model):
         actual_message += message
         logger.log(log_level, actual_message)
 
-    def calculate_counts(self):
+    def calculate_counts(self, connect_only=False):
+        """Calculate scan counts from tasks.
+
+        :param connect_only: counts should only include
+        connection scan results
+        :return: systems_count, systems_scanned, systems_failed
+        """
+        if self.status == ScanTask.CREATED or \
+                self.status == ScanTask.PENDING:
+            return None, None, None
+
+        systems_count = 0
+        systems_scanned = 0
+        systems_failed = 0
+
+        connection_systems_count,\
+            connection_systems_scanned,\
+            connection_systems_failed = self._calculate_counts(
+                ScanTask.SCAN_TYPE_CONNECT)
+        if self.scan_type == ScanTask.SCAN_TYPE_CONNECT or connect_only:
+            systems_count = connection_systems_count
+            systems_scanned = connection_systems_scanned
+            systems_failed = connection_systems_failed
+        else:
+            _,\
+                inspect_systems_scanned,\
+                inspect_systems_failed = self._calculate_counts(
+                    ScanTask.SCAN_TYPE_INSPECT)
+            systems_count = connection_systems_count
+            systems_scanned = inspect_systems_scanned
+            systems_failed = inspect_systems_failed + connection_systems_failed
+        return systems_count, systems_scanned, systems_failed
+
+    def _calculate_counts(self, scan_type):
         """Calculate scan counts from tasks.
 
         :return: systems_count, systems_scanned, systems_failed
         """
-        systems_count = None
-        systems_scanned = None
-        systems_failed = None
+        systems_count = 0
+        systems_scanned = 0
+        systems_failed = 0
         tasks = self.tasks.filter(
-            scan_type=self.scan_type).order_by('sequence_number')
+            scan_type=scan_type).order_by('sequence_number')
         for task in tasks:
             if task.systems_count is not None:
                 if systems_count is None:
@@ -164,25 +197,17 @@ class ScanJob(models.Model):
 
     def _log_stats(self, prefix):
         """Log stats for scan."""
-        sys_count = 0
-        sys_failed = 0
-        sys_scanned = 0
-
-        # Only count stats for type of scan you are running
-        for task in self.tasks.filter(scan_type=self.scan_type):
-            if task.systems_count is not None:
-                sys_count += task.systems_count
-            if task.systems_failed is not None:
-                sys_failed += task.systems_failed
-            if task.systems_scanned is not None:
-                sys_scanned += task.systems_scanned
+        systems_count,\
+            systems_scanned,\
+            systems_failed = self._calculate_counts(
+                ScanTask.SCAN_TYPE_CONNECT)
 
         message = '%s Stats: systems_count=%d,'\
             ' systems_scanned=%d, systems_failed=%d' %\
             (prefix,
-             sys_count,
-             sys_scanned,
-             sys_failed)
+             systems_count,
+             systems_scanned,
+             systems_failed)
         self.log_message(message)
 
     def _compute_elapsed_time(self):

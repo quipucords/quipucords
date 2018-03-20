@@ -1564,17 +1564,17 @@ definitions:
       systems_count:
         type: "integer"
         format: "int64"
-        description: "The total number of systems to be scanned in the source."
+        description: "The total number of systems to be scanned in the scan job."
         example: 10
       systems_scanned:
         type: "integer"
         format: "int64"
-        description: "The total number of systems that have been scanned in the source."
+        description: "The total number of successful system connections in the scan job."
         example: 8
       systems_failed:
         type: "integer"
         format: "int64"
-        description: "The total number of systems that failed during the scan of the source."
+        description: "The total number of failed system connections for the scan job."
         example: 2
       source_systems_count:
         type: "integer"
@@ -1584,12 +1584,12 @@ definitions:
       source_systems_scanned:
         type: "integer"
         format: "int64"
-        description: "The total number of systems that have been scanned in the source."
+        description: "The total number of successful system connections in the source."
         example: 4
       source_systems_failed:
         type: "integer"
         format: "int64"
-        description: "The total number of systems that failed during the scan of the source."
+        description: "The total number of failed system connections for the source."
         example: 1
   ScanJobOut:
     allOf:
@@ -1707,6 +1707,13 @@ definitions:
           - canceled
           - failed
           - completed
+      scan_type:
+        type: "string"
+        description: "The type of scan."
+        example: "inspect"
+        enum:
+          - connect
+          - inspect
       status_details:
         type: "object"
         properties:
