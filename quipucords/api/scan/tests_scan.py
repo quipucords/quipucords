@@ -397,9 +397,7 @@ class ScanTest(TestCase):
         self.assertEqual(
             json_scan.get('most_recent'),
             {'id': 1,
-             'systems_count': 2,
-             'systems_scanned': 1,
-             'systems_failed': 1,
+             'scan_type': 'inspect',
              'status': 'pending',
              'status_details': {'job_status_message': 'Job is pending.'}})
 
@@ -482,6 +480,7 @@ class TestScanList(TestCase):
                     {'id': 2,
                      'jobs': [{'id': 1}],
                      'most_recent': {'id': 1,
+                                     'scan_type': 'inspect',
                                      'status': 'created',
                                      'status_details':
                                      {'job_status_message':

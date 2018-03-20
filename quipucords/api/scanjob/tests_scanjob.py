@@ -1294,6 +1294,12 @@ class ScanJobTest(TestCase):
         """Test view expand_scanjob."""
         scan_job, scan_task = create_scan_job(
             self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        connect_task = scan_task.prerequisites.first()
+        scan_job.status = ScanTask.RUNNING
+        scan_job.save()
+        connect_task.update_stats('TEST_VC', sys_count=2,
+                                  sys_failed=0,
+                                  sys_scanned=2)
         scan_task.update_stats('TEST_VC.', sys_count=2,
                                sys_failed=1, sys_scanned=1)
 
