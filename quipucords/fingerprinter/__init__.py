@@ -87,6 +87,8 @@ def process_fact_collection(sender, instance, **kwargs):
             number_invalid += 1
             logger.error('Invalid fingerprint: %s', fingerprint_dict)
             logger.error('Fingerprint errors: %s', serializer.errors)
+        logger.debug('Fingerprints (report id=%d): %s',
+                     instance.id, fingerprint_dict)
 
     logger.info('Fingerprint engine (report id=%d) - end processing '
                 '(valid fingerprints=%d, invalid fingerprints=%d)',
