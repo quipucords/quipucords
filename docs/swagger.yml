@@ -11,6 +11,17 @@ info:
 
 basePath: "/api/v1"
 
+schemes:
+  - http
+  - https
+securityDefinitions:
+  Token:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+  - Token: []
+
 tags:
 - name: "Credential"
   description: "API related to the Credential model"
@@ -60,7 +71,7 @@ paths:
       tags:
         - "Credential"
       summary: "Add a new credential"
-      description: "Create a new credential for use when connecting to a target system."
+      description: "Create a new credential for use when connecting to target systems."
       operationId: "addCredential"
       consumes:
       - "application/json"
@@ -69,33 +80,35 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "Credential object that needs to be stored"
+        description: "Credential object that needs to be stored."
         required: true
         schema:
           $ref: "#/definitions/Credential"
       responses:
         201:
-          description: "Credential created"
+          description: "Credential created."
           schema:
             $ref: "#/definitions/CredentialOut"
         400:
-          description: "Invalid input"
+          description: "Invalid request"
+        401:
+          description: "Not authorized"
     get:
       tags:
         - "Credential"
       summary: "List exsiting credentials"
-      description: "List all credential for use when connecting to a target system."
+      description: "List all credential."
       operationId: "listCredentials"
       produces:
       - "application/json"
       parameters:
         - name: "name"
           in: "query"
-          description: "A list of names representing credentials"
+          description: "Filter list by a list of credential names."
           type: "string"
         - name: "cred_type"
           in: "query"
-          description: "Filter list based on credential type"
+          description: "Filter list based on credential type."
           type: "string"
           enum:
             - network
@@ -113,7 +126,7 @@ paths:
           format: "int64"
         - name: "ordering"
           in: "query"
-          description: "Order the results with the field name; '-' means descending"
+          description: "Order the results with the field name; '-' means descending."
           type: "string"
         - name: "search_by_name"
           in: "query"
@@ -121,15 +134,17 @@ paths:
           type: "string"
       responses:
         200:
-          description: "Credential retrieved"
+          description: "Credentials retrieved"
           schema:
             $ref: "#/definitions/CredentialPagination"
+        401:
+          description: "Not authorized"
   /credentials/{cred_id}/:
     get:
       tags:
         - "Credential"
       summary: "Get an existing credential"
-      description: "Get a credential for use when connecting to a target system."
+      description: "Retreive a credential by id."
       operationId: "getCredential"
       produces:
       - "application/json"
@@ -145,13 +160,15 @@ paths:
           description: "Credential retrieved"
           schema:
             $ref: "#/definitions/CredentialOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Credential not found"
     put:
       tags:
         - "Credential"
-      summary: "Update an existing credential"
-      description: "Update a credential for use when connecting to a target system."
+      summary: "Full update an existing credential"
+      description: "Full update of an existing credential."
       operationId: "updateCredential"
       consumes:
       - "application/json"
@@ -166,7 +183,7 @@ paths:
         format: "int64"
       - in: "body"
         name: "body"
-        description: "Credential object that needs to be modified"
+        description: "Credential object to replace existing credential object."
         required: true
         schema:
           $ref: "#/definitions/Credential"
@@ -177,13 +194,49 @@ paths:
             $ref: "#/definitions/CredentialOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
+        404:
+          description: "Credential not found"
+    patch:
+      tags:
+        - "Credential"
+      summary: "Partial update of an existing credential"
+      description: "Partial update an existing credential."
+      operationId: "partialUpdateCredential"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cred_id"
+        in: "path"
+        description: "ID of credential to update"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Portion of credential object that should overlay existing credential object."
+        required: true
+        schema:
+          $ref: "#/definitions/Credential"
+      responses:
+        200:
+          description: "Credential updated"
+          schema:
+            $ref: "#/definitions/CredentialOut"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Not authorized"
         404:
           description: "Credential not found"
     delete:
       tags:
         - "Credential"
       summary: "Delete an existing credential"
-      description: "Delete a credential for use when connecting to a target system."
+      description: "Delete a credential by id."
       operationId: "deleteCredential"
       produces:
       - "application/json"
@@ -201,6 +254,8 @@ paths:
           description: "Credential is used by existing sources."
           schema:
             $ref: "#/definitions/CredentialDeletionError"
+        401:
+          description: "Not authorized"
         404:
           description: "Credential not found"
   /reports/{report_id}/details/:
@@ -916,6 +971,7 @@ paths:
       summary: "Obtain a user token."
       description: "Obtain a user token."
       operationId: "obtainToken"
+      security: []
       produces:
       - "application/json"
       parameters:
@@ -1124,13 +1180,20 @@ definitions:
             - satellite
         username:
           type: "string"
+          example: "admin"
           description: "The connection username for the credential"
         password:
           type: "string"
+          example: "********"
           description: "The connection password for the credential"
         ssh_keyfile:
           type: "string"
+          example: "~/.ssh/id_rsa"
           description: "The connection private ssh keyfile for the credential"
+        ssh_passphrase:
+          type: "string"
+          example: "********"
+          description: "The passphrase for the ssh keyfile"
         become_method:
           type: "string"
           description: "The method to become for ansible privilege escalation"
@@ -1145,9 +1208,11 @@ definitions:
             - runas
         become_user:
           type: "string"
+          example: "admin"
           description: "The user to become when running a privileged command during network scan."
         become_password:
           type: "string"
+          example: "********"
           description: "The privilege escalation password to be used when running a network scan."
         sources:
           type: "array"
