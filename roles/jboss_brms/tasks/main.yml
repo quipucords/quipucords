@@ -54,7 +54,7 @@
   when: 'jboss_brms'
 
 - name: cat MANIFEST.MF files
-  raw: cat "{{ item }}"/META-INF/MANIFEST.MF 2>/dev/null
+  raw: cat '{{ item }}/META-INF/MANIFEST.MF' 2>/dev/null
   register: jboss_brms_manifest_mf
   ignore_errors: yes
   with_items: "{{ business_central_candidates + kie_server_candidates }}"
