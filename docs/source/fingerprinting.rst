@@ -1,5 +1,10 @@
+System Fingerprinting
+---------------------
+Quipucords is used to inspect and gather information about your IT infrastructure. System information gathered from a single sources or multiple sources are processed to create a summarized set of data called a fingerprint which highlights features that identify they system, such as operating system, architecture, number of CPUs and cores, different products installed and entitlements in use on the system etc. The sections below describe the components of a fingerprint and the process used to create the fingerprint.
+
+
 System Fingerprints
-===================
+^^^^^^^^^^^^^^^^^^^
 A system fingerprint is composed of a set of system facts, products, entitlements, sources, and metadata. The following example shows a system fingerprint. ::
 
     {
@@ -68,7 +73,7 @@ Lastly, each system fingerprint has a list of sources which contained this syste
 
 
 System Deduplication and Merging
-===================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Quipucords is used to inspect and gather information about your IT infrastructure.  System information can be gathered using the following types of sources:
 
 - network
@@ -78,7 +83,7 @@ Quipucords is used to inspect and gather information about your IT infrastructur
 A scan is composed of one or more sources. A single system can be found in multiple sources during a scan. For example, a virtual machine on vCenter server could be running a Satellite managed RHEL OS installation. A network source could also be used to scan this system. In this case, the system will be reported via vcenter, satellite, and network sources during a scan. Quipucords feeds unprocessed system facts from a scan into a fingerprint engine. The fingerprint engine matches and merges data for systems seen in more than one source.
 
 Deduplication of Systems
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 Quipucords uses specific system facts to identify duplicate systems. The following phases remove duplicate systems during the deduplication process:
 
 1. All systems from network sources are combined into a single network system set. Systems are considered to be duplicates if they have the same fact value for ``subscription_manager_id`` or ``bios_uuid``.
@@ -88,7 +93,7 @@ Quipucords uses specific system facts to identify duplicate systems. The followi
 5. The network-satellite system set is merged with the vcenter system set to form the complete system set. Systems are considered to be duplicates if they have a matching MAC address in the ``mac_addresses`` fact or if the vcenter fact value of ``vm_uuid`` matches the network value of ``bios_uuid``.
 
 Merging Systems
----------------
+~~~~~~~~~~~~~~~
 After Quipucords determines that two systems are duplicates it performs a merge. The merged system will have a union of system facts from each source. When merging a fact that appears in both systems, the precedence from highest to lowest is:
 
 1. network
@@ -99,11 +104,11 @@ A system fingerprint contains a ``metadata`` dictionary that captures the origin
 
 
 Post Processing
----------------
+~~~~~~~~~~~~~~~
 After deduplication and merging are complete, there is a post processing phase used to create derived system facts. Derived system facts are generated from more than one system fact.
 
 System Creation Date
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 ``system_creation_date`` is a derived system fact. The ``system_creation_date`` is determined by the following primitive facts. The primitive facts below are ordered according to the accuracy of matching the real system creation time. The highest non-empty value will be used.
 
 1. date_machine_id
