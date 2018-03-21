@@ -1,9 +1,11 @@
+.. _config-and-start:
+
 Configuring and Starting Quipucords
-===================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 After you install the Quipucords server container image in the image registry, you must select configuration options to be used at the time that you start the server and the command line tool. When you are sure of the options that you want to use, you can start Quipucords by starting the server and the command line tool.
 
 Selecting the Quipucords Server Configuration Options
------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When you run the command to start the Quipucords server, you supply values for several options that affect the configuration of that server. You must make the following decisions:
 
 - Accepting or changing the default exposed server port
@@ -35,7 +37,7 @@ The following steps guide you through those choices.
        # mkdir log
 
 Starting the Quipucords Server
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, SQLlite database, and log output during the Quipucords server configuration.
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
@@ -53,7 +55,7 @@ To view the status of the server after it is running, enter the following comman
   # sudo docker ps
 
 Changing the Default Password for the Quipucords Server
--------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Quipucords server has a default administrator user with a default user name of ``admin`` and a default password of ``pass``. To ensure the security of your Quipucords server, it is recommended that you change the default password to a different password.
 
 To change the default password for the Quipucords server, use the following steps:
@@ -69,35 +71,6 @@ To change the default password for the Quipucords server, use the following step
 
 **TIP:** You can also enter the local or remote URL (as applicable) for the Quipucords server in a browser window to verify that the Quipucords server is responding.
 
-.. _connection:
+.. include:: cli_configure.rst
 
-Configuring the qpc Command Line Tool Connection
-------------------------------------------------
-After the Quipucords server is running, you can configure the qpc command line tool to work with the server. The ``qpc server config`` command configures the connection between the qpc command line tool and the Quipucords server.
-
-The ``qpc server config`` command takes the following options:
-
-- The ``--host`` option is required. If you are using the qpc command line tool on the same system where the server is running, you can supply the loopback address ``127.0.0.1`` as the value. Otherwise, supply the IP address for your Quipucords server.
-- The ``--port`` option is optional. The default value for this option is ``443``. If you decided to remap the Quipucords default exposed server port to another port, the port option is required. You must supply the port option and the remapped value in the command, for example, ``--port 8443``.
-
-For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool::
-
-  # qpc server config --host 127.0.0.1
-
-However, if you are configuring the command line tool on a system that is remote from the server, the Quipucords server is running on the IP address 192.0.2.0, and the port is remapped to 8443, you would enter the following command to configure the qpc command line tool::
-
-  # qpc server config --host 192.0.2.0 --port 8443
-
-.. _login:
-
-Logging in to the Quipucords Server
------------------------------------
-After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run qpc commands.
-
-1. To log in to the server, enter the following command::
-
-  # qpc server login
-
-2. Enter the server user name and password at the prompts.
-
-The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server, and expires daily.
+.. include:: cli_login.rst
