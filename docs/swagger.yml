@@ -18,10 +18,16 @@ tags:
   description: "API related to the Source model"
 - name: "Scan"
   description: "API related to the Scan model"
+- name: "Scan Job"
+  description: "API related to the Scan Job model"
 - name: "Fact"
   description: "API related to the Fact model"
+- name: "User"
+  description: "API related to the User model"
 - name: "Report"
   description: "API related to the Report model"
+- name: "Status"
+  description: "API related to the server status"
 
 paths:
   /facts/:
@@ -654,7 +660,6 @@ paths:
           required: true
           type: "integer"
           format: "int64"
-
         - name: "status"
           in: "query"
           description: "Filter list based on job status"
@@ -904,7 +909,52 @@ paths:
           description: "Server status"
           schema:
             $ref: "#/definitions/ServerStatus"
+  /token/:
+    put:
+      tags:
+        - "User"
+      summary: "Obtain a user token."
+      description: "Obtain a user token."
+      operationId: "obtainToken"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Credentials used to obtain token"
+        required: true
+        schema:
+          $ref: "#/definitions/ObtainTokenIn"
+      responses:
+        200:
+          description: "Successfully obtained token."
+          schema:
+            $ref: "#/definitions/ObtainTokenOut"
+        400:
+          description: "Unable to log in with provided credentials."
+
 definitions:
+  ObtainTokenIn:
+    type: "object"
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: "string"
+        description: "Authentication username."
+      password:
+        type: "string"
+        description: "Authentication password."
+  ObtainTokenOut:
+    type: "object"
+    required:
+      - token
+    properties:
+      token:
+        type: "string"
+        example: "7f7f81baaa26aeaf46a907e017fbec9e19ff474d"
+        description: "Authentication token."
   ServerStatus:
     type: "object"
     properties:
