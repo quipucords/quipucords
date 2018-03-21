@@ -31,12 +31,12 @@ tags:
   description: "API related to the Scan model"
 - name: "Scan Job"
   description: "API related to the Scan Job model"
+- name: "Report"
+  description: "API related to the Report model"
 - name: "Fact"
   description: "API related to the Fact model"
 - name: "User"
   description: "API related to the User model"
-- name: "Report"
-  description: "API related to the Report model"
 - name: "Status"
   description: "API related to the server status"
 
@@ -233,125 +233,6 @@ paths:
           description: "Not authorized"
         404:
           description: "Credential not found"
-  /facts/:
-    post:
-      tags:
-        - "Fact"
-      summary: "Publish facts from environment scans"
-      description: "Publish facts from environment scans"
-      operationId: "publishFacts"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Facts that need to be stored"
-        required: true
-        schema:
-          $ref: "#/definitions/FactCollectionIn"
-      responses:
-        201:
-          description: "Fact collection created"
-          schema:
-            $ref: "#/definitions/FactCollectionOut"
-        400:
-          description: "Invalid input"
-
-
-  /reports/{report_id}/details/:
-    get:
-      tags:
-        - "Report"
-      summary: "Retrieve a detailed report for systems scanned"
-      description: "Get detailed report for systems that have been scanned."
-      operationId: "getDetailReport"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "report_id"
-        in: "path"
-        description: "The Report ID to be queried."
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Detailed report for scanned systems retrieved"
-          schema:
-            $ref: "#/definitions/FactCollectionSource"
-        404:
-          description: "Report for report id not found"
-  /reports/{report_id}/deployments/:
-    get:
-      tags:
-        - "Report"
-      summary: "Retrieve a deployment report for systems scanned"
-      description: "Get deployment report for systems that have been scanned."
-      operationId: "getDeploymentReport"
-      produces:
-      - "application/json"
-      parameters:
-        - name: "report_id"
-          in: "path"
-          description: "The Report ID to be queried."
-          required: true
-          type: "integer"
-          format: "int64"
-        - name: "group_count"
-          in: "query"
-          description: "The field to group and count on. Cannot be used with other filters."
-          type: "string"
-        - name: "source_type"
-          in: "query"
-          description: "Present the value for source_type."
-          type: "boolean"
-        - name: "os_name"
-          in: "query"
-          description: "Present the value for os_name."
-          type: "boolean"
-        - name: "os_release"
-          in: "query"
-          description: "Present the value for os_release."
-          type: "boolean"
-        - name: "cpu_socket_count"
-          in: "query"
-          description: "Present the value for cpu_socket_count."
-          type: "boolean"
-        - name: "system_creation_date"
-          in: "query"
-          description: "Present the value for system_creation_date."
-          type: "boolean"
-        - name: "infrastructure_type"
-          in: "query"
-          description: "Present the value for infrastructure_type."
-          type: "boolean"
-        - name: "vm_host"
-          in: "query"
-          description: "Present the value for vm_host."
-          type: "boolean"
-        - name: "vm_host_socket_count"
-          in: "query"
-          description: "Present the value for vm_host_socket_count."
-          type: "boolean"
-        - name: "vm_cluster"
-          in: "query"
-          description: "Present the value for vm_cluster."
-          type: "boolean"
-        - name: "vm_datacenter"
-          in: "query"
-          description: "Present the value for vm_datacenter."
-          type: "boolean"
-      responses:
-        200:
-          description: "Deployment report for scanned systems retrieved"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SystemReportOut"
-        404:
-          description: "Report for report id not found"
   /sources/:
     post:
       tags:
@@ -926,6 +807,147 @@ paths:
             $ref: "#/definitions/FactCollectionOut"
         400:
           description: "Scan job not merged due to invalid request."
+  /reports/{report_id}/details/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve a detailed report for systems scanned"
+      description: "Get detailed report for systems that have been scanned."
+      operationId: "getDetailReport"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "report_id"
+        in: "path"
+        description: "The Report ID to be queried."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Detailed report for scanned systems retrieved"
+          schema:
+            $ref: "#/definitions/FactCollectionSource"
+        404:
+          description: "Report for report id not found"
+  /reports/{report_id}/deployments/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve a deployment report for systems scanned"
+      description: "Get deployment report for systems that have been scanned."
+      operationId: "getDeploymentReport"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "report_id"
+          in: "path"
+          description: "The Report ID to be queried."
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "group_count"
+          in: "query"
+          description: "The field to group and count on. Cannot be used with other filters."
+          type: "string"
+        - name: "source_type"
+          in: "query"
+          description: "Present the value for source_type."
+          type: "boolean"
+        - name: "os_name"
+          in: "query"
+          description: "Present the value for os_name."
+          type: "boolean"
+        - name: "os_release"
+          in: "query"
+          description: "Present the value for os_release."
+          type: "boolean"
+        - name: "cpu_socket_count"
+          in: "query"
+          description: "Present the value for cpu_socket_count."
+          type: "boolean"
+        - name: "system_creation_date"
+          in: "query"
+          description: "Present the value for system_creation_date."
+          type: "boolean"
+        - name: "infrastructure_type"
+          in: "query"
+          description: "Present the value for infrastructure_type."
+          type: "boolean"
+        - name: "vm_host"
+          in: "query"
+          description: "Present the value for vm_host."
+          type: "boolean"
+        - name: "vm_host_socket_count"
+          in: "query"
+          description: "Present the value for vm_host_socket_count."
+          type: "boolean"
+        - name: "vm_cluster"
+          in: "query"
+          description: "Present the value for vm_cluster."
+          type: "boolean"
+        - name: "vm_datacenter"
+          in: "query"
+          description: "Present the value for vm_datacenter."
+          type: "boolean"
+      responses:
+        200:
+          description: "Deployment report for scanned systems retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SystemReportOut"
+        404:
+          description: "Report for report id not found"
+  /facts/:
+    post:
+      tags:
+        - "Fact"
+      summary: "Publish facts from environment scans"
+      description: "Publish facts from environment scans"
+      operationId: "publishFacts"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Facts that need to be stored"
+        required: true
+        schema:
+          $ref: "#/definitions/FactCollectionIn"
+      responses:
+        201:
+          description: "Fact collection created"
+          schema:
+            $ref: "#/definitions/FactCollectionOut"
+        400:
+          description: "Invalid input"
+  /token/:
+    put:
+      tags:
+        - "User"
+      summary: "Obtain a user token."
+      description: "Obtain a user token."
+      operationId: "obtainToken"
+      security: []
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Credentials used to obtain token"
+        required: true
+        schema:
+          $ref: "#/definitions/ObtainTokenIn"
+      responses:
+        200:
+          description: "Successfully obtained token."
+          schema:
+            $ref: "#/definitions/ObtainTokenOut"
+        400:
+          description: "Unable to log in with provided credentials."
   /users/current/:
     get:
       tags:
@@ -967,31 +989,6 @@ paths:
           description: "Server status"
           schema:
             $ref: "#/definitions/ServerStatus"
-  /token/:
-    put:
-      tags:
-        - "User"
-      summary: "Obtain a user token."
-      description: "Obtain a user token."
-      operationId: "obtainToken"
-      security: []
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Credentials used to obtain token"
-        required: true
-        schema:
-          $ref: "#/definitions/ObtainTokenIn"
-      responses:
-        200:
-          description: "Successfully obtained token."
-          schema:
-            $ref: "#/definitions/ObtainTokenOut"
-        400:
-          description: "Unable to log in with provided credentials."
-
 definitions:
   Credential:
     type: "object"
