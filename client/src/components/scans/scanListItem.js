@@ -10,8 +10,7 @@ import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ScanSourceList from './scanSourceList';
-import ScanFailedHostsList from './scanFailedHostList';
-import ScanSuccessHostList from './scanSuccessHostList';
+import ScanHostList from './scanHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
@@ -34,7 +33,7 @@ class ScanListItem extends React.Component {
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
     if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
-      this.closeExandIfNoData(this.expandType());
+      this.closeExpandIfNoData(this.expandType());
     }
   }
 
@@ -49,7 +48,7 @@ class ScanListItem extends React.Component {
     );
   }
 
-  closeExandIfNoData(expandType) {
+  closeExpandIfNoData(expandType) {
     const { item } = this.props;
 
     let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
@@ -271,14 +270,13 @@ class ScanListItem extends React.Component {
   }
 
   renderExpansionContents() {
-    const { item, onSummaryDownload, onDetailedDownload } = this.props;
-    const { lastRefresh } = this.state;
+    const { item, onSummaryDownload, onDetailedDownload, lastRefresh } = this.props;
 
     switch (this.expandType()) {
       case 'systemsScanned':
-        return <ScanSuccessHostList scan={item} lastRefresh={lastRefresh} />;
+        return <ScanHostList scan={item} lastRefresh={lastRefresh} status="success" />;
       case 'systemsFailed':
-        return <ScanFailedHostsList scan={item} lastRefresh={lastRefresh} />;
+        return <ScanHostList scan={item} lastRefresh={lastRefresh} status="failed" />;
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'jobs':
