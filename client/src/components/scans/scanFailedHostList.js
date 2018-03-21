@@ -2,24 +2,20 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EmptyState, Grid, Icon, Pager } from 'patternfly-react';
+import { EmptyState, Grid, Icon } from 'patternfly-react';
 import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
-import { getConnectionScanResults } from '../../redux/actions/scansActions';
+import { getConnectionScanResults, getInspectionScanResults } from '../../redux/actions/scansActions';
 
 class ScanFailedHostList extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['onNextPage', 'onPreviousPage']);
-
     this.state = {
       scanResults: [],
       scanResultsError: false,
-      scanResultsPending: false,
-      page: 1,
-      disableNext: true,
-      disablePrevious: true
+      connectionScanResultsPending: false,
+      inspectionScanResultsPending: false
     };
   }
 
@@ -34,24 +30,47 @@ class ScanFailedHostList extends React.Component {
     }
   }
 
-  onNextPage() {
-    this.setState({ page: this.state.page + 1 });
-    this.refresh(this.state.page + 1);
+  isIpAddress(name) {
+    let vals = name.split('.');
+    if (vals.length === 4) {
+      return _.find(vals, val => Number.isNaN(val)) === undefined;
+    }
+    return false;
   }
 
-  onPreviousPage() {
-    this.setState({ page: this.state.page - 1 });
-    this.refresh(this.state.page - 1);
+  ipAddressValue(name) {
+    const values = name.split('.');
+    return values[0] * 0x1000000 + values[1] * 0x10000 + values[2] * 0x100 + values[3] * 1;
   }
 
-  refresh(page) {
-    const { scan, getConnectionScanResults } = this.props;
+  addResults(results) {
+    const { scanResults } = this.state;
 
-    this.setState({
-      scanResultsPending: true,
-      disableNext: true,
-      disablePrevious: true
+    let failedResults = [];
+    _.forEach(_.get(results, 'value.data.results', []), result => {
+      if (result.status === 'failed') {
+        failedResults.push(result);
+      }
     });
+
+    let allResults = [...scanResults, ...failedResults];
+
+    allResults.sort((item1, item2) => {
+      if (this.isIpAddress(item1.name) && this.isIpAddress(item2.name)) {
+        const value1 = this.ipAddressValue(item1.name);
+        const value2 = this.ipAddressValue(item2.name);
+
+        return value1 - value2;
+      }
+
+      return item1.name.localeCompare(item2.name);
+    });
+
+    return allResults;
+  }
+
+  getInspectionResults(page) {
+    const { scan, getInspectionScanResults } = this.props;
 
     const queryObject = {
       page: page === undefined ? this.state.page : page,
@@ -60,30 +79,66 @@ class ScanFailedHostList extends React.Component {
       status: 'failed'
     };
 
-    if (_.get(scan, 'most_recent.id')) {
-      getConnectionScanResults(scan.most_recent.id, queryObject)
-        .then(results => {
-          this.setState({
-            scanResultsPending: false,
-            scanResults: _.get(results.value, 'data'),
-            disableNext: _.get(results.value, 'data.next') === null,
-            disablePrevious: _.get(results.value, 'data.previous') === null
-          });
-        })
-        .catch(error => {
-          this.setState({
-            scanResultsPending: false,
-            scanResultsError: helpers.getErrorMessageFromResults(error),
-            disableNext: true,
-            disablePrevious: true
-          });
+    getInspectionScanResults(scan.most_recent.id, queryObject)
+      .then(results => {
+        const morePages = _.get(results.value, 'data.next') !== null;
+        this.setState({
+          inspectionScanResultsPending: morePages,
+          scanResults: this.addResults(results)
         });
-    }
+
+        if (morePages) {
+          this.getInspectionResults(page + 1);
+        }
+      })
+      .catch(error => {
+        this.setState({
+          inspectionScanResultsPending: false,
+          scanResultsError: helpers.getErrorMessageFromResults(error)
+        });
+      });
+  }
+
+  getConnectionResults(page) {
+    const { scan, getConnectionScanResults } = this.props;
+
+    const queryObject = {
+      page: page === undefined ? this.state.page : page,
+      page_size: 100,
+      ordering: 'name',
+      status: 'failed'
+    };
+
+    getConnectionScanResults(scan.most_recent.id, queryObject)
+      .then(results => {
+        const morePages = _.get(results.value, 'data.next') !== null;
+        this.setState({
+          connectionScanResultsPending: morePages,
+          scanResults: this.addResults(results)
+        });
+
+        if (morePages) {
+          this.getConnectionResults(page + 1);
+        }
+      })
+      .catch(error => {
+        this.setState({
+          connectionScanResultsPending: false,
+          scanResultsError: helpers.getErrorMessageFromResults(error)
+        });
+      });
+  }
+
+  refresh() {
+    this.setState({ scanResultsPending: true, inspectionScanResultsPending: true, scanResults: [] });
+    this.getConnectionResults(1);
+    this.getInspectionResults(1);
   }
 
   render() {
-    const { scanResults, scanResultsPending, scanResultsError, disableNext, disablePrevious } = this.state;
-    if (scanResultsPending === true) {
+    const { scanResults, connectionScanResultsPending, inspectionScanResultsPending, scanResultsError } = this.state;
+
+    if (connectionScanResultsPending || inspectionScanResultsPending) {
       return (
         <EmptyState>
           <EmptyState.Icon name="spinner spinner-xl" />
@@ -102,15 +157,7 @@ class ScanFailedHostList extends React.Component {
       );
     }
 
-    let results = _.get(scanResults, 'results', []);
-    let displayHosts = [];
-    _.forEach(results, result => {
-      if (result.status === 'failed') {
-        displayHosts.push(result);
-      }
-    });
-
-    if (_.size(displayHosts) === 0) {
+    if (_.size(scanResults) === 0) {
       return (
         <EmptyState>
           <EmptyState.Icon name="warning-triangle-o" />
@@ -122,34 +169,19 @@ class ScanFailedHostList extends React.Component {
     }
 
     return (
-      <React.Fragment>
-        {(!disableNext || !disablePrevious) && (
-          <Grid fluid>
-            <Grid.Row>
-              <Pager
-                className="pager-sm"
-                onNextPage={this.onNextPage}
-                onPreviousPage={this.onPreviousPage}
-                disableNext={disableNext}
-                disablePrevious={disablePrevious}
-              />
+      <Grid fluid className="host-list">
+        {scanResults &&
+          scanResults.map((host, index) => (
+            <Grid.Row key={index}>
+              <Grid.Col xs={6} sm={4}>
+                <span>
+                  <Icon type="pf" name="error-circle-o" />
+                  &nbsp; {host.name}
+                </span>
+              </Grid.Col>
             </Grid.Row>
-          </Grid>
-        )}
-        <Grid fluid className="host-list">
-          {displayHosts &&
-            displayHosts.map((host, index) => (
-              <Grid.Row key={index}>
-                <Grid.Col xs={6} sm={4}>
-                  <span>
-                    <Icon type="pf" name="error-circle-o" />
-                    &nbsp; {host.name}
-                  </span>
-                </Grid.Col>
-              </Grid.Row>
-            ))}
-        </Grid>
-      </React.Fragment>
+          ))}
+      </Grid>
     );
   }
 }
@@ -157,7 +189,8 @@ class ScanFailedHostList extends React.Component {
 ScanFailedHostList.propTypes = {
   scan: PropTypes.object,
   lastRefresh: PropTypes.number,
-  getConnectionScanResults: PropTypes.func
+  getConnectionScanResults: PropTypes.func,
+  getInspectionScanResults: PropTypes.func
 };
 
 const mapStateToProps = function(state) {
@@ -165,7 +198,8 @@ const mapStateToProps = function(state) {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  getConnectionScanResults: (id, query) => dispatch(getConnectionScanResults(id, query))
+  getConnectionScanResults: (id, query) => dispatch(getConnectionScanResults(id, query)),
+  getInspectionScanResults: (id, query) => dispatch(getInspectionScanResults(id, query))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScanFailedHostList);
