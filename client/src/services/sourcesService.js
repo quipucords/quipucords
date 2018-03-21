@@ -7,6 +7,7 @@ class SourcesService {
       url: process.env.REACT_APP_SOURCES_SERVICE,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data,
       params: query
     });
@@ -17,7 +18,8 @@ class SourcesService {
       method: 'delete',
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -32,6 +34,7 @@ class SourcesService {
   static getSources(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
@@ -42,6 +45,7 @@ class SourcesService {
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data
     });
   }

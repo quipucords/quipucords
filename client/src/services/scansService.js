@@ -7,6 +7,7 @@ class ScansService {
       url: `${process.env.REACT_APP_SCANS_SERVICE}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data
     });
   }
@@ -18,6 +19,7 @@ class ScansService {
   static getScans(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
@@ -28,6 +30,7 @@ class ScansService {
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data
     });
   }
@@ -37,7 +40,8 @@ class ScansService {
       method: 'patch',
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -46,7 +50,8 @@ class ScansService {
       method: 'delete',
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -55,32 +60,37 @@ class ScansService {
       method: 'post',
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
   static getScanJobs(id, query = {}) {
     return axios({
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
 
   static getScanJob(id) {
     return axios({
-      url: `${process.env.REACT_APP_SCAN_JOBS_SERVICE}${id}`
+      url: `${process.env.REACT_APP_SCAN_JOBS_SERVICE}${id}`,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
   static getConnectionScanResults(id) {
     return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id)
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id),
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
   static getInspectionScanResults(id) {
     return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id)
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id),
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -89,7 +99,8 @@ class ScansService {
       method: 'put',
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -98,7 +109,8 @@ class ScansService {
       method: 'put',
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -107,7 +119,8 @@ class ScansService {
       method: 'put',
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id),
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -117,7 +130,8 @@ class ScansService {
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_MERGE,
       data: data,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 }

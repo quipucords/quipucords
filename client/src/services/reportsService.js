@@ -43,6 +43,7 @@ class ReportsService {
 
     return axios({
       url: apiPath,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
@@ -58,6 +59,7 @@ class ReportsService {
 
     return axios({
       url: apiPath,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
