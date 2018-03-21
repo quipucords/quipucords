@@ -1,6 +1,6 @@
 Authentication
 --------------
-This section breaks down the different authentication models used within Quipucords from interacting with the server from the command line or how the server interacts with remote systems.
+This section breaks down the different authentication models used within Quipucords from interacting with the server from the command line to how the server interacts with remote systems.
 
 Quipucords Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^

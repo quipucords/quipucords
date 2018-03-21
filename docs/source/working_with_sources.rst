@@ -107,9 +107,9 @@ To create a satellite source, use the following steps:
 
 Editing, Listing, and Clearing Credentials
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Beyond creating credentials for use with sources you can perform several other operations. You can edit a credential for cases where passwords or passphrases need to be updated. You can list and filter credentials. For credentials that are no longer needed you can they can be removed. These interactions are described in the `Credentials section <man.html#credentials>`_ of the Command Line Usage.
+Beyond creating credentials for use with sources you can perform several other operations. You can edit a credential for cases where passwords or passphrases need to be updated. You can list and filter credentials. Credentials that are no longer needed can be removed. These interactions are described in the `Credentials section <man.html#credentials>`_ of the Command Line Usage.
 
 
 Editing, Listing, and Clearing Sources
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Beyond creating sources for use with scans you can perform several other operations. You can edit a source for cases credentials need to be updated or options changed. You can list and filter sources. For sources that are no longer needed you can they can be removed. These interactions are described in the `Sources section <man.html#sources>`_ of the Command Line Usage.
+Beyond creating sources for use with scans you can perform several other operations. You can edit a source for cases credentials need to be updated or options changed. You can list and filter sources. Sources that are no longer needed you can they can be removed. These interactions are described in the `Sources section <man.html#sources>`_ of the Command Line Usage.

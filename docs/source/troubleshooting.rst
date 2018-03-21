@@ -8,7 +8,7 @@ Logs for the command line can be found in the ``~/.local/share/qpc/`` directory 
 
 Troubleshooting the Server
 --------------------------
-Logs from the server are mapped from the running container into a users specified directory. If you used the defaults found in `Selecting the Quipucords Server Configuration Options <configure.html#selecting-the-quipucords-server-configuration-options>`_ section, the directory would be ``~/quipucords/log``. You will find three log files within this directory:
+Logs from the server are mapped from the running container into a users specified directory. If you used the defaults found in the `Selecting the Quipucords Server Configuration Options <configure.html#selecting-the-quipucords-server-configuration-options>`_ section, the directory would be ``~/quipucords/log``. You will find three log files within this directory:
 
 - **supervisord.log**
   - Logs for the supervisor service that keeps the server running in case of unexpected issues
