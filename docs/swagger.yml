@@ -1115,21 +1115,27 @@ definitions:
         type: "integer"
         format: "int64"
         description: "API version number"
+        example: 1
       build:
         type: "string"
         description: "The build number"
+        example: "17de132"
       server_address:
         type: "string"
         description: "The ip and port information"
+        example: "127.0.0.1:8000"
       python:
         type: "string"
         description: "The python string version"
+        example: "3.6.1"
       modules:
         type: "object"
         description: "name/version string pairs describing the modules on the server"
+        example: {"ansible": "2.3.2.0", "django": "1.11.5", "rest_framework": "3.4.6"}
       platform:
         type: "object"
         description: "name/value string pairs describing the server"
+        example: {"system": "Fedora", "node": "26aec4157585", "release": "26", "version": "Fedora 26", "machine": "x86_64", "processor": "i386"}
 
   DeletionError:
     type: "object"
