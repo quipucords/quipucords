@@ -9,6 +9,20 @@ Before developing for Quipucords UI, the requirements:
  * Your system needs to be running `NodeJS version 8+ <https://nodejs.org/>`_
  * And `Docker <https://docs.docker.com/engine/installation/>`_
 
+Docker & Mac
+^^^^^^^^^^^^
+Setting Docker up on a Mac? Install the appropriate package and you should be good to go. To check if everything installed correctly you can try these steps.
+
+* At a terminal prompt type::
+
+    $ docker run hello-world
+
+Docker & Linux
+^^^^^^^^^^^^^^
+Setting Docker up on a Linux machine can include an additional convenience step. If you're having to prefix "sudo" in front of your Docker commands you can try these steps.
+
+* `Docker postinstall documentation <https://docs.docker.com/install/linux/linux-postinstall/>`_
+
 Development
 -----------
 

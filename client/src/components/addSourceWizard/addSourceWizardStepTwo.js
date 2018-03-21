@@ -204,11 +204,15 @@ class AddSourceWizardStepTwo extends React.Component {
       _.each(value, host => {
         if (
           host !== '' &&
-          !new RegExp(
+          (!new RegExp(
             '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31))$'
-          ).test(host)
+          ).test(host) &&
+            !new RegExp(
+              '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$',
+              'i'
+            ).test(host))
         ) {
-          validation = 'You must enter a valid IP address';
+          validation = 'You must enter a valid IP address or hostname';
           return false;
         }
       });
@@ -218,8 +222,13 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   validateHost(value) {
-    if (!new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(value)) {
-      return 'You must enter an IP address';
+    if (
+      !new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(value) &&
+      !new RegExp('^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$', 'i').test(
+        value
+      )
+    ) {
+      return 'You must enter an IP address or hostname';
     }
 
     return null;
@@ -325,7 +334,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="hosts"
                 value={multiHostDisplay}
                 rows={5}
-                placeholder="Enter IP addresses"
+                placeholder="Enter IP addresses or hostnames"
                 onChange={this.onChangeHosts}
               />
               <Form.HelpBlock>Comma separated, IP ranges, dns, and wildcards are valid.</Form.HelpBlock>
@@ -347,7 +356,7 @@ class AddSourceWizardStepTwo extends React.Component {
         return (
           <React.Fragment>
             <FieldGroup
-              label={'IP Address:Port'}
+              label={'IP Address or Hostname'}
               error={hostsError || portError}
               errorMessage={hostsError || portError}
             >
@@ -355,7 +364,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="hosts"
                 type="text"
                 value={singleHostPortDisplay}
-                placeholder="Enter an IP address (default port :443)"
+                placeholder="Enter an IP address or hostname (default port :443)"
                 onChange={this.onChangeHost}
               />
             </FieldGroup>

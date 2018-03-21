@@ -7,6 +7,7 @@ class CredentialsService {
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data
     });
   }
@@ -16,7 +17,8 @@ class CredentialsService {
       method: 'delete',
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
@@ -31,6 +33,7 @@ class CredentialsService {
   static getCredentials(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       params: query
     });
   }
@@ -41,6 +44,7 @@ class CredentialsService {
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data: data
     });
   }

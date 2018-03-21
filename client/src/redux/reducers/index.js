@@ -1,29 +1,29 @@
 import { combineReducers } from 'redux';
 
 import addSourceWizardReducer from './addSourceWizardReducer';
+import confirmationModalReducer from './confirmationModalReducer';
 import credentialsReducer from './credentialsReducer';
 import factsReducer from './factsReducer';
 import reportsReducer from './reportsReducer';
-import sourcesReducer from './sourcesReducer';
 import scansReducer from './scansReducer';
-import toastNotificationsReducer from './toastNotificationsReducer';
-import confirmationModalReducer from './confirmationModalReducer';
-import viewOptionsReducer from './viewOptionsReducer';
-import userReducer from './userReducer';
+import sourcesReducer from './sourcesReducer';
 import statusReducer from './statusReducer';
+import toastNotificationsReducer from './toastNotificationsReducer';
+import userReducer from './userReducer';
+import viewOptionsReducer from './viewOptionsReducer';
 
 const reducers = {
   addSourceWizard: addSourceWizardReducer,
+  confirmationModal: confirmationModalReducer,
   credentials: credentialsReducer,
   facts: factsReducer,
   reports: reportsReducer,
-  sources: sourcesReducer,
   scans: scansReducer,
+  sources: sourcesReducer,
+  status: statusReducer,
   toastNotifications: toastNotificationsReducer,
-  confirmationModal: confirmationModalReducer,
-  viewOptions: viewOptionsReducer,
   user: userReducer,
-  status: statusReducer
+  viewOptions: viewOptionsReducer
 };
 
 const reduxReducers = combineReducers(reducers);

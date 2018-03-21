@@ -179,7 +179,7 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 const getErrorMessageFromResults = results => {
   let responseData = _.get(results, 'response.data', results.message);
 
-  if (responseData instanceof String) {
+  if (typeof responseData === 'string') {
     return responseData;
   }
 
