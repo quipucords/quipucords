@@ -24,7 +24,12 @@ Quipucords requires two types of data to access IT resources and run the inspect
 
    requirements
    install
-   configure
-   getting_started
-   fingerprints
-   man
+   quick_start
+   cli_server_interaction
+   working_with_sources
+   working_with_scans
+   working_with_scan_jobs
+   working_with_reports
+   Command Line Usage <man>
+   troubleshooting
+   advanced_topics

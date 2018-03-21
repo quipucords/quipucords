@@ -1,22 +1,5 @@
-Getting Started with Quipucords
-===============================
-You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. The following information describes how you use the qpc command line interface to complete common Quipucords tasks. The complete list of options for each qpc command and subcommand are listed in the qpc man page.
-
-+Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements <requirements.html>`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
-
-You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the collection of *facts* in the output as a *report* to review the results.
-
-Before You Begin: Check the Connection to the Quipucords Server
----------------------------------------------------------------
-In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people might hold this responsibility. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that the command line tool instance is configured to connect to the server and that the user name can log in to the command line interface.
-
-For more information, see the following sections:
-
-- `Configuring the qpc Command Line Tool Connection <configure.html#connection>`_
-- `Logging in to the Quipucords Server <configure.html#login>`_.
-
-Creating Credentials and Sources for the Different Source Types
----------------------------------------------------------------
+Working with Credentials and Sources
+====================================
 The type of source that you are going to inspect determines the type of data that is required for credential and source configuration. Quipucords currently supports the following source types in the source creation command:
 
 - network
@@ -29,6 +12,7 @@ In addition, the source creation command references one or more credentials. Typ
 
 The following scenarios provide examples of how you would create a network, vcenter, or satellite source and create the credentials required for each.
 
+.. _network:
 Creating a Network Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 To create a network source, use the following steps:
@@ -71,6 +55,7 @@ To create a network source, use the following steps:
    # qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
 
 
+.. _vcenter:
 Creating a vCenter Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 To create a vcenter source, use the following steps:
@@ -95,6 +80,7 @@ To create a vcenter source, use the following steps:
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the server for vCenter Server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The ``--disable-ssl`` option can take a value of ``True`` to connect to the server over standard HTTP.
 
+.. _satellite:
 Creating a Satellite Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To create a satellite source, use the following steps:
@@ -119,96 +105,11 @@ To create a satellite source, use the following steps:
 
    **IMPORTANT:** By default, sources are scanned with full SSL validation, but you might need to adjust the level of SSL validation to connect properly to the Satellite server. The ``source add`` command supports options that are commonly used to downgrade the SSL validation. The ``--ssl-cert-verify`` option can take a value of ``False`` to disable SSL certificate validation; this option would be used for any server with a self-signed certificate. The Satellite server does not support disabling SSL, so the ``--disable-ssl`` option has no effect.
 
-Creating a Scan
----------------
-After you set up your credentials and sources, you can run a Quipucords scan to inspect your IT environment. You can create a scan on a single source or combine sources, even sources of different types.
-
-To create a scan, use the following steps:
-
-Create the scan by using the ``scan add`` command, specifying a name for the ``name`` option and one or more sources for the ``sources`` option::
-
-  # qpc scan add --name scan1 --sources source_name1 source_name2
-
-For example, if you want to create a scan called ``myscan`` with the network source ``mynetwork`` and the Satellite source ``mysatellite6``, you would enter the following command::
-
-  # qpc scan add --name myscan --sources mynetwork mysatellite6
-
-Running a Scan
---------------
-
-**IMPORTANT:** Scans run consecutively on the Quipucords server, in the order in which the ``qpc scan start`` command for each scan is entered.
-
-To run a scan, use the following steps:
-
-Run the scan by using the ``scan start`` command, specifying the name of a scan for the ``name`` option::
-
-  # qpc scan start --name scan_name1
-
-For example, if you want to run the scan ``myscan``, you would enter the following command::
-
-  # qpc scan start --name myscan
-
-Showing Scan Job Results for an Active Scan
--------------------------------------------
-When you run the ``scan start`` command, the output provides an identifier for that scan job. You can show the scan job results to follow the status of the scan job by using the ``scan job`` command and specifying the provided identifier.
-
-**IMPORTANT:** The ``scan job`` command can show results only after the scan job starts running. You can also use this command on a scan job that is completed.
-
-For example, you could run the following scan as the first scan in your environment::
-
-  # qpc scan start --name myscan
-
-The output for the command shows the following information, with ``1`` listed as the scan job identifier::
-
-  Scan "1" started
-
-To show the scan results to follow the status of that scan, you would enter the following command::
-
-  # qpc scan job --id 1
-
-Listing Scan Results
---------------------
-In addition to showing the status of a single scan job, you can also show a list of all scans jobs that are in progress or are completed for a particular scan. To show this list of scan jobs, you use the ``scan job`` command. The output of this command includes the scan job identifier, the source or sources for that scan, and the current state of the scan.
-
-To show the list of scan results, enter the following command::
-
-  # qpc scan job --name scan_name1
-
-Viewing the Scan Report
------------------------
-When the scan job completes, you have the capability to produce a report for that scan job. You can request a report with all the details, or facts, of the scan, or request a report with a summary. The summary report process runs steps to merge the facts found during the inspection of the various hosts that are contacted during the scan. When possible, the report process also runs steps to deduplicate redundant systems. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
-
-To generate a summary report, enter the ``report summary`` command and specify the identifier for the scan job and the format for the output file.
-
-For example, if you want to create the report summary for a scan with the scan job identifier of ``1`` and you want to generate that report in CSV format in the ``~/scan_result.csv`` file, you would enter the following command::
-
-  # qpc report summary --id 1 --csv --output-file=~/scan_result.csv
-
-However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan job identifier ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command::
-
-  # qpc report detail --id 1 --csv --output-file=~/scan_result.csv
-
-Pausing and Restarting a Scan
------------------------------
-As you use Quipucords, you might need to stop a currently running scan. There might be various business reasons that require you to do this, for example, the need to do an emergency fix due to an alert from your IT health monitoring system or the need to run a higher priority scan if a lower priority scan is currently running.
-
-When you stop a scan by using the ``scan pause`` command, you can restart that same scan by using the ``scan restart`` command. To pause and restart a scan, use the following steps:
-
-1. Make sure that you have the scan job identifier for the currently running scan. To obtain the scan job identifier, see the information in `Showing Scan Job Results for an Active Scan`_.
-
-2. Enter the command to pause the scan job. For example, if the scan job identifier is ``1``, you would enter the following command::
-
-    # qpc scan pause --id 1
-
-3. When you are ready to start the scan job again, enter the command to restart the scan. For example, to restart scan ``1``, you would enter the following command::
-
-    # qpc scan restart --id 1
+Editing, Listing, and Clearing Credentials
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Beyond creating credentials for use with sources you can perform several other operations. You can edit a credential for cases where passwords or passphrases need to be updated. You can list and filter credentials. For credentials that are no longer needed you can they can be removed. These interactions are described in the `Credentials section <man.html#credentials>`_ of the Command Line Usage.
 
 
-Logging out of the Quipucords Server
-------------------------------------
-When you log in to the server, the command retrieves a token that is used for authentication with subsequent command line interface commands. That token expires daily. In addition, the token is removed when you log out of the server.
-
-To log out of the server, enter the following command::
-
-  # qpc server logout
+Editing, Listing, and Clearing Sources
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Beyond creating sources for use with scans you can perform several other operations. You can edit a source for cases credentials need to be updated or options changed. You can list and filter sources. For sources that are no longer needed you can they can be removed. These interactions are described in the `Sources section <man.html#sources>`_ of the Command Line Usage.
