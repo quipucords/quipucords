@@ -350,6 +350,12 @@ def detect_jboss_eap(source, facts):
 
     product_dict[PRESENCE] = presence
     if versions:
+        versions = [
+            version for version in versions
+            if not version.lower().startswith('wildfly') and not
+            version.lower().startswith('jbossas')]
+        if not versions:
+            product_dict[PRESENCE] = Product.ABSENT
         product_dict[VERSION] = list(versions)
 
     if raw_facts:
