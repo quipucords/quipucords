@@ -949,7 +949,6 @@ paths:
       summary: "Logs out the current user"
       description: "Logs out the currently authenticated user."
       operationId: "logoutUser"
-      security: []
       responses:
         200:
           description: "logged out"
@@ -962,6 +961,7 @@ paths:
       summary: "Provides endpoint for server status"
       description: "Server status and setup information."
       operationId: "serverStatus"
+      security: []
       responses:
         200:
           description: "Server status"
