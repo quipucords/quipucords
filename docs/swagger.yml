@@ -238,7 +238,7 @@ paths:
       tags:
         - "Source"
       summary: "Add a new source"
-      description: "Create a new source for scanning."
+      description: "Create a new source for scanning"
       operationId: "addSource"
       consumes:
         - "application/json"
@@ -254,7 +254,7 @@ paths:
         - in: "query"
           name: "scan"
           type: "boolean"
-          description: "Query parameter for optional connection scan upon source creation."
+          description: "Query parameter for optional connection scan upon source creation"
           required: false
       responses:
         201:
@@ -263,11 +263,13 @@ paths:
             $ref: "#/definitions/SourceOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
     get:
       tags:
         - "Source"
       summary: "List sources"
-      description: "List all sources available for scanning."
+      description: "List all sources available for scanning"
       operationId: "listSources"
       produces:
         - "application/json"
@@ -286,12 +288,12 @@ paths:
             - satellite
         - name: "page"
           in: "query"
-          description: "Value for selecting a page of results."
+          description: "Value for selecting a page of results"
           type: "integer"
           format: "int64"
         - name: "page_size"
           in: "query"
-          description: "Value for the maximum number of results per page."
+          description: "Value for the maximum number of results per page"
           type: "integer"
           format: "int64"
         - name: "ordering"
@@ -300,17 +302,19 @@ paths:
           type: "string"
         - name: "search_by_name"
           in: "query"
-          description: "Partial match search of sources by name."
+          description: "Partial match search of sources by name"
           type: "string"
         - name: "search_credentials_by_name"
           in: "query"
-          description: "Partial match search of source credentials by name."
+          description: "Partial match search of source credentials by name"
           type: "string"
       responses:
         200:
           description: "Sources retrieved"
           schema:
             $ref: "#/definitions/SourcePagination"
+        401:
+          description: "Not authorized"
   /sources/{source_id}/:
     get:
       tags:
@@ -332,13 +336,15 @@ paths:
           description: "Source returned"
           schema:
             $ref: "#/definitions/SourceOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Source not found"
     put:
       tags:
         - "Source"
-      summary: "Update an existing source"
-      description: "Update an existing source"
+      summary: "Full update of an existing source"
+      description: "Full update of an existing source"
       operationId: "updateSource"
       consumes:
         - "application/json"
@@ -353,7 +359,7 @@ paths:
           format: "int64"
         - name: "body"
           in: "body"
-          description: "Source object to be modified"
+          description: "Source object to replace existing source object"
           required: true
           schema:
             $ref: "#/definitions/SourceIn"
@@ -364,6 +370,42 @@ paths:
             $ref: "#/definitions/SourceOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
+        404:
+          description: "No source found"
+    patch:
+      tags:
+        - "Source"
+      summary: "Partial update of an existing source"
+      description: "Partial update of an existing source"
+      operationId: "partialUpdateSource"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "source_id"
+          in: "path"
+          description: "ID of source to update"
+          required: true
+          type: "number"
+          format: "int64"
+        - name: "body"
+          in: "body"
+          description: "Source fields to update"
+          required: true
+          schema:
+            $ref: "#/definitions/SourceIn"
+      responses:
+        200:
+          description: "Source updated"
+          schema:
+            $ref: "#/definitions/SourceOut"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Not authorized"
         404:
           description: "No source found"
     delete:
@@ -385,9 +427,11 @@ paths:
         204:
           description: "Source deleted"
         400:
-          description: "Source is used by existing scans."
+          description: "Source is used by existing scans"
           schema:
             $ref: "#/definitions/SourceDeletionError"
+        401:
+          description: "Not authorized"
         404:
           description: "Source not found"
   /scans/:
@@ -1078,9 +1122,11 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+        example: 15
       name:
         type: "string"
         description: "The name of the credential"
+        example: "TestEnvCredential"
   CredentialOut:
     allOf:
       - $ref: "#/definitions/Credential"
@@ -1586,6 +1632,7 @@ definitions:
       name:
         type: "string"
         description: "The name of the source"
+        example: "TestSource"
       source_type:
         type: "string"
         description: "The type of the source"
@@ -1593,15 +1640,17 @@ definitions:
           - network
           - vcenter
           - satellite
-      hosts:
-        type: "array"
-        items:
-          type: "string"
-        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
       port:
         type: "integer"
         format: "int32"
         description: "The port to use on the host(s)."
+        example: 22
+      hosts:
+        type: "array"
+        items:
+          type: "string"
+          example: "192.168.0.1"
+        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
   SourceDeletionError:
     allOf:
       - $ref: "#/definitions/DeletionError"
@@ -1626,6 +1675,7 @@ definitions:
             items:
               type: "integer"
               format: "int64"
+              example: 15
             description: "The credentials to try with these hosts."
           options:
             $ref: "#/definitions/SourceOptions"
@@ -1639,9 +1689,11 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+        example: 15
       name:
         type: "string"
         description: "The name of the source"
+        example: "TestSource"
       source_type:
         type: "string"
         description: "The type of the source"
@@ -1676,6 +1728,7 @@ definitions:
           - canceled
           - failed
           - completed
+        example: "completed"
       status_details:
         type: "object"
         properties:
@@ -1742,6 +1795,7 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+            example: 15
           credentials:
             type: "array"
             items:
