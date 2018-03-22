@@ -10,7 +10,7 @@ const initialState = {
   cancelButtonText: 'Cancel'
 };
 
-export default function confirmationModalReducer(state = initialState, action) {
+const confirmationModalReducer = function(state = initialState, action) {
   switch (action.type) {
     case confirmationModalTypes.CONFIRMATION_MODAL_SHOW:
       return Object.assign({}, state, {
@@ -33,4 +33,10 @@ export default function confirmationModalReducer(state = initialState, action) {
     default:
       return state;
   }
-}
+};
+
+confirmationModalReducer.initialState = initialState;
+
+export { initialState, confirmationModalReducer };
+
+export default confirmationModalReducer;

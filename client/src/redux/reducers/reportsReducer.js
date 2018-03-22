@@ -31,6 +31,8 @@ const reportsReducer = function(state = initialState, action) {
   }
 };
 
+reportsReducer.initialState = initialState;
+
 export { initialState, reportsReducer };
 
 export default reportsReducer;

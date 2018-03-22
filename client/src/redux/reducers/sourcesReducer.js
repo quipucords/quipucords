@@ -115,6 +115,8 @@ const sourcesReducer = function(state = initialState, action) {
   }
 };
 
+sourcesReducer.initialState = initialState;
+
 export { initialState, sourcesReducer };
 
 export default sourcesReducer;

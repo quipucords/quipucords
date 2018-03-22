@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfirmationModal Component should shallow render a basic component 1`] = `
+<Modal
+  animation={true}
+  autoFocus={true}
+  backdrop={true}
+  bsClass="modal"
+  dialogComponentClass={[Function]}
+  enforceFocus={true}
+  keyboard={true}
+  manager={
+    ModalManager {
+      "add": [Function],
+      "containers": Array [],
+      "data": Array [],
+      "handleContainerOverflow": true,
+      "hideSiblingNodes": true,
+      "isTopModal": [Function],
+      "modals": Array [],
+      "remove": [Function],
+    }
+  }
+  onHide={[Function]}
+  renderBackdrop={[Function]}
+  restoreFocus={true}
+  show={true}
+>
+  <ModalHeader
+    bsClass="modal-header"
+    closeButton={false}
+    closeLabel="Close"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Close"
+      className="close"
+      onClick={[Function]}
+    >
+      <Icon
+        name="close"
+        type="pf"
+      />
+    </button>
+    <ModalTitle
+      bsClass="modal-title"
+      componentClass="h4"
+    >
+      Confirm
+    </ModalTitle>
+  </ModalHeader>
+  <ModalBody
+    bsClass="modal-body"
+    componentClass="div"
+  >
+    <div
+      className="confirm-modal-body"
+    >
+      <span
+        className="confirm-modal-icon"
+      >
+        <Icon
+          name="warning-triangle-o"
+          type="pf"
+        />
+      </span>
+      <span
+        className="confirm-modal-content"
+      >
+        <span
+          className="spacer"
+        />
+        <div
+          className="confirm-modal-content-heading"
+        />
+        <div />
+        <span
+          className="spacer"
+        />
+      </span>
+    </div>
+  </ModalBody>
+  <ModalFooter
+    bsClass="modal-footer"
+    componentClass="div"
+  >
+    <Button
+      active={false}
+      autoFocus={true}
+      block={false}
+      bsClass="btn"
+      bsStyle="default"
+      className="btn-cancel"
+      disabled={false}
+      onClick={[Function]}
+    />
+    <Button
+      active={false}
+      block={false}
+      bsClass="btn"
+      bsStyle="primary"
+      disabled={false}
+    >
+      Confirm
+    </Button>
+  </ModalFooter>
+</Modal>
+`;
