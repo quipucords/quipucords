@@ -99,3 +99,60 @@ class ProcessKarafHomeSystemOrgJboss(process.Processor):
         """Pass the output back through."""
         return {str(result['stdout_lines']): result['rc'] == 0
                 for result in output['results']}
+
+
+class ProcessJbossFuseCamelVersion(util.FuseVersionProcessor):
+    """Process the output of looking for camel version'."""
+
+    KEY = 'jboss_fuse_on_karaf_camel_ver'
+
+
+class ProcessJbossFuseActivemqVersion(util.FuseVersionProcessor):
+    """Process the output of looking for activemq version'."""
+
+    KEY = 'jboss_fuse_on_karaf_activemq_ver'
+
+
+class ProcessJbossFuseCxfVersion(util.FuseVersionProcessor):
+    """Process the output of looking for cxf version'."""
+
+    KEY = 'jboss_fuse_on_karaf_cxf_ver'
+
+
+class ProcessJbossFuseOnEapCamelVersion(util.FuseVersionProcessor):
+    """Process the output of looking for camel version'."""
+
+    KEY = 'jboss_fuse_on_eap_camel_ver'
+
+
+class ProcessJbossFuseOnEapActivemqVersion(util.FuseVersionProcessor):
+    """Process the output of looking for activemq version'."""
+
+    KEY = 'jboss_fuse_on_eap_activemq_ver'
+
+
+class ProcessJbossFuseOnEapCxfVersion(util.FuseVersionProcessor):
+    """Process the output of looking for cxf version'."""
+
+    KEY = 'jboss_fuse_on_eap_cxf_ver'
+
+
+class ProcessLocateCamel(util.FuseVersionProcessorLocate):
+    """Process the output of 'locate camel-core'."""
+
+    KEY = 'jboss_fuse_camel_ver'
+    DEPS = ['have_locate']
+
+
+class ProcessLocateActivemq(util.FuseVersionProcessorLocate):
+    """Process the output of 'locate activemq'."""
+
+    KEY = 'jboss_fuse_activemq_ver'
+    DEPS = ['have_locate']
+
+
+class ProcessLocateCxf(util.FuseVersionProcessorLocate):
+    """Process the output of 'locate cxf-rt'."""
+
+    KEY = 'jboss_fuse_cxf_ver'
+    DEPS = ['have_locate']

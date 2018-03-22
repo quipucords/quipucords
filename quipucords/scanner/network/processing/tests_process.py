@@ -193,8 +193,8 @@ class TestProcess(TestCase):
         """Test a key whose processor has a dependency, which is present."""
         self.assertEqual(
             process.process(self.scan_task,
-                            {DEPENDENT_KEY: ansible_result(
-                                '')}, NO_PROCESSOR_KEY, 'result',
+                            {HOST: {DEPENDENT_KEY: ansible_result('')}},
+                            NO_PROCESSOR_KEY, 'result',
                             HOST),
             'result')
 

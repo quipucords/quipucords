@@ -92,9 +92,10 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     # outer for loop.
     try:
         for dep in getattr(processor, DEPS, []):
-            if dep not in previous_host_facts or \
-                    not previous_host_facts[dep] or \
-                    isinstance(previous_host_facts[dep], Exception):
+            if not previous_host_facts or \
+                    dep not in previous_host_facts[host].keys() or \
+                    not previous_host_facts[host][dep] or \
+                    isinstance(previous_host_facts[host][dep], Exception):
                 log_message = 'POST PROCESSING MISSING REQ DEP %s. '\
                     'Fact %s missing dependency %s' %\
                     (host, fact_key, dep)

@@ -27,11 +27,21 @@ JBOSS_FUSE_FUSE_ON_EAP = 'eap_home_bin'
 JBOSS_FUSE_ON_KARAF_KARAF_HOME = 'karaf_home_bin_fuse'
 JBOSS_FUSE_SYSTEMCTL_FILES = 'jboss_fuse_systemctl_unit_files'
 JBOSS_FUSE_CHKCONFIG = 'jboss_fuse_chkconfig'
+SUBMAN_CONSUMED = 'subman_consumed'
+ENTITLEMENTS = 'entitlements'
+# versions from fuse on eap or karaf
+JBOSS_FUSE_ACTIVEMQ_VER = 'fuse_activemq_version'
+JBOSS_FUSE_CAMEL_VER = 'fuse_camel_version'
+JBOSS_FUSE_CXF_VER = 'fuse_cxf_version'
+# versions from fuse on eap
+JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER = 'jboss_fuse_on_eap_activemq_ver'
+JBOSS_FUSE_ON_EAP_CAMEL_VER = 'jboss_fuse_on_eap_camel_ver'
+JBOSS_FUSE_ON_EAP_CXF_VER = 'jboss_fuse_on_eap_cxf_ver'
+# versions from extended-products scan
 JBOSS_ACTIVEMQ_VER = 'jboss_activemq_ver'
 JBOSS_CAMEL_VER = 'jboss_camel_ver'
 JBOSS_CXF_VER = 'jboss_cxf_ver'
-SUBMAN_CONSUMED = 'subman_consumed'
-ENTITLEMENTS = 'entitlements'
+
 
 FUSE_CLASSIFICATIONS = {
     'redhat-630187': 'Fuse-6.3.0',
@@ -43,7 +53,26 @@ FUSE_CLASSIFICATIONS = {
 }
 
 
-# pylint: disable=R0914
+def get_versions(fuse_on_eap_versions):
+    """Combine the versions found for camel, activemq & cxf.
+
+    :param: fuse_on_eap_versions: A list of lists containing dictionaries
+    mapping install dirs and versions
+    :returns a list of versions
+    """
+    new_versions = []
+
+    for versions in fuse_on_eap_versions:
+        if versions:
+            for dictionary in versions:
+                new_versions.append(dictionary['version'])
+    # at this point we have a nested list of versions and we want it
+    # to be a flat list
+    new_versions = [item for items in new_versions for item in items]
+    return new_versions
+
+
+# pylint: disable=R0914, too-many-statements
 def detect_jboss_fuse(source, facts):
     """Detect if JBoss Fuse is present based on system facts.
 
@@ -55,12 +84,25 @@ def detect_jboss_fuse(source, facts):
     fuse_on_karaf = facts.get(JBOSS_FUSE_ON_KARAF_KARAF_HOME)
     systemctl_files = facts.get(JBOSS_FUSE_SYSTEMCTL_FILES)
     chkconfig = facts.get(JBOSS_FUSE_CHKCONFIG)
-    fuse_activemq = facts.get(JBOSS_ACTIVEMQ_VER, [])
-    fuse_camel = facts.get(JBOSS_CAMEL_VER, [])
-    fuse_cxf = facts.get(JBOSS_CXF_VER, [])
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
-    fuse_versions = list(set(fuse_activemq + fuse_camel + fuse_cxf))
+    # Get versions from regular scan
+    fuse_activemq = facts.get(JBOSS_FUSE_ACTIVEMQ_VER, [])
+    fuse_camel = facts.get(JBOSS_FUSE_CAMEL_VER, [])
+    fuse_cxf = facts.get(JBOSS_FUSE_CXF_VER, [])
+    # Get fuse on eap versions from a regular scan
+    eap_camel = facts.get(JBOSS_FUSE_ON_EAP_CAMEL_VER, [])
+    eap_activemq = facts.get(JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER, [])
+    eap_cxf = facts.get(JBOSS_FUSE_ON_EAP_CXF_VER, [])
+    eap_versions = get_versions([eap_camel, eap_activemq, eap_cxf])
+    # Get versions from extended-products scan
+    ext_fuse_activemq = facts.get(JBOSS_ACTIVEMQ_VER, [])
+    ext_fuse_camel = facts.get(JBOSS_CAMEL_VER, [])
+    ext_fuse_cxf = facts.get(JBOSS_CXF_VER, [])
+    # Set versions from extended-products scan & regular scan
+    fuse_versions = list(set(fuse_activemq + fuse_camel + fuse_cxf +
+                             ext_fuse_activemq + ext_fuse_camel +
+                             ext_fuse_cxf + eap_versions))
 
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
@@ -80,9 +122,15 @@ def detect_jboss_fuse(source, facts):
     if is_fuse_on_eap or is_fuse_on_karaf or fuse_versions:
         raw_facts_dict = {JBOSS_FUSE_FUSE_ON_EAP: is_fuse_on_eap,
                           JBOSS_FUSE_ON_KARAF_KARAF_HOME: is_fuse_on_karaf,
-                          JBOSS_ACTIVEMQ_VER: fuse_activemq,
-                          JBOSS_CAMEL_VER: fuse_camel,
-                          JBOSS_CXF_VER: fuse_cxf}
+                          JBOSS_ACTIVEMQ_VER: ext_fuse_activemq,
+                          JBOSS_CAMEL_VER: ext_fuse_camel,
+                          JBOSS_CXF_VER: ext_fuse_cxf,
+                          JBOSS_FUSE_ACTIVEMQ_VER: fuse_activemq,
+                          JBOSS_FUSE_CAMEL_VER: fuse_camel,
+                          JBOSS_FUSE_CXF_VER: fuse_cxf,
+                          JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER: eap_activemq,
+                          JBOSS_FUSE_ON_EAP_CAMEL_VER: eap_camel,
+                          JBOSS_FUSE_ON_EAP_CXF_VER: eap_cxf}
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.PRESENT
         versions = []

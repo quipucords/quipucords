@@ -178,3 +178,58 @@ class StdoutPassthroughProcessor(process.Processor):
         """
         return {item['item']: item['stdout'] if item['rc'] == 0 else False
                 for item in output['results']}
+
+
+class FuseVersionProcessor(process.Processor):
+    """Pass the item name and std out to the fingerprinter.
+
+    Used for with_items tasks when looking for fuse version
+    """
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a list containing dictionaries defining the home
+        directory and version, or an empty list
+        """
+        results = []
+        for item in output['results']:
+            result = {}
+            item_name = item['item']
+            if item['rc']:
+                pass
+            else:
+                if item['stdout'] != '':
+                    value = str(item['stdout']).splitlines()
+                    result['install_home'] = item_name
+                    result['version'] = list(set(value))
+            if result:
+                results.append(result)
+        return results
+
+
+class FuseVersionProcessorLocate(process.Processor):
+    """Pass stdout lines to the fingerprinter.
+
+    Used for locate tasks when looking for fuse version
+    """
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a list containing the version or an empty list
+        """
+        results = []
+        if not output['rc']:
+            results = list(set(output['stdout_lines']))
+        return results
