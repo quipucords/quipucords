@@ -2,15 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { connect } from 'react-redux';
-import { Popover, OverlayTrigger, ListView, Button, Checkbox, Icon } from 'patternfly-react';
+import { Button, Checkbox, Grid, Icon, ListView, OverlayTrigger, Popover } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment';
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
-import { getConnectionScanResults } from '../../redux/actions/scansActions';
 import SourceCredentialsList from './sourceCredentialsList';
-import SourceHostList from './sourceHostList';
+import ScanHostList from '../scans/scanHostList';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
@@ -19,18 +18,12 @@ class SourceListItem extends React.Component {
     super();
 
     helpers.bindMethods(this, ['itemSelectChange', 'toggleExpand', 'closeExpand']);
-
-    this.state = {
-      scanResultsPending: false,
-      scanResultsError: null,
-      scanResults: null
-    };
   }
 
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
     if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
-      this.loadExpandData(this.expandType());
+      this.closeExandIfNoData(this.expandType());
     }
   }
 
@@ -63,7 +56,7 @@ class SourceListItem extends React.Component {
     });
   }
 
-  loadExpandData(expandType) {
+  closeExandIfNoData(expandType) {
     const { item } = this.props;
 
     if (expandType === 'okHosts' || expandType === 'failedHosts') {
@@ -71,32 +64,8 @@ class SourceListItem extends React.Component {
       let failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
 
       if ((expandType === 'okHosts' && okHostCount === 0) || (expandType === 'failedHosts' && failedHostCount === 0)) {
-        Store.dispatch({
-          type: viewTypes.EXPAND_ITEM,
-          viewType: viewTypes.SOURCES_VIEW,
-          item: item
-        });
-        return;
+        this.closeExpand();
       }
-
-      this.setState({
-        scanResultsPending: true,
-        scanResultsError: null
-      });
-      this.props
-        .getConnectionScanResults(item.connection.id)
-        .then(results => {
-          this.setState({
-            scanResultsPending: false,
-            scanResults: _.get(results.value, 'data')
-          });
-        })
-        .catch(error => {
-          this.setState({
-            scanResultsPending: false,
-            scanResultsError: helpers.getErrorMessageFromResults(error)
-          });
-        });
     }
   }
 
@@ -116,7 +85,6 @@ class SourceListItem extends React.Component {
         item: item,
         expandType: expandType
       });
-      this.loadExpandData(expandType);
     }
   }
 
@@ -218,29 +186,49 @@ class SourceListItem extends React.Component {
     ];
   }
 
+  renderHostRow(host) {
+    return (
+      <React.Fragment>
+        <Grid.Col xs={host.status === 'success' ? 6 : 12} sm={4}>
+          <span>
+            <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+            &nbsp; {host.name}
+          </span>
+        </Grid.Col>
+        {host.status === 'success' && (
+          <Grid.Col xs={6} sm={4}>
+            <span>
+              <Icon type="fa" name="id-card" />
+              &nbsp; {host.credential.name}
+            </span>
+          </Grid.Col>
+        )}
+      </React.Fragment>
+    );
+  }
+
   renderExpansionContents() {
-    const { item } = this.props;
-    const { scanResults, scanResultsError, scanResultsPending } = this.state;
+    const { item, lastRefresh } = this.props;
 
     switch (this.expandType()) {
       case 'okHosts':
         return (
-          <SourceHostList
-            source={item}
-            scanResults={scanResults}
-            scanResultsError={scanResultsError}
-            scanResultsPending={scanResultsPending}
+          <ScanHostList
+            scanId={item.connection.id}
+            lastRefresh={lastRefresh}
             status="success"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
           />
         );
       case 'failedHosts':
         return (
-          <SourceHostList
-            source={item}
-            scanResults={scanResults}
-            scanResultsError={scanResultsError}
-            scanResultsPending={scanResultsPending}
+          <ScanHostList
+            scanId={item.connection.id}
+            lastRefresh={lastRefresh}
             status="failed"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
           />
         );
       case 'credentials':
@@ -383,7 +371,6 @@ SourceListItem.propTypes = {
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onScan: PropTypes.func,
-  getConnectionScanResults: PropTypes.func,
   selectedSources: PropTypes.array,
   expandedSources: PropTypes.array
 };
@@ -395,8 +382,4 @@ const mapStateToProps = function(state) {
   });
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  getConnectionScanResults: id => dispatch(getConnectionScanResults(id))
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(SourceListItem);
+export default connect(mapStateToProps)(SourceListItem);

@@ -96,6 +96,10 @@
   }
 
   .list-group-item-container {
+    display: flex;
+    align-items: stretch;
+    flex-direction: row;
+
     .container-fluid {
       padding-right: 40px;
       .dropdown.btn-group {
@@ -107,6 +111,32 @@
         }
       }
     }
+
+    .pager {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .host-results {
+      width: 100%;
+    }
+
+    .hidden-results {
+      opacity: 0;
+      span {
+        white-space: nowrap;
+      }
+    }
+
+    .host-list {
+      overflow-y: auto;
+      max-height: 300px;
+      border: solid 1px $list-view-active-border;
+      margin-right: 20px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
     // Within an expansion area, make blank slate become a single line, no background, no borders
     .blank-slate-pf {
       background: transparent;
