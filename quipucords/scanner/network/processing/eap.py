@@ -102,6 +102,8 @@ class ProcessJbossEapProcesses(process.Processor):
 
     KEY = 'jboss_eap_processes'
 
+    IGNORE_PROCESSES = ['bash', 'grep', 'oom_reaper']
+
     @staticmethod
     def process(output):
         """Return the number of jboss eap processes on the system."""
@@ -114,7 +116,7 @@ class ProcessJbossEapProcesses(process.Processor):
         num_matches = 0
         for line in output['stdout_lines']:
             parts = line.split(None, 1)
-            if parts[0] == 'bash' or parts[0] == 'grep':
+            if parts[0] in ProcessJbossEapProcesses.IGNORE_PROCESSES:
                 continue
             num_matches += 1
 
