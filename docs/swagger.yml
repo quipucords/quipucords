@@ -1182,7 +1182,6 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/FactCollectionSource"
-          description: "The facts obtained during a scan"
           minItems: 1
   FactCollectionOut:
     type: "object"
@@ -1199,7 +1198,6 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/FactCollectionSource"
-          description: "The facts obtained during a scan"
           minItems: 1
   FactCollectionSource:
     type: "object"
@@ -1210,11 +1208,11 @@ definitions:
     properties:
       source_id:
         type: "integer"
-        description: "The source associated with these facts"
+        description: "The source id associated with these facts"
         example: 12
       source_type:
         type: "string"
-        description: "The type of source used for scanning"
+        description: "The source type associated with these facts"
         enum:
           - network
           - vcenter
@@ -1223,7 +1221,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/SystemFact"
-        description: "The facts obtained during a scan for this source"
+        description: "The facts associated with this source"
         minItems: 1
   ListPagination:
     type: "object"
