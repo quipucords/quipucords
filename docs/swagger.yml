@@ -884,10 +884,6 @@ paths:
           required: true
           type: "integer"
           format: "int64"
-        - name: "group_count"
-          in: "query"
-          description: "The field to group and count on"
-          type: "string"
       responses:
         200:
           description: "Deployment report for scanned systems retrieved"
