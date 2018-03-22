@@ -1178,7 +1178,7 @@ definitions:
         example: 12
       source_type:
         type: "string"
-        description: "The source type associated with facts"
+        description: "The source type associated with these facts"
         enum:
           - network
           - vcenter
@@ -1187,7 +1187,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/SystemFact"
-        description: "The facts associated with source"
+        description: "The facts associated with this source"
         minItems: 1
   ListPagination:
     type: "object"
