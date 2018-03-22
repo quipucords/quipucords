@@ -79,3 +79,9 @@
     redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("") }}'
   ignore_errors: yes
   when: '"stdout" in internal_redhat_packages_certs_cmd'
+
+- name: gather enabled repositiries
+  raw: yum repolist enabled 2> /dev/null | grep -v -e "Loaded plugins" -e "repo id" -e "repolist"
+  register: yum_enabled_repolist
+  ignore_errors: yes
+  when: internal_have_yum
