@@ -102,6 +102,7 @@
 
     .container-fluid {
       padding-right: 40px;
+      flex: 1 1 auto;
       .dropdown.btn-group {
         .dropdown-toggle {
           color: $color-pf-black-700;
