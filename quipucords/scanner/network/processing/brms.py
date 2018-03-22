@@ -19,15 +19,10 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # #### Processors ####
 
 
-class ProcessJbossBRMSManifestMF(util.PerItemProcessor):
+class ProcessJbossBRMSManifestMF(util.ManifestVersionProcessor):
     """Process the MANIFEST.MF files."""
 
     KEY = 'jboss_brms_manifest_mf'
-
-    @staticmethod
-    def process_item(item):
-        """Return stdout if not empty."""
-        return item['stdout'] or None
 
 
 class ProcessJbossBRMSKieBusinessCentral(process.Processor):

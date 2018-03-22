@@ -21,7 +21,8 @@ class ProductBRMSTest(TestCase):
     def test_detect_jboss_brms_present(self):
         """Test the detect_jboss_brms method."""
         source = {'source_id': 1, 'source_type': 'network'}
-        facts = {'jboss_brms_manifest_mf': {'opt/brms/': 'Red Hat'},
+        facts = {'jboss_brms_manifest_mf': {'opt/brms/':
+                                            '6.4.0.Final-redhat-3'},
                  'jboss_brms_kie_api_ver': ['6.4.0.Final-redhat-3']}
         product = detect_jboss_brms(source, facts)
         expected = {'name': 'JBoss BRMS',

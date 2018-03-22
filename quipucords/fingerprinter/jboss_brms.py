@@ -11,12 +11,11 @@
 
 """Ingests raw facts to determine the status of JBoss BRMS for a system."""
 
-import os
 import logging
+import os
+import re
 from api.models import Product, Source
-from fingerprinter.utils import (strip_prefix,
-                                 strip_suffix,
-                                 product_entitlement_found,
+from fingerprinter.utils import (product_entitlement_found,
                                  generate_raw_fact_members)
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -37,7 +36,10 @@ JBOSS_BRMS_DROOLS_CORE_VER = 'jboss_brms_drools_core_ver'
 SUBMAN_CONSUMED = 'subman_consumed'
 ENTITLEMENTS = 'entitlements'
 
+# These classifications apply to both strings in kie filenames and
+# Implementation-Version strings in BRMS MANIFEST.MF files.
 BRMS_CLASSIFICATIONS = {
+    '6.5.0.Final-redhat-2': 'BRMS 6.4.0',
     '6.4.0.Final-redhat-3': 'BRMS 6.3.0',
     '6.3.0.Final-redhat-5': 'BRMS 6.2.0',
     '6.2.0.Final-redhat-4': 'BRMS 6.1.0',
@@ -56,6 +58,22 @@ BRMS_CLASSIFICATIONS = {
 }
 
 
+def classify_version_string(version_string):
+    """Classify a version string.
+
+    :param version_string: a BRMS version string, in MANIFEST.MF format.
+
+    :returns: a version string in our standard format.
+    """
+    if version_string in BRMS_CLASSIFICATIONS:
+        return BRMS_CLASSIFICATIONS[version_string]
+
+    if 'redhat' in version_string:
+        return 'Unknown-Release: ' + version_string
+
+    return None
+
+
 def classify_kie_file(pathname):
     """Classify a kie-api-* file.
 
@@ -69,15 +87,10 @@ def classify_kie_file(pathname):
 
     basename = os.path.basename(pathname)
 
-    version_string = strip_suffix(
-        strip_prefix(basename, 'kie-api-'),
-        '.jar')
-
-    if version_string in BRMS_CLASSIFICATIONS:
-        return BRMS_CLASSIFICATIONS[version_string]
-
-    if 'redhat' in version_string:
-        return version_string
+    # Filename format is 'kie-api-' + version + '.jar' + stuff.
+    match = re.match(r'kie-api-(.*)\.jar.*', basename)
+    if match:
+        return classify_version_string(match.group(1))
 
     return None
 
@@ -90,8 +103,6 @@ def detect_jboss_brms(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    business_central_candidates = facts.get(BUSINESS_CENTRAL_CANDIDATES, [])
-    kie_server_candidates = facts.get(KIE_SERVER_CANDIDATES, [])
     manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, {})
     kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, [])
     locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, [])
@@ -100,30 +111,8 @@ def detect_jboss_brms(source, facts):
     find_drools = facts.get(JBOSS_BRMS_DROOLS_CORE_VER, [])
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
-    base_directories = set(business_central_candidates + kie_server_candidates)
     kie_files = kie_in_bc + locate_kie_api
-    ext_search_versions = list(set(find_kie_api + find_kie_war + find_drools))
-
-    kie_versions_by_directory = {}
-    for directory in base_directories:
-        versions_in_dir = set()
-        for filename in list(kie_files):
-            if filename.startswith(directory):
-                kie_files.remove(filename)
-                category = classify_kie_file(filename)
-                if category:
-                    versions_in_dir.add(category)
-                # Deliberately drop files if their category is falsey,
-                # because it means that they are not Red Hat files.
-        kie_versions_by_directory[directory] = versions_in_dir
-
-    found_manifest = any(('Red Hat' in manifest
-                          for _, manifest in manifest_mfs.items()))
-    found_versions = any((version
-                          for _, version in kie_versions_by_directory.items()))
-    found_redhat_brms = (found_manifest or
-                         found_versions or
-                         ext_search_versions)
+    ext_search_results = set(find_kie_api + find_kie_war + find_drools)
 
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
@@ -138,10 +127,34 @@ def detect_jboss_brms(source, facts):
     }
     product_dict = {'name': PRODUCT}
 
+    versions = set()
+    found_kie_version = False
+    for filename in kie_files:
+        category = classify_kie_file(filename)
+        # categories that are falsey are not Red Hat files.
+        if category:
+            versions.add(category)
+            found_kie_version = True
+
+    found_manifest_version = False
+    for manifest_version in manifest_mfs.values():
+        category = classify_version_string(manifest_version)
+        if category:
+            versions.add(category)
+            found_manifest_version = True
+
+    for search_version in ext_search_results:
+        category = classify_version_string(search_version)
+        if category:
+            versions.add(category)
+
+    found_redhat_brms = bool(versions)
+
     if found_redhat_brms:
-        raw_facts_dict = {JBOSS_BRMS_MANIFEST_MF: found_manifest,
-                          JBOSS_BRMS_KIE_IN_BC: (found_versions and kie_in_bc),
-                          JBOSS_BRMS_LOCATE_KIE_API: (found_versions and
+        raw_facts_dict = {JBOSS_BRMS_MANIFEST_MF: found_manifest_version,
+                          JBOSS_BRMS_KIE_IN_BC: (found_kie_version and
+                                                 kie_in_bc),
+                          JBOSS_BRMS_LOCATE_KIE_API: (found_kie_version and
                                                       locate_kie_api),
                           JBOSS_BRMS_KIE_API_VER: find_kie_api,
                           JBOSS_BRMS_KIE_WAR_VER: find_kie_war,
@@ -149,14 +162,7 @@ def detect_jboss_brms(source, facts):
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         metadata[RAW_FACT_KEY] = raw_facts
         product_dict[PRESENCE_KEY] = Product.PRESENT
-        versions = []
-        if ext_search_versions:
-            for version_data in ext_search_versions:
-                unknown_release = 'Unknown-Release: ' + version_data
-                versions.append(BRMS_CLASSIFICATIONS.get(version_data,
-                                                         unknown_release))
-            if versions:
-                product_dict[VERSION_KEY] = versions
+        product_dict[VERSION_KEY] = list(versions)
 
     elif product_entitlement_found(subman_consumed, PRODUCT):
         metadata[RAW_FACT_KEY] = SUBMAN_CONSUMED

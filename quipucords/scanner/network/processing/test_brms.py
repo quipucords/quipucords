@@ -22,14 +22,24 @@ from scanner.network.processing.util_for_test import (ansible_results,
 class TestProcessJbossBRMSManifestMF(unittest.TestCase):
     """Test ProcessJbossBRMSManifestMF."""
 
-    MANIFEST = 'This is manifest file output'
+    # This is a portion of the BRMS 6.4.0 MANIFEST.MF
+    MANIFEST = """Manifest-Version: 1.0
+Implementation-Title: KIE Drools Workbench - Distribution Wars
+Implementation-Version: 6.5.0.Final-redhat-2
+"""
 
-    def test_success_case(self):
-        """Return item's stdout."""
+    def test_success(self):
+        """Extract the Implementation_Version from a manifest."""
         self.assertEqual(
             brms.ProcessJbossBRMSManifestMF.process_item(
-                ansible_item('/tmp/good', self.MANIFEST)),
-            self.MANIFEST)
+                ansible_item('manifest', self.MANIFEST)),
+            '6.5.0.Final-redhat-2')
+
+    def test_no_version(self):
+        """Don't crash if the manifest is missing a version."""
+        self.assertIsNone(
+            brms.ProcessJbossBRMSManifestMF.process_item(
+                ansible_item('manifest', 'not\na\nmanifest')))
 
 
 class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
