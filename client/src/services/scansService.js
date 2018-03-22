@@ -80,16 +80,18 @@ class ScansService {
     });
   }
 
-  static getConnectionScanResults(id) {
+  static getConnectionScanResults(id, query = {}) {
     return axios({
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id),
+      params: query,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 
-  static getInspectionScanResults(id) {
+  static getInspectionScanResults(id, query = {}) {
     return axios({
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id),
+      params: query,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }

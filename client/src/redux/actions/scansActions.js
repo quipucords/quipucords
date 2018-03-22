@@ -64,17 +64,17 @@ const getScanJob = id => dispatch => {
   });
 };
 
-const getConnectionScanResults = id => dispatch => {
+const getConnectionScanResults = (id, query = {}) => dispatch => {
   return dispatch({
     type: scansTypes.GET_SCAN_CONNECTION_RESULTS,
-    payload: scansService.getConnectionScanResults(id)
+    payload: scansService.getConnectionScanResults(id, query)
   });
 };
 
-const getInspectionScanResults = id => dispatch => {
+const getInspectionScanResults = (id, query = {}) => dispatch => {
   return dispatch({
     type: scansTypes.GET_SCAN_INSPECTION_RESULTS,
-    payload: scansService.getInspectionScanResults(id)
+    payload: scansService.getInspectionScanResults(id, query)
   });
 };
 

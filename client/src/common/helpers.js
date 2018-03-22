@@ -197,6 +197,19 @@ const getErrorMessageFromResults = results => {
   return _.join(getMessages(responseData), '\n');
 };
 
+const isIpAddress = name => {
+  let vals = name.split('.');
+  if (vals.length === 4) {
+    return _.find(vals, val => Number.isNaN(val)) === undefined;
+  }
+  return false;
+};
+
+const ipAddressValue = name => {
+  const values = name.split('.');
+  return values[0] * 0x1000000 + values[1] * 0x10000 + values[2] * 0x100 + values[3] * 1;
+};
+
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
 
 const FULFILLED_ACTION = base => `${base}_FULFILLED`;
@@ -221,6 +234,8 @@ export const helpers = {
   viewPropsChanged,
   createViewQueryObject,
   getErrorMessageFromResults,
+  isIpAddress,
+  ipAddressValue,
   DEV_MODE,
   FULFILLED_ACTION,
   PENDING_ACTION,
