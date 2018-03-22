@@ -692,6 +692,11 @@ paths:
           - success
           - failed
           - unreachable
+      - name: "source_id"
+        in: "query"
+        description: "Filter list based on result source identifier"
+        type: "integer"
+        format: "int64"
       responses:
         200:
           description: "Scan job connection results retrieved"
@@ -734,6 +739,11 @@ paths:
           - success
           - failed
           - unreachable
+      - name: "source_id"
+        in: "query"
+        description: "Filter list based on result source identifier"
+        type: "integer"
+        format: "int64"
       responses:
         200:
           description: "Scan job inspection results retrieved"
