@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
-import { EmptyState, Grid, Icon, Pager } from 'patternfly-react';
+import { EmptyState, Grid, Pager } from 'patternfly-react';
 import { getConnectionScanResults, getInspectionScanResults } from '../../redux/actions/scansActions';
 
 class ScanHostList extends React.Component {
@@ -20,29 +20,35 @@ class ScanHostList extends React.Component {
       inspectionScanResultsPending: false,
       page: 1,
       disableNext: true,
-      disablePrevious: true
+      disablePrevious: true,
+      prevResults: []
     };
   }
 
   componentDidMount() {
-    this.refresh();
+    this.refresh(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
-    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh) || nextProps.status !== this.props.status) {
-      this.refresh(nextProps.status);
+    if (
+      !_.isEqual(nextProps.lastRefresh, this.props.lastRefresh) ||
+      nextProps.status !== this.props.status ||
+      nextProps.useConnectionResults !== this.props.useConnectionResults ||
+      nextProps.useInspectionResults !== this.props.useInspectionResults
+    ) {
+      this.refresh(nextProps);
     }
   }
 
   onNextPage() {
     this.setState({ page: this.state.page + 1 });
-    this.refresh(this.state.page + 1);
+    this.refresh(this.props, this.state.page + 1);
   }
 
   onPreviousPage() {
     this.setState({ page: this.state.page - 1 });
-    this.refresh(this.state.page - 1);
+    this.refresh(this.props, this.state.page - 1);
   }
 
   addResults(results) {
@@ -73,7 +79,7 @@ class ScanHostList extends React.Component {
   }
 
   getInspectionResults(page, status) {
-    const { scan, getInspectionScanResults } = this.props;
+    const { scanId, usePaging, getInspectionScanResults } = this.props;
 
     const queryObject = {
       page: page === undefined ? this.state.page : page,
@@ -82,14 +88,16 @@ class ScanHostList extends React.Component {
       status: status
     };
 
-    getInspectionScanResults(scan.most_recent.id, queryObject)
+    getInspectionScanResults(scanId, queryObject)
       .then(results => {
-        // At the moment, we are getting all results
-        const morePages = _.get(results.value, 'data.next') !== null;
+        const morePages = !usePaging && _.get(results.value, 'data.next') !== null;
 
         this.setState({
           inspectionScanResultsPending: morePages,
-          scanResults: this.addResults(results)
+          scanResults: this.addResults(results),
+          prevResults: morePages || this.state.connectionScanResultsPending ? this.state.prevResults : [],
+          disableNext: !usePaging || _.get(results.value, 'data.next') === null,
+          disablePrevious: !usePaging || _.get(results.value, 'data.previous') === null
         });
 
         if (morePages) {
@@ -99,13 +107,15 @@ class ScanHostList extends React.Component {
       .catch(error => {
         this.setState({
           inspectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
+          scanResultsError: helpers.getErrorMessageFromResults(error),
+          disableNext: true,
+          disablePrevious: true
         });
       });
   }
 
   getConnectionResults(page, status) {
-    const { scan, getConnectionScanResults } = this.props;
+    const { scanId, usePaging, getConnectionScanResults } = this.props;
 
     const queryObject = {
       page: page === undefined ? this.state.page : page,
@@ -114,12 +124,16 @@ class ScanHostList extends React.Component {
       status: status
     };
 
-    getConnectionScanResults(scan.most_recent.id, queryObject)
+    getConnectionScanResults(scanId, queryObject)
       .then(results => {
-        const morePages = _.get(results.value, 'data.next') !== null;
+        const morePages = !usePaging && _.get(results.value, 'data.next') !== null;
+
         this.setState({
           connectionScanResultsPending: morePages,
-          scanResults: this.addResults(results)
+          scanResults: this.addResults(results),
+          prevResults: morePages || this.state.inspectionScanResultsPending ? this.state.prevResults : [],
+          disableNext: !usePaging || _.get(results.value, 'data.next') === null,
+          disablePrevious: !usePaging || _.get(results.value, 'data.previous') === null
         });
 
         if (morePages) {
@@ -129,27 +143,57 @@ class ScanHostList extends React.Component {
       .catch(error => {
         this.setState({
           connectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
+          scanResultsError: helpers.getErrorMessageFromResults(error),
+          disableNext: true,
+          disablePrevious: true
         });
       });
   }
 
-  refresh(propStatus) {
-    const status = propStatus || this.props.status;
-    const getConnectionResults = status === 'failed';
+  refresh(useProps, page = 1) {
+    let { useConnectionResults, useInspectionResults, status } = useProps;
 
     this.setState({
       scanResultsPending: true,
-      connectionScanResultsPending: getConnectionResults,
-      inspectionScanResultsPending: true,
-      scanResults: []
+      connectionScanResultsPending: useConnectionResults,
+      inspectionScanResultsPending: useInspectionResults,
+      scanResults: [],
+      prevResults: this.state.scanResults
     });
 
-    if (getConnectionResults) {
-      this.getConnectionResults(1, status);
+    if (useConnectionResults) {
+      this.getConnectionResults(page, status);
     }
 
-    this.getInspectionResults(1, status);
+    if (useInspectionResults) {
+      this.getInspectionResults(page, status);
+    }
+  }
+
+  renderResults(results) {
+    const { renderHostRow } = this.props;
+    const { disablePrevious, disableNext } = this.state;
+
+    return (
+      <div className="host-results">
+        {(!disableNext || !disablePrevious) && (
+          <Grid fluid>
+            <Grid.Row>
+              <Pager
+                className="pager-sm"
+                onNextPage={this.onNextPage}
+                onPreviousPage={this.onPreviousPage}
+                disableNext={disableNext}
+                disablePrevious={disablePrevious}
+              />
+            </Grid.Row>
+          </Grid>
+        )}
+        <Grid fluid className="host-list">
+          {results && results.map((host, index) => <Grid.Row key={index}>{renderHostRow(host)}</Grid.Row>)}
+        </Grid>
+      </div>
+    );
   }
 
   render() {
@@ -159,16 +203,18 @@ class ScanHostList extends React.Component {
       connectionScanResultsPending,
       inspectionScanResultsPending,
       scanResultsError,
-      disablePrevious,
-      disableNext
+      prevResults
     } = this.state;
 
     if (inspectionScanResultsPending || connectionScanResultsPending) {
       return (
-        <EmptyState>
-          <EmptyState.Icon name="spinner spinner-xl" />
-          <EmptyState.Title>Loading scan results...</EmptyState.Title>
-        </EmptyState>
+        <React.Fragment>
+          <EmptyState>
+            <EmptyState.Icon name="spinner spinner-xl" />
+            <EmptyState.Title>Loading scan results...</EmptyState.Title>
+          </EmptyState>
+          <div className="hidden-results">{this.renderResults(prevResults)}</div>
+        </React.Fragment>
       );
     }
 
@@ -193,45 +239,26 @@ class ScanHostList extends React.Component {
       );
     }
 
-    return (
-      <React.Fragment>
-        {(!disableNext || !disablePrevious) && (
-          <Grid fluid>
-            <Grid.Row>
-              <Pager
-                className="pager-sm"
-                onNextPage={this.onNextPage}
-                onPreviousPage={this.onPreviousPage}
-                disableNext={disableNext}
-                disablePrevious={disablePrevious}
-              />
-            </Grid.Row>
-          </Grid>
-        )}
-        <Grid fluid className="host-list">
-          {scanResults &&
-            scanResults.map((host, index) => (
-              <Grid.Row key={index}>
-                <Grid.Col xs={6} sm={4}>
-                  <span>
-                    <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
-                    &nbsp; {host.name}
-                  </span>
-                </Grid.Col>
-              </Grid.Row>
-            ))}
-        </Grid>
-      </React.Fragment>
-    );
+    return this.renderResults(scanResults);
   }
 }
 
 ScanHostList.propTypes = {
-  scan: PropTypes.object,
+  scanId: PropTypes.number,
   lastRefresh: PropTypes.number,
   status: PropTypes.string,
+  usePaging: PropTypes.bool,
+  renderHostRow: PropTypes.func,
+  useConnectionResults: PropTypes.bool,
+  useInspectionResults: PropTypes.bool,
   getConnectionScanResults: PropTypes.func,
   getInspectionScanResults: PropTypes.func
+};
+
+ScanHostList.defaultProps = {
+  useConnectionResults: false,
+  useInspectionResults: false,
+  usePaging: false
 };
 
 const mapStateToProps = function(state) {

@@ -84,7 +84,7 @@ class ScansService {
     return axios({
       url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id),
       params: query,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
 

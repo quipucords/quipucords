@@ -2,14 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { connect } from 'react-redux';
-import { Popover, OverlayTrigger, ListView, Button, Checkbox, Icon } from 'patternfly-react';
+import { Button, Checkbox, Grid, Icon, ListView, OverlayTrigger, Popover } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment';
 import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SourceCredentialsList from './sourceCredentialsList';
-import SourceHostList from './sourceHostList';
+import ScanHostList from '../scans/scanHostList';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
@@ -186,14 +186,51 @@ class SourceListItem extends React.Component {
     ];
   }
 
+  renderHostRow(host) {
+    return (
+      <React.Fragment>
+        <Grid.Col xs={host.status === 'success' ? 6 : 12} sm={4}>
+          <span>
+            <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+            &nbsp; {host.name}
+          </span>
+        </Grid.Col>
+        {host.status === 'success' && (
+          <Grid.Col xs={6} sm={4}>
+            <span>
+              <Icon type="fa" name="id-card" />
+              &nbsp; {host.credential.name}
+            </span>
+          </Grid.Col>
+        )}
+      </React.Fragment>
+    );
+  }
+
   renderExpansionContents() {
     const { item, lastRefresh } = this.props;
 
     switch (this.expandType()) {
       case 'okHosts':
-        return <SourceHostList source={item} lastRefresh={lastRefresh} status="success" />;
+        return (
+          <ScanHostList
+            scanId={item.connection.id}
+            lastRefresh={lastRefresh}
+            status="success"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
+          />
+        );
       case 'failedHosts':
-        return <SourceHostList source={item} lastRefresh={lastRefresh} status="failed" />;
+        return (
+          <ScanHostList
+            scanId={item.connection.id}
+            lastRefresh={lastRefresh}
+            status="failed"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
+          />
+        );
       case 'credentials':
         return <SourceCredentialsList source={item} />;
       default:

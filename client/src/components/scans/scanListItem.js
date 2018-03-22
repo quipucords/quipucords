@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { connect } from 'react-redux';
-import { Button, Checkbox, DropdownButton, Icon, ListView, MenuItem } from 'patternfly-react';
+import { Button, Checkbox, DropdownButton, Grid, Icon, ListView, MenuItem } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment';
 import { helpers } from '../../common/helpers';
@@ -269,14 +269,42 @@ class ScanListItem extends React.Component {
     }
   }
 
+  renderHostRow(host) {
+    return (
+      <Grid.Col xs={12}>
+        <span>
+          <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+          &nbsp; {host.name}
+        </span>
+      </Grid.Col>
+    );
+  }
+
   renderExpansionContents() {
     const { item, onSummaryDownload, onDetailedDownload, lastRefresh } = this.props;
 
     switch (this.expandType()) {
       case 'systemsScanned':
-        return <ScanHostList scan={item} lastRefresh={lastRefresh} status="success" />;
+        return (
+          <ScanHostList
+            scanId={item.most_recent.id}
+            lastRefresh={lastRefresh}
+            status="success"
+            renderHostRow={this.renderHostRow}
+            useInspectionResults
+          />
+        );
       case 'systemsFailed':
-        return <ScanHostList scan={item} lastRefresh={lastRefresh} status="failed" />;
+        return (
+          <ScanHostList
+            scanId={item.most_recent.id}
+            lastRefresh={lastRefresh}
+            status="failed"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
+            useInspectionResults
+          />
+        );
       case 'sources':
         return <ScanSourceList scan={item} />;
       case 'jobs':
