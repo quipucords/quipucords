@@ -215,6 +215,7 @@ class SourceListItem extends React.Component {
         return (
           <ScanHostList
             scanId={item.connection.id}
+            sourceId={item.id}
             lastRefresh={lastRefresh}
             status="success"
             renderHostRow={this.renderHostRow}
@@ -225,6 +226,7 @@ class SourceListItem extends React.Component {
         return (
           <ScanHostList
             scanId={item.connection.id}
+            sourceId={item.id}
             lastRefresh={lastRefresh}
             status="failed"
             renderHostRow={this.renderHostRow}
@@ -336,6 +338,7 @@ class SourceListItem extends React.Component {
       </div>
     );
   }
+
   render() {
     const { item, selectedSources } = this.props;
     const selected = this.isSelected(item, selectedSources);
