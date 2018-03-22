@@ -1049,6 +1049,18 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/SourceMin"
+  CredentialDeletionError:
+    allOf:
+      - $ref: "#/definitions/DeletionError"
+      - type: "object"
+        required:
+          - sources
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceMin"
+            description: "The list of sources"
   CredentialMin:
     type: "object"
     required:
@@ -1084,56 +1096,6 @@ definitions:
             items:
               $ref: "#/definitions/CredentialOut"
             description: "The paginated credentials"
-  ObtainTokenIn:
-    type: "object"
-    required:
-      - username
-      - password
-    properties:
-      username:
-        type: "string"
-        description: "Authentication username."
-      password:
-        type: "string"
-        description: "Authentication password."
-  ObtainTokenOut:
-    type: "object"
-    required:
-      - token
-    properties:
-      token:
-        type: "string"
-        example: "7f7f81baaa26aeaf46a907e017fbec9e19ff474d"
-        description: "Authentication token."
-  ServerStatus:
-    type: "object"
-    properties:
-      api_version:
-        type: "integer"
-        format: "int64"
-        description: "API version number"
-        example: 1
-      build:
-        type: "string"
-        description: "The build number"
-        example: "17de132"
-      server_address:
-        type: "string"
-        description: "The ip and port information"
-        example: "127.0.0.1:8000"
-      python:
-        type: "string"
-        description: "The python string version"
-        example: "3.6.1"
-      modules:
-        type: "object"
-        description: "name/version string pairs describing the modules on the server"
-        example: {"ansible": "2.3.2.0", "django": "1.11.5", "rest_framework": "3.4.6"}
-      platform:
-        type: "object"
-        description: "name/value string pairs describing the server"
-        example: {"system": "Fedora", "node": "26aec4157585", "release": "26", "version": "Fedora 26", "machine": "x86_64", "processor": "i386"}
-
   DeletionError:
     type: "object"
     required:
@@ -1142,72 +1104,41 @@ definitions:
       detail:
         type: "string"
         description: "Deletion error message"
-  CredentialDeletionError:
-    allOf:
-      - $ref: "#/definitions/DeletionError"
-      - type: "object"
-        required:
-          - sources
-        properties:
-          results:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceMin"
-            description: "The list of sources"
-  SourceDeletionError:
-    allOf:
-      - $ref: "#/definitions/DeletionError"
-      - type: "object"
-        required:
-          - scans
-        properties:
-          results:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanMin"
-            description: "The list of scans"
-  ListPagination:
+  DisableOptionalProducts:
     type: "object"
-    required:
-      - count
-      - next
-      - previous
-      - results
     properties:
-      count:
-        type: "integer"
-        format: "int64"
-        description: "Total number of credentials"
-      next:
-        type: "string"
-        description: "URL for next page of results"
-      previous:
-        type: "string"
-        description: "URL for previous page of results"
-  SystemFact:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+        default: false
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+  ExtendedSearchProducts:
     type: "object"
-    required:
-      - etc_release_name
-      - etc_release_release
-      - etc_release_version
-      - connection_uuid
     properties:
-        etc_release_name:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+        default: false
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      search_directories:
+        type: "array"
+        items:
           type: "string"
-          description: "The name of the operation system"
-          example: "Red Hat Enterprise Linux Server"
-        etc_release_release:
-          type: "string"
-          description: "The release of the operating system"
-          example: "Red Hat Enterprise Linux Server release 6.7 (Santiago)"
-        etc_release_version:
-          type: "string"
-          description: "The version of the operating system"
-          example: "6.7"
-        connection_uuid:
-          type: "string"
-          description: "The UUID of the connection"
-          example: "abc7f26f-1234-57bd-85d8-de7617123456"
+        description: "Search directories for the find command."
   FactCollectionIn:
     type: "object"
     required:
@@ -1260,6 +1191,643 @@ definitions:
           $ref: "#/definitions/SystemFact"
         description: "The facts obtained during a scan for this source"
         minItems: 1
+  ListPagination:
+    type: "object"
+    required:
+      - count
+      - next
+      - previous
+      - results
+    properties:
+      count:
+        type: "integer"
+        format: "int64"
+        description: "Total number of credentials"
+      next:
+        type: "string"
+        description: "URL for next page of results"
+      previous:
+        type: "string"
+        description: "URL for previous page of results"
+  ObtainTokenIn:
+    type: "object"
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: "string"
+        description: "Authentication username."
+      password:
+        type: "string"
+        description: "Authentication password."
+  ObtainTokenOut:
+    type: "object"
+    required:
+      - token
+    properties:
+      token:
+        type: "string"
+        example: "7f7f81baaa26aeaf46a907e017fbec9e19ff474d"
+        description: "Authentication token."
+  RawFactsOut:
+    type: "object"
+    required:
+      - name
+      - value
+    properties:
+      name:
+        type: "string"
+        description: "The raw fact name."
+      value:
+        type: "string"
+        description: "The raw fact value"
+  Scan:
+    type: "object"
+    properties:
+        scan_type:
+          type: "string"
+          description: "The type of scan. 'connect' is the default."
+          enum:
+            - inspect
+            - connect
+        options:
+          $ref: "#/definitions/ScanOptions"
+  ScanIn:
+    allOf:
+      - $ref: "#/definitions/Scan"
+      - type: "object"
+        required:
+          - sources
+        properties:
+          sources:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+            description: "The list of source identifiers"
+  ScanJob:
+    type: "object"
+    properties:
+        scan_type:
+          type: "string"
+          description: "The type of scan. 'connect' is the default."
+          enum:
+            - inspect
+            - connect
+        options:
+          $ref: "#/definitions/ScanOptions"
+  ScanJobConnectionResultsOut:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+            results:
+              type: "array"
+              items:
+                $ref: "#/definitions/SystemConnectResultOut"
+              description: "The task connection results"
+  ScanJobInspectionResultsOut:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+            results:
+              type: "array"
+              items:
+                $ref: "#/definitions/SystemInspectResultOut"
+              description: "The task inspection results"
+  ScanJobMerge:
+    type: "object"
+    properties:
+      jobs:
+        type: "array"
+        items:
+          type: "integer"
+  ScanJobMin:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      report_id:
+        type: "integer"
+        format: "int64"
+  ScanJobMostRecent:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        example: 42
+      report_id:
+        type: "integer"
+        format: "int64"
+        example: 3
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      systems_count:
+        type: "integer"
+        format: "int64"
+        example: 21
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        example: 20
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        example: 1
+      status:
+        type: "string"
+        description: "The status of the scan."
+        example: "completed"
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      scan_type:
+        type: "string"
+        description: "The type of scan."
+        example: "inspect"
+        enum:
+          - connect
+          - inspect
+      status_details:
+        type: "object"
+        properties:
+          job_status_message:
+            type: "string"
+            example: "Job is complete."
+  ScanJobOut:
+    allOf:
+      - $ref: "#/definitions/ScanJob"
+      - type: "object"
+        required:
+          - id
+          - sources
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          status:
+            type: "string"
+            description: "The status of the scan."
+            enum:
+              - created
+              - pending
+              - running
+              - paused
+              - canceled
+              - failed
+              - completed
+          sources:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceMin"
+            description: "The list of sources"
+          tasks:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanTask"
+            description: "The scan tasks being processed."
+          start_time:
+            type: "string"
+            format: "date-time"
+          end_time:
+            type: "string"
+            format: "date-time"
+          systems_count:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems to be scanned."
+          systems_scanned:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems that have been scanned."
+          systems_failed:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems that failed to scan."
+          report_id:
+            type: "integer"
+            format: "int64"
+            description: "The identifier of the sent fact collection."
+  ScanJobPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanJobOut"
+            description: "The paginated scan jobs"
+  ScanMin:
+    type: "object"
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        description: "The name of the scan"
+  ScanOptions:
+    type: "object"
+    properties:
+      max_concurrency:
+        type: "integer"
+        format: "int64"
+        description: "The maximum concurrent host scans. default is 50."
+      disabled_optional_products:
+        $ref: "#/definitions/DisableOptionalProducts"
+      enabled_extended_product_search:
+        $ref: "#/definitions/ExtendedSearchProducts"
+  ScanOut:
+    allOf:
+      - type: "object"
+        required:
+          - id
+          - sources
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          sources:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceMin"
+            description: "The list of sources"
+          jobs:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanJobMin"
+          most_recent:
+            type: "object"
+            $ref: "#/definitions/ScanJobMostRecent"
+      - $ref: "#/definitions/Scan"
+  ScanPagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanOut"
+            description: "The paginated scan"
+  ScanTask:
+    type: "object"
+    properties:
+      source:
+        type: "integer"
+        format: "int64"
+        description: "The identifier of the source."
+      scan_type:
+        type: "string"
+        description: "The type of scan task."
+        enum:
+          - inspect
+          - connect
+      status:
+        type: "string"
+        description: "The status of the scan task."
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the taks."
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that have been scanned in the task."
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that failed during the scan task."
+  ServerStatus:
+    type: "object"
+    properties:
+      api_version:
+        type: "integer"
+        format: "int64"
+        description: "API version number"
+        example: 1
+      build:
+        type: "string"
+        description: "The build number"
+        example: "17de132"
+      server_address:
+        type: "string"
+        description: "The ip and port information"
+        example: "127.0.0.1:8000"
+      python:
+        type: "string"
+        description: "The python string version"
+        example: "3.6.1"
+      modules:
+        type: "object"
+        description: "name/version string pairs describing the modules on the server"
+        example: {"ansible": "2.3.2.0", "django": "1.11.5", "rest_framework": "3.4.6"}
+      platform:
+        type: "object"
+        description: "name/value string pairs describing the server"
+        example: {"system": "Fedora", "node": "26aec4157585", "release": "26", "version": "Fedora 26", "machine": "x86_64", "processor": "i386"}
+  Source:
+    type: "object"
+    required:
+      - name
+      - source_type
+      - hosts
+      - port
+    properties:
+      name:
+        type: "string"
+        description: "The name of the source"
+      source_type:
+        type: "string"
+        description: "The type of the source"
+        enum:
+          - network
+          - vcenter
+          - satellite
+      hosts:
+        type: "array"
+        items:
+          type: "string"
+        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
+      port:
+        type: "integer"
+        format: "int32"
+        description: "The port to use on the host(s)."
+  SourceDeletionError:
+    allOf:
+      - $ref: "#/definitions/DeletionError"
+      - type: "object"
+        required:
+          - scans
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/ScanMin"
+            description: "The list of scans"
+  SourceIn:
+    allOf:
+      - $ref: "#/definitions/Source"
+      - type: "object"
+        required:
+          - credentials
+        properties:
+          credentials:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+            description: "The credentials to try with these hosts."
+          options:
+            $ref: "#/definitions/SourceOptions"
+  SourceMin:
+    type: "object"
+    required:
+      - id
+      - name
+      - source_type
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        description: "The name of the source"
+      source_type:
+        type: "string"
+        description: "The type of the source"
+        enum:
+          - network
+          - vcenter
+          - satellite
+  SourceMostRecentConnectionJob:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      report_id:
+        type: "integer"
+        format: "int64"
+        example: 3
+      start_time:
+        type: "string"
+        format: "date-time"
+      end_time:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+        description: "The status of the scan job."
+        enum:
+          - created
+          - pending
+          - running
+          - paused
+          - canceled
+          - failed
+          - completed
+      status_details:
+        type: "object"
+        properties:
+          job_status_message:
+            type: "string"
+            example: "Job is complete."
+      systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the scan job."
+        example: 10
+      systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of successful system connections in the scan job."
+        example: 8
+      systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of failed system connections for the scan job."
+        example: 2
+      source_systems_count:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems to be scanned in the source."
+        example: 5
+      source_systems_scanned:
+        type: "integer"
+        format: "int64"
+        description: "The total number of successful system connections in the source."
+        example: 4
+      source_systems_failed:
+        type: "integer"
+        format: "int64"
+        description: "The total number of failed system connections for the source."
+        example: 1
+  SourceOptions:
+    type: "object"
+    properties:
+      ssl_cert_verify:
+        type: "boolean"
+        description: "If false disable SSL certificate verification."
+      ssl_protocol:
+        type: "string"
+        description: "The SSL protocol to be used."
+        enum:
+          - SSLv2
+          - SSLv23
+          - SSLv3
+          - TLSv1
+          - TLSv1_1
+          - TLSv1_2
+      disable_ssl:
+        type: "boolean"
+        description: "If true disable SSL communication."
+  SourceOut:
+    allOf:
+      - $ref: "#/definitions/Source"
+      - type: "object"
+        required:
+          - id
+          - credentials
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          credentials:
+            type: "array"
+            items:
+              $ref: "#/definitions/CredentialMin"
+            description: "The credentials to try with these hosts."
+          options:
+            $ref: "#/definitions/SourceOptions"
+          connection:
+            $ref: "#/definitions/SourceMostRecentConnectionJob"
+  SourcePagination:
+    allOf:
+      - $ref: "#/definitions/ListPagination"
+      - type: "object"
+        required:
+          - results
+        properties:
+          results:
+            type: "array"
+            items:
+              $ref: "#/definitions/SourceOut"
+            description: "The paginated source"
+  SystemConnectResultOut:
+    type: "object"
+    required:
+      - name
+      - source
+      - credential
+      - status
+    properties:
+      name:
+        type: "string"
+        description: "The name of the system (ip, hostname, etc.)"
+      credential:
+        $ref: "#/definitions/CredentialMin"
+      source:
+        $ref: "#/definitions/SourceMin"
+      status:
+        type: "string"
+        description: "The status of the system connection."
+        enum:
+          - success
+          - unreachable
+          - failed
+  SystemFact:
+    type: "object"
+    required:
+      - etc_release_name
+      - etc_release_release
+      - etc_release_version
+      - connection_uuid
+    properties:
+        etc_release_name:
+          type: "string"
+          description: "The name of the operation system"
+          example: "Red Hat Enterprise Linux Server"
+        etc_release_release:
+          type: "string"
+          description: "The release of the operating system"
+          example: "Red Hat Enterprise Linux Server release 6.7 (Santiago)"
+        etc_release_version:
+          type: "string"
+          description: "The version of the operating system"
+          example: "6.7"
+        connection_uuid:
+          type: "string"
+          description: "The UUID of the connection"
+          example: "abc7f26f-1234-57bd-85d8-de7617123456"
+  SystemInspectResultOut:
+    type: "object"
+    required:
+      - name
+      - status
+      - source
+      - facts
+    properties:
+      name:
+        type: "string"
+        description: "The name of the system (ip, hostname, etc.)"
+      status:
+        type: "string"
+        description: "The status of the system inspection."
+        enum:
+          - success
+          - unreachable
+          - failed
+      source:
+        $ref: "#/definitions/SourceMin"
+      facts:
+        type: "array"
+        items:
+          $ref: "#/definitions/RawFactsOut"
+        description: "The raw facts collected from the system."
   SystemReport:
     type: "object"
     properties:
@@ -1367,602 +1935,6 @@ definitions:
           items:
             $ref: "#/definitions/SystemReport"
           description: "The report for the systems that were scanned"
-  SourceOptions:
-    type: "object"
-    properties:
-      ssl_cert_verify:
-        type: "boolean"
-        description: "If false disable SSL certificate verification."
-      ssl_protocol:
-        type: "string"
-        description: "The SSL protocol to be used."
-        enum:
-          - SSLv2
-          - SSLv23
-          - SSLv3
-          - TLSv1
-          - TLSv1_1
-          - TLSv1_2
-      disable_ssl:
-        type: "boolean"
-        description: "If true disable SSL communication."
-  Source:
-    type: "object"
-    required:
-      - name
-      - source_type
-      - hosts
-      - port
-    properties:
-      name:
-        type: "string"
-        description: "The name of the source"
-      source_type:
-        type: "string"
-        description: "The type of the source"
-        enum:
-          - network
-          - vcenter
-          - satellite
-      hosts:
-        type: "array"
-        items:
-          type: "string"
-        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
-      port:
-        type: "integer"
-        format: "int32"
-        description: "The port to use on the host(s)."
-  SourceMin:
-    type: "object"
-    required:
-      - id
-      - name
-      - source_type
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-        description: "The name of the source"
-      source_type:
-        type: "string"
-        description: "The type of the source"
-        enum:
-          - network
-          - vcenter
-          - satellite
-  SourceIn:
-    allOf:
-      - $ref: "#/definitions/Source"
-      - type: "object"
-        required:
-          - credentials
-        properties:
-          credentials:
-            type: "array"
-            items:
-              type: "integer"
-              format: "int64"
-            description: "The credentials to try with these hosts."
-          options:
-            $ref: "#/definitions/SourceOptions"
-  SourceOut:
-    allOf:
-      - $ref: "#/definitions/Source"
-      - type: "object"
-        required:
-          - id
-          - credentials
-        properties:
-          id:
-            type: "integer"
-            format: "int64"
-          credentials:
-            type: "array"
-            items:
-              $ref: "#/definitions/CredentialMin"
-            description: "The credentials to try with these hosts."
-          options:
-            $ref: "#/definitions/SourceOptions"
-          connection:
-            $ref: "#/definitions/SourceMostRecentConnectionJob"
-  SourcePagination:
-    allOf:
-      - $ref: "#/definitions/ListPagination"
-      - type: "object"
-        required:
-          - results
-        properties:
-          results:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceOut"
-            description: "The paginated source"
-  ScanTask:
-    type: "object"
-    properties:
-      source:
-        type: "integer"
-        format: "int64"
-        description: "The identifier of the source."
-      scan_type:
-        type: "string"
-        description: "The type of scan task."
-        enum:
-          - inspect
-          - connect
-      status:
-        type: "string"
-        description: "The status of the scan task."
-        enum:
-          - created
-          - pending
-          - running
-          - paused
-          - canceled
-          - failed
-          - completed
-      start_time:
-        type: "string"
-        format: "date-time"
-      end_time:
-        type: "string"
-        format: "date-time"
-      systems_count:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems to be scanned in the taks."
-      systems_scanned:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems that have been scanned in the task."
-      systems_failed:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems that failed during the scan task."
-  DisableOptionalProducts:
-    type: "object"
-    properties:
-      jboss_eap:
-        type: "boolean"
-        description: "The setting for JBoss EAP"
-        default: false
-      jboss_fuse:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      jboss_brms:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-  ExtendedSearchProducts:
-    type: "object"
-    properties:
-      jboss_eap:
-        type: "boolean"
-        description: "The setting for JBoss EAP"
-        default: false
-      jboss_fuse:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      jboss_brms:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      search_directories:
-        type: "array"
-        items:
-          type: "string"
-        description: "Search directories for the find command."
-  ScanOptions:
-    type: "object"
-    properties:
-      max_concurrency:
-        type: "integer"
-        format: "int64"
-        description: "The maximum concurrent host scans. default is 50."
-      disabled_optional_products:
-        $ref: "#/definitions/DisableOptionalProducts"
-      enabled_extended_product_search:
-        $ref: "#/definitions/ExtendedSearchProducts"
-  Scan:
-    type: "object"
-    properties:
-        scan_type:
-          type: "string"
-          description: "The type of scan. 'connect' is the default."
-          enum:
-            - inspect
-            - connect
-        options:
-          $ref: "#/definitions/ScanOptions"
-  ScanMin:
-    type: "object"
-    required:
-      - id
-      - name
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-        description: "The name of the scan"
-  ScanIn:
-    allOf:
-      - $ref: "#/definitions/Scan"
-      - type: "object"
-        required:
-          - sources
-        properties:
-          sources:
-            type: "array"
-            items:
-              type: "integer"
-              format: "int64"
-            description: "The list of source identifiers"
-  ScanOut:
-    allOf:
-      - type: "object"
-        required:
-          - id
-          - sources
-        properties:
-          id:
-            type: "integer"
-            format: "int64"
-          sources:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceMin"
-            description: "The list of sources"
-          jobs:
-            type: "array"
-            items:
-              $ref: "#/definitions/JobMin"
-          most_recent:
-            type: "object"
-            $ref: "#/definitions/JobMostRecent"
-      - $ref: "#/definitions/Scan"
-  ScanPagination:
-    allOf:
-      - $ref: "#/definitions/ListPagination"
-      - type: "object"
-        required:
-          - results
-        properties:
-          results:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanOut"
-            description: "The paginated scan"
-  ScanJob:
-    type: "object"
-    properties:
-        scan_type:
-          type: "string"
-          description: "The type of scan. 'connect' is the default."
-          enum:
-            - inspect
-            - connect
-        options:
-          $ref: "#/definitions/ScanOptions"
-
-  SourceMostRecentConnectionJob:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      report_id:
-        type: "integer"
-        format: "int64"
-        example: 3
-      start_time:
-        type: "string"
-        format: "date-time"
-      end_time:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "The status of the scan job."
-        enum:
-          - created
-          - pending
-          - running
-          - paused
-          - canceled
-          - failed
-          - completed
-      status_details:
-        type: "object"
-        properties:
-          job_status_message:
-            type: "string"
-            example: "Job is complete."
-      systems_count:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems to be scanned in the scan job."
-        example: 10
-      systems_scanned:
-        type: "integer"
-        format: "int64"
-        description: "The total number of successful system connections in the scan job."
-        example: 8
-      systems_failed:
-        type: "integer"
-        format: "int64"
-        description: "The total number of failed system connections for the scan job."
-        example: 2
-      source_systems_count:
-        type: "integer"
-        format: "int64"
-        description: "The total number of systems to be scanned in the source."
-        example: 5
-      source_systems_scanned:
-        type: "integer"
-        format: "int64"
-        description: "The total number of successful system connections in the source."
-        example: 4
-      source_systems_failed:
-        type: "integer"
-        format: "int64"
-        description: "The total number of failed system connections for the source."
-        example: 1
-  ScanJobOut:
-    allOf:
-      - $ref: "#/definitions/ScanJob"
-      - type: "object"
-        required:
-          - id
-          - sources
-        properties:
-          id:
-            type: "integer"
-            format: "int64"
-          status:
-            type: "string"
-            description: "The status of the scan."
-            enum:
-              - created
-              - pending
-              - running
-              - paused
-              - canceled
-              - failed
-              - completed
-          sources:
-            type: "array"
-            items:
-              $ref: "#/definitions/SourceMin"
-            description: "The list of sources"
-          tasks:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanTask"
-            description: "The scan tasks being processed."
-          start_time:
-            type: "string"
-            format: "date-time"
-          end_time:
-            type: "string"
-            format: "date-time"
-          systems_count:
-            type: "integer"
-            format: "int64"
-            description: "The total number of systems to be scanned."
-          systems_scanned:
-            type: "integer"
-            format: "int64"
-            description: "The total number of systems that have been scanned."
-          systems_failed:
-            type: "integer"
-            format: "int64"
-            description: "The total number of systems that failed to scan."
-          report_id:
-            type: "integer"
-            format: "int64"
-            description: "The identifier of the sent fact collection."
-  ScanJobMerge:
-    type: "object"
-    properties:
-      jobs:
-        type: "array"
-        items:
-          type: "integer"
-  ScanJobPagination:
-    allOf:
-      - $ref: "#/definitions/ListPagination"
-      - type: "object"
-        required:
-          - results
-        properties:
-          results:
-            type: "array"
-            items:
-              $ref: "#/definitions/ScanJobOut"
-            description: "The paginated scan jobs"
-  JobMostRecent:
-    type: "object"
-    required:
-      - id
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-        example: 42
-      report_id:
-        type: "integer"
-        format: "int64"
-        example: 3
-      start_time:
-        type: "string"
-        format: "date-time"
-      end_time:
-        type: "string"
-        format: "date-time"
-      systems_count:
-        type: "integer"
-        format: "int64"
-        example: 21
-      systems_scanned:
-        type: "integer"
-        format: "int64"
-        example: 20
-      systems_failed:
-        type: "integer"
-        format: "int64"
-        example: 1
-      status:
-        type: "string"
-        description: "The status of the scan."
-        example: "completed"
-        enum:
-          - created
-          - pending
-          - running
-          - paused
-          - canceled
-          - failed
-          - completed
-      scan_type:
-        type: "string"
-        description: "The type of scan."
-        example: "inspect"
-        enum:
-          - connect
-          - inspect
-      status_details:
-        type: "object"
-        properties:
-          job_status_message:
-            type: "string"
-            example: "Job is complete."
-  JobMin:
-    type: "object"
-    required:
-      - id
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      report_id:
-        type: "integer"
-        format: "int64"
-  SysConnResultOut:
-    type: "object"
-    required:
-      - name
-      - source
-      - credential
-      - status
-    properties:
-      name:
-        type: "string"
-        description: "The name of the system (ip, hostname, etc.)"
-      credential:
-        $ref: "#/definitions/CredentialMin"
-      source:
-        $ref: "#/definitions/SourceMin"
-      status:
-        type: "string"
-        description: "The status of the system connection."
-        enum:
-          - success
-          - unreachable
-          - failed
-  ConnResultsOut:
-    type: "object"
-    required:
-      - source
-      - systems
-    properties:
-      source:
-        $ref: "#/definitions/SourceMin"
-      systems:
-        type: "array"
-        items:
-          $ref: "#/definitions/SysConnResultOut"
-        description: "The connection result for each system."
-  RawFactsOut:
-    type: "object"
-    required:
-      - name
-      - value
-    properties:
-      name:
-        type: "string"
-        description: "The raw fact name."
-      value:
-        type: "string"
-        description: "The raw fact value"
-  SysInspectResultOut:
-    type: "object"
-    required:
-      - name
-      - status
-      - source
-      - facts
-    properties:
-      name:
-        type: "string"
-        description: "The name of the system (ip, hostname, etc.)"
-      status:
-        type: "string"
-        description: "The status of the system inspection."
-        enum:
-          - success
-          - unreachable
-          - failed
-      source:
-        $ref: "#/definitions/SourceMin"
-      facts:
-        type: "array"
-        items:
-          $ref: "#/definitions/RawFactsOut"
-        description: "The raw facts collected from the system."
-  InspectResultsOut:
-    type: "object"
-    required:
-      - source
-      - systems
-    properties:
-      source:
-        $ref: "#/definitions/SourceMin"
-      systems:
-        type: "array"
-        items:
-          $ref: "#/definitions/SysInspectResultOut"
-        description: "The inspection result for each system."
-  ScanJobConnectionResultsOut:
-    allOf:
-      - $ref: "#/definitions/ListPagination"
-      - type: "object"
-        required:
-          - results
-        properties:
-            results:
-              type: "array"
-              items:
-                $ref: "#/definitions/SysConnResultOut"
-              description: "The task connection results"
-  ScanJobInspectionResultsOut:
-    allOf:
-      - $ref: "#/definitions/ListPagination"
-      - type: "object"
-        required:
-          - results
-        properties:
-            results:
-              type: "array"
-              items:
-                $ref: "#/definitions/SysInspectResultOut"
-              description: "The task inspection results"
   User:
     type: "object"
     required:
