@@ -19,3 +19,4 @@ from . import cpu
 from . import ifconfig
 from . import date
 from . import subman
+from . import yum
