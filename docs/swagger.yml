@@ -675,6 +675,23 @@ paths:
         required: true
         type: "integer"
         format: "int64"
+      - name: "ordering"
+        in: "query"
+        description: "Order the results with the field name; '-' means descending"
+        type: "string"
+        enum:
+          - "name"
+          - "status"
+          - "-name"
+          - "-status"
+      - name: "status"
+        in: "query"
+        description: "Filter list based on result status"
+        type: "string"
+        enum:
+          - success
+          - failed
+          - unreachable
       responses:
         200:
           description: "Scan job connection results retrieved"
@@ -700,6 +717,23 @@ paths:
         required: true
         type: "integer"
         format: "int64"
+      - name: "ordering"
+        in: "query"
+        description: "Order the results with the field name; '-' means descending"
+        type: "string"
+        enum:
+          - "name"
+          - "status"
+          - "-name"
+          - "-status"
+      - name: "status"
+        in: "query"
+        description: "Filter list based on result status"
+        type: "string"
+        enum:
+          - success
+          - failed
+          - unreachable
       responses:
         200:
           description: "Scan job inspection results retrieved"

@@ -145,6 +145,9 @@ PLURAL_TASK_INSPECT_RESULTS_MSG = 'Task inspection results'
 PLURAL_SYS_INSPECT_RESULTS_MSG = 'System inspection results'
 PLURAL_RAW_FACT_MSG = 'Raw facts'
 
+QUERY_PARAM_INVALID = 'Invalid value for for query parameter %s. ' \
+    'Valid inputs are %s.'
+
 NO_PAUSE = 'Scan cannot be paused. ' \
     'The scan must be running for it to be paused.'
 

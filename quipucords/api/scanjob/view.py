@@ -135,9 +135,47 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan)
 
+    @staticmethod
+    def handle_result_filters(request):
+        """Get the associated filter parameters or return validation errors.
+
+        @param request: The incoming request
+        @returns: A tuple of ordering filter and status filter
+        """
+        valid_orderging_filters = ['name', 'status', '-name', '-status']
+        valid_status_filters = ['success', 'failed', 'unreachable']
+        ordering_param = 'ordering'
+        default_ordering = 'status'
+        status_param = 'status'
+        ordering_filter = request.query_params.get(ordering_param,
+                                                   default_ordering)
+        status_filter = request.query_params.get(status_param, None)
+
+        # validate query params
+        if ordering_filter and ordering_filter not in valid_orderging_filters:
+            valid_list = ', '.join(valid_orderging_filters)
+            message = _(messages.QUERY_PARAM_INVALID %
+                        (ordering_param, valid_list))
+            error = {
+                'detail': [message]
+            }
+            raise ValidationError(error)
+        if status_filter and status_filter not in valid_status_filters:
+            valid_list = ', '.join(valid_status_filters)
+            message = _(messages.QUERY_PARAM_INVALID %
+                        (status_param, valid_list))
+            error = {
+                'detail': [message]
+            }
+            raise ValidationError(error)
+
+        return (ordering_filter, status_filter)
+
     @detail_route(methods=['get'])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
+        ordering_filter, status_filter = self.handle_result_filters(request)
+
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
             all_tasks = scan_job.connection_results.task_results.all()
@@ -151,10 +189,13 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             else:
                 system_result_queryset = \
                     system_result_queryset | task_result.systems.all()
-        # assign the paginator and order the queryset by status
+        # create ordered queryset and assign the paginator
+        ordered_query_set = system_result_queryset.order_by(ordering_filter)
+        if status_filter:
+            ordered_query_set = ordered_query_set.filter(status=status_filter)
+
         paginator = StandardResultsSetPagination()
-        page = paginator.paginate_queryset(
-            system_result_queryset.order_by('status'), request)
+        page = paginator.paginate_queryset(ordered_query_set, request)
 
         if page is not None:
             serializer = SystemConnectionResultSerializer(page, many=True)
@@ -166,21 +207,27 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['get'])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
+        ordering_filter, status_filter = self.handle_result_filters(request)
+
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
             all_tasks = scan_job.inspection_results.task_results.all()
         except ValueError:
             return Response(status=400)
-        system_inspection_queryset = None
+        system_result_queryset = None
         for task_result in all_tasks:
-            if system_inspection_queryset is None:
-                system_inspection_queryset = task_result.systems.all()
+            if system_result_queryset is None:
+                system_result_queryset = task_result.systems.all()
             else:
-                system_inspection_queryset = \
-                    system_inspection_queryset | task_result.systems.all()
+                system_result_queryset = \
+                    system_result_queryset | task_result.systems.all()
+        # create ordered queryset and assign the paginator
         paginator = StandardResultsSetPagination()
-        page = paginator.paginate_queryset(
-            system_inspection_queryset.order_by('status'), request)
+        ordered_query_set = system_result_queryset.order_by(ordering_filter)
+        if status_filter:
+            ordered_query_set = ordered_query_set.filter(status=status_filter)
+        page = paginator.paginate_queryset(ordered_query_set, request)
+
         if page is not None:
             serializer = SystemInspectionResultSerializer(page, many=True)
             for system in serializer.data:
@@ -273,7 +320,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                 scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by(
                     'sequence_number')
             if not inspect_tasks:
-                message = (messages.SJ_MERGE_JOB_NO_TASKS % job.id)
+                message = _(messages.SJ_MERGE_JOB_NO_TASKS % job.id)
                 error.get('jobs').append(message)
                 raise ValidationError(error)
             sources += build_sources_from_tasks(inspect_tasks.all())
