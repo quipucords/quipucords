@@ -925,7 +925,7 @@ paths:
         400:
           description: "Invalid input"
   /token/:
-    put:
+    post:
       tags:
         - "User"
       summary: "Obtain a user token."
@@ -953,7 +953,7 @@ paths:
       tags:
         - "User"
       summary: "Gets the username of the current user"
-      description: "Gets the username of the currently authenticated user."
+      description: "Gets the username of the currently authenticated user"
       operationId: "currentUser"
       produces:
       - "application/json"
@@ -969,7 +969,7 @@ paths:
       tags:
         - "User"
       summary: "Logs out the current user"
-      description: "Logs out the currently authenticated user."
+      description: "Logs out the currently authenticated user"
       operationId: "logoutUser"
       responses:
         200:
@@ -1943,3 +1943,4 @@ definitions:
       username:
         type: "string"
         description: "The username"
+        example: "admin"
