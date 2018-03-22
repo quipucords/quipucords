@@ -140,16 +140,19 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         """Get the associated filter parameters or return validation errors.
 
         @param request: The incoming request
-        @returns: A tuple of ordering filter and status filter
+        @returns: A tuple of ordering filter, status filter,
+            and source_id filter
         """
         valid_orderging_filters = ['name', 'status', '-name', '-status']
         valid_status_filters = ['success', 'failed', 'unreachable']
         ordering_param = 'ordering'
         default_ordering = 'status'
         status_param = 'status'
+        source_id_param = 'source_id'
         ordering_filter = request.query_params.get(ordering_param,
                                                    default_ordering)
         status_filter = request.query_params.get(status_param, None)
+        source_id_filter = request.query_params.get(source_id_param, None)
 
         # validate query params
         if ordering_filter and ordering_filter not in valid_orderging_filters:
@@ -168,13 +171,21 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
                 'detail': [message]
             }
             raise ValidationError(error)
+        if source_id_filter and not is_int(source_id_filter):
+            message = _(messages.QUERY_PARAM_INVALID %
+                        (source_id_param, 'source identifiers'))
+            error = {
+                'detail': [message]
+            }
+            raise ValidationError(error)
 
-        return (ordering_filter, status_filter)
+        return (ordering_filter, status_filter, source_id_filter)
 
     @detail_route(methods=['get'])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
-        ordering_filter, status_filter = self.handle_result_filters(request)
+        ordering_filter, status_filter, source_id_filter = \
+            self.handle_result_filters(request)
 
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
@@ -193,6 +204,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
         if status_filter:
             ordered_query_set = ordered_query_set.filter(status=status_filter)
+        if source_id_filter:
+            ordered_query_set = \
+                ordered_query_set.filter(source__id=source_id_filter)
 
         paginator = StandardResultsSetPagination()
         page = paginator.paginate_queryset(ordered_query_set, request)
@@ -207,7 +221,8 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['get'])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
-        ordering_filter, status_filter = self.handle_result_filters(request)
+        ordering_filter, status_filter, source_id_filter = \
+            self.handle_result_filters(request)
 
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
@@ -226,6 +241,10 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
         if status_filter:
             ordered_query_set = ordered_query_set.filter(status=status_filter)
+        if source_id_filter:
+            ordered_query_set = \
+                ordered_query_set.filter(source__id=source_id_filter)
+
         page = paginator.paginate_queryset(ordered_query_set, request)
 
         if page is not None:
