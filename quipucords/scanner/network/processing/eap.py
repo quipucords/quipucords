@@ -205,28 +205,27 @@ class ProcessEapHomeBinForFuse(util.IndicatorFileFinder):
     INDICATOR_FILES = ['fuseconfig.sh', 'fusepatch.sh']
 
 
-class ProcessEapHomeLayers(process.Processor):
+class ItemSuccessChecker(util.PerItemProcessor):
+    """Check whether each item succeeded."""
+
+    KEY = None
+
+    @staticmethod
+    def process_item(item):
+        """Check whether the item succeeded."""
+        return item['rc'] == 0
+
+
+class ProcessEapHomeLayers(ItemSuccessChecker):
     """Process the output of eap home layers."""
 
     KEY = 'eap_home_layers'
 
-    @staticmethod
-    def process(output):
-        """Pass the output back through."""
-        return {result['item']: result['rc'] == 0
-                for result in output['results']}
 
-
-class ProcessEapHomeLayersConf(process.Processor):
+class ProcessEapHomeLayersConf(ItemSuccessChecker):
     """Process the output of eap home layers conf."""
 
     KEY = 'eap_home_layers_conf'
-
-    @staticmethod
-    def process(output):
-        """Pass the output back through."""
-        return {result['item']: result['rc'] == 0
-                for result in output['results']}
 
 
 class ProcessFindJbossEAPJarVer(util.FindJarVer):

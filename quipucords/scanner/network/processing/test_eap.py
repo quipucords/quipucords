@@ -14,8 +14,8 @@
 
 import unittest
 from scanner.network.processing import process, eap
-from scanner.network.processing.test_util import ansible_result, \
-    ansible_results
+from scanner.network.processing.util_for_test import ansible_result, \
+    ansible_results, ansible_item
 
 
 class TestProcessJbossEapRunningPaths(unittest.TestCase):
@@ -261,22 +261,22 @@ class TestProcessEapHomeBinForFuse(unittest.TestCase):
         self.assertEqual(actual_result, expected_result)
 
 
-class TestProcessEapHomeLayers(unittest.TestCase):
+class TestItemSuccessChecker(unittest.TestCase):
     """Test looking for eap home layers."""
 
     def test_success(self):
         """Found eap home layers."""
         self.assertEqual(
-            eap.ProcessEapHomeLayers.process(ansible_results(
-                [{'item': 'foo', 'stdout': 'bin/fuse'}])),
-            {'foo': True})
+            eap.ItemSuccessChecker.process_item(
+                ansible_item('foo', 'bin/fuse')),
+            True)
 
     def test_not_found(self):
         """Did not find eap home layers."""
         self.assertEqual(
-            eap.ProcessEapHomeLayers.process(ansible_results(
-                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
-            {'foo': False})
+            eap.ItemSuccessChecker.process_item(
+                ansible_item('foo', '', rc=1)),
+            False)
 
 
 class TestProcessEapHomeLayersConf(unittest.TestCase):

@@ -11,7 +11,7 @@
 
 from django.test import TestCase
 from scanner.network.processing import process
-from scanner.network.processing.test_util import ansible_result, \
+from scanner.network.processing.util_for_test import ansible_result, \
     ansible_results
 from api.models import (Credential, ScanTask, Source)
 
