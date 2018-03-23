@@ -618,16 +618,14 @@ paths:
       tags:
         - "Scan Job"
       summary: "Trigger a scan"
-      description: "Create a new scan job."
+      description: "Create a new scan job"
       operationId: "triggerScan"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
         - name: "scan_id"
           in: "path"
-          description: "Scan used to create job."
+          description: "Scan used to create job"
           required: true
           type: "integer"
           format: "int64"
@@ -638,18 +636,20 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
     get:
       tags:
         - "Scan Job"
       summary: "List exsiting scan jobs"
-      description: "List all scans."
+      description: "List all scans jobs for a specific scan"
       operationId: "listScanJobs"
       produces:
         - "application/json"
       parameters:
         - name: "scan_id"
           in: "path"
-          description: "Scan used to create job."
+          description: "Scan id use in search"
           required: true
           type: "integer"
           format: "int64"
@@ -674,12 +674,12 @@ paths:
             - inspect
         - name: "page"
           in: "query"
-          description: "Value for selecting a page of results."
+          description: "Value for selecting a page of results"
           type: "integer"
           format: "int64"
         - name: "page_size"
           in: "query"
-          description: "Value for the maximum number of results per page."
+          description: "Value for the maximum number of results per page"
           type: "integer"
           format: "int64"
         - name: "ordering"
@@ -691,12 +691,14 @@ paths:
           description: "Scan jobs retrieved"
           schema:
             $ref: "#/definitions/ScanJobPagination"
+        401:
+          description: "Not authorized"
   /jobs/{scan_job_id}/:
     get:
       tags:
         - "Scan Job"
       summary: "Get an existing scan job"
-      description: "Get a scan job's current status."
+      description: "Get a scan job's current status"
       operationId: "getScanJob"
       produces:
       - "application/json"
@@ -712,6 +714,8 @@ paths:
           description: "Scan job retrieved"
           schema:
             $ref: "#/definitions/ScanJobOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job not found"
   /jobs/{scan_job_id}/connection/:
@@ -719,14 +723,14 @@ paths:
       tags:
         - "Scan Job"
       summary: "Get the connection results of existing scan job"
-      description: "Get the connection results of a scan."
+      description: "Get the connection results of a scan"
       operationId: "getScanConnectionResults"
       produces:
       - "application/json"
       parameters:
       - name: "scan_job_id"
         in: "path"
-        description: "ID of scan job to retrieve connection results for"
+        description: "ID of scan job used in search"
         required: true
         type: "integer"
         format: "int64"
@@ -759,6 +763,8 @@ paths:
             $ref: "#/definitions/ScanJobConnectionResultsOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job connection results not found"
   /jobs/{scan_job_id}/inspection/:
@@ -766,14 +772,14 @@ paths:
       tags:
         - "Scan Job"
       summary: "Get the inspection results of existing scan job"
-      description: "Get the inspection results of a scan."
+      description: "Get the inspection results of a scan"
       operationId: "getScanInspectionResults"
       produces:
       - "application/json"
       parameters:
       - name: "scan_job_id"
         in: "path"
-        description: "ID of scan job to retrieve inspection results for"
+        description: "ID of scan job to use in search"
         required: true
         type: "integer"
         format: "int64"
@@ -806,6 +812,8 @@ paths:
             $ref: "#/definitions/ScanJobInspectionResultsOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job inspection results not found"
   /jobs/{scan_job_id}/pause/:
@@ -813,7 +821,7 @@ paths:
       tags:
         - "Scan Job"
       summary: "Pauses an existing scan job"
-      description: "Pauses a scan if its currently running, fails otherwise."
+      description: "Pauses a scan if its currently running, fails otherwise"
       operationId: "pauseScan"
       produces:
       - "application/json"
@@ -831,6 +839,8 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Scan job not running"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job not found"
   /jobs/{scan_job_id}/cancel/:
@@ -838,7 +848,7 @@ paths:
       tags:
         - "Scan Job"
       summary: "Cancels an existing scan job"
-      description: "Cancels a scan if its has not finished, fails otherwise."
+      description: "Cancels a scan if its has not finished, fails otherwise"
       operationId: "cancelScan"
       produces:
       - "application/json"
@@ -856,6 +866,8 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Scan job has already finished"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job not found"
   /jobs/{scan_job_id}/restart/:
@@ -863,7 +875,7 @@ paths:
       tags:
         - "Scan Job"
       summary: "Restarts an existing scan job"
-      description: "Restarts a scan if its has been paused, fails otherwise."
+      description: "Restarts a scan if its has been paused, fails otherwise"
       operationId: "restartScan"
       produces:
       - "application/json"
@@ -881,14 +893,16 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Scan job was not in paused state"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan job not found"
   /jobs/merge/:
     put:
       tags:
         - "Scan Job"
-      summary: "Merge results from multiple scan jobs."
-      description: "Merge results from two or more completed scan jobs."
+      summary: "Merge results from multiple scan jobs"
+      description: "Merge results from two or more completed scan jobs"
       operationId: "mergeJobResults"
       produces:
       - "application/json"
@@ -901,11 +915,13 @@ paths:
           $ref: "#/definitions/ScanJobMerge"
       responses:
         201:
-          description: "Scan job results merged and fact collection created."
+          description: "Scan job results merged and fact collection created"
           schema:
             $ref: "#/definitions/FactCollectionOut"
         400:
-          description: "Scan job not merged due to invalid request."
+          description: "Scan job not merged due to invalid request"
+        401:
+          description: "Not authorized"
   /reports/{report_id}/details/:
     get:
       tags:
@@ -1169,6 +1185,7 @@ definitions:
       detail:
         type: "string"
         description: "Deletion error message"
+        example: "Failed to delete"
   FactCollectionIn:
     type: "object"
     required:
@@ -1231,12 +1248,15 @@ definitions:
         type: "integer"
         format: "int64"
         description: "Total number of credentials"
+        example: 3
       next:
         type: "string"
         description: "URL for next page of results"
+        example: "http://localhost:8000/api/v1/scans/?page=3"
       previous:
         type: "string"
         description: "URL for previous page of results"
+        example: "http://localhost:8000/api/v1/scans/?page=1"
   ObtainTokenIn:
     type: "object"
     required:
@@ -1246,9 +1266,11 @@ definitions:
       username:
         type: "string"
         description: "Authentication username."
+        example: "admin"
       password:
         type: "string"
         description: "Authentication password."
+        example: "password"
   ObtainTokenOut:
     type: "object"
     required:
@@ -1267,9 +1289,11 @@ definitions:
       name:
         type: "string"
         description: "The raw fact name."
+        example: "etc_release_name"
       value:
         type: "string"
         description: "The raw fact value"
+        example: "Red Hat Enterprise Linux Server"
   Scan:
     type: "object"
     properties:
@@ -1337,10 +1361,11 @@ definitions:
     properties:
         scan_type:
           type: "string"
-          description: "The type of scan. 'connect' is the default."
+          description: "The type of scan"
           enum:
             - inspect
             - connect
+          default: "connect"
         options:
           $ref: "#/definitions/ScanOptions"
   ScanJobConnectionResultsOut:
@@ -1374,6 +1399,7 @@ definitions:
         type: "array"
         items:
           type: "integer"
+        example: [1,2,3]
   ScanJobMin:
     type: "object"
     required:
@@ -1454,6 +1480,7 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+            example: 15
           status:
             type: "string"
             description: "The status of the scan."
@@ -1474,7 +1501,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/ScanTask"
-            description: "The scan tasks being processed."
+            description: "The scan tasks being processed"
           start_time:
             type: "string"
             format: "date-time"
@@ -1484,19 +1511,23 @@ definitions:
           systems_count:
             type: "integer"
             format: "int64"
-            description: "The total number of systems to be scanned."
+            description: "The total number of systems to be scanned"
+            example: 20
           systems_scanned:
             type: "integer"
             format: "int64"
-            description: "The total number of systems that have been scanned."
+            description: "The total number of systems that have been scanned"
+            example: 10
           systems_failed:
             type: "integer"
             format: "int64"
-            description: "The total number of systems that failed to scan."
+            description: "The total number of systems that failed to scan"
+            example: 10
           report_id:
             type: "integer"
             format: "int64"
-            description: "The identifier of the sent fact collection."
+            description: "The identifier of the sent fact collection"
+            example: 2
   ScanJobPagination:
     allOf:
       - $ref: "#/definitions/ListPagination"
@@ -1578,6 +1609,7 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The identifier of the source."
+        example: 1
       scan_type:
         type: "string"
         description: "The type of scan task."
@@ -1605,14 +1637,17 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The total number of systems to be scanned in the taks."
+        example: 20
       systems_scanned:
         type: "integer"
         format: "int64"
         description: "The total number of systems that have been scanned in the task."
+        example: 10
       systems_failed:
         type: "integer"
         format: "int64"
         description: "The total number of systems that failed during the scan task."
+        example: 10
   ServerStatus:
     type: "object"
     properties:
@@ -1848,6 +1883,7 @@ definitions:
       name:
         type: "string"
         description: "The name of the system (ip, hostname, etc.)"
+        example: "192.168.0.1"
       credential:
         $ref: "#/definitions/CredentialMin"
       source:
@@ -1929,9 +1965,10 @@ definitions:
       name:
         type: "string"
         description: "The name of the system (ip, hostname, etc.)"
+        example: "192.168.0.1"
       status:
         type: "string"
-        description: "The status of the system inspection."
+        description: "The status of the system inspection"
         enum:
           - success
           - unreachable
@@ -1942,7 +1979,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/RawFactsOut"
-        description: "The raw facts collected from the system."
+        description: "The raw facts collected from the system"
   SystemProducts:
     type: "object"
     properties:
@@ -1973,10 +2010,12 @@ definitions:
           type: "integer"
           format: "int64"
           description: "Fingerprint database identifier"
+          example: 15
         report_id:
             type: "integer"
             format: "int64"
             description: "Fact collection identifier"
+            example: 20
         name:
           type: "string"
           description: "The system name"
@@ -2012,7 +2051,7 @@ definitions:
           items:
             type: "string"
             description: "IP addresses of system"
-            example: "192.168.0.1"
+          example: ["192.168.0.1","192.168.0.2"]
           description: "The infrastructure type"
         cpu_count:
           type: "integer"
