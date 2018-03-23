@@ -252,7 +252,7 @@ LOGGING = {
         },
         'api.scantasks': {
             'handlers': LOGGING_HANDLERS,
-            'level': 'DEBUG',
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.scanjob': {
             'handlers': LOGGING_HANDLERS,
@@ -260,7 +260,7 @@ LOGGING = {
         },
         'fingerprinter': {
             'handlers': LOGGING_HANDLERS,
-            'level': 'DEBUG',
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'api.signals.scanjob_signal': {
             'handlers': LOGGING_HANDLERS,
@@ -284,7 +284,7 @@ LOGGING = {
         },
         'scanner.network': {
             'handlers': LOGGING_HANDLERS,
-            'level': 'DEBUG',
+            'level': QUIPUCORDS_LOGGING_LEVEL,
         },
         'scanner.vcenter': {
             'handlers': LOGGING_HANDLERS,
