@@ -10,7 +10,7 @@
 """Initial processing of the shell output from the jboss_brms role."""
 
 import logging
-from scanner.network.processing import process
+from scanner.network.processing import process, util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -19,20 +19,15 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # #### Processors ####
 
 
-class ProcessJbossBRMSManifestMF(process.Processor):
+class ProcessJbossBRMSManifestMF(util.PerItemProcessor):
     """Process the MANIFEST.MF files."""
 
     KEY = 'jboss_brms_manifest_mf'
 
     @staticmethod
-    def process(output):
-        """Return the command's output."""
-        manifest_contents = {}
-        for result in output['results']:
-            # map a directory (the item) to the manifest output
-            if result['stdout'] != '':
-                manifest_contents[result['item']] = result['stdout']
-        return manifest_contents
+    def process_item(item):
+        """Return stdout if not empty."""
+        return item['stdout'] or None
 
 
 class ProcessJbossBRMSKieBusinessCentral(process.Processor):

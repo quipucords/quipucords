@@ -14,7 +14,7 @@
 
 import unittest
 from scanner.network.processing import process, karaf
-from scanner.network.processing.test_util import ansible_result, \
+from scanner.network.processing.util_for_test import ansible_result, \
     ansible_results
 
 

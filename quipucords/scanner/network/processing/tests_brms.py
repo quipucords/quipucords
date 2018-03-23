@@ -14,23 +14,22 @@
 
 import unittest
 from scanner.network.processing import brms
-from scanner.network.processing.test_util import (ansible_results,
-                                                  ansible_result)
+from scanner.network.processing.util_for_test import (ansible_results,
+                                                      ansible_result,
+                                                      ansible_item)
 
 
 class TestProcessJbossBRMSManifestMF(unittest.TestCase):
     """Test ProcessJbossBRMSManifestMF."""
 
-    good_result = {'item': '/tmp/good/',
-                   'stdout': 'This is manifest file output',
-                   'rc': 0}
-    manifest_results = ansible_results([good_result])
+    MANIFEST = 'This is manifest file output'
 
     def test_success_case(self):
-        """Return a dict of directory: manifest pairs."""
+        """Return item's stdout."""
         self.assertEqual(
-            brms.ProcessJbossBRMSManifestMF.process(self.manifest_results),
-            {self.good_result['item']: self.good_result['stdout']})
+            brms.ProcessJbossBRMSManifestMF.process_item(
+                ansible_item('/tmp/good', self.MANIFEST)),
+            self.MANIFEST)
 
 
 class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):

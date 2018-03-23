@@ -13,7 +13,7 @@
 
 import unittest
 from scanner.network.processing import subman
-from scanner.network.processing.test_util import ansible_result
+from scanner.network.processing.util_for_test import ansible_result
 
 
 class TestProcessSubmanConsumed(unittest.TestCase):

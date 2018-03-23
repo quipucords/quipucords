@@ -11,7 +11,7 @@
 
 import logging
 import re
-from scanner.network.processing import process, util
+from scanner.network.processing import util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -104,7 +104,7 @@ VERSION_CLASSIFICATIONS = {
 }
 
 
-class ProcessRunJarManifest(process.Processor):
+class ProcessRunJarManifest(util.PerItemProcessor):
     """Process the MANIFEST.MF file from run.jar."""
 
     KEY = 'eap5_home_run_jar_manifest'
@@ -117,22 +117,9 @@ class ProcessRunJarManifest(process.Processor):
         r'Implementation-Version:.*(CVS|SVN)Tag=(\S+)\s*.*')
 
     @classmethod
-    def process(cls, output):
-        """Process the contents of a MANIFEST.MF file.
-
-        :param output: an Ansible task result dictionary.
-
-        :returns: a dictionary mapping EAP_HOME candidate directory to
-            EAP version. If we can't detect an EAP version for a
-            candidate, it won't be in the dictionary.
-        """
-        results = {}
-
-        for item in output['results']:
-            directory = item['item']
-            for line in item['stdout_lines']:
-                match = cls.VERSION_REGEXP.match(line)
-                if match:
-                    results[directory] = match.group(2)
-
-        return results
+    def process_item(cls, item):
+        """Look for an EAP version in a MANIFEST.MF file."""
+        for line in item['stdout_lines']:
+            match = cls.VERSION_REGEXP.match(line)
+            if match:
+                return match.group(2)

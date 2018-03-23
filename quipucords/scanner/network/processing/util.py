@@ -9,7 +9,11 @@
 
 """Utilities for processing Ansible task outputs."""
 
+import logging
 from scanner.network.processing import process
+
+
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def get_line(lines, line_index=0):
@@ -91,7 +95,45 @@ class FindJar(process.Processor):
         return versions
 
 
-class IndicatorFileFinder(process.Processor):
+class PerItemProcessor(process.Processor):
+    """Process the output of an Ansible with-items task.
+
+    Calls cls.processItem() on each item of the result and returns a
+    dict mapping item name to process_item output. If process_item
+    returns None for an item or raises an exception, that item will
+    not be in the result dictionary.
+
+    The big benefit of this class is that it simplifies testing for
+    its subclasses, because they only need to check that their
+    process_item method works.
+    """
+
+    KEY = None
+
+    @classmethod
+    def process(cls, output):
+        """Process the output of an Ansible with-items task."""
+        result = {}
+        for item in output['results']:
+            item_name = item['item']
+            try:
+                val = cls.process_item(item)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.debug('Processor for %s hit error on %s', cls.KEY, item)
+                logger.exception(ex)
+                val = None
+            if val is not None:
+                result[item_name] = val
+
+        return result
+
+    @staticmethod
+    def process_item(item):
+        """Override this method to provide per-item processing."""
+        raise NotImplementedError()
+
+
+class IndicatorFileFinder(PerItemProcessor):
     """Look for indicator files in the output of many 'ls -1's.
 
     Use by subclassing and defining a class variable INDICATOR_FILES,
@@ -105,29 +147,22 @@ class IndicatorFileFinder(process.Processor):
     KEY = None
 
     @classmethod
-    def process(cls, output):
-        """Find indicator files in the output, item by item."""
-        results = {}
+    def process_item(cls, item):
+        """Look for indicator files in item's stdout lines."""
+        if item['rc']:
+            return []
 
-        for item in output['results']:
-            directory = item['item']
-            if item['rc']:
-                results[directory] = []
-                continue
+        files = item['stdout_lines']
+        # pylint: disable=no-member
+        found_in_dir = [filename for filename in cls.INDICATOR_FILES
+                        if filename in files]
+        if found_in_dir:
+            return found_in_dir
 
-            files = item['stdout_lines']
-            # pylint: disable=no-member
-            found_in_dir = [filename for filename in cls.INDICATOR_FILES
-                            if filename in files]
-            if found_in_dir:
-                results[directory] = found_in_dir
-            else:
-                results[directory] = []
-
-        return results
+        return []
 
 
-class StdoutSearchProcessor(process.Processor):
+class StdoutSearchProcessor(PerItemProcessor):
     """Look for a string in the output of a with_items task.
 
     Use by subclassing and setting SEARCH_STRING to the string to look
@@ -138,43 +173,24 @@ class StdoutSearchProcessor(process.Processor):
     SEARCH_STRING = None
 
     @classmethod
-    def process(cls, output):
-        """Process the output of a with_items task from Ansible.
+    def process_item(cls, item):
+        """Search stdout for the SEARCH_STRING."""
+        if item['rc']:
+            return False
 
-        :param output: the output of a with_items task.
-
-        :returns: a dictionary mapping each item name to True if
-          SEARCH_STRING was found in that item's stdout, and False
-          otherwise.
-        """
-        results = {}
-        for item in output['results']:
-            item_name = item['item']
-            if item['rc']:
-                results[item_name] = False
-            else:
-                results[item_name] = cls.SEARCH_STRING in item['stdout']
-
-        return results
+        return cls.SEARCH_STRING in item['stdout']
 
 
-class StdoutPassthroughProcessor(process.Processor):
+class StdoutPassthroughProcessor(PerItemProcessor):
     """Pass through stdout to the fingerprinter, or False on error.
 
     Used for the output of 'cat some-file', where some-file might not
-    exist. Works for with-items tasks.
+    exist.
     """
 
     KEY = None
 
     @staticmethod
-    def process(output):
-        """Process the output of a with_items task from Ansible.
-
-        :param output: the output of a with_items task.
-
-        :returns: a dictionary mapping each item name to the item's
-        stdout if the item's 'rc' is zero, or False otherwise.
-        """
-        return {item['item']: item['stdout'] if item['rc'] == 0 else False
-                for item in output['results']}
+    def process_item(item):
+        """Make sure item succeeded and pass stdout through."""
+        return item['rc'] == 0 and item['stdout']
