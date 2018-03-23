@@ -172,21 +172,21 @@
   when: 'have_java and jboss_eap_ext'
 
 - name: check for activemq version on eap
-  raw: ls -1 "{{ item }}"/modules/system/layers/fuse/org/apache/activemq/main 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p' | sed 's/\n//'
+  raw: ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/activemq/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p' | sed 's/\n//'
   register: jboss_fuse_on_eap_activemq_ver
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_fuse'
 
 - name: check modules/system/layers/fuse/org/apache/camel/core/main/ for camel version
-  raw: ls -1 "{{ item }}"/modules/system/layers/fuse/org/apache/camel/core/main 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/camel/core/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_eap_camel_ver
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_fuse'
 
 - name: check modules/system/layers/base/org/apache/cxf/impl/main for cxf-rt version
-  raw: ls -1 "{{ item }}"/modules/system/layers/base/org/apache/cxf/impl/main 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: ls -1 '{{ item }}/modules/system/layers/base/org/apache/cxf/impl/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_eap_cxf_ver
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"

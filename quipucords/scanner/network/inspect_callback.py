@@ -131,7 +131,7 @@ class InspectResultCallback(CallbackBase):
                 self._finalize_host(host, SystemInspectionResult.SUCCESS)
             else:
                 processed_value = process.process(
-                    self.scan_task, self._ansible_facts, key, value, host)
+                    self.scan_task, self._ansible_facts.get(host, {}), key, value, host)
                 host_facts[key] = processed_value
 
         if bool(host_facts):

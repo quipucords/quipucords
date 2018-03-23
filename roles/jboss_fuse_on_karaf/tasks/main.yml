@@ -103,7 +103,7 @@
   when: 'have_locate and jboss_fuse'
 
 - name: check /system/org/apache/camel/camel-core for camel-ver
-  raw: ls -1 "{{ item }}"/system/org/apache/camel/camel-core 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_camel_ver
   ignore_errors: yes
   with_items: "{{ karaf_homes }}"
@@ -124,7 +124,7 @@
   when: 'have_locate and jboss_fuse'
 
 - name: check /system/org/apache/activemq/activemq-camel for activemq-ver
-  raw: ls -1 "{{ item }}"/system/org/apache/activemq/activemq-camel 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_activemq_ver
   ignore_errors: yes
   with_items: "{{ karaf_homes }}"
@@ -145,7 +145,7 @@
   when: 'have_locate and jboss_fuse'
 
 - name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
-  raw: ls -1 "{{ item }}"/system/org/apache/cxf/cxf-rt-bindings-coloc 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_cxf_ver
   ignore_errors: yes
   with_items: "{{ karaf_homes }}"
@@ -158,4 +158,3 @@
        jboss_fuse_on_karaf_cxf_ver.get('stdout_lines', [])) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
-

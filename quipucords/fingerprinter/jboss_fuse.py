@@ -61,11 +61,9 @@ def get_versions(fuse_on_eap_versions):
     :returns a list of versions
     """
     new_versions = []
-
-    for versions in fuse_on_eap_versions:
-        if versions:
-            for dictionary in versions:
-                new_versions.append(dictionary['version'])
+    if fuse_on_eap_versions:
+        for dictionary in fuse_on_eap_versions:
+            new_versions.append(dictionary['version'])
     # at this point we have a nested list of versions and we want it
     # to be a flat list
     new_versions = [item for items in new_versions for item in items]
@@ -94,7 +92,7 @@ def detect_jboss_fuse(source, facts):
     eap_camel = facts.get(JBOSS_FUSE_ON_EAP_CAMEL_VER, [])
     eap_activemq = facts.get(JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER, [])
     eap_cxf = facts.get(JBOSS_FUSE_ON_EAP_CXF_VER, [])
-    eap_versions = get_versions([eap_camel, eap_activemq, eap_cxf])
+    eap_versions = get_versions(eap_camel + eap_activemq + eap_cxf)
     # Get versions from extended-products scan
     ext_fuse_activemq = facts.get(JBOSS_ACTIVEMQ_VER, [])
     ext_fuse_camel = facts.get(JBOSS_CAMEL_VER, [])
