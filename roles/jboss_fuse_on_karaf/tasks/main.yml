@@ -96,3 +96,65 @@
   become: true
   when: 'jboss_fuse'
 
+- name: Use locate to look for camel-ver
+  raw: locate camel-core | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_camel_ver
+  ignore_errors: yes
+  when: 'have_locate and jboss_fuse'
+
+- name: check /system/org/apache/camel/camel-core for camel-ver
+  raw: ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_on_karaf_camel_ver
+  ignore_errors: yes
+  with_items: "{{ karaf_homes }}"
+  when: 'jboss_fuse'
+
+- name: set the camel-ver fact
+  set_fact:
+      fuse_camel_version: "{{
+      (jboss_fuse_camel_ver.get('stdout_lines', []) +
+       jboss_fuse_on_karaf_camel_ver.get('stdout_lines', [])) | unique }}"
+  ignore_errors: yes
+  when: 'jboss_fuse'
+
+- name: Use locate to look for activemq-ver
+  raw: locate activemq | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_activemq_ver
+  ignore_errors: yes
+  when: 'have_locate and jboss_fuse'
+
+- name: check /system/org/apache/activemq/activemq-camel for activemq-ver
+  raw: ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_on_karaf_activemq_ver
+  ignore_errors: yes
+  with_items: "{{ karaf_homes }}"
+  when: 'jboss_fuse'
+
+- name: set the activemq-version fact
+  set_fact:
+      fuse_activemq_version: "{{
+      (jboss_fuse_activemq_ver.get('stdout_lines', []) +
+       jboss_fuse_on_karaf_activemq_ver.get('stdout_lines', [])) | unique }}"
+  ignore_errors: yes
+  when: 'jboss_fuse'
+
+- name: Use locate to look for cxf-rt-ver
+  raw: locate cxf-rt| sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_cxf_ver
+  ignore_errors: yes
+  when: 'have_locate and jboss_fuse'
+
+- name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
+  raw: ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  register: jboss_fuse_on_karaf_cxf_ver
+  ignore_errors: yes
+  with_items: "{{ karaf_homes }}"
+  when: 'jboss_fuse'
+
+- name: set the cxf-rt fact
+  set_fact:
+      fuse_cxf_version: "{{
+      (jboss_fuse_cxf_ver.get('stdout_lines', []) +
+       jboss_fuse_on_karaf_cxf_ver.get('stdout_lines', [])) | unique }}"
+  ignore_errors: yes
+  when: 'jboss_fuse'

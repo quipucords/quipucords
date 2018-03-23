@@ -99,3 +99,115 @@ class ProcessKarafHomeSystemOrgJboss(process.Processor):
         """Pass the output back through."""
         return {str(result['stdout_lines']): result['rc'] == 0
                 for result in output['results']}
+
+
+class FuseVersionProcessor(process.Processor):
+    """Pass the item name and std out to the fingerprinter.
+
+    Used for with_items tasks when looking for fuse version
+    """
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a list containing dictionaries defining the home
+        directory and version, or an empty list
+        """
+        results = []
+        for item in output['results']:
+            result = {}
+            item_name = item['item']
+            if item['rc']:
+                pass
+            else:
+                if item['stdout'] != '':
+                    value = str(item['stdout']).splitlines()
+                    result['install_home'] = item_name
+                    result['version'] = list(set(value))
+            if result:
+                results.append(result)
+        return results
+
+
+class FuseVersionProcessorLocate(process.Processor):
+    """Pass stdout lines to the fingerprinter.
+
+    Used for locate tasks when looking for fuse version
+    """
+
+    KEY = None
+
+    @staticmethod
+    def process(output):
+        """Process the output of a with_items task from Ansible.
+
+        :param output: the output of a with_items task.
+
+        :returns: a list containing the version or an empty list
+        """
+        results = []
+        if not output['rc']:
+            results = list(set(output['stdout_lines']))
+        return results
+
+
+class ProcessJbossFuseCamelVersion(FuseVersionProcessor):
+    """Process the output of looking for camel version'."""
+
+    KEY = 'jboss_fuse_on_karaf_camel_ver'
+
+
+class ProcessJbossFuseActivemqVersion(FuseVersionProcessor):
+    """Process the output of looking for activemq version'."""
+
+    KEY = 'jboss_fuse_on_karaf_activemq_ver'
+
+
+class ProcessJbossFuseCxfVersion(FuseVersionProcessor):
+    """Process the output of looking for cxf version'."""
+
+    KEY = 'jboss_fuse_on_karaf_cxf_ver'
+
+
+class ProcessJbossFuseOnEapCamelVersion(FuseVersionProcessor):
+    """Process the output of looking for camel version'."""
+
+    KEY = 'jboss_fuse_on_eap_camel_ver'
+
+
+class ProcessJbossFuseOnEapActivemqVersion(FuseVersionProcessor):
+    """Process the output of looking for activemq version'."""
+
+    KEY = 'jboss_fuse_on_eap_activemq_ver'
+
+
+class ProcessJbossFuseOnEapCxfVersion(FuseVersionProcessor):
+    """Process the output of looking for cxf version'."""
+
+    KEY = 'jboss_fuse_on_eap_cxf_ver'
+
+
+class ProcessLocateCamel(FuseVersionProcessorLocate):
+    """Process the output of 'locate camel-core'."""
+
+    KEY = 'jboss_fuse_camel_ver'
+    DEPS = ['have_locate']
+
+
+class ProcessLocateActivemq(FuseVersionProcessorLocate):
+    """Process the output of 'locate activemq'."""
+
+    KEY = 'jboss_fuse_activemq_ver'
+    DEPS = ['have_locate']
+
+
+class ProcessLocateCxf(FuseVersionProcessorLocate):
+    """Process the output of 'locate cxf-rt'."""
+
+    KEY = 'jboss_fuse_cxf_ver'
+    DEPS = ['have_locate']

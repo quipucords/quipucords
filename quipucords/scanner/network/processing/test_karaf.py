@@ -130,3 +130,147 @@ class TestProcessKarafHomeSystemOrgJboss(unittest.TestCase):
             karaf.ProcessKarafHomeSystemOrgJboss.process(ansible_results(
                 [{'item': 'foo', 'stdout': '', 'rc': 1}])),
             {'[]': False})
+
+
+class TestProcessJbossFuseCamelVersion(unittest.TestCase):
+    """Test the output of looking for camel version."""
+
+    def test_success(self):
+        """Found camel-core."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseCamelVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def test_not_found(self):
+        """Did not find camel-core."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseCamelVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def on_eap_test_success(self):
+        """Found camel on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapCamelVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def on_eap_test_not_found(self):
+        """Did not find camel on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapCamelVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def locate_test_success(self):
+        """Found camel with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateCamel.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout_lines': 'redhat-630187'}])),
+            list(set('redhat-630187')))
+
+    def locate_test_not_found(self):
+        """Did not find camel with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateCamel.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+
+class TestProcessJbossFuseActivemqVersion(unittest.TestCase):
+    """Test the output of looking for activemq version."""
+
+    def test_success(self):
+        """Found activemq."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseActivemqVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def test_not_found(self):
+        """Did not find activemq."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseActivemqVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def on_eap_test_success(self):
+        """Found activemq on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapActivemqVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def on_eap_test_not_found(self):
+        """Did not find activemq on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapActivemqVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def locate_test_success(self):
+        """Found activemq with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateActivemq.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout_lines': 'redhat-630187'}])),
+            list(set('redhat-630187')))
+
+    def locate_test_not_found(self):
+        """Did not find activemq with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateActivemq.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+
+class TestProcessJbossFuseCxfVersion(unittest.TestCase):
+    """Test the output of looking for cxf version."""
+
+    def test_success(self):
+        """Found cxf."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseCxfVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def test_not_found(self):
+        """Did not find cxf."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseCxfVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def on_eap_test_success(self):
+        """Found cxf on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapCxfVersion.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout': 'redhat-630187'}])),
+            [{'install_home': '/fake/dir',
+              'version': ['redhat-630187']}])
+
+    def on_eap_test_not_found(self):
+        """Did not find cxf on eap home dir."""
+        self.assertEqual(
+            karaf.ProcessJbossFuseOnEapCxfVersion.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
+
+    def locate_test_success(self):
+        """Found cxf with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateCxf.process(ansible_results(
+                [{'item': '/fake/dir', 'stdout_lines': 'redhat-630187'}])),
+            list(set('redhat-630187')))
+
+    def locate_test_not_found(self):
+        """Did not find cxf with locate."""
+        self.assertEqual(
+            karaf.ProcessLocateCxf.process(ansible_results(
+                [{'item': 'foo', 'stdout': '', 'rc': 1}])),
+            [])
