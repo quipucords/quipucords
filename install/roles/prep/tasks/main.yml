@@ -7,11 +7,15 @@
     is_fedora_26: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '26') }}"
     is_fedora_27: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '27') }}"
 
-
-- name: Set is_fedora_26_27
+- name: Set is_fedora_26_27 to true
   set_fact:
     is_fedora_26_27: true
   when: is_fedora_26 or is_fedora_27
+
+- name: Set is_fedora_26_27 to false
+  set_fact:
+    is_fedora_26_27: false
+  when: not (is_fedora_26 or is_fedora_27)
 
 - fail:
     msg: "This is not a supported system for installation. Must be RHEL 6/7, CentOS 6/7, or Fedora 26/27."
