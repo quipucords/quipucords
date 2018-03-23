@@ -120,6 +120,6 @@ class ProductFuseTest(TestCase):
         eap_cxf = [{'homedir': '/foo/bin',
                     'version': ['redhat-630187']}]
         eap_activemq = []
-        versions = get_versions([eap_camel, eap_cxf, eap_activemq])
+        versions = get_versions(eap_camel + eap_cxf + eap_activemq)
         expected = ['redhat-620133', 'redhat-630187']
         self.assertEqual(versions, expected)
