@@ -1,18 +1,13 @@
+import expect from 'expect';
+import moxios from 'moxios';
 import promiseMiddleware from 'redux-promise-middleware';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import expect from 'expect';
-
-import * as actions from '../scansActions';
+import { actions } from '../';
 import { reducers } from '../../reducers';
 
-// const mockStore = configureMockStore(middlewares);
-
-import moxios from 'moxios';
-import scansReducer from '../../reducers/scansReducer';
-
 describe('ScansActions', function() {
-  const middlewares = [promiseMiddleware()];
-  const generateStore = () => createStore(combineReducers({ ...reducers }), applyMiddleware(...middlewares));
+  const middleware = [promiseMiddleware()];
+  const generateStore = () => createStore(combineReducers({ scans: reducers.scans }), applyMiddleware(...middleware));
 
   beforeEach(() => {
     moxios.install();
@@ -44,7 +39,7 @@ describe('ScansActions', function() {
     headers: { 'content-type': 'application/json' }
   };
 
-  it('updates the scans view state when getScans has been done', done => {
+  it('Update the scans view state when getScans is complete', done => {
     moxios.wait(() => {
       const request = moxios.requests.mostRecent();
       request.respondWith({
@@ -54,15 +49,18 @@ describe('ScansActions', function() {
     });
 
     const store = generateStore();
-    expect(store.scans).toEqual(scansReducer.initialState);
-    let dispatcher = actions.getScans();
+    expect(reducers.scans.initialState).toBeDefined();
+
+    const dispatcher = actions.scans.getScans();
     dispatcher(store.dispatch).then(() => {
-      let view = store.getState().scans.view;
+      const view = store.getState().scans.view;
+
       expect(view.scans).toEqual(getScansMock.results);
       expect(view.fulfilled).toBeTruthy();
       expect(view.pending).toBeFalsy();
       expect(view.error).toBeFalsy();
       expect(view.errorMessage).toEqual('');
+
       done();
     });
   });

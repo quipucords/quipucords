@@ -1,18 +1,16 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import browser from 'detect-browser';
-
 import { AboutModal } from 'patternfly-react';
-
+import _ from 'lodash';
 import logo from '../../styles/images/Red_Hat_logo.svg';
 import productTitle from '../../styles/images/title.svg';
 
 const About = ({ user, status, shown, onClose }) => {
   const versionText = `${_.get(status, 'api_version', 'unknown')} (Build: ${_.get(status, 'build', 'unknown')})`;
+
   return (
     <AboutModal
-      key="aboutModal"
       show={shown}
       onHide={onClose}
       productTitle={<img src={productTitle} alt="Red Hat Entitlements Reporting" />}
@@ -39,4 +37,5 @@ About.propTypes = {
   shown: PropTypes.bool,
   onClose: PropTypes.func
 };
+
 export default About;

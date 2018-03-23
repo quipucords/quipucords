@@ -1,7 +1,7 @@
-import * as moment from 'moment';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Icon } from 'patternfly-react';
+import * as moment from 'moment';
 import helpers from '../../common/helpers';
 
 class RefreshTimeButton extends React.Component {
@@ -54,10 +54,11 @@ class RefreshTimeButton extends React.Component {
         <Icon type="fa" name="refresh" />
         <span className="last-refresh-time">
           Refreshed{' '}
-          {moment
-            .utc(lastRefresh)
-            .utcOffset(moment().utcOffset())
-            .fromNow()}
+          {lastRefresh &&
+            moment
+              .utc(lastRefresh)
+              .utcOffset(moment().utcOffset())
+              .fromNow()}
         </span>
       </Button>
     );

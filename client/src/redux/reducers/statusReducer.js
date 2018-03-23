@@ -9,7 +9,7 @@ const initialState = {
   currentStatus: {}
 };
 
-export default function statusReducer(state = initialState, action) {
+const statusReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
     case helpers.REJECTED_ACTION(statusTypes.STATUS_INFO):
@@ -34,4 +34,10 @@ export default function statusReducer(state = initialState, action) {
     default:
       return state;
   }
-}
+};
+
+statusReducer.initialState = initialState;
+
+export { initialState, statusReducer };
+
+export default statusReducer;

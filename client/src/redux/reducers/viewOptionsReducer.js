@@ -30,7 +30,7 @@ initialState[viewTypes.SOURCES_VIEW] = Object.assign(INITAL_VIEW_STATE);
 initialState[viewTypes.SCANS_VIEW] = Object.assign(INITAL_VIEW_STATE);
 initialState[viewTypes.CREDENTIALS_VIEW] = Object.assign(INITAL_VIEW_STATE);
 
-export default function viewOptionsReducer(state = initialState, action) {
+const viewOptionsReducer = function(state = initialState, action) {
   let updateState = {};
 
   let updatePageCounts = (viewType, itemsCount) => {
@@ -269,4 +269,10 @@ export default function viewOptionsReducer(state = initialState, action) {
     default:
       return state;
   }
-}
+};
+
+viewOptionsReducer.initialState = initialState;
+
+export { initialState, viewOptionsReducer };
+
+export default viewOptionsReducer;

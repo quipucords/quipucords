@@ -646,6 +646,8 @@ const scansReducer = function(state = initialState, action) {
   }
 };
 
+scansReducer.initialState = initialState;
+
 export { initialState, scansReducer };
 
 export default scansReducer;

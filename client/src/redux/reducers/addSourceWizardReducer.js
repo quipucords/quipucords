@@ -158,6 +158,8 @@ function addSourceWizardReducer(state = initialState, action) {
   }
 }
 
+addSourceWizardReducer.initialState = initialState;
+
 export { initialState, addSourceWizardReducer };
 
 export default addSourceWizardReducer;

@@ -61,6 +61,8 @@ const factsReducer = function(state = initialState, action) {
   }
 };
 
+factsReducer.initialState = initialState;
+
 export { initialState, factsReducer };
 
 export default factsReducer;
