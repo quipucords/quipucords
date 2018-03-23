@@ -99,7 +99,7 @@
 - name: Add QPC repository for RHEL/CentOS 7
   get_url:
     url: "{{ qpc_repo_url }}"
-    dest: /etc/yum.repos.d/"{{ qpc_repo_file }}"
+    dest: '/etc/yum.repos.d/{{ qpc_repo_file }}'
     mode: 0644
     force: yes
   become: true
@@ -109,7 +109,7 @@
 
 - name: Install the latest version of QPC
   yum:
-    name: "{{ qpc_version }}"
+    name: '{{ qpc_version }}'
     state: present
   become: true
   when:
