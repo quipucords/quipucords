@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DropdownSelect Component should render 1`] = `
+<div
+  class="dropdown btn-group"
+  title="test title"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="dropdown-toggle btn btn-default"
+    id="testing"
+    role="button"
+    type="button"
+  >
+    <span>
+      test title
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="testing"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        One
+      </a>
+    </li>
+  </ul>
+</div>
+`;

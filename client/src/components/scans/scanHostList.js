@@ -53,16 +53,15 @@ class ScanHostList extends React.Component {
 
   addResults(results) {
     const { scanResults } = this.state;
-    const { status } = this.props;
+    const { useConnectionResults, useInspectionResults } = this.props;
+    const usePaging = !useConnectionResults || !useInspectionResults;
 
-    let statusResults = [];
-    _.forEach(_.get(results, 'value.data.results', []), result => {
-      if (result.status === status) {
-        statusResults.push(result);
-      }
-    });
+    let newResults = _.get(results, 'value.data.results', []);
+    if (usePaging) {
+      return newResults;
+    }
 
-    let allResults = [...scanResults, ...statusResults];
+    let allResults = [...scanResults, ...newResults];
 
     allResults.sort((item1, item2) => {
       if (helpers.isIpAddress(item1.name) && helpers.isIpAddress(item2.name)) {
@@ -79,7 +78,8 @@ class ScanHostList extends React.Component {
   }
 
   getInspectionResults(page, status) {
-    const { scanId, usePaging, getInspectionScanResults } = this.props;
+    const { scanId, sourceId, getInspectionScanResults, useConnectionResults, useInspectionResults } = this.props;
+    const usePaging = !useConnectionResults || !useInspectionResults;
 
     const queryObject = {
       page: page === undefined ? this.state.page : page,
@@ -87,6 +87,10 @@ class ScanHostList extends React.Component {
       ordering: 'name',
       status: status
     };
+
+    if (sourceId) {
+      queryObject.source_id = sourceId;
+    }
 
     getInspectionScanResults(scanId, queryObject)
       .then(results => {
@@ -115,7 +119,8 @@ class ScanHostList extends React.Component {
   }
 
   getConnectionResults(page, status) {
-    const { scanId, usePaging, getConnectionScanResults } = this.props;
+    const { scanId, sourceId, getConnectionScanResults, useConnectionResults, useInspectionResults } = this.props;
+    const usePaging = !useConnectionResults || !useInspectionResults;
 
     const queryObject = {
       page: page === undefined ? this.state.page : page,
@@ -123,6 +128,10 @@ class ScanHostList extends React.Component {
       ordering: 'name',
       status: status
     };
+
+    if (sourceId) {
+      queryObject.source_id = sourceId;
+    }
 
     getConnectionScanResults(scanId, queryObject)
       .then(results => {
@@ -245,9 +254,9 @@ class ScanHostList extends React.Component {
 
 ScanHostList.propTypes = {
   scanId: PropTypes.number,
+  sourceId: PropTypes.number,
   lastRefresh: PropTypes.number,
   status: PropTypes.string,
-  usePaging: PropTypes.bool,
   renderHostRow: PropTypes.func,
   useConnectionResults: PropTypes.bool,
   useInspectionResults: PropTypes.bool,
@@ -257,8 +266,7 @@ ScanHostList.propTypes = {
 
 ScanHostList.defaultProps = {
   useConnectionResults: false,
-  useInspectionResults: false,
-  usePaging: false
+  useInspectionResults: false
 };
 
 const mapStateToProps = function(state) {

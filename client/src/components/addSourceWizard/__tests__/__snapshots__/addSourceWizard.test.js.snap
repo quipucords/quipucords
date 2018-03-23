@@ -1,0 +1,185 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddSourceWizard Component should shallow render a basic component 1`] = `
+<React.Fragment>
+  <Modal
+    animation={true}
+    autoFocus={true}
+    backdrop={true}
+    bsClass="modal"
+    dialogClassName="modal-dialog modal-lg wizard-pf quipucords-wizard"
+    dialogComponentClass={[Function]}
+    enforceFocus={true}
+    keyboard={true}
+    manager={
+      ModalManager {
+        "add": [Function],
+        "containers": Array [],
+        "data": Array [],
+        "handleContainerOverflow": true,
+        "hideSiblingNodes": true,
+        "isTopModal": [Function],
+        "modals": Array [],
+        "remove": [Function],
+      }
+    }
+    onHide={[Function]}
+    renderBackdrop={[Function]}
+    restoreFocus={true}
+    show={true}
+  >
+    <Wizard
+      className=""
+      embedded={false}
+    >
+      <ModalHeader
+        bsClass="modal-header"
+        closeButton={false}
+        closeLabel="Close"
+      >
+        <button
+          aria-hidden="true"
+          aria-label="Close"
+          className="close"
+          onClick={[Function]}
+        >
+          <Icon
+            name="close"
+            type="pf"
+          />
+        </button>
+        <ModalTitle
+          bsClass="modal-title"
+          componentClass="h4"
+        >
+          Add
+           Source
+        </ModalTitle>
+      </ModalHeader>
+      <ModalBody
+        bsClass="modal-body"
+        className="wizard-pf-body clearfix"
+        componentClass="div"
+      >
+        <WizardSteps
+          className=""
+          steps={
+            Array [
+              <WizardStep
+                activeStep={1}
+                className=""
+                label="1"
+                onClick={[Function]}
+                step={1}
+                stepIndex={0}
+                title="Type"
+              />,
+              <WizardStep
+                activeStep={1}
+                className=""
+                label="2"
+                onClick={[Function]}
+                step={2}
+                stepIndex={1}
+                title="Credentials"
+              />,
+              <WizardStep
+                activeStep={1}
+                className=""
+                label="3"
+                onClick={[Function]}
+                step={3}
+                stepIndex={2}
+                title="Results"
+              />,
+            ]
+          }
+        />
+        <WizardRow
+          className=""
+        >
+          <WizardMain
+            className=""
+          >
+            <WizardContents
+              activeStepIndex={0}
+              activeSubStepIndex={null}
+              className=""
+              key="Type"
+              stepIndex={0}
+              subStepIndex={null}
+            >
+              <Connect(AddSourceWizardStepOne) />
+            </WizardContents>
+            <WizardContents
+              activeStepIndex={0}
+              activeSubStepIndex={null}
+              className=""
+              key="Credentials"
+              stepIndex={1}
+              subStepIndex={null}
+            >
+              <Connect(AddSourceWizardStepTwo) />
+            </WizardContents>
+            <WizardContents
+              activeStepIndex={0}
+              activeSubStepIndex={null}
+              className=""
+              key="Results"
+              stepIndex={2}
+              subStepIndex={null}
+            >
+              <Connect(AddSourceWizardStepThree) />
+            </WizardContents>
+          </WizardMain>
+        </WizardRow>
+      </ModalBody>
+      <ModalFooter
+        bsClass="modal-footer"
+        className="wizard-pf-footer"
+        componentClass="div"
+      >
+        <Button
+          active={false}
+          block={false}
+          bsClass="btn"
+          bsStyle="default"
+          className="btn-cancel"
+          disabled={false}
+          onClick={[Function]}
+        >
+          Cancel
+        </Button>
+        <Button
+          active={false}
+          block={false}
+          bsClass="btn"
+          bsStyle="default"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <Icon
+            name="angle-left"
+            type="fa"
+          />
+          Back
+        </Button>
+        <Button
+          active={false}
+          block={false}
+          bsClass="btn"
+          bsStyle="primary"
+          disabled={true}
+          onClick={[Function]}
+        >
+          Next
+          <Icon
+            name="angle-right"
+            type="fa"
+          />
+        </Button>
+      </ModalFooter>
+    </Wizard>
+  </Modal>
+</React.Fragment>
+`;

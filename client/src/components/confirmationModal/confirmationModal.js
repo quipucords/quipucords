@@ -1,6 +1,6 @@
-import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Modal, Button, Icon } from 'patternfly-react';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';

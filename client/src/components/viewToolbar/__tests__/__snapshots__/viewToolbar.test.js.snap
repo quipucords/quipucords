@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ViewPaginationRow Component should render 1`] = `
+<div
+  class="container-fluid"
+>
+  <div
+    class="toolbar-pf row"
+  >
+    <div
+      class="col-sm-12"
+    >
+      <form
+        class="toolbar-pf-actions"
+      >
+        <div
+          class="filter-pf form-group toolbar-pf-filter"
+        >
+          <div
+            class="filter-pf-fields"
+          >
+            <div
+              class="input-group"
+            />
+          </div>
+        </div>
+        <div
+          class="form-group"
+        >
+          <button
+            class="refresh-button btn btn-link"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="fa fa-refresh"
+            />
+            <span
+              class="last-refresh-time"
+            >
+              Refreshed 
+            </span>
+          </button>
+        </div>
+        <div
+          class="toolbar-pf-action-right"
+        />
+      </form>
+      <div
+        class="toolbar-pf-results row"
+      >
+        <div
+          class="col-sm-12"
+        >
+          <p
+            class="filter-pf-active-label"
+          >
+            No Filters
+          </p>
+          <h5
+            class="quipucords-view-count"
+          >
+            200 
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

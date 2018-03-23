@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ListStatusItem Component should render 1`] = `
+<div
+  class="list-view-pf-additional-info-item list-view-info-item-icon-count"
+>
+  <span>
+    <div
+      class="list-view-pf-expand active"
+    >
+      <span
+        class="fa fa-angle-right fa-angle-down"
+      />
+      <span
+        aria-hidden="true"
+        class="fa fa-id-card list-view-compound-item-icon"
+      />
+      <strong>
+        100
+      </strong>
+    </div>
+  </span>
+</div>
+`;
