@@ -20,7 +20,7 @@ const initialState = {
   }
 };
 
-export default function userReducer(state = initialState, action) {
+const userReducer = function(state = initialState, action) {
   switch (action.type) {
     // Error/Rejected
     case helpers.REJECTED_ACTION(userTypes.USER_INFO):
@@ -155,4 +155,10 @@ export default function userReducer(state = initialState, action) {
     default:
       return state;
   }
-}
+};
+
+userReducer.initialState = initialState;
+
+export { initialState, userReducer };
+
+export default userReducer;

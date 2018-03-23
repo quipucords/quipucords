@@ -37,7 +37,9 @@ class DropdownSelect extends React.Component {
           <Dropdown.Toggle>
             <span>{title}</span>
           </Dropdown.Toggle>
-          <Dropdown.Menu>{children && children.map(menuItem => React.cloneElement(menuItem))}</Dropdown.Menu>
+          <Dropdown.Menu>
+            {children && React.Children.map(children, menuItem => React.cloneElement(menuItem))}
+          </Dropdown.Menu>
         </Dropdown>
       );
     }
@@ -49,7 +51,9 @@ class DropdownSelect extends React.Component {
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {children &&
-            children.map(menuItem => React.cloneElement(menuItem, { onClick: passOnClick(menuItem.props.onClick) }))}
+            React.Children.map(children, menuItem =>
+              React.cloneElement(menuItem, { onClick: passOnClick(menuItem.props.onClick) })
+            )}
         </Dropdown.Menu>
       </Dropdown>
     );

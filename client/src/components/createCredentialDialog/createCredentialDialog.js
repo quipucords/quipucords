@@ -1,11 +1,9 @@
-import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
-
-import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-react';
-
-import { helpers } from '../../common/helpers';
+import { connect } from 'react-redux';
 import Store from '../../redux/store';
+import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-react';
+import { helpers } from '../../common/helpers';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
 import {
   addCredential,
@@ -13,7 +11,6 @@ import {
   getWizardCredentials,
   updateCredential
 } from '../../redux/actions/credentialsActions';
-
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
 
 class CreateCredentialDialog extends React.Component {

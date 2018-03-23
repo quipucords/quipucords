@@ -15,6 +15,11 @@
   "engines": {
     "node": ">=8.0.0"
   },
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ]
+  },
   "sassDepIncludes": "--include-path node_modules/patternfly/dist/sass --include-path node_modules/bootstrap-sass/assets/stylesheets --include-path node_modules/font-awesome-sass/assets/stylesheets",
   "scripts": {
     "api:clean": "npm run api:dev -- -u; npm run api:stage -- -uc; npm run api:prod -- -uc",
@@ -66,19 +71,22 @@
   },
   "devDependencies": {
     "create-react-app": "^1.5.2",
-    "eslint": "^4.18.2",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-to-json": "^3.3.3",
+    "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-config-standard-jsx": "^5.0.0",
     "eslint-config-standard-react": "^6.0.0",
     "eslint-plugin-import": "^2.9.0",
-    "eslint-plugin-jest": "^21.13.0",
+    "eslint-plugin-jest": "^21.15.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-prettier": "^2.6.0",
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-react": "^7.7.0",
     "eslint-plugin-standard": "^3.0.1",
-    "express": "^4.16.2",
+    "express": "^4.16.3",
     "jest": "^21.2.1",
     "jest-cli": "^21.2.1",
     "moxios": "^0.4.0",
@@ -88,7 +96,7 @@
     "react-app-rewired": "^1.5.0",
     "redux-mock-store": "^1.5.1",
     "swagger-parser": "^4.0.2",
-    "swagger-ui-express": "^2.0.15",
+    "swagger-ui-express": "^3.0.0",
     "write-file-webpack-plugin": "^4.2.0",
     "yamljs": "^0.3.0"
   }

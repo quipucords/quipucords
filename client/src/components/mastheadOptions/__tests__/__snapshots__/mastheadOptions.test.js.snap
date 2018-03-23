@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MastheadOptions Component should render 1`] = `
+<nav
+  class="collapse navbar-collapse"
+>
+  <ul
+    class="navbar-iconic nav navbar-nav navbar-right"
+  >
+    <li
+      class="dropdown"
+    >
+      <a
+        aria-expanded="false"
+        aria-haspopup="true"
+        class="nav-item-iconic dropdown-toggle"
+        href="#"
+        id="help"
+        role="button"
+      >
+        <span
+          aria-hidden="true"
+          class="pficon pficon-help"
+        />
+         
+        <span
+          class="caret"
+        />
+      </a>
+      <ul
+        aria-labelledby="help"
+        class="dropdown-menu"
+        role="menu"
+      >
+        <li
+          class=""
+          role="presentation"
+        >
+          <a
+            href="#"
+            role="menuitem"
+            tabindex="-1"
+          >
+            About
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li
+      class="dropdown"
+    >
+      <a
+        aria-expanded="false"
+        aria-haspopup="true"
+        class="nav-item-iconic dropdown-toggle"
+        href="#"
+        id="user"
+        role="button"
+      >
+        <span
+          aria-hidden="true"
+          class="pficon pficon-user"
+        />
+         Admin 
+        <span
+          class="caret"
+        />
+      </a>
+      <ul
+        aria-labelledby="user"
+        class="dropdown-menu"
+        role="menu"
+      >
+        <li
+          class=""
+          role="presentation"
+        >
+          <a
+            href="#"
+            role="menuitem"
+            tabindex="-1"
+          >
+            Log out
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+`;

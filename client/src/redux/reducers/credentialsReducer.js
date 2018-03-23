@@ -271,6 +271,8 @@ const credentialsReducer = function(state = initialState, action) {
   }
 };
 
+credentialsReducer.initialState = initialState;
+
 export { initialState, credentialsReducer };
 
 export default credentialsReducer;
