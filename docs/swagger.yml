@@ -439,7 +439,7 @@ paths:
       tags:
         - "Scan"
       summary: "Create a scan"
-      description: "Create a new scan."
+      description: "Create a new scan"
       operationId: "createScan"
       consumes:
       - "application/json"
@@ -448,7 +448,7 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "Scan object that configures a scan"
+        description: "Scan object that defines a scan"
         required: true
         schema:
           $ref: "#/definitions/ScanIn"
@@ -459,6 +459,8 @@ paths:
             $ref: "#/definitions/ScanOut"
         400:
           description: "Invalid input"
+        401:
+          description: "Not authorized"
     get:
       tags:
         - "Scan"
@@ -477,12 +479,12 @@ paths:
             - inspect
         - name: "page"
           in: "query"
-          description: "Value for selecting a page of results."
+          description: "Value for selecting a page of results"
           type: "integer"
           format: "int64"
         - name: "page_size"
           in: "query"
-          description: "Value for the maximum number of results per page."
+          description: "Value for the maximum number of results per page"
           type: "integer"
           format: "int64"
         - name: "ordering"
@@ -491,23 +493,25 @@ paths:
           type: "string"
         - name: "search_by_name"
           in: "query"
-          description: "Partial match search of scans by name."
+          description: "Partial match search of scans by name"
           type: "string"
         - name: "search_sources_by_name"
           in: "query"
-          description: "Partial match search of scan sources by name."
+          description: "Partial match search of scan sources by name"
           type: "string"
       responses:
         200:
           description: "Scans retrieved"
           schema:
             $ref: "#/definitions/ScanPagination"
+        401:
+          description: "Not authorized"
   /scans/{scan_id}/:
     get:
       tags:
         - "Scan"
       summary: "Get an existing scan"
-      description: "Get a scan's current configuration."
+      description: "Get a scan's current definition"
       operationId: "getScan"
       produces:
       - "application/json"
@@ -523,13 +527,15 @@ paths:
           description: "Scan job retrieved"
           schema:
             $ref: "#/definitions/ScanOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan not found"
     put:
       tags:
         - "Scan"
-      summary: "Update an existing scan"
-      description: "Update a scan's configuration."
+      summary: "Full update of an existing scan"
+      description: "Full update of an existing scan"
       operationId: "updateScan"
       produces:
       - "application/json"
@@ -542,7 +548,7 @@ paths:
         format: "int64"
       - in: "body"
         name: "body"
-        description: "Scan object that configures a scan"
+        description: "Scan object to replace existing scan object"
         required: true
         schema:
           $ref: "#/definitions/ScanIn"
@@ -551,13 +557,15 @@ paths:
           description: "Scan job updated"
           schema:
             $ref: "#/definitions/ScanOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan not found"
     patch:
       tags:
         - "Scan"
-      summary: "Partial update an existing scan"
-      description: "Partial update a scan's configuration."
+      summary: "Partial update of an existing scan"
+      description: "Partial update of an existing scan"
       operationId: "partialUpdateScan"
       produces:
       - "application/json"
@@ -570,7 +578,7 @@ paths:
         format: "int64"
       - in: "body"
         name: "body"
-        description: "Scan object that configures a scan"
+        description: "Scan fields to update"
         required: true
         schema:
           $ref: "#/definitions/ScanIn"
@@ -579,13 +587,15 @@ paths:
           description: "Scan job updated"
           schema:
             $ref: "#/definitions/ScanOut"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan not found"
     delete:
       tags:
         - "Scan"
       summary: "Delete an existing scan"
-      description: "Delete a scan."
+      description: "Delete a scan"
       operationId: "deleteScan"
       produces:
       - "application/json"
@@ -599,9 +609,10 @@ paths:
       responses:
         204:
           description: "Scan deleted"
+        401:
+          description: "Not authorized"
         404:
           description: "Scan not found"
-
   /scans/{scan_id}/jobs/:
     post:
       tags:
@@ -1158,41 +1169,6 @@ definitions:
       detail:
         type: "string"
         description: "Deletion error message"
-  DisableOptionalProducts:
-    type: "object"
-    properties:
-      jboss_eap:
-        type: "boolean"
-        description: "The setting for JBoss EAP"
-        default: false
-      jboss_fuse:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      jboss_brms:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-  ExtendedSearchProducts:
-    type: "object"
-    properties:
-      jboss_eap:
-        type: "boolean"
-        description: "The setting for JBoss EAP"
-        default: false
-      jboss_fuse:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      jboss_brms:
-        type: "boolean"
-        description: "The setting for JBoss Fuse"
-        default: false
-      search_directories:
-        type: "array"
-        items:
-          type: "string"
-        description: "Search directories for the find command."
   FactCollectionIn:
     type: "object"
     required:
@@ -1299,12 +1275,49 @@ definitions:
     properties:
         scan_type:
           type: "string"
-          description: "The type of scan. 'connect' is the default."
+          description: "The type of scan"
           enum:
             - inspect
             - connect
+          default: "connect"
         options:
           $ref: "#/definitions/ScanOptions"
+  ScanDisableOptionalProducts:
+    type: "object"
+    properties:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+        default: false
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+  ScanExtendedSearchProducts:
+    type: "object"
+    properties:
+      jboss_eap:
+        type: "boolean"
+        description: "The setting for JBoss EAP"
+        default: false
+      jboss_fuse:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      jboss_brms:
+        type: "boolean"
+        description: "The setting for JBoss Fuse"
+        default: false
+      search_directories:
+        type: "array"
+        items:
+          type: "string"
+          example: "/"
+        description: "Search directories for the find command"
   ScanIn:
     allOf:
       - $ref: "#/definitions/Scan"
@@ -1317,6 +1330,7 @@ definitions:
             items:
               type: "integer"
               format: "int64"
+              example: 4
             description: "The list of source identifiers"
   ScanJob:
     type: "object"
@@ -1368,9 +1382,11 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+        example: 2
       report_id:
         type: "integer"
         format: "int64"
+        example: 15
   ScanJobMostRecent:
     type: "object"
     required:
@@ -1404,7 +1420,7 @@ definitions:
         example: 1
       status:
         type: "string"
-        description: "The status of the scan."
+        description: "The status of the scan"
         example: "completed"
         enum:
           - created
@@ -1416,7 +1432,7 @@ definitions:
           - completed
       scan_type:
         type: "string"
-        description: "The type of scan."
+        description: "The type of scan"
         example: "inspect"
         enum:
           - connect
@@ -1502,20 +1518,24 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+        example: 4
       name:
         type: "string"
         description: "The name of the scan"
+        example: "WeeklyScan"
   ScanOptions:
     type: "object"
     properties:
       max_concurrency:
         type: "integer"
         format: "int64"
-        description: "The maximum concurrent host scans. default is 50."
+        description: "The maximum concurrent host scans"
+        example: 50
+        default: 50
       disabled_optional_products:
-        $ref: "#/definitions/DisableOptionalProducts"
+        $ref: "#/definitions/ScanDisableOptionalProducts"
       enabled_extended_product_search:
-        $ref: "#/definitions/ExtendedSearchProducts"
+        $ref: "#/definitions/ScanExtendedSearchProducts"
   ScanOut:
     allOf:
       - type: "object"
@@ -1526,6 +1546,7 @@ definitions:
           id:
             type: "integer"
             format: "int64"
+            example: 4
           sources:
             type: "array"
             items:
@@ -1536,7 +1557,6 @@ definitions:
             items:
               $ref: "#/definitions/ScanJobMin"
           most_recent:
-            type: "object"
             $ref: "#/definitions/ScanJobMostRecent"
       - $ref: "#/definitions/Scan"
   ScanPagination:
