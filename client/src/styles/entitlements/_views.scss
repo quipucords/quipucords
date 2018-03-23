@@ -91,6 +91,15 @@
     }
   }
 
+  .list-item-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: -7px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .list-view-pf-left .pficon.list-view-pf-icon-sm, .list-view-pf-left .fa.list-view-pf-icon-sm {
     border: 0;
   }
@@ -132,7 +141,9 @@
     .host-list {
       overflow-y: auto;
       max-height: 300px;
-      border: solid 1px $list-view-active-border;
+      border: solid 1px $list-view-divider;
+      border-left: 0;
+      border-right: 0;
       margin-right: 20px;
       padding-top: 10px;
       padding-bottom: 10px;
