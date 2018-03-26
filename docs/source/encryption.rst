@@ -4,7 +4,7 @@ Quipucords stores authentication passwords and SSH key passphrases within its da
 
 Encryption Mechanism
 ^^^^^^^^^^^^^^^^^^^^
-The encryption uses the secret key for the Quipucords server.  The *secret key* for the server is generated during the initial server startup and resides in the directory that is mapped to ``/var/data/``. If you chose the default configuration options for the Quipucords server, the secret key is in the following location: ``~/quipucords/data/secret.txt``.
+The encryption uses the secret key for the Quipucords server.  The *secret key* for the server is generated during the initial server start process and resides in the directory that is mapped to ``/var/data/``. If you chose the default configuration options for the Quipucords server, the secret key is in the following location: ``~/quipucords/data/secret.txt``.
 
 Data Security
 ^^^^^^^^^^^^^
