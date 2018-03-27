@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
-import { EmptyState, Grid, Pager } from 'patternfly-react';
+import { Button, EmptyState, Grid } from 'patternfly-react';
 import { getConnectionScanResults, getInspectionScanResults } from '../../redux/actions/scansActions';
 
 class ScanHostList extends React.Component {
@@ -19,8 +20,8 @@ class ScanHostList extends React.Component {
       connectionScanResultsPending: false,
       inspectionScanResultsPending: false,
       page: 1,
-      disableNext: true,
-      disablePrevious: true,
+      moreResults: false,
+      nextSetSize: 0,
       prevResults: []
     };
   }
@@ -41,6 +42,13 @@ class ScanHostList extends React.Component {
     }
   }
 
+  componentDidUpdate() {
+    if (this.scrollToHost) {
+      this.scrollHostListToHost(this.scrollToHost);
+      this.scrollToHost = null;
+    }
+  }
+
   onNextPage() {
     this.setState({ page: this.state.page + 1 });
     this.refresh(this.props, this.state.page + 1);
@@ -56,23 +64,23 @@ class ScanHostList extends React.Component {
     const { useConnectionResults, useInspectionResults } = this.props;
     const usePaging = !useConnectionResults || !useInspectionResults;
 
-    let newResults = _.get(results, 'value.data.results', []);
-    if (usePaging) {
-      return newResults;
-    }
-
+    const newResults = _.get(results, 'value.data.results', []);
     let allResults = [...scanResults, ...newResults];
 
-    allResults.sort((item1, item2) => {
-      if (helpers.isIpAddress(item1.name) && helpers.isIpAddress(item2.name)) {
-        const value1 = helpers.ipAddressValue(item1.name);
-        const value2 = helpers.ipAddressValue(item2.name);
+    if (!usePaging) {
+      allResults.sort((item1, item2) => {
+        if (helpers.isIpAddress(item1.name) && helpers.isIpAddress(item2.name)) {
+          const value1 = helpers.ipAddressValue(item1.name);
+          const value2 = helpers.ipAddressValue(item2.name);
 
-        return value1 - value2;
-      }
+          return value1 - value2;
+        }
 
-      return item1.name.localeCompare(item2.name);
-    });
+        return item1.name.localeCompare(item2.name);
+      });
+    } else {
+      this.scrollToHost = _.head(newResults);
+    }
 
     return allResults;
   }
@@ -135,17 +143,20 @@ class ScanHostList extends React.Component {
 
     getConnectionScanResults(scanId, queryObject)
       .then(results => {
-        const morePages = !usePaging && _.get(results.value, 'data.next') !== null;
+        const allResults = this.addResults(results);
+        const morePages = _.get(results.value, 'data.next') !== null;
+        const fullCount = _.get(results.value, 'data.count');
+        const nextSetSize = Math.min(fullCount - _.size(allResults), 100);
 
         this.setState({
-          connectionScanResultsPending: morePages,
-          scanResults: this.addResults(results),
-          prevResults: morePages || this.state.inspectionScanResultsPending ? this.state.prevResults : [],
-          disableNext: !usePaging || _.get(results.value, 'data.next') === null,
-          disablePrevious: !usePaging || _.get(results.value, 'data.previous') === null
+          moreResults: morePages,
+          nextSetSize: nextSetSize,
+          connectionScanResultsPending: morePages && !usePaging,
+          scanResults: allResults,
+          prevResults: morePages || this.state.inspectionScanResultsPending ? this.state.prevResults : []
         });
 
-        if (morePages) {
+        if (morePages && !usePaging) {
           this.getConnectionResults(page + 1, status);
         }
       })
@@ -166,7 +177,7 @@ class ScanHostList extends React.Component {
       scanResultsPending: true,
       connectionScanResultsPending: useConnectionResults,
       inspectionScanResultsPending: useInspectionResults,
-      scanResults: [],
+      scanResults: page === 1 ? [] : this.state.scanResults,
       prevResults: this.state.scanResults
     });
 
@@ -179,27 +190,39 @@ class ScanHostList extends React.Component {
     }
   }
 
+  scrollHostListToHost(host) {
+    const { scanResults } = this.state;
+    const hostList = ReactDOM.findDOMNode(this.refs.hostList);
+    const firstHost = ReactDOM.findDOMNode(_.get(this.refs, `host_${_.get(_.head(scanResults), 'name')}`));
+    const scrollHost = ReactDOM.findDOMNode(_.get(this.refs, `host_${host.name}`));
+
+    if (hostList && scrollHost) {
+      hostList.scrollTop = hostList.scrollTop - _.get(firstHost, 'offsetTop') + scrollHost.offsetTop;
+    }
+  }
+
   renderResults(results) {
     const { renderHostRow } = this.props;
-    const { disablePrevious, disableNext } = this.state;
+    const { moreResults, nextSetSize } = this.state;
 
     return (
       <div className="host-results">
-        {(!disableNext || !disablePrevious) && (
-          <Grid fluid>
-            <Grid.Row>
-              <Pager
-                className="pager-sm"
-                onNextPage={this.onNextPage}
-                onPreviousPage={this.onPreviousPage}
-                disableNext={disableNext}
-                disablePrevious={disablePrevious}
-              />
-            </Grid.Row>
-          </Grid>
-        )}
-        <Grid fluid className="host-list">
-          {results && results.map((host, index) => <Grid.Row key={index}>{renderHostRow(host)}</Grid.Row>)}
+        <Grid fluid className="host-list" ref="hostList">
+          {results &&
+            results.map((host, index) => (
+              <Grid.Row key={index} ref={`host_${host.name}`}>
+                {renderHostRow(host)}
+              </Grid.Row>
+            ))}
+          {moreResults && (
+            <Grid fluid>
+              <Grid.Row>
+                <Button bsStyle="link" className="show-next-button" onClick={this.onNextPage}>
+                  Show next {nextSetSize} results
+                </Button>
+              </Grid.Row>
+            </Grid>
+          )}
         </Grid>
       </div>
     );

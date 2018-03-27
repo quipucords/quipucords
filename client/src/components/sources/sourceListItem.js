@@ -9,7 +9,7 @@ import { helpers } from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SourceCredentialsList from './sourceCredentialsList';
-import ScanHostList from '../scans/scanHostList';
+import ScanHostList from '../scanHostList/scanHostList';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
