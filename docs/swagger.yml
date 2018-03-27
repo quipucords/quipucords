@@ -943,7 +943,7 @@ paths:
         200:
           description: "Detailed report successfully retrieved"
           schema:
-            $ref: "#/definitions/FactCollectionSource"
+            $ref: "#/definitions/FactCollectionOut"
         401:
           description: "Not authorized"
         404:
@@ -1207,7 +1207,7 @@ definitions:
           format: "int64"
           description: "The fact collection identifier"
           example: 15
-        facts:
+        sources:
           type: "array"
           items:
             $ref: "#/definitions/FactCollectionSource"
