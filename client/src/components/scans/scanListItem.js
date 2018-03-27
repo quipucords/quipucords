@@ -10,7 +10,7 @@ import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ScanSourceList from './scanSourceList';
-import ScanHostList from './scanHostList';
+import ScanHostList from '../scanHostList/scanHostList';
 import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
@@ -332,7 +332,7 @@ class ScanListItem extends React.Component {
         className={classes}
         checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
-        leftContent={<strong>{item.name}</strong>}
+        leftContent={<div className="list-item-name">{item.name}</div>}
         description={this.renderDescription()}
         additionalInfo={this.renderStatusItems()}
         compoundExpand

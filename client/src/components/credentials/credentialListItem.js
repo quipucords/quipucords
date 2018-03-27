@@ -129,22 +129,18 @@ class CredentialListItem extends React.Component {
 
   renderExpansionContents() {
     const { item, expandedCredentials } = this.props;
+    const typeIcon = helpers.sourceTypeIcon(item.cred_type);
 
     switch (this.expandType(item, expandedCredentials)) {
       case 'sources':
         item.sources &&
           item.sources.sort((item1, item2) => {
-            let cmpVal = item1.source_type.localeCompare(item2.source_type);
-            if (cmpVal === 0) {
-              cmpVal = item1.name.localeCompare(item2.name);
-            }
-            return cmpVal;
+            return item1.name.localeCompare(item2.name);
           });
         return (
           <Grid fluid>
             {item.sources &&
               item.sources.map((source, index) => {
-                let typeIcon = helpers.sourceTypeIcon(source.source_type);
                 return (
                   <Grid.Row key={index}>
                     <Grid.Col xs={12} sm={4}>
@@ -181,11 +177,13 @@ class CredentialListItem extends React.Component {
         checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={
-          <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
-            <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
-          </SimpleTooltip>
+          <React.Fragment>
+            <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
+              <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
+            </SimpleTooltip>
+            <span className="list-item-name">{item.name}</span>
+          </React.Fragment>
         }
-        heading={item.name}
         description={
           <SimpleTooltip id="methodTip" tooltip="Authorization Type">
             {helpers.authorizationTypeString(item.auth_type)}
