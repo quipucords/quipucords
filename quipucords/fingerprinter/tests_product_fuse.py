@@ -13,7 +13,7 @@
 
 from django.test import TestCase
 from fingerprinter.jboss_fuse import (detect_jboss_fuse,
-                                      get_versions)
+                                      get_version)
 
 
 class ProductFuseTest(TestCase):
@@ -99,7 +99,8 @@ class ProductFuseTest(TestCase):
                  'fuse_camel_version': ['redhat-630187'],
                  'jboss_fuse_on_eap_activemq_ver': [{'homedir': '/foo/bin',
                                                      'version':
-                                                         ['redhat-630187']}]}
+                                                         ['redhat-630187']}],
+                 'jboss_cxf_ver': ['redhat-630187']}
         product = detect_jboss_fuse(source, facts)
         expected = {'name': 'JBoss Fuse',
                     'presence': 'present',
@@ -108,18 +109,31 @@ class ProductFuseTest(TestCase):
                         {'source_id': 1,
                          'source_name': None,
                          'source_type': 'network',
-                         'raw_fact_key':
-                             'eap_home_bin/fuse_camel_version/'
-                             'jboss_fuse_on_eap_activemq_ver'}}
+                         'raw_fact_key': 'eap_home_bin/fuse_camel_version/'
+                                         'jboss_cxf_ver/'
+                                         'jboss_fuse_on_eap_activemq_ver'}}
         self.assertEqual(product, expected)
 
-    def test_get_versions(self):
-        """Test the get_versions method."""
+    def test_detect_activemq_fuse_absent(self):
+        """Test the detect_jboss_fuse method with activemq version found."""
+        source = {'source_id': 1, 'source_type': 'network'}
+        facts = {'jboss_fuse_on_eap_activemq_ver': [{'homedir': '/foo/bin',
+                                                     'version':
+                                                         ['redhat-630187']}]}
+        product = detect_jboss_fuse(source, facts)
+        expected = {'name': 'JBoss Fuse',
+                    'presence': 'absent',
+                    'metadata':
+                        {'source_id': 1,
+                         'source_name': None,
+                         'source_type': 'network',
+                         'raw_fact_key': None}}
+        self.assertEqual(product, expected)
+
+    def test_get_version(self):
+        """Test the get_version method."""
         eap_camel = [{'homedir': '/foo/bin',
                       'version': ['redhat-620133']}]
-        eap_cxf = [{'homedir': '/foo/bin',
-                    'version': ['redhat-630187']}]
-        eap_activemq = []
-        versions = get_versions(eap_camel + eap_cxf + eap_activemq)
-        expected = ['redhat-620133', 'redhat-630187']
+        versions = get_version(eap_camel)
+        expected = ['redhat-620133']
         self.assertEqual(versions, expected)
