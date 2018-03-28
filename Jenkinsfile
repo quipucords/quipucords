@@ -42,9 +42,6 @@ node('f25-os') {
         def image_name = "quipucords:0.0.41"
 
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
-        sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/$image_name"
-        sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/$image_name"
 
         def tarfile = "quipucords.0.0.41.tar"
         def targzfile = tarfile + ".gz"
