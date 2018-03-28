@@ -10,7 +10,6 @@
 """Utilities for processing Ansible task outputs."""
 
 import logging
-import re
 from scanner.network.processing import process
 
 
@@ -195,25 +194,3 @@ class StdoutPassthroughProcessor(PerItemProcessor):
     def process_item(item):
         """Make sure item succeeded and pass stdout through."""
         return item['rc'] == 0 and item['stdout']
-
-
-IMPLEMENTATION_VERSION_RE = re.compile(r'Implementation-Version:\s*(.*)\s*')
-
-
-class ManifestVersionProcessor(PerItemProcessor):
-    """Get the Implementation-Version from a MANIFEST.MF file."""
-
-    KEY = None
-
-    @staticmethod
-    def process_item(item):
-        """Get the implementation version from a MANIFEST.MF file."""
-        if item['rc']:
-            return None
-
-        for line in item['stdout_lines']:
-            match = IMPLEMENTATION_VERSION_RE.match(line)
-            if match:
-                return match.group(1)
-
-        return None

@@ -11,9 +11,8 @@
 
 """Ingests raw facts to determine the status of JBoss BRMS for a system."""
 
+import itertools
 import logging
-import os
-import re
 from api.models import Product, Source
 from fingerprinter.utils import (product_entitlement_found,
                                  generate_raw_fact_members)
@@ -74,27 +73,6 @@ def classify_version_string(version_string):
     return None
 
 
-def classify_kie_file(pathname):
-    """Classify a kie-api-* file.
-
-    :param pathname: the path to the file
-    :returns: a BRMS version string, or None if not a Red Hat kie file.
-    """
-    # os.path.basename behaves differently if the last part of the
-    # path ends in a /, so normalize.
-    if pathname.endswith('/'):
-        pathname = pathname[:-1]
-
-    basename = os.path.basename(pathname)
-
-    # Filename format is 'kie-api-' + version + '.jar' + stuff.
-    match = re.match(r'kie-api-(.*)\.jar.*', basename)
-    if match:
-        return classify_version_string(match.group(1))
-
-    return None
-
-
 # pylint: disable=R0912,R0914,R0915
 def detect_jboss_brms(source, facts):
     """Detect if JBoss BRMS is present based on system facts.
@@ -103,16 +81,14 @@ def detect_jboss_brms(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, {})
-    kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, [])
-    locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, [])
-    find_kie_api = facts.get(JBOSS_BRMS_KIE_API_VER, [])
-    find_kie_war = facts.get(JBOSS_BRMS_KIE_WAR_VER, [])
-    find_drools = facts.get(JBOSS_BRMS_DROOLS_CORE_VER, [])
+    manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, set())
+    kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, set())
+    locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, set())
+    find_kie_api = facts.get(JBOSS_BRMS_KIE_API_VER, set())
+    find_kie_war = facts.get(JBOSS_BRMS_KIE_WAR_VER, set())
+    find_drools = facts.get(JBOSS_BRMS_DROOLS_CORE_VER, set())
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
-    kie_files = kie_in_bc + locate_kie_api
-    ext_search_results = set(find_kie_api + find_kie_war + find_drools)
 
     source_object = Source.objects.filter(id=source.get('source_id')).first()
     if source_object:
@@ -129,24 +105,42 @@ def detect_jboss_brms(source, facts):
 
     versions = set()
     found_kie_version = False
-    for filename in kie_files:
-        category = classify_kie_file(filename)
+    for directory, version_string in itertools.chain(kie_in_bc,
+                                                     locate_kie_api):
+        # directory, basename = posixpath.split(filename)
+        # category = classify_kie_file(basename)
+        category = classify_version_string(version_string)
         # categories that are falsey are not Red Hat files.
         if category:
-            versions.add(category)
+            # directory = directory or 'Unknown directory'
+            # Make directory part of the version string so we will
+            # report when the same BRMS version is installed in two
+            # places on one host.
+            versions.add('{0}:{1}'.format(directory, category))
             found_kie_version = True
 
     found_manifest_version = False
-    for manifest_version in manifest_mfs.values():
+    for directory, manifest_version in manifest_mfs:
         category = classify_version_string(manifest_version)
         if category:
-            versions.add(category)
+            versions.add('{0}:{1}'.format(directory, category))
             found_manifest_version = True
 
-    for search_version in ext_search_results:
+    for directory, filename in itertools.chain(find_kie_api,
+                                               find_drools):
+        category = classify_version_string(filename)
+        if category:
+            versions.add('{0}:{1}'.format(directory, category))
+
+    for search_version in find_kie_war:
         category = classify_version_string(search_version)
         if category:
-            versions.add(category)
+            # The find_kie_war task can't output directories, so these
+            # are always unknown. The issue is that it has some old
+            # code to handle compressed .war archives, and we have no
+            # test cases for this code, which makes changing it too
+            # risky.
+            versions.add('Unknown directory:' + category)
 
     found_redhat_brms = bool(versions)
 

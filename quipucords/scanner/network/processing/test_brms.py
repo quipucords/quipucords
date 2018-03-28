@@ -32,8 +32,8 @@ Implementation-Version: 6.5.0.Final-redhat-2
         """Extract the Implementation_Version from a manifest."""
         self.assertEqual(
             brms.ProcessJbossBRMSManifestMF.process_item(
-                ansible_item('manifest', self.MANIFEST)),
-            '6.5.0.Final-redhat-2')
+                ansible_item('/opt/brms/', self.MANIFEST)),
+            ('/opt/brms', '6.5.0.Final-redhat-2'))
 
     def test_no_version(self):
         """Don't crash if the manifest is missing a version."""
@@ -42,11 +42,32 @@ Implementation-Version: 6.5.0.Final-redhat-2
                 ansible_item('manifest', 'not\na\nmanifest')))
 
 
+class TestEnclosingWarArchive(unittest.TestCase):
+    """Test enclosing_war_archive."""
+
+    def test_enclosing(self):
+        """Return the enclosing war archive."""
+        self.assertEqual(
+            brms.enclosing_war_archive('/foo/kie-server.war/bar/baz'),
+            '/foo/kie-server.war')
+
+    def test_war_root(self):
+        """Return the war archive when applied to just the archive."""
+        self.assertEqual(
+            brms.enclosing_war_archive('/foo/kie-server.war'),
+            '/foo/kie-server.war')
+
+    def test_no_war_archive(self):
+        """Return None when there is no war archive."""
+        self.assertIsNone(
+            brms.enclosing_war_archive('/foo/bar/baz'))
+
+
 class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
     """Test ProcessJbossBRMSKieBusinessCentral."""
 
     good_result = {'item': '/tmp/good/',
-                   'stdout': '/tmp/good/file.file',
+                   'stdout': '/tmp/good/kie-api-version-string.jar-1234',
                    'rc': 0}
     bad_result = {'item': '/tmp/bad/',
                   'stdout': '',
@@ -56,29 +77,21 @@ class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         self.assertEqual(
-            brms.ProcessJbossBRMSKieBusinessCentral.process(self.ls_results),
-            [self.good_result['stdout']])
+            set(
+                brms.ProcessJbossBRMSKieBusinessCentral.process(
+                    self.ls_results)),
+            {('/tmp/good', 'version-string')})
 
 
-class TestProcessFindBRMSKieApiVer(unittest.TestCase):
-    """Test ProcessFindBRMSKieApiVer."""
-
-    def test_success_case(self):
-        """Return stdout_lines in case of success."""
-        self.assertEqual(
-            brms.ProcessFindBRMSKieApiVer.process(ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
-
-
-class TestProcessFindBRMSDroolsCoreVer(unittest.TestCase):
-    """Test ProcessFindBRMSDroolsCoreVer."""
+class TestJarNameProcessor(unittest.TestCase):
+    """Test JarNameProcessor."""
 
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         self.assertEqual(
-            brms.ProcessFindBRMSDroolsCoreVer.process(
-                ansible_result('a\nb\nc')),
-            ['a', 'b', 'c'])
+            set(brms.JarNameProcessor.process(
+                ansible_result('/a\n/b\n/foo/c'))),
+            {('/', 'a'), ('/', 'b'), ('/foo', 'c')})
 
 
 class TestProcessFindBRMSKieWarVer(unittest.TestCase):
