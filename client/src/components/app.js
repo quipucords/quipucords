@@ -12,7 +12,7 @@ import About from './about/about';
 import AddSourceWizard from './addSourceWizard/addSourceWizard';
 import CreateCredentialDialog from './createCredentialDialog/createCredentialDialog';
 import Content from './content/content';
-import ToastNotificationsList from './toastNotificationList/toastNotificatinsList';
+import ToastNotificationsList from './toastNotificationsList/toastNotificationsList';
 import ConfirmationModal from './confirmationModal/confirmationModal';
 import MastheadOptions from './mastheadOptions/mastheadOptions';
 import productTitle from '../styles/images/title.svg';
