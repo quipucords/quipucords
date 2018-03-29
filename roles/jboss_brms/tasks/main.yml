@@ -30,6 +30,17 @@
   ignore_errors: yes
   when: 'jboss_brms'
 
+- name: search filesystem for kie-server candidates
+  raw: find {{search_directories}} -xdev -name kie*.war 2> /dev/null
+  register: internal_jboss_brms_kie_search_candidates
+  ignore_errors: yes
+  when: 'jboss_brms_ext'
+
+- name: set kie_search_candidates
+  set_fact:
+    kie_search_candidates: "{{ internal_jboss_brms_kie_search_candidates.get('stdout_lines', []) }}"
+  ignore_errors: yes
+
 # Combine the above with any EAP_HOME directories we've found
 - name: create list if eap_home_candidates is not empty
   set_fact:
@@ -57,7 +68,7 @@
   raw: cat '{{ item }}/META-INF/MANIFEST.MF' 2>/dev/null
   register: jboss_brms_manifest_mf
   ignore_errors: yes
-  with_items: "{{ business_central_candidates + kie_server_candidates }}"
+  with_items: "{{ business_central_candidates + kie_server_candidates + kie_search_candidates }}"
   when: 'jboss_brms'
 
 - name: look for kie-api files inside candidate directories
@@ -69,27 +80,20 @@
 
 - name: look for all kie-api files on the system
   raw: locate --basename 'kie-api*'
-  register: internal_jboss_brms_locate_kie_api
+  register: jboss_brms_locate_kie_api
   ignore_errors: yes
   when: 'have_locate and jboss_brms'
-
-- name: set jboss_brms_locate_kie_api
-  set_fact:
-    jboss_brms_locate_kie_api: "{{ internal_jboss_brms_locate_kie_api.get('stdout_lines', []) }}"
-  ignore_errors: yes
-  when: 'jboss_brms'
-
 
 # Tasks that do filesystem scans. This will scan linux systems for
 # JBoss BRMS or Drools Installations
 - name: Gather jboss.brms.kie-api-ver
-  raw: find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sed 's/.*kie-api-//g' | sed 's/.jar.*//g' | sort -u
+  raw: find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sort -u
   register: jboss_brms_kie_api_ver
   ignore_errors: yes
   when: 'jboss_brms_ext'
 
 - name: Gather jboss.brms.drools-core-ver
-  raw: find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sed 's/.*drools-core-//g' | sed 's/.jar.*//g' | sort -u
+  raw: find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sort -u
   register: jboss_brms_drools_core_ver
   ignore_errors: yes
   when: 'jboss_brms_ext'
