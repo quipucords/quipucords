@@ -104,6 +104,13 @@
     - find_qpc_server_local is defined
     - find_qpc_server_local
 
+- name: Ensure packages directory exists
+  shell: mkdir -p "{{ pkg_install_dir }}"
+  when:
+    - install_server
+    - not find_qpc_server_local
+    - not docker_image_present
+
 - name: Obtain Quipucords server container image
   get_url:
     url: "{{ server_url }}"

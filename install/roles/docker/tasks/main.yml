@@ -114,6 +114,13 @@
     - not have_docker
     - not find_docker_rpm_local
 
+- name: Ensure packages directory exists
+  shell: mkdir -p "{{ pkg_install_dir }}"
+  when:
+    - is_rhel_centos_6
+    - not have_docker
+    - not find_docker_rpm_local
+
 - name: Obtain Docker Engine for Centos/RHEL 6 family
   get_url:
     url: http://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
