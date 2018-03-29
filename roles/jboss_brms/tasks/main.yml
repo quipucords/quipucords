@@ -87,13 +87,13 @@
 # Tasks that do filesystem scans. This will scan linux systems for
 # JBoss BRMS or Drools Installations
 - name: Gather jboss.brms.kie-api-ver
-  raw: find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sed 's/.jar.*//g' | sort -u
+  raw: find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sort -u
   register: jboss_brms_kie_api_ver
   ignore_errors: yes
   when: 'jboss_brms_ext'
 
 - name: Gather jboss.brms.drools-core-ver
-  raw: find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sed 's/.jar.*//g' | sort -u
+  raw: find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sort -u
   register: jboss_brms_drools_core_ver
   ignore_errors: yes
   when: 'jboss_brms_ext'

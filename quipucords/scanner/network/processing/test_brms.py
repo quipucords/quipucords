@@ -83,15 +83,27 @@ class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
             {('/tmp/good', 'version-string')})
 
 
-class TestJarNameProcessor(unittest.TestCase):
-    """Test JarNameProcessor."""
+class TestFindBRMSKieApiVer(unittest.TestCase):
+    """Test FindBRMSKieApiVer."""
+
+    ansible_stdout = (
+        '/opt/jboss/jboss-eap-6.4/standalone/deployments/business-central.war/'
+        'WEB-INF/lib/kie-api-6.5.0.Final-redhat-2.jar\r\n'
+        '/opt/jboss/jboss-eap-6.4/standalone/deployments/kie-server.war/'
+        'WEB-INF/lib/kie-api-6.5.0.Final-redhat-2.jar\r\n')
+
+    expected = {('/opt/jboss/jboss-eap-6.4/standalone/'
+                 'deployments/business-central.war', '6.5.0.Final-redhat-2'),
+                ('/opt/jboss/jboss-eap-6.4/standalone/'
+                 'deployments/kie-server.war', '6.5.0.Final-redhat-2')}
 
     def test_success_case(self):
-        """Return stdout_lines in case of success."""
+        """Return the correct (directory, version string) pairs."""
         self.assertEqual(
-            set(brms.JarNameProcessor.process(
-                ansible_result('/a\n/b\n/foo/c'))),
-            {('/', 'a'), ('/', 'b'), ('/foo', 'c')})
+            set(
+                brms.ProcessFindBRMSKieApiVer.process(
+                    ansible_result(self.ansible_stdout))),
+            self.expected)
 
 
 class TestProcessFindBRMSKieWarVer(unittest.TestCase):

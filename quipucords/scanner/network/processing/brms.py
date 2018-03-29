@@ -98,6 +98,7 @@ def enclosing_war_archive(path):
 
 
 KIE_FILENAME_RE = re.compile(r'kie-api-(.*)\.jar.*')
+JAR_SUFFIX_RE = re.compile(r'(.*)\.jar.*')
 
 
 class ProcessJbossBRMSKieBusinessCentral(process.Processor):
@@ -124,56 +125,57 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
         return list(results)
 
 
-class ProcessLocateKieApiFiles(process.Processor):
-    """Process locate results for kie-api files."""
+class EnclosingWarJarProcessor(process.Processor):
+    """Find the enclosing WAR archive of a jar file.
 
-    KEY = 'jboss_brms_locate_kie_api'
-    DEPS = ['have_locate']
+    Additionally, remove a prefix and .jar.* suffix from the jar
+    name.
+    """
 
-    @staticmethod
-    def process(output):
+    KEY = None
+
+    # Remove this prefix of the jar name, if given
+    REMOVE_PREFIX = None
+
+    @classmethod
+    def process(cls, output):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
         for line in output['stdout_lines']:
             filename = posixpath.basename(line)
             directory = enclosing_war_archive(line)
-            match = KIE_FILENAME_RE.match(filename)
+            match = JAR_SUFFIX_RE.match(filename)
             if not match:
                 continue
-            results.add((directory, match.group(1)))
-
-        return list(results)
-
-
-class JarNameProcessor(process.Processor):
-    """Process the results of a find command."""
-
-    KEY = None
-
-    @staticmethod
-    def process(output):
-        """Split lines into directory / filename pairs."""
-        results = set()
-
-        for line in output['stdout_lines']:
-            directory, filename = posixpath.split(line)
-            if not directory or not filename:
+            without_suffix = match.group(1)
+            if not without_suffix.startswith(cls.REMOVE_PREFIX):
                 continue
-            results.add((normalize_path(directory), filename))
+            version_string = without_suffix[len(cls.REMOVE_PREFIX):]
+            results.add((directory, version_string))
 
         return list(results)
 
 
-class ProcessFindBRMSKieApiVer(JarNameProcessor):
+class ProcessLocateKieApiFiles(EnclosingWarJarProcessor):
+    """Process locate results for kie-api files."""
+
+    KEY = 'jboss_brms_locate_kie_api'
+    DEPS = ['have_locate']
+    REMOVE_PREFIX = 'kie-api-'
+
+
+class ProcessFindBRMSKieApiVer(EnclosingWarJarProcessor):
     """Process a list of kie-api* files."""
 
     KEY = 'jboss_brms_kie_api_ver'
+    REMOVE_PREFIX = 'kie-api-'
 
 
-class ProcessFindBRMSDroolsCoreVer(JarNameProcessor):
-    """Process the results of a find command."""
+class ProcessFindBRMSDroolsCoreVer(EnclosingWarJarProcessor):
+    """Process a list of drools-core* files."""
 
     KEY = 'jboss_brms_drools_core_ver'
+    REMOVE_PREFIX = 'drools-core-'
 
 
 class ProcessFindBRMSKieWarVer(process.Processor):
