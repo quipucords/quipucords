@@ -4,7 +4,7 @@ Quipucords uses several different types of authentication models. These include 
 
 Quipucords Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Communication with the Quipucords server uses an authentication token. When you enter the ``qpc server login`` command, you are prompted for the server user name and password. The login command exchanges the user name and password, which are encrypted and transmitted to the server over HTTPS, for the authentication token. The authentication token is then used for all subsequent commands in that session. An authentication token expires when you log out of that session, and it also expires on a daily basis.
+Communication with the Quipucords server uses an authentication token. When you enter the ``qpc server login`` command, you are prompted for the server user name and password. The login command exchanges the user name and password, which are encrypted and transmitted to the server over HTTPS, for the authentication token. The authentication token is then used for all subsequent commands in that session. An authentication token expires when you log out of that session. It also expires on a daily basis.
 
 Network Authentication
 ^^^^^^^^^^^^^^^^^^^^^^
