@@ -105,42 +105,31 @@ def detect_jboss_brms(source, facts):
 
     versions = set()
     found_kie_version = False
-    for directory, version_string in itertools.chain(kie_in_bc,
-                                                     locate_kie_api):
-        # directory, basename = posixpath.split(filename)
-        # category = classify_kie_file(basename)
+    for _, version_string in itertools.chain(kie_in_bc,
+                                             locate_kie_api):
         category = classify_version_string(version_string)
         # categories that are falsey are not Red Hat files.
         if category:
-            # directory = directory or 'Unknown directory'
-            # Make directory part of the version string so we will
-            # report when the same BRMS version is installed in two
-            # places on one host.
-            versions.add('{0}:{1}'.format(directory, category))
+            versions.add(category)
             found_kie_version = True
 
     found_manifest_version = False
-    for directory, manifest_version in manifest_mfs:
+    for _, manifest_version in manifest_mfs:
         category = classify_version_string(manifest_version)
         if category:
-            versions.add('{0}:{1}'.format(directory, category))
+            versions.add(category)
             found_manifest_version = True
 
-    for directory, filename in itertools.chain(find_kie_api,
-                                               find_drools):
+    for _, filename in itertools.chain(find_kie_api,
+                                       find_drools):
         category = classify_version_string(filename)
         if category:
-            versions.add('{0}:{1}'.format(directory, category))
+            versions.add(category)
 
     for search_version in find_kie_war:
         category = classify_version_string(search_version)
         if category:
-            # The find_kie_war task can't output directories, so these
-            # are always unknown. The issue is that it has some old
-            # code to handle compressed .war archives, and we have no
-            # test cases for this code, which makes changing it too
-            # risky.
-            versions.add('Unknown directory:' + category)
+            versions.add(category)
 
     found_redhat_brms = bool(versions)
 

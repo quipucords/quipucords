@@ -28,7 +28,7 @@ class ProductBRMSTest(TestCase):
         product = detect_jboss_brms(source, facts)
         expected = {'name': 'JBoss BRMS',
                     'presence': 'present',
-                    'version': ['/opt/brms:BRMS 6.3.0'],
+                    'version': ['BRMS 6.3.0'],
                     'metadata': {
                         'source_id': 1,
                         'source_name': None,
