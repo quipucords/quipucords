@@ -38,6 +38,7 @@ ENTITLEMENTS = 'entitlements'
 # These classifications apply to both strings in kie filenames and
 # Implementation-Version strings in BRMS MANIFEST.MF files.
 BRMS_CLASSIFICATIONS = {
+    '7.5.0.Final-redhat-4': 'RHDM 7.0.0',
     '6.5.0.Final-redhat-2': 'BRMS 6.4.0',
     '6.4.0.Final-redhat-3': 'BRMS 6.3.0',
     '6.3.0.Final-redhat-5': 'BRMS 6.2.0',
