@@ -106,7 +106,7 @@ class ScanJobsList extends React.Component {
           {job.systems_scanned > 0 ? job.systems_scanned : '0'}
         </Grid.Col>
         <Grid.Col xs={3} sm={2} smPush={5}>
-          {job.status === 'completed' && (
+          {job.report_id > 0 && (
             <Dropdown id={helpers.generateId()} className="pull-right" pullRight>
               <Dropdown.Toggle useAnchor>
                 <Icon type="fa" name="download" />
