@@ -272,13 +272,11 @@
 }
 
 .quipucords-credential-list-item {
-  @media (min-width: 992px) {
-    .list-group-item-heading {
-      width: calc(60% - 20px);
-    }
-    .list-group-item-text {
-      width: calc(40% - 20px);
-    }
+  .list-view-pf-description {
+    margin-top: 4px;
+  }
+  .list-view-pf-additional-info {
+    margin-top: -3px;
   }
 }
 

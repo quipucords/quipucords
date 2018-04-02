@@ -167,27 +167,33 @@ class CredentialListItem extends React.Component {
     const sourceTypeIcon = helpers.sourceTypeIcon(item.cred_type);
     const classes = cx({
       'quipucords-credential-list-item': true,
+      'list-view-pf-top-align': true,
       active: selected
     });
 
     return (
       <ListView.Item
         key={item.id}
+        stacked
         className={classes}
         checkboxInput={<Checkbox checked={selected} bsClass="" onChange={this.itemSelectChange} />}
         actions={this.renderActions()}
         leftContent={
-          <React.Fragment>
-            <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
-              <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
-            </SimpleTooltip>
-            <span className="list-item-name">{item.name}</span>
-          </React.Fragment>
+          <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
+            <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
+          </SimpleTooltip>
         }
         description={
-          <SimpleTooltip id="methodTip" tooltip="Authorization Type">
-            {helpers.authorizationTypeString(item.auth_type)}
-          </SimpleTooltip>
+          <div className="quipucords-split-description">
+            <span className="quipucords-description-left">
+              <ListView.DescriptionHeading>{item.name}</ListView.DescriptionHeading>
+            </span>
+            <span className="quipucords-description-right">
+              <SimpleTooltip id="methodTip" tooltip="Authorization Type">
+                {helpers.authorizationTypeString(item.auth_type)}
+              </SimpleTooltip>
+            </span>
+          </div>
         }
         additionalInfo={this.renderStatusItems()}
         compoundExpand
