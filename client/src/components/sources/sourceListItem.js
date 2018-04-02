@@ -369,7 +369,7 @@ class SourceListItem extends React.Component {
 }
 
 SourceListItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object.isRequired,
   lastRefresh: PropTypes.number,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,

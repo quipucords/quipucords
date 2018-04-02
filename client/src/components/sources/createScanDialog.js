@@ -136,7 +136,7 @@ class CreateScanDialog extends React.Component {
   renderErrorMessage() {
     const { action } = this.props;
 
-    if (action.error) {
+    if (action && action.error) {
       return (
         <Alert type="error" onDismiss={this.errorDismissed}>
           <strong>Error</strong> {action.errorMessage}

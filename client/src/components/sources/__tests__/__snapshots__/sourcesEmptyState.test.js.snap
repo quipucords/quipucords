@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourcesEmptyState Component should render a basic component 1`] = `
+<div
+  class="container-fluid"
+>
+  <div
+    class="row"
+  >
+    <div
+      class="blank-slate-pf full-page-blank-slate"
+    >
+      <div
+        class="blank-slate-pf-icon"
+      >
+        <span
+          aria-hidden="true"
+          class="pficon pficon-add-circle-o"
+        />
+      </div>
+      <h4
+        class="h1 blank-slate-pf-title"
+      >
+        Welcome to Red Hat Entitlements Reporting
+      </h4>
+      <p
+        class="blank-slate-pf-info"
+      >
+        A source defines a collection of network information, including IP addresses or host names,
+        <br />
+         or systems management solution information, in addition to SSH ports and SSH credentials
+      </p>
+      <div
+        class="blank-slate-pf-main-action"
+      >
+        <button
+          class="btn btn-lg btn-primary"
+          type="button"
+        >
+          Add Source
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourceListItem Component should render a basic component with a success status 1`] = `
+<div
+  class="list-group-item quipucords-scan-list-item list-view-pf-top-align"
+>
+  <div
+    class="list-view-pf-checkbox"
+  >
+    <div
+      class=""
+    >
+      <label
+        title=""
+      >
+        <input
+          type="checkbox"
+        />
+      </label>
+    </div>
+  </div>
+  <div
+    class="list-view-pf-actions"
+  >
+    <span>
+      <button
+        class="btn btn-link"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          aria-label="Start"
+          class="fa fa-play"
+        />
+      </button>
+    </span>
+  </div>
+  <div
+    class="list-view-pf-main-info"
+  >
+    <div
+      class="list-view-pf-left"
+    >
+      <div
+        class="list-item-name"
+      />
+    </div>
+    <div
+      class="list-view-pf-body"
+    >
+      <div
+        class="list-view-pf-description"
+      >
+        <div
+          class="list-group-item-text"
+        >
+          <div
+            class="scan-description"
+          >
+            <span
+              aria-hidden="true"
+              class="pficon pficon-ok scan-status-icon"
+            />
+            <div
+              class="scan-status-text"
+            >
+              <div>
+                Scan created
+              </div>
+              <div
+                class="text-muted"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="list-view-pf-additional-info"
+      >
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Successful
+            </span>
+          </span>
+        </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Failed
+            </span>
+          </span>
+        </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Sources
+            </span>
+          </span>
+        </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Previous
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

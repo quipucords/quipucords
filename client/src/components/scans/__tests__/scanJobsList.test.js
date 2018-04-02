@@ -1,15 +1,15 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
-import ScanHostList from '../scanHostList';
+import ScanJobsList from '../scanJobsList';
 
-describe('ScanHostList Component', function() {
+describe('ScanJobsList Component', function() {
   const generateEmptyStore = () => configureMockStore()({});
 
   it('should shallow render a basic component with an empty state status', () => {
     const store = generateEmptyStore();
     const props = {};
-    const wrapper = shallow(<ScanHostList {...props} status="success" />, { context: { store } });
+    const wrapper = shallow(<ScanJobsList {...props} />, { context: { store } });
 
     expect(wrapper.dive()).toMatchSnapshot();
   });
