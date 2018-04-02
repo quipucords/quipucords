@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ToastNotificationsList Component should shallow render a basic component 1`] = `
+<ToastNotificationList
+  className=""
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+  onMouseOver={[Function]}
+/>
+`;
