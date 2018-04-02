@@ -1,25 +1,45 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Grid, Icon } from 'patternfly-react';
 import { helpers } from '../../common/helpers';
+import { getScanJob } from '../../redux/actions/scansActions';
 
 class ScanSourceList extends React.Component {
   constructor() {
     super();
 
     this.state = {
-      sources: []
+      sources: [],
+      scanJob: []
     };
   }
 
   componentDidMount() {
     this.sortSources(_.get(this.props, 'scan'));
+    this.refresh();
   }
 
   componentWillReceiveProps(nextProps) {
+    // Check for changes resulting in a fetch
+    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
+      this.refresh();
+    }
+
     if (nextProps.scan !== this.props.scan) {
       this.sortSources(_.get(nextProps, 'scan'));
+    }
+  }
+
+  refresh() {
+    const { scan, getScanJob } = this.props;
+    const jobId = _.get(scan, 'most_recent.id');
+
+    if (jobId) {
+      getScanJob(jobId).then(results => {
+        this.setState({ scanJob: _.get(results.value, 'data') });
+      });
     }
   }
 
@@ -39,6 +59,23 @@ class ScanSourceList extends React.Component {
     this.setState({ sources: sources });
   }
 
+  getSourceStatus(source) {
+    const { scanJob } = this.state;
+
+    if (!source || !scanJob) {
+      return null;
+    }
+
+    // Get the tasks for this source
+    const connectTask = _.find(scanJob.tasks, { source: source.id, scan_type: 'connect' });
+    const inspectTask = _.find(scanJob.tasks, { source: source.id, scan_type: 'inspect' });
+
+    if (_.get(connectTask, 'status') !== 'completed' || !inspectTask) {
+      return `Connection Scan: ${_.get(connectTask, 'status_message', 'checking status...')}`;
+    }
+    return `Inspection Scan: ${_.get(inspectTask, 'status_message', 'checking status...')}`;
+  }
+
   renderSourceIcon(source) {
     let iconInfo = helpers.sourceTypeIcon(source.source_type);
 
@@ -52,11 +89,12 @@ class ScanSourceList extends React.Component {
       <Grid fluid>
         {sources.map((item, index) => (
           <Grid.Row key={index}>
-            <Grid.Col xs={12} sm={4}>
-              <span>
-                {this.renderSourceIcon(item)}
-                &nbsp; {item.name}
-              </span>
+            <Grid.Col xs={4} md={3}>
+              {this.renderSourceIcon(item)}
+              &nbsp; {item.name}
+            </Grid.Col>
+            <Grid.Col xs={8} md={9}>
+              {this.getSourceStatus(item)}
             </Grid.Col>
           </Grid.Row>
         ))}
@@ -66,7 +104,17 @@ class ScanSourceList extends React.Component {
 }
 
 ScanSourceList.propTypes = {
-  scan: PropTypes.object
+  scan: PropTypes.object,
+  lastRefresh: PropTypes.number,
+  getScanJob: PropTypes.func
 };
 
-export default ScanSourceList;
+const mapStateToProps = function(state) {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  getScanJob: (id, query) => dispatch(getScanJob(id))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ScanSourceList);

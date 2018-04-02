@@ -49,7 +49,7 @@ class ScanJobsList extends React.Component {
     const { scan, getScanJobs } = this.props;
 
     this.setState({
-      scanResultsPending: true,
+      scanJobsPending: true,
       disableNext: true,
       disablePrevious: true
     });

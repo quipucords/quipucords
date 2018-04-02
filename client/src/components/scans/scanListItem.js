@@ -317,10 +317,15 @@ class ScanListItem extends React.Component {
           />
         );
       case 'sources':
-        return <ScanSourceList scan={item} />;
+        return <ScanSourceList scan={item} lastRefresh={lastRefresh} />;
       case 'jobs':
         return (
-          <ScanJobsList scan={item} onSummaryDownload={onSummaryDownload} onDetailedDownload={onDetailedDownload} />
+          <ScanJobsList
+            scan={item}
+            onSummaryDownload={onSummaryDownload}
+            onDetailedDownload={onDetailedDownload}
+            lastRefresh={lastRefresh}
+          />
         );
       default:
         return null;
