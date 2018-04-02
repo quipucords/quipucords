@@ -205,6 +205,20 @@ class ScanListItem extends React.Component {
   renderActions() {
     const { item, onSummaryDownload, onDetailedDownload, onPause, onCancel, onStart, onResume } = this.props;
 
+    let downloadActions = null;
+    if (_.get(item, 'most_recent.report_id')) {
+      downloadActions = (
+        <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
+          <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
+            Summary Report
+          </MenuItem>
+          <MenuItem eventKey="2" onClick={() => onDetailedDownload(_.get(item, 'most_recent.report_id'))}>
+            Detailed Report
+          </MenuItem>
+        </DropdownButton>
+      );
+    }
+
     switch (_.get(item, 'most_recent.status')) {
       case 'completed':
         return (
@@ -214,14 +228,7 @@ class ScanListItem extends React.Component {
                 <Icon type="pf" name="spinner2" aria-label="Start" />
               </Button>
             </SimpleTooltip>
-            <DropdownButton key="downLoadButton" title="Download" pullRight id={`downloadButton_${item.id}`}>
-              <MenuItem eventKey="1" onClick={() => onSummaryDownload(_.get(item, 'most_recent.report_id'))}>
-                Summary Report
-              </MenuItem>
-              <MenuItem eventKey="2" onClick={() => onDetailedDownload(_.get(item, 'most_recent.report_id'))}>
-                Detailed Report
-              </MenuItem>
-            </DropdownButton>
+            {downloadActions}
           </React.Fragment>
         );
       case 'failed':
@@ -231,6 +238,7 @@ class ScanListItem extends React.Component {
             <Button key="restartButton" onClick={() => onStart(item)} bsStyle="link">
               <Icon type="pf" name="spinner2" aria-label="Start" />
             </Button>
+            {downloadActions}
           </SimpleTooltip>
         );
       case 'created':
@@ -248,6 +256,7 @@ class ScanListItem extends React.Component {
                 <Icon type="fa" name="stop" aria-label="Stop" />
               </Button>
             </SimpleTooltip>
+            {downloadActions}
           </React.Fragment>
         );
       case 'paused':
@@ -256,6 +265,7 @@ class ScanListItem extends React.Component {
             <Button key="resumeButton" onClick={() => onResume(item)} bsStyle="link">
               <Icon type="fa" name="play" aria-label="Resume" />
             </Button>
+            {downloadActions}
           </SimpleTooltip>
         );
       default:
@@ -264,6 +274,7 @@ class ScanListItem extends React.Component {
             <Button onClick={() => onStart(item)} bsStyle="link">
               <Icon type="fa" name="play" aria-label="Start" />
             </Button>
+            {downloadActions}
           </SimpleTooltip>
         );
     }
