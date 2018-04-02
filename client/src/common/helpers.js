@@ -79,7 +79,7 @@ const scanStatusString = scanStatus => {
     case 'canceled':
       return 'Canceled';
     default:
-      console.error('Unknown status: ' + scanStatus);
+      console.error(`Unknown status: ${scanStatus}`);
       return '';
   }
 };
