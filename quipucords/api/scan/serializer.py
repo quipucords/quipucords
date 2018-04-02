@@ -139,6 +139,7 @@ class ScanSerializer(NotEmptySerializer):
         model = Scan
         fields = ['id', 'name', 'sources', 'scan_type', 'options', 'jobs',
                   'most_recent_scanjob']
+        read_only_fields = ['most_recent_scanjob']
 
     @transaction.atomic
     def create(self, validated_data):
