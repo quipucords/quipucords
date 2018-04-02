@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScanHostList Component should shallow render a basic component with a basic status 1`] = `
+<EmptyState
+  className=""
+>
+  <EmptyStateIcon
+    className=""
+    name="warning-triangle-o"
+    type="pf"
+  />
+  <EmptyStateTitle
+    className=""
+  >
+    Successful systems were not available, please refresh.
+  </EmptyStateTitle>
+</EmptyState>
+`;
