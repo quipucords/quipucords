@@ -351,8 +351,22 @@ class SourceSerializer(NotEmptySerializer):
         bit_range = r'(3[0-2]|[1-2][0-9]|[0-9])'
         relaxed_ip_pattern = r'[0-9]*\.[0-9]*\.[0-9\[\]:]*\.[0-9\[\]:]*'
         relaxed_cidr_pattern = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*'
-        relaxed_invalid_ip_range = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*-' \
-                                   r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*'
+        greedy_subset = r'[0-9]*'
+        range_subset = r'[0-9]*-[0-9]*'
+        relaxed_invalid_ip_range = [
+            r'{0}\.{0}\.{0}\.{0}-{0}\.{0}\.{0}\.{0}'.format(greedy_subset),
+            r'{0}\.{0}\.{0}\.{1}'.format(greedy_subset, range_subset),
+            r'{0}\.{0}\.{1}\.{0}'.format(greedy_subset, range_subset),
+            r'{0}\.{1}\.{0}\.{0}'.format(greedy_subset, range_subset),
+            r'{1}\.{0}\.{0}\.{0}'.format(greedy_subset, range_subset),
+            r'{1}\.{1}\.{0}\.{0}'.format(greedy_subset, range_subset),
+            r'{1}\.{0}\.{1}\.{0}'.format(greedy_subset, range_subset),
+            r'{1}\.{0}\.{0}\.{1}'.format(greedy_subset, range_subset),
+            r'{1}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
+            r'{1}\.{0}\.{1}\.{1}'.format(greedy_subset, range_subset),
+            r'{0}\.{0}\.{0}\.{0}'.format(range_subset),
+            r'{0}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
+            r'{0}\.{1}\.{1}\.{0}'.format(greedy_subset, range_subset)]
 
         # type IP:          192.168.0.1
         # type CIDR:        192.168.0.0/16
@@ -379,16 +393,15 @@ class SourceSerializer(NotEmptySerializer):
         host_errors = []
         for host_range in hosts_list:
             result = None
-
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
-            invalid_ip_range_match = re.match(relaxed_invalid_ip_range,
-                                              host_range)
+            invalid_ip_range_match = [re.match(invalid_ip_range,
+                                               host_range)
+                                      for invalid_ip_range in
+                                      relaxed_invalid_ip_range]
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
-            is_likely_invalid_ip_range = (invalid_ip_range_match and
-                                          invalid_ip_range_match.end() ==
-                                          len(host_range))
+            is_likely_invalid_ip_range = any(invalid_ip_range_match)
 
             if is_likely_invalid_ip_range:
                 err_message = _(messages.NET_INVALID_RANGE_FORMAT %
