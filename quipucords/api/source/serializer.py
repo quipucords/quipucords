@@ -364,7 +364,7 @@ class SourceSerializer(NotEmptySerializer):
             r'{1}\.{0}\.{0}\.{1}'.format(greedy_subset, range_subset),
             r'{1}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
             r'{1}\.{0}\.{1}\.{1}'.format(greedy_subset, range_subset),
-            r'{1}\.{1}\.{1}\.{1}'.format(range_subset),
+            r'{0}\.{0}\.{0}\.{0}'.format(range_subset),
             r'{0}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
             r'{0}\.{1}\.{1}\.{0}'.format(greedy_subset, range_subset)]
 
