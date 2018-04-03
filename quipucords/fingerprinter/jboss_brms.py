@@ -55,8 +55,13 @@ BRMS_CLASSIFICATIONS = {
     '5.1.0.BRMS': 'BRMS 5.1.0',
     '5.0.2.BRMS': 'BRMS 5.0.2',
     '5.0.1.BRMS': 'BRMS 5.0.1',
-    'drools-core-5.0.0': 'BRMS 5.0.0',
-    '6.5.0.Final': 'Drools 6.5.0'
+    '5.0.1': 'Drools 5.0.1',
+    '5.6.0.Final': 'Drools 5.6.0',
+    '6.0.1.Final': 'Drools 6.0.1',
+    '6.5.0.Final': 'Drools 6.5.0',
+    '7.0.0.Final': 'Drools 7.0.0',
+    '7.5.0.Final': 'Drools 7.5.0',
+    '7.6.0.Final': 'Drools 7.6.0'
 }
 
 
@@ -134,7 +139,9 @@ def detect_jboss_brms(source, facts):
         if category:
             versions.add(category)
 
-    found_redhat_brms = bool(versions)
+    # Exclude Drools versions for now.
+    found_redhat_brms = any((not version.startswith('Drools')
+                             for version in versions))
 
     if found_redhat_brms:
         raw_facts_dict = {JBOSS_BRMS_MANIFEST_MF: found_manifest_version,
