@@ -3,14 +3,15 @@
 """A setuptools-based script for installing quipucords."""
 import os
 import sys
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 BASE_QPC_DIR = os.path.abspath(
     os.path.normpath(
         os.path.join(os.path.dirname(sys.argv[0]), '.')))
 sys.path.insert(0, os.path.join(BASE_QPC_DIR, 'quipucords'))
 # pylint: disable=wrong-import-position
-from qpc import __version__  # noqa: E402
+from qpc import __version__  # noqa: E402, I100
 
 setup(
     name='quipucords',

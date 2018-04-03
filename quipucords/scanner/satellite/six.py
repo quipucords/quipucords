@@ -12,10 +12,13 @@
 
 import logging
 from multiprocessing import Pool
-import requests
+
 from api.models import (SystemInspectionResult)
-from scanner.satellite.api import SatelliteInterface, SatelliteException
+
+import requests
+
 from scanner.satellite import utils
+from scanner.satellite.api import SatelliteException, SatelliteInterface
 
 
 # Get an instance of a logger

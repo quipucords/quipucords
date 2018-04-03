@@ -11,15 +11,19 @@
 """Test the vcenter inspect capabilities."""
 
 import json
-from unittest.mock import Mock, patch, ANY
-from django.test import TestCase
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from unittest.mock import ANY, Mock, patch
+
 from api.models import (Credential,
-                        Source,
                         ScanTask,
+                        Source,
                         SystemInspectionResult)
-from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
+
+from django.test import TestCase
+
+from pyVmomi import vim  # pylint: disable=no-name-in-module
+
 from scanner.test_util import create_scan_job
+from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
 
 
 def invalid_login():

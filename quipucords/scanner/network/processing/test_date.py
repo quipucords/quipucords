@@ -12,8 +12,8 @@
 
 
 import unittest
-from scanner.network.processing import process
-from scanner.network.processing import date
+
+from scanner.network.processing import date, process
 from scanner.network.processing.util_for_test import ansible_result
 
 

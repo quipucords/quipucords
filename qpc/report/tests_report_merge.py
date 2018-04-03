@@ -10,18 +10,20 @@
 #
 """Test the CLI module."""
 
-import unittest
 import os
 import sys
 import time
-from io import StringIO
+import unittest
 from argparse import ArgumentParser, Namespace
-import requests_mock
-from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
+from io import StringIO
+
+import qpc.messages as messages
 from qpc.report import MERGE_URI
 from qpc.report.merge import ReportMergeCommand
+from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
-import qpc.messages as messages
+
+import requests_mock
 
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')

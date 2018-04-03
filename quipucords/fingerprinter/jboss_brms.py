@@ -13,9 +13,11 @@
 
 import itertools
 import logging
+
 from api.models import Product, Source
-from fingerprinter.utils import (product_entitlement_found,
-                                 generate_raw_fact_members)
+
+from fingerprinter.utils import (generate_raw_fact_members,
+                                 product_entitlement_found)
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

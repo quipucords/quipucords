@@ -12,6 +12,7 @@
 """Test the product eap."""
 
 from django.test import TestCase
+
 from fingerprinter.jboss_eap import detect_jboss_eap
 
 

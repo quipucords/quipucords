@@ -12,14 +12,17 @@
 """ScanStartCommand is used to trigger a host scan."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
-from qpc.request import POST
-from qpc.clicommand import CliCommand
+
+import qpc.messages as messages
 import qpc.scan as scan
+from qpc.clicommand import CliCommand
+from qpc.request import POST
 from qpc.scan.utils import get_scan_object_id
 from qpc.translation import _
-import qpc.messages as messages
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

@@ -10,18 +10,22 @@
 #
 """Test the satellite six interface."""
 
-from unittest.mock import patch, ANY
-import requests_mock
-from django.test import TestCase
+from unittest.mock import ANY, patch
+
 from api.models import (Credential,
-                        Source,
+                        ScanOptions,
                         ScanTask,
-                        SystemInspectionResult,
-                        ScanOptions)
-from scanner.satellite.utils import construct_url
+                        Source,
+                        SystemInspectionResult)
+
+from django.test import TestCase
+
+import requests_mock
+
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
                                    host_fields, host_subscriptions)
+from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
 
 

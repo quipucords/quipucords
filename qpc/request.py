@@ -11,13 +11,19 @@
 #
 """Common module for handling request calls to the server."""
 
-import sys
 import json
-import requests
-from qpc.utils import log, log_request_info, handle_error_response
-from qpc.translation import _
+import sys
+
 import qpc.messages as messages
-from qpc.utils import (get_server_location, read_client_token, get_ssl_verify)
+from qpc.translation import _
+from qpc.utils import (get_server_location,
+                       get_ssl_verify,
+                       handle_error_response,
+                       log,
+                       log_request_info,
+                       read_client_token)
+
+import requests
 
 # Need to determine how we get this information; config file at install?
 

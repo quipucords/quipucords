@@ -10,12 +10,16 @@
 #
 """Callback object for capturing ansible task execution."""
 
-import logging
 import json
-from django.db import transaction
+import logging
+
 from ansible.plugins.callback import CallbackBase
-from api.models import (SystemInspectionResult,
-                        RawFact)
+
+from api.models import (RawFact,
+                        SystemInspectionResult)
+
+from django.db import transaction
+
 from scanner import scan_data_log
 from scanner.network.processing import process
 

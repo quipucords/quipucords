@@ -10,8 +10,8 @@
 """Infrastructure for the initial data postprocessing."""
 
 import abc
-from logging import (ERROR, DEBUG)
 import traceback
+from logging import (DEBUG, ERROR)
 
 # ### Conventions ####
 #

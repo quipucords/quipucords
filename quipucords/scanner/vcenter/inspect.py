@@ -9,14 +9,18 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for vcenter inspection task."""
-import logging
 import json
+import logging
 from datetime import datetime
+
+from api.models import (RawFact,
+                        ScanTask,
+                        SystemInspectionResult)
+
 from django.db import transaction
+
 from pyVmomi import vim  # pylint: disable=no-name-in-module
-from api.models import (ScanTask,
-                        SystemInspectionResult,
-                        RawFact)
+
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
 

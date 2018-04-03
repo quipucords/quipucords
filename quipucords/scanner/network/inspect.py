@@ -11,20 +11,24 @@
 """ScanTask used for network connection discovery."""
 import logging
 import os.path
+
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
+
 from api.credential.serializer import CredentialSerializer
-from api.models import (ScanTask,
-                        ScanOptions,
+from api.models import (ScanOptions,
+                        ScanTask,
                         SystemConnectionResult,
                         SystemInspectionResult)
-from scanner.task import ScanTaskRunner
+
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
-                                   _credential_vars,
                                    _construct_vars,
+                                   _credential_vars,
                                    run_playbook,
                                    write_inventory)
+from scanner.task import ScanTaskRunner
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

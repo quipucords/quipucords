@@ -11,11 +11,12 @@
 
 """Util for common operations."""
 
-import os
 import logging
-from rest_framework.serializers import ValidationError
+import os
 
 from api.scantasks.model import ScanTask
+
+from rest_framework.serializers import ValidationError
 
 
 # Get an instance of a logger

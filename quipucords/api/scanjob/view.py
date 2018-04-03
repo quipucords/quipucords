@@ -12,36 +12,47 @@
 
 import logging
 import os
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
-from rest_framework.decorators import detail_route, list_route
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
-from rest_framework.serializers import ValidationError
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
+
+import api.messages as messages
+from api.common.pagination import StandardResultsSetPagination
+from api.common.util import is_int
+from api.fact.util import (build_sources_from_tasks,
+                           get_or_create_fact_collection,
+                           validate_fact_collection_json)
+from api.models import (Credential,
+                        FactCollection,
+                        RawFact,
+                        ScanJob,
+                        ScanTask,
+                        Source)
+from api.scanjob.serializer import expand_scanjob
+from api.serializers import (FactCollectionSerializer,
+                             ScanJobSerializer,
+                             SystemConnectionResultSerializer,
+                             SystemInspectionResultSerializer)
+from api.signals.scanjob_signal import (cancel_scan,
+                                        pause_scan,
+                                        restart_scan)
+
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-import api.messages as messages
-from api.common.util import is_int
-from api.common.pagination import StandardResultsSetPagination
-from api.models import (ScanTask, ScanJob, FactCollection, Source,
-                        Credential, RawFact)
-from api.serializers import (ScanJobSerializer,
-                             SystemConnectionResultSerializer,
-                             SystemInspectionResultSerializer,
-                             FactCollectionSerializer)
-from api.scanjob.serializer import expand_scanjob
-from api.signals.scanjob_signal import (pause_scan,
-                                        cancel_scan, restart_scan)
-from api.fact.util import (build_sources_from_tasks,
-                           validate_fact_collection_json,
-                           get_or_create_fact_collection)
+
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
+
 from fingerprinter import pfc_signal
 
+from rest_framework import mixins, status, viewsets
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import detail_route, list_route
+from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

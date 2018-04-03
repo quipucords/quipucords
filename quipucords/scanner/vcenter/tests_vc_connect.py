@@ -9,17 +9,21 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the vcenter connect capabilities."""
-
-from unittest.mock import Mock, patch, ANY
 from socket import gaierror
-from django.test import TestCase
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from unittest.mock import ANY, Mock, patch
+
 from api.models import (Credential,
-                        Source,
-                        ScanTask)
-from scanner.vcenter.connect import (ConnectTaskRunner, get_vm_names,
-                                     get_vm_container)
+                        ScanTask,
+                        Source)
+
+from django.test import TestCase
+
+from pyVmomi import vim  # pylint: disable=no-name-in-module
+
 from scanner.test_util import create_scan_job
+from scanner.vcenter.connect import (ConnectTaskRunner,
+                                     get_vm_container,
+                                     get_vm_names)
 
 
 def invalid_login():

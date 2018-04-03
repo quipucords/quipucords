@@ -9,24 +9,26 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the CLI module."""
-
-import unittest
-import sys
 import os
-from io import StringIO
+import sys
+import unittest
 from argparse import ArgumentParser, Namespace
-import requests
-import requests_mock
+from io import StringIO
+
 import qpc.messages as messages
 from qpc.cli import CLI
-from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.cred import (CREDENTIAL_URI,
                       NETWORK_CRED_TYPE,
-                      VCENTER_CRED_TYPE,
-                      SATELLITE_CRED_TYPE)
+                      SATELLITE_CRED_TYPE,
+                      VCENTER_CRED_TYPE)
 from qpc.cred.edit import CredEditCommand
+from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
+from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
+
+import requests
+
+import requests_mock
 
 TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()

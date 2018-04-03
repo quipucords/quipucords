@@ -13,7 +13,8 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from scanner.network.processing import process, karaf
+
+from scanner.network.processing import karaf, process
 from scanner.network.processing.util_for_test import ansible_result, \
     ansible_results
 

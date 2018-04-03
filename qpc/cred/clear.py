@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,14 +12,17 @@
 """CredClearCommand is used to clear a or all credentials."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
-from qpc.utils import handle_error_response
-from qpc.clicommand import CliCommand
+
 import qpc.cred as credential
-from qpc.request import GET, DELETE, request
-from qpc.translation import _
 import qpc.messages as messages
+from qpc.clicommand import CliCommand
+from qpc.request import DELETE, GET, request
+from qpc.translation import _
+from qpc.utils import handle_error_response
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

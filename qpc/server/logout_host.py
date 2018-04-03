@@ -12,13 +12,15 @@
 """LogoutHostCommand is used to remove any existing login token."""
 
 from __future__ import print_function
-from requests import codes
-from qpc.clicommand import CliCommand
-import qpc.server as server
-from qpc.request import PUT
-from qpc.utils import delete_client_token
-from qpc.translation import _
+
 import qpc.messages as messages
+import qpc.server as server
+from qpc.clicommand import CliCommand
+from qpc.request import PUT
+from qpc.translation import _
+from qpc.utils import delete_client_token
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

@@ -13,10 +13,11 @@
 # pylint: disable=missing-docstring
 
 import unittest
+
 from scanner.network.processing import brms
-from scanner.network.processing.util_for_test import (ansible_results,
+from scanner.network.processing.util_for_test import (ansible_item,
                                                       ansible_result,
-                                                      ansible_item)
+                                                      ansible_results)
 
 
 class TestProcessJbossBRMSManifestMF(unittest.TestCase):

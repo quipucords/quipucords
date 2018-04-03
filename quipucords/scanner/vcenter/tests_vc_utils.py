@@ -10,11 +10,17 @@
 #
 """Test the vcenter utils."""
 
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import ANY, Mock, patch
+
+from api.models import (Credential,
+                        ScanTask,
+                        Source,
+                        SourceOptions)
+
 from django.test import TestCase
-from api.models import (Credential, Source, SourceOptions, ScanTask)
-from scanner.vcenter.utils import vcenter_connect
+
 from scanner.test_util import create_scan_job
+from scanner.vcenter.utils import vcenter_connect
 
 
 class VCenterUtilsTest(TestCase):

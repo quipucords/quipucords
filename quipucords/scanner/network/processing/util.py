@@ -10,6 +10,7 @@
 """Utilities for processing Ansible task outputs."""
 
 import logging
+
 from scanner.network.processing import process
 
 

@@ -11,15 +11,19 @@
 """ScanJobRunner runs a group of scan tasks."""
 import logging
 from multiprocessing import Process
-from django.db.models import Q
-from fingerprinter import pfc_signal
-from api.fact.util import (validate_fact_collection_json,
-                           build_sources_from_tasks,
-                           get_or_create_fact_collection)
+
+from api.fact.util import (build_sources_from_tasks,
+                           get_or_create_fact_collection,
+                           validate_fact_collection_json)
 from api.models import (FactCollection,
                         ScanTask,
                         Source)
-from scanner import network, vcenter, satellite
+
+from django.db.models import Q
+
+from fingerprinter import pfc_signal
+
+from scanner import network, satellite, vcenter
 
 
 # Get an instance of a logger

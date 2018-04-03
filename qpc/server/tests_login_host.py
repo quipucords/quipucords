@@ -10,16 +10,18 @@
 #
 """Test the CLI module."""
 
+import sys
 import unittest
 from unittest.mock import patch
-import sys
+from argparse import ArgumentParser, Namespace  # noqa: I100
 from io import StringIO
-from argparse import ArgumentParser, Namespace
-import requests_mock
-from qpc.tests_utilities import HushUpStderr, redirect_stdout, DEFAULT_CONFIG
-from qpc.utils import get_server_location, write_server_config
+
 from qpc.server import LOGIN_URI
 from qpc.server.login_host import LoginHostCommand
+from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
+from qpc.utils import get_server_location, write_server_config
+
+import requests_mock
 
 
 TMP_KEY = '/tmp/testkey'

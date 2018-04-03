@@ -13,11 +13,17 @@
 import logging
 import ssl
 import xmlrpc.client
-import requests
-from rest_framework import status as codes
+
 from api.vault import decrypt_data_as_unicode
-from scanner.satellite.api import SATELLITE_VERSION_5, SATELLITE_VERSION_6
-from scanner.satellite.api import SatelliteException, SatelliteAuthException
+
+import requests
+
+from rest_framework import status as codes
+
+from scanner.satellite.api import (SATELLITE_VERSION_5,
+                                   SATELLITE_VERSION_6,
+                                   SatelliteAuthException,
+                                   SatelliteException)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

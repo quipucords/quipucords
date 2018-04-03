@@ -11,8 +11,8 @@
 """Test util for the scan features."""
 
 from api.models import (Scan,
-                        ScanTask,
-                        ScanJob)
+                        ScanJob,
+                        ScanTask)
 
 
 def create_scan_job(source,
