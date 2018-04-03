@@ -9,14 +9,16 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the satellite five interface."""
-
-from unittest.mock import patch
 import xmlrpc.client
-from django.test import TestCase
+from unittest.mock import patch
+
 from api.models import (Credential,
-                        Source,
                         ScanTask,
+                        Source,
                         SystemInspectionResult)
+
+from django.test import TestCase
+
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import (SatelliteFive)
 from scanner.test_util import create_scan_job

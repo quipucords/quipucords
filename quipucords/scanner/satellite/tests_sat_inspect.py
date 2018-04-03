@@ -10,17 +10,23 @@
 #
 """Test the satellite inspect task."""
 
-from unittest.mock import patch, ANY
-from django.test import TestCase
-from requests import exceptions
+from unittest.mock import ANY, patch
+
 from api.models import (Credential,
-                        Source, ScanTask)
+                        ScanTask,
+                        Source)
+
+from django.test import TestCase
+
+from requests import exceptions
+
+
+from scanner.satellite.api import (SATELLITE_VERSION_5,
+                                   SATELLITE_VERSION_6,
+                                   SatelliteAuthException,
+                                   SatelliteException)
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
-from scanner.satellite.api import (SatelliteException,
-                                   SatelliteAuthException,
-                                   SATELLITE_VERSION_5,
-                                   SATELLITE_VERSION_6)
 from scanner.test_util import create_scan_job
 
 

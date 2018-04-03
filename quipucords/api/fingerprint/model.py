@@ -10,9 +10,9 @@
 #
 
 """Models system fingerprints."""
+from api.fact.model import FactCollection
 
 from django.db import models
-from api.fact.model import FactCollection
 
 
 class SystemFingerprint(models.Model):

@@ -12,11 +12,13 @@
 """Quipucords Command Line utilities."""
 
 from __future__ import print_function
+
+import json
 import logging
 import os
-import json
-from qpc.translation import _ as t
+
 import qpc.messages as messages
+from qpc.translation import _ as t
 
 QPC_PATH = 'qpc'
 CONFIG_HOME_PATH = '~/.config/'

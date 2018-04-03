@@ -11,7 +11,9 @@
 """Callback object for capturing ansible task execution."""
 
 import logging
+
 from ansible.plugins.callback import CallbackBase
+
 from api.connresults.model import SystemConnectionResult
 
 # Get an instance of a logger

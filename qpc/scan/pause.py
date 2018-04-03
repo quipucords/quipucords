@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,12 +12,14 @@
 """ScanPauseCommand is used to pause a specific system scan."""
 
 from __future__ import print_function
-from requests import codes
-from qpc.clicommand import CliCommand
+
+import qpc.messages as messages
 import qpc.scan as scan
+from qpc.clicommand import CliCommand
 from qpc.request import PUT
 from qpc.translation import _
-import qpc.messages as messages
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

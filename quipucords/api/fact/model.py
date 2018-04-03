@@ -12,6 +12,7 @@
 """Models to capture system facts."""
 
 import json
+
 from django.db import models
 
 

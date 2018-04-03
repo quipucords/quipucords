@@ -14,13 +14,18 @@
 import logging
 import uuid
 from datetime import datetime
-import django.dispatch
-from api.models import (FactCollection, Source,
-                        Product, SystemFingerprint)
+
+from api.models import (FactCollection,
+                        Product,
+                        Source,
+                        SystemFingerprint)
 from api.serializers import FingerprintSerializer
+
+import django.dispatch
+
+from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
-from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.utils import strip_suffix
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

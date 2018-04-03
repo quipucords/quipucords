@@ -13,9 +13,11 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from scanner.network.processing import process, eap
-from scanner.network.processing.util_for_test import ansible_result, \
-    ansible_results, ansible_item
+
+from scanner.network.processing import eap, process
+from scanner.network.processing.util_for_test import (ansible_item,
+                                                      ansible_result,
+                                                      ansible_results)
 
 
 class TestProcessJbossEapRunningPaths(unittest.TestCase):

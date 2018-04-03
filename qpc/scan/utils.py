@@ -12,12 +12,14 @@
 """Utilities for the scan module."""
 
 from __future__ import print_function
-from requests import codes
-from qpc.request import GET, request
-import qpc.source as source
-import qpc.scan as scan
-from qpc.translation import _
+
 import qpc.messages as messages
+import qpc.scan as scan
+import qpc.source as source
+from qpc.request import GET, request
+from qpc.translation import _
+
+from requests import codes
 
 
 def get_source_ids(parser, source_names):

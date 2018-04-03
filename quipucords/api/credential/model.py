@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,11 +12,11 @@
 
 These models are used in the REST definitions
 """
-
-from django.utils.translation import ugettext as _
-from django.db import models
-from api.vault import encrypt_data_as_unicode
 import api.messages as messages
+from api.vault import encrypt_data_as_unicode
+
+from django.db import models
+from django.utils.translation import ugettext as _
 
 
 class Credential(models.Model):

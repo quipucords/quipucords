@@ -12,40 +12,51 @@
 """Quipucords Command Line Interface."""
 
 from __future__ import print_function
-from argparse import ArgumentParser
+
 import sys
-import qpc.server as server
+from argparse import ArgumentParser
+
+
 import qpc.cred as cred
-import qpc.source as source
-import qpc.scan as scan
+import qpc.messages as messages
 import qpc.report as report
-from qpc.utils import (ensure_config_dir_exists,
-                       get_server_location,
-                       read_client_token,
-                       ensure_data_dir_exists,
-                       setup_logging,
-                       log)
+import qpc.scan as scan
+import qpc.server as server
+import qpc.source as source
+from qpc.cred.commands import (CredAddCommand,
+                               CredClearCommand,
+                               CredEditCommand,
+                               CredListCommand,
+                               CredShowCommand,)
+from qpc.report.commands import (ReportDetailCommand,
+                                 ReportMergeCommand,
+                                 ReportSummaryCommand)
+from qpc.scan.commands import (ScanAddCommand,
+                               ScanCancelCommand,
+                               ScanClearCommand,
+                               ScanEditCommand,
+                               ScanJobCommand,
+                               ScanListCommand,
+                               ScanPauseCommand,
+                               ScanRestartCommand,
+                               ScanShowCommand,
+                               ScanStartCommand)
 from qpc.server.commands import (ConfigureHostCommand,
                                  LoginHostCommand,
                                  LogoutHostCommand)
-from qpc.cred.commands import (CredAddCommand,
-                               CredListCommand,
-                               CredEditCommand,
-                               CredShowCommand,
-                               CredClearCommand)
-from qpc.source.commands import (SourceAddCommand, SourceListCommand,
-                                 SourceShowCommand, SourceClearCommand,
-                                 SourceEditCommand)
-from qpc.scan.commands import (ScanAddCommand, ScanStartCommand,
-                               ScanListCommand, ScanShowCommand,
-                               ScanPauseCommand, ScanCancelCommand,
-                               ScanRestartCommand, ScanEditCommand,
-                               ScanClearCommand, ScanJobCommand)
-from qpc.report.commands import (ReportSummaryCommand,
-                                 ReportDetailCommand,
-                                 ReportMergeCommand)
+from qpc.source.commands import (SourceAddCommand,
+                                 SourceClearCommand,
+                                 SourceEditCommand,
+                                 SourceListCommand,
+                                 SourceShowCommand)
 from qpc.translation import _
-import qpc.messages as messages
+from qpc.utils import (ensure_config_dir_exists,
+                       ensure_data_dir_exists,
+                       get_server_location,
+                       log,
+                       read_client_token,
+                       setup_logging)
+
 from . import __version__
 
 

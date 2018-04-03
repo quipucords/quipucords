@@ -9,11 +9,12 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Utilities used for VCenter operations."""
-
-import ssl
 import atexit
-from pyVim.connect import SmartConnect, SmartConnectNoSSL, Disconnect
+import ssl
+
 from api.vault import decrypt_data_as_unicode
+
+from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
 
 
 def vcenter_connect(scan_task):

@@ -12,16 +12,19 @@
 """SourceAddCommand is used to add sources for system scans."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
-from qpc.request import POST, GET, request
-from qpc.clicommand import CliCommand
-from qpc.utils import read_in_file
-import qpc.source as source
-from qpc.source.utils import validate_port, build_source_payload
+
 import qpc.cred as cred
-from qpc.translation import _
 import qpc.messages as messages
+import qpc.source as source
+from qpc.clicommand import CliCommand
+from qpc.request import GET, POST, request
+from qpc.source.utils import build_source_payload, validate_port
+from qpc.translation import _
+from qpc.utils import read_in_file
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

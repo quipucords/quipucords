@@ -9,15 +9,16 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Satellite API Interface."""
-
-import logging
 import json
-from django.db import transaction
-from api.models import (ScanTask,
+import logging
+
+from api.models import (RawFact,
                         ScanOptions,
+                        ScanTask,
                         SystemConnectionResult,
-                        SystemInspectionResult,
-                        RawFact)
+                        SystemInspectionResult)
+
+from django.db import transaction
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

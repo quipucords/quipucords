@@ -10,11 +10,13 @@
 """Log all scan data to the filesystem for later debugging."""
 
 import json
-import logging
-from logging import handlers
 import multiprocessing as mp
-from api.source.serializer import SourceSerializer
+import logging  # noqa: I100
+from logging import handlers
+
 from api.source import util as view_util
+from api.source.serializer import SourceSerializer
+
 from quipucords import settings
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

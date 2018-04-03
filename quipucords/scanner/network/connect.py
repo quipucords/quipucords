@@ -10,24 +10,30 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
-import pexpect
+
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
-from api.serializers import SourceSerializer, CredentialSerializer
+
 from api.models import (Credential,
-                        ScanTask,
                         ScanOptions,
+                        ScanTask,
                         SystemConnectionResult)
+from api.serializers import CredentialSerializer, SourceSerializer
+
 from django.db import transaction
-from scanner.task import ScanTaskRunner
+
+import pexpect
+
+
 from scanner.network.connect_callback import ConnectResultCallback
-from scanner.network.utils import (run_playbook,
-                                   _construct_error,
+from scanner.network.utils import (_construct_error,
                                    _construct_vars,
                                    decrypt_data_as_unicode,
                                    expand_hostpattern,
+                                   run_playbook,
                                    write_inventory)
+from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -12,13 +12,16 @@
 """Viewset for user function."""
 import logging
 import os
+
 from django.contrib.auth import logout
-from rest_framework.authtoken.models import Token
+
 from rest_framework import viewsets
-from rest_framework.decorators import list_route
-from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
 

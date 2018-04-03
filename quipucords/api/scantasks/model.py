@@ -12,16 +12,17 @@
 
 These models are used in the REST definitions.
 """
-from datetime import datetime
-import logging
 import json
-from django.db import transaction
-from django.utils.translation import ugettext as _
-from django.db import models
-from api.source.model import Source
+import logging
+from datetime import datetime
+
 import api.messages as messages
 from api.connresults.model import TaskConnectionResult
 from api.inspectresults.model import TaskInspectionResult
+from api.source.model import Source
+
+from django.db import models, transaction
+from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -12,19 +12,22 @@
 """Test the fact engine API."""
 
 from datetime import datetime
-from django.test import TestCase
-from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
-                           NETWORK_VCENTER_MERGE_KEYS,
-                           NETWORK_SATELLITE_MERGE_KEYS,
-                           _process_source,
-                           _compute_system_creation_time,
-                           _remove_duplicate_fingerprints,
-                           _merge_fingerprint,
-                           _create_index_for_fingerprints,
-                           _merge_matching_fingerprints,
-                           _merge_fingerprints_from_source_types,
-                           _process_network_fact)
+
 from api.models import Source
+
+from django.test import TestCase
+
+from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
+                           NETWORK_SATELLITE_MERGE_KEYS,
+                           NETWORK_VCENTER_MERGE_KEYS,
+                           _compute_system_creation_time,
+                           _create_index_for_fingerprints,
+                           _merge_fingerprint,
+                           _merge_fingerprints_from_source_types,
+                           _merge_matching_fingerprints,
+                           _process_network_fact,
+                           _process_source,
+                           _remove_duplicate_fingerprints)
 
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse (Pilot)',

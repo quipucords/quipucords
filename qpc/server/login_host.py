@@ -12,14 +12,17 @@
 """LoginHostCommand is used to login with username and password."""
 
 from __future__ import print_function
+
 from getpass import getpass
-from requests import codes
+
+import qpc.messages as messages
+import qpc.server as server
 from qpc.clicommand import CliCommand
 from qpc.request import POST
-from qpc.utils import write_client_token, delete_client_token
-import qpc.server as server
 from qpc.translation import _
-import qpc.messages as messages
+from qpc.utils import delete_client_token, write_client_token
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

@@ -10,6 +10,7 @@
 """Initial processing of the shell output from the jboss_fuse_on_karaf role."""
 
 import logging
+
 from scanner.network.processing import util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

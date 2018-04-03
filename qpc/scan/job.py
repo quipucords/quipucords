@@ -12,16 +12,19 @@
 """ScanListCommand is used to list system scans."""
 
 from __future__ import print_function
+
 import sys
 import urllib.parse as urlparse
-from requests import codes
-from qpc.utils import pretty_print
-from qpc.clicommand import CliCommand
-import qpc.scan as scan
-from qpc.scan.utils import get_scan_object_id
-from qpc.request import GET
-from qpc.translation import _
+
 import qpc.messages as messages
+import qpc.scan as scan
+from qpc.clicommand import CliCommand
+from qpc.request import GET
+from qpc.scan.utils import get_scan_object_id
+from qpc.translation import _
+from qpc.utils import pretty_print
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

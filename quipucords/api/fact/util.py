@@ -12,11 +12,15 @@
 """Util for validating and persisting source facts."""
 
 import logging
+
+import api.messages as messages
+from api.models import (FactCollection,
+                        ScanTask,
+                        Source)
+from api.serializers import FactCollectionSerializer
+
 from django.db import transaction
 from django.utils.translation import ugettext as _
-import api.messages as messages
-from api.models import Source, FactCollection, ScanTask
-from api.serializers import FactCollectionSerializer
 
 
 ERRORS_KEY = 'errors'

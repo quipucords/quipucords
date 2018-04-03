@@ -11,17 +11,23 @@
 """Test the discovery scanner capabilities."""
 
 import unittest
-from unittest.mock import patch, Mock, ANY
-from django.test import TestCase
+from unittest.mock import ANY, Mock, patch
+
 from ansible.errors import AnsibleError
+
 from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
-                        Source,
-                        ScanTask)
+                        ScanTask,
+                        Source)
 from api.serializers import CredentialSerializer, SourceSerializer
-from scanner.network.connect import construct_connect_inventory, connect, \
-    ConnectResultStore
+
+from django.test import TestCase
+
+
 from scanner.network import ConnectTaskRunner
+from scanner.network.connect import (ConnectResultStore,
+                                     connect,
+                                     construct_connect_inventory)
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import _construct_vars
 from scanner.test_util import create_scan_job

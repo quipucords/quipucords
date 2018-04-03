@@ -12,13 +12,15 @@
 """ConfigureHostCommand is used to set target host and port server."""
 
 from __future__ import print_function
+
 from argparse import SUPPRESS
-from qpc.clicommand import CliCommand
-import qpc.server as config
-from qpc.source.utils import validate_port
-from qpc.utils import write_server_config
-from qpc.translation import _
+
 import qpc.messages as messages
+import qpc.server as config
+from qpc.clicommand import CliCommand
+from qpc.source.utils import validate_port
+from qpc.translation import _
+from qpc.utils import write_server_config
 
 
 # pylint: disable=too-few-public-methods

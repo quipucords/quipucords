@@ -10,22 +10,25 @@
 #
 """Module for serializing all model object for database storage."""
 
-import re
-import logging
 import json
+import logging
+import re
+
+import api.messages as messages
+from api.common.serializer import (CustomJSONField,
+                                   NotEmptySerializer,
+                                   ValidStringChoiceField)
+from api.common.util import check_for_existing_name
+from api.models import Credential, Source, SourceOptions
+
 from django.db import transaction
 from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ValidationError,
-                                        PrimaryKeyRelatedField,
-                                        CharField,
+
+from rest_framework.serializers import (CharField,
                                         IntegerField,
-                                        NullBooleanField)
-from api.models import Credential, Source, SourceOptions
-import api.messages as messages
-from api.common.serializer import (NotEmptySerializer,
-                                   ValidStringChoiceField,
-                                   CustomJSONField)
-from api.common.util import check_for_existing_name
+                                        NullBooleanField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
 
 
 class CredentialsField(PrimaryKeyRelatedField):

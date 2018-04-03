@@ -11,26 +11,30 @@
 """Module for serializing all model object for database storage."""
 
 import json
-from django.db import transaction
-from django.utils.translation import ugettext as _
-from rest_framework.serializers import (PrimaryKeyRelatedField,
-                                        ValidationError,
-                                        IntegerField,
-                                        CharField,
-                                        BooleanField)
-from api.models import (Source,
-                        ScanTask,
-                        Scan,
-                        ScanOptions,
-                        ExtendedProductSearchOptions,
-                        DisabledOptionalProductsOptions)
+
+
 import api.messages as messages
-from api.common.serializer import (NotEmptySerializer,
-                                   ValidStringChoiceField,
-                                   CustomJSONField)
-from api.scantasks.serializer import SourceField
+from api.common.serializer import (CustomJSONField,
+                                   NotEmptySerializer,
+                                   ValidStringChoiceField)
 from api.common.util import (check_for_existing_name,
                              check_path_validity)
+from api.models import (DisabledOptionalProductsOptions,
+                        ExtendedProductSearchOptions,
+                        Scan,
+                        ScanOptions,
+                        ScanTask,
+                        Source)
+from api.scantasks.serializer import SourceField
+
+from django.db import transaction
+from django.utils.translation import ugettext as _
+
+from rest_framework.serializers import (BooleanField,
+                                        CharField,
+                                        IntegerField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
 
 # pylint: disable=invalid-name
 try:

@@ -12,14 +12,18 @@
 """CredEditCommand is used to edit credentials."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
-from qpc.request import PATCH, GET, request
-from qpc.clicommand import CliCommand
+
+
 import qpc.cred as credential
-from qpc.cred.utils import build_credential_payload
-from qpc.translation import _
 import qpc.messages as messages
+from qpc.clicommand import CliCommand
+from qpc.cred.utils import build_credential_payload
+from qpc.request import GET, PATCH, request
+from qpc.translation import _
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

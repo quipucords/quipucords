@@ -11,8 +11,10 @@
 """Test the common util."""
 
 from collections import OrderedDict
-from django.test import TestCase
+
 from api.common.util import CSVHelper
+
+from django.test import TestCase
 
 
 class CommonUtilTest(TestCase):

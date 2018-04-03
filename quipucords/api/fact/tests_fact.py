@@ -11,11 +11,15 @@
 """Test the fact API."""
 
 import json
+
+import api.messages as messages
+from api.models import (Credential,
+                        FactCollection,
+                        Source)
+
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-import api.messages as messages
-from api.models import (FactCollection,
-                        Source, Credential)
+
 from rest_framework import status
 
 

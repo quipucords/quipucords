@@ -10,15 +10,18 @@
 #
 """Test the report API."""
 
+import copy
 import json
 import uuid
-import copy
-from django.test import TestCase
+
+from api.models import (Credential,
+                        FactCollection,
+                        Source)
+from api.report.renderer import FactCollectionCSVRenderer, ReportCSVRenderer
+
 from django.core.urlresolvers import reverse
-from api.models import (Source,
-                        Credential,
-                        FactCollection)
-from api.report.renderer import ReportCSVRenderer, FactCollectionCSVRenderer
+from django.test import TestCase
+
 from rest_framework import status
 
 

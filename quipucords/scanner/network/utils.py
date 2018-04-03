@@ -11,17 +11,20 @@
 """Scanner used for host connection discovery."""
 
 from collections import namedtuple
-from django.conf import settings
+
 from ansible import constants as C
 from ansible.errors import AnsibleError
+from ansible.executor.task_queue_manager import TaskQueueManager
+from ansible.inventory import Inventory
+from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
 from ansible.parsing.dataloader import DataLoader
 from ansible.parsing.utils.addresses import parse_address
-from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
-from ansible.vars import VariableManager
-from ansible.inventory import Inventory
 from ansible.playbook.play import Play
-from ansible.executor.task_queue_manager import TaskQueueManager
+from ansible.vars import VariableManager
+
 from api.vault import decrypt_data_as_unicode, write_to_yaml
+
+from django.conf import settings
 
 
 ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \

@@ -10,8 +10,9 @@
 #
 """Test the utils module."""
 
-import unittest
 import os
+import unittest
+
 from qpc import utils
 
 

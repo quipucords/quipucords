@@ -12,26 +12,31 @@
 
 # pylint: disable=unused-argument,invalid-name,too-many-lines
 
-from unittest.mock import patch
 import json
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-from rest_framework import status
+from unittest.mock import patch
+
+
 import api.messages as messages
-from api.scanjob.serializer import (ScanJobSerializer)
-from api.scan.serializer import ExtendedProductSearchOptionsSerializer
 from api.models import (Credential,
-                        Source,
-                        ScanTask,
-                        Scan,
-                        ExtendedProductSearchOptions,
                         DisabledOptionalProductsOptions,
-                        ScanOptions,
+                        ExtendedProductSearchOptions,
+                        RawFact,
+                        Scan,
                         ScanJob,
+                        ScanOptions,
+                        ScanTask,
+                        Source,
                         SystemConnectionResult,
-                        SystemInspectionResult,
-                        RawFact)
-from api.scanjob.view import (expand_scanjob)
+                        SystemInspectionResult)
+from api.scan.serializer import ExtendedProductSearchOptionsSerializer
+from api.scanjob.serializer import ScanJobSerializer
+from api.scanjob.view import expand_scanjob
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
+from rest_framework import status
+
 from scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
 

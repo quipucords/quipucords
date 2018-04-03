@@ -12,6 +12,7 @@
 
 
 import unittest
+
 from scanner.network.processing import yum
 from scanner.network.processing.util_for_test import ansible_result
 

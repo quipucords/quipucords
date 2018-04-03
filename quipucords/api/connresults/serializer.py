@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -10,10 +10,12 @@
 #
 """Module for serializing all model object for database storage."""
 
-from rest_framework.serializers import CharField, ChoiceField
-from api.models import (JobConnectionResult, TaskConnectionResult,
-                        SystemConnectionResult)
 from api.common.serializer import NotEmptySerializer
+from api.models import (JobConnectionResult,
+                        SystemConnectionResult,
+                        TaskConnectionResult)
+
+from rest_framework.serializers import CharField, ChoiceField
 
 
 class SystemConnectionResultSerializer(NotEmptySerializer):

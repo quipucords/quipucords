@@ -12,6 +12,7 @@
 """Test the product brms."""
 
 from django.test import TestCase
+
 from fingerprinter.jboss_brms import detect_jboss_brms
 
 

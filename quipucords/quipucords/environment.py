@@ -11,11 +11,11 @@
 
 """Gets system environment data."""
 
+import logging
 import os
-import sys
 import platform
 import subprocess
-import logging
+import sys
 
 # pylint: disable=invalid-name
 # Get an instance of a logger

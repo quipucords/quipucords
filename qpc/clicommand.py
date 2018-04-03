@@ -12,9 +12,11 @@
 """Base CLI Command Class."""
 
 from __future__ import print_function
+
 import sys
-from qpc.utils import handle_error_response, log_args
+
 from qpc.request import request
+from qpc.utils import handle_error_response, log_args
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
