@@ -67,7 +67,7 @@ class ProcessJbossFuseChkconfig(util.InitLineFinder):
 
     DEPS = ['have_chkconfig']
     KEY = 'jboss_fuse_chkconfig'
-    KEYWORDS = ['jboss', 'fuse']
+    KEYWORDS = ['fuse']
 
 
 class ProcessJbossFuseSystemctl(util.InitLineFinder):
