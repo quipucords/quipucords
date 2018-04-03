@@ -125,6 +125,12 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
         return list(results)
 
 
+# If the user installs Drools directly from the zip, they'll get files
+# with the version string plus '-sources' appended. Remove the
+# '-sources' to dedup those with the plain version strings.
+SOURCES = '-sources'
+
+
 class EnclosingWarJarProcessor(process.Processor):
     """Find the enclosing WAR archive of a jar file.
 
@@ -148,6 +154,8 @@ class EnclosingWarJarProcessor(process.Processor):
             if not match:
                 continue
             without_suffix = match.group(1)
+            if without_suffix.endswith(SOURCES):
+                without_suffix = without_suffix[:-len(SOURCES)]
             if not without_suffix.startswith(cls.REMOVE_PREFIX):
                 continue
             version_string = without_suffix[len(cls.REMOVE_PREFIX):]
