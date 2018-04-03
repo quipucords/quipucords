@@ -11,10 +11,12 @@
 """Test the API application."""
 
 from datetime import datetime
-from django.test import TestCase
+
 import api.messages as messages
-from api.models import Credential, Source, ScanTask
+from api.models import Credential, ScanTask, Source
 from api.serializers import ScanTaskSerializer
+
+from django.test import TestCase
 
 
 def dummy_start():

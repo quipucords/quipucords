@@ -12,17 +12,20 @@
 """ScanEditCommand is used to edit existing scans."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
-from qpc.request import PATCH, GET, request
-from qpc.clicommand import CliCommand
-import qpc.scan as scan
-from qpc.scan.utils import (get_source_ids,
-                            build_scan_payload,
-                            get_optional_products,
-                            get_enabled_products)
-from qpc.translation import _
+
 import qpc.messages as messages
+import qpc.scan as scan
+from qpc.clicommand import CliCommand
+from qpc.request import GET, PATCH, request
+from qpc.scan.utils import (build_scan_payload,
+                            get_enabled_products,
+                            get_optional_products,
+                            get_source_ids)
+from qpc.translation import _
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

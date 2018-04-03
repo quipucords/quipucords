@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,11 +12,14 @@
 """Signal manager to handle scan triggering."""
 
 import logging
+
+import api.messages as messages
+
 import django.dispatch
 from django.utils.translation import ugettext as _
-import api.messages as messages
-from scanner.manager import SCAN_MANAGER
+
 from scanner import ScanJobRunner
+from scanner.manager import SCAN_MANAGER
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

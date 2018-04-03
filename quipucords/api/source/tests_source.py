@@ -13,16 +13,21 @@
 import json
 from datetime import datetime
 from unittest.mock import patch
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-from rest_framework import status
+
+import api.messages as messages
 from api.models import (Credential,
                         Scan,
-                        Source,
-                        ScanTask)
-import api.messages as messages
-from api.source.view import format_source
+                        ScanTask,
+                        Source)
 from api.serializers import SourceSerializer
+from api.source.view import format_source
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
+from rest_framework import status
+
+
 from scanner.test_util import create_scan_job
 
 

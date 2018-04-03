@@ -11,16 +11,20 @@
 """Test the API application."""
 
 import json
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-from rest_framework import status
+
 from api.models import (Credential,
                         Scan,
                         ScanJob,
-                        Source,
-                        ScanTask)
-from api.scan.view import (expand_scan)
+                        ScanTask,
+                        Source)
 from api.scan.serializer import ScanSerializer
+from api.scan.view import expand_scan
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
+from rest_framework import status
+
 from scanner.test_util import create_scan_job
 
 # pylint: disable=unused-argument,invalid-name

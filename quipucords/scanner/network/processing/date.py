@@ -10,6 +10,7 @@
 """Initial processing of the shell output from the date role."""
 
 import logging
+
 from scanner.network.processing import process
 from scanner.network.processing.util import get_line
 

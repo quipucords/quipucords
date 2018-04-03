@@ -12,6 +12,7 @@
 """Test the product utils."""
 
 from django.test import TestCase
+
 from fingerprinter.utils import (strip_prefix, strip_suffix)
 
 

@@ -11,28 +11,35 @@
 """Describes the views associated with the API models."""
 
 import os
-from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
-from django.db import transaction
-from django.http import Http404
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
-from rest_framework.serializers import ValidationError
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
-from django_filters.rest_framework import (DjangoFilterBackend,
-                                           FilterSet,
-                                           CharFilter)
-from filters import mixins
-from api.filters import ListFilter
-from api.serializers import CredentialSerializer
-from api.models import Credential, Source
+
 import api.messages as messages
 from api.common.util import is_int
+from api.filters import ListFilter
+from api.models import Credential, Source
+from api.serializers import CredentialSerializer
+
+from django.db import transaction
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
+
+from django_filters.rest_framework import (CharFilter,
+                                           DjangoFilterBackend,
+                                           FilterSet)
+
+from filters import mixins
+
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+from rest_framework.viewsets import ModelViewSet
+
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
+
 
 IDENTIFIER_KEY = 'id'
 NAME_KEY = 'name'

@@ -9,14 +9,15 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the satellite factory."""
+from api.models import (Credential, ScanTask, Source)
 
 from django.test import TestCase
-from api.models import (Credential, Source, ScanTask)
-from scanner.satellite.factory import create
-from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
-from scanner.satellite.five import SatelliteFive
+
 from scanner.satellite.api import (SATELLITE_VERSION_5,
                                    SATELLITE_VERSION_6)
+from scanner.satellite.factory import create
+from scanner.satellite.five import SatelliteFive
+from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
 from scanner.test_util import create_scan_job
 
 

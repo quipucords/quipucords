@@ -9,13 +9,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Satellite 5 API handlers."""
-
 import logging
-from multiprocessing import Pool
 import xmlrpc.client
+from multiprocessing import Pool
+
 from api.models import SystemInspectionResult
-from scanner.satellite.api import SatelliteInterface, SatelliteException
+
 from scanner.satellite import utils
+from scanner.satellite.api import SatelliteException, SatelliteInterface
 
 
 # Get an instance of a logger

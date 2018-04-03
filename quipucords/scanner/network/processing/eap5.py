@@ -11,6 +11,7 @@
 
 import logging
 import re
+
 from scanner.network.processing import util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

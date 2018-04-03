@@ -12,13 +12,16 @@
 """ReportMergeCommand is used to merge scan jobs results."""
 
 from __future__ import print_function
+
 import sys
-from requests import codes
+
+import qpc.messages as messages
+import qpc.report as report
 from qpc.clicommand import CliCommand
 from qpc.request import PUT
-import qpc.report as report
 from qpc.translation import _
-import qpc.messages as messages
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

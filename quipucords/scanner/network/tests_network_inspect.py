@@ -11,23 +11,29 @@
 """Test the inspect scanner capabilities."""
 
 import os.path
-from types import SimpleNamespace
 import unittest
-from unittest.mock import patch, Mock, ANY
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-import requests_mock
+from unittest.mock import ANY, Mock, patch
+from types import SimpleNamespace  # noqa: I100
+
 from ansible.errors import AnsibleError
+
 from api.models import (Credential,
-                        Source,
                         ScanTask,
+                        Source,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
+import requests_mock
+
 from scanner import scan_data_log
-from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network import InspectTaskRunner
-from scanner.network.inspect_callback import InspectResultCallback, \
-    normalize_result, ANSIBLE_FACTS
+from scanner.network.inspect import (_construct_scan_inventory)
+from scanner.network.inspect_callback import (ANSIBLE_FACTS,
+                                              InspectResultCallback,
+                                              normalize_result)
 from scanner.test_util import create_scan_job
 
 

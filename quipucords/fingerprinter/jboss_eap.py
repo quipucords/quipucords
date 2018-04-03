@@ -12,7 +12,9 @@
 """Ingests raw facts to determine the status of JBoss EAP for a system."""
 
 import logging
+
 from api.models import Product, Source
+
 from fingerprinter.utils import product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

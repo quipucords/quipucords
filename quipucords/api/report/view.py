@@ -10,30 +10,35 @@
 #
 
 """View for system reports."""
-import os
 import logging
-from django.utils.translation import ugettext as _
-from django.db.models import Count
+import os
+
+import api.messages as messages
+from api.common.util import is_int
+from api.models import FactCollection, SystemFingerprint
+from api.report.renderer import FactCollectionCSVRenderer, ReportCSVRenderer
+from api.serializers import FactCollectionSerializer, FingerprintSerializer
+
 from django.core.exceptions import FieldError
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from rest_framework.serializers import ValidationError
-from rest_framework.response import Response
+from django.utils.translation import ugettext as _
+
+
 from rest_framework import status
-from rest_framework.decorators import (api_view,
-                                       renderer_classes,
-                                       authentication_classes,
-                                       permission_classes)
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (api_view,
+                                       authentication_classes,
+                                       permission_classes,
+                                       renderer_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import (BrowsableAPIRenderer,
                                       JSONRenderer)
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
-from api.report.renderer import ReportCSVRenderer, FactCollectionCSVRenderer
-from api.models import SystemFingerprint, FactCollection
-from api.serializers import FingerprintSerializer, FactCollectionSerializer
-import api.messages as messages
-from api.common.util import is_int
 
 
 # pylint: disable=invalid-name

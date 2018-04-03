@@ -10,8 +10,8 @@
 #
 """Test the status API view."""
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 
 
 class StatusTest(TestCase):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,12 +12,17 @@
 """Queue Manager module."""
 
 import logging
-from time import sleep
 from threading import Thread
-from api.models import (ScanTask,
-                        ScanJob)
-from scanner import ScanJobRunner
+from time import sleep
+
+
+from api.models import (ScanJob,
+                        ScanTask)
+
 from django.db.models import Q
+
+from scanner import ScanJobRunner
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -10,13 +10,14 @@
 #
 """Test the CLI module."""
 
-import unittest
 import sys
+import unittest
 from io import StringIO
+
+from qpc import messages
 from qpc.cli import CLI
 from qpc.tests_utilities import HushUpStderr, redirect_stdout
 from qpc.utils import read_server_config, write_server_config
-from qpc import messages
 
 DEFAULT_PORT = 443
 

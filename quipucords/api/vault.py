@@ -11,10 +11,13 @@
 """Vault is used to read and write data securely using the Ansible vault."""
 
 import tempfile
-import yaml
-from django.conf import settings
+
 from ansible.parsing.vault import VaultLib
 from ansible.parsing.yaml.dumper import AnsibleDumper
+
+from django.conf import settings
+
+import yaml
 
 
 def represent_none(self, _):

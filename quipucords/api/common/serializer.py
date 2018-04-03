@@ -12,10 +12,12 @@
 
 import json
 from collections import OrderedDict
+
 import api.messages as messages
-from rest_framework.serializers import (ModelSerializer,
+
+from rest_framework.serializers import (ChoiceField,
                                         Field,
-                                        ChoiceField,
+                                        ModelSerializer,
                                         ValidationError)
 
 

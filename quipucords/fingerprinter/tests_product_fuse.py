@@ -12,6 +12,7 @@
 """Test the product fuse."""
 
 from django.test import TestCase
+
 from fingerprinter.jboss_fuse import (detect_jboss_fuse,
                                       get_version)
 

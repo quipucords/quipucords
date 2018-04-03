@@ -11,33 +11,40 @@
 """Describes the views associated with the API models."""
 
 import os
-from django.http import Http404
-from django.db import transaction
-from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter
-from rest_framework.serializers import ValidationError
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
-from django_filters.rest_framework import (DjangoFilterBackend,
-                                           FilterSet,
-                                           CharFilter)
-from api.filters import ListFilter
-from api.serializers import SourceSerializer
-from api.models import (Source,
-                        Scan,
-                        ScanJob,
-                        ScanTask)
+
 import api.messages as messages
-from api.common.util import is_int, is_boolean, convert_to_boolean, \
-    expand_scanjob_with_times
+from api.common.util import (convert_to_boolean,
+                             expand_scanjob_with_times,
+                             is_boolean,
+                             is_int)
+from api.filters import ListFilter
+from api.models import (Scan,
+                        ScanJob,
+                        ScanTask,
+                        Source)
+from api.serializers import SourceSerializer
 from api.signals.scanjob_signal import start_scan
 from api.source.util import expand_credential
+
+from django.db import transaction
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
+
+from django_filters.rest_framework import (CharFilter,
+                                           DjangoFilterBackend,
+                                           FilterSet)
+
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+from rest_framework.viewsets import ModelViewSet
+
+from rest_framework_expiring_authtoken.authentication import \
+    ExpiringTokenAuthentication
 
 
 IDENTIFIER_KEY = 'id'

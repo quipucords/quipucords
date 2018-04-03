@@ -11,12 +11,15 @@
 """Test the API application."""
 
 import json
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-from rest_framework import status
-from api.models import Credential, Source
+
 import api.messages as messages
+from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+
+from rest_framework import status
 
 
 class CredentialTest(TestCase):

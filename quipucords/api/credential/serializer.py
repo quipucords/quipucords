@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -11,13 +11,16 @@
 """Module for serializing all model object for database storage."""
 
 import os
-from django.utils.translation import ugettext as _
-from rest_framework.serializers import (ValidationError,
-                                        CharField)
-from api.models import Credential
+
 import api.messages as messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
+from api.models import Credential
+
+from django.utils.translation import ugettext as _
+
+from rest_framework.serializers import (CharField,
+                                        ValidationError)
 
 
 def expand_filepath(filepath):

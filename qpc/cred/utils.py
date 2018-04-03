@@ -12,9 +12,11 @@
 """Utilities for the credential credentials module."""
 
 from __future__ import print_function
+
 from getpass import getpass
-from qpc.translation import _
+
 import qpc.messages as messages
+from qpc.translation import _
 
 
 def get_password(args, req_payload, add_none=True):

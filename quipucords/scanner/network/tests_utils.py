@@ -12,7 +12,9 @@
 
 import unittest
 from unittest import mock
+
 from ansible.executor.task_queue_manager import TaskQueueManager
+
 from scanner.network import utils
 
 

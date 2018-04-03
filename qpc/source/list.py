@@ -12,14 +12,17 @@
 """SourceListCommand is used to list sources for system scans."""
 
 from __future__ import print_function
+
 import urllib.parse as urlparse
-from requests import codes
-from qpc.utils import pretty_print
-from qpc.clicommand import CliCommand
+
+import qpc.messages as messages
 import qpc.source as source
+from qpc.clicommand import CliCommand
 from qpc.request import GET
 from qpc.translation import _
-import qpc.messages as messages
+from qpc.utils import pretty_print
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods
