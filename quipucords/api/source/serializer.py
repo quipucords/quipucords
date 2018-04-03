@@ -353,6 +353,7 @@ class SourceSerializer(NotEmptySerializer):
         relaxed_cidr_pattern = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*'
         relaxed_invalid_ip_range = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*-' \
                                    r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*'
+        relaxed_invalid_ip_range_alt = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*-[0-9]*'
 
         # type IP:          192.168.0.1
         # type CIDR:        192.168.0.0/16
@@ -379,18 +380,23 @@ class SourceSerializer(NotEmptySerializer):
         host_errors = []
         for host_range in hosts_list:
             result = None
-
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
             invalid_ip_range_match = re.match(relaxed_invalid_ip_range,
                                               host_range)
+            invalid_ip_range_match_alt = re.match(relaxed_invalid_ip_range_alt,
+                                                  host_range)
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
             is_likely_invalid_ip_range = (invalid_ip_range_match and
                                           invalid_ip_range_match.end() ==
                                           len(host_range))
+            is_likely_invalid_ip_range_alt = (
+                invalid_ip_range_match_alt and
+                invalid_ip_range_match_alt.end() ==
+                len(host_range))
 
-            if is_likely_invalid_ip_range:
+            if is_likely_invalid_ip_range or is_likely_invalid_ip_range_alt:
                 err_message = _(messages.NET_INVALID_RANGE_FORMAT %
                                 (host_range,))
                 result = ValidationError(err_message)
