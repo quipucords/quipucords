@@ -80,18 +80,24 @@ class ConnectResultStore(object):
 
         if status == SystemConnectionResult.SUCCESS:
             message = '%s with %s' % (name, credential.name)
-            self.scan_task.increment_stats(message, increment_sys_scanned=True)
+            self.scan_task.increment_stats(message,
+                                           increment_sys_scanned=True,
+                                           prefix='CONNECTED')
         elif status == SystemConnectionResult.UNREACHABLE:
             message = '%s is UNREACHABLE' % (name)
             self.scan_task.increment_stats(
-                message, increment_sys_unreachable=True)
+                message,
+                increment_sys_unreachable=True,
+                prefix='FAILED')
         else:
             if credential is not None:
                 message = '%s with %s' % (name, credential.name)
             else:
                 message = '%s has no valid credentials' % name
 
-            self.scan_task.increment_stats(message, increment_sys_failed=True)
+            self.scan_task.increment_stats(message,
+                                           increment_sys_failed=True,
+                                           prefix='FAILED')
 
         self._remaining_hosts.remove(name)
 

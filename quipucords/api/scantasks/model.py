@@ -209,7 +209,8 @@ class ScanTask(models.Model):
                         increment_sys_count=False,
                         increment_sys_scanned=False,
                         increment_sys_failed=False,
-                        increment_sys_unreachable=False):
+                        increment_sys_unreachable=False,
+                        prefix='PROCESSING'):
         """Increment scan task stats.
 
         Helper method to increment and save values.  Log will be
@@ -249,7 +250,7 @@ class ScanTask(models.Model):
             else:
                 sys_unreachable = self.systems_unreachable
             sys_unreachable += 1
-        stat_string = 'PROCESSING %s.' % name
+        stat_string = '%s %s.' % (prefix, name)
         self.update_stats(stat_string,
                           sys_count=sys_count,
                           sys_scanned=sys_scanned,

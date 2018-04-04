@@ -61,17 +61,19 @@ class ConnectResultCallback(CallbackBase):
         result_message = result._result.get(
             'msg', 'No information given on unreachable warning.  '
             'Missing msg attribute.')
-        ssl_ansible_error = result_message is not None and \
+        ssl_ansible_auth_error = result_message is not None and \
             'permission denied' in result_message.lower()
-        if not ssl_ansible_error:
+        if not ssl_ansible_auth_error:
+            # host is unreachable
             self.result_store.record_result(host,
                                             self.source,
                                             self.credential,
                                             SystemConnectionResult.UNREACHABLE)
         else:
-            message = 'UNREACHABLE %s. %s' % (host, result_message)
-            self.result_store.scan_task.log_message(
-                message, log_level=logging.WARN)
+            # invalid creds
+            message = 'PERMISSION DENIED %s could not connect'\
+                ' with cred %s.' % (host, self.credential.name)
+            self.result_store.scan_task.log_message(message)
 
         result_obj = _construct_result(result)
         logger.debug('%s', result_obj)
@@ -86,8 +88,15 @@ class ConnectResultCallback(CallbackBase):
         authentication_error = result_message is not None and \
             'permission denied' in result_message.lower()
         if not authentication_error:
+            # failure is not authentication
             message = 'FAILED %s. %s' % (host, result_message)
             self.result_store.scan_task.log_message(
                 message, log_level=logging.ERROR)
+        else:
+            # invalid creds
+            message = 'PERMISSION DENIED %s could not connect'\
+                ' with cred %s.' % (host, self.credential.name)
+            self.result_store.scan_task.log_message(message)
+
         result_obj = _construct_result(result)
         logger.debug('%s', result_obj)
