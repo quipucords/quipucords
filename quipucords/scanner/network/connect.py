@@ -205,7 +205,6 @@ def connect(hosts, callback, credential, connection_port, forks=50):
     result = run_playbook(inventory_file, callback, playbook,
                           extra_vars, forks=forks)
 
-    print('result: %s' % result)
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and
             result != TaskQueueManager.RUN_FAILED_HOSTS):
