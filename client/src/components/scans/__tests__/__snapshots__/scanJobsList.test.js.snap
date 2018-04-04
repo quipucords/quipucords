@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ScanHostList Component should shallow render a basic component with an empty state status 1`] = `
+exports[`ScanJobsList Component should shallow render a basic component with an empty state status 1`] = `
 <EmptyState
   className=""
 >
   <EmptyStateIcon
     className=""
-    name="warning-triangle-o"
+    name="spinner spinner-xl"
     type="pf"
   />
   <EmptyStateTitle
     className=""
   >
-    Successful systems were not available, please refresh.
+    Loading scan jobs...
   </EmptyStateTitle>
 </EmptyState>
 `;

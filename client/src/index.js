@@ -11,8 +11,6 @@ import App from './components/app';
 import { baseName } from './routes';
 import store from './redux/store';
 
-// ToDo: Evaluate the need for being offline, causes authentication errors
-
 ReactDOM.render(
   <Provider store={store}>
     <Router basename={baseName}>

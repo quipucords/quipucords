@@ -99,7 +99,7 @@ const scanStatusIcon = scanStatus => {
     case 'paused':
       return { type: 'pf', name: 'warning-triangle-o', classNames: [] };
     default:
-      console.error('Unknown status: ' + scanStatus);
+      console.error(`Unknown status: ${scanStatus}`);
       return { type: 'pf', name: 'unknown', classNames: [] };
   }
 };

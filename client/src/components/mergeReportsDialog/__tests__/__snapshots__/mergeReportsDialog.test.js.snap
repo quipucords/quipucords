@@ -76,7 +76,11 @@ exports[`ToastNotificationsList Component should shallow render a basic componen
               Failed scans that cannot be included in the merged report:
             </span>
             <ul>
-              <li />
+              <li
+                key="1"
+              >
+                test
+              </li>
             </ul>
           </div>
         </div>

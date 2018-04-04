@@ -362,7 +362,7 @@ class ScanListItem extends React.Component {
 }
 
 ScanListItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object.isRequired,
   lastRefresh: PropTypes.number,
   onSummaryDownload: PropTypes.func,
   onDetailedDownload: PropTypes.func,

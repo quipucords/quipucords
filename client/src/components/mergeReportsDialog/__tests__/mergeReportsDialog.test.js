@@ -9,7 +9,7 @@ describe('ToastNotificationsList Component', function() {
   it('should shallow render a basic component', () => {
     const store = generateEmptyStore();
     const props = { show: true };
-    const wrapper = shallow(<MergeReportsDialog {...props} show details={false} scans={[{}]} />, {
+    const wrapper = shallow(<MergeReportsDialog {...props} show details={false} scans={[{ id: 1, name: 'test' }]} />, {
       context: { store }
     });
 
