@@ -75,7 +75,8 @@ class ProcessJbossFuseSystemctl(util.InitLineFinder):
 
     DEPS = ['have_systemctl']
     KEY = 'jboss_fuse_systemctl_unit_files'
-    KEYWORDS = ['jboss', 'fuse']
+    KEYWORDS = ['fuse']
+    IGNORE_WORDS = ['sys-fs-fuse-connections.mount']
 
 
 class ProcessKarafHomeBinFuse(process.Processor):
