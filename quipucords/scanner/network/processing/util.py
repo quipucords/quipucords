@@ -41,6 +41,7 @@ class InitLineFinder(process.Processor):
 
     KEY = None
     KEYWORDS = None  # A list of keywords to search for
+    IGNORE_WORDS = None  # A list of words to ignore
 
     @classmethod
     def process(cls, output):
@@ -54,7 +55,12 @@ class InitLineFinder(process.Processor):
             start = line.split()[0]
             # pylint: disable=not-an-iterable
             if any((keyword in start for keyword in cls.KEYWORDS)):
-                matches.append(line.strip())
+                if (cls.IGNORE_WORDS and
+                        not any((ignore in start
+                                 for ignore in cls.IGNORE_WORDS))):
+                    matches.append(line.strip())
+                elif cls.IGNORE_WORDS is None:
+                    matches.append(line.strip())
 
         return matches
 

@@ -69,7 +69,7 @@ class TestProcessKarafInitFiles(unittest.TestCase):
     processors = [karaf.ProcessJbossFuseChkconfig,
                   karaf.ProcessJbossFuseSystemctl]
 
-    def test_no_jboss(self):
+    def test_no_fuse(self):
         """No 'fuse' found."""
         for processor in self.processors:
             self.assertEqual(
@@ -77,7 +77,21 @@ class TestProcessKarafInitFiles(unittest.TestCase):
                 processor.process(ansible_result('foo\nbar\n\nbaz')),
                 [])
 
-    def test_eap(self):
+    def test_fuse_skipped(self):
+        """'fuse' not found for Systemctl."""
+        for processor in self.processors:
+            expected = ['sys-fs-fuse-connections.mount']
+            if processor.IGNORE_WORDS is not None:
+                expected = []
+
+            self.assertEqual(
+                processor.process(
+                    ansible_result('  foo\n  '
+                                   'sys-fs-fuse-connections.mount\n  '
+                                   'baz fuse')),
+                expected)
+
+    def test_fuse(self):
         """'fuse' found."""
         for processor in self.processors:
             self.assertEqual(
