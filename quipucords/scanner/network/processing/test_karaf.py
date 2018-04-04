@@ -70,23 +70,12 @@ class TestProcessKarafInitFiles(unittest.TestCase):
                   karaf.ProcessJbossFuseSystemctl]
 
     def test_no_jboss(self):
-        """No 'jboss' or 'fuse' found."""
+        """No 'fuse' found."""
         for processor in self.processors:
             self.assertEqual(
                 # Blank line in input to check that processor will skip it.
                 processor.process(ansible_result('foo\nbar\n\nbaz')),
                 [])
-
-    def test_jboss(self):
-        """'jboss' found."""
-        # This tests that the processor returns the 'jboss bar' line
-        # and that it does *not* return the 'baz jboss' line, becuase
-        # in that line 'jboss' is not in the first piece.
-        for processor in self.processors:
-            self.assertEqual(
-                processor.process(
-                    ansible_result('  foo\n  jboss bar\n  baz jboss')),
-                ['jboss bar'])
 
     def test_eap(self):
         """'fuse' found."""
