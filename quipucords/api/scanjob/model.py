@@ -148,29 +148,38 @@ class ScanJob(models.Model):
         """
         if self.status == ScanTask.CREATED or \
                 self.status == ScanTask.PENDING:
-            return None, None, None
+            return None, None, None, None
 
         systems_count = 0
         systems_scanned = 0
         systems_failed = 0
+        systems_unreachable = 0
 
         connection_systems_count,\
             connection_systems_scanned,\
-            connection_systems_failed = self._calculate_counts(
+            connection_systems_failed,\
+            connection_systems_unreachable = self._calculate_counts(
                 ScanTask.SCAN_TYPE_CONNECT)
         if self.scan_type == ScanTask.SCAN_TYPE_CONNECT or connect_only:
             systems_count = connection_systems_count
             systems_scanned = connection_systems_scanned
             systems_failed = connection_systems_failed
+            systems_unreachable = connection_systems_unreachable
         else:
             _,\
                 inspect_systems_scanned,\
-                inspect_systems_failed = self._calculate_counts(
+                inspect_systems_failed,\
+                inspect_systems_unreachable = self._calculate_counts(
                     ScanTask.SCAN_TYPE_INSPECT)
             systems_count = connection_systems_count
             systems_scanned = inspect_systems_scanned
             systems_failed = inspect_systems_failed + connection_systems_failed
-        return systems_count, systems_scanned, systems_failed
+            systems_unreachable = \
+                inspect_systems_unreachable + connection_systems_unreachable
+        return systems_count,\
+            systems_scanned, \
+            systems_failed, \
+            systems_unreachable
 
     def _calculate_counts(self, scan_type):
         """Calculate scan counts from tasks.
@@ -180,6 +189,7 @@ class ScanJob(models.Model):
         systems_count = 0
         systems_scanned = 0
         systems_failed = 0
+        systems_unreachable = 0
         tasks = self.tasks.filter(
             scan_type=scan_type).order_by('sequence_number')
         for task in tasks:
@@ -195,21 +205,30 @@ class ScanJob(models.Model):
                 if systems_failed is None:
                     systems_failed = 0
                 systems_failed += task.systems_failed
-        return systems_count, systems_scanned, systems_failed
+            if task.systems_unreachable is not None:
+                if systems_unreachable is None:
+                    systems_unreachable = 0
+                systems_unreachable += task.systems_unreachable
+        return systems_count,\
+            systems_scanned,\
+            systems_failed,\
+            systems_unreachable
 
     def _log_stats(self, prefix):
         """Log stats for scan."""
         systems_count,\
             systems_scanned,\
-            systems_failed = self._calculate_counts(
+            systems_failed,\
+            systems_unreachable = self._calculate_counts(
                 ScanTask.SCAN_TYPE_CONNECT)
 
         message = '%s Stats: systems_count=%d,'\
-            ' systems_scanned=%d, systems_failed=%d' %\
+            ' systems_scanned=%d, systems_failed=%d, systems_unreachable=%d' %\
             (prefix,
              systems_count,
              systems_scanned,
-             systems_failed)
+             systems_failed,
+             systems_unreachable)
         self.log_message(message)
 
     def _compute_elapsed_time(self):

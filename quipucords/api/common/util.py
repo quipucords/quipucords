@@ -194,16 +194,14 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
 
     :returns: a JSON dict with some of the ScanJob's fields.
     """
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-branches
     systems_count, \
         systems_scanned, \
-        systems_failed = scanjob.calculate_counts(connect_only)
+        systems_failed, \
+        systems_unreachable = scanjob.calculate_counts(connect_only)
     report_id = scanjob.report_id
     start_time = scanjob.start_time
     end_time = scanjob.end_time
-    systems_count = systems_count
-    systems_scanned = systems_scanned
-    systems_failed = systems_failed
     job_status = scanjob.status
     if not connect_only:
         scan_type = scanjob.scan_type
@@ -225,6 +223,8 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
         job_json['systems_scanned'] = systems_scanned
     if systems_failed is not None:
         job_json['systems_failed'] = systems_failed
+    if systems_unreachable is not None:
+        job_json['systems_unreachable'] = systems_unreachable
     if not connect_only and scan_type is not None:
         job_json['scan_type'] = scan_type
     if job_status_message is not None:

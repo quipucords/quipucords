@@ -58,6 +58,8 @@ class ScanTaskSerializer(NotEmptySerializer):
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
+    systems_unreachable = IntegerField(
+        required=False, min_value=0, read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)
 
@@ -67,7 +69,8 @@ class ScanTaskSerializer(NotEmptySerializer):
         model = ScanTask
         fields = ['source', 'scan_type', 'status', 'status_message',
                   'systems_count', 'systems_scanned',
-                  'systems_failed', 'start_time', 'end_time']
+                  'systems_failed', 'systems_unreachable',
+                  'start_time', 'end_time']
 
     @staticmethod
     def validate_source(source):

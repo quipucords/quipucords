@@ -1816,9 +1816,11 @@ class ScanJobTest(TestCase):
         scan_job.save()
         connect_task.update_stats('TEST_VC', sys_count=2,
                                   sys_failed=0,
-                                  sys_scanned=2)
+                                  sys_scanned=2,
+                                  sys_unreachable=0)
         scan_task.update_stats('TEST_VC.', sys_count=2,
-                               sys_failed=1, sys_scanned=1)
+                               sys_failed=1, sys_scanned=1,
+                               sys_unreachable=0)
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
         serializer = ScanJobSerializer(scan_job)

@@ -171,8 +171,12 @@ class InspectResultCallback(CallbackBase):
             if host_status == SystemInspectionResult.SUCCESS:
                 self.scan_task.increment_stats(
                     host, increment_sys_scanned=True)
+            elif host_status == SystemInspectionResult.UNREACHABLE:
+                self.scan_task.increment_stats(
+                    host, increment_sys_unreachable=True)
             else:
-                self.scan_task.increment_stats(host, increment_sys_failed=True)
+                self.scan_task.increment_stats(
+                    host, increment_sys_failed=True)
 
         sys_result = SystemInspectionResult(
             name=host, status=host_status, source=self.scan_task.source)

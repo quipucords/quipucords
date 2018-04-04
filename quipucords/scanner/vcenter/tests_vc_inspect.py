@@ -134,7 +134,11 @@ class InspectTaskRunnerTest(TestCase):
 
         virtual_machine.summary = summary
         self.scan_task.update_stats(
-            'TEST_VC.', sys_count=5, sys_failed=0, sys_scanned=0)
+            'TEST_VC.',
+            sys_count=5,
+            sys_failed=0,
+            sys_scanned=0,
+            sys_unreachable=0)
         getnics = (['00:50:56:9e:09:8c'], ['1.2.3.4'])
         with patch('scanner.vcenter.inspect.get_nics',
                    return_value=getnics):

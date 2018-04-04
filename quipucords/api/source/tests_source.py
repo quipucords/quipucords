@@ -144,7 +144,8 @@ class SourceTest(TestCase):
         source.save()
         end = datetime.now()
         scan_job, scan_task = create_scan_job(source)
-        scan_task.update_stats('', sys_count=10, sys_scanned=9, sys_failed=1)
+        scan_task.update_stats(
+            '', sys_count=10, sys_scanned=9, sys_failed=1, sys_unreachable=0)
         scan_job.start_time = start
         scan_job.end_time = end
         scan_job.status = ScanTask.COMPLETED
@@ -157,8 +158,7 @@ class SourceTest(TestCase):
         out = format_source(json_source)
 
         # pylint: disable=line-too-long
-        expected = {'id': 1, 'name': 'source1', 'source_type': 'network', 'port': 22, 'hosts': ['1.2.3.4'], 'connection': {'id': 1, 'start_time': start, 'end_time': end, 'systems_count': 10, 'systems_scanned': 9, 'systems_failed': 1, 'status_details': {'job_status_message': 'Job is pending.'}, 'status': 'completed', 'source_systems_count': 10, 'source_systems_scanned': 9, 'source_systems_failed': 1}}  # noqa
-
+        expected = {'id': 1, 'name': 'source1', 'source_type': 'network', 'port': 22, 'hosts': ['1.2.3.4'], 'connection': {'id': 1, 'start_time': start, 'end_time': end, 'systems_count': 10, 'systems_scanned': 9, 'systems_failed': 1, 'systems_unreachable': 0, 'status_details': {'job_status_message': 'Job is pending.'}, 'status': 'completed', 'source_systems_count': 10, 'source_systems_scanned': 9, 'source_systems_failed': 1, 'source_systems_unreachable': 0}}  # noqa
         self.assertEqual(out, expected)
 
     #################################################
