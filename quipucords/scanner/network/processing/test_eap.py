@@ -192,7 +192,7 @@ class TestProcessEapHomeVersionTxt(unittest.TestCase):
                     {'item': 'dir2', 'rc': 1, 'stdout': self.cat_result},
                     # dir3: cat was successful, output does not have 'Red Hat'.
                     {'item': 'dir3', 'stdout': 'foo'}])),
-            {'dir1': self.cat_result,
+            {'dir1': '6.4.0',
              'dir2': False,
              'dir3': 'foo'})
 

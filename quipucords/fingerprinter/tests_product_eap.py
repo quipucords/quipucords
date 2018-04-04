@@ -11,9 +11,24 @@
 
 """Test the product eap."""
 
+import unittest
 from django.test import TestCase
+from fingerprinter.jboss_eap import detect_jboss_eap, version_aware_dedup
 
-from fingerprinter.jboss_eap import detect_jboss_eap
+
+class TestVersionAwareDedup(unittest.TestCase):
+    """Test the version aware dedup."""
+
+    def test_dedup(self):
+        """Dedup redundant version numbers."""
+        self.assertEqual(
+            version_aware_dedup(['1', '1.0', '1.0.1']),
+            {'1.0.1'})
+
+    def test_empty_input(self):
+        """Return an empty set for an empty input."""
+        self.assertEqual(
+            version_aware_dedup([]), set())
 
 
 class ProductEAPTest(TestCase):
@@ -29,7 +44,7 @@ class ProductEAPTest(TestCase):
         product = detect_jboss_eap(source, facts)
         expected = {'name': 'JBoss EAP',
                     'presence': 'present',
-                    'version': ['EAP-6.4'],
+                    'version': ['6.4.0'],
                     'metadata': {
                         'source_id': 1,
                         'source_name': None,
