@@ -12,7 +12,9 @@
 """Test the product eap."""
 
 import unittest
+
 from django.test import TestCase
+
 from fingerprinter.jboss_eap import detect_jboss_eap, version_aware_dedup
 
 
