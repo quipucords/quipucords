@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourceListItem Component should render a basic component 1`] = `
+<div
+  class="list-group-item list-view-pf-stacked list-view-pf-top-align"
+>
+  <div
+    class="list-view-pf-checkbox"
+  >
+    <div
+      class=""
+    >
+      <label
+        title=""
+      >
+        <input
+          type="checkbox"
+        />
+      </label>
+    </div>
+  </div>
+  <div
+    class="list-view-pf-actions"
+  >
+    <span>
+      <span>
+        <button
+          class="btn btn-link"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            aria-label="Edit"
+            class="pficon pficon-edit"
+          />
+        </button>
+      </span>
+      <span>
+        <button
+          class="btn btn-link"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            aria-label="Delete"
+            class="pficon pficon-delete"
+          />
+        </button>
+      </span>
+      <button
+        class="btn btn-default"
+        type="button"
+      >
+        Scan
+      </button>
+    </span>
+  </div>
+  <div
+    class="list-view-pf-main-info"
+  >
+    <div
+      class="list-view-pf-left"
+    >
+      <span>
+        <span
+          aria-hidden="true"
+          class="pficon pficon-network-range list-view-pf-icon-sm"
+        />
+      </span>
+    </div>
+    <div
+      class="list-view-pf-body"
+    >
+      <div
+        class="list-view-pf-description"
+      >
+        <div
+          class="list-group-item-text"
+        >
+          <div
+            class="quipucords-split-description"
+          >
+            <span
+              class="quipucords-description-left"
+            >
+              <div
+                class="list-group-item-heading"
+              />
+            </span>
+            <span
+              class="quipucords-description-right"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="list-view-pf-additional-info"
+      >
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Credentials
+            </span>
+          </span>
+        </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Successful
+            </span>
+          </span>
+        </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Failed
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

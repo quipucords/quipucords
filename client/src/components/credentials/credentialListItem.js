@@ -207,7 +207,7 @@ class CredentialListItem extends React.Component {
 }
 
 CredentialListItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object.isRequired,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   selectedCredentials: PropTypes.array,

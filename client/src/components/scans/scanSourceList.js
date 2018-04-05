@@ -44,11 +44,8 @@ class ScanSourceList extends React.Component {
   }
 
   sortSources(scan) {
-    if (!scan) {
-      return;
-    }
+    let sources = [..._.get(scan, 'sources', [])];
 
-    let sources = [...scan.sources];
     sources.sort((item1, item2) => {
       let cmp = item1.source_type.localeCompare(item2.source_type);
       if (cmp === 0) {
@@ -56,6 +53,7 @@ class ScanSourceList extends React.Component {
       }
       return cmp;
     });
+
     this.setState({ sources: sources });
   }
 
@@ -73,11 +71,12 @@ class ScanSourceList extends React.Component {
     if (_.get(connectTask, 'status') !== 'completed' || !inspectTask) {
       return `Connection Scan: ${_.get(connectTask, 'status_message', 'checking status...')}`;
     }
+
     return `Inspection Scan: ${_.get(inspectTask, 'status_message', 'checking status...')}`;
   }
 
   renderSourceIcon(source) {
-    let iconInfo = helpers.sourceTypeIcon(source.source_type);
+    const iconInfo = helpers.sourceTypeIcon(source.source_type);
 
     return <Icon type={iconInfo.type} name={iconInfo.name} />;
   }
@@ -104,7 +103,7 @@ class ScanSourceList extends React.Component {
 }
 
 ScanSourceList.propTypes = {
-  scan: PropTypes.object,
+  scan: PropTypes.object.isRequired,
   lastRefresh: PropTypes.number,
   getScanJob: PropTypes.func
 };

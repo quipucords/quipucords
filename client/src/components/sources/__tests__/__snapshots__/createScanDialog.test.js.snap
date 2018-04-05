@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateScanDialog Component should render a basic component 1`] = `
+<div
+  role="dialog"
+>
+  <div
+    class="modal-backdrop fade in"
+  />
+  <div
+    class="fade in modal"
+    role="dialog"
+    style="display: block; padding-right: 0px;"
+    tabindex="-1"
+  >
+    <div
+      class="modal-dialog"
+    >
+      <div
+        class="modal-content"
+        role="document"
+      >
+        <div
+          class="modal-header"
+        >
+          <button
+            aria-hidden="true"
+            aria-label="Close"
+            class="close"
+          >
+            <span
+              aria-hidden="true"
+              class="pficon pficon-close"
+            />
+          </button>
+          <h4
+            class="modal-title"
+          >
+            Scan
+          </h4>
+        </div>
+        <div
+          class="modal-body"
+        />
+        <div
+          class="container-fluid"
+        >
+          <form
+            class="form-horizontal"
+          >
+            <div
+              class="form-group"
+            >
+              <label
+                class="col-sm-3 control-label"
+                for="scanName"
+              >
+                <label
+                  class="control-label"
+                  for="scanName"
+                >
+                  Name
+                </label>
+              </label>
+              <div
+                class="col-sm-9"
+              >
+                <input
+                  class="form-control"
+                  id="scanName"
+                  name="scanName"
+                  placeholder="Enter a name for the scan"
+                  type="text"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class="form-group"
+            >
+              <label
+                class="col-sm-3 control-label"
+              >
+                Sources
+              </label>
+              <div
+                class="col-sm-9"
+              >
+                <textarea
+                  class="quipucords-form-control form-control"
+                  readonly=""
+                  rows="1"
+                  type="textarea"
+                >
+                  test name
+                </textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          class="modal-footer"
+        >
+          <button
+            class="btn-cancel btn btn-default"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            disabled=""
+            type="submit"
+          >
+            Scan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
