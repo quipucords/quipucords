@@ -413,3 +413,6 @@
   }
 }
 
+.pficon.pficon-disconnected.is-error::before {
+  color: $color-pf-red-100;
+}

@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
 import { Icon, ListView } from 'patternfly-react';
+import _ from 'lodash';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 
 const ListStatusItem = ({
@@ -12,14 +14,16 @@ const ListStatusItem = ({
   expanded,
   expandType,
   toggleExpand,
-  iconType,
-  iconName
+  iconInfo
 }) => {
-  let renderExpandContent = (iconType, iconName, count, text) => {
-    if (iconType && iconName) {
+  let renderExpandContent = (iconInfo, count, text) => {
+    if (iconInfo) {
+      const classes = _.get(iconInfo.classNames, 'length', 0)
+        ? cx('list-view-compound-item-icon', ...iconInfo.classNames)
+        : 'list-view-compound-item-icon';
       return (
         <React.Fragment>
-          <Icon className="list-view-compound-item-icon" type={iconType} name={iconName} />
+          <Icon className={classes} type={iconInfo.type} name={iconInfo.name} />
           <strong>{count}</strong>
         </React.Fragment>
       );
@@ -43,7 +47,7 @@ const ListStatusItem = ({
               toggleExpand(expandType);
             }}
           >
-            {renderExpandContent(iconType, iconName, count, tipPlural)}
+            {renderExpandContent(iconInfo, count, tipPlural)}
           </ListView.Expand>
         </SimpleTooltip>
       </ListView.InfoItem>
@@ -68,8 +72,7 @@ ListStatusItem.propTypes = {
   expanded: PropTypes.bool,
   expandType: PropTypes.string,
   toggleExpand: PropTypes.func,
-  iconType: PropTypes.string,
-  iconName: PropTypes.string
+  iconInfo: PropTypes.object
 };
 
 export default ListStatusItem;
