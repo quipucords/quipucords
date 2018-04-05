@@ -69,6 +69,7 @@ class ScanTask(models.Model):
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
+    systems_unreachable = models.PositiveIntegerField(null=True)
     sequence_number = models.PositiveIntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
@@ -87,6 +88,7 @@ class ScanTask(models.Model):
             'systems_count: {}, '\
             'systems_scanned: {}, '\
             'systems_failed: {}, '\
+            'systems_unreachable: {}, '\
             'start_time: {} '\
             'end_time: {}, '\
             'connection_result: {}, '\
@@ -98,6 +100,7 @@ class ScanTask(models.Model):
                                            self.systems_count,
                                            self.systems_scanned,
                                            self.systems_failed,
+                                           self.systems_unreachable,
                                            self.start_time,
                                            self.end_time,
                                            self.connection_result,
@@ -126,6 +129,7 @@ class ScanTask(models.Model):
         """Log stats for scan."""
         sys_count = self.systems_count
         sys_failed = self.systems_failed
+        sys_unreachable = self.systems_unreachable
         sys_scanned = self.systems_scanned
         if sys_count is None:
             sys_count = 0
@@ -133,12 +137,15 @@ class ScanTask(models.Model):
             sys_scanned = 0
         if sys_failed is None:
             sys_failed = 0
+        if sys_unreachable is None:
+            sys_unreachable = 0
         message = '%s Stats: systems_count=%d,'\
-            ' systems_scanned=%d, systems_failed=%d' %\
+            ' systems_scanned=%d, systems_failed=%d, systems_unreachable=%d' %\
             (prefix,
              sys_count,
              sys_scanned,
-             sys_failed)
+             sys_failed,
+             sys_unreachable)
         self.log_message(message)
 
     def log_message(self, message, log_level=logging.INFO):
@@ -167,14 +174,17 @@ class ScanTask(models.Model):
                      description,
                      sys_count=None,
                      sys_scanned=None,
-                     sys_failed=None):
+                     sys_failed=None,
+                     sys_unreachable=None):
         """Update scan task stats.
 
         :param description: Description to be logged with stats.
         :param sys_count: Total number of systems.
         :param sys_scanned: Systems scanned.
         :param sys_failed: Systems failed during scan.
+        :param sys_unreachable: Systems unreachable during scan.
         """
+        # pylint: disable=too-many-arguments
         stats_changed = False
         if sys_count is not None and sys_count != self.systems_count:
             self.systems_count = sys_count
@@ -185,6 +195,10 @@ class ScanTask(models.Model):
         if sys_failed is not None and sys_failed != self.systems_failed:
             self.systems_failed = sys_failed
             stats_changed = True
+        if sys_unreachable is not None and \
+                sys_unreachable != self.systems_unreachable:
+            self.systems_unreachable = sys_unreachable
+            stats_changed = True
 
         if stats_changed:
             self.save()
@@ -194,7 +208,9 @@ class ScanTask(models.Model):
     def increment_stats(self, name,
                         increment_sys_count=False,
                         increment_sys_scanned=False,
-                        increment_sys_failed=False):
+                        increment_sys_failed=False,
+                        increment_sys_unreachable=False,
+                        prefix='PROCESSING'):
         """Increment scan task stats.
 
         Helper method to increment and save values.  Log will be
@@ -203,9 +219,12 @@ class ScanTask(models.Model):
         :param increment_sys_count: True if should be incremented.
         :param increment_sys_scanned: True if should be incremented.
         :param increment_sys_failed: True if should be incremented.
+        :param increment_sys_unreachable: True if should be incremented.
         """
+        # pylint: disable=too-many-arguments
         sys_count = None
         sys_failed = None
+        sys_unreachable = None
         sys_scanned = None
         if increment_sys_count:
             if self.systems_count is None:
@@ -225,10 +244,18 @@ class ScanTask(models.Model):
             else:
                 sys_failed = self.systems_failed
             sys_failed += 1
-
-        stat_string = 'PROCESSING %s.' % name
-        self.update_stats(stat_string, sys_count=sys_count,
-                          sys_scanned=sys_scanned, sys_failed=sys_failed)
+        if increment_sys_unreachable:
+            if self.systems_unreachable is None:
+                sys_unreachable = 0
+            else:
+                sys_unreachable = self.systems_unreachable
+            sys_unreachable += 1
+        stat_string = '%s %s.' % (prefix, name)
+        self.update_stats(stat_string,
+                          sys_count=sys_count,
+                          sys_scanned=sys_scanned,
+                          sys_failed=sys_failed,
+                          sys_unreachable=sys_unreachable)
 
     @transaction.atomic
     def start(self):

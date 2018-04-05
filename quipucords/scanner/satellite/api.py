@@ -107,6 +107,9 @@ class SatelliteInterface(object):
         if status == SystemInspectionResult.SUCCESS:
             self.inspect_scan_task.increment_stats(
                 name, increment_sys_scanned=True)
+        elif status == SystemInspectionResult.UNREACHABLE:
+            self.inspect_scan_task.increment_stats(
+                name, increment_sys_unreachable=True)
         else:
             self.inspect_scan_task.increment_stats(
                 name, increment_sys_failed=True)

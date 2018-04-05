@@ -35,6 +35,7 @@ TASKS_KEY = 'tasks'
 SYSTEMS_COUNT_KEY = 'systems_count'
 SYSTEMS_SCANNED_KEY = 'systems_scanned'
 SYSTEMS_FAILED_KEY = 'systems_failed'
+SYSTEMS_UNREACHABLE_KEY = 'systems_unreachable'
 
 
 def expand_scanjob(json_scan):
@@ -59,11 +60,13 @@ def expand_scanjob(json_scan):
         scan_job = ScanJob.objects.get(pk=json_scan.get('id'))
         systems_count,\
             systems_scanned,\
-            systems_failed = scan_job.calculate_counts()
+            systems_failed,\
+            systems_unreachable = scan_job.calculate_counts()
 
         json_scan[SYSTEMS_COUNT_KEY] = systems_count
         json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
         json_scan[SYSTEMS_FAILED_KEY] = systems_failed
+        json_scan[SYSTEMS_UNREACHABLE_KEY] = systems_unreachable
     return json_scan
 
 

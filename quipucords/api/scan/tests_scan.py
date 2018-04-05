@@ -390,7 +390,7 @@ class ScanTest(TestCase):
             self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
         scan_task.update_stats('TEST_VC.', sys_count=2, sys_failed=1,
-                               sys_scanned=1)
+                               sys_scanned=1, sys_unreachable=0)
 
         serializer = ScanSerializer(scan_job.scan)
         json_scan = serializer.data

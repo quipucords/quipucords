@@ -85,6 +85,12 @@ def format_source(json_source):
             else:
                 json_scan_job['source_systems_failed'] = 0
 
+            if task_for_source.systems_unreachable is not None:
+                json_scan_job['source_systems_unreachable'] = \
+                    task_for_source.systems_unreachable
+            else:
+                json_scan_job['source_systems_unreachable'] = 0
+
         json_source['connection'] = json_scan_job
     return json_source
 

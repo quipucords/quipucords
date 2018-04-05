@@ -1444,6 +1444,10 @@ definitions:
         type: "integer"
         format: "int64"
         example: 1
+      systems_unreachable:
+        type: "integer"
+        format: "int64"
+        example: 0
       status:
         type: "string"
         description: "The status of the scan"
@@ -1523,6 +1527,11 @@ definitions:
             format: "int64"
             description: "The total number of systems that failed to scan"
             example: 10
+          systems_unreachable:
+            type: "integer"
+            format: "int64"
+            description: "The total number of systems that were unreachable"
+            example: 0
           report_id:
             type: "integer"
             format: "int64"
@@ -1647,6 +1656,11 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The total number of systems that failed during the scan task."
+        example: 10
+      systems_unreachable:
+        type: "integer"
+        format: "int64"
+        description: "The total number of systems that were unreachable for the scan task."
         example: 10
   ServerStatus:
     type: "object"
@@ -1819,6 +1833,11 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The total number of failed system connections for the source."
+        example: 1
+      source_systems_unreachable:
+        type: "integer"
+        format: "int64"
+        description: "The total number of unreachable system connections for the source."
         example: 1
   SourceOptions:
     type: "object"

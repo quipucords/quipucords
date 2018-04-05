@@ -111,7 +111,10 @@ class InspectTaskRunner(ScanTaskRunner):
 
         try:
             # Execute scan
-            connected, failed, completed = self._obtain_discovery_data()
+            connected, \
+                completed, \
+                failed, \
+                unreachable = self._obtain_discovery_data()
             processed_hosts = failed + completed
             num_total = len(connected) + len(processed_hosts)
 
@@ -122,7 +125,8 @@ class InspectTaskRunner(ScanTaskRunner):
             self.scan_task.update_stats('INITIAL NETWORK INSPECT STATS',
                                         sys_count=len(connected),
                                         sys_scanned=len(completed),
-                                        sys_failed=len(failed))
+                                        sys_failed=len(failed),
+                                        sys_unreachable=len(unreachable))
 
             # remove completed hosts
             remaining = [
@@ -248,6 +252,8 @@ class InspectTaskRunner(ScanTaskRunner):
         connected = []
         failed = []
         completed = []
+        unreachable = []
+        nostatus = []
         for result in self.connect_scan_task.connection_result.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
                 host_cred = result.credential
@@ -257,9 +263,20 @@ class InspectTaskRunner(ScanTaskRunner):
         for result in self.scan_task.inspection_result.systems.all():
             if result.status == SystemInspectionResult.SUCCESS:
                 completed.append(result.name)
-            else:
+            elif result.status == SystemInspectionResult.FAILED:
                 failed.append(result.name)
-        return connected, failed, completed
+            elif result.status == SystemInspectionResult.UNREACHABLE:
+                unreachable.append(result.name)
+            else:
+                nostatus.append(result.name)
+
+        if bool(nostatus):
+            invalid_state_msg = 'Results without a validate state: %s' % (
+                ', '.join(nostatus))
+            self.scan_task.log_message(
+                invalid_state_msg, log_level=logging.ERROR)
+
+        return connected, completed, failed, unreachable
 
 
 # pylint: disable=too-many-locals

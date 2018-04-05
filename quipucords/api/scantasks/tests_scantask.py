@@ -156,13 +156,17 @@ class ScanTaskTest(TestCase):
         task.save()
         task.increment_stats('foo', increment_sys_count=True,
                              increment_sys_scanned=True,
-                             increment_sys_failed=True)
+                             increment_sys_failed=True,
+                             increment_sys_unreachable=True)
         self.assertEqual(1, task.systems_count)
         self.assertEqual(1, task.systems_scanned)
         self.assertEqual(1, task.systems_failed)
+        self.assertEqual(1, task.systems_unreachable)
         task.increment_stats('foo', increment_sys_count=True,
                              increment_sys_scanned=True,
-                             increment_sys_failed=True)
+                             increment_sys_failed=True,
+                             increment_sys_unreachable=True)
         self.assertEqual(2, task.systems_count)
         self.assertEqual(2, task.systems_scanned)
         self.assertEqual(2, task.systems_failed)
+        self.assertEqual(2, task.systems_unreachable)

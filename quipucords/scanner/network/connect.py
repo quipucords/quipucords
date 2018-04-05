@@ -62,7 +62,8 @@ class ConnectResultStore(object):
 
         scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
                                sys_count=len(hosts), sys_scanned=0,
-                               sys_failed=0)
+                               sys_failed=0,
+                               sys_unreachable=0)
 
     @transaction.atomic
     def record_result(self, name, source, credential, status):
@@ -79,14 +80,24 @@ class ConnectResultStore(object):
 
         if status == SystemConnectionResult.SUCCESS:
             message = '%s with %s' % (name, credential.name)
-            self.scan_task.increment_stats(message, increment_sys_scanned=True)
+            self.scan_task.increment_stats(message,
+                                           increment_sys_scanned=True,
+                                           prefix='CONNECTED')
+        elif status == SystemConnectionResult.UNREACHABLE:
+            message = '%s is UNREACHABLE' % (name)
+            self.scan_task.increment_stats(
+                message,
+                increment_sys_unreachable=True,
+                prefix='FAILED')
         else:
             if credential is not None:
                 message = '%s with %s' % (name, credential.name)
             else:
                 message = '%s has no valid credentials' % name
 
-            self.scan_task.increment_stats(message, increment_sys_failed=True)
+            self.scan_task.increment_stats(message,
+                                           increment_sys_failed=True,
+                                           prefix='FAILED')
 
         self._remaining_hosts.remove(name)
 
@@ -155,8 +166,10 @@ class ConnectTaskRunner(ScanTaskRunner):
                 connect(remaining_hosts, callback, cred_data,
                         connection_port, forks=forks)
             except AnsibleError as ansible_error:
-                error_message = 'Connect scan task failed for %s. %s' %\
-                    (self.scan_task, ansible_error)
+                remaining_hosts_str = ', '.join(result_store.remaining_hosts())
+                error_message = 'Connect scan task failed with credential %s.'\
+                    ' Error: %s Hosts: %s' %\
+                    (credential.name, ansible_error, remaining_hosts_str)
                 return error_message, ScanTask.FAILED
 
             remaining_hosts = result_store.remaining_hosts()
@@ -197,8 +210,10 @@ def connect(hosts, callback, credential, connection_port, forks=50):
     _handle_ssh_passphrase(credential)
     result = run_playbook(inventory_file, callback, playbook,
                           extra_vars, forks=forks)
+
     if (result != TaskQueueManager.RUN_OK and
-            result != TaskQueueManager.RUN_UNREACHABLE_HOSTS):
+            result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and
+            result != TaskQueueManager.RUN_FAILED_HOSTS):
         raise _construct_error(result)
 
 
