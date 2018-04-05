@@ -161,8 +161,7 @@ class ScanListItem extends React.Component {
         expanded={expandType === 'systemsScanned'}
         expandType="systemsScanned"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="ok"
+        iconInfo={helpers.scanStatusIcon('success')}
       />,
       <ListStatusItem
         key="systemsFailed"
@@ -174,8 +173,7 @@ class ScanListItem extends React.Component {
         expanded={expandType === 'systemsFailed'}
         expandType="systemsFailed"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="error-circle-o"
+        iconInfo={helpers.scanStatusIcon('failed')}
       />,
       <ListStatusItem
         key="sources"

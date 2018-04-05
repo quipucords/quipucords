@@ -14,8 +14,7 @@ describe('ListStatusItem Component', function() {
       expanded: true,
       expandType: 'credentials',
       toggleExpand: jest.fn(),
-      iconType: 'fa',
-      iconName: 'id-card'
+      iconInfo: { type: 'fa', name: 'id-card' }
     };
 
     const component = mount(<ListStatusItem {...props} />);

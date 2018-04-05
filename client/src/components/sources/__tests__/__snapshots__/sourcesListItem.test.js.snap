@@ -123,6 +123,15 @@ exports[`SourceListItem Component should render a basic component 1`] = `
             </span>
           </span>
         </div>
+        <div
+          class="list-view-pf-additional-info-item list-view-info-item-icon-count empty-count"
+        >
+          <span>
+            <span>
+              0 Unreachable
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   </div>
