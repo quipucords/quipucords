@@ -16,11 +16,9 @@ const ListStatusItem = ({
   toggleExpand,
   iconInfo
 }) => {
-  let renderExpandContent = (iconInfo, count, text) => {
+  const renderExpandContent = (iconInfo, count, text) => {
     if (iconInfo) {
-      const classes = _.get(iconInfo.classNames, 'length', 0)
-        ? cx('list-view-compound-item-icon', ...iconInfo.classNames)
-        : 'list-view-compound-item-icon';
+      const classes = cx('list-view-compound-item-icon', ..._.get(iconInfo, 'classNames', []));
       return (
         <React.Fragment>
           <Icon className={classes} type={iconInfo.type} name={iconInfo.name} />

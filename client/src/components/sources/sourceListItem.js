@@ -23,7 +23,7 @@ class SourceListItem extends React.Component {
   componentWillReceiveProps(nextProps) {
     // Check for changes resulting in a fetch
     if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
-      this.closeExandIfNoData(this.expandType());
+      this.closeExpandIfNoData(this.expandType());
     }
   }
 
@@ -56,7 +56,7 @@ class SourceListItem extends React.Component {
     });
   }
 
-  closeExandIfNoData(expandType) {
+  closeExpandIfNoData(expandType) {
     const { item } = this.props;
 
     if (expandType === 'okHosts' || expandType === 'failedHosts') {
@@ -198,11 +198,13 @@ class SourceListItem extends React.Component {
 
   renderHostRow(host) {
     const iconInfo = helpers.scanStatusIcon(host.status);
+    const classes = cx(...iconInfo.classNames);
+
     return (
       <React.Fragment>
         <Grid.Col xs={host.status === 'success' ? 6 : 12} sm={4}>
           <span>
-            <Icon type={iconInfo.type} name={iconInfo.name} className={iconInfo.classNames} />
+            <Icon type={iconInfo.type} name={iconInfo.name} className={classes} />
             &nbsp; {host.name}
           </span>
         </Grid.Col>
