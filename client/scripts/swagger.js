@@ -4,7 +4,7 @@ const swaggerParser = require('swagger-parser');
 const YAML = require('yamljs');
 const yamlFile = `${process.cwd()}/../docs/swagger.yml`;
 const app = express();
-const port = process.env.PORT || 4040;
+const port = process.env.PORT || 5050;
 const swaggerDocument = YAML.load(yamlFile);
 
 app.use('/docs/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

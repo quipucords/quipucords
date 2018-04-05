@@ -41,6 +41,29 @@ checkContainerRunning()
 }
 #
 #
+# Check then set for first port
+#
+checkSetPort()
+{
+  local PORT=$1
+  local LPORT=3000
+  local UPORT=9000
+
+  if [ -z "$(lsof -Pi :$PORT -sTCP:LISTEN -t)" >/dev/null ]; then
+    echo $PORT
+  else
+    while true; do
+      RPORT=$(($RANDOM % $(($LPORT - $UPORT + 1)) + $LPORT))
+
+      if [ -z "$(lsof -Pi :$RPORT -sTCP:LISTEN -t)" >/dev/null ]; then
+        echo $RPORT
+        exit 0
+      fi
+    done
+  fi
+}
+#
+#
 # Install & Run Quipucords API Mock Container
 #
 devApi()
@@ -52,6 +75,8 @@ devApi()
   local UPDATE=$3
 
   docker stop -t 0 $NAME >/dev/null
+
+  PORT="$(checkSetPort $PORT)"
 
   if [ -z "$(docker images | grep ^$CONTAINER' ')" ] || [ "$UPDATE" = true ]; then
     echo "Setting up development Docker API container"
@@ -90,6 +115,8 @@ stageApi()
   local TEMPLATE_VOLUME="/app/quipucords/quipucords/templates/client"
 
   docker stop -t 0 $NAME >/dev/null
+
+  PORT="$(checkSetPort $PORT)"
 
   if [ -z "$(docker images | grep ^$CONTAINER' ')" ] || [ "$UPDATE" = true ]; then
     echo "Setting up staging Docker API container"
