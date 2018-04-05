@@ -11,6 +11,7 @@
 
 """Ingests raw facts to determine the status of JBoss EAP for a system."""
 
+import bisect
 import logging
 
 from api.models import Product, Source
@@ -81,30 +82,30 @@ EAP_CLASSIFICATIONS = {
     '1.5.2.Final': 'WildFly-10',
     '1.6.1.Final': 'WildFly-11',
     '1.7.0.Final': 'WildFly-12',
-    'JBPAPP_4_2_0_GA': 'EAP-4.2',
-    'JBPAPP_4_2_0_GA_C': 'EAP-4.2',
-    'JBPAPP_4_3_0_GA': 'EAP-4.3',
-    'JBPAPP_4_3_0_GA_C': 'EAP-4.3',
-    'JBPAPP_5_0_0_GA': 'EAP-5.0.0',
-    'JBPAPP_5_0_1': 'EAP-5.0.1',
-    'JBPAPP_5_1_0': 'EAP-5.1.0',
-    'JBPAPP_5_1_1': 'EAP-5.1.1',
-    'JBPAPP_5_1_2': 'EAP-5.1.2',
-    'JBPAPP_5_2_0': 'EAP-5.2.0',
-    '1.1.2.GA-redhat-1': 'EAP-6.0.0',
-    '1.1.3.GA-redhat-1': 'EAP-6.0.1',
-    '1.2.0.Final-redhat-1': 'EAP-6.1.0',
-    '1.2.2.Final-redhat-1': 'EAP-6.1.1',
-    '1.3.0.Final-redhat-2': 'EAP-6.2',
-    '1.3.3.Final-redhat-1': 'EAP-6.3',
-    '1.3.4.Final-redhat-1': 'EAP-6.3',
-    '1.3.5.Final-redhat-1': 'EAP-6.3',
-    '1.3.6.Final-redhat-1': 'EAP-6.4',
-    '1.3.7.Final-redhat-1': 'EAP-6.4',
-    '1.4.4.Final-redhat-1': 'EAP-7.0',
-    '1.5.1.Final-redhat-1': 'EAP-7.0',
-    '1.5.4.Final-redhat-1': 'EAP-7.0',
-    '1.6.0.Final-redhat-1': 'EAP-7.1'
+    'JBPAPP_4_2_0_GA': '4.2',
+    'JBPAPP_4_2_0_GA_C': '4.2',
+    'JBPAPP_4_3_0_GA': '4.3',
+    'JBPAPP_4_3_0_GA_C': '4.3',
+    'JBPAPP_5_0_0_GA': '5.0.0',
+    'JBPAPP_5_0_1': '5.0.1',
+    'JBPAPP_5_1_0': '5.1.0',
+    'JBPAPP_5_1_1': '5.1.1',
+    'JBPAPP_5_1_2': '5.1.2',
+    'JBPAPP_5_2_0': '5.2.0',
+    '1.1.2.GA-redhat-1': '6.0.0',
+    '1.1.3.GA-redhat-1': '6.0.1',
+    '1.2.0.Final-redhat-1': '6.1.0',
+    '1.2.2.Final-redhat-1': '6.1.1',
+    '1.3.0.Final-redhat-2': '6.2.0',
+    '1.3.3.Final-redhat-1': '6.3.0',
+    '1.3.4.Final-redhat-1': '6.3',
+    '1.3.5.Final-redhat-1': '6.3',
+    '1.3.6.Final-redhat-1': '6.4.0',
+    '1.3.7.Final-redhat-1': '6.4',
+    '1.4.4.Final-redhat-1': '7.0',
+    '1.5.1.Final-redhat-1': '7.0.0',
+    '1.5.4.Final-redhat-1': '7.0',
+    '1.6.0.Final-redhat-1': '7.1.0'
 }
 
 
@@ -304,6 +305,32 @@ def presence_ge(a, b):
     return PRESENCE_ORDER.index(a) >= PRESENCE_ORDER.index(b)
 
 
+def version_aware_dedup(versions):
+    """Deduplicate a list of version numbers of different precisions.
+
+    If versions contains '7.0.0' and '7.0', this function will return
+    a single entry for '7.0.0'.
+
+    :param versions: an iterable of version strings
+    :returns: a deduplicated set of version strings
+    """
+    in_order = sorted(versions)
+    deduped = set()
+
+    for version in in_order:
+        i = bisect.bisect_right(in_order, version)
+        # i is the first index in in_order after the index of
+        # version. If there are entries in in_order that have version
+        # as a prefix but are more specific, they should be
+        # immediately to the right of version. Meaning that if there
+        # is one at all, then there should be one at index i.
+        if i < len(in_order) and in_order[i].startswith(version):
+            continue
+        deduped.add(version)
+
+    return deduped
+
+
 def detect_jboss_eap(source, facts):
     """Detect if JBoss EAP is present based on system facts.
 
@@ -358,7 +385,7 @@ def detect_jboss_eap(source, facts):
             version.lower().startswith('jbossas')]
         if not versions:
             product_dict[PRESENCE] = Product.ABSENT
-        product_dict[VERSION] = list(versions)
+        product_dict[VERSION] = list(version_aware_dedup(versions))
 
     if raw_facts:
         metadata[RAW_FACT_KEY] = '/'.join(raw_facts)

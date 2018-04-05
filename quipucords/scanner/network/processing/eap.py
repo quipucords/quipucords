@@ -10,6 +10,7 @@
 """Initial processing of raw shell output from Ansible commands."""
 
 import logging
+import re
 
 from scanner.network.processing import process, util
 
@@ -173,10 +174,28 @@ class ProcessEapHomeLs(util.IndicatorFileFinder):
                        'modules', 'jboss-modules.jar', 'version.txt']
 
 
-class ProcessEapHomeVersionTxt(util.StdoutPassthroughProcessor):
-    """Process the output of 'cat .../version.txt'."""
+class ProcessEapHomeVersionTxt(util.PerItemProcessor):
+    """Extract the version from an EAP version.txt file."""
 
     KEY = 'eap_home_version_txt'
+    VERSION_RE = re.compile(
+        r'Red Hat JBoss Enterprise Application Platform - Version (.*)\.GA')
+
+    @staticmethod
+    def process_item(item):
+        """Extract just the version number."""
+        if item['rc']:
+            return False
+
+        match = ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'])
+        if match:
+            return match.group(1)
+
+        # If we found a version.txt file, this likely *is* JBoss EAP,
+        # it's just a version file format that we don't recognize. If
+        # we return it unchanged, the fingerprinter will prepend
+        # 'Unknown-version: ' and count it as found.
+        return item['stdout'].strip()
 
 
 class ProcessEapHomeReadmeTxt(util.StdoutSearchProcessor):
