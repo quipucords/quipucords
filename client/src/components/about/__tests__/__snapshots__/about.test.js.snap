@@ -75,7 +75,7 @@ exports[`About Component should render 1`] = `
                 <strong>
                   Browser Version
                 </strong>
-                 node 8.9.4
+                  
               </li>
               <li
                 class=""

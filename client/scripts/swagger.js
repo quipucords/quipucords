@@ -10,9 +10,7 @@ const swaggerDocument = YAML.load(yamlFile);
 app.use('/docs/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, function() {
-  console.log(
-    `\nYou can now view API docs in the browser.\n  Open: http://localhost:${port}/docs/api\n`
-  );
+  console.log(`\nYou can now view API docs in the browser.\n  Open: http://localhost:${port}/docs/api\n`);
 
   swaggerParser.validate(yamlFile, err => {
     if (err) {
