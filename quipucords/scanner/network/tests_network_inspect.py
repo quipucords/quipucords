@@ -335,7 +335,7 @@ class NetworkInspectScannerTest(TestCase):
         _, result = scanner._inspect_scan(
             self.host_list,
             base_ssh_executable=path)
-        self.assertEqual(result, ScanTask.FAILED)
+        self.assertEqual(result, ScanTask.COMPLETED)
 
     def test_ssh_hang(self):
         """Simulate an ssh hang."""

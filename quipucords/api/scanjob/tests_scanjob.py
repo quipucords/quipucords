@@ -1006,7 +1006,7 @@ class ScanJobTest(TestCase):
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
+                                    'value': 'fact_value'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_ordering_by_name(self):
@@ -1092,14 +1092,14 @@ class ScanJobTest(TestCase):
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]},
+                                    'value': 'fact_value'}]},
                         {'name': 'Foo1',
                          'status': 'success',
                          'source': {'id': 1,
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
+                                    'value': 'fact_value'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_filter_by_source_id(self):
@@ -1263,14 +1263,14 @@ class ScanJobTest(TestCase):
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]},
+                                    'value': 'fact_value'}]},
                         {'name': 'Foo',
                          'status': 'success',
                          'source': {'id': 1,
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
+                                    'value': 'fact_value'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_results_with_none(self):
@@ -1317,7 +1317,7 @@ class ScanJobTest(TestCase):
                                     'name': 'source1',
                                     'source_type': 'network'},
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
+                                    'value': 'fact_value'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_delete_source(self):
@@ -1362,7 +1362,7 @@ class ScanJobTest(TestCase):
                          'status': 'success',
                          'source': 'deleted',
                          'facts': [{'name': 'fact_key',
-                                    'value': '"fact_value"'}]}]}
+                                    'value': 'fact_value'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_not_found(self):

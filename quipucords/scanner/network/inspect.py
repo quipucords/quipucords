@@ -60,6 +60,7 @@ DEFAULT_ROLES = [
 ]
 
 DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']
+NETWORK_SCAN_IDENTITY_KEY = 'connection_host'
 
 
 class ScannerException(Exception):
@@ -134,8 +135,10 @@ class InspectTaskRunner(ScanTaskRunner):
                 if unprocessed[0] not in processed_hosts]
             scan_message, scan_result = self._inspect_scan(remaining)
 
+            self.scan_task.cleanup_facts(NETWORK_SCAN_IDENTITY_KEY)
             temp_facts = self.scan_task.get_facts()
             fact_size = len(temp_facts)
+            self._add_unreachable_hosts(temp_facts)
             if temp_facts is None or fact_size == 0:
                 msg = 'SystemFacts set is empty.  '\
                     'No results will be reported to fact endpoint.'
@@ -158,6 +161,29 @@ class InspectTaskRunner(ScanTaskRunner):
             return '%d systems could not be scanned.' % \
                 self.scan_task.systems_failed, ScanTask.FAILED
         return scan_message, scan_result
+
+    def _add_unreachable_hosts(self, systems_list):
+        """Add entry for systems that were unreachable.
+
+        :param systems_list: Current list of system results.
+        """
+        connected_hosts = \
+            self.connect_scan_task.connection_result.systems.filter(
+                status=SystemConnectionResult.SUCCESS).values('name')
+        connected_hosts = set([system.get('name')
+                               for system in connected_hosts])
+        scanned_hosts = set([system.get(NETWORK_SCAN_IDENTITY_KEY)
+                             for system in systems_list])
+        unreachable_hosts = connected_hosts - scanned_hosts
+
+        for host in unreachable_hosts:
+            sys_result = SystemInspectionResult(
+                name=host,
+                status=SystemInspectionResult.UNREACHABLE,
+                source=self.scan_task.source)
+            sys_result.save()
+            self.scan_task.inspection_result.systems.add(sys_result)
+            self.scan_task.inspection_result.save()
 
     # pylint: disable=too-many-locals,W0102
     def _inspect_scan(self, connected, roles=DEFAULT_ROLES,
@@ -231,8 +257,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
-                scan_message = new_error_msg
-                scan_result = ScanTask.FAILED
                 callback.finalize_failed_hosts()
                 if result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and \
                         result != TaskQueueManager.RUN_FAILED_HOSTS:
