@@ -11,8 +11,9 @@ const SourcesEmptyState = ({ onAddSource }) => {
           <EmptyState.Icon />
           <EmptyState.Title>Welcome to Red Hat Entitlements Reporting</EmptyState.Title>
           <EmptyState.Info>
-            A source defines a collection of network information, including IP addresses or host names,<br /> or systems
-            management solution information, in addition to SSH ports and SSH credentials
+            Begin by adding one or more sources. A source contains a collection of network information, <br />
+            including systems management solution information, IP addresses, or host names, in addition to <br />
+            SSH ports and credentials.
           </EmptyState.Info>
           <EmptyState.Action>
             <Button bsStyle="primary" bsSize="large" onClick={onAddSource}>

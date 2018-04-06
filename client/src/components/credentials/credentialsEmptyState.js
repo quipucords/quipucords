@@ -11,9 +11,9 @@ const CredentialsEmptyState = ({ onAddCredential, onAddSource }) => {
           <EmptyState.Icon />
           <EmptyState.Title>Welcome to Red Hat Entitlements Reporting</EmptyState.Title>
           <EmptyState.Info>
-            A credential defines a set of user authentication information to be used during a scan.<br />A credential
-            includes a username and a password or SSH key. Entitlements Reporting uses SSH<br />to connect to servers on
-            the network and uses credentials to access those servers.
+            Credentials contain authentication information needed to scan a source. A credential includes <br />
+            a username and a password or SSH key. Entitlements Reporting uses SSH to connect to servers <br /> on the
+            network and uses credentials to access those servers.
           </EmptyState.Info>
           <EmptyState.Action>
             <DropdownButton

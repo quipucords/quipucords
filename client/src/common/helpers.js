@@ -109,7 +109,7 @@ const scanStatusIcon = scanStatus => {
 const authorizationTypeString = authorizationType => {
   switch (authorizationType) {
     case 'usernamePassword':
-      return 'Username & Password';
+      return 'Username and Password';
     case 'sshKey':
       return 'SSH Key';
     default:

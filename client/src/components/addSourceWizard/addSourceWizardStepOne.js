@@ -68,7 +68,7 @@ class AddSourceWizardStepOne extends React.Component {
             checked={sourceType === 'network'}
             onChange={this.onChangeSourceType}
           >
-            Network range
+            Network Range
           </Radio>
           <Radio
             name="sourceType"

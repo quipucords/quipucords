@@ -61,8 +61,7 @@ class AddSourceWizard extends React.Component {
       Store.dispatch({
         type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
         title: 'Cancel Add Source',
-        heading: 'Are you sure you want to exit this wizard?',
-        body: 'Exiting this wizard will cancel adding the source.',
+        heading: 'Are you sure you want to cancel adding this source?',
         cancelButtonText: 'No',
         confirmButtonText: 'Yes',
         onConfirm: closeWizard

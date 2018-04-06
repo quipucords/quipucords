@@ -26,9 +26,11 @@ exports[`SourcesEmptyState Component should render a basic component 1`] = `
       <p
         class="blank-slate-pf-info"
       >
-        A source defines a collection of network information, including IP addresses or host names,
+        Begin by adding one or more sources. A source contains a collection of network information, 
         <br />
-         or systems management solution information, in addition to SSH ports and SSH credentials
+        including systems management solution information, IP addresses, or host names, in addition to 
+        <br />
+        SSH ports and credentials.
       </p>
       <div
         class="blank-slate-pf-main-action"
