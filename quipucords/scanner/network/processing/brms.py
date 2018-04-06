@@ -171,6 +171,7 @@ class ProcessLocateKieApiFiles(EnclosingWarJarProcessor):
     KEY = 'jboss_brms_locate_kie_api'
     DEPS = ['have_locate']
     REMOVE_PREFIX = 'kie-api-'
+    RETURN_CODE_ANY = True
 
 
 class ProcessFindBRMSKieApiVer(EnclosingWarJarProcessor):
