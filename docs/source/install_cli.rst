@@ -19,7 +19,7 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 
   - For Red Hat Enterprise Linux 7 or CentOS 7, enter the following command::
 
-      # wget -O group_quipucords-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo
+      # wget -O /etc/yum.repos.d/group_quipucords-qpc-epel-7.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo
 
   - For Red Hat Enterprise Linux 6 or CentOS 6, enter the following command::
 
