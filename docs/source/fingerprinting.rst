@@ -1,11 +1,17 @@
-System Fingerprinting
----------------------
-Quipucords is used to inspect and gather information about your IT infrastructure. System information gathered from a single sources or multiple sources are processed to create a summarized set of data called a fingerprint which highlights features that identify they system, such as operating system, architecture, number of CPUs and cores, different products installed and entitlements in use on the system etc. The sections below describe the components of a fingerprint and the process used to create the fingerprint.
+Fingerprints and the Fingerprinting Process
+-------------------------------------------
+The Quipucords scan process is used to discover the systems in your IT infrastructure and to inspect and gather information about the nature and contents of those systems. A *system* is any entity that can be interrogated by the Quipucords inspection tasks through an SSH connection, vCenter Server data, or the Satellite API. Therefore, a system can be a machine, such as a physical or virtual machine, and it can also be a different type of entity, such as a container.
+
+During a scan, information, or a collection of facts, about a system is gathered from a single source (such as a network source only) or multiple sources (such as a network source and satellite source). A *fact* is a single piece of data about a system. Facts are processed to create a summarized set of data for that system that is called a fingerprint. A *fingerprint* is a set of facts that identifies a unique system and the features on that system, such as the operating system, CPU architecture, number of CPUs and cores, the different products that are installed on that system, the entitlements that are in use on that system, and so on.
+
+Fingerprinting is the result of Quipucords analytical processing that occurs when you request a summary report for a scan. If you request a detailed report, you receive the raw facts for that scan without any fingerprinting. When you request a summary report, the deduplication, merging, and post-processing of facts occurs to produce the fingerprint. These processes include identifying installed products and versions from the raw facts, finding consumed entitlements, finding and merging duplicate instances of products from different sources, and finding products installed in nondefault locations, among other steps.
+
+The following sections show example fingerprint data, describe the components of a fingerprint, and describe in more detail the process that is used to create the fingerprint.
 
 
-System Fingerprints
+Fingerprints
 ^^^^^^^^^^^^^^^^^^^
-A system fingerprint is composed of a set of system facts, products, entitlements, sources, and metadata. The following example shows a system fingerprint. ::
+A fingerprint is composed of a set of facts about the system in addition to facts about products, entitlements, sources, and metadata. The following example shows fingerprint data. A fingerprint for a single system, even with very few Red Hat products installed on it, can be many lines. Therefore, only a partial fingerprint is used in this example. ::
 
     {
         "os_release": "Red Hat Enterprise Linux Atomic Host 7.4",
@@ -63,53 +69,55 @@ A system fingerprint is composed of a set of system facts, products, entitlement
         ]
     }
 
-A scan produces system facts.  As an example, the ``os_release`` describes the operation system and release used by the system.  For each system fact, there is a corresponding entry in the metadata object that identifies the original source of the system fact.
+The first several lines of a fingerprint show facts about the system. For example, the ``os_release`` fact describes the installed operating system and release. For each system fact, there is a corresponding entry in the ``metadata`` section of the fingerprint that identifies the original source of that system fact.
 
-Each fingerprint contains an entitlement list.  The entitlement has a name, id, and metadata describing the original source.  In the example previous example, the system has the ``Satellite Tools 6.3`` entitlement.
+The fingerprint also lists the consumed entitlements for that system in the ``entitlements`` section. Each entitlement in the list has a name, ID, and metadata that describes the original source of that fact. In the example fingerprint, the system has the ``Satellite Tools 6.3`` entitlement.
 
-A system fingerprint also contains a list of products.  A product has a name, version, presence, and metadata field.  The system above has JBoss EAP installed.
+Next, the fingerprint lists the installed products in the ``products`` section. A product has a name, version, presence, and metadata field. Because the presence field shows ``absent`` as the value for JBoss EAP, the system in this example does not have JBoss EAP installed.
 
-Lastly, each system fingerprint has a list of sources which contained this system.  A system can be contained in more than one source.
+Lastly, the fingerprint lists the sources that contain this system in the ``sources`` section. A system can be contained in more than one source. For example, for a scan that includes both a network source and a satellite source, a single system can be found in both parts of the scan.
 
 
 System Deduplication and Merging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Quipucords is used to inspect and gather information about your IT infrastructure.  System information can be gathered using the following types of sources:
+You can gather system information by using one or more of the following types of sources for a scan:
 
 - network
 - vcenter
 - satellite
 
-A scan is composed of one or more sources. A single system can be found in multiple sources during a scan. For example, a virtual machine on vCenter server could be running a Satellite managed RHEL OS installation. A network source could also be used to scan this system. In this case, the system will be reported via vcenter, satellite, and network sources during a scan. Quipucords feeds unprocessed system facts from a scan into a fingerprint engine. The fingerprint engine matches and merges data for systems seen in more than one source.
+A single system can be found in multiple sources during a scan. For example, a virtual machine on vCenter Server could be running a Red Hat Enterprise Linux operating system installation that is also managed by Satellite. If you construct a scan that contains a vcenter, satellite, and network source, then that single system is reported by all three vcenter, satellite, and network sources during the scan.
+
+To resolve this issue and build an accurate fingerprint, Quipucords feeds unprocessed system facts from the scan into a fingerprint engine. The fingerprint engine matches and merges data for systems that are found in more than one source by using the deduplication and merge processes.
 
 Deduplication of Systems
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Quipucords uses specific system facts to identify duplicate systems. The following phases remove duplicate systems during the deduplication process:
+Quipucords uses specific facts about a system to identify duplicate systems. The following phases use these specific facts to remove duplicate systems during the deduplication process:
 
-1. All systems from network sources are combined into a single network system set. Systems are considered to be duplicates if they have the same fact value for ``subscription_manager_id`` or ``bios_uuid``.
-2. All systems from vcenter sources are combined into a single vcenter system set. Systems are considered to be duplicates if they have the same fact value for ``vm_uuid``.
-3. All systems from satellite sources are combined into a single satellite system set. Systems are considered to be duplicates if they have the same fact value for ``subscription_manager_id``.
-4. The network system set is merged with the satellite system set to form a single network-satellite system set. Systems are considered to be duplicates if they have the same fact value for ``subscription_manager_id`` or a matching MAC address in the ``mac_addresses`` fact.
-5. The network-satellite system set is merged with the vcenter system set to form the complete system set. Systems are considered to be duplicates if they have a matching MAC address in the ``mac_addresses`` fact or if the vcenter fact value of ``vm_uuid`` matches the network value of ``bios_uuid``.
+1. All systems from network sources are combined into a single network system set. Systems are considered to be duplicates if they have the same value for the ``subscription_manager_id`` or ``bios_uuid`` facts.
+2. All systems from vcenter sources are combined into a single vcenter system set. Systems are considered to be duplicates if they have the same value for the ``vm_uuid`` fact.
+3. All systems from satellite sources are combined into a single satellite system set. Systems are considered to be duplicates if they have the same value for the ``subscription_manager_id`` fact.
+4. The network system set is merged with the satellite system set to form a single network-satellite system set. Systems are considered to be duplicates if they have the same value for the ``subscription_manager_id`` fact or matching MAC address values in the ``mac_addresses`` fact.
+5. The network-satellite system set is merged with the vcenter system set to form the complete system set. Systems are considered to be duplicates if they have matching MAC address values in the ``mac_addresses`` fact or if the vcenter value for the ``vm_uuid`` fact matches the network value for the ``bios_uuid`` fact.
 
 Merging Systems
 ~~~~~~~~~~~~~~~
-After Quipucords determines that two systems are duplicates it performs a merge. The merged system will have a union of system facts from each source. When merging a fact that appears in both systems, the precedence from highest to lowest is:
+After Quipucords determines that two systems are duplicates, it performs a merge. The merged system has a union of system facts from each source. When Quipucords merges a fact that appears in both systems, it uses the following order of precedence to merge the fact, from highest to lowest:
 
 1. network
 2. satellite
 3. vcenter
 
-A system fingerprint contains a ``metadata`` dictionary that captures the original source of each system fact.
+A system fingerprint contains a ``metadata`` dictionary that captures the original source of each fact for that system.
 
 
 Post Processing
 ~~~~~~~~~~~~~~~
-After deduplication and merging are complete, there is a post processing phase used to create derived system facts. Derived system facts are generated from more than one system fact.
+After deduplication and merging are complete, there is a post-processing phase that creates derived system facts. A *derived system fact* is a fact that generated from the evaluation of more than one system fact. The majority of derived system facts are related to product identification data, such as the presence of a specific product and its version. The following information shows how the derived system fact ``system_creation_date`` is created.
 
 System Creation Date
 """"""""""""""""""""
-``system_creation_date`` is a derived system fact. The ``system_creation_date`` is determined by the following primitive facts. The primitive facts below are ordered according to the accuracy of matching the real system creation time. The highest non-empty value will be used.
+The ``system_creation_date`` fact is a derived system fact that contains the real system creation time. The value for this fact is determined by the evaluation of the following facts. The value for each fact is examined in the following order of precedence, with the order of precedence determined by the accuracy of the match to the real system creation time. The highest non-empty value is used to determine the value of the ``system_creation_date`` derived system fact.
 
 1. date_machine_id
 2. registration_time
