@@ -161,8 +161,7 @@ class ScanListItem extends React.Component {
         expanded={expandType === 'systemsScanned'}
         expandType="systemsScanned"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="ok"
+        iconInfo={helpers.scanStatusIcon('success')}
       />,
       <ListStatusItem
         key="systemsFailed"
@@ -174,8 +173,7 @@ class ScanListItem extends React.Component {
         expanded={expandType === 'systemsFailed'}
         expandType="systemsFailed"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="error-circle-o"
+        iconInfo={helpers.scanStatusIcon('failed')}
       />,
       <ListStatusItem
         key="sources"
@@ -282,12 +280,17 @@ class ScanListItem extends React.Component {
 
   renderHostRow(host) {
     return (
-      <Grid.Col xs={12}>
-        <span>
-          <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
-          &nbsp; {host.name}
-        </span>
-      </Grid.Col>
+      <React.Fragment>
+        <Grid.Col xs={6} sm={4} md={3}>
+          <span>
+            <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+            &nbsp; {host.name}
+          </span>
+        </Grid.Col>
+        <Grid.Col xs={6} sm={8} md={9}>
+          {_.get(host, 'source.name')}
+        </Grid.Col>
+      </React.Fragment>
     );
   }
 

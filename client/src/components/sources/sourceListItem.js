@@ -137,6 +137,7 @@ class SourceListItem extends React.Component {
     const credentialCount = _.size(_.get(item, 'credentials', []));
     let okHostCount = _.get(item, 'connection.source_systems_scanned', 0);
     let failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
+    let unreachableHostCount = _.get(item, 'connection.source_systems_unreachable', 0);
 
     if (helpers.DEV_MODE) {
       okHostCount = helpers.devModeNormalizeCount(okHostCount);
@@ -154,8 +155,7 @@ class SourceListItem extends React.Component {
         expanded={expandType === 'credentials'}
         expandType="credentials"
         toggleExpand={this.toggleExpand}
-        iconType="fa"
-        iconName="id-card"
+        iconInfo={{ type: 'fa', name: 'id-card' }}
       />,
       <ListStatusItem
         key="okHosts"
@@ -167,8 +167,7 @@ class SourceListItem extends React.Component {
         expanded={expandType === 'okHosts'}
         expandType="okHosts"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="ok"
+        iconInfo={helpers.scanStatusIcon('success')}
       />,
       <ListStatusItem
         key="failedHosts"
@@ -180,18 +179,30 @@ class SourceListItem extends React.Component {
         expanded={expandType === 'failedHosts'}
         expandType="failedHosts"
         toggleExpand={this.toggleExpand}
-        iconType="pf"
-        iconName="error-circle-o"
+        iconInfo={helpers.scanStatusIcon('failed')}
+      />,
+      <ListStatusItem
+        key="unreachableHosts"
+        id="unreachableHosts"
+        count={unreachableHostCount}
+        emptyText="0 Unreachable"
+        tipSingular="Unreachable System"
+        tipPlural="Unreachable Systems"
+        expanded={expandType === 'unreachableHosts'}
+        expandType="unreachableHosts"
+        toggleExpand={this.toggleExpand}
+        iconInfo={helpers.scanStatusIcon('unreachable')}
       />
     ];
   }
 
   renderHostRow(host) {
+    const iconInfo = helpers.scanStatusIcon(host.status);
     return (
       <React.Fragment>
         <Grid.Col xs={host.status === 'success' ? 6 : 12} sm={4}>
           <span>
-            <Icon type="pf" name={host.status === 'success' ? 'ok' : 'error-circle-o'} />
+            <Icon type={iconInfo.type} name={iconInfo.name} className={iconInfo.classNames} />
             &nbsp; {host.name}
           </span>
         </Grid.Col>
@@ -229,6 +240,17 @@ class SourceListItem extends React.Component {
             sourceId={item.id}
             lastRefresh={lastRefresh}
             status="failed"
+            renderHostRow={this.renderHostRow}
+            useConnectionResults
+          />
+        );
+      case 'unreachableHosts':
+        return (
+          <ScanHostList
+            scanId={item.connection.id}
+            sourceId={item.id}
+            lastRefresh={lastRefresh}
+            status="unreachable"
             renderHostRow={this.renderHostRow}
             useConnectionResults
           />

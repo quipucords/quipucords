@@ -329,7 +329,32 @@ class ScanTask(models.Model):
     def get_facts(self):
         """Access inspection facts."""
         # pylint: disable=too-many-nested-blocks
-        facts = []
+        all_systems_facts = []
+        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            system_results = self.get_result()
+            if system_results:
+                # Process all results that were save to db
+                for system_result in system_results.systems.all():
+                    system_facts = {}
+                    for raw_fact in system_result.facts.all():
+                        if not raw_fact.value or raw_fact.value == '':
+                            continue
+                        # Load values as JSON
+                        value_to_use = json.loads(raw_fact.value)
+                        system_facts[raw_fact.name] = value_to_use
+                    if bool(system_facts):
+                        all_systems_facts.append(system_facts)
+
+        return all_systems_facts
+
+    @transaction.atomic
+    def cleanup_facts(self, identity_key):
+        """Cleanup inspection facts.
+
+        :param identity_key: A key that identifies the system.  If
+        key not present, the system is discarded.
+        """
+        # pylint: disable=too-many-nested-blocks
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             system_results = self.get_result()
             if system_results:
@@ -342,9 +367,10 @@ class ScanTask(models.Model):
                         # Load values as JSON
                         value_to_use = json.loads(raw_fact.value)
                         fact[raw_fact.name] = value_to_use
-                    facts.append(fact)
 
-        return facts
+                    if fact.get(identity_key) is None:
+                        system_result.facts.all().delete()
+                        system_result.delete()
 
     def get_result(self):
         """Access results from ScanTask.

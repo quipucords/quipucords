@@ -92,6 +92,8 @@ const scanStatusIcon = scanStatus => {
     case 'failed':
     case 'canceled':
       return { type: 'pf', name: 'error-circle-o', classNames: [] };
+    case 'unreachable':
+      return { type: 'pf', name: 'disconnected', classNames: ['is-error'] };
     case 'created':
     case 'pending':
     case 'running':

@@ -219,8 +219,7 @@ class ScanJob(models.Model):
         systems_count,\
             systems_scanned,\
             systems_failed,\
-            systems_unreachable = self._calculate_counts(
-                ScanTask.SCAN_TYPE_CONNECT)
+            systems_unreachable = self.calculate_counts()
 
         message = '%s Stats: systems_count=%d,'\
             ' systems_scanned=%d, systems_failed=%d, systems_unreachable=%d' %\
