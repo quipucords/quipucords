@@ -3,6 +3,8 @@
 - name: Set operating system information
   set_fact:
     is_rhel_centos_6: "{{ ((ansible_distribution == 'RedHat') or (ansible_distribution == 'CentOS')) and (ansible_distribution_major_version == '6') }}"
+    is_rhel7: "{{ (ansible_distribution == 'RedHat') and (ansible_distribution_major_version == '7') }}"
+    is_centos_7: "{{ (ansible_distribution == 'CentOS') and (ansible_distribution_major_version == '7') }}"
     is_rhel_centos_7: "{{ ((ansible_distribution == 'RedHat') or (ansible_distribution == 'CentOS')) and (ansible_distribution_major_version == '7') }}"
     is_fedora_26: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '26') }}"
     is_fedora_27: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '27') }}"

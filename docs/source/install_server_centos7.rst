@@ -1,5 +1,5 @@
-Installing Docker on Red Hat Enterprise Linux 7 or CentOS 7
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing Docker on CentOS 7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can install Docker in different ways, depending on your needs:
 
 - You can set up the Docker repositories and then install from them. This choice is the recommended approach because it simplifies the installation and upgrade tasks.
@@ -32,8 +32,8 @@ Installing from a package
 
     # sudo yum install /path/to/package.rpm
 
-Starting Docker on Red Hat Enterprise Linux 7 or CentOS 7
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Starting Docker on CentOS 7
+"""""""""""""""""""""""""""
 After you install Docker, you must start it and verify that it is running.
 
 1. Start Docker::
@@ -44,4 +44,4 @@ After you install Docker, you must start it and verify that it is running.
 
     # sudo docker run hello-world
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 7 or CentOS 7, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
+After you complete the steps to install Docker for CentOS 7, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
