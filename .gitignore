@@ -109,9 +109,6 @@ ENV/
 # sqlite
 db.sqlite3
 
-# Migration
-migrations/
-
 # From ide
 .idea/
 
