@@ -78,7 +78,7 @@
     - not have_docker
     - find_docker_rpm_local
 
-- name: Add Docker CE repository for Centos/RHEL 7 family
+- name: Add Docker CE repository for Centos 7
   yum_repository:
     name: docker-ce
     description: Docker CE repo
@@ -87,7 +87,7 @@
     gpgcheck: yes
   become: true
   when:
-    - is_rhel_centos_7
+    - is_centos_7
     - not have_docker
     - not find_docker_rpm_local
 
@@ -104,13 +104,23 @@
     - not have_docker
     - not find_docker_rpm_local
 
+- name: Install the latest version of docker for RHEL 7
+  yum:
+    name: docker
+    state: latest
+  become: true
+  when:
+    - is_rhel7
+    - not have_docker
+    - not find_docker_rpm_local
+
 - name: Install the latest version of docker-ce
   yum:
     name: docker-ce
     state: latest
   become: true
   when:
-    - is_rhel_centos_7
+    - is_centos_7
     - not have_docker
     - not find_docker_rpm_local
 
