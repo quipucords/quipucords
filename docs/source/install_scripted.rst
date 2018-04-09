@@ -2,6 +2,9 @@ Scripted Installation
 ----------------------
 The scripted installation utilizes Ansible to install the command line and container image and any associated dependencies.
 
+
+**TIP:** *Red Hat Enterprise Linux 7* users will need to enable the `Extras <https://access.redhat.com/solutions/912213>`_ ( ``rhel-7-server-extras-rpms`` ) and `Optional <https://access.redhat.com/solutions/265523>`_ ( ``rhel-7-server-optional-rpms`` ) repositories.
+
 Installing the Ansible Prerequisite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Follow the `Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_ to prepare the system to install the software.
