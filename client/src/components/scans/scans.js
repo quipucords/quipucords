@@ -1,9 +1,9 @@
-import _ from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-
 import { Alert, Button, DropdownButton, EmptyState, Grid, Form, ListView, MenuItem, Modal } from 'patternfly-react';
+import _ from 'lodash';
 
 import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } from '../../redux/actions/scansActions';
 import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
@@ -17,15 +17,14 @@ import {
 } from '../../redux/constants';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
-
 import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
-
-import SourcesEmptyState from '../sources/sourcesEmptyState';
+import ScansEmptyState from './scansEmptyState';
 import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
+import { getScansSources } from '../../redux/actions/sourcesActions';
 
 class Scans extends React.Component {
   constructor() {
@@ -52,7 +51,8 @@ class Scans extends React.Component {
     this.deletingScan = null;
 
     this.state = {
-      lastRefresh: null
+      lastRefresh: null,
+      redirectTo: null
     };
   }
 
@@ -210,13 +210,20 @@ class Scans extends React.Component {
   }
 
   addSource() {
-    Store.dispatch({
-      type: sourcesTypes.CREATE_SOURCE_SHOW
-    });
+    const { sourcesCount } = this.props;
+
+    if (sourcesCount) {
+      this.setState({ redirectTo: '/sources' });
+    } else {
+      Store.dispatch({
+        type: sourcesTypes.CREATE_SOURCE_SHOW
+      });
+    }
   }
 
   refresh(props) {
     const options = _.get(props, 'viewOptions') || this.props.viewOptions;
+    this.props.getScansSources();
     this.props.getScans(helpers.createViewQueryObject(options, { scan_type: 'inspect' }));
   }
 
@@ -400,8 +407,8 @@ class Scans extends React.Component {
   }
 
   render() {
-    const { error, errorMessage, scans, viewOptions } = this.props;
-    const { lastRefresh } = this.state;
+    const { error, errorMessage, scans, sourcesCount, viewOptions } = this.props;
+    const { lastRefresh, redirectTo } = this.state;
 
     if (error) {
       return (
@@ -412,6 +419,10 @@ class Scans extends React.Component {
           {this.renderPendingMessage()}
         </EmptyState>
       );
+    }
+
+    if (redirectTo) {
+      return <Redirect to={redirectTo} push />;
     }
 
     if (_.size(scans) || _.size(viewOptions.activeFilters)) {
@@ -441,7 +452,7 @@ class Scans extends React.Component {
 
     return (
       <React.Fragment>
-        <SourcesEmptyState onAddSource={this.addSource} />
+        <ScansEmptyState onAddSource={this.addSource} sourcesExist={!!sourcesCount} />
         {this.renderPendingMessage()}
       </React.Fragment>
     );
@@ -455,6 +466,7 @@ Scans.propTypes = {
   cancelScan: PropTypes.func,
   restartScan: PropTypes.func,
   deleteScan: PropTypes.func,
+  getScansSources: PropTypes.func,
   getReportSummaryCsv: PropTypes.func,
   getReportDetailsCsv: PropTypes.func,
   fulfilled: PropTypes.bool,
@@ -462,6 +474,7 @@ Scans.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   scans: PropTypes.array,
+  sourcesCount: PropTypes.number,
   viewOptions: PropTypes.object,
   update: PropTypes.object
 };
@@ -473,14 +486,14 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   restartScan: id => dispatch(restartScan(id)),
   cancelScan: id => dispatch(cancelScan(id)),
   deleteScan: id => dispatch(deleteScan(id)),
+  getScansSources: queryObj => dispatch(getScansSources(queryObj)),
   getReportSummaryCsv: (id, query) => dispatch(getReportSummaryCsv(id, query)),
   getReportDetailsCsv: id => dispatch(getReportDetailsCsv(id))
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.scans.view, state.scans.persist, {
-    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW],
-    update: state.scans.update
+  return Object.assign({}, state.scans.view, state.scans.update, {
+    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW]
   });
 };
 

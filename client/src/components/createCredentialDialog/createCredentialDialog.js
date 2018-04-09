@@ -56,7 +56,7 @@ class CreateCredentialDialog extends React.Component {
         message: (
           <span>
             Credential <strong>{nextProps.credential.name}</strong> successfully
-            {this.props.edit ? ' updated' : ' created'}.
+            {this.props.edit ? ' updated' : ' added'}.
           </span>
         )
       });
@@ -260,7 +260,7 @@ class CreateCredentialDialog extends React.Component {
               <Form.FormControl
                 type="password"
                 value={password}
-                placeholder="Enter the password"
+                placeholder="Enter Password"
                 onChange={e => this.updatePassword(e)}
               />
               {passwordError && <Form.HelpBlock>{passwordError}</Form.HelpBlock>}
@@ -396,7 +396,7 @@ class CreateCredentialDialog extends React.Component {
           <Button className="close" onClick={this.cancel} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </Button>
-          <Modal.Title>{edit ? `Edit Credential - ${credentialName}` : 'Create Credential'}</Modal.Title>
+          <Modal.Title>{edit ? `Edit Credential - ${credentialName}` : 'Add Credential'}</Modal.Title>
         </Modal.Header>
         <Modal.Body />
         <Grid fluid>
@@ -419,7 +419,7 @@ class CreateCredentialDialog extends React.Component {
                 <Form.FormControl
                   type="text"
                   className="quipucords-form-control"
-                  placeholder="Enter the credential name"
+                  placeholder="Enter a name for the credential"
                   autoFocus={!edit}
                   value={credentialName}
                   onChange={e => this.updateCredentialName(e)}
@@ -464,7 +464,7 @@ class CreateCredentialDialog extends React.Component {
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
-                  placeholder="Enter the username"
+                  placeholder="Enter Username"
                   value={username}
                   onChange={e => this.updateUsername(e)}
                 />

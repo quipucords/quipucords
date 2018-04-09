@@ -224,7 +224,7 @@ class Credentials extends React.Component {
 
     return (
       <div className="form-group">
-        <DropdownButton bsStyle="primary" title="Create" pullRight id="createCredentialButton">
+        <DropdownButton bsStyle="primary" title="Add" pullRight id="createCredentialButton">
           <MenuItem eventKey="1" onClick={() => this.addCredential('network')}>
             Network Credential
           </MenuItem>

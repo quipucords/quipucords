@@ -1,5 +1,6 @@
 import helpers from '../../common/helpers';
-import { scansTypes } from '../constants';
+import { scansTypes, sourcesTypes } from '../constants';
+import _ from 'lodash';
 
 const initialState = {
   view: {
@@ -7,7 +8,8 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false,
-    scans: []
+    scans: [],
+    sourcesCount: 0
   },
 
   detail: {
@@ -114,7 +116,8 @@ const scansReducer = function(state = initialState, action) {
         {
           scans: action.payload.data.results,
           pending: false,
-          fulfilled: true
+          fulfilled: true,
+          sourcesCount: state.view.sourcesCount
         },
         {
           state,
@@ -534,6 +537,18 @@ const scansReducer = function(state = initialState, action) {
         {
           state,
           initialState
+        }
+      );
+
+    case helpers.FULFILLED_ACTION(sourcesTypes.GET_SCANS_SOURCES):
+      return helpers.setStateProp(
+        'view',
+        {
+          sourcesCount: _.get(action, 'payload.data.count', 0)
+        },
+        {
+          state,
+          reset: false
         }
       );
 

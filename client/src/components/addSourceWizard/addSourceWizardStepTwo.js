@@ -322,7 +322,7 @@ class AddSourceWizardStepTwo extends React.Component {
     const { hostsError, port, portError, multiHostDisplay, singleHostPortDisplay } = this.state;
     const { source } = this.props;
 
-    let sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
+    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
 
     switch (sourceType) {
       case 'network':
@@ -334,17 +334,20 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="hosts"
                 value={multiHostDisplay}
                 rows={5}
-                placeholder="Enter IP addresses or hostnames"
+                placeholder="Enter values separated by commas"
                 onChange={this.onChangeHosts}
               />
-              <Form.HelpBlock>Comma separated, IP ranges, dns, and wildcards are valid.</Form.HelpBlock>
+              <Form.HelpBlock>
+                IP addresses, IP ranges, DNS host names, and wildcards are valid. Use CIDR or Ansible notation for
+                ranges.
+              </Form.HelpBlock>
             </FieldGroup>
             <FieldGroup label={'Port'} error={portError} errorMessage={portError}>
               <Form.FormControl
                 name="port"
                 type="text"
                 value={port}
-                placeholder="Default port :22"
+                placeholder="Default port is 22"
                 onChange={e => this.onChangePort(e.target.value)}
               />
             </FieldGroup>
@@ -364,7 +367,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 name="hosts"
                 type="text"
                 value={singleHostPortDisplay}
-                placeholder="Enter an IP address or hostname (default port :443)"
+                placeholder="Enter an IP address or hostname (default port is 443)"
                 onChange={this.onChangeHost}
               />
             </FieldGroup>
@@ -448,6 +451,9 @@ class AddSourceWizardStepTwo extends React.Component {
 
   render() {
     const { sourceName, sourceNameError } = this.state;
+    const { source } = this.props;
+
+    const sourceTypeString = helpers.sourceTypeString(_.get(source, apiTypes.API_SOURCE_TYPE));
 
     return (
       <Form horizontal>
@@ -456,7 +462,7 @@ class AddSourceWizardStepTwo extends React.Component {
             type="text"
             name="sourceName"
             value={sourceName}
-            placeholder="Enter a source name"
+            placeholder={`Enter a name for the ${sourceTypeString} source`}
             onChange={this.onChangeSourceName}
           />
         </FieldGroup>

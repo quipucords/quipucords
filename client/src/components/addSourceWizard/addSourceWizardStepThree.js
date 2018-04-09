@@ -32,7 +32,7 @@ const AddSourceWizardStepThree = ({ view }) => {
         <span className="glyphicon glyphicon-ok-circle" />
       </div>
       <h3 className="blank-slate-pf-main-action">
-        Source <strong>{view.source.name}</strong> has been {view.add ? 'created' : 'updated'}.
+        <strong>{view.source.name}</strong> was {view.add ? 'created' : 'updated'}.
       </h3>
     </div>
   );

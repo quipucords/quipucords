@@ -8,7 +8,8 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false,
-    scans: []
+    scans: [],
+    sourcesCount: 0
   },
 
   detail: {
