@@ -25,8 +25,8 @@ PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
 META_DATA_KEY = 'metadata'
-JBOSS_FUSE_FUSE_ON_EAP = 'eap_home_bin'
-JBOSS_FUSE_ON_KARAF_KARAF_HOME = 'karaf_home_bin_fuse'
+EAP_HOME_BIN = 'eap_home_bin'
+KARAF_HOME_BIN_FUSE = 'karaf_home_bin_fuse'
 JBOSS_FUSE_SYSTEMCTL_FILES = 'jboss_fuse_systemctl_unit_files'
 JBOSS_FUSE_CHKCONFIG = 'jboss_fuse_chkconfig'
 SUBMAN_CONSUMED = 'subman_consumed'
@@ -79,8 +79,8 @@ def detect_jboss_fuse(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    fuse_on_eap = facts.get(JBOSS_FUSE_FUSE_ON_EAP)
-    fuse_on_karaf = facts.get(JBOSS_FUSE_ON_KARAF_KARAF_HOME)
+    eap_home_bin = facts.get(EAP_HOME_BIN)
+    karaf_home_bin_fuse = facts.get(KARAF_HOME_BIN_FUSE)
     systemctl_files = facts.get(JBOSS_FUSE_SYSTEMCTL_FILES)
     chkconfig = facts.get(JBOSS_FUSE_CHKCONFIG)
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
@@ -115,8 +115,10 @@ def detect_jboss_fuse(source, facts):
     }
     product_dict = {'name': PRODUCT}
     raw_facts = None
-    is_fuse_on_eap = (fuse_on_eap and any(fuse_on_eap.values()))
-    is_fuse_on_karaf = (fuse_on_karaf and any(fuse_on_karaf.values()))
+
+    is_fuse_on_eap = (eap_home_bin and any(eap_home_bin.values()))
+    is_fuse_on_karaf = (karaf_home_bin_fuse and
+                        any(karaf_home_bin_fuse.values()))
     if (activemq_list and camel_list and cxf_list) or is_fuse_on_eap or \
             is_fuse_on_karaf:
         # Set versions from extended-products scan & regular scan
@@ -125,8 +127,8 @@ def detect_jboss_fuse(source, facts):
                                  eap_camel + ext_fuse_camel +
                                  fuse_cxf + eap_cxf + ext_fuse_cxf))
     if is_fuse_on_eap or is_fuse_on_karaf or fuse_versions:
-        raw_facts_dict = {JBOSS_FUSE_FUSE_ON_EAP: is_fuse_on_eap,
-                          JBOSS_FUSE_ON_KARAF_KARAF_HOME: is_fuse_on_karaf,
+        raw_facts_dict = {EAP_HOME_BIN: is_fuse_on_eap,
+                          KARAF_HOME_BIN_FUSE: is_fuse_on_karaf,
                           JBOSS_ACTIVEMQ_VER: ext_fuse_activemq,
                           JBOSS_CAMEL_VER: ext_fuse_camel,
                           JBOSS_CXF_VER: ext_fuse_cxf,
