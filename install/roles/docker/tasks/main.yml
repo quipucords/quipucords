@@ -9,6 +9,15 @@
   set_fact:
     have_chkconfig: "{{ have_chkconfig_raw.rc == 0 }}"
 
+- name: Test for systemctl command
+  shell: command -v systemctl
+  register: have_systemctl_raw
+  ignore_errors: yes
+
+- name: Set have_systemctl
+  set_fact:
+    have_systemctl: "{{ have_systemctl_raw.rc == 0 }}"
+
 - name: Test for docker command
   shell: command -v docker
   register: have_docker_raw
@@ -184,3 +193,11 @@
   when:
     - is_rhel_centos_6
     - have_chkconfig
+
+- name: Setup systemctl to start docker
+  shell: systemctl enable docker
+  become: true
+  ignore_errors: yes
+  when:
+    - is_rhel_centos_7
+    - have_systemctl
