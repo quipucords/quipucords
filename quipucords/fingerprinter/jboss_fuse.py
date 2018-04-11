@@ -32,9 +32,9 @@ JBOSS_FUSE_CHKCONFIG = 'jboss_fuse_chkconfig'
 SUBMAN_CONSUMED = 'subman_consumed'
 ENTITLEMENTS = 'entitlements'
 # versions from fuse on eap or karaf
-JBOSS_FUSE_ACTIVEMQ_VER = 'fuse_activemq_version'
-JBOSS_FUSE_CAMEL_VER = 'fuse_camel_version'
-JBOSS_FUSE_CXF_VER = 'fuse_cxf_version'
+FUSE_ACTIVEMQ_VERSION = 'fuse_activemq_version'
+FUSE_CAMEL_VERSION = 'fuse_camel_version'
+FUSE_CXF_VERSION = 'fuse_cxf_version'
 # versions from fuse on eap
 JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER = 'jboss_fuse_on_eap_activemq_ver'
 JBOSS_FUSE_ON_EAP_CAMEL_VER = 'jboss_fuse_on_eap_camel_ver'
@@ -86,17 +86,17 @@ def detect_jboss_fuse(source, facts):
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
     # Get activemq versions
-    fuse_activemq = facts.get(JBOSS_FUSE_ACTIVEMQ_VER, [])
+    fuse_activemq = facts.get(FUSE_ACTIVEMQ_VERSION, [])
     eap_activemq = get_version(facts.get(JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER, []))
     ext_fuse_activemq = facts.get(JBOSS_ACTIVEMQ_VER, [])
     activemq_list = fuse_activemq + eap_activemq + ext_fuse_activemq
     # Get camel-core versions
-    fuse_camel = facts.get(JBOSS_FUSE_CAMEL_VER, [])
+    fuse_camel = facts.get(FUSE_CAMEL_VERSION, [])
     eap_camel = get_version(facts.get(JBOSS_FUSE_ON_EAP_CAMEL_VER, []))
     ext_fuse_camel = facts.get(JBOSS_CAMEL_VER, [])
     camel_list = fuse_camel + eap_camel + ext_fuse_camel
     # Get cxf-rt versions
-    fuse_cxf = facts.get(JBOSS_FUSE_CXF_VER, [])
+    fuse_cxf = facts.get(FUSE_CXF_VERSION, [])
     eap_cxf = get_version(facts.get(JBOSS_FUSE_ON_EAP_CXF_VER, []))
     ext_fuse_cxf = facts.get(JBOSS_CXF_VER, [])
     cxf_list = fuse_cxf + eap_cxf + ext_fuse_cxf
@@ -132,9 +132,9 @@ def detect_jboss_fuse(source, facts):
                           JBOSS_ACTIVEMQ_VER: ext_fuse_activemq,
                           JBOSS_CAMEL_VER: ext_fuse_camel,
                           JBOSS_CXF_VER: ext_fuse_cxf,
-                          JBOSS_FUSE_ACTIVEMQ_VER: fuse_activemq,
-                          JBOSS_FUSE_CAMEL_VER: fuse_camel,
-                          JBOSS_FUSE_CXF_VER: fuse_cxf,
+                          FUSE_ACTIVEMQ_VERSION: fuse_activemq,
+                          FUSE_CAMEL_VERSION: fuse_camel,
+                          FUSE_CXF_VERSION: fuse_cxf,
                           JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER: eap_activemq,
                           JBOSS_FUSE_ON_EAP_CAMEL_VER: eap_camel,
                           JBOSS_FUSE_ON_EAP_CXF_VER: eap_cxf}
