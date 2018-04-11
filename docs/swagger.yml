@@ -1242,7 +1242,6 @@ definitions:
       - count
       - next
       - previous
-      - results
     properties:
       count:
         type: "integer"
