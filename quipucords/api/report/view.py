@@ -98,7 +98,13 @@ def deployments(request, pk=None):
         report = build_report(pk, request.query_params)
         if report is not None:
             return Response(report)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+
+        report_fact_collection = get_object_or_404(
+            FactCollection.objects.all(), pk=pk)
+        return Response({'detail':
+                         'Deployment report %s could not be created.'
+                         '  See server logs.' % report_fact_collection.id},
+                        status=status.HTTP_424_FAILED_DEPENDENCY)
 
 
 def validate_filters(filters):
