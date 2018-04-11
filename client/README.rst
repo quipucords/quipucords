@@ -1,7 +1,10 @@
 Quipucords UI
 =============
+User interface for Quipucords based on `Patternfly <https://www.patternfly.org/>`_ |pflogo|
 
-User interface for Quipucords. This project was bootstrapped with `Create React App <https://github.com/facebookincubator/create-react-app>`_.
+.. |pflogo| image:: https://www.patternfly.org/assets/img/logo.svg
+  :width: 30
+  :target: https://www.patternfly.org
 
 Requirements
 ------------
