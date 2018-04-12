@@ -804,7 +804,16 @@ def _process_vcenter_fact(source, fact):
     add_fact_to_fingerprint(source, 'vm.name', fact, 'name', fingerprint)
 
     add_fact_to_fingerprint(source, 'vm.os', fact, 'os_release', fingerprint)
-
+    vcenter_os_release = fact.get('vm.os', '')
+    is_redhat = False
+    if vcenter_os_release != '':
+        rhel_os_releases = ['red hat enterprise linux', 'rhel']
+        for rhel_release in rhel_os_releases:
+            if rhel_release in vcenter_os_release.lower():
+                is_redhat = True
+    add_fact_to_fingerprint(source, 'vm.os',
+                            fact, 'is_redhat', fingerprint,
+                            fact_value=is_redhat)
     add_fact_to_fingerprint(source, 'vcenter_source', fact,
                             'infrastructure_type', fingerprint,
                             fact_value='virtualized')
@@ -858,15 +867,51 @@ def _process_satellite_fact(source, fact):
     :returns: fingerprint produced from fact
     """
     # pylint: disable=too-many-branches
+    rhel_versions = {'4Server': 'Red Hat Enterprise Linux 4 Server',
+                     '5Server': 'Red Hat Enterprise Linux 5 Server',
+                     '6Server': 'Red Hat Enterprise Linux 6 Server',
+                     '7Server': 'Red Hat Enterprise Linux 7 Server',
+                     '8Server': 'Red Hat Enterprise Linux 8 Server'}
 
     fingerprint = {META_DATA_KEY: {}}
 
     # Common facts
     add_fact_to_fingerprint(source, 'hostname', fact, 'name', fingerprint)
 
-    add_fact_to_fingerprint(source, 'os_release', fact,
-                            'os_release', fingerprint)
     add_fact_to_fingerprint(source, 'os_name', fact, 'os_name', fingerprint)
+    # Get the os name
+    satellite_os_name = fact.get('os_name')
+    is_redhat = False
+    rhel_version = None
+    # if the os name is none
+    if not satellite_os_name:
+        # grab the os release
+        satellite_os_release = fact.get('os_release', '')
+        if satellite_os_release in rhel_versions.keys():
+            # if the os release is a rhel version
+            # 1. set the is redhat fact to true and add it to fingerprint
+            # 2. set the rhel version to the rhel versions value
+            is_redhat = True
+            rhel_version = rhel_versions[satellite_os_release]
+        add_fact_to_fingerprint(source, 'os_release',
+                                fact, 'is_redhat', fingerprint,
+                                fact_value=is_redhat)
+    else:
+        # if the os name indicates redhat, set is_redhat to true
+        rhel_os_names = ['rhel', 'red', 'redhat']
+        if satellite_os_name.lower() in rhel_os_names:
+            is_redhat = True
+        add_fact_to_fingerprint(source, 'os_name',
+                                fact, 'is_redhat', fingerprint,
+                                fact_value=is_redhat)
+    if rhel_version:
+        add_fact_to_fingerprint(source, 'os_release', fact,
+                                'os_release', fingerprint,
+                                fact_value=rhel_version)
+    else:
+        add_fact_to_fingerprint(source, 'os_release', fact,
+                                'os_release', fingerprint)
+
     add_fact_to_fingerprint(source, 'os_version', fact,
                             'os_version', fingerprint)
 

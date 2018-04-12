@@ -168,7 +168,8 @@ class EngineTest(TestCase):
             vm_host_cpu_count=8,
             vm_datacenter='NY',
             vm_cluster='23sd',
-            architecture='x86_64'):
+            architecture='x86_64',
+            is_redhat=True):
         """Create an in memory FactCollection for tests."""
         fact = {}
         if source_id:
@@ -208,7 +209,9 @@ class EngineTest(TestCase):
             fact['vm.cluster'] = vm_cluster
         if architecture:
             fact['uname_processor'] = architecture
-
+        if 'red hat enterprise linux' in vm_os.lower() or \
+                'rhel' in vm_os.lower():
+            fact['is_redhat'] = is_redhat
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
 
@@ -231,7 +234,8 @@ class EngineTest(TestCase):
             virtual_host='9.3.4.6',
             num_sockets=8,
             entitlements=SAT_ENTITLEMENTS,
-            architecture='x86_64'):
+            architecture='x86_64',
+            is_redhat=True):
         """Create an in memory FactCollection for tests."""
         fact = {}
         if source_id:
@@ -276,6 +280,9 @@ class EngineTest(TestCase):
             fact['entitlements'] = entitlements
         if architecture:
             fact['architecture'] = architecture
+        if 'red hat enterprise linux' in os_name.lower() or \
+                'rhel' in os_name.lower():
+            fact['is_redhat'] = is_redhat
 
         fact_collection = {'id': report_id, 'facts': [fact]}
         return fact_collection
@@ -362,6 +369,8 @@ class EngineTest(TestCase):
                          fingerprint.get('vm_cluster'))
         self.assertEqual(fact.get('uname_processor'),
                          fingerprint.get('architecture'))
+        self.assertEqual(fact.get('is_redhat'),
+                         fingerprint.get('is_redhat'))
 
     def _validate_satellite_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -388,6 +397,8 @@ class EngineTest(TestCase):
                          fingerprint.get('cpu_socket_count'))
         self.assertEqual(fact.get('architecture'),
                          fingerprint.get('architecture'))
+        self.assertEqual(fact.get('is_redhat'),
+                         fingerprint.get('is_redhat'))
 
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""
