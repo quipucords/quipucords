@@ -10,9 +10,7 @@ Installing from the repository
 
 2. Enable the required repositories::
 
-    # sudo subscription-manager repos --enable=rhel-7-server-rpms
-    # sudo subscription-manager repos --enable=rhel-7-server-extras-rpms
-    # sudo subscription-manager repos --enable=rhel-7-server-optional-rpms
+    # sudo subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms
 
 3. Install Docker from the repository::
 
