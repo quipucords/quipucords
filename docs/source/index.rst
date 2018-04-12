@@ -32,4 +32,4 @@ Quipucords requires two types of data to access IT resources and run the inspect
    working_with_reports
    Command Line Usage <man>
    troubleshooting
-   advanced_topics
+   concepts
