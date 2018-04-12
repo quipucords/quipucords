@@ -811,6 +811,7 @@ def _process_vcenter_fact(source, fact):
         for rhel_release in rhel_os_releases:
             if rhel_release in vcenter_os_release.lower():
                 is_redhat = True
+                break
     add_fact_to_fingerprint(source, 'vm.os',
                             fact, 'is_redhat', fingerprint,
                             fact_value=is_redhat)
