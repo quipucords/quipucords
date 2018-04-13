@@ -229,7 +229,12 @@ def host_fields(scan_task, api_version, url, org_id, host_id):
 
     os_release = host_info.get(OS_RELEASE)
     if os_release:
-        host_info[OS_NAME] = os_release.split(' ')[0]
+        os_name = os_release.split(' ')[0]
+        if os_release.lower().startswith('red hat enterprise linux'):
+            os_name = 'Red Hat Enterprise Linux'
+        elif os_release.lower().startswith('red hat'):
+            os_name = 'Red Hat'
+        host_info[OS_NAME] = os_name
         host_info[OS_VERSION] = os_release.rsplit(' ').pop()
 
     host_info.pop(VIRTUAL_GUESTS, None)
