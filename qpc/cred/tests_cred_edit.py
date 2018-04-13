@@ -98,7 +98,6 @@ class CredentialEditCliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aec.main(args)
-                    aec.main(args)
                     self.assertTrue('credential "cred_none" does not exist'
                                     in cred_out.getvalue())
 
@@ -139,14 +138,14 @@ class CredentialEditCliTests(unittest.TestCase):
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         results = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
                     'username': 'root',
-                    'password': '********'}]
+                    'sshkeyfile': '/foo/bar'}]
         data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
-                             password=None, become_password=None,
+                             sshkeyfile='/foo/bar', become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aec.main(args)
@@ -180,14 +179,14 @@ class CredentialEditCliTests(unittest.TestCase):
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         results = [{'id': 1, 'name': 'cred1',
                     'cred_type': VCENTER_CRED_TYPE, 'username': 'root',
-                    'password': '********'}]
+                    'sshkeyfile': '/foo/bar'}]
         data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root',
-                             password=None)
+                             sshkeyfile='/foo/bar')
             with redirect_stdout(cred_out):
                 aec.main(args)
                 self.assertEqual(cred_out.getvalue(),

@@ -57,8 +57,9 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 
 %changelog
 * Fri Apr 13 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
-- Allow true/false for boolean values in source options. <kholdawa@redhat.com>
+- Clean up the CLI tests for credential. <aaiken@redhat.com>
 - Enable editing the disable-ssl option for a source. <aaiken@redhat.com>
+- Allow true/false for boolean values in source options. <kholdawa@redhat.com>
 - Update man page to indicate ssl options cannot be used with network sources. <kholdawa@redhat.com>
 * Wed Mar 14 2018 Ashley Aiken <aaiken@redhat.com> 0.0.41-1
 - Fix scan list pagination support

@@ -105,7 +105,6 @@ class CredentialAddCliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     aac.main(args)
-                    aac.main(args)
                     self.assertTrue('credential with this name already exists.'
                                     in cred_out.getvalue())
 
