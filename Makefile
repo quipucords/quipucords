@@ -86,5 +86,5 @@ manpage:
 	  --standalone -t man -o build/qpc.1 \
 	  --variable=section:1 \
 	  --variable=date:'March 18, 2018' \
-	  --variable=footer:'version 0.0.41' \
+	  --variable=footer:'version 0.0.42' \
 	  --variable=header:'QPC Command Line Guide'
