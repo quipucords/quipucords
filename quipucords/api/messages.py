@@ -74,7 +74,7 @@ NET_INVALID_PORT = 'Source of type network must have ssh port in' \
                    ' range [0, 65535]'
 NET_HC_DO_NOT_EXIST = 'Host credential with id=%d could not be'\
     ' found in database.'
-
+NET_SSL_OPTIONS_NOT_ALLOWED = 'Invalid SSL options for network source: %s'
 
 VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
 VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
