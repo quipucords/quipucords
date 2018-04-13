@@ -61,7 +61,7 @@ class SourceEditCommand(CliCommand):
                                  help=_(messages.SOURCE_PORT_HELP))
         self.parser.add_argument('--ssl-cert-verify',
                                  dest='ssl_cert_verify',
-                                 choices=['True', 'False'],
+                                 choices=source.BOOLEAN_CHOICES,
                                  help=_(messages.SOURCE_SSL_CERT_HELP),
                                  required=False)
         self.parser.add_argument('--ssl-protocol',
