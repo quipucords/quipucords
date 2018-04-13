@@ -249,8 +249,8 @@ class SourceAddCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
 
-    def test_add_source_sat_no_ssl(self):
-        """Testing the add satellite source command successfully."""
+    def test_add_source_sat_NO_SSL(self):
+        """Testing the add satellite with ssl_cert_verify set to False."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         cred_results = [{'id': 1, 'name': 'cred1'}]
@@ -267,3 +267,22 @@ class SourceAddCliTests(unittest.TestCase):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
+
+    def test_add_source_sat_no_ssl(self):
+            """Testing the add satellite with ssl_cert_verify set to false."""
+            source_out = StringIO()
+            get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+            cred_results = [{'id': 1, 'name': 'cred1'}]
+            get_cred_data = {'count': 1, 'results': cred_results}
+            post_source_url = get_server_location() + SOURCE_URI
+            with requests_mock.Mocker() as mocker:
+                mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+                mocker.post(post_source_url, status_code=201)
+                nac = SourceAddCommand(SUBPARSER)
+                args = Namespace(name='source1', cred=['cred1'],
+                                hosts=['1.2.3.4'], type='vcenter',
+                                ssl_cert_verify='false')
+                with redirect_stdout(source_out):
+                    nac.main(args)
+                    self.assertEqual(source_out.getvalue(),
+                                    messages.SOURCE_ADDED % 'source1' + '\n')
