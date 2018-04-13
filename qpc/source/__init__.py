@@ -24,7 +24,7 @@ SATELLITE_SOURCE_TYPE = 'satellite'
 
 SOURCE_URI = '/api/v1/sources/'
 
-BOOLEAN_CHOICES = ['True', 'False']
+BOOLEAN_CHOICES = ['True', 'False', 'true', 'false']
 VALID_SSL_PROTOCOLS = ['SSLv23',
                        'TLSv1',
                        'TLSv1_1',
