@@ -56,7 +56,7 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
-* Fri Apr 13 2018 Kevan Holdaway <kholdawaß@redhat.com> 0.0.42-1
+* Fri Apr 13 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
 - Allow true/false for boolean values in source options
 * Wed Mar 14 2018 Ashley Aiken <aaiken@redhat.com> 0.0.41-1
 - Fix scan list pagination support
