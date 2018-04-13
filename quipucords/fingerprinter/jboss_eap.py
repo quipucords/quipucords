@@ -247,12 +247,12 @@ def get_eap_jar_version(version_dict):
 # information respectively. PRESENCE can also be a literal presence
 # value and VERSION can be a literal set, as a convenience.
 FACTS = [
-    {NAME: JBOSS_EAP_RUNNING_PATHS, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_RUNNING_PATHS, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_JBOSS_USER, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_COMMON_FILES, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_PROCESSES, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_PACKAGES, PRESENCE: Product.PRESENT},
-    {NAME: JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR, PRESENCE: Product.PRESENT},
+    {NAME: JBOSS_EAP_LOCATE_JBOSS_MODULES_JAR, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_SYSTEMCTL_FILES, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_CHKCONFIG, PRESENCE: Product.POTENTIAL},
     {NAME: JBOSS_EAP_EAP_HOME,
@@ -264,7 +264,7 @@ FACTS = [
      PRESENCE: Product.PRESENT,
      VERSION: classify_jar_versions},
     {NAME: EAP_HOME_VERSION_TXT,
-     PRESENCE: Product.PRESENT,
+     PRESENCE: any_value_true,
      VERSION: process_version_txt},
     {NAME: EAP_HOME_README_TXT,
      PRESENCE: Product.ABSENT},
