@@ -428,6 +428,16 @@ class SourceTest(TestCase):
              'port': '22',
              'credentials': [self.vc_cred_for_upload]})
 
+    def test_create_with_options_not_allowed_network_type(self):
+        """Test network type doesn't allow ssl options."""
+        data = {'name': 'source1',
+                'source_type': Source.NETWORK_SOURCE_TYPE,
+                'hosts': ['1.2.3.4'],
+                'port': '22',
+                'credentials': [self.vc_cred_for_upload],
+                'options': {'ssl_cert_verify': False}}
+        response = self.create_expect_400(data)
+
     def test_list(self):
         """List all Source objects."""
         data = {'name': 'source',
