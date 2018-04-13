@@ -180,6 +180,58 @@ class SourceEditCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_UPDATED % 'source1' + '\n')
 
+    def test_edit_disable_ssl(self):
+        """Testing that you can edit the disable-ssl arg successfully."""
+        source_out = StringIO()
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_patch = get_server_location() + SOURCE_URI + '1/'
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials': [{'id': 2, 'name': 'cred2'}],
+                    'disable_ssl': 'true'}]
+        source_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
+            mocker.patch(url_patch, status_code=200)
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.5'],
+                             cred=['credential1'], disable_ssl='True')
+            with redirect_stdout(source_out):
+                aec.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_UPDATED % 'source1' + '\n')
+
+    def test_edit_ssl_protocol(self):
+        """Testing that you can edit the ssl_protocol arg successfully."""
+        source_out = StringIO()
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_patch = get_server_location() + SOURCE_URI + '1/'
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'credentials': [{'id': 2, 'name': 'cred2'}],
+                    'ssl_protocol': 'SSLv23'}]
+        source_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
+            mocker.patch(url_patch, status_code=200)
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.5'],
+                             cred=['credential1'], ssl_protocol='SSLv23')
+            with redirect_stdout(source_out):
+                aec.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_UPDATED % 'source1' + '\n')
+
     def test_edit_source_no_val(self):
         """Testing the edit source command with a server error."""
         source_out = StringIO()
