@@ -80,6 +80,7 @@ EAP_CLASSIFICATIONS = {
     '1.5.0.Final': 'WildFly-10',
     '1.5.1.Final': 'WildFly-10',
     '1.5.2.Final': 'WildFly-10',
+    '1.6.0.Final': 'WildFly-11',
     '1.6.1.Final': 'WildFly-11',
     '1.7.0.Final': 'WildFly-12',
     'JBPAPP_4_2_0_GA': '4.2',
