@@ -436,7 +436,7 @@ class SourceTest(TestCase):
                 'port': '22',
                 'credentials': [self.vc_cred_for_upload],
                 'options': {'ssl_cert_verify': False}}
-        response = self.create_expect_400(data)
+        self.create_expect_400(data)
 
     def test_list(self):
         """List all Source objects."""

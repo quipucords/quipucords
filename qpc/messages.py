@@ -68,10 +68,13 @@ SOURCE_PORT_HELP = 'Port to use for connection for the scan; '\
     'network default is 22, vcenter default is 443.'
 SOURCE_SSL_CERT_HELP = 'If true, the SSL certificate will'\
     ' be verified when making requests to the source, otherwise no '\
-    'verification will occur.'
+    'verification will occur. '\
+    'Not valid for network sources.'
 SOURCE_SSL_PROTOCOL_HELP = 'The SSL protocol to be used during a secure'\
-    ' connection.'
-SOURCE_SSL_DISABLE_HELP = 'Disable SSL usage during a connection.'
+    ' connection. '\
+    'Not valid for network sources.'
+SOURCE_SSL_DISABLE_HELP = 'Disable SSL usage during a connection. '\
+    'Not valid for network sources.'
 SOURCE_ADD_CREDS_NOT_FOUND = 'An error occurred while processing the '\
     '"--cred" input values. References for the following credential '\
     'could not be found: %s. Failed to add source "%s". '\
