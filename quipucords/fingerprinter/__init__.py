@@ -900,7 +900,7 @@ def _process_satellite_fact(source, fact):
     else:
         # if the os name indicates redhat, set is_redhat to true
         rhel_os_names = ['rhel', 'redhat']
-        if satellite_os_name.lower().strip() in rhel_os_names:
+        if satellite_os_name.lower().replace(' ', '') in rhel_os_names:
             is_redhat = True
         add_fact_to_fingerprint(source, 'os_name',
                                 fact, 'is_redhat', fingerprint,
