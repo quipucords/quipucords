@@ -1,7 +1,7 @@
 %{!?python3_sitelib: %define python3_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: qpc
-Version: 0.0.41
+Version: 0.0.42
 Release: 1%{?dist}
 Summary: A tool for discovery and inspection of an IT environment.
 
@@ -56,6 +56,8 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
+* Fri Apr 13 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
+- Allow true/false for boolean values in source options
 * Wed Mar 14 2018 Ashley Aiken <aaiken@redhat.com> 0.0.41-1
 - Fix scan list pagination support
 * Thu Mar 8 2018 Ashley Aiken <aaiken@redhat.com> 0.0.40-1
