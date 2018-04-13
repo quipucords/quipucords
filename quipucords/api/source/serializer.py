@@ -289,6 +289,16 @@ class SourceSerializer(NotEmptySerializer):
 
         if options:
             if instance.options is None:
+                if source_type == Source.NETWORK_SOURCE_TYPE and \
+                        bool(options):
+                    invalid_options = ', '.join(
+                        [key for key in options.keys()])
+                    error = {
+                        'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
+                                      invalid_options)]
+                    }
+                    raise ValidationError(error)
+
                 options = SourceOptions.objects.create(**options)
                 options.save()
                 instance.options = options
