@@ -86,7 +86,7 @@ class CredentialEditCliTests(unittest.TestCase):
                                 in cred_out.getvalue())
 
     def test_edit_cred_none(self):
-        """Testing the edit credential command for none existing credential."""
+        """Testing the edit credential command for non-existing credential."""
         cred_out = StringIO()
         url = get_server_location() + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
@@ -97,7 +97,6 @@ class CredentialEditCliTests(unittest.TestCase):
                              password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aec.main(args)
                     aec.main(args)
                     self.assertTrue('credential "cred_none" does not exist'
                                     in cred_out.getvalue())
@@ -139,14 +138,14 @@ class CredentialEditCliTests(unittest.TestCase):
         url_patch = get_server_location() + CREDENTIAL_URI + '1/'
         results = [{'id': 1, 'name': 'cred1', 'cred_type': NETWORK_CRED_TYPE,
                     'username': 'root',
-                    'password': '********'}]
+                    'sshkeyfile': '/foo/bar'}]
         data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
             aec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
-                             password=None, become_password=None,
+                             sshkeyfile='/woot/ness', become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
                 aec.main(args)
