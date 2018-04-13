@@ -170,8 +170,7 @@ class ProcessEapHomeLs(util.IndicatorFileFinder):
 
     KEY = 'eap_home_ls'
 
-    INDICATOR_FILES = ['appclient', 'standalone', 'JBossEULA.txt',
-                       'modules', 'jboss-modules.jar', 'version.txt']
+    INDICATOR_FILES = ['JBossEULA.txt', 'version.txt']
 
 
 class ProcessEapHomeVersionTxt(util.PerItemProcessor):
