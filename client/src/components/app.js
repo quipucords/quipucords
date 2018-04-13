@@ -16,6 +16,7 @@ import ToastNotificationsList from './toastNotificationsList/toastNotificationsL
 import ConfirmationModal from './confirmationModal/confirmationModal';
 import MastheadOptions from './mastheadOptions/mastheadOptions';
 import productTitle from '../styles/images/title.svg';
+import rhProductTitle from '../styles/images/brand/title.svg';
 
 class App extends React.Component {
   constructor() {
@@ -136,13 +137,15 @@ class App extends React.Component {
       window.location = '/logout';
     }
 
+    const titleImg = helpers.RH_BRAND ? rhProductTitle : productTitle;
+
     if (!session.loggedIn) {
       return (
         <div className="layout-pf layout-pf-fixed">
           <nav className="navbar navbar-pf-vertical">
             <div className="navbar-header">
               <span className="navbar-brand">
-                <img className="navbar-brand-name" src={productTitle} alt="" />
+                <img className="navbar-brand-name" src={titleImg} alt="" />
               </span>
             </div>
           </nav>
@@ -155,7 +158,7 @@ class App extends React.Component {
       <div className="layout-pf layout-pf-fixed">
         <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
-            <VerticalNav.Brand titleImg={productTitle} />
+            <VerticalNav.Brand titleImg={titleImg} />
             <MastheadOptions user={user} showAboutModal={this.showAbout} logoutUser={logoutUser} />
           </VerticalNav.Masthead>
           {this.renderMenuItems()}

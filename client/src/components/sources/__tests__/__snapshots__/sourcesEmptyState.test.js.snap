@@ -21,7 +21,7 @@ exports[`SourcesEmptyState Component should render a basic component 1`] = `
       <h4
         class="h1 blank-slate-pf-title"
       >
-        Welcome to Red Hat Entitlements Reporting
+        Welcome to  Entitlements Reporting
       </h4>
       <p
         class="blank-slate-pf-info"

@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import About from '../about';
 
 describe('About Component', function() {
-  it('should render', () => {
+  it('should render a basic display', () => {
     const props = {
       user: { currentUser: { username: 'admin' } },
       status: {},
