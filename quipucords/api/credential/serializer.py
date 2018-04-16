@@ -87,6 +87,15 @@ class CredentialSerializer(NotEmptySerializer):
             # Set the default become_user to root if not specified
             validated_data['become_user'] = Credential.BECOME_USER_DEFAULT
 
+        cred_type = 'cred_type' in validated_data and \
+            validated_data['cred_type']
+        if cred_type == Credential.VCENTER_CRED_TYPE:
+            validated_data = self.validate_vcenter_cred(validated_data)
+        elif cred_type == Credential.SATELLITE_CRED_TYPE:
+            validated_data = self.validate_satellite_cred(validated_data)
+        else:
+            validated_data = self.validate_host_cred(validated_data)
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -104,16 +113,15 @@ class CredentialSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
-        return super().update(instance, validated_data)
-
-    def validate(self, attrs):
-        """Validate the attributes."""
-        cred_type = 'cred_type' in attrs and attrs['cred_type']
+        cred_type = instance.cred_type
         if cred_type == Credential.VCENTER_CRED_TYPE:
-            return self.validate_vcenter_cred(attrs)
+            validated_data = self.validate_vcenter_cred(validated_data)
         elif cred_type == Credential.SATELLITE_CRED_TYPE:
-            return self.validate_satellite_cred(attrs)
-        return self.validate_host_cred(attrs)
+            validated_data = self.validate_satellite_cred(validated_data)
+        else:
+            validated_data = self.validate_host_cred(validated_data)
+
+        return super().update(instance, validated_data)
 
     def validate_host_cred(self, attrs):
         """Validate the attributes for host creds."""
