@@ -397,9 +397,7 @@ class ScanJob(models.Model):
         """Restart a job.
 
         Change job state from PENDING, PAUSED OR RUNNING
-        TO RUNNING status. Handles job that need to be run,
-        jobs that were running and the server quick, and
-        paused jobs.
+        TO PENDING status.
         """
         self.safe_state_change('_restart')
 
@@ -408,9 +406,7 @@ class ScanJob(models.Model):
         """Restart a job.
 
         Change job state from PENDING, PAUSED OR RUNNING
-        TO RUNNING status. Handles job that need to be run,
-        jobs that were running and the server quick, and
-        paused jobs.
+        TO PENDING status.
         """
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(target_status,
