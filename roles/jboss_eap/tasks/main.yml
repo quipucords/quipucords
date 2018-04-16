@@ -6,7 +6,7 @@
 
 # Tasks that can locate an EAP_HOME directory
 - name: Gather jboss.eap.running-paths
-  raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*"); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
+  raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
   register: jboss_eap_running_paths
   ignore_errors: yes
   when: 'have_java and jboss_eap'
@@ -62,14 +62,14 @@
 # the user has java. We have both to give ourselves more chances to
 # get the data we need.
 - name: get jboss-modules.jar MANIFEST.MF
-  raw: unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF
+  raw: unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF 2>/dev/null
   register: eap_home_jboss_modules_manifest
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap and have_unzip'
 
 - name: get jboss-modules.jar version
-  raw: java -jar "{{ item }}"/jboss-modules.jar -version
+  raw: java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
   register: eap_home_jboss_modules_version
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"

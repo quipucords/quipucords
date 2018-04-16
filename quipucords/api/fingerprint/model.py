@@ -57,7 +57,7 @@ class SystemFingerprint(models.Model):
         max_length=36, unique=False, null=True)
 
     cpu_socket_count = models.PositiveIntegerField(unique=False, null=True)
-    cpu_core_count = models.PositiveIntegerField(unique=False, null=True)
+    cpu_core_count = models.FloatField(unique=False, null=True)
 
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
