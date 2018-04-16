@@ -41,15 +41,17 @@ class ScanJobRunner(Process):
 
     def run(self):
         """Trigger thread execution."""
-        if self.scan_job.status == ScanTask.CREATED:
-            # Job is not ready to run
-            self.scan_job.queue()
-
         # Job is not running so start
         self.scan_job.start()
+        if self.scan_job.status != ScanTask.RUNNING:
+            error_message = 'Job could not transition to running state.'\
+                '  See error logs.'
+            self.scan_job.fail(error_message)
+            return ScanTask.FAILED
 
         # Load tasks that have no been run or are in progress
         task_runners = []
+
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')

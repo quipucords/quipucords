@@ -412,7 +412,7 @@ class ScanJob(models.Model):
         jobs that were running and the server quick, and
         paused jobs.
         """
-        target_status = ScanTask.RUNNING
+        target_status = ScanTask.PENDING
         has_error = self.validate_status_change(target_status,
                                                 [ScanTask.PENDING,
                                                  ScanTask.PAUSED,
