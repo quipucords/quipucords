@@ -126,7 +126,8 @@ class CredentialTest(TestCase):
                                                'ssh_keyfile.']}
         url = reverse('cred-list')
         data = {'name': 'cred1',
-                'username': 'user1'}
+                'username': 'user1',
+                'cred_type': Credential.NETWORK_CRED_TYPE}
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -143,6 +144,7 @@ class CredentialTest(TestCase):
         url = reverse('cred-list')
         data = {'name': 'cred1',
                 'username': 'user1',
+                'cred_type': Credential.NETWORK_CRED_TYPE,
                 'ssh_keyfile': 'blah'}
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
@@ -525,6 +527,30 @@ class CredentialTest(TestCase):
         response = self.client.post(url, json.dumps(data),
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, expected_error)
+
+    def test_sat_cred_update_ssh_key_not_allowed(self):
+        """Ensure Satellite update doesn't allow adding ssh_keyfile."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.SATELLITE_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        initial = self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+
+        update_data = {
+            'name': 'newName',
+            'ssh_keyfile': 'random_path'
+        }
+        url = reverse('cred-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(update_data),
+                                     content_type='application/json',
+                                     format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error = {'non_field_errors': [
+            messages.SAT_FIELDS_NOT_ALLOWED]}
         self.assertEqual(response.data, expected_error)
 
     def test_sat_create_extra_keyfile(self):

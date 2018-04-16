@@ -87,6 +87,13 @@ class CredentialSerializer(NotEmptySerializer):
             # Set the default become_user to root if not specified
             validated_data['become_user'] = Credential.BECOME_USER_DEFAULT
 
+        if cred_type == Credential.VCENTER_CRED_TYPE:
+            validated_data = self.validate_vcenter_cred(validated_data)
+        elif cred_type == Credential.SATELLITE_CRED_TYPE:
+            validated_data = self.validate_satellite_cred(validated_data)
+        else:
+            validated_data = self.validate_host_cred(validated_data)
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -104,16 +111,15 @@ class CredentialSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
-        return super().update(instance, validated_data)
-
-    def validate(self, attrs):
-        """Validate the attributes."""
-        cred_type = 'cred_type' in attrs and attrs['cred_type']
+        cred_type = instance.cred_type
         if cred_type == Credential.VCENTER_CRED_TYPE:
-            return self.validate_vcenter_cred(attrs)
+            validated_data = self.validate_vcenter_cred(validated_data)
         elif cred_type == Credential.SATELLITE_CRED_TYPE:
-            return self.validate_satellite_cred(attrs)
-        return self.validate_host_cred(attrs)
+            validated_data = self.validate_satellite_cred(validated_data)
+        else:
+            validated_data = self.validate_host_cred(validated_data)
+
+        return super().update(instance, validated_data)
 
     def validate_host_cred(self, attrs):
         """Validate the attributes for host creds."""
@@ -185,21 +191,22 @@ class CredentialSerializer(NotEmptySerializer):
     def validate_satellite_cred(self, attrs):
         """Validate the attributes for satellite creds."""
         # Required fields for satellite
-        username = 'username' in attrs and attrs['username']
-        password = 'password' in attrs and attrs['password']
+        if not self.partial:
+            username = 'username' in attrs and attrs['username']
+            password = 'password' in attrs and attrs['password']
 
-        if not (password and username):
-            error = {
-                'non_field_errors': [_(messages.SAT_PWD_AND_USERNAME)]
-            }
-            raise ValidationError(error)
+            if not (password and username):
+                error = {
+                    'non_field_errors': [_(messages.SAT_PWD_AND_USERNAME)]
+                }
+                raise ValidationError(error)
 
         # Not allowed fields for satellite
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         ssh_passphrase = 'ssh_passphrase' in attrs \
-                         and attrs['ssh_passphrase']
+            and attrs['ssh_passphrase']
         become_password = 'become_password' in attrs \
-                          and attrs['become_password']
+            and attrs['become_password']
         become_user = 'become_user' in attrs and attrs['become_user']
         become_method = 'become_method' in attrs \
                         and attrs['become_method']
@@ -210,5 +217,4 @@ class CredentialSerializer(NotEmptySerializer):
                 'non_field_errors': [_(messages.SAT_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
-
         return attrs
