@@ -104,6 +104,7 @@ class CredentialAddCliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
                     cac.main(args)
+                    cac.main(args)
 
     def test_add_cred_ssl_err(self):
         """Testing the add credential command with a connection error."""
