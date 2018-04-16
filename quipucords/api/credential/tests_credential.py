@@ -550,7 +550,7 @@ class CredentialTest(TestCase):
                                      format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected_error = {'non_field_errors': [
-            messages.SAT_PWD_AND_USERNAME]}
+            messages.SAT_FIELDS_NOT_ALLOWED]}
         self.assertEqual(response.data, expected_error)
 
     def test_sat_create_extra_keyfile(self):

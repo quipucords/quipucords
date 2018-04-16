@@ -87,8 +87,6 @@ class CredentialSerializer(NotEmptySerializer):
             # Set the default become_user to root if not specified
             validated_data['become_user'] = Credential.BECOME_USER_DEFAULT
 
-        cred_type = 'cred_type' in validated_data and \
-            validated_data['cred_type']
         if cred_type == Credential.VCENTER_CRED_TYPE:
             validated_data = self.validate_vcenter_cred(validated_data)
         elif cred_type == Credential.SATELLITE_CRED_TYPE:
@@ -193,21 +191,22 @@ class CredentialSerializer(NotEmptySerializer):
     def validate_satellite_cred(self, attrs):
         """Validate the attributes for satellite creds."""
         # Required fields for satellite
-        username = 'username' in attrs and attrs['username']
-        password = 'password' in attrs and attrs['password']
+        if not self.partial:
+            username = 'username' in attrs and attrs['username']
+            password = 'password' in attrs and attrs['password']
 
-        if not (password and username):
-            error = {
-                'non_field_errors': [_(messages.SAT_PWD_AND_USERNAME)]
-            }
-            raise ValidationError(error)
+            if not (password and username):
+                error = {
+                    'non_field_errors': [_(messages.SAT_PWD_AND_USERNAME)]
+                }
+                raise ValidationError(error)
 
         # Not allowed fields for satellite
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
         ssh_passphrase = 'ssh_passphrase' in attrs \
-                         and attrs['ssh_passphrase']
+            and attrs['ssh_passphrase']
         become_password = 'become_password' in attrs \
-                          and attrs['become_password']
+            and attrs['become_password']
         become_user = 'become_user' in attrs and attrs['become_user']
         become_method = 'become_method' in attrs \
                         and attrs['become_method']
@@ -218,5 +217,4 @@ class CredentialSerializer(NotEmptySerializer):
                 'non_field_errors': [_(messages.SAT_FIELDS_NOT_ALLOWED)]
             }
             raise ValidationError(error)
-
         return attrs
