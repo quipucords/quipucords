@@ -43,10 +43,16 @@ class Manager(Thread):
         """Start to excute scans in the queue."""
         if len(self.scan_queue) > 0:  # pylint: disable=C1801
             self.current_task = self.scan_queue.pop()
-            logger.debug('Scan manager running %s.', self.current_task)
-            self.current_task.start()
-            self.current_task.join()
-            self.current_task = None
+            if self.current_task.scan_job.status == ScanTask.PENDING:
+                logger.debug('Scan manager running %s.', self.current_task)
+                self.current_task.start()
+                self.current_task.join()
+                self.current_task = None
+            else:
+                error = 'Could not start job. Job was not in %s state.' % \
+                    ScanTask.PENDING
+                self.current_task.scan_job.log_message(
+                    error, log_level=logging.ERROR)
 
     def put(self, task):
         """Add task to scan queue.
@@ -63,14 +69,21 @@ class Manager(Thread):
         """
         killed = False
         job_id = job.id
-        job.log_message('TERMINATING TASK PROCESS')
-        logger.debug('Current task is %s.', self.current_task)
+        job.log_message('TERMINATING JOB PROCESS')
         if (self.current_task is not None and
                 self.current_task.identifier == job_id and
                 self.current_task.is_alive()):
-            self.current_task.terminate()
+            job_runner = self.current_task
+            job_runner.terminate()
+            job_runner.join()
+            killed = not job_runner.is_alive()
+            job.log_message(
+                'Process successfully killed=%s.' % killed)
+            if not killed:
+                job.log_message(
+                    'Request to kill process failed.',
+                    log_level=logging.ERROR)
             self.current_task = None
-            killed = True
         else:
             logger.debug('Checking scan queue for task to remove.')
             removed = False
@@ -101,6 +114,8 @@ class Manager(Thread):
             scanner = ScanJobRunner(scanjob)
             logger.debug('Adding ScanJob(id=%d, status=%s, scan_type=%s)',
                          scanjob.id, scanjob.status, scanjob.scan_type)
+            if scanjob.status == ScanTask.CREATED:
+                scanjob.queue()
             self.put(scanner)
             restarted_scan_count += 1
 
