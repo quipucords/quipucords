@@ -17,7 +17,6 @@ from io import StringIO
 
 from qpc.cred import CREDENTIAL_URI
 from qpc.cred.list import CredListCommand
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
 
@@ -52,12 +51,11 @@ class CredentialListCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    alc.main(args)
-                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
+                    clc.main(args)
 
     def test_list_cred_conn_err(self):
         """Testing the list credential command with a connection error."""
@@ -65,12 +63,11 @@ class CredentialListCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    alc.main(args)
-                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
+                    clc.main(args)
 
     def test_list_cred_internal_err(self):
         """Testing the list credential command with an internal error."""
@@ -78,12 +75,11 @@ class CredentialListCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace()
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    alc.main(args)
-                    self.assertEqual(cred_out.getvalue(), 'Server Error')
+                    clc.main(args)
 
     def test_list_cred_empty(self):
         """Testing the list credential command successfully with empty data."""
@@ -91,10 +87,10 @@ class CredentialListCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json={'count': 0})
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(cred_out):
-                alc.main(args)
+                clc.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  'No credentials exist yet.\n')
 
@@ -120,10 +116,10 @@ class CredentialListCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
             mocker.get(next_link, status_code=200, json=data2)
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace()
             with redirect_stdout(cred_out):
-                alc.main(args)
+                clc.main(args)
                 expected = '[{"id":1,"name":"cred1","password":"********",' \
                     '"username":"root"}]'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
@@ -146,10 +142,10 @@ class CredentialListCliTests(unittest.TestCase):
         }
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
-            alc = CredListCommand(SUBPARSER)
+            clc = CredListCommand(SUBPARSER)
             args = Namespace(type='network')
             with redirect_stdout(cred_out):
-                alc.main(args)
+                clc.main(args)
                 expected = '[{"cred_type":"network","id":1,'\
                     '"name":"cred1","password":"********",' \
                     '"username":"root"}]'
