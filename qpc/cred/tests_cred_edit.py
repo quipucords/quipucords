@@ -22,7 +22,6 @@ from qpc.cred import (CREDENTIAL_URI,
                       SATELLITE_CRED_TYPE,
                       VCENTER_CRED_TYPE)
 from qpc.cred.edit import CredEditCommand
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
 
@@ -65,9 +64,6 @@ class CredentialEditCliTests(unittest.TestCase):
                 sys.argv = ['/bin/qpc', 'credential',
                             'edit', '--name', 'credential1']
                 CLI().main()
-                self.assertEqual(cred_out.getvalue(),
-                                 'No arguments provided to edit '
-                                 'credential credential1')
 
     def test_edit_bad_key(self):
         """Testing the credential edit command.
@@ -81,9 +77,6 @@ class CredentialEditCliTests(unittest.TestCase):
                             '--name', 'cred1',
                             '--sshkeyfile', 'bad_path']
                 CLI().main()
-                self.assertTrue('Please provide a valid location for the '
-                                '"--sshkeyfile" argument.'
-                                in cred_out.getvalue())
 
     def test_edit_cred_none(self):
         """Testing the edit credential command for non-existing credential."""
@@ -91,15 +84,13 @@ class CredentialEditCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=cred_none'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json={'count': 0})
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred_none', username='root',
                              filename=TMP_KEY,
                              password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aec.main(args)
-                    self.assertTrue('credential "cred_none" does not exist'
-                                    in cred_out.getvalue())
+                    cec.main(args)
 
     def test_edit_cred_ssl_err(self):
         """Testing the edit credential command with a connection error."""
@@ -107,14 +98,13 @@ class CredentialEditCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aec.main(args)
-                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
+                    cec.main(args)
 
     def test_edit_cred_conn_err(self):
         """Testing the edit credential command with a connection error."""
@@ -122,14 +112,13 @@ class CredentialEditCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              filename=TMP_KEY,
                              password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aec.main(args)
-                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
+                    cec.main(args)
 
     def test_edit_host_cred(self):
         """Testing the edit credential command successfully."""
@@ -143,12 +132,12 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              sshkeyfile='/woot/ness', become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')
 
@@ -163,12 +152,12 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, become_password=None,
                              ssh_passphrase=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')
 
@@ -184,11 +173,11 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root',
                              password=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')
 
@@ -204,11 +193,11 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root',
                              password=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')
 
@@ -218,14 +207,12 @@ class CredentialEditCliTests(unittest.TestCase):
         url_get = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=500, json=None)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root', filename=TMP_KEY,
                              password=None, become_password=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aec.main(args)
-                    self.assertEqual(cred_out.getvalue(),
-                                     messages.SERVER_INTERNAL_ERROR)
+                    cec.main(args)
 
     def test_edit_sat_cred(self):
         """Testing the edit credential command successfully."""
@@ -239,11 +226,11 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root',
                              password=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')
 
@@ -259,10 +246,10 @@ class CredentialEditCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(url_get, status_code=200, json=data)
             mocker.patch(url_patch, status_code=200)
-            aec = CredEditCommand(SUBPARSER)
+            cec = CredEditCommand(SUBPARSER)
             args = Namespace(name='cred1', username='root',
                              password=None)
             with redirect_stdout(cred_out):
-                aec.main(args)
+                cec.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_UPDATED % 'cred1' + '\n')

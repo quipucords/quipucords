@@ -25,7 +25,6 @@ from qpc.cred import (CREDENTIAL_URI,
                       SATELLITE_CRED_TYPE,
                       VCENTER_CRED_TYPE)
 from qpc.cred.add import CredAddCommand
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
 
@@ -96,7 +95,7 @@ class CredentialAddCliTests(unittest.TestCase):
         error = {'name': ['credential with this name already exists.']}
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=400, json=error)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='cred_dup', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
@@ -104,10 +103,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aac.main(args)
-                    aac.main(args)
-                    self.assertTrue('credential with this name already exists.'
-                                    in cred_out.getvalue())
+                    cac.main(args)
 
     def test_add_cred_ssl_err(self):
         """Testing the add credential command with a connection error."""
@@ -115,7 +111,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.SSLError)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
@@ -123,8 +119,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aac.main(args)
-                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
+                    cac.main(args)
 
     def test_add_cred_conn_err(self):
         """Testing the add credential command with a connection error."""
@@ -132,7 +127,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, exc=requests.exceptions.ConnectTimeout)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
@@ -140,8 +135,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              ssh_passphrase=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aac.main(args)
-                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
+                    cac.main(args)
 
     def test_add_host_cred(self):
         """Testing the add host cred command successfully."""
@@ -149,7 +143,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
@@ -157,7 +151,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              become_method=None, become_user=None,
                              become_password=None)
             with redirect_stdout(cred_out):
-                aac.main(args)
+                cac.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  'Credential "credential1" was added.\n')
 
@@ -167,7 +161,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1', username='root',
                              type=NETWORK_CRED_TYPE,
                              filename=TMP_KEY,
@@ -175,7 +169,7 @@ class CredentialAddCliTests(unittest.TestCase):
                              become_method='sudo', become_user='root',
                              become_password=None)
             with redirect_stdout(cred_out):
-                aac.main(args)
+                cac.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CRED_ADDED % 'credential1' + '\n')
 
@@ -186,14 +180,14 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1',
                              type=VCENTER_CRED_TYPE,
                              username='root',
                              password='sdf')
             do_mock_raw_input.return_value = 'abc'
             with redirect_stdout(cred_out):
-                aac.main(args)
+                cac.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CONN_PASSWORD + '\n' +
                                  messages.CRED_ADDED % 'credential1' + '\n')
@@ -205,14 +199,14 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=201)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1',
                              type=SATELLITE_CRED_TYPE,
                              username='root',
                              password='sdf')
             do_mock_raw_input.return_value = 'abc'
             with redirect_stdout(cred_out):
-                aac.main(args)
+                cac.main(args)
                 self.assertEqual(cred_out.getvalue(),
                                  messages.CONN_PASSWORD + '\n' +
                                  messages.CRED_ADDED % 'credential1' + '\n')
@@ -224,7 +218,7 @@ class CredentialAddCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(url, status_code=401)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1',
                              type=SATELLITE_CRED_TYPE,
                              username='root',
@@ -232,7 +226,7 @@ class CredentialAddCliTests(unittest.TestCase):
             do_mock_raw_input.return_value = 'abc'
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aac.main(args)
+                    cac.main(args)
 
     @patch('getpass._raw_input')
     def test_add_cred_expired(self, do_mock_raw_input):
@@ -242,7 +236,7 @@ class CredentialAddCliTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             expired = {'detail': 'Token has expired'}
             mocker.post(url, status_code=400, json=expired)
-            aac = CredAddCommand(SUBPARSER)
+            cac = CredAddCommand(SUBPARSER)
             args = Namespace(name='credential1',
                              type=SATELLITE_CRED_TYPE,
                              username='root',
@@ -250,4 +244,4 @@ class CredentialAddCliTests(unittest.TestCase):
             do_mock_raw_input.return_value = 'abc'
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    aac.main(args)
+                    cac.main(args)

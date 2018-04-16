@@ -17,7 +17,6 @@ from io import StringIO
 
 from qpc.cred import CREDENTIAL_URI
 from qpc.cred.show import CredShowCommand
-from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
 
@@ -52,12 +51,11 @@ class CredentialShowCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.SSLError)
-            asc = CredShowCommand(SUBPARSER)
+            csc = CredShowCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    asc.main(args)
-                    self.assertEqual(cred_out.getvalue(), SSL_ERROR_MSG)
+                    csc.main(args)
 
     def test_show_cred_conn_err(self):
         """Testing the show credential command with a connection error."""
@@ -65,12 +63,11 @@ class CredentialShowCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, exc=requests.exceptions.ConnectTimeout)
-            asc = CredShowCommand(SUBPARSER)
+            csc = CredShowCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    asc.main(args)
-                    self.assertEqual(cred_out.getvalue(), CONNECTION_ERROR_MSG)
+                    csc.main(args)
 
     def test_show_cred_internal_err(self):
         """Testing the show credential command with an internal error."""
@@ -78,12 +75,11 @@ class CredentialShowCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=credential1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=500, json={'error': ['Server Error']})
-            asc = CredShowCommand(SUBPARSER)
+            csc = CredShowCommand(SUBPARSER)
             args = Namespace(name='credential1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    asc.main(args)
-                    self.assertEqual(cred_out.getvalue(), 'Server Error')
+                    csc.main(args)
 
     def test_show_cred_empty(self):
         """Testing the show credential command successfully with empty data."""
@@ -91,13 +87,11 @@ class CredentialShowCliTests(unittest.TestCase):
         url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json={'count': 0})
-            asc = CredShowCommand(SUBPARSER)
+            csc = CredShowCommand(SUBPARSER)
             args = Namespace(name='cred1')
             with self.assertRaises(SystemExit):
                 with redirect_stdout(cred_out):
-                    asc.main(args)
-                    self.assertEqual(cred_out.getvalue(),
-                                     'credential "cred1" does not exist\n')
+                    csc.main(args)
 
     def test_show_cred_data(self):
         """Testing the show credential command with stubbed data."""
@@ -109,10 +103,10 @@ class CredentialShowCliTests(unittest.TestCase):
         data = {'count': 1, 'results': results}
         with requests_mock.Mocker() as mocker:
             mocker.get(url, status_code=200, json=data)
-            asc = CredShowCommand(SUBPARSER)
+            csc = CredShowCommand(SUBPARSER)
             args = Namespace(name='cred1')
             with redirect_stdout(cred_out):
-                asc.main(args)
+                csc.main(args)
                 expected = '{"id":1,"name":"cred1","password":"********",' \
                     '"username":"root"}'
                 self.assertEqual(cred_out.getvalue().replace('\n', '')
