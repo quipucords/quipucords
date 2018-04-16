@@ -2,23 +2,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { detect } from 'detect-browser';
 import { AboutModal } from 'patternfly-react';
+import helpers from '../../common/helpers';
 import _ from 'lodash';
-import logo from '../../styles/images/Red_Hat_logo.svg';
+import logo from '../../styles/images/logo.svg';
 import productTitle from '../../styles/images/title.svg';
+import rhLogo from '../../styles/images/brand/logo.svg';
+import rhProductTitle from '../../styles/images/brand/title.svg';
 
 const About = ({ user, status, shown, onClose }) => {
   const versionText = `${_.get(status, 'api_version', 'unknown')} (Build: ${_.get(status, 'build', 'unknown')})`;
   const browser = detect();
 
+  let props = {
+    show: shown,
+    onHide: onClose,
+    logo: logo,
+    productTitle: <img src={productTitle} alt="Entitlements Reporting" />,
+    altLogo: 'ER'
+  };
+
+  if (helpers.RH_BRAND) {
+    props.logo = rhLogo;
+    props.productTitle = <img src={rhProductTitle} alt="Red Hat Entitlements Reporting" />;
+    props.altLogo = 'RH ER';
+    props.trademarkText = 'Copyright (c) 2018 Red Hat Inc.';
+  }
+
   return (
-    <AboutModal
-      show={shown}
-      onHide={onClose}
-      productTitle={<img src={productTitle} alt="Red Hat Entitlements Reporting" />}
-      logo={logo}
-      altLogo="RH ER"
-      trademarkText="Copyright (c) 2018 Red Hat Inc."
-    >
+    <AboutModal {...props}>
       <AboutModal.Versions>
         <AboutModal.VersionItem label="Version" versionText={versionText} />
         <AboutModal.VersionItem label="Username" versionText={_.get(user, 'currentUser.username', '')} />
