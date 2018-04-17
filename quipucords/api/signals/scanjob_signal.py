@@ -41,6 +41,7 @@ def handle_scan(sender, instance, **kwargs):
     """
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('START'))
     scanner = ScanJobRunner(instance)
+    instance.queue()
     if not SCAN_MANAGER.is_alive():
         SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up

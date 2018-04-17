@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { Button, DropdownButton, EmptyState, Grid, MenuItem, Row } from 'patternfly-react';
+import helpers from '../../common/helpers';
 
 const CredentialsEmptyState = ({ onAddCredential, onAddSource }) => {
   return (
@@ -9,7 +9,7 @@ const CredentialsEmptyState = ({ onAddCredential, onAddSource }) => {
       <Row>
         <EmptyState className="full-page-blank-slate">
           <EmptyState.Icon />
-          <EmptyState.Title>Welcome to Red Hat Entitlements Reporting</EmptyState.Title>
+          <EmptyState.Title>Welcome to {helpers.RH_BRAND && 'Red Hat'} Entitlements Reporting</EmptyState.Title>
           <EmptyState.Info>
             Credentials contain authentication information needed to scan a source. A credential includes <br />
             a username and a password or SSH key. Entitlements Reporting uses SSH to connect to servers <br /> on the

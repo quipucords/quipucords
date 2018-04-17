@@ -20,6 +20,7 @@ from api.models import (Entitlement,
 from rest_framework.serializers import (CharField,
                                         ChoiceField,
                                         DateField,
+                                        FloatField,
                                         IntegerField,
                                         ModelSerializer,
                                         NullBooleanField,
@@ -80,7 +81,7 @@ class FingerprintSerializer(ModelSerializer):
     subscription_manager_id = CharField(required=False, max_length=36)
 
     cpu_socket_count = IntegerField(required=False, min_value=0)
-    cpu_core_count = IntegerField(required=False, min_value=0)
+    cpu_core_count = FloatField(required=False, min_value=0)
 
     system_creation_date = DateField(required=False)
 

@@ -11,6 +11,9 @@
 """Test the scan manager capabilities."""
 
 from threading import Thread
+from unittest.mock import Mock
+
+from api.models import ScanTask
 
 from django.test import TestCase
 
@@ -25,6 +28,8 @@ class MockTask(Thread):
         """Create a mock task."""
         Thread.__init__(self)
         self.id = 1
+        self.scan_job = Mock()
+        self.scan_job.status = ScanTask.PENDING
 
     def log_message(self, message):
         """Fake log message."""

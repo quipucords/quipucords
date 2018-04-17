@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`About Component should render 1`] = `
+exports[`About Component should render a basic display 1`] = `
 <div
   role="dialog"
 >
@@ -43,7 +43,7 @@ exports[`About Component should render 1`] = `
         >
           <h1>
             <img
-              alt="Red Hat Entitlements Reporting"
+              alt="Entitlements Reporting"
               src="title.svg"
             />
           </h1>
@@ -89,16 +89,14 @@ exports[`About Component should render 1`] = `
           </div>
           <div
             class="trademark-pf"
-          >
-            Copyright (c) 2018 Red Hat Inc.
-          </div>
+          />
         </div>
         <div
           class="modal-footer"
         >
           <img
-            alt="RH ER"
-            src="Red_Hat_logo.svg"
+            alt="ER"
+            src="logo.svg"
           />
         </div>
       </div>

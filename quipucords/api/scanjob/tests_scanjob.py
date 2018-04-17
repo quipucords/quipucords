@@ -217,7 +217,7 @@ class ScanJobTest(TestCase):
 
         scan_job.restart()
         connect_task = scan_job.tasks.first()
-        self.assertEqual(scan_job.status, ScanTask.RUNNING)
+        self.assertEqual(scan_job.status, ScanTask.PENDING)
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         scan_job.cancel()
