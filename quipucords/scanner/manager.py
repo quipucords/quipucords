@@ -12,6 +12,7 @@
 """Queue Manager module."""
 
 import logging
+import os
 from threading import Thread, Timer
 from time import sleep
 
@@ -41,11 +42,14 @@ class Manager(Thread):
 
     def log_info(self):
         """Log the status of the scan manager."""
-        interval = 60
+        try:
+            interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT', '60'))
+        except ValueError:
+            interval = 60
         heartbeat = Timer(interval, self.log_info)
-        logger.debug('Scan manager running: %s. '
-                     'Current task: %s. '
-                     'Number of scans in queue: %s.',
+        logger.info('Scan manager running: %s. '
+                    'Current task: %s. '
+                    'Number of scan jobs in queue: %s.',
                      self.running, self.current_task, len(self.scan_queue))
         if self.running:
             heartbeat.start()
