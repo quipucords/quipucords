@@ -12,7 +12,7 @@
 """Queue Manager module."""
 
 import logging
-from threading import Thread
+from threading import Thread, Timer
 from time import sleep
 
 
@@ -38,6 +38,20 @@ class Manager(Thread):
         self.current_task = None
         self.running = True
         logger.debug('Scan manager created.')
+
+    def log_info(self):
+        """Log the status of the scan manager."""
+        interval = 60
+        heartbeat = Timer(interval, self.log_info)
+        logger.debug('Scan manager running: %s. '
+                     'Current task: %s. '
+                     'Number of scans in queue: %s.',
+                     self.running, self.current_task, len(self.scan_queue))
+        if self.running:
+            heartbeat.start()
+        else:
+            if heartbeat.is_alive():
+                heartbeat.cancel()
 
     def work(self):
         """Start to excute scans in the queue."""
@@ -126,6 +140,7 @@ class Manager(Thread):
         """Trigger thread execution."""
         self.restart_incomplete_scansjobs()
         logger.debug('Scan manager started.')
+        self.log_info()
         while self.running:
             queue_len = len(self.scan_queue)
             if queue_len > 0 and self.current_task is None:
