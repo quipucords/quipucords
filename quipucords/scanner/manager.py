@@ -43,14 +43,15 @@ class Manager(Thread):
     def log_info(self):
         """Log the status of the scan manager."""
         try:
-            interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT', '60'))
+            interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT',
+                                          '60'))
         except ValueError:
             interval = 60
         heartbeat = Timer(interval, self.log_info)
         logger.info('Scan manager running: %s. '
                     'Current task: %s. '
                     'Number of scan jobs in queue: %s.',
-                     self.running, self.current_task, len(self.scan_queue))
+                    self.running, self.current_task, len(self.scan_queue))
         if self.running:
             heartbeat.start()
         else:
