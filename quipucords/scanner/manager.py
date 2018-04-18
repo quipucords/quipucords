@@ -62,7 +62,8 @@ class Manager(Thread):
         """Start to excute scans in the queue."""
         if len(self.scan_queue) > 0:  # pylint: disable=C1801
             self.current_task = self.scan_queue.pop()
-            if self.current_task.scan_job.status == ScanTask.PENDING:
+            if self.current_task.scan_job.status in \
+                    [ScanTask.PENDING, ScanTask.RUNNING]:
                 logger.debug('Scan manager running %s.', self.current_task)
                 self.current_task.start()
                 self.current_task.join()
