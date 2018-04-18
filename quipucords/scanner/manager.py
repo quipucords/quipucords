@@ -48,15 +48,15 @@ class Manager(Thread):
         except ValueError:
             interval = 60
         heartbeat = Timer(interval, self.log_info)
-        logger.info('Scan manager running: %s. '
-                    'Current task: %s. '
-                    'Number of scan jobs in queue: %s.',
-                    self.running, self.current_task, len(self.scan_queue))
+        current_scan_job = None
+        if self.current_task:
+            current_scan_job = self.current_task.identifier
+        logger.info('Scan Manager Stats: '
+                    'current_scan_job=%s. '
+                    'queue_length=%s.',
+                    current_scan_job, len(self.scan_queue))
         if self.running:
             heartbeat.start()
-        else:
-            if heartbeat.is_alive():
-                heartbeat.cancel()
 
     def work(self):
         """Start to excute scans in the queue."""
