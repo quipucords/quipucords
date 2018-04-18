@@ -15,12 +15,12 @@ If you have not already setup your Quipucords server refer to the `Installing an
 
 Connection to the Quipucords Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people might hold this responsibility. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that the command line tool instance is configured to connect to the server and that the user name can log in to the command line interface.
+In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people using different machines might hold this responsibility, so multiple instances of the command line tool might be needed. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that the command line tool instance is configured to connect to the server and that the user name can log in to the command line interface.
 
 For more information, see the following sections:
 
-- `Configuring the qpc Command Line Tool Connection <install.html#connection>`_
-- `Logging in to the Quipucords Server <install.html#login>`_.
+- `Configuring the qpc Command Line Tool Connection <cli_server_interaction.html#connection>`_
+- `Logging in to the Quipucords Server <cli_server_interaction.html#login>`_
 
 Creating Credentials and Sources for a Network
 ----------------------------------------------

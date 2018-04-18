@@ -2,7 +2,7 @@ Installing Docker on Red Hat Enterprise Linux 7
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can install Docker from the RHEL extras repository:
 
-- You can set up the the `Extras <https://access.redhat.com/solutions/912213>`_ ( ``rhel-7-server-extras-rpms`` ) and `Optional <https://access.redhat.com/solutions/265523>`_ ( ``rhel-7-server-optional-rpms`` ) repositories and then install Docker from them. This is the recommended approach because it simplifies the installation and upgrade tasks. Visit the Red Hat `documentation <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_atomic_host/7/html-single/getting_started_with_containers/index#getting_docker_in_rhel_7>`_ for further detail.
+- You can set up the the `Extras <https://access.redhat.com/solutions/912213>`_ (``rhel-7-server-extras-rpms``) and `Optional <https://access.redhat.com/solutions/265523>`_ (``rhel-7-server-optional-rpms``) repositories and then install Docker from them. This is the recommended approach because it simplifies the installation and upgrade tasks. For more information about installing Docker with Red Hat Enterprise Linux 7, see `Getting Docker in RHEL 7 <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_atomic_host/7/html-single/getting_started_with_containers/index#getting_docker_in_rhel_7>`_.
 
 Installing from the repository
 """"""""""""""""""""""""""""""
