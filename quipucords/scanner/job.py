@@ -41,6 +41,7 @@ class ScanJobRunner(Process):
 
     def run(self):
         """Trigger thread execution."""
+        # pylint: disable=too-many-locals,too-many-statements
         # Job is not running so start
         self.scan_job.start()
         if self.scan_job.status != ScanTask.RUNNING:
@@ -73,6 +74,7 @@ class ScanJobRunner(Process):
         self.scan_job.log_message(
             'Queuing the following incomplete tasks: %s' % task_info_message)
 
+        failed_tasks = []
         for runner in task_runners:
             # Mark runner as running
             runner.scan_task.start()
@@ -111,9 +113,13 @@ class ScanJobRunner(Process):
 
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully so save job status as fail
-                error_message = 'One of more tasks did not complete.  '\
-                    'See tasks for details.'
-                self.scan_job.fail(error_message)
+                failed_tasks.append(runner.scan_task)
+
+        if bool(failed_tasks):
+            failed_task_ids = ', '.join([str(task.id)
+                                         for task in failed_tasks])
+            error_message = 'The following tasks failed: %s' % failed_task_ids
+            self.scan_job.fail(error_message)
 
         if self.scan_job.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             self._send_facts_to_engine()

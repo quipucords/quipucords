@@ -47,6 +47,15 @@ then
   usage;
 fi
 
+command -v ansible > /dev/null 2>&1
+
+if [ $? -ne 0 ]
+then
+  echo "Installation failed. Ansible prerequisite could not be found."
+  echo "Follow installation documentation for installing Ansible."
+  exit 1
+fi
+
 
 echo ansible-playbook $PLAYBOOKFILE -v -K $*
 ansible-playbook $PLAYBOOKFILE -v -K $*

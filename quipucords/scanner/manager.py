@@ -12,7 +12,8 @@
 """Queue Manager module."""
 
 import logging
-from threading import Thread
+import os
+from threading import Thread, Timer
 from time import sleep
 
 
@@ -39,11 +40,30 @@ class Manager(Thread):
         self.running = True
         logger.debug('Scan manager created.')
 
+    def log_info(self):
+        """Log the status of the scan manager."""
+        try:
+            interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT',
+                                          '60'))
+        except ValueError:
+            interval = 60
+        heartbeat = Timer(interval, self.log_info)
+        current_scan_job = None
+        if self.current_task:
+            current_scan_job = self.current_task.identifier
+        logger.info('Scan Manager Stats: '
+                    'current_scan_job=%s. '
+                    'queue_length=%s.',
+                    current_scan_job, len(self.scan_queue))
+        if self.running:
+            heartbeat.start()
+
     def work(self):
         """Start to excute scans in the queue."""
         if len(self.scan_queue) > 0:  # pylint: disable=C1801
             self.current_task = self.scan_queue.pop()
-            if self.current_task.scan_job.status == ScanTask.PENDING:
+            if self.current_task.scan_job.status in \
+                    [ScanTask.PENDING, ScanTask.RUNNING]:
                 logger.debug('Scan manager running %s.', self.current_task)
                 self.current_task.start()
                 self.current_task.join()
@@ -126,6 +146,7 @@ class Manager(Thread):
         """Trigger thread execution."""
         self.restart_incomplete_scansjobs()
         logger.debug('Scan manager started.')
+        self.log_info()
         while self.running:
             queue_len = len(self.scan_queue)
             if queue_len > 0 and self.current_task is None:

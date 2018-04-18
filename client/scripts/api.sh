@@ -76,8 +76,6 @@ devApi()
 
   docker stop -t 0 $NAME >/dev/null
 
-  PORT="$(checkSetPort $PORT)"
-
   if [ -z "$(docker images | grep ^$CONTAINER' ')" ] || [ "$UPDATE" = true ]; then
     echo "Setting up development Docker API container"
     docker pull $CONTAINER
