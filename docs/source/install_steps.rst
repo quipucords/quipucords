@@ -1,6 +1,6 @@
-Step by Step Installation
+Step-by-Step Installation
 -------------------------
-Installation of the command line and server components can be performed by following instructions.
+You can install the command line and server components by using the following instructions.
 
 .. include:: install_cli.rst
 

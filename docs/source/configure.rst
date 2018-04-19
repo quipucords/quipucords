@@ -54,6 +54,8 @@ To view the status of the server after it is running, enter the following comman
 
   # sudo docker ps
 
+.. _change-default-pw:
+
 Changing the Default Password for the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Quipucords server has a default administrator user with a default user name of ``admin`` and a default password of ``pass``. To ensure the security of your Quipucords server, it is recommended that you change the default password to a different password.
@@ -71,6 +73,9 @@ To change the default password for the Quipucords server, use the following step
 
 **TIP:** You can also enter the local or remote URL (as applicable) for the Quipucords server in a browser window to verify that the Quipucords server is responding.
 
-.. include:: cli_configure.rst
+Next Steps
+~~~~~~~~~~
+The Quipucords server is now installed and started. However, you must still complete the following steps before you can begin using Quipucords:
 
-.. include:: cli_login.rst
+- `Configuring the qpc Command Line Tool Connection <cli_server_interaction.html#connection>`_
+- `Logging in to the Quipucords Server <cli_server_interaction.html#login>`_
