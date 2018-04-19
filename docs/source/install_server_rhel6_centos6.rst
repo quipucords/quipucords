@@ -1,6 +1,6 @@
 Installing Docker on Red Hat Enterprise Linux and CentOS 6.6 or later
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To install Docker on Red Hat Enterprise Linux/CentOS 6.6 or later, you must have kernel 2.6.32-431 or later installed.
+To install Docker on Red Hat Enterprise Linux or CentOS 6.6 or later, you must have kernel 2.6.32-431 or later installed.
 
 To check the current kernel release, open a terminal session and use the ``uname`` command to display the kernel release information, as shown in the following example::
 
@@ -32,7 +32,7 @@ Starting Docker on Red Hat Enterprise Linux and CentOS 6.6 or later
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 After you install Docker, you must start it and verify that it is running.
 
-1. Start the Docker daemon::
+1. Start the Docker daemon::for further detail
 
     # sudo service docker start
 
@@ -59,4 +59,4 @@ This command displays output similar to the following truncated example. The fir
 
     # sudo chkconfig docker on
 
-After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6+ or CentOS 6.6+, you can continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
+After you complete the steps to install Docker for Red Hat Enterprise Linux 6.6 or later or CentOS 6.6 or later, you can continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image <install.html#container>`_.
