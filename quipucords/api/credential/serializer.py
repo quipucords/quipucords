@@ -160,14 +160,15 @@ class CredentialSerializer(NotEmptySerializer):
     def validate_vcenter_cred(self, attrs):
         """Validate the attributes for vcenter creds."""
         # Required fields for vcenter
-        username = 'username' in attrs and attrs['username']
-        password = 'password' in attrs and attrs['password']
+        if not self.partial:
+            username = 'username' in attrs and attrs['username']
+            password = 'password' in attrs and attrs['password']
 
-        if not (password and username):
-            error = {
-                'non_field_errors': [_(messages.VC_PWD_AND_USERNAME)]
-            }
-            raise ValidationError(error)
+            if not (password and username):
+                error = {
+                    'non_field_errors': [_(messages.VC_PWD_AND_USERNAME)]
+                }
+                raise ValidationError(error)
 
         # Not allowed fields for vcenter
         ssh_keyfile = 'ssh_keyfile' in attrs and attrs['ssh_keyfile']
