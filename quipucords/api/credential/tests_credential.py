@@ -41,6 +41,19 @@ class CredentialTest(TestCase):
                                          username=username,
                                          password=password)
 
+    def update_credential(self, name=None,
+                          username=None, password=None):
+        """Update a Credential object.
+
+        :param name: name of the host credential
+        :param username: the user used during the discovery and inspection
+        :param password: the connection password
+        :returns: A Credential model
+        """
+        return Credential.objects.update(name=name,
+                                         username=username,
+                                         password=password)
+
     def create(self, data):
         """Call the create endpoint."""
         url = reverse('cred-list')
@@ -421,6 +434,18 @@ class CredentialTest(TestCase):
                                     'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
+
+    def test_vcentercred_update(self):
+        """Ensure we can create and update a vcenter credential."""
+        data = {'name': 'cred1',
+                'cred_type': Credential.VCENTER_CRED_TYPE,
+                'username': 'user1',
+                'password': 'pass1'}
+        self.create_expect_201(data)
+        self.assertEqual(Credential.objects.count(), 1)
+        self.assertEqual(Credential.objects.get().name, 'cred1')
+        self.update_credential(name='cred1', username='root')
+        self.assertEqual(Credential.objects.get().username, 'root')
 
     def test_hostcred_default_become_method(self):
         """Ensure we can set the default become_method via API."""
