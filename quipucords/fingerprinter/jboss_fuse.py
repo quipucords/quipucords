@@ -13,7 +13,7 @@
 
 import logging
 
-from api.models import Product, Source
+from api.models import Product
 
 from fingerprinter.utils import (generate_raw_fact_members,
                                  product_entitlement_found)
@@ -102,15 +102,8 @@ def detect_jboss_fuse(source, facts):
     cxf_list = fuse_cxf + eap_cxf + ext_fuse_cxf
     fuse_versions = []
 
-    source_object = Source.objects.filter(id=source.get('source_id')).first()
-    if source_object:
-        source_name = source_object.name
-    else:
-        source_name = None
-
     metadata = {
-        'source_id': source['source_id'],
-        'source_name': source_name,
+        'source_name': source['source_name'],
         'source_type': source['source_type'],
     }
     product_dict = {'name': PRODUCT}

@@ -14,7 +14,7 @@
 import bisect
 import logging
 
-from api.models import Product, Source
+from api.models import Product
 
 from fingerprinter.utils import product_entitlement_found
 
@@ -353,15 +353,8 @@ def detect_jboss_eap(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    source_object = Source.objects.filter(id=source.get('source_id')).first()
-    if source_object:
-        source_name = source_object.name
-    else:
-        source_name = None
-
     metadata = {
-        'source_id': source['source_id'],
-        'source_name': source_name,
+        'source_name': source['source_name'],
         'source_type': source['source_type'],
     }
     product_dict = {'name': PRODUCT}

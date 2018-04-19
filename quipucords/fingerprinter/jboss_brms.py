@@ -14,7 +14,7 @@
 import itertools
 import logging
 
-from api.models import Product, Source
+from api.models import Product
 
 from fingerprinter.utils import (generate_raw_fact_members,
                                  product_entitlement_found)
@@ -98,15 +98,8 @@ def detect_jboss_brms(source, facts):
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     entitlements = facts.get(ENTITLEMENTS, [])
 
-    source_object = Source.objects.filter(id=source.get('source_id')).first()
-    if source_object:
-        source_name = source_object.name
-    else:
-        source_name = None
-
     metadata = {
-        'source_id': source['source_id'],
-        'source_name': source_name,
+        'source_name': source['source_name'],
         'source_type': source['source_type'],
     }
     product_dict = {'name': PRODUCT}

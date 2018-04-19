@@ -88,7 +88,7 @@ class FactCollectionTest(TestCase):
     def test_greenpath_create(self):
         """Create fact collection object via API."""
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
@@ -117,54 +117,45 @@ class FactCollectionTest(TestCase):
             response_json['sources'],
             messages.FC_REQUIRED_ATTRIBUTE)
 
-    def test_source_missing_id(self):
-        """Test source is missing source_id."""
+    def test_source_missing_name(self):
+        """Test source is missing source_name."""
         request_json = {'sources': [{'foo': 'abc'}]}
         response_json = self.create_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
         self.assertEqual(
-            response_json['invalid_sources'][0]['errors']['source_id'],
+            response_json['invalid_sources'][0]['errors']['source_name'],
             messages.FC_REQUIRED_ATTRIBUTE)
 
-    def test_source_empty_id(self):
-        """Test source has empty source_id."""
-        request_json = {'sources': [{'source_id': ''}]}
+    def test_source_empty_name(self):
+        """Test source has empty source_name."""
+        request_json = {'sources': [{'source_name': ''}]}
         response_json = self.create_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
         self.assertEqual(
-            response_json['invalid_sources'][0]['errors']['source_id'],
+            response_json['invalid_sources'][0]['errors']['source_name'],
             messages.FC_REQUIRED_ATTRIBUTE)
 
-    def test_source_id_not_int(self):
-        """Test source has source_id not int."""
-        request_json = {'sources': [{'source_id': 'abc'}]}
+    def test_source_name_not_string(self):
+        """Test source has source_name that is not a string."""
+        request_json = {'sources': [{'source_name': 100,
+                                     'source_type':
+                                         self.net_source.source_type}]}
         response_json = self.create_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
         self.assertEqual(
-            response_json['invalid_sources'][0]['errors']['source_id'],
-            messages.FC_SOURCE_ID_NOT_INT)
-
-    def test_source_id_not_exist(self):
-        """Test source_id is not back by model object."""
-        request_json = {'sources': [{'source_id': 42}]}
-        response_json = self.create_expect_400(
-            request_json)
-        self.assertEqual(len(response_json['valid_sources']), 0)
-        self.assertEqual(len(response_json['invalid_sources']), 1)
-        self.assertEqual(
-            response_json['invalid_sources'][0]['errors']['source_id'],
-            messages.FC_SOURCE_NOT_FOUND % 42)
+            response_json['invalid_sources'][0]['errors']['source_name'],
+            messages.FC_SOURCE_NAME_NOT_STR)
 
     def test_missing_source_type(self):
         """Test source_type is missing."""
         request_json = {'sources': [
-            {'source_id': self.net_source.id}]}
+            {'source_name': self.net_source.name}]}
         response_json = self.create_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
@@ -189,7 +180,7 @@ class FactCollectionTest(TestCase):
     def test_invalid_source_type(self):
         """Test source_type has invalid_value."""
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'source_name': self.net_source.name,
                           'source_type': 'abc'}]}
         response_json = self.create_expect_400(
             request_json)
@@ -206,7 +197,7 @@ class FactCollectionTest(TestCase):
     def test_source_missing_facts(self):
         """Test source missing facts attr."""
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type}]}
         response_json = self.create_expect_400(
             request_json)
@@ -219,7 +210,7 @@ class FactCollectionTest(TestCase):
     def test_source_empty_facts(self):
         """Test source has empty facts list."""
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': []}]}
         response_json = self.create_expect_400(

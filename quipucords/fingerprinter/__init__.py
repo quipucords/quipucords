@@ -229,12 +229,10 @@ def _post_process_merged_fingerprints(fingerprints):
     """
     for fingerprint in fingerprints:
         expanded_sources = []
-        for source_id in fingerprint[SOURCES_KEY]:
-            source_object = Source.objects.filter(id=source_id).first()
+        for source in fingerprint['sources_info']:
             expanded_source = {
-                'id': source_object.id,
-                'source_type': source_object.source_type,
-                'name': source_object.name
+                'source_type': source.get('source_type'),
+                'source_name': source.get('name')
             }
             expanded_sources.append(expanded_source)
         fingerprint[SOURCES_KEY] = expanded_sources
@@ -275,16 +273,14 @@ def _process_source(report_id, source):
 
     :param report_id: id of report
     associated with facts
-    :param source_id: id of source associated with facts
-    :param source_type: the type of source (network, vcenter, etc)
-    :param facts: facts to process
+    :param source: The JSON source information
     :returns: fingerprints produced from facts
     """
     fingerprints = []
     for fact in source['facts']:
         fingerprint = None
-        source_id = source['source_id']
-        source_type = source['source_type']
+        source_type = source.get('source_type')
+        source_name = source.get('source_name')
         if source_type == Source.NETWORK_SOURCE_TYPE:
             fingerprint = _process_network_fact(source, fact)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
@@ -297,7 +293,11 @@ def _process_source(report_id, source):
 
         if fingerprint is not None:
             fingerprint['report_id'] = report_id
-            fingerprint[SOURCES_KEY] = [source_id]
+            fingerprint[SOURCES_KEY] = \
+                {source_name: {'source_type': source_type,
+                               'name': source_name}}
+            fingerprint['sources_info'] = [{'source_type': source_type,
+                                            'name': source_name}]
             fingerprints.append(fingerprint)
 
     return fingerprints
@@ -589,11 +589,6 @@ def add_fact_to_fingerprint(source,
     raw facts instead of direct access.
     """
     # pylint: disable=too-many-arguments
-    source_object = Source.objects.filter(id=source.get('source_id')).first()
-    if source_object:
-        source_name = source_object.name
-    else:
-        source_name = None
     actual_fact_value = None
     if fact_value is not None:
         actual_fact_value = fact_value
@@ -603,8 +598,7 @@ def add_fact_to_fingerprint(source,
     if actual_fact_value is not None:
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
-            'source_id': source['source_id'],
-            'source_name': source_name,
+            'source_name': source['source_name'],
             'source_type': source['source_type'],
             'raw_fact_key': raw_fact_key
         }
@@ -639,11 +633,6 @@ def add_entitlements_to_fingerprint(source,
     this fact.
     """
     # pylint: disable=too-many-arguments
-    source_object = Source.objects.filter(id=source.get('source_id')).first()
-    if source_object:
-        source_name = source_object.name
-    else:
-        source_name = None
     actual_fact_value = None
     if raw_fact.get(raw_fact_key) is not None:
         actual_fact_value = raw_fact.get(raw_fact_key)
@@ -660,8 +649,7 @@ def add_entitlements_to_fingerprint(source,
                 add = True
             if add:
                 f_ent[META_DATA_KEY] = {
-                    'source_id': source['source_id'],
-                    'source_name': source_name,
+                    'source_name': source['source_name'],
                     'source_type': source['source_type'],
                     'raw_fact_key': raw_fact_key
                 }

@@ -30,8 +30,8 @@ VALID_SOURCES_KEY = 'valid_sources'
 # JSON attribute constants
 SOURCES_KEY = 'sources'
 SOURCE_KEY = 'source'
-SOURCE_ID_KEY = 'source_id'
 SOURCE_TYPE_KEY = 'source_type'
+SOURCE_NAME_KEY = 'source_name'
 FACTS_KEY = 'facts'
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -51,7 +51,7 @@ def build_sources_from_tasks(tasks):
         if task_facts:
             source = inspect_task.source
             if source is not None:
-                source_dict = {'source_id': source.id,
+                source_dict = {'source_name': source.name,
                                'source_type': source.source_type,
                                'facts': task_facts}
                 sources.append(source_dict)
@@ -101,30 +101,25 @@ def _validate_source_json(source_json):
     dict with error result or None.
     """
     invalid_field_obj = {}
-    source_id = source_json.get(SOURCE_ID_KEY)
     has_error = False
-    if not source_id:
-        has_error = True
-        invalid_field_obj[SOURCE_ID_KEY] = _(
-            messages.FC_REQUIRED_ATTRIBUTE)
-
-    if not has_error and not isinstance(source_id, int):
-        has_error = True
-        invalid_field_obj[SOURCE_ID_KEY] = _(
-            messages.FC_SOURCE_ID_NOT_INT)
-
-    if not has_error:
-        source = Source.objects.filter(pk=source_id).first()
-        if not source:
-            has_error = True
-            invalid_field_obj[SOURCE_ID_KEY] = _(
-                messages.FC_SOURCE_NOT_FOUND % source_id)
 
     source_type = source_json.get(SOURCE_TYPE_KEY)
+    source_name = source_json.get(SOURCE_NAME_KEY)
+
+    if not source_name:
+        has_error = True
+        invalid_field_obj[SOURCE_NAME_KEY] = _(
+            messages.FC_REQUIRED_ATTRIBUTE)
+
     if not source_type:
         has_error = True
         invalid_field_obj[SOURCE_TYPE_KEY] = _(
             messages.FC_REQUIRED_ATTRIBUTE)
+
+    if not has_error and not isinstance(source_name, str):
+        has_error = True
+        invalid_field_obj[SOURCE_NAME_KEY] = _(
+            messages.FC_SOURCE_NAME_NOT_STR)
 
     if not has_error and not \
             [valid_type for valid_type in Source.SOURCE_TYPE_CHOICES
