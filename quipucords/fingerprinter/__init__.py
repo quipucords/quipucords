@@ -228,14 +228,10 @@ def _post_process_merged_fingerprints(fingerprints):
     associated with facts.
     """
     for fingerprint in fingerprints:
-        expanded_sources = []
-        for source in fingerprint['sources_info']:
-            expanded_source = {
-                'source_type': source.get('source_type'),
-                'source_name': source.get('name')
-            }
-            expanded_sources.append(expanded_source)
-        fingerprint[SOURCES_KEY] = expanded_sources
+        sources = []
+        for source in fingerprint[SOURCES_KEY]:
+            sources.append(fingerprint[SOURCES_KEY][source])
+        fingerprint[SOURCES_KEY] = sources
         _compute_system_creation_time(fingerprint)
 
 
@@ -295,9 +291,7 @@ def _process_source(report_id, source):
             fingerprint['report_id'] = report_id
             fingerprint[SOURCES_KEY] = \
                 {source_name: {'source_type': source_type,
-                               'name': source_name}}
-            fingerprint['sources_info'] = [{'source_type': source_type,
-                                            'name': source_name}]
+                               'source_name': source_name}}
             fingerprints.append(fingerprint)
 
     return fingerprints
@@ -498,7 +492,7 @@ def _create_index_for_fingerprints(id_key,
     return result_by_key, key_not_found_list
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-locals
 def _merge_fingerprint(priority_fingerprint,
                        to_merge_fingerprint,
                        reverse_priority_keys=None):
@@ -537,9 +531,12 @@ def _merge_fingerprint(priority_fingerprint,
             priority_fingerprint[fact_key] = to_merge_fact
 
     # merge sources
-    merged_sources = set(priority_fingerprint[SOURCES_KEY]) | \
-        set(to_merge_fingerprint[SOURCES_KEY])
-    priority_fingerprint[SOURCES_KEY] = list(merged_sources)
+    priority_sources = priority_fingerprint[SOURCES_KEY]
+    to_merge_sources = to_merge_fingerprint[SOURCES_KEY]
+
+    for source in to_merge_sources:
+        if source not in priority_sources.keys():
+            priority_sources[source] = to_merge_sources[source]
 
     if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
         if ENTITLEMENTS_KEY not in priority_fingerprint:

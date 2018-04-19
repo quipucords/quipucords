@@ -527,7 +527,8 @@ class EngineTest(TestCase):
             }
 
         }
-        nsources = [1]
+        nsources = {'source1': {'source_name': 'source1',
+                                'source_type': Source.NETWORK_SOURCE_TYPE}}
         nfingerprint_to_merge = {
             'id': 1, 'os_release': 'RHEL 7', 'bios_uuid': 'match',
             'metadata': nmetadata, 'sources': nsources}
@@ -556,7 +557,8 @@ class EngineTest(TestCase):
             }
 
         }
-        vsources = [2]
+        vsources = {'source1': {'source_name': 'source1',
+                                'source_type': Source.VCENTER_SOURCE_TYPE}}
         vfingerprint_to_merge = {
             'id': 5, 'os_release': 'Windows 7', 'vm_uuid': 'match',
             'metadata': vmetadata, 'sources': vsources}
@@ -574,6 +576,9 @@ class EngineTest(TestCase):
 
         _, merge_list, no_match_found_list = _merge_matching_fingerprints(
             'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
+        merged_sources = {'source1': {'source_name': 'source1',
+                                      'source_type':
+                                          Source.NETWORK_SOURCE_TYPE}}
 
         # merge list should always contain all nfingerprints (base_list)
         self.assertEqual(len(merge_list), 3)
@@ -586,8 +591,8 @@ class EngineTest(TestCase):
 
         # assert network os_release had priority
         self.assertEqual(nfingerprint_to_merge.get('os_release'), 'RHEL 7')
-        self.assertListEqual(nfingerprint_to_merge.get(
-            'sources'), nsources + vsources)
+        self.assertEqual(nfingerprint_to_merge.get(
+            'sources'), merged_sources)
 
         # assert those that didn't match, don't have VM properties
         self.assertIsNone(nfingerprint_no_match.get('vm_uuid'))
