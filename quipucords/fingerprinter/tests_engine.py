@@ -48,7 +48,7 @@ class EngineTest(TestCase):
     def _create_network_fc_json(
             self,
             report_id=1,
-            source_id=1,
+            source_name='source1',
             source_type=Source.NETWORK_SOURCE_TYPE,
             cpu_count=1,
             etc_release_name='RHEL',
@@ -80,8 +80,8 @@ class EngineTest(TestCase):
         """Create an in memory FactCollection for tests."""
         # pylint: disable=too-many-statements
         fact = {}
-        if source_id:
-            fact['source_id'] = source_id
+        if source_name:
+            fact['source_name'] = source_name
         if source_type:
             fact['source_type'] = source_type
         if cpu_count:
@@ -154,7 +154,7 @@ class EngineTest(TestCase):
     def _create_vcenter_fc_json(
             self,
             report_id=1,
-            source_id=2,
+            source_name='source2',
             source_type=Source.VCENTER_SOURCE_TYPE,
             vm_cpu_count=2,
             vm_os='RHEL 7.3',
@@ -172,8 +172,8 @@ class EngineTest(TestCase):
             is_redhat=True):
         """Create an in memory FactCollection for tests."""
         fact = {}
-        if source_id:
-            fact['source_id'] = source_id
+        if source_name:
+            fact['source_name'] = source_name
         if source_type:
             fact['source_type'] = source_type
         if vm_cpu_count:
@@ -218,7 +218,7 @@ class EngineTest(TestCase):
     def _create_satellite_fc_json(
             self,
             report_id=1,
-            source_id=3,
+            source_name='source3',
             source_type=Source.SATELLITE_SOURCE_TYPE,
             hostname='9.8.7.6',
             os_name='RHEL',
@@ -238,8 +238,8 @@ class EngineTest(TestCase):
             is_redhat=True):
         """Create an in memory FactCollection for tests."""
         fact = {}
-        if source_id:
-            fact['source_id'] = source_id
+        if source_name:
+            fact['source_name'] = source_name
         if source_type:
             fact['source_type'] = source_type
         if hostname:
@@ -404,7 +404,7 @@ class EngineTest(TestCase):
         """Create test network fingerprint."""
         n_fact_collection = self._create_network_fc_json(*args, **kwargs)
         nfact = n_fact_collection['facts'][0]
-        source = {'source_id': 1,
+        source = {'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': n_fact_collection['facts']}
         nfingerprints = _process_source(n_fact_collection['id'],
@@ -418,7 +418,7 @@ class EngineTest(TestCase):
         """Create test network/vcenter fingerprints."""
         v_fact_collection = self._create_vcenter_fc_json(*args, **kwargs)
         vfact = v_fact_collection['facts'][0]
-        source = {'source_id': 2,
+        source = {'source_name': 'source2',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
         vfingerprints = _process_source(v_fact_collection['id'],
@@ -431,7 +431,7 @@ class EngineTest(TestCase):
         """Create test network/vcenter fingerprints."""
         s_fact_collection = self._create_satellite_fc_json(*args, **kwargs)
         vfact = s_fact_collection['facts'][0]
-        source = {'source_id': 2,
+        source = {'source_name': 'source3',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': s_fact_collection['facts']}
         sfingerprints = _process_source(s_fact_collection['id'],
@@ -447,7 +447,7 @@ class EngineTest(TestCase):
         """Test process network source."""
         fact_collection = self._create_network_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_id': 1,
+        source = {'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -459,7 +459,7 @@ class EngineTest(TestCase):
         """Test process vcenter source."""
         fact_collection = self._create_vcenter_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_id': 1,
+        source = {'source_name': 'source1',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -471,7 +471,7 @@ class EngineTest(TestCase):
         """Test process satellite source."""
         fact_collection = self._create_satellite_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_id': 1,
+        source = {'source_name': 'source1',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -516,18 +516,19 @@ class EngineTest(TestCase):
         """Test merge of two lists of fingerprints."""
         nmetadata = {
             'os_release': {
-                'source_id': 1,
+                'source_name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'raw_fact_key': 'etc_release_release'
             },
             'bios_uuid': {
-                'source_id': 1,
+                'source_name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'raw_fact_key': 'dmi_system_uuid'
             }
 
         }
-        nsources = [1]
+        nsources = {'source1': {'source_name': 'source1',
+                                'source_type': Source.NETWORK_SOURCE_TYPE}}
         nfingerprint_to_merge = {
             'id': 1, 'os_release': 'RHEL 7', 'bios_uuid': 'match',
             'metadata': nmetadata, 'sources': nsources}
@@ -545,18 +546,19 @@ class EngineTest(TestCase):
 
         vmetadata = {
             'os_release': {
-                'source_id': 1,
+                'source_name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'raw_fact_key': 'etc_release_release'
             },
             'vm_uuid': {
-                'source_id': 1,
+                'source_name': 'source1',
                 'source_type': Source.NETWORK_SOURCE_TYPE,
                 'raw_fact_key': 'vm.uuid'
             }
 
         }
-        vsources = [2]
+        vsources = {'source1': {'source_name': 'source1',
+                                'source_type': Source.VCENTER_SOURCE_TYPE}}
         vfingerprint_to_merge = {
             'id': 5, 'os_release': 'Windows 7', 'vm_uuid': 'match',
             'metadata': vmetadata, 'sources': vsources}
@@ -574,6 +576,9 @@ class EngineTest(TestCase):
 
         _, merge_list, no_match_found_list = _merge_matching_fingerprints(
             'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
+        merged_sources = {'source1': {'source_name': 'source1',
+                                      'source_type':
+                                          Source.NETWORK_SOURCE_TYPE}}
 
         # merge list should always contain all nfingerprints (base_list)
         self.assertEqual(len(merge_list), 3)
@@ -586,8 +591,8 @@ class EngineTest(TestCase):
 
         # assert network os_release had priority
         self.assertEqual(nfingerprint_to_merge.get('os_release'), 'RHEL 7')
-        self.assertListEqual(nfingerprint_to_merge.get(
-            'sources'), nsources + vsources)
+        self.assertEqual(nfingerprint_to_merge.get(
+            'sources'), merged_sources)
 
         # assert those that didn't match, don't have VM properties
         self.assertIsNone(nfingerprint_no_match.get('vm_uuid'))
@@ -725,7 +730,7 @@ class EngineTest(TestCase):
             source_type='network',
             port=22)
         source.save()
-        sourcetopass = {'source_id': 1, 'source_type': 'network'}
+        sourcetopass = {'source_name': 'source1', 'source_type': 'network'}
         fingerprint = {'metadata': {}}
         result = _process_network_fact(sourcetopass, fingerprint)
         self.assertEqual(

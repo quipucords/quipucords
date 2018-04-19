@@ -1662,10 +1662,10 @@ class ScanJobTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
         expected = {'id': 1, 'sources':
-                    [{'source_id': 1,
+                    [{'source_name': 'source1',
                       'source_type': 'network',
                       'facts': [{'fact_key': 'fact_value'}]},
-                     {'source_id': 1,
+                     {'source_name': 'source1',
                       'source_type': 'network',
                       'facts': [{'fact_key': 'fact_value'}]}],
                     'status': 'complete'}

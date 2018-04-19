@@ -78,7 +78,7 @@ class DetailReportTest(TestCase):
     def test_details(self):
         """Get details for a report via API."""
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
@@ -106,6 +106,7 @@ class DetailReportTest(TestCase):
 
         request_json = {'sources':
                         [{'source_id': self.net_source.id,
+                          'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
@@ -113,9 +114,9 @@ class DetailReportTest(TestCase):
             request_json)
         test_json = copy.deepcopy(response_json)
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
-            '\r\nvalue\r\n\r\n\r\n'
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n' \
+                   'Source\r\nname,type\r\ntest_source,network' \
+                   '\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n'
         self.assertEqual(csv_result, expected)
 
         # Test cached works too
@@ -123,7 +124,7 @@ class DetailReportTest(TestCase):
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
         expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\nkey'\
+            'Source\r\nname,type\r\ntest_source,network\r\nFacts\r\nkey'\
             '\r\nvalue\r\n\r\n\r\n'
         # These would be different if not cached
         self.assertEqual(csv_result, expected)
@@ -162,7 +163,7 @@ class DetailReportTest(TestCase):
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
         expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nid,name,type\r\n1,test_source,network\r\nFacts\r\n'\
+            'Source\r\nname,type\r\ntest_source,network\r\nFacts\r\n'\
             '\r\n'
         self.assertEqual(csv_result, expected)
 
@@ -209,7 +210,7 @@ class DeploymentReportTest(TestCase):
                               os_versions=None):
         """Create a FactCollection for test."""
         facts = []
-        fc_json = {'sources': [{'source_id': self.net_source.id,
+        fc_json = {'sources': [{'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
 
@@ -313,7 +314,7 @@ class DeploymentReportTest(TestCase):
 
         # Create a system fingerprint via collection receiver
         facts = []
-        fc_json = {'sources': [{'source_id': self.net_source.id,
+        fc_json = {'sources': [{'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
 
@@ -403,7 +404,7 @@ class DeploymentReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,vmware,,,,,,,\r\n\r\n'  # noqa
+        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[None],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[None],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[None],,2017-07-18,,vmware,,,,,,,\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
 
     def test_csv_renderer_only_name(self):

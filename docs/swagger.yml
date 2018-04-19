@@ -1215,14 +1215,14 @@ definitions:
   FactCollectionSource:
     type: "object"
     required:
-      - source_id
+      - source_name
       - source_type
       - facts
     properties:
-      source_id:
-        type: "integer"
-        description: "The source id associated with these facts"
-        example: 12
+      source_name:
+        type: "string"
+        description: "The source name associated with these facts"
+        example: "source1"
       source_type:
         type: "string"
         description: "The source type associated with these facts"

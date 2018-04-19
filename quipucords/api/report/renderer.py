@@ -77,13 +77,10 @@ class FactCollectionCSVRenderer(renderers.BaseRenderer):
         csv_writer.writerow([])
 
         for source in sources:
-            source_object = Source.objects.get(pk=source.get('source_id'))
-            source_name = source_object.name
             csv_writer.writerow(['Source'])
-            csv_writer.writerow(['id', 'name', 'type'])
+            csv_writer.writerow(['name', 'type'])
             csv_writer.writerow([
-                source.get('source_id'),
-                source_name,
+                source.get('source_name'),
                 source.get('source_type')])
             csv_writer.writerow(['Facts'])
             fact_list = source.get('facts')
