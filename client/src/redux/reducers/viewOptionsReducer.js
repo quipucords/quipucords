@@ -136,9 +136,10 @@ const viewOptionsReducer = function(state = initialState, action) {
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
         sortType: action.sortType,
         sortField: action.sortType.id,
-        sortAscending: true,
+        sortAscending: _.get(action, 'sortType.sortAscending', true),
         currentPage: 1
       });
+
       return Object.assign({}, state, updateState);
 
     case viewToolbarTypes.TOGGLE_SORT_ASCENDING:
