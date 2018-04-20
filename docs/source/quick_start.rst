@@ -2,13 +2,13 @@ Quick Start: A Network Scan Example
 ===================================
 This Quick Start information describes how you use the qpc command line interface to complete a simple Quipucords task of scanning a network and viewing a report. Use this information to become more familiar with Quipucords terminology, commands, and processes.
 
-The complete list of options for each qpc command and subcommand are listed in the `qpc man page <man.html>`_.
+For more information about how to work with Quipucords, see `Using Quipucords <using_qpc.html>`_. For the complete list of options for each qpc command and subcommand, see the `qpc man page <man.html>`_.
 
 How a Quipucords Scan Works
 ---------------------------
 You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements <requirements.html>`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
 
-You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the collection of *facts* in the output as a *report* to review the results.
+You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. A scan can be run multiple times, and each instance is saved as a *scan job*. When you have completed a scan, you can access the collection of *facts* in the scan job output as a *report* to review the results.
 
 Before You Begin: Checking the Setup and Connection for the Quipucords Server
 -----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ For example, if you want to run the scan ``myscan``, you would enter the followi
   # qpc scan start --name myscan
 
 
-When you run the ``scan start`` command, the output provides an identifier for that scan job. You can show the scan job results to follow the status of the scan job. For more information, see  `Working with Scan Jobs <working_with_scan_jobs.html>`_.
+When you run the ``scan start`` command, the output provides an identifier for that instance of the scan, or scan job. You can show the scan job results to follow the status of the scan job. For more information, see  `Working with Scan Jobs <working_with_scan_jobs.html>`_.
 
 Viewing the Scan Report
 -----------------------

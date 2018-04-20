@@ -1,5 +1,5 @@
 Working with Credentials and Sources
-====================================
+------------------------------------
 The type of source that you are going to inspect determines the type of data that is required for credential and source configuration. Quipucords currently supports the following source types in the source creation command:
 
 - network
@@ -107,9 +107,9 @@ To create a satellite source, use the following steps:
 
 Editing, Listing, and Clearing Credentials
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Beyond creating credentials for use with sources you can perform several other operations. You can edit a credential for cases where passwords or passphrases need to be updated. You can list and filter credentials. Credentials that are no longer needed can be removed. These interactions are described in the `Credentials section <man.html#credentials>`_ of the Command Line Usage.
+In addition to creating credentials for use with sources, you can perform several other operations on credentials. You can edit a credential for situations where passwords or passphrases need to be updated. You can list and filter credentials, and you can remove credentials that are no longer needed. These operations are described in the `Credentials section <man.html#credentials>`_ of the Command Line Usage.
 
 
 Editing, Listing, and Clearing Sources
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Beyond creating sources for use with scans you can perform several other operations. You can edit a source for cases credentials need to be updated or options changed. You can list and filter sources. Sources that are no longer needed you can they can be removed. These interactions are described in the `Sources section <man.html#sources>`_ of the Command Line Usage.
+In addition to creating sources for use with scans, you can perform several other operations on sources. You can edit a source for situations where credentials need to be updated or options need to be changed. You can list and filter sources, and you can remove sources that are no longer needed. These operations are described in the `Sources section <man.html#sources>`_ of the Command Line Usage.
