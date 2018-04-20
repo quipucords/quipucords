@@ -32,7 +32,7 @@ Starting Docker on Red Hat Enterprise Linux and CentOS 6.6 or later
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 After you install Docker, you must start it and verify that it is running.
 
-1. Start the Docker daemon::for further detail
+1. Start the Docker daemon::
 
     # sudo service docker start
 
