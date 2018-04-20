@@ -2,7 +2,7 @@
 
 Logging in to the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run qpc commands.
+After the connection between the qpc command line tool and the Quipucords server is configured on the system where you want to use the command line interface, you can log into the server and begin using the command line interface to run the qpc commands that set up and run scans.
 
 1. To log in to the server, enter the following command::
 

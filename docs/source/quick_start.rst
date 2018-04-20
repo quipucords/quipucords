@@ -1,20 +1,24 @@
-Quick Start
-===========
-You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. The following information describes how you use the qpc command line interface to complete a simple Quipucords task of scanning a network and viewing a report. The complete list of options for each qpc command and subcommand are listed in the `qpc man page <man.html>`_.
+Quick Start: A Network Scan Example
+===================================
+This Quick Start information describes how you use the qpc command line interface to complete a simple Quipucords task of scanning a network and viewing a report. Use this information to become more familiar with Quipucords terminology, commands, and processes.
 
-Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements <requirements.html>`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
+The complete list of options for each qpc command and subcommand are listed in the `qpc man page <man.html>`_.
+
+How a Quipucords Scan Works
+---------------------------
+You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements <requirements.html>`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
 
 You can save multiple credentials and sources to use with Quipucords in various combinations as you run inspection processes, or *scans*. When you have completed a scan, you can access the collection of *facts* in the output as a *report* to review the results.
 
-Before You Begin: Check Setup and Connection to the Quipucords Server
----------------------------------------------------------------------
+Before You Begin: Checking the Setup and Connection for the Quipucords Server
+-----------------------------------------------------------------------------
 
-Setup of the Quipucords Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you have not already setup your Quipucords server refer to the `Installing and Configuring Quipucords <install.html>`_ documentation first.
+Checking the Setup of the Quipucords Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you have not already set up your Quipucords server, see `Installing and Configuring Quipucords <install.html>`_.
 
-Connection to the Quipucords Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Checking the Connection to the Quipucords Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In some organizations, a single person might be responsible for scanning IT resources. However, in others, multiple people using different machines might hold this responsibility, so multiple instances of the command line tool might be needed. Any additional Quipucords users who did not install the Quipucords server and command line tool must ensure that the command line tool instance is configured to connect to the server and that the user name can log in to the command line interface.
 
 For more information, see the following sections:
@@ -27,15 +31,17 @@ Creating Credentials and Sources for a Network
 
 A *network* source is composed of one or more host names, one or more IP addresses, IP ranges, or a combination of these network resources. In addition, the source creation command references one or more credentials. Typically, a network source might include multiple credentials because it is expected that many credentials would be needed to access a broad IP range.
 
-The following scenario provide examples of how you would create a network source and credentials.
+The following scenario provides examples of how you would create a network source and credential.
 
 To create a network source, use the following steps:
 
-1. Create a network credential with root-level access::
+1. Create a network credential with root-level access:
+
+   ::
 
    # qpc cred add --type network --name cred_name --username root_name [--sshkeyfile key_file] [--password]
 
-   If you did not use the ``sshkeyfile`` option to provide an SSH key for the user name value, enter the password of the user with root-level access at the connection password prompt. See the section on `Working with Credentials and Sources <working_with_sources.html>`_ for further details.
+   If you did not use the ``sshkeyfile`` option to provide an SSH key for the user name value, enter the password of the user with root-level access at the connection password prompt. For more information, see `Working with Credentials and Sources <working_with_sources.html>`_.
 
    For example, for a network credential where the credential name is ``sudouser1``, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command::
 
@@ -51,11 +57,11 @@ To create a network source, use the following steps:
 
    # qpc source add --type network --name source_name --hosts host_name_or_file --cred cred_name
 
-   For example, for a network source where the source name is ``mynetwork``, the network to be scanned is the ``192.0.2.0/24`` subnet, and the network credentials that are used to run the scan are ``roothost1`` and ``roothost2``, you would enter the following command::
+   For example, for a network source where the source name is ``mynetwork``, the network to be scanned is the ``192.0.2.0/24`` subnet, and the network credential that is used to run the scan is ``sudouser1``, you would enter the following command::
 
-   # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred roothost1 roothost2
+   # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:254] --cred sudouser1
 
-   See the section on `Working with Credentials and Sources <working_with_sources.html>`_ for further details.
+   For more information about creating credentials and sources, including credentials and sources for Satellite or vCenter Server scans, see `Working with Credentials and Sources <working_with_sources.html>`_.
 
 Creating a Scan
 ---------------
@@ -67,11 +73,11 @@ Create the scan by using the ``scan add`` command, specifying a name for the ``n
 
   # qpc scan add --name scan1 --sources source_name1 source_name2
 
-For example, if you want to create a scan called ``myscan`` with the network source, you would enter the following command::
+For example, if you want to create a scan called ``myscan`` with the network source ``mynetwork``, you would enter the following command::
 
   # qpc scan add --name myscan --sources mynetwork
 
-For more information on viewing, editing or review scans refer to the `Working with Scans <working_with_scans.html>`_ section.
+For more information, see `Working with Scans <working_with_scans.html>`_.
 
 Running a Scan
 --------------
@@ -86,7 +92,7 @@ For example, if you want to run the scan ``myscan``, you would enter the followi
   # qpc scan start --name myscan
 
 
-When you run the ``scan start`` command, the output provides an identifier for that scan job. You can show the scan job results to follow the status of the scan job, see the `Working with Scan Jobs <working_with_scan_jobs.html>`_ section for further details.
+When you run the ``scan start`` command, the output provides an identifier for that scan job. You can show the scan job results to follow the status of the scan job. For more information, see  `Working with Scan Jobs <working_with_scan_jobs.html>`_.
 
 Viewing the Scan Report
 -----------------------
@@ -98,8 +104,8 @@ For example, if you want to create the report summary for a scan with the scan j
 
   # qpc report summary --scan-job 1 --csv --output-file=~/scan_result.csv
 
-However, if you want to create the detailed report, you would use the ``report detail`` command.  This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan job identifier ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command::
+However, if you want to create the detailed report, you would use the ``report detail`` command. This command takes the same options as the ``report summary`` command. The output is not deduplicated and merged, so it contains all facts from each source. For example, to create the detailed report for a scan with the scan job identifier ``1``, with CSV output in the ``~/scan_result.csv`` file, you would enter the following command::
 
   # qpc report detail --scan-job 1 --csv --output-file=~/scan_result.csv
 
-For further details on creating a report from multiple scan job results see the `Working with Reports <working_with_reports.html>`_ section.
+For more information, see `Working with Reports <working_with_reports.html>`_.
