@@ -228,10 +228,7 @@ def _post_process_merged_fingerprints(fingerprints):
     associated with facts.
     """
     for fingerprint in fingerprints:
-        sources = []
-        for source in fingerprint[SOURCES_KEY]:
-            sources.append(fingerprint[SOURCES_KEY][source])
-        fingerprint[SOURCES_KEY] = sources
+        fingerprint[SOURCES_KEY] = list(fingerprint[SOURCES_KEY].values())
         _compute_system_creation_time(fingerprint)
 
 
@@ -275,6 +272,7 @@ def _process_source(report_id, source):
     fingerprints = []
     for fact in source['facts']:
         fingerprint = None
+        server_id = source.get('server_id')
         source_type = source.get('source_type')
         source_name = source.get('source_name')
         if source_type == Source.NETWORK_SOURCE_TYPE:
@@ -290,8 +288,10 @@ def _process_source(report_id, source):
         if fingerprint is not None:
             fingerprint['report_id'] = report_id
             fingerprint[SOURCES_KEY] = \
-                {source_name: {'source_type': source_type,
-                               'source_name': source_name}}
+                {'%s+%s' % (server_id, source_name): {
+                    'server_id': server_id,
+                    'source_type': source_type,
+                    'source_name': source_name}}
             fingerprints.append(fingerprint)
 
     return fingerprints
@@ -322,7 +322,6 @@ def _merge_fingerprints_from_source_types(merge_keys_list,
         return number_merged, merge_list
 
     # start with the base_list fingerprints
-
     result = base_list[:]
     to_merge = merge_list[:]
     for key_tuple in merge_keys_list:
@@ -595,6 +594,7 @@ def add_fact_to_fingerprint(source,
     if actual_fact_value is not None:
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
+            'server_id': source['server_id'],
             'source_name': source['source_name'],
             'source_type': source['source_type'],
             'raw_fact_key': raw_fact_key
@@ -646,6 +646,7 @@ def add_entitlements_to_fingerprint(source,
                 add = True
             if add:
                 f_ent[META_DATA_KEY] = {
+                    'server_id': source['server_id'],
                     'source_name': source['source_name'],
                     'source_type': source['source_type'],
                     'raw_fact_key': raw_fact_key

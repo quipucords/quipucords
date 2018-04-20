@@ -15,8 +15,11 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.models import FactCollection, SystemFingerprint
-from api.report.renderer import FactCollectionCSVRenderer, ReportCSVRenderer
+from api.fact.util import (get_or_create_fact_collection,
+                           validate_fact_collection_json)
+from api.models import (FactCollection,
+                        SystemFingerprint)
+from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 from api.serializers import FactCollectionSerializer, FingerprintSerializer
 
 from django.core.exceptions import FieldError
@@ -24,6 +27,7 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
+from fingerprinter import pfc_signal
 
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
@@ -60,7 +64,7 @@ else:
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   FactCollectionCSVRenderer))
+                   DetailsCSVRenderer))
 def details(request, pk=None):
     """Lookup and return a details system report."""
     if pk is not None:
@@ -83,7 +87,7 @@ def details(request, pk=None):
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   ReportCSVRenderer))
+                   DeploymentCSVRenderer))
 def deployments(request, pk=None):
     """Lookup and return a deployment system report."""
     validate_filters(request.query_params)
@@ -210,3 +214,97 @@ def build_report(report_id, filters):
                 filtered_data[key] = visible_data
             report['report'].append(filtered_data)
     return report
+
+
+@api_view(['PUT'])
+@authentication_classes(auth_classes)
+@permission_classes(perm_classes)
+def merge(request):
+    """Merge reports."""
+    error = {
+        'reports': []
+    }
+    reports = validate_merge_report(request.data)
+    sources = []
+    for report in reports:
+        sources = sources + report.get_sources()
+
+    fact_collection_json = {'sources': sources}
+    has_errors, validation_result = validate_fact_collection_json(
+        fact_collection_json)
+    if has_errors:
+        message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
+        error.get('reports').append(message)
+        raise ValidationError(error)
+
+    # Create FC model and save data
+    fact_collection = get_or_create_fact_collection(fact_collection_json)
+
+    # Send signal so fingerprint engine processes raw facts
+    try:
+        pfc_signal.send(sender=FactCollection.__class__,
+                        instance=fact_collection)
+        # Transition from persisted to complete after processing
+        fact_collection.status = FactCollection.FC_STATUS_COMPLETE
+        fact_collection.save()
+        logger.debug(
+            'Fact collection %d successfully processed.',
+            fact_collection.id)
+    except Exception as error:
+        # Transition from persisted to failed after engine failed
+        fact_collection.status = FactCollection.FC_STATUS_FAILED
+        fact_collection.save()
+        logger.error(
+            'Fact collection %d failed to be processed.',
+            fact_collection.id)
+        logger.error('%s:%s', error.__class__.__name__, error)
+        raise ValidationError(error)
+
+    # Prepare REST response body
+    serializer = FactCollectionSerializer(fact_collection)
+    result = serializer.data
+    return Response(result, status=status.HTTP_201_CREATED)
+
+
+def validate_merge_report(data):
+    """Validate merge reports."""
+    # pylint: disable=no-self-use
+    error = {
+        'reports': []
+    }
+    if not isinstance(data, dict) or \
+            data.get('reports') is None:
+        error.get('reports').append(_(messages.REPORT_MERGE_REQUIRED))
+        raise ValidationError(error)
+    report_ids = data.get('reports')
+    if not isinstance(report_ids, list):
+        error.get('reports').append(_(messages.REPORT_MERGE_NOT_LIST))
+        raise ValidationError(error)
+
+    report_id_count = len(report_ids)
+    if report_id_count < 2:
+        error.get('reports').append(_(messages.REPORT_MERGE_TOO_SHORT))
+        raise ValidationError(error)
+
+    non_integer_values = [
+        report_id for report_id in report_ids if not is_int(report_id)]
+    if bool(non_integer_values):
+        error.get('reports').append(_(messages.REPORT_MERGE_NOT_INT))
+        raise ValidationError(error)
+
+    report_ids = [int(report_id) for report_id in report_ids]
+    unique_id_count = len(set(report_ids))
+    if unique_id_count != report_id_count:
+        error.get('reports').append(_(messages.REPORT_MERGE_NOT_UNIQUE))
+        raise ValidationError(error)
+
+    reports = FactCollection.objects.filter(pk__in=report_ids).order_by('-id')
+    actual_report_ids = [report.id for report in reports]
+    missing_reports = set(report_ids) - set(actual_report_ids)
+    if bool(missing_reports):
+        message = _(messages.REPORT_MERGE_NOT_FOUND) % (
+            ', '.join([str(i) for i in missing_reports]))
+        error.get('reports').append(message)
+        raise ValidationError(error)
+
+    return reports

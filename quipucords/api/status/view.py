@@ -12,6 +12,7 @@
 """View for server status."""
 
 from api import API_VERSION
+from api.status.model import ServerInformation
 
 from quipucords.environment import (commit,
                                     modules,
@@ -35,4 +36,5 @@ def status(request):
     server_info['platform'] = platform_info()
     server_info['python'] = python_version()
     server_info['modules'] = modules()
+    server_info['server_id'] = ServerInformation.create_or_retreive_server_id()
     return Response(server_info)

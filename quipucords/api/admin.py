@@ -15,11 +15,13 @@ from api.models import (Credential,
                         JobInspectionResult,
                         Scan,
                         ScanJob,
+                        ServerInformation,
                         Source,
                         SystemFingerprint)
 
 from django.contrib import admin
 
+admin.site.register(ServerInformation)
 admin.site.register(FactCollection)
 admin.site.register(Credential)
 admin.site.register(Source)

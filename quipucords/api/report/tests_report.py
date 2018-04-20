@@ -14,15 +14,19 @@ import copy
 import json
 import uuid
 
+import api.messages as messages
 from api.models import (Credential,
                         FactCollection,
+                        ServerInformation,
                         Source)
-from api.report.renderer import FactCollectionCSVRenderer, ReportCSVRenderer
+from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from rest_framework import status
+
+# pylint: disable=line-too-long
 
 
 class DetailReportTest(TestCase):
@@ -44,6 +48,7 @@ class DetailReportTest(TestCase):
 
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
+        self.server_id = ServerInformation.create_or_retreive_server_id()
 
     def create(self, data):
         """Call the create endpoint."""
@@ -78,7 +83,8 @@ class DetailReportTest(TestCase):
     def test_details(self):
         """Get details for a report via API."""
         request_json = {'sources':
-                        [{'source_name': self.net_source.name,
+                        [{'server_id': self.server_id,
+                          'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
@@ -92,8 +98,8 @@ class DetailReportTest(TestCase):
     # Test CSV Renderer
     ##############################################################
     def test_csv_renderer(self):
-        """Test FactCollectionCSVRenderer."""
-        renderer = FactCollectionCSVRenderer()
+        """Test DetailsCSVRenderer."""
+        renderer = DetailsCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
@@ -105,7 +111,7 @@ class DetailReportTest(TestCase):
         self.assertIsNone(value)
 
         request_json = {'sources':
-                        [{'source_id': self.net_source.id,
+                        [{'server_id': self.server_id,
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
@@ -114,18 +120,13 @@ class DetailReportTest(TestCase):
             request_json)
         test_json = copy.deepcopy(response_json)
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n' \
-                   'Source\r\nname,type\r\ntest_source,network' \
-                   '\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n'
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n' % self.server_id  # noqa
         self.assertEqual(csv_result, expected)
 
         # Test cached works too
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nname,type\r\ntest_source,network\r\nFacts\r\nkey'\
-            '\r\nvalue\r\n\r\n\r\n'
         # These would be different if not cached
         self.assertEqual(csv_result, expected)
 
@@ -162,9 +163,7 @@ class DetailReportTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\n'\
-            'Source\r\nname,type\r\ntest_source,network\r\nFacts\r\n'\
-            '\r\n'
+        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % self.server_id  # noqa
         self.assertEqual(csv_result, expected)
 
 
@@ -188,6 +187,7 @@ class DeploymentReportTest(TestCase):
 
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
+        self.server_id = ServerInformation.create_or_retreive_server_id()
 
     def create_fact_collection(self, data):
         """Call the create endpoint."""
@@ -210,7 +210,8 @@ class DeploymentReportTest(TestCase):
                               os_versions=None):
         """Create a FactCollection for test."""
         facts = []
-        fc_json = {'sources': [{'source_name': self.net_source.name,
+        fc_json = {'sources': [{'server_id': self.server_id,
+                                'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
 
@@ -314,7 +315,8 @@ class DeploymentReportTest(TestCase):
 
         # Create a system fingerprint via collection receiver
         facts = []
-        fc_json = {'sources': [{'source_name': self.net_source.name,
+        fc_json = {'sources': [{'server_id': self.server_id,
+                                'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
 
@@ -381,8 +383,8 @@ class DeploymentReportTest(TestCase):
     # Test CSV Renderer
     ##############################################################
     def test_csv_renderer(self):
-        """Test ReportCSVRenderer."""
-        renderer = ReportCSVRenderer()
+        """Test DeploymentCSVRenderer."""
+        renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
@@ -403,13 +405,12 @@ class DeploymentReportTest(TestCase):
 
         csv_result = renderer.render(report)
 
-        # pylint: disable=line-too-long
         expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[None],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[None],,2017-07-18,,vmware,,,,,,,\r\n,,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[None],,2017-07-18,,vmware,,,,,,,\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
 
     def test_csv_renderer_only_name(self):
-        """Test ReportCSVRenderer name filter."""
-        renderer = ReportCSVRenderer()
+        """Test DeploymentCSVRenderer name filter."""
+        renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
@@ -429,9 +430,159 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
-        print(report)
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
         expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
         self.assertEqual(csv_result, expected)
+
+    ##############################################################
+    # Test Report Merge
+    ##############################################################
+    def test_merge_empty_body(self):
+        """Test merge with empty body."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_REQUIRED]})
+
+    def test_merge_empty_dict(self):
+        """Test merge with empty dict."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_REQUIRED]})
+
+    def test_merge_jobs_not_list(self):
+        """Test merge with not list."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {'reports': 5}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_LIST]})
+
+    def test_merge_jobs_list_too_short(self):
+        """Test merge with list too short."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {'reports': [5]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_TOO_SHORT]})
+
+    def test_merge_jobs_list_contains_string(self):
+        """Test merge with containing str."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {'reports': [5, 'hello']}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_INT]})
+
+    def test_merge_jobs_list_contains_duplicates(self):
+        """Test merge with containing duplicates."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {'reports': [5, 5]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_UNIQUE]})
+
+    def test_merge_jobs_list_contains_invalid_job_ids(self):
+        """Test merge with containing duplicates."""
+        # pylint: disable=no-member
+        url = '/api/v1/reports/merge/'
+        data = {'reports': [5, 6]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_response = response.json()
+        self.assertEqual(
+            json_response, {'reports':
+                            [messages.REPORT_MERGE_NOT_FOUND % '5, 6']})
+
+    def test_merge_jobs_success(self):
+        """Test merge jobs success."""
+        url = reverse('facts-list')
+        sources1 = [{'server_id': self.server_id,
+                     'source_name': self.net_source.name,
+                     'source_type': self.net_source.source_type,
+                     'facts': [{'key1': 'value1'}]}]
+        sources2 = [{'server_id': 'abc',
+                     'source_name': 'another_name',
+                     'source_type': 'network',
+                     'facts': [{'key2': 'value2'}]}]
+        request_json = {'sources': sources1}
+        response = self.client.post(url,
+                                    json.dumps(request_json),
+                                    'application/json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
+        response_json = response.json()
+        self.assertEqual(
+            response_json['sources'],
+            sources1)
+        report1_id = response_json['id']
+
+        request_json = {'sources': sources2}
+        response = self.client.post(url,
+                                    json.dumps(request_json),
+                                    'application/json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
+        response_json = response.json()
+        self.assertEqual(
+            response_json['sources'],
+            sources2)
+        report2_id = response_json['id']
+
+        url = '/api/v1/reports/merge/'
+        data = {'reports': [report1_id, report2_id]}
+        response = self.client.put(url, json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        json_response = response.json()
+        expected = {'id': 3,
+                    'sources': [
+                        {'server_id': 'abc',
+                         'source_name': 'another_name',
+                         'source_type': 'network',
+                         'facts': [{'key2': 'value2'}]},
+                        {'server_id': self.server_id,
+                         'source_name': 'test_source',
+                         'source_type': 'network',
+                         'facts': [{'key1': 'value1'}]}],
+                    'status': 'complete'}
+
+        self.assertEqual(
+            json_response, expected)

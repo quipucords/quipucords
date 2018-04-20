@@ -121,6 +121,15 @@ SJ_MERGE_JOB_NO_RESULTS = 'The specified set of jobs'\
 SJ_MERGE_JOB_NO_TASKS = 'Merge cannot be completed. Source for job with '\
     'id=%d has been deleted.'
 
+REPORT_MERGE_REQUIRED = 'This field is required'
+REPORT_MERGE_NOT_LIST = 'This field must be a list of report ids.'
+REPORT_MERGE_TOO_SHORT = 'Two or more scan report ids are required.'
+REPORT_MERGE_NOT_INT = 'Scan report ids must be integers.'
+REPORT_MERGE_NOT_UNIQUE = 'Set of ids must be unique.'
+REPORT_MERGE_NOT_FOUND = 'Not all scan report ids exist. '\
+    'Scan reports not found: %s'
+REPORT_MERGE_NO_RESULTS = 'The specified set of reports '\
+    'produced invalid fact collection.  Error: %s'
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
