@@ -16,6 +16,7 @@ import logging
 import api.messages as messages
 from api.models import (FactCollection,
                         ScanTask,
+                        ServerInformation,
                         Source)
 from api.serializers import FactCollectionSerializer
 
@@ -30,6 +31,7 @@ VALID_SOURCES_KEY = 'valid_sources'
 # JSON attribute constants
 SOURCES_KEY = 'sources'
 SOURCE_KEY = 'source'
+SERVER_ID_KEY = 'server_id'
 SOURCE_TYPE_KEY = 'source_type'
 SOURCE_NAME_KEY = 'source_name'
 FACTS_KEY = 'facts'
@@ -43,6 +45,7 @@ def build_sources_from_tasks(tasks):
     :param tasks: ScanTask objects used to build results
     :returns: dict containing sources structure for facts endpoint
     """
+    server_id = ServerInformation.create_or_retreive_server_id()
     sources = []
     for inspect_task in tasks:
         if inspect_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:
@@ -51,9 +54,11 @@ def build_sources_from_tasks(tasks):
         if task_facts:
             source = inspect_task.source
             if source is not None:
-                source_dict = {'source_name': source.name,
-                               'source_type': source.source_type,
-                               'facts': task_facts}
+                source_dict = {
+                    SERVER_ID_KEY: server_id,
+                    SOURCE_NAME_KEY: source.name,
+                    SOURCE_TYPE_KEY: source.source_type,
+                    FACTS_KEY: task_facts}
                 sources.append(source_dict)
     return sources
 
@@ -101,7 +106,12 @@ def _validate_source_json(source_json):
     dict with error result or None.
     """
     invalid_field_obj = {}
+    server_id = source_json.get(SERVER_ID_KEY)
     has_error = False
+    if not server_id:
+        has_error = True
+        invalid_field_obj[SERVER_ID_KEY] = _(
+            messages.FC_REQUIRED_ATTRIBUTE)
 
     source_type = source_json.get(SOURCE_TYPE_KEY)
     source_name = source_json.get(SOURCE_NAME_KEY)

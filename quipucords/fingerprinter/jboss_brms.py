@@ -99,6 +99,7 @@ def detect_jboss_brms(source, facts):
     entitlements = facts.get(ENTITLEMENTS, [])
 
     metadata = {
+        'server_id': source['server_id'],
         'source_name': source['source_name'],
         'source_type': source['source_type'],
     }

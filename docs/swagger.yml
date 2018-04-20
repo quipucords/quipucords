@@ -1215,10 +1215,15 @@ definitions:
   FactCollectionSource:
     type: "object"
     required:
+      - server_id
       - source_name
       - source_type
       - facts
     properties:
+      server_id:
+        type: "string"
+        description: "Globally unique server identifier"
+        example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
       source_name:
         type: "string"
         description: "The source name associated with these facts"
@@ -1689,6 +1694,10 @@ definitions:
         type: "object"
         description: "name/value string pairs describing the server"
         example: {"system": "Fedora", "node": "26aec4157585", "release": "26", "version": "Fedora 26", "machine": "x86_64", "processor": "i386"}
+      server_id:
+        type: "string"
+        description: "Globally unique server identifier"
+        example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
   Source:
     type: "object"
     required:
@@ -1955,6 +1964,10 @@ definitions:
   SystemFactMetadata:
     type: "object"
     properties:
+        server_id:
+          type: "string"
+          description: "Globally unique server identifier"
+          example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
         source_id:
           type: "integer"
           format: "int64"

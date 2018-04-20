@@ -258,6 +258,10 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
+        'api.status': {
+            'handlers': LOGGING_HANDLERS,
+            'level': QUIPUCORDS_LOGGING_LEVEL,
+        },
         'fingerprinter': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
