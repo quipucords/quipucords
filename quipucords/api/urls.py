@@ -18,6 +18,7 @@ from api.views import (CredentialViewSet,
                        deployments,
                        details,
                        jobs,
+                       merge,
                        status)
 
 from django.conf.urls import url
@@ -52,6 +53,7 @@ ROUTER.register(r'users',
 urlpatterns = [
     url(r'^reports/(?P<pk>[^/.]+)/details/$', details),
     url(r'^reports/(?P<pk>[^/.]+)/deployments/$', deployments),
+    url(r'^reports/merge/$', merge),
 ]
 
 urlpatterns += [
