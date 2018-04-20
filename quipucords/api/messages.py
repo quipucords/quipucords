@@ -128,8 +128,8 @@ REPORT_MERGE_NOT_INT = 'Scan report ids must be integers.'
 REPORT_MERGE_NOT_UNIQUE = 'Set of ids must be unique.'
 REPORT_MERGE_NOT_FOUND = 'Not all scan report ids exist. '\
     'Scan reports not found: %s'
-REPORT_MERGE_NO_RESULTS = 'The specified set of reports'\
-    ' produced invalid fact collection.  Error: %s'
+REPORT_MERGE_NO_RESULTS = 'The specified set of reports '\
+    'produced invalid fact collection.  Error: %s'
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
