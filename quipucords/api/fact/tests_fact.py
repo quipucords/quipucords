@@ -15,6 +15,7 @@ import json
 import api.messages as messages
 from api.models import (Credential,
                         FactCollection,
+                        ServerInformation,
                         Source)
 
 from django.core.urlresolvers import reverse
@@ -45,6 +46,8 @@ class FactCollectionTest(TestCase):
 
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
+
+        self.server_id = ServerInformation.create_or_retreive_server_id()
 
     def create(self, data):
         """Call the create endpoint."""
@@ -88,7 +91,8 @@ class FactCollectionTest(TestCase):
     def test_greenpath_create(self):
         """Create fact collection object via API."""
         request_json = {'sources':
-                        [{'source_name': self.net_source.name,
+                        [{'server_id': self.server_id,
+                          'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
@@ -141,9 +145,10 @@ class FactCollectionTest(TestCase):
 
     def test_source_name_not_string(self):
         """Test source has source_name that is not a string."""
-        request_json = {'sources': [{'source_name': 100,
+        request_json = {'sources': [{'server_id': self.server_id,
+                                     'source_name': 100,
                                      'source_type':
-                                         self.net_source.source_type}]}
+                                     self.net_source.source_type}]}
         response_json = self.create_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
@@ -180,7 +185,8 @@ class FactCollectionTest(TestCase):
     def test_invalid_source_type(self):
         """Test source_type has invalid_value."""
         request_json = {'sources':
-                        [{'source_name': self.net_source.name,
+                        [{'server_id': self.server_id,
+                          'source_name': self.net_source.name,
                           'source_type': 'abc'}]}
         response_json = self.create_expect_400(
             request_json)

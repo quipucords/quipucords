@@ -15,7 +15,8 @@ import logging
 from io import StringIO
 
 from api.common.util import CSVHelper
-from api.models import FactCollection, Source
+from api.models import (FactCollection,
+                        Source)
 
 from rest_framework import renderers
 
@@ -29,7 +30,7 @@ SATELLITE_DETECTION_KEY = 'detection-satellite'
 SOURCES_KEY = 'sources'
 
 
-class FactCollectionCSVRenderer(renderers.BaseRenderer):
+class DetailsCSVRenderer(renderers.BaseRenderer):
     """Class to render detailed report as CSV."""
 
     # pylint: disable=too-few-public-methods
@@ -78,8 +79,12 @@ class FactCollectionCSVRenderer(renderers.BaseRenderer):
 
         for source in sources:
             csv_writer.writerow(['Source'])
-            csv_writer.writerow(['name', 'type'])
+            csv_writer.writerow(
+                ['Server Identifier',
+                 'Source Name',
+                 'Source Type'])
             csv_writer.writerow([
+                source.get('server_id'),
                 source.get('source_name'),
                 source.get('source_type')])
             csv_writer.writerow(['Facts'])
@@ -110,7 +115,7 @@ class FactCollectionCSVRenderer(renderers.BaseRenderer):
         return csv_content
 
 
-class ReportCSVRenderer(renderers.BaseRenderer):
+class DeploymentCSVRenderer(renderers.BaseRenderer):
     """Class to render Deployment report as CSV."""
 
     # pylint: disable=too-few-public-methods

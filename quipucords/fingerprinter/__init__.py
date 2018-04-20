@@ -290,8 +290,7 @@ def _process_source(report_id, source):
         if fingerprint is not None:
             fingerprint['report_id'] = report_id
             fingerprint[SOURCES_KEY] = \
-                {source_name: {'source_type': source_type,
-                               'source_name': source_name}}
+                {source_name: source}
             fingerprints.append(fingerprint)
 
     return fingerprints
@@ -595,6 +594,7 @@ def add_fact_to_fingerprint(source,
     if actual_fact_value is not None:
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
+            'server_id': source['server_id'],
             'source_name': source['source_name'],
             'source_type': source['source_type'],
             'raw_fact_key': raw_fact_key
@@ -646,6 +646,7 @@ def add_entitlements_to_fingerprint(source,
                 add = True
             if add:
                 f_ent[META_DATA_KEY] = {
+                    'server_id': source['server_id'],
                     'source_name': source['source_name'],
                     'source_type': source['source_type'],
                     'raw_fact_key': raw_fact_key

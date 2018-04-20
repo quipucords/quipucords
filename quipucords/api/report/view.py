@@ -16,7 +16,7 @@ import os
 import api.messages as messages
 from api.common.util import is_int
 from api.models import FactCollection, SystemFingerprint
-from api.report.renderer import FactCollectionCSVRenderer, ReportCSVRenderer
+from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 from api.serializers import FactCollectionSerializer, FingerprintSerializer
 
 from django.core.exceptions import FieldError
@@ -60,7 +60,7 @@ else:
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   FactCollectionCSVRenderer))
+                   DetailsCSVRenderer))
 def details(request, pk=None):
     """Lookup and return a details system report."""
     if pk is not None:
@@ -83,7 +83,7 @@ def details(request, pk=None):
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   ReportCSVRenderer))
+                   DeploymentCSVRenderer))
 def deployments(request, pk=None):
     """Lookup and return a deployment system report."""
     validate_filters(request.query_params)

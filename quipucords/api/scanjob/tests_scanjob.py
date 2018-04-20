@@ -25,6 +25,7 @@ from api.models import (Credential,
                         ScanJob,
                         ScanOptions,
                         ScanTask,
+                        ServerInformation,
                         Source,
                         SystemConnectionResult,
                         SystemInspectionResult)
@@ -50,6 +51,7 @@ class ScanJobTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
+        self.server_id = ServerInformation.create_or_retreive_server_id()
         self.cred = Credential.objects.create(
             name='cred1',
             username='username',
@@ -1659,13 +1661,17 @@ class ScanJobTest(TestCase):
         response = self.client.put(url, json.dumps(data),
                                    content_type='application/json',
                                    format='json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
         expected = {'id': 1, 'sources':
-                    [{'source_name': 'source1',
+                    [{'server_id': self.server_id,
+                      'source_name': 'source1',
                       'source_type': 'network',
                       'facts': [{'fact_key': 'fact_value'}]},
-                     {'source_name': 'source1',
+                     {'server_id': self.server_id,
+                      'source_name': 'source1',
                       'source_type': 'network',
                       'facts': [{'fact_key': 'fact_value'}]}],
                     'status': 'complete'}

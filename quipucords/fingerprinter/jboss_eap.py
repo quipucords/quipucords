@@ -354,6 +354,7 @@ def detect_jboss_eap(source, facts):
     :returns: dictionary defining the product presence
     """
     metadata = {
+        'server_id': source['server_id'],
         'source_name': source['source_name'],
         'source_type': source['source_type'],
     }

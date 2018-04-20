@@ -67,6 +67,15 @@ def modules():
     return module_data
 
 
+def init_server_identifier():
+    """Create or retreive server's global identifier."""
+    from api.status.model import ServerInformation
+
+    server_id = ServerInformation.create_or_retreive_server_id()
+    logger.info('Globally unique server identifier is %s',
+                server_id)
+
+
 def startup():
     """Log environment at startup."""
     logger.info('Platform:')
@@ -81,3 +90,4 @@ def startup():
 
     logger.info('Modules: %s', ', '.join(module_list))
     logger.info('Commit: %s', commit())
+    init_server_identifier()

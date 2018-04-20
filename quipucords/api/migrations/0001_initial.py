@@ -166,6 +166,13 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='ServerInformation',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('global_identifier', models.CharField(max_length=36)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Source',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
