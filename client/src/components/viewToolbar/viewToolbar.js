@@ -1,8 +1,7 @@
-import _ from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
+import _ from 'lodash';
 
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
@@ -57,7 +56,7 @@ class ViewToolbar extends React.Component {
       filterText += value;
     }
 
-    let filter = { field: field, value: value, label: filterText };
+    const filter = { field: field, value: value, label: filterText };
     Store.dispatch({
       type: viewToolbarTypes.ADD_FILTER,
       viewType: viewType,
@@ -76,13 +75,14 @@ class ViewToolbar extends React.Component {
 
   filterValueSelected(newFilterValue) {
     const { filterType, viewType } = this.props;
+    const filterValue = newFilterValue;
 
-    let filterValue = newFilterValue;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
       viewType: viewType,
       filterValue
     });
+
     if (newFilterValue) {
       this.filterAdded(filterType, newFilterValue);
     }
@@ -90,8 +90,8 @@ class ViewToolbar extends React.Component {
 
   updateCurrentValue(event) {
     const { viewType } = this.props;
+    const filterValue = event.target.value;
 
-    let filterValue = event.target.value;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
       viewType: viewType,
@@ -145,6 +145,7 @@ class ViewToolbar extends React.Component {
 
   renderFilterInput() {
     const { filterType, filterValue } = this.props;
+
     if (!filterType) {
       return null;
     }

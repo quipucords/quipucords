@@ -12,11 +12,11 @@ class ScansService {
     });
   }
 
-  static getScan(id) {
+  getScan(id) {
     return this.getScans(id);
   }
 
-  static getScans(id = '', query = {}) {
+  getScans(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
@@ -138,4 +138,4 @@ class ScansService {
   }
 }
 
-export default ScansService;
+export default new ScansService();

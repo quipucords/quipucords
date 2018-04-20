@@ -12,7 +12,7 @@ class CredentialsService {
     });
   }
 
-  static deleteCredential(id) {
+  deleteCredential(id) {
     return axios({
       method: 'delete',
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
@@ -22,15 +22,15 @@ class CredentialsService {
     });
   }
 
-  static deleteCredentials(data = []) {
+  deleteCredentials(data = []) {
     return Promise.all.apply(this, data.map(id => this.deleteCredential(id)));
   }
 
-  static getCredential(id) {
+  getCredential(id) {
     return this.getCredentials(id);
   }
 
-  static getCredentials(id = '', query = {}) {
+  getCredentials(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
@@ -50,4 +50,4 @@ class CredentialsService {
   }
 }
 
-export default CredentialsService;
+export default new CredentialsService();

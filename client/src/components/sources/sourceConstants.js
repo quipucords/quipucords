@@ -25,6 +25,9 @@ const SourceFilterFields = [
   }
 ];
 
+/**
+ * ID: Enum with the following possible values [name, source_type, most_recent_connect_scan__start_time]
+ */
 const SourceSortFields = [
   {
     id: 'name',
@@ -38,8 +41,9 @@ const SourceSortFields = [
   },
   {
     id: 'most_recent_connect_scan__start_time',
-    title: 'Most Recent Connection Scan',
-    isNumeric: true
+    title: 'Most Recent',
+    isNumeric: true,
+    sortAscending: false
   }
 ];
 
