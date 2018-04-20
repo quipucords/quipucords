@@ -145,13 +145,13 @@ class Sources extends React.Component {
   }
 
   handleDeleteSource(item) {
-    let heading = (
+    const heading = (
       <span>
         Are you sure you want to delete the source <strong>{item.name}</strong>?
       </span>
     );
 
-    let onConfirm = () => this.doDeleteSource(item);
+    const onConfirm = () => this.doDeleteSource(item);
 
     Store.dispatch({
       type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,

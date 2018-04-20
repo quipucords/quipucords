@@ -26,3 +26,4 @@ from api.connresults.model import (JobConnectionResult, TaskConnectionResult,
 from api.inspectresults.model import (JobInspectionResult, TaskInspectionResult,
                                       SystemInspectionResult, RawFact)
 from api.scantasks.model import ScanTask
+from api.status.model import ServerInformation

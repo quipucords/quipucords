@@ -103,6 +103,7 @@ def detect_jboss_fuse(source, facts):
     fuse_versions = []
 
     metadata = {
+        'server_id': source['server_id'],
         'source_name': source['source_name'],
         'source_type': source['source_type'],
     }

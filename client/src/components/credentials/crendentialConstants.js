@@ -18,6 +18,9 @@ const CredentialFilterFields = [
   }
 ];
 
+/**
+ * ID: Enum with the following possible values [name, cred_type]
+ */
 const CredentialSortFields = [
   {
     id: 'name',

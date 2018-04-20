@@ -13,6 +13,9 @@ const ScanFilterFields = [
   }
 ];
 
+/**
+ * ID: Enum with the following possible values [id, name, scan_type, most_recent_scanjob__start_time, most_recent_scanjob__status]
+ */
 const ScanSortFields = [
   {
     id: 'name',
@@ -21,8 +24,9 @@ const ScanSortFields = [
   },
   {
     id: 'most_recent_scanjob__start_time',
-    title: 'Most Recent Time',
-    isNumeric: true
+    title: 'Most Recent',
+    isNumeric: true,
+    sortAscending: false
   }
 ];
 

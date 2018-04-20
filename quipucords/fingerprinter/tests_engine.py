@@ -13,7 +13,7 @@
 
 from datetime import datetime
 
-from api.models import Source
+from api.models import ServerInformation, Source
 
 from django.test import TestCase
 
@@ -37,6 +37,10 @@ SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
 
 class EngineTest(TestCase):
     """Tests Engine class."""
+
+    def setUp(self):
+        """Create test case setup."""
+        self.server_id = ServerInformation.create_or_retreive_server_id()
 
     # pylint: disable=no-self-use,too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
@@ -404,7 +408,8 @@ class EngineTest(TestCase):
         """Create test network fingerprint."""
         n_fact_collection = self._create_network_fc_json(*args, **kwargs)
         nfact = n_fact_collection['facts'][0]
-        source = {'source_name': 'source1',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': n_fact_collection['facts']}
         nfingerprints = _process_source(n_fact_collection['id'],
@@ -418,7 +423,8 @@ class EngineTest(TestCase):
         """Create test network/vcenter fingerprints."""
         v_fact_collection = self._create_vcenter_fc_json(*args, **kwargs)
         vfact = v_fact_collection['facts'][0]
-        source = {'source_name': 'source2',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source2',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
         vfingerprints = _process_source(v_fact_collection['id'],
@@ -431,7 +437,8 @@ class EngineTest(TestCase):
         """Create test network/vcenter fingerprints."""
         s_fact_collection = self._create_satellite_fc_json(*args, **kwargs)
         vfact = s_fact_collection['facts'][0]
-        source = {'source_name': 'source3',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source3',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': s_fact_collection['facts']}
         sfingerprints = _process_source(s_fact_collection['id'],
@@ -447,7 +454,8 @@ class EngineTest(TestCase):
         """Test process network source."""
         fact_collection = self._create_network_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_name': 'source1',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -459,7 +467,8 @@ class EngineTest(TestCase):
         """Test process vcenter source."""
         fact_collection = self._create_vcenter_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_name': 'source1',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -471,7 +480,8 @@ class EngineTest(TestCase):
         """Test process satellite source."""
         fact_collection = self._create_satellite_fc_json()
         fact = fact_collection['facts'][0]
-        source = {'source_name': 'source1',
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = _process_source(fact_collection['id'],
@@ -730,7 +740,8 @@ class EngineTest(TestCase):
             source_type='network',
             port=22)
         source.save()
-        sourcetopass = {'source_name': 'source1', 'source_type': 'network'}
+        sourcetopass = {'server_id': self.server_id,
+                        'source_name': 'source1', 'source_type': 'network'}
         fingerprint = {'metadata': {}}
         result = _process_network_fact(sourcetopass, fingerprint)
         self.assertEqual(

@@ -13,7 +13,7 @@ class SourcesService {
     });
   }
 
-  static deleteSource(id) {
+  deleteSource(id) {
     return axios({
       method: 'delete',
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
@@ -23,15 +23,15 @@ class SourcesService {
     });
   }
 
-  static deleteSources(data = []) {
+  deleteSources(data = []) {
     return Promise.all.apply(this, data.map(id => this.deleteSource(id)));
   }
 
-  static getSource(id) {
+  getSource(id) {
     return this.getSources(id);
   }
 
-  static getSources(id = '', query = {}) {
+  getSources(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
@@ -51,4 +51,4 @@ class SourcesService {
   }
 }
 
-export default SourcesService;
+export default new SourcesService();
