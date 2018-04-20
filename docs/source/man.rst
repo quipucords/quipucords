@@ -528,14 +528,21 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 Merging Scan Job Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report merge`` command combines results from two or more scan jobs to create a report. The ``qpc report summary`` or ``qpc report detail`` can be used to obtain the report.
+The ``qpc report merge`` command combines results from two or more scan job identifiers, report identifers, or JSON details report files to create a single report. The ``qpc report summary`` or ``qpc report detail`` can be used to obtain the report.
 
-**qpc report merge --ids** *scan_job_identifiers*
+**qpc report merge (--job-ids** *scan_job_identifiesr*|**--report-ids** *report_identifiers*|**--json-files** *json_details_report_files* **)
 
-``--ids=scan_job_identifiers``
+``--job-ids=scan_job_identifiers``
 
-  Required. Contains the scan job identifiers that will be merged.
+  Contains the scan job identifiers that will be merged.  Mutually exclusive with the ``--report-ids`` option and the ``--json-files`` option.
 
+``--report-ids=report_identifiers``
+
+  Contains the report identifiers that will be merged.  Mutually exclusive with the ``--job-ids`` option and the ``--json-files`` option.
+
+``--json-files=json_details_report_files``
+
+  Contains the JSON details report files that will be merged.  Mutually exclusive with the ``--job-ids`` option and the ``--report-ids`` option.
 
 Options for All Commands
 ------------------------
