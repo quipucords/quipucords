@@ -72,7 +72,7 @@ def init_server_identifier():
     from api.status.model import ServerInformation
 
     server_id = ServerInformation.create_or_retreive_server_id()
-    logger.info('Globally unique server identifier is %s',
+    logger.info('Server ID: %s',
                 server_id)
 
 

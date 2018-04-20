@@ -1222,7 +1222,7 @@ definitions:
     properties:
       server_id:
         type: "string"
-        description: "The server's globally unique id"
+        description: "Globally unique server identifier"
         example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
       source_name:
         type: "string"
@@ -1966,7 +1966,7 @@ definitions:
     properties:
         server_id:
           type: "string"
-          description: "The server's globally unique id"
+          description: "Globally unique server identifier"
           example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
         source_id:
           type: "integer"
