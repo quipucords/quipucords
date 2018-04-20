@@ -492,8 +492,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mapStateToProps = function(state) {
-  return Object.assign({}, state.scans.view, state.scans.update, {
-    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW]
+  return Object.assign({}, state.scans.view, {
+    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW],
+    update: state.scans.update
   });
 };
 
