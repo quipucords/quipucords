@@ -6,8 +6,11 @@ import _ from 'lodash';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { scansTypes, toastNotificationTypes } from '../../redux/constants';
-import { mergeScans } from '../../redux/actions/scansActions';
-import { getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } from '../../redux/actions/reportsActions';
+import {
+  getMergedScanReportDetailsCsv,
+  getMergedScanReportSummaryCsv,
+  mergeScanReports
+} from '../../redux/actions/reportsActions';
 
 class MergeReportsDialog extends React.Component {
   constructor() {
@@ -36,8 +39,8 @@ class MergeReportsDialog extends React.Component {
     });
   }
 
-  getValidJobsId() {
-    return this.getValidScans().map(scan => scan.most_recent.id);
+  getValidReportId() {
+    return this.getValidScans().map(scan => scan.most_recent.report_id);
   }
 
   notifyDownloadStatus(error, results) {
@@ -60,9 +63,9 @@ class MergeReportsDialog extends React.Component {
   }
 
   mergeScanResults() {
-    const { scans, mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
+    const { mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
+    const data = { reports: this.getValidReportId() };
 
-    const data = { jobs: this.getValidJobsId(scans) };
     mergeScans(data).then(
       response => {
         if (details) {
@@ -211,7 +214,7 @@ MergeReportsDialog.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  mergeScans: data => dispatch(mergeScans(data)),
+  mergeScans: data => dispatch(mergeScanReports(data)),
   getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id)),
   getMergedScanReportSummaryCsv: id => dispatch(getMergedScanReportSummaryCsv(id))
 });
