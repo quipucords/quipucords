@@ -1968,11 +1968,6 @@ definitions:
           type: "string"
           description: "Globally unique server identifier"
           example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
-        source_id:
-          type: "integer"
-          format: "int64"
-          description: "The id of source where this fact originated"
-          example: 12
         source_name:
           type: "string"
           description: "The name of source where this fact originated"
@@ -2034,6 +2029,21 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/SystemFactMetadata"
+  SystemReportSource:
+    type: "object"
+    properties:
+        server_id:
+          type: "string"
+          description: "Globally unique server identifier"
+          example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
+        source_name:
+          type: "string"
+          description: "The name of source where this fact originated"
+          example: "TestMachines"
+        source_type:
+          type: "string"
+          description: "The type of source where this fact originated"
+          example: "network"
   SystemReport:
     type: "object"
     properties:
@@ -2177,7 +2187,7 @@ definitions:
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/SourceMin"
+            $ref: "#/definitions/SystemReportSource"
         system_last_checkin_date:
             type: "string"
             format: "date"
@@ -2186,8 +2196,10 @@ definitions:
   SystemReportOut:
     properties:
         report_id:
-          type: "string"
+          type: "integer"
+          format: "int64"
           description: "The fact collection id associate with report"
+          example: 1
         report:
           type: "array"
           items:
