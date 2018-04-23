@@ -415,10 +415,10 @@ Use the ``qpc scan start`` command to create and run a scan job from an existing
 
   Contains the name of the scan object to run.
 
-Viewing Scans jobs
-~~~~~~~~~~~~~~~~~~
+Viewing Scan Jobs
+~~~~~~~~~~~~~~~~~
 
-The ``qpc scan job`` command returns the the list of scan jobs or a single scan job associated with a scan object. The output of this command includes the scan job identifiers as well as the status of each job and the results.
+The ``qpc scan job`` command returns the list of scan jobs for a scan object or information about a single scan job for a scan object. For the list of scan jobs, the output of this command includes the scan job identifiers for each currently running or completed scan job, the current state of each scan job, and the source or sources for that scan. For information about a single scan job, the output of this command includes status of the scan job, the start time of the scan job, and (if applicable) the end time of the scan job.
 
 **qpc scan job (--name** *scan_name* | **--id=** *scan_job_identifier* **) --status=** *(created | pending | running | paused | canceled | completed | failed)*
 
