@@ -156,7 +156,7 @@ class IndicatorFileFinder(PerItemProcessor):
     @classmethod
     def process_item(cls, item):
         """Look for indicator files in item's stdout lines."""
-        if item['rc']:
+        if item.get('rc', True):
             return []
 
         files = item['stdout_lines']
@@ -182,7 +182,7 @@ class StdoutSearchProcessor(PerItemProcessor):
     @classmethod
     def process_item(cls, item):
         """Search stdout for the SEARCH_STRING."""
-        if item['rc']:
+        if item.get('rc', True):
             return False
 
         return cls.SEARCH_STRING in item['stdout']
