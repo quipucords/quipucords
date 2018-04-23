@@ -29,12 +29,9 @@ Quipucords is an *agentless* inspection tool, so there is no need to install the
 
    requirements
    install
-   quick_start
    cli_server_interaction
-   working_with_sources
-   working_with_scans
-   working_with_scan_jobs
-   working_with_reports
+   quick_start
+   using_qpc
    Command Line Usage <man>
    troubleshooting
    concepts

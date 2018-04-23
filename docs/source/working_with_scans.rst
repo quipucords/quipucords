@@ -1,10 +1,10 @@
 Working with Scans
-==================
-Scans compose sources to be scanned in a reproducible way. The sections below will describe how they are created and how to start a scan.
+------------------
+A scan is an object that groups one or more sources into a unit that can be scanned in a reproducible way. The following information describes how to create scans and how to start scans.
 
 Creating a Scan
----------------
-After you set up your credentials and sources, you can run a Quipucords scan to inspect your IT environment. You can create a scan on a single source or combine sources, even sources of different types.
+^^^^^^^^^^^^^^^
+After you set up your credentials and sources, you can run a Quipucords scan to inspect your IT environment. You can create a scan that uses a single source or combines sources, even sources of different types.
 
 To create a scan, use the following steps:
 
@@ -17,7 +17,8 @@ For example, if you want to create a scan called ``myscan`` with the network sou
   # qpc scan add --name myscan --sources mynetwork mysatellite6
 
 Running a Scan
---------------
+^^^^^^^^^^^^^^
+After a scan is created, you can run it. You can run a scan multiple times. Each instance of a scan is assigned a unique identifier, and is known as a scan job.
 
 **IMPORTANT:** Scans run consecutively on the Quipucords server, in the order in which the ``qpc scan start`` command for each scan is entered.
 
