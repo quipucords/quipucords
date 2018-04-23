@@ -214,17 +214,6 @@ class ReportDetailTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
 
-    def test_detail_merge_error_multiple_args(self):
-        """Testing report merge error with no arguments."""
-        report_out = StringIO()
-        nac = ReportMergeCommand(SUBPARSER)
-        args = Namespace(scan_job_ids=[1, 2],
-                         json_files=[1, 2],
-                         report_ids=None)
-        with self.assertRaises(SystemExit):
-            with redirect_stdout(report_out):
-                nac.main(args)
-
     def test_detail_merge_error_too_few_args(self):
         """Testing report merge error with only 1 job id."""
         report_out = StringIO()
