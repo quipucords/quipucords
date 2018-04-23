@@ -18,10 +18,18 @@ However, if you want to create the detailed report, you would use the ``report d
 
 Merging Scan Results
 ^^^^^^^^^^^^^^^^^^^^
-You can combine results from two or more scan jobs and use that merged data to create a single report. You can start this process by using the ``qpc report merge`` command.
+You can combine results from two or more scan jobs, reports, or JSON details report files and use that merged data to create a single report. You can start this process by using the ``qpc report merge`` command.
 
 For example, if you want to merge the results from the scan jobs with identifiers of ``11``, ``15``, and ``22``, you would enter the following command::
 
-  # qpc report merge --ids 11 15 22
+  # qpc report merge --job-ids 11 15 22
 
-The output of the command provides an identifier that can be used like the scan identifier for a single scan job. You can then use this identifier and the ``qpc report`` command with the ``detail`` or ``summary`` subcommands to generate a report from the merged results.
+If you want to merge the results from reports with identifiers of ``1``, ``2``, and ``3``, you would enter the following command::
+
+  # qpc report merge --report-ids 1 2 3
+
+Additionally, if you would like to create a merged report from JSON details report files, you would enter the following command::
+
+  # qpc report merge --json-files /path/to/file1.JSON /path/to/file2.JSON
+
+The output of the above commands provides a report identifier that can be used to access the merged data. You can use this identifier and the ``qpc report`` command with the ``detail`` or ``summary`` subcommands to generate a report from the merged results.

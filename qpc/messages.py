@@ -154,14 +154,24 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
     'A list of fully-qualified paths to search for extended product '\
     'search.'
 
+REPORT_JSON_FILE_HELP = 'A list of files that contain the json details ' \
+                        'reports to merge.'
+REPORT_JSON_FILES_HELP = 'At least two json details report files are ' \
+                         'required to merge.'
+REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
+                           'details report.'
+REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
+                               'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
+REPORT_REPORT_IDS_HELP = 'Report identifiers.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
 REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
 REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
     'Scan Job %s does not exist.'
+REPORT_SJS_DO_NOT_EXIST = 'The following scan jobs do not exist: %s.'
 REPORT_NO_SUMMARY_REPORT_FOR_SJ = \
     'No report summary available for scan job %s.'
 REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID = \
