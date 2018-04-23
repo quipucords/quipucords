@@ -62,7 +62,7 @@ class ProcessIdUJboss(process.Processor):
     @staticmethod
     def process(output):
         """Check whether id succeeded or failed."""
-        if output['rc'] == 0:
+        if output.get('rc', 1) == 0:
             return True
 
         plain_output = output['stdout'].strip().lower()
@@ -183,7 +183,7 @@ class ProcessEapHomeVersionTxt(util.PerItemProcessor):
     @staticmethod
     def process_item(item):
         """Extract just the version number."""
-        if item['rc']:
+        if item.get('rc', True):
             return False
 
         match = ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'])
@@ -232,7 +232,7 @@ class ItemSuccessChecker(util.PerItemProcessor):
     @staticmethod
     def process_item(item):
         """Check whether the item succeeded."""
-        return item['rc'] == 0
+        return item.get('rc', 1) == 0
 
 
 class ProcessEapHomeLayers(ItemSuccessChecker):
