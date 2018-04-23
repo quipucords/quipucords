@@ -87,7 +87,7 @@ class ProcessKarafHomeBinFuse(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return {result['item']: result['rc'] == 0
+        return {result['item']: result.get('rc', 1) == 0
                 for result in output['results']}
 
 
@@ -99,7 +99,7 @@ class ProcessKarafHomeSystemOrgJboss(process.Processor):
     @staticmethod
     def process(output):
         """Pass the output back through."""
-        return {str(result['stdout_lines']): result['rc'] == 0
+        return {str(result['stdout_lines']): result.get('rc', 1) == 0
                 for result in output['results']}
 
 
@@ -124,7 +124,7 @@ class FuseVersionProcessor(process.Processor):
         for item in output['results']:
             result = {}
             item_name = item['item']
-            if item['rc']:
+            if item.get('rc', True):
                 pass
             else:
                 if item['stdout'] != '':
@@ -153,7 +153,7 @@ class FuseVersionProcessorLocate(process.Processor):
         :returns: a list containing the version or an empty list
         """
         results = []
-        if not output['rc']:
+        if output.get('rc', 1) == 0:
             results = list(set(output['stdout_lines']))
         return results
 

@@ -59,7 +59,7 @@ class ProcessJbossBRMSManifestMF(process.Processor):
     @staticmethod
     def process_item(item):
         """Get the implementation version from a MANIFEST.MF file."""
-        if item['rc']:
+        if item.get('rc', True):
             return None
 
         directory = normalize_path(item['item'])
@@ -112,7 +112,7 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
         for item in output['results']:
-            if item['rc']:
+            if item.get('rc', True):
                 continue
 
             directory = normalize_path(item['item'])
