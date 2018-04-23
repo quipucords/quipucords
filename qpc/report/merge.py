@@ -91,6 +91,8 @@ class ReportMergeCommand(CliCommand):
         """
         not_found = False
         report_ids = []
+        job_not_found = []
+        report_not_found = []
         for scan_job_id in set(self.args.scan_job_ids):
             # check for existence of scan_job
             path = SCAN_JOB_URI + str(scan_job_id) + '/'
@@ -105,13 +107,12 @@ class ReportMergeCommand(CliCommand):
                     report_ids.append(report_id)
                 else:
                     # there is not a report id associated with this scan job
-                    print(_(messages.SCAN_JOB_REPORT_ID_DOES_NOT_EXIST %
-                            scan_job_id))
+                    report_not_found.append(scan_job_id)
                     not_found = True
             else:
-                print(_(messages.SCAN_JOB_DOES_NOT_EXIST % scan_job_id))
+                job_not_found.append(scan_job_id)
                 not_found = True
-        return not_found, report_ids
+        return not_found, report_ids, job_not_found, report_not_found
 
     def _merge_json(self):
         """Combine the sources for each json file provided.
@@ -139,8 +140,14 @@ class ReportMergeCommand(CliCommand):
         report_ids = []
         if self.args.scan_job_ids:
             # check for existence of jobs & get report ids
-            not_found, report_ids = self._get_report_ids()
+            not_found, report_ids, job_not_found, report_not_found = \
+                self._get_report_ids()
             if not_found is True:
+                if job_not_found:
+                    print(_(messages.REPORT_SJS_DO_NOT_EXIST % job_not_found))
+                if report_not_found:
+                    print(_(messages.REPORTS_REPORTS_DO_NOT_EXIST %
+                            report_not_found))
                 sys.exit(1)
         elif self.args.report_ids:
             report_ids = self.args.report_ids

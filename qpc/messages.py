@@ -123,7 +123,6 @@ SCAN_MAX_CONCURRENCY_HELP = 'Maximum number of concurrent scans; '\
 SCAN_RESULTS_HELP = 'View results of the specified scan.'
 SCAN_DOES_NOT_EXIST = 'Scan "%s" does not exist.'
 SCAN_JOB_DOES_NOT_EXIST = 'Scan job "%s" does not exist.'
-SCAN_JOB_REPORT_ID_DOES_NOT_EXIST = 'Report for scan job "%s" does not exist.'
 SCAN_LIST_NO_SCANS = 'No scans found.'
 SCAN_STARTED = 'Scan "%s" started.'
 SCAN_PAUSED = 'Scan "%s" paused.'
@@ -161,6 +160,8 @@ REPORT_JSON_FILES_HELP = 'At least two json details report files are ' \
                          'required to merge.'
 REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
                            'details report.'
+REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
+                               'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_REPORT_IDS_HELP = 'Report identifiers.'
@@ -170,6 +171,7 @@ REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
     'Scan Job %s does not exist.'
+REPORT_SJS_DO_NOT_EXIST = 'The following scan jobs do not exist: %s.'
 REPORT_NO_SUMMARY_REPORT_FOR_SJ = \
     'No report summary available for scan job %s.'
 REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID = \
