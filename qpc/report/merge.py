@@ -27,32 +27,6 @@ from qpc.translation import _
 from requests import codes
 
 
-def get_id_and_sources(filename):
-    """Return the sources and id from a valid json details report file.
-
-    :param filename: the filename to read
-    :returns: the id and list of sources found
-    :raises: ValueError if incoming value is not a file that could be found
-    """
-    input_path = os.path.expanduser(os.path.expandvars(filename))
-    if os.path.isfile(input_path):
-        try:
-            with open(input_path, 'r') as in_file:
-                result = in_file.read()
-                report_id = json.loads(result).get('id')
-                sources = json.loads(result).get('sources')
-                if not report_id or not sources:
-                    print(_(messages.REPORT_INVALID_JSON_FILE % filename))
-                    sys.exit(1)
-        except EnvironmentError as err:
-            err_msg = (messages.READ_FILE_ERROR % (input_path, err))
-            print(err_msg)
-            sys.exit(1)
-        return report_id, sources
-    else:
-        raise ValueError(_(messages.NOT_A_FILE % input_path))
-
-
 # pylint: disable=too-few-public-methods
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
@@ -82,6 +56,32 @@ class ReportMergeCommand(CliCommand):
                            help=_(messages.REPORT_JSON_FILE_HELP))
         self.json = None
         self.report_ids = None
+
+    @staticmethod
+    def get_id_and_sources(filename):
+        """Return the sources and id from a valid json details report file.
+
+        :param filename: the filename to read
+        :returns: the id and list of sources found
+        :raises: ValueError if incoming value is not a file that could be found
+        """
+        input_path = os.path.expanduser(os.path.expandvars(filename))
+        if os.path.isfile(input_path):
+            try:
+                with open(input_path, 'r') as in_file:
+                    result = in_file.read()
+                    report_id = json.loads(result).get('id')
+                    sources = json.loads(result).get('sources')
+                    if not report_id or not sources:
+                        print(_(messages.REPORT_INVALID_JSON_FILE % filename))
+                        sys.exit(1)
+            except EnvironmentError as err:
+                err_msg = (messages.READ_FILE_ERROR % (input_path, err))
+                print(err_msg)
+                sys.exit(1)
+            return report_id, sources
+        else:
+            raise ValueError(_(messages.NOT_A_FILE % input_path))
 
     def _get_report_ids(self):
         """Grab the report ids from the scan job if it exists.
@@ -123,7 +123,7 @@ class ReportMergeCommand(CliCommand):
         if len(self.args.json_files) > 1:
             for file in self.args.json_files:
                 try:
-                    report_id, sources = get_id_and_sources(file)
+                    report_id, sources = self.get_id_and_sources(file)
                     all_sources += sources
                 except ValueError:
                     print(_(messages.REPORT_INVALID_JSON_FILE % file))
