@@ -225,8 +225,16 @@ class InspectTaskRunner(ScanTaskRunner):
 
         base_ssh_executable = base_ssh_executable or 'ssh'
         ssh_timeout = ssh_timeout or DEFAULT_TIMEOUT
+
+        # pylint: disable=line-too-long
+        # the ssh arg is required for become-pass because
+        # ansible checks for an exact string match of ssh
+        # anywhere in the command array
+        # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
+        # timeout_ssh will remove the ssh argument before running the command
         ssh_args = ['--executable=' + base_ssh_executable,
-                    '--timeout=' + ssh_timeout]
+                    '--timeout=' + ssh_timeout,
+                    'ssh']
 
         group_names, inventory = _construct_scan_inventory(
             connected, connection_port, forks,
