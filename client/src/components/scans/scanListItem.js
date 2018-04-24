@@ -51,9 +51,10 @@ class ScanListItem extends React.Component {
   closeExpandIfNoData(expandType) {
     const { item } = this.props;
 
-    let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
-    let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
-    let prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+    const successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+    const failedHosts = _.get(item, 'most_recent.systems_failed', 0);
+    const prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+
     if (
       (expandType === 'systemsScanned' && successHosts === 0) ||
       (expandType === 'systemsFailed' && failedHosts === 0) ||
@@ -144,11 +145,11 @@ class ScanListItem extends React.Component {
   renderStatusItems() {
     const { item } = this.props;
 
-    let expandType = this.expandType();
-    let sourcesCount = item.sources ? item.sources.length : 0;
-    let prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
-    let successHosts = _.get(item, 'most_recent.systems_scanned', 0);
-    let failedHosts = _.get(item, 'most_recent.systems_failed', 0);
+    const expandType = this.expandType();
+    const sourcesCount = item.sources ? item.sources.length : 0;
+    const prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+    const successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+    const failedHosts = _.get(item, 'most_recent.systems_failed', 0);
 
     return [
       <ListStatusItem
