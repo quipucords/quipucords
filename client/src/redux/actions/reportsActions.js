@@ -32,7 +32,7 @@ const getReportDetailsCsv = id => dispatch => {
 const getMergedScanReportSummaryCsv = id => dispatch => {
   return dispatch({
     type: reportsTypes.GET_REPORT,
-    payload: reportsService.getMergedScanReporSummaryCsv(id)
+    payload: reportsService.getMergedScanReportSummaryCsv(id)
   });
 };
 
@@ -43,11 +43,19 @@ const getMergedScanReportDetailsCsv = id => dispatch => {
   });
 };
 
+const mergeScanReports = data => dispatch => {
+  return dispatch({
+    type: reportsTypes.GET_MERGE_REPORT,
+    payload: reportsService.mergeScanReports(data)
+  });
+};
+
 export {
   getReportSummary,
   getReportSummaryCsv,
   getReportDetails,
   getReportDetailsCsv,
   getMergedScanReportSummaryCsv,
-  getMergedScanReportDetailsCsv
+  getMergedScanReportDetailsCsv,
+  mergeScanReports
 };

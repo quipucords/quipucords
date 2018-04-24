@@ -99,13 +99,6 @@ const restartScan = id => dispatch => {
   });
 };
 
-const mergeScans = data => dispatch => {
-  return dispatch({
-    type: scansTypes.GET_MERGE_SCAN_RESULTS,
-    payload: scansService.mergeScans(data)
-  });
-};
-
 export {
   addScan,
   getScan,
@@ -120,6 +113,5 @@ export {
   getInspectionScanResults,
   pauseScan,
   cancelScan,
-  restartScan,
-  mergeScans
+  restartScan
 };

@@ -64,13 +64,6 @@ const initialState = {
     delete: false
   },
 
-  merge: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false
-  },
-
   merge_dialog: {
     show: false,
     scans: [],
@@ -1008,65 +1001,5 @@ describe('scansReducer', function() {
     expect(resultState.connectionResults).toEqual(initialState.connectionResults);
     expect(resultState.inspectionResults).toEqual(initialState.inspectionResults);
     expect(resultState.detail).toEqual(initialState.detail);
-  });
-
-  it('should handle GET_MERGE_SCAN_RESULTS_REJECTED', () => {
-    let dispatched = {
-      type: helpers.REJECTED_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'MERGE ERROR'
-          }
-        }
-      }
-    };
-
-    let resultState = scansReducer(undefined, dispatched);
-
-    expect(resultState.merge.error).toBeTruthy();
-    expect(resultState.merge.errorMessage).toEqual('MERGE ERROR');
-    expect(resultState.merge.pending).toBeFalsy();
-    expect(resultState.merge.fulfilled).toBeFalsy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.deployments).toEqual(initialState.deployments);
-    expect(resultState.details).toEqual(initialState.details);
-  });
-
-  it('should handle GET_MERGE_SCAN_RESULTS_PENDING', () => {
-    let dispatched = {
-      type: helpers.PENDING_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS)
-    };
-
-    let resultState = scansReducer(undefined, dispatched);
-
-    expect(resultState.merge.error).toBeFalsy();
-    expect(resultState.merge.errorMessage).toEqual('');
-    expect(resultState.merge.pending).toBeTruthy();
-    expect(resultState.merge.fulfilled).toBeFalsy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.deployments).toEqual(initialState.deployments);
-    expect(resultState.details).toEqual(initialState.details);
-  });
-
-  it('should handle GET_MERGE_SCAN_RESULTS_FULFILLED', () => {
-    let dispatched = {
-      type: helpers.FULFILLED_ACTION(scansTypes.GET_MERGE_SCAN_RESULTS)
-    };
-
-    let resultState = scansReducer(undefined, dispatched);
-
-    expect(resultState.merge.error).toBeFalsy();
-    expect(resultState.merge.errorMessage).toEqual('');
-    expect(resultState.merge.pending).toBeFalsy();
-    expect(resultState.merge.fulfilled).toBeTruthy();
-
-    expect(resultState.persist).toEqual(initialState.persist);
-    expect(resultState.deployments).toEqual(initialState.deployments);
-    expect(resultState.details).toEqual(initialState.details);
   });
 });
