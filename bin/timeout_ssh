@@ -16,12 +16,14 @@ import sys
 
 ARG_EXECUTABLE = '--executable='
 ARG_TIMEOUT = '--timeout='
+ARG_SSH = 'ssh'
 
 # Ansible lets us set the ssh executable, but whatever string we
 # provide is interpreted as an executable, so we can't set it to
 # 'timeout 100' or something like that. Instead, we have this tiny
 # program whose only job is to be a single executable that Ansible can
 # call which will then trampoline out to timeout.
+
 
 def main(argv):
     # I don't think we can control the order that Ansible passes
@@ -51,9 +53,15 @@ def main(argv):
     else:
         timeout_command = 'timeout'
 
+    # the ssh arg is required for become-pass because
+    # ansible checks for an exact string match of ssh
+    # anywhere in the command array
+    # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500
+    # the code below will remove the ssh argument before running the command
     executable_args = [arg for arg in argv[1:]
                        if (not arg.startswith(ARG_EXECUTABLE) and
-                           not arg.startswith(ARG_TIMEOUT))]
+                           not arg.startswith(ARG_TIMEOUT) and
+                           arg != ARG_SSH)]
 
     timeout_args = [timeout_command, timeout, executable] + executable_args
 
