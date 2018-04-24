@@ -16,6 +16,7 @@ import sys
 
 ARG_EXECUTABLE = '--executable='
 ARG_TIMEOUT = '--timeout='
+ARG_SSH = 'ssh'
 
 # Ansible lets us set the ssh executable, but whatever string we
 # provide is interpreted as an executable, so we can't set it to
@@ -60,7 +61,7 @@ def main(argv):
     executable_args = [arg for arg in argv[1:]
                        if (not arg.startswith(ARG_EXECUTABLE) and
                            not arg.startswith(ARG_TIMEOUT) and
-                           arg != 'ssh')]
+                           arg != ARG_SSH)]
 
     timeout_args = [timeout_command, timeout, executable] + executable_args
 
