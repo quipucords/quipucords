@@ -3,11 +3,11 @@ import axios from 'axios';
 import moment from 'moment';
 
 class ReportsService {
-  getTimeStampFromResults(results) {
+  static getTimeStampFromResults(results) {
     return moment(_.get(results, 'headers.date', Date.now())).format('YYYYMMDD_HHmmss');
   }
 
-  downloadCSV(data = '', fileName = 'report.csv') {
+  static downloadCSV(data = '', fileName = 'report.csv') {
     return new Promise((resolve, reject) => {
       try {
         const blob = new Blob([data], { type: 'text/csv' });
@@ -38,7 +38,7 @@ class ReportsService {
     });
   }
 
-  getReportDetails(id, query = {}) {
+  static getReportDetails(id, query = {}) {
     let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DETAILS.replace('{0}', id);
 
     return axios({
@@ -48,13 +48,13 @@ class ReportsService {
     });
   }
 
-  getReportDetailsCsv(id) {
+  static getReportDetailsCsv(id) {
     return this.getReportDetails(id, { format: 'csv' }).then(success => {
       return this.downloadCSV(success.data, `report_${id}_details_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
 
-  getReportSummary(id, query = {}) {
+  static getReportSummary(id, query = {}) {
     let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DEPLOYMENTS.replace('{0}', id);
 
     return axios({
@@ -64,22 +64,34 @@ class ReportsService {
     });
   }
 
-  getReportSummaryCsv(id, query = {}) {
+  static getReportSummaryCsv(id, query = {}) {
     return this.getReportSummary(id, Object.assign(query, { format: 'csv' })).then(success => {
       return this.downloadCSV(success.data, `report_${id}_summary_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
 
-  getMergedScanReportDetailsCsv(id) {
+  static getMergedScanReportDetailsCsv(id) {
     return this.getReportDetails(id, { format: 'csv' }).then(success => {
       return this.downloadCSV(success.data, `merged_report_details_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
-  getMergedScanReporSummaryCsv(id) {
+
+  static getMergedScanReportSummaryCsv(id) {
     return this.getReportSummary(id, { format: 'csv' }).then(success => {
       return this.downloadCSV(success.data, `merged_report_summary_${this.getTimeStampFromResults(success)}.csv`);
     });
   }
+
+  static mergeScanReports(data = {}) {
+    return axios({
+      method: 'put',
+      url: process.env.REACT_APP_REPORTS_SERVICE_MERGE,
+      data: data,
+      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
+      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
+      timeout: process.env.REACT_APP_AJAX_TIMEOUT
+    });
+  }
 }
 
-export default new ReportsService();
+export default ReportsService;

@@ -3,11 +3,20 @@ import { reportsTypes } from '../../constants/index';
 import reportsReducer from '../reportsReducer';
 
 const initialState = {
-  error: false,
-  errorMessage: '',
-  pending: false,
-  fulfilled: false,
-  reports: []
+  report: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false,
+    reports: []
+  },
+
+  merge: {
+    error: false,
+    errorMessage: '',
+    pending: false,
+    fulfilled: false
+  }
 };
 
 describe('ReportsReducer', function() {
@@ -30,13 +39,13 @@ describe('ReportsReducer', function() {
     };
 
     let resultState = reportsReducer(undefined, dispatched);
-    expect(resultState.error).toBeTruthy();
-    expect(resultState.errorMessage).toEqual('GET ERROR');
-    expect(resultState.pending).toBeFalsy();
-    expect(resultState.fulfilled).toBeFalsy();
-    expect(resultState.reports).toHaveLength(0);
+    expect(resultState.report.error).toBeTruthy();
+    expect(resultState.report.errorMessage).toEqual('GET ERROR');
+    expect(resultState.report.pending).toBeFalsy();
+    expect(resultState.report.fulfilled).toBeFalsy();
+    expect(resultState.report.reports).toHaveLength(0);
 
-    expect(resultState.persist).toEqual(initialState.persist);
+    expect(resultState.report.persist).toEqual(initialState.report.persist);
   });
 
   it('should handle GET_REPORT_PENDING', () => {
@@ -46,11 +55,11 @@ describe('ReportsReducer', function() {
 
     let resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.error).toBeFalsy();
-    expect(resultState.errorMessage).toEqual('');
-    expect(resultState.pending).toBeTruthy();
-    expect(resultState.fulfilled).toBeFalsy();
-    expect(resultState.reports).toHaveLength(0);
+    expect(resultState.report.error).toBeFalsy();
+    expect(resultState.report.errorMessage).toEqual('');
+    expect(resultState.report.pending).toBeTruthy();
+    expect(resultState.report.fulfilled).toBeFalsy();
+    expect(resultState.report.reports).toHaveLength(0);
   });
 
   it('should handle GET_REPORT_FULFILLED', () => {
@@ -80,10 +89,10 @@ describe('ReportsReducer', function() {
 
     let resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.error).toBeFalsy();
-    expect(resultState.errorMessage).toEqual('');
-    expect(resultState.pending).toBeFalsy();
-    expect(resultState.fulfilled).toBeTruthy();
-    expect(resultState.reports).toHaveLength(4);
+    expect(resultState.report.error).toBeFalsy();
+    expect(resultState.report.errorMessage).toEqual('');
+    expect(resultState.report.pending).toBeFalsy();
+    expect(resultState.report.fulfilled).toBeTruthy();
+    expect(resultState.report.reports).toHaveLength(4);
   });
 });

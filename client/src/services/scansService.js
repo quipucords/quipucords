@@ -12,11 +12,11 @@ class ScansService {
     });
   }
 
-  getScan(id) {
+  static getScan(id) {
     return this.getScans(id);
   }
 
-  getScans(id = '', query = {}) {
+  static getScans(id = '', query = {}) {
     return axios({
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
@@ -125,17 +125,6 @@ class ScansService {
       timeout: process.env.REACT_APP_AJAX_TIMEOUT
     });
   }
-
-  static mergeScans(data) {
-    return axios({
-      method: 'put',
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_MERGE,
-      data: data,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
 }
 
-export default new ScansService();
+export default ScansService;
