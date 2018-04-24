@@ -897,31 +897,6 @@ paths:
           description: "Not authorized"
         404:
           description: "Scan job not found"
-  /jobs/merge/:
-    put:
-      tags:
-        - "Scan Job"
-      summary: "Merge results from multiple scan jobs"
-      description: "Merge results from two or more completed scan jobs"
-      operationId: "mergeJobResults"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Scan jobs to combine"
-        required: true
-        schema:
-          $ref: "#/definitions/ScanJobMerge"
-      responses:
-        201:
-          description: "Scan job results merged and fact collection created"
-          schema:
-            $ref: "#/definitions/FactCollectionOut"
-        400:
-          description: "Scan job not merged due to invalid request"
-        401:
-          description: "Not authorized"
   /reports/{report_id}/details/:
     get:
       tags:
@@ -976,6 +951,31 @@ paths:
           description: "Not authorized"
         404:
           description: "Report for report id not found"
+  /reports/merge/:
+    put:
+      tags:
+        - "Report"
+      summary: "Merge results from multiple reports."
+      description: "Merge results from two or more existing reports."
+      operationId: "mergeReportResults"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Reports to combine"
+        required: true
+        schema:
+          $ref: "#/definitions/ReportMerge"
+      responses:
+        201:
+          description: "Report results merged and fact collection created"
+          schema:
+            $ref: "#/definitions/FactCollectionOut"
+        400:
+          description: "Reports not merged due to invalid request"
+        401:
+          description: "Not authorized"
   /facts/:
     post:
       tags:
@@ -1396,10 +1396,10 @@ definitions:
               items:
                 $ref: "#/definitions/SystemInspectResultOut"
               description: "The task inspection results"
-  ScanJobMerge:
+  ReportMerge:
     type: "object"
     properties:
-      jobs:
+      reports:
         type: "array"
         items:
           type: "integer"
