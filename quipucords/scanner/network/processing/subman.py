@@ -31,7 +31,9 @@ class ProcessSubmanConsumed(process.Processor):
         entitlements_data = []
         entitlements = output.get('stdout_lines', [])
         for entitlement in entitlements:
-            name, entitlement_id = entitlement.split(' - ')
-            entitlement_dict = {'name': name, 'entitlement_id': entitlement_id}
-            entitlements_data.append(entitlement_dict)
+            if entitlement:
+                name, entitlement_id = entitlement.split(' - ')
+                entitlement_dict = {'name': name,
+                                    'entitlement_id': entitlement_id}
+                entitlements_data.append(entitlement_dict)
         return entitlements_data
