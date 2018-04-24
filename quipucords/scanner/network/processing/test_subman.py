@@ -34,3 +34,9 @@ class TestProcessSubmanConsumed(unittest.TestCase):
             subman.ProcessSubmanConsumed.process(
                 ansible_result('')),
             [])
+
+    def test_empty_string(self):
+        """Found empty string."""
+        self.assertEqual(
+            subman.ProcessSubmanConsumed.process(ansible_result('\n\r')),
+            [])
