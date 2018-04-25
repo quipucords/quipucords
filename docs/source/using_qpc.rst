@@ -1,5 +1,5 @@
-Using Quipucords
-================
+Using Quipucords from the Command Line Interface
+================================================
 After you use the command line interface to log in to the Quipucords server, you can begin using Quipucords.
 
 You use the capabilities of Quipucords to inspect and gather information on your IT infrastructure. Quipucords requires the configuration of two basic structures to manage the inspection process. A *credential* contains the access credentials, such as the user name and password or SSH key of the user, with sufficient authority to run the inspection process on a particular source. For more information about this authority, see `Requirements <requirements.html>`_. A *source* defines the entity or entities to be inspected, such as a host, subnet, network, or systems management solution such as vCenter Server or Satellite. When you create a source, you also include one or more of the configured credentials to use to access the individual entities in the source during the inspection process.
