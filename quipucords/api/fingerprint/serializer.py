@@ -15,6 +15,7 @@ from rest_framework.serializers import (PrimaryKeyRelatedField,
                                         IntegerField,
                                         CharField,
                                         ChoiceField,
+                                        FloatField,
                                         NullBooleanField,
                                         DateField,
                                         ModelSerializer)
@@ -79,7 +80,7 @@ class FingerprintSerializer(ModelSerializer):
     subscription_manager_id = CharField(required=False, max_length=36)
 
     cpu_socket_count = IntegerField(required=False, min_value=0)
-    cpu_core_count = IntegerField(required=False, min_value=0)
+    cpu_core_count = FloatField(required=False, min_value=0)
 
     system_creation_date = DateField(required=False)
 
