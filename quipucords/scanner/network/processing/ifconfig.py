@@ -35,3 +35,19 @@ class ProcessIPAddresses(process.Processor):
                         result.append(ip_line)
                     break
         return list(set(result))
+
+
+class ProcessMacAddresses(process.Processor):
+    """Process the mac addresses from ifconfig."""
+
+    KEY = 'ifconfig_mac_addresses'
+
+    @staticmethod
+    def process(output):
+        """Pass the output back through."""
+        result = []
+        addresses = output.get('stdout_lines', [])
+        for address in addresses:
+            if address:
+                result.append(address)
+        return list(set(result))

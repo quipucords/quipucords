@@ -18,7 +18,7 @@
 
 - name: extract result value for ifconfig.mac-addresses
   set_fact:
-    ifconfig_mac_addresses: "{{  internal_ifconfig_mac_addresses_cmd['stdout_lines'] | default(None) }}"
+    ifconfig_mac_addresses: "{{ internal_ifconfig_mac_addresses_cmd | default(None) }}"
   ignore_errors: yes
   when: '"stdout_lines" in internal_ifconfig_mac_addresses_cmd'
 
