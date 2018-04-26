@@ -32,7 +32,7 @@ class ProcessJbossEapRunningPaths(process.Processor):
     DEPS = ['have_java']
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Just preserve the output, except for a known issue."""
         if FIND_WARNING in output['stdout']:
             logger.error('Find command failed')
@@ -47,7 +47,7 @@ class ProcessFindJboss(process.Processor):
     KEY = 'jboss_eap_find_jboss_modules_jar'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the command's output."""
         return output['stdout_lines']
 
@@ -60,7 +60,7 @@ class ProcessIdUJboss(process.Processor):
     RETURN_CODE_ANY = True
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Check whether id succeeded or failed."""
         if output.get('rc', 1) == 0:
             return True
@@ -82,7 +82,7 @@ class ProcessJbossEapCommonFiles(process.Processor):
     KEY = 'jboss_eap_common_files'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Find all of the times 'test' succeeded."""
         items = output['results']
 
@@ -107,7 +107,7 @@ class ProcessJbossEapProcesses(process.Processor):
     IGNORE_PROCESSES = ['bash', 'grep', 'oom_reaper']
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the number of jboss eap processes on the system."""
         # The task on the remote host requires three processes: a ps,
         # a grep, and a bash to run the pipeline. Of those, the bash
@@ -131,7 +131,7 @@ class ProcessJbossEapPackages(process.Processor):
     KEY = 'jboss_eap_packages'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Count the number of lines of output."""
         return len(output['stdout_lines'])
 
@@ -144,7 +144,7 @@ class ProcessJbossEapLocate(process.Processor):
     DEPS = ['have_locate']
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return output['stdout_lines']
 

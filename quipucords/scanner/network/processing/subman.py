@@ -26,7 +26,7 @@ class ProcessSubmanConsumed(process.Processor):
     KEY = 'subman_consumed'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         entitlements_data = []
         entitlements = output.get('stdout_lines', [])

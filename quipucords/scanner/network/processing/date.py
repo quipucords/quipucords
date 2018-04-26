@@ -28,7 +28,7 @@ class ProcessDateDate(process.Processor):
     KEY = 'date_date'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -39,7 +39,7 @@ class ProcessDateFilesystemCreate(process.Processor):
     KEY = 'date_filesystem_create'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -50,6 +50,6 @@ class ProcessDateMachineId(process.Processor):
     KEY = 'date_machine_id'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])

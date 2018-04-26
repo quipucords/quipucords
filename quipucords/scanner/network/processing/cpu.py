@@ -27,7 +27,7 @@ class ProcessCpuModelVer(process.Processor):
     KEY = 'cpu_model_ver'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -38,7 +38,7 @@ class ProcessCpuCpuFamily(process.Processor):
     KEY = 'cpu_cpu_family'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -49,7 +49,7 @@ class ProcessCpuVendorId(process.Processor):
     KEY = 'cpu_vendor_id'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -60,7 +60,7 @@ class ProcessCpuModelName(process.Processor):
     KEY = 'cpu_model_name'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
 
@@ -71,6 +71,6 @@ class ProcessCpuBogomips(process.Processor):
     KEY = 'cpu_bogomips'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return get_line(output['stdout_lines'])
