@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { MenuItem, Button, Icon, Form, Grid } from 'patternfly-react';
+import { MenuItem, Button, Icon, Form, Grid, Checkbox } from 'patternfly-react';
 import Store from '../../redux/store';
 import helpers from '../../common/helpers';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
@@ -25,7 +25,8 @@ class AddSourceWizardStepTwo extends React.Component {
       credentialsError: null,
       port: '',
       portError: null,
-      singleHostPortDisplay: ''
+      singleHostPortDisplay: '',
+      sslCertVerify: ''
     };
 
     this.state = { ...this.initialState };
@@ -36,15 +37,22 @@ class AddSourceWizardStepTwo extends React.Component {
       'onClickCredential',
       'onChangeHost',
       'onChangeHosts',
-      'onChangePort'
+      'onChangePort',
+      'onChangeSslCertVerify'
     ]);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (
-      _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]) !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])
-    ) {
-      this.setState({ ...this.initialState }, () => {
+    const nextSourceType = _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]);
+
+    if (nextSourceType !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])) {
+      let sslCertVerify = '';
+
+      if (nextSourceType === 'vcenter' || nextSourceType === 'satellite') {
+        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
+      }
+
+      this.setState(Object.assign({ ...this.initialState }, { sslCertVerify }), () => {
         this.invalidateStep();
       });
     }
@@ -62,6 +70,7 @@ class AddSourceWizardStepTwo extends React.Component {
       const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
       let singlePort;
       let singleHostPortDisplay;
+      let sslCertVerify;
 
       if (nextProps.source.sourceType !== 'network' && _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
         singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT, '');
@@ -73,13 +82,18 @@ class AddSourceWizardStepTwo extends React.Component {
           : '';
       }
 
+      if (nextProps.source.sourceType === 'vcenter' || nextProps.source.sourceType === 'satellite') {
+        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
+      }
+
       return {
         sourceName: _.get(nextProps.source, apiTypes.API_SOURCE_NAME, ''),
         multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
         hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
         port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
         singleHostPortDisplay: singleHostPortDisplay || '',
-        credentials: credentials.map(val => val.id)
+        credentials: credentials.map(val => val.id),
+        sslCertVerify: sslCertVerify || ''
       };
     }
 
@@ -101,7 +115,8 @@ class AddSourceWizardStepTwo extends React.Component {
       port,
       portError,
       credentials,
-      credentialsError
+      credentialsError,
+      sslCertVerify
     } = this.state;
     const { source } = this.props;
 
@@ -122,6 +137,10 @@ class AddSourceWizardStepTwo extends React.Component {
 
       if (port !== '') {
         _.set(updatedSource, apiTypes.API_SOURCE_PORT, port);
+      }
+
+      if (sslCertVerify !== '') {
+        _.set(updatedSource, ['options', apiTypes.API_SOURCE_SSL_CERT], sslCertVerify);
       }
 
       Store.dispatch({
@@ -268,6 +287,15 @@ class AddSourceWizardStepTwo extends React.Component {
       {
         port: value,
         portError: this.validatePort(value)
+      },
+      () => this.validateStep()
+    );
+  }
+
+  onChangeSslCertVerify(event) {
+    this.setState(
+      {
+        sslCertVerify: event.target.checked || false
       },
       () => this.validateStep()
     );
@@ -449,6 +477,29 @@ class AddSourceWizardStepTwo extends React.Component {
     );
   }
 
+  renderOptions() {
+    const { sslCertVerify } = this.state;
+    const { source } = this.props;
+
+    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
+
+    switch (sourceType) {
+      case 'vcenter':
+      case 'satellite':
+        return (
+          <FieldGroup label={'Options'}>
+            <div className="quipucords-checkbox">
+              <Checkbox checked={sslCertVerify} bsClass="" onChange={this.onChangeSslCertVerify}>
+                &nbsp; Verify SSL Certificate
+              </Checkbox>
+            </div>
+          </FieldGroup>
+        );
+      default:
+        return null;
+    }
+  }
+
   render() {
     const { sourceName, sourceNameError } = this.state;
     const { source } = this.props;
@@ -468,6 +519,7 @@ class AddSourceWizardStepTwo extends React.Component {
         </FieldGroup>
         {this.renderHosts()}
         {this.renderCredentials()}
+        {this.renderOptions()}
       </Form>
     );
   }
