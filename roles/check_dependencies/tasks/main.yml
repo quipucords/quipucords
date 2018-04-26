@@ -4,14 +4,14 @@
   set_fact:
     internal_host_started_processing_role: "check_dependencies"
 
-- name: gather internal_have_dmidecode_cmd
+- name: gather have_dmidecode_cmd
   raw: command -v /usr/sbin/dmidecode
-  register: internal_have_dmidecode_cmd
+  register: have_dmidecode_cmd
   ignore_errors: yes
 
-- name: set internal_have_dmidecode
+- name: set have_dmidecode
   set_fact:
-    internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.get('rc') == 0 }}"
+    have_dmidecode: "{{ have_dmidecode_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_tune2fs_cmd

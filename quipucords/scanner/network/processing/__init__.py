@@ -20,3 +20,4 @@ from . import ifconfig
 from . import date
 from . import subman
 from . import yum
+from . import virt
