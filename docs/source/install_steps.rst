@@ -4,7 +4,7 @@ You can install the command line and server components by using the following in
 
 .. include:: install_cli.rst
 
-Installing the Docker Requirement and Quipucords Server Container Image
+Installing Docker and the Quipucords Server Container Image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The Quipucords server is delivered as a container image that runs on your server. First you must install and start the necessary prerequisite, Docker, to run the container. Then you can obtain and install the Quipucords server container image.
 
