@@ -24,6 +24,7 @@ PROCESSORS = {}
 NO_DATA = ''  # Result value when we have errors.
 
 DEPS = 'DEPS'
+REQUIRE_DEPS = 'REQUIRE_DEPS'
 FAILED = 'failed'
 KEY = 'KEY'
 RC = 'rc'
@@ -90,16 +91,20 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
     # Use StopIteration to let the inner for loop continue the
     # outer for loop.
+    dependencies = {}
     try:
+        require_deps = getattr(processor, REQUIRE_DEPS, True)
         for dep in getattr(processor, DEPS, []):
-            if dep not in previous_host_facts.keys() or \
-                    not previous_host_facts[dep] or \
-                    isinstance(previous_host_facts[dep], Exception):
-                log_message = 'POST PROCESSING MISSING REQ DEP %s. '\
-                    'Fact %s missing dependency %s' %\
-                    (host, fact_key, dep)
-                scan_task.log_message(log_message, log_level=DEBUG)
-                raise StopIteration()
+            if require_deps or isinstance(previous_host_facts[dep], Exception):
+                if dep not in previous_host_facts.keys() or \
+                        not previous_host_facts[dep] or \
+                        isinstance(previous_host_facts[dep], Exception):
+                    log_message = 'POST PROCESSING MISSING REQ DEP %s. '\
+                        'Fact %s missing dependency %s' %\
+                        (host, fact_key, dep)
+                    scan_task.log_message(log_message, log_level=DEBUG)
+                    raise StopIteration()
+            dependencies[dep] = previous_host_facts.get(dep)
     except StopIteration:
         return NO_DATA
 
@@ -131,7 +136,7 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
         return NO_DATA
 
     try:
-        processor_out = processor.process(fact_value)
+        processor_out = processor.process(fact_value, dependencies)
     except Exception:  # pylint: disable=broad-except
         log_message = 'FAILED POST PROCESSING %s. '\
             'Processor for %s got value %s, returned %s' % (
@@ -167,7 +172,10 @@ class Processor(object, metaclass=ProcessorMeta):
     #   DEPS: a list of keys of other facts that this one depends
     #     on. If one of the deps had an error, we will show a "missing
     #     dependency" message rather than an error for this fact
-    #     (optional).
+    #     (optional).  If REQUIRE_DEPS is False and a dependency is
+    #     missing (not an Exception), processing will continue.
+    #   REQUIRE_DEPS: bool indicating whether a missing dependency should
+    #      be an error or not.
     #   RETURN_CODE_ANY: if True, process() will pass results with
     #     non-zero return code to this processor. If False, process()
     #     will emit a default error message if the shell command has
@@ -178,7 +186,7 @@ class Processor(object, metaclass=ProcessorMeta):
     KEY = None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Process Ansible output.
 
         :param output: an Ansible output dictionary. This typically
@@ -186,6 +194,8 @@ class Processor(object, metaclass=ProcessorMeta):
           instead have a member 'results', which is an array of dicts
           that each have 'rc', 'stdout', 'stdout_lines', and
           'item'.
+        :param dependencies: declared dependencies will be passed
+          to the processor so values can be examined.
 
         :returns: a Python object that represents output. Returns
           NO_DATA in case of error.
