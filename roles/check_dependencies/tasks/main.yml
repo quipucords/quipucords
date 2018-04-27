@@ -117,15 +117,14 @@
     have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_ifconfig_cmd
-  raw: command -v ifconfig
-  register: internal_have_ifconfig_cmd
+- name: gather internal_whereis_ifconfig_cmd
+  raw: whereis ifconfig
+  register:  internal_whereis_ifconfig_cmd
   ignore_errors: yes
-  become: yes
 
 - name: set internal_have_ifconfig
   set_fact:
-    internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.get('rc') == 0 }}"
+    internal_have_ifconfig: "{{ internal_whereis_ifconfig_cmd.get('rc') == 0  }} and {{ internal_whereis_ifconfig_cmd.get('stdout_lines') != ['ifconfig:']}}"
   ignore_errors: yes
 
 # Not internal for the same reason as have_java.
