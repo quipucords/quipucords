@@ -107,15 +107,16 @@
     have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_chkconfig_cmd
-  raw: command -v chkconfig
-  register: internal_have_chkconfig_cmd
+- name: gather internal_whereis_chkconfig_cmd
+  raw: whereis chkconfig
+  register: internal_whereis_chkconfig_cmd
   ignore_errors: yes
 
 - name: set have_chkconfig
   set_fact:
-    have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
+    have_chkconfig: true
   ignore_errors: yes
+  when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines') != ['chkconfig:'])
 
 - name: gather internal_have_ifconfig_cmd
   raw: command -v ifconfig
