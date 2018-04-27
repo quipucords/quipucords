@@ -74,11 +74,11 @@
   register: internal_cpu_socket_count_cmd
   become: yes
   ignore_errors: yes
-  when: 'have_dmidecode'
+  when: 'internal_have_dmidecode'
 
 - name: extract result value for cpu.socket_count
   set_fact:
-    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout'] | trim if have_dmidecode else '' }}"
+    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
   ignore_errors: yes
   when: '"stdout" in internal_cpu_socket_count_cmd'
 

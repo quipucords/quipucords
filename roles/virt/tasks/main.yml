@@ -6,49 +6,39 @@
 
 - name: check if privcmd exists
   raw: if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
-  register: virt_xen_privcmd_found
+  register: internal_xen_privcmd_found
   ignore_errors: yes
 
 - name: check if kvm exists
   raw: if [ -e /dev/kvm ]; then echo "Y"; else echo "N"; fi
-  register: virt_kvm_found
+  register: internal_kvm_found
   ignore_errors: yes
 
 - name: check for xen guests
   raw: ps aux | grep xend | grep -v grep | wc -l
-  register: virt_xen_guest
+  register: internal_xen_guest
   ignore_errors: yes
 
-- name: set system manufacture
-  raw: manufacturer=$(/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p')
-  register: virt_sys_manufacturer_cmd
+- name: set system manufacturer
+  raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  register: internal_sys_manufacturer
   become: yes
   ignore_errors: yes
-  when: 'have_dmidecode'
-
-- name: extract result value for virt_sys_manufacturer_cmd
-  set_fact:
-    virt_sys_manufacturer: "{{  virt_sys_manufacturer_cmd['stdout_lines'][0] | trim | default('') }}"
-  ignore_errors: yes
-  when: '"stdout_lines" in virt_sys_manufacturer_cmd'
-
-- name: handle failure value for virt_sys_manufacturer
-  set_fact:
-    virt_sys_manufacturer: ""
-  ignore_errors: yes
-  when: '"stdout_lines" not in virt_sys_manufacturer_cmd'
+  when: 'internal_have_dmidecode'
 
 - name: check cpu model name for QEMU
   raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
-  register: virt_cpu_model_name_kvm
+  register: internal_cpu_model_name_kvm
   ignore_errors: yes
 
 - name: initialize virt.type
-  set_fact: virt_type=""
+  raw: echo "DUMMY_VALUE"
+  register: virt_type
   ignore_errors: yes
 
 - name: initialize virt.virt
-  set_fact: virt_virt=""
+  raw: echo "DUMMY_VALUE"
+  register: virt_virt
   ignore_errors: yes
 
 - name: gather virt.num_guests fact

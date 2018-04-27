@@ -95,7 +95,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     try:
         require_deps = getattr(processor, REQUIRE_DEPS, True)
         for dep in getattr(processor, DEPS, []):
-            if require_deps or isinstance(previous_host_facts[dep], Exception):
+            if require_deps or isinstance(
+                    previous_host_facts.get(dep), Exception):
                 if dep not in previous_host_facts.keys() or \
                         not previous_host_facts[dep] or \
                         isinstance(previous_host_facts[dep], Exception):
@@ -186,7 +187,7 @@ class Processor(object, metaclass=ProcessorMeta):
     KEY = None
 
     @staticmethod
-    def process(output, dependencies=None):
+    def process(output, dependencies):
         """Process Ansible output.
 
         :param output: an Ansible output dictionary. This typically
