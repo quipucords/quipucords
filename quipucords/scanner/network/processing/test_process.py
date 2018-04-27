@@ -89,7 +89,7 @@ class MyProcessor(process.Processor):
     KEY = TEST_KEY
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return 1 to distinguish from MyDependentProcessor."""
         return 1
 
@@ -102,7 +102,7 @@ class MyDependentProcessor(process.Processor):
     DEPS = [NO_PROCESSOR_KEY]
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return 2 to distinguish from MyProcessor."""
         return 2
 
@@ -114,7 +114,7 @@ class MyErroringProcessor(process.Processor):
     KEY = PROCESSOR_ERROR_KEY
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Uh oh, this processor doesn't work."""
         raise Exception('Something went wrong!')
 
