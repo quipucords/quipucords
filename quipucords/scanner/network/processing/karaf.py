@@ -29,7 +29,7 @@ class ProcessKarafRunningProcesses(process.Processor):
     KEY = 'karaf_running_processes'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Preserve the output except for a known issue."""
         if FIND_WARNING in output['stdout']:
             logging.error('Find command failed')
@@ -44,7 +44,7 @@ class ProcessFindKaraf(process.Processor):
     KEY = 'karaf_find_karaf_jar'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the command's output."""
         return output['stdout_lines']
 
@@ -57,7 +57,7 @@ class ProcessLocateKaraf(process.Processor):
     DEPS = ['have_locate']
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return output['stdout_lines']
 
@@ -85,7 +85,7 @@ class ProcessKarafHomeBinFuse(process.Processor):
     KEY = 'karaf_home_bin_fuse'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return {result['item']: result.get('rc', 1) == 0
                 for result in output['results']}
@@ -97,7 +97,7 @@ class ProcessKarafHomeSystemOrgJboss(process.Processor):
     KEY = 'karaf_home_system_org_jboss'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         return {str(result['stdout_lines']): result.get('rc', 1) == 0
                 for result in output['results']}
@@ -112,7 +112,7 @@ class FuseVersionProcessor(process.Processor):
     KEY = None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Process the output of a with_items task from Ansible.
 
         :param output: the output of a with_items task.
@@ -145,7 +145,7 @@ class FuseVersionProcessorLocate(process.Processor):
     KEY = None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Process the output of a with_items task from Ansible.
 
         :param output: the output of a with_items task.

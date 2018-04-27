@@ -2,7 +2,7 @@ Quick Start: A Network Scan Example
 ===================================
 This Quick Start information describes how you use the qpc command line interface to complete a simple Quipucords task of scanning a network and viewing a report. Use this information to become more familiar with Quipucords terminology, commands, and processes.
 
-For more information about how to work with Quipucords, see `Using Quipucords <using_qpc.html>`_. For the complete list of options for each qpc command and subcommand, see the `qpc man page <man.html>`_.
+For more information about how to work with Quipucords, see `Using Quipucords from the Command Line Interface <using_qpc.html>`_. For the complete list of options for each qpc command and subcommand, see the `qpc man page <man.html>`_.
 
 How a Quipucords Scan Works
 ---------------------------
