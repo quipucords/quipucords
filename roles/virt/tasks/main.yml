@@ -32,13 +32,13 @@
   ignore_errors: yes
 
 - name: initialize virt.type
-  raw: echo "DUMMY_VALUE"
-  register: virt_type
+  set_fact:
+    virt_type: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 - name: initialize virt.virt
-  raw: echo "DUMMY_VALUE"
-  register: virt_virt
+  set_fact:
+    virt_virt: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 - name: gather virt.num_guests fact
