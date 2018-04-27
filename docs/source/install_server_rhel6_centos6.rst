@@ -29,7 +29,8 @@ When your system meets the minimum required kernel release, you can use the foll
     # sudo yum localinstall --nogpgcheck docker-engine-1.7.1-1.el6.x86_64.rpm
 
 Starting Docker on Red Hat Enterprise Linux and CentOS 6.6 or later
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 After you install Docker, you must start it and verify that it is running.
 
 1. Start the Docker daemon::

@@ -7,7 +7,10 @@ You can install Docker in different ways, depending on your needs:
 - You can download the RPM package, install it manually, and manage upgrades manually. This choice is useful when Docker is installed on systems with limited or no access to the internet.
 
 Installing from the repository
-""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++
+
+To install from the repository, use the following steps:
+
 1. Make sure that you are logged in as a user with ``sudo`` or ``root`` privileges.
 
 2. Install the required packages::
@@ -23,7 +26,10 @@ Installing from the repository
     # sudo yum install docker-ce
 
 Installing from a package
-"""""""""""""""""""""""""
++++++++++++++++++++++++++
+
+To install from a package, use the following steps:
+
 1. Go to https://download.docker.com/linux/centos/7/x86_64/stable/Packages/. For the Docker version that you want to install, download the RPM package to the intended installation system.
 
 2. Make sure that you are logged in as a user with ``sudo`` or ``root`` privileges.
@@ -33,7 +39,8 @@ Installing from a package
     # sudo yum install /path/to/package.rpm
 
 Starting Docker on CentOS 7
-"""""""""""""""""""""""""""
++++++++++++++++++++++++++++
+
 After you install Docker, you must start it and verify that it is running.
 
 1. Start Docker::

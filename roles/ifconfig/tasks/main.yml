@@ -4,13 +4,8 @@
   set_fact:
     internal_host_started_processing_role: "ifconfig"
 
-- name: initialize ifconfig.mac-addresses
-  set_fact:
-    ifconfig_mac_addresses: "{{ None }}"
-  ignore_errors: yes
-
 - name: gather ifconfig.mac-addresses fact
-  raw: ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+  raw: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
   register: internal_ifconfig_mac_addresses_cmd
   ignore_errors: yes
   become: yes
@@ -23,7 +18,7 @@
   when: '"stdout_lines" in internal_ifconfig_mac_addresses_cmd'
 
 - name: gather ifconfig.ip-address fact
-  raw: ifconfig -a
+  raw: /sbin/ifconfig -a
   register: internal_ifconfig_ip_addresses_cmd
   ignore_errors: yes
   become: yes
