@@ -8,7 +8,7 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 
-"""Unit tests for initial processing of ifconfig facts."""
+"""Unit tests for initial processing of virt facts."""
 
 
 import unittest
@@ -193,7 +193,7 @@ class TestProcessVirtType(unittest.TestCase):
             virt.VIRT_TYPE_VMWARE)
 
     def test_dmidecode_virtualbox_case(self):
-        """Found virt_type dmidecode vmware fact."""
+        """Found virt_type dmidecode virtualbox fact."""
         dependencies = {
             'internal_have_dmidecode': True,
             'internal_sys_manufacturer': 'hi innotek gMBh there',

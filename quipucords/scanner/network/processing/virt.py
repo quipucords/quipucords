@@ -7,7 +7,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Initial processing of the shell output from the cpu role."""
+"""Initial processing of the shell output from the virt role."""
 
 from api.common.util import convert_to_int, is_int
 
@@ -31,7 +31,6 @@ class ProcessVirtXenPrivcmdFound(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_xen_privcmd_found output."""
-        result = output
         result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
@@ -47,7 +46,6 @@ class ProcessVirtKvmFound(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_kvm_found output."""
-        result = output
         result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
@@ -63,7 +61,6 @@ class ProcessVirtXenGuest(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_xen_guest output."""
-        result = output
         result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
@@ -82,7 +79,6 @@ class ProcessSystemManufacturer(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_sys_manufacturer output."""
-        result = output
         result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
@@ -99,7 +95,6 @@ class ProcessVirtCpuModelNameKvm(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_cpu_model_name_kvm output."""
-        result = output
         result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
