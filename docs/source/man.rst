@@ -368,7 +368,6 @@ For example, if you would like to reset the ``--disabled-optional-products`` opt
 **TIP:** After editing a scan use the ``qpc scan show`` command to review those edits.
 
 Listing and Showing Scans
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``qpc scan list`` command returns the summary details for all created scan objects or all created scan objects of a certain type. The output of this command includes the identifier, the source or sources, and any options supplied by the user.

@@ -1,7 +1,8 @@
 .. _connection:
 
 Configuring the qpc Command Line Tool Connection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------
+
 After the Quipucords server is running, you can configure the qpc command line tool to work with the server. When the command line tool is configured, you can log in to Quipucords with the command line interface and begin setting up and running scans on your IT infrastructure.
 
 The ``qpc server config`` command configures the connection between the qpc command line tool and the Quipucords server.
