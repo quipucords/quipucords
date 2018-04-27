@@ -71,7 +71,7 @@ class ProcessJbossBRMSManifestMF(process.Processor):
         return None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return a set of (directory, version string) pairs."""
         results = set()
         for item in output['results']:
@@ -108,7 +108,7 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
     KEY = 'jboss_brms_kie_in_business_central'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
         for item in output['results']:
@@ -145,7 +145,7 @@ class EnclosingWarJarProcessor(process.Processor):
     REMOVE_PREFIX = None
 
     @classmethod
-    def process(cls, output):
+    def process(cls, output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
         for line in output['stdout_lines']:
@@ -200,6 +200,6 @@ class ProcessFindBRMSKieWarVer(process.Processor):
     KEY = 'jboss_brms_kie_war_ver'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the command's output."""
         return output['stdout_lines']

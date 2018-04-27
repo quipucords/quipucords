@@ -23,7 +23,7 @@ class ProcessIPAddresses(process.Processor):
     KEY = 'ifconfig_ip_addresses'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         result = []
         lines = [line.strip() for line in output['stdout_lines']]
@@ -43,7 +43,7 @@ class ProcessMacAddresses(process.Processor):
     KEY = 'ifconfig_mac_addresses'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         result = []
         addresses = output.get('stdout_lines', [])

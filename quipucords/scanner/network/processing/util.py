@@ -44,7 +44,7 @@ class InitLineFinder(process.Processor):
     IGNORE_WORDS = None  # A list of words to ignore
 
     @classmethod
-    def process(cls, output):
+    def process(cls, output, dependencies=None):
         """Find lines where the first element contains a keyword."""
         matches = []
 
@@ -71,7 +71,7 @@ class FindJarVer(process.Processor):
     KEY = None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the command's output."""
         versions = []
         for line in output['stdout_lines']:
@@ -91,7 +91,7 @@ class FindJar(process.Processor):
     KEY = None
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Return the command's output."""
         versions = []
         for line in output['stdout_lines']:
@@ -118,7 +118,7 @@ class PerItemProcessor(process.Processor):
     KEY = None
 
     @classmethod
-    def process(cls, output):
+    def process(cls, output, dependencies=None):
         """Process the output of an Ansible with-items task."""
         result = {}
         for item in output['results']:

@@ -26,7 +26,7 @@ class ProcessEnableYumRepolist(process.Processor):
     KEY = 'yum_enabled_repolist'
 
     @staticmethod
-    def process(output):
+    def process(output, dependencies=None):
         """Pass the output back through."""
         repos = []
         out_lines = output['stdout_lines']
