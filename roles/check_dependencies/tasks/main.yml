@@ -123,10 +123,33 @@
   ignore_errors: yes
   become: yes
 
+- name: gather internal_have_ifconfig_cmd
+  raw: whereis ifconfig
+  register:  internal_whereis_ifconfig_cmd
+  ignore_errors: yes
+  become: yes
+
+- name: set internal_whereis_ifconfig
+  set_fact:
+    internal_whereis_ifconfig: false
+  ignore_errors: yes
+
 - name: set internal_have_ifconfig
   set_fact:
-    internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.get('rc') == 0 }}"
+    internal_have_ifconfig: false
   ignore_errors: yes
+
+- name: set internal_whereis_ifconfig
+  set_fact:
+    internal_whereis_ifconfig: true
+  ignore_errors: yes
+  when: (internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines') not in [['', 'ifconfig:'], [''], ['ifconfig:']])
+
+- name: set internal_have_ifconfig
+  set_fact:
+    internal_have_ifconfig: true
+  ignore_errors: yes
+  when: (internal_have_ifconfig_cmd.get('rc') == 0 or internal_whereis_ifconfig == true)
 
 # Not internal for the same reason as have_java.
 - name: gather internal_have_unzip_cmd
