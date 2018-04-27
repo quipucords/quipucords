@@ -11,6 +11,7 @@
 """Callback object for capturing ansible task execution."""
 
 import logging
+import traceback
 
 from ansible.plugins.callback import CallbackBase
 
@@ -34,6 +35,7 @@ class ConnectResultCallback(CallbackBase):
     scan, as we scan it.
     """
 
+    # pylint: disable=protected-access
     def __init__(self, result_store, credential, source, display=None):
         """Create result callback."""
         super().__init__(display=display)
@@ -43,60 +45,87 @@ class ConnectResultCallback(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
-        host = result._host.name      # pylint: disable=protected-access
-        task_result = result._result  # pylint: disable=protected-access
-        if 'rc' in task_result and task_result['rc'] == 0:
-            self.result_store.record_result(host,
-                                            self.source,
-                                            self.credential,
-                                            SystemConnectionResult.SUCCESS)
+        try:
+            host = result._host.name      # pylint: disable=protected-access
+            task_result = result._result  # pylint: disable=protected-access
+            if 'rc' in task_result and task_result['rc'] == 0:
+                self.result_store.record_result(host,
+                                                self.source,
+                                                self.credential,
+                                                SystemConnectionResult.SUCCESS)
 
-        result_obj = _construct_result(result)
-        logger.debug('%s', result_obj)
+            result_obj = _construct_result(result)
+            logger.debug('%s', result_obj)
+        except Exception as error:
+            self.result_store.scan_task.log_message(
+                'UNEXPECTED FAILURE in v2_runner_on_ok.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
+                log_level=logging.ERROR)
+            traceback.print_exc()
+            raise error
 
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
-        # pylint: disable=protected-access
-        host = result._host.name
-        result_message = result._result.get(
-            'msg', 'No information given on unreachable warning.  '
-            'Missing msg attribute.')
-        ssl_ansible_auth_error = result_message is not None and \
-            'permission denied' in result_message.lower()
-        if not ssl_ansible_auth_error:
-            # host is unreachable
-            self.result_store.record_result(host,
-                                            self.source,
-                                            self.credential,
-                                            SystemConnectionResult.UNREACHABLE)
-        else:
-            # invalid creds
-            message = 'PERMISSION DENIED %s could not connect'\
-                ' with cred %s.' % (host, self.credential.name)
-            self.result_store.scan_task.log_message(message)
+        try:
+            host = result._host.name
+            result_message = result._result.get(
+                'msg', 'No information given on unreachable warning.  '
+                'Missing msg attribute.')
+            ssl_ansible_auth_error = result_message is not None and \
+                'permission denied' in result_message.lower()
+            if not ssl_ansible_auth_error:
+                # host is unreachable
+                self.result_store.record_result(
+                    host,
+                    self.source,
+                    self.credential,
+                    SystemConnectionResult.UNREACHABLE)
+            else:
+                # invalid creds
+                message = 'PERMISSION DENIED %s could not connect'\
+                    ' with cred %s.' % (host, self.credential.name)
+                self.result_store.scan_task.log_message(message)
 
-        result_obj = _construct_result(result)
-        logger.debug('%s', result_obj)
+            result_obj = _construct_result(result)
+            logger.debug('%s', result_obj)
+        except Exception as error:
+            self.result_store.scan_task.log_message(
+                'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
+                log_level=logging.ERROR)
+            traceback.print_exc()
+            raise error
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
         # pylint: disable=protected-access
-        host = result._host.name
-        result_message = result._result.get(
-            'stderr', 'No information given on failure.  '
-            'Missing stderr attribute.')
-        authentication_error = result_message is not None and \
-            'permission denied' in result_message.lower()
-        if not authentication_error:
-            # failure is not authentication
-            message = 'FAILED %s. %s' % (host, result_message)
-            self.result_store.scan_task.log_message(
-                message, log_level=logging.ERROR)
-        else:
-            # invalid creds
-            message = 'PERMISSION DENIED %s could not connect'\
-                ' with cred %s.' % (host, self.credential.name)
-            self.result_store.scan_task.log_message(message)
+        try:
+            host = result._host.name
+            result_message = result._result.get(
+                'stderr', 'No information given on failure.  '
+                'Missing stderr attribute.')
+            authentication_error = result_message is not None and \
+                'permission denied' in result_message.lower()
+            if not authentication_error:
+                # failure is not authentication
+                message = 'FAILED %s. %s' % (host, result_message)
+                self.result_store.scan_task.log_message(
+                    message, log_level=logging.ERROR)
+            else:
+                # invalid creds
+                message = 'PERMISSION DENIED %s could not connect'\
+                    ' with cred %s.' % (host, self.credential.name)
+                self.result_store.scan_task.log_message(message)
 
-        result_obj = _construct_result(result)
-        logger.debug('%s', result_obj)
+            result_obj = _construct_result(result)
+            logger.debug('%s', result_obj)
+        except Exception as error:
+            self.result_store.scan_task.log_message(
+                'UNEXPECTED FAILURE in v2_runner_on_failed.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
+                log_level=logging.ERROR)
+            traceback.print_exc()
+            raise error

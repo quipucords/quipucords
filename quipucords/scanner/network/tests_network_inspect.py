@@ -76,7 +76,8 @@ class TestNormalizeResult(unittest.TestCase):
                     _host=SimpleNamespace(name='hostname'),
                     _result=self.RESULT,
                     _task=SimpleNamespace(register='internal_name'))),
-            [])
+            [('internal_name',
+              {'rc': 0, 'stdout': 'a', 'stdout_lines': ['a']})])
 
     def test_register_not_internal(self):
         """A task that registers a non-internal variable."""
@@ -125,7 +126,7 @@ class TestNormalizeResult(unittest.TestCase):
                     _result={ANSIBLE_FACTS:
                              {'internal_fact': 'fact_result'}},
                     _task=SimpleNamespace(register='name'))),
-            [])
+            [('internal_fact', 'fact_result')])
 
 
 class NetworkInspectScannerTest(TestCase):

@@ -33,6 +33,8 @@ RETURN_CODE_ANY = 'RETURN_CODE_ANY'
 SKIPPED = 'skipped'
 STDOUT = 'stdout'
 
+QPC_FORCE_POST_PROCESS = 'QPC_FORCE_POST_PROCESS'
+
 SUDO_ERROR = 'sudo: a password is required'
 
 
@@ -95,7 +97,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     try:
         require_deps = getattr(processor, REQUIRE_DEPS, True)
         for dep in getattr(processor, DEPS, []):
-            if require_deps or isinstance(previous_host_facts[dep], Exception):
+            if require_deps or isinstance(
+                    previous_host_facts.get(dep), Exception):
                 if dep not in previous_host_facts.keys() or \
                         not previous_host_facts[dep] or \
                         isinstance(previous_host_facts[dep], Exception):
@@ -110,30 +113,31 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
     # Don't touch things that are not standard Ansible results,
     # because we don't know what format they will have.
-    if not is_ansible_task_result(fact_value):
-        log_message = 'FAILED POST PROCESSING %s. '\
-            'fact_value %s:%s needs postprocessing but'\
-            ' is not an Ansible result' % (host, fact_key, fact_value)
-        scan_task.log_message(log_message, log_level=ERROR)
-        # We don't know what data is supposed to go here, because
-        # we can't run the postprocessor. Leaving the existing
-        # data would cause database corruption and maybe trigger
-        # other bugs later on. So treat this like any other error.
-        return NO_DATA
+    if fact_value != QPC_FORCE_POST_PROCESS:
+        if not is_ansible_task_result(fact_value):
+            log_message = 'FAILED POST PROCESSING %s. '\
+                'fact_value %s:%s needs postprocessing but'\
+                ' is not an Ansible result' % (host, fact_key, fact_value)
+            scan_task.log_message(log_message, log_level=ERROR)
+            # We don't know what data is supposed to go here, because
+            # we can't run the postprocessor. Leaving the existing
+            # data would cause database corruption and maybe trigger
+            # other bugs later on. So treat this like any other error.
+            return NO_DATA
 
-    if fact_value.get(SKIPPED, False):
-        log_message = 'SKIPPED POST PROCESSSING %s. '\
-            'fact %s skipped, no results' % (
-                host, fact_key)
-        scan_task.log_message(log_message, log_level=DEBUG)
-        return NO_DATA
+        if fact_value.get(SKIPPED, False):
+            log_message = 'SKIPPED POST PROCESSSING %s. '\
+                'fact %s skipped, no results' % (
+                    host, fact_key)
+            scan_task.log_message(log_message, log_level=DEBUG)
+            return NO_DATA
 
-    return_code = fact_value.get(RC, 0)
-    if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-        log_message = 'FAILED REMOTE COMMAND %s. %s exited with %s: %s' % (
-            host, fact_key, return_code, fact_value['stdout'])
-        scan_task.log_message(log_message, log_level=ERROR)
-        return NO_DATA
+        return_code = fact_value.get(RC, 0)
+        if return_code and not getattr(processor, RETURN_CODE_ANY, False):
+            log_message = 'FAILED REMOTE COMMAND %s. %s exited with %s: %s' % (
+                host, fact_key, return_code, fact_value['stdout'])
+            scan_task.log_message(log_message, log_level=ERROR)
+            return NO_DATA
 
     try:
         processor_out = processor.process(fact_value, dependencies)
@@ -186,7 +190,7 @@ class Processor(object, metaclass=ProcessorMeta):
     KEY = None
 
     @staticmethod
-    def process(output, dependencies=None):
+    def process(output, dependencies):
         """Process Ansible output.
 
         :param output: an Ansible output dictionary. This typically
