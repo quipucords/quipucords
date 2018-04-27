@@ -16,6 +16,13 @@ from scanner.network.processing import process
 
 # pylint: disable=too-few-public-methods
 
+VIRT_TYPE_VMWARE = 'vmware'
+VIRT_TYPE_VIRTUALBOX = 'virtualbox'
+VIRT_TYPE_VIRTUALPC = 'virtualpc'
+VIRT_TYPE_KVM = 'kvm'
+VIRT_TYPE_XEN = 'xen'
+
+
 class ProcessVirtXenPrivcmdFound(process.Processor):
     """Process the internal_xen_privcmd_found from virt."""
 
@@ -93,19 +100,11 @@ class ProcessVirtCpuModelNameKvm(process.Processor):
     def process(output, dependencies):
         """Process internal_cpu_model_name_kvm output."""
         result = output
+        result = output.get('stdout_lines')
         if isinstance(result, list):
             result = [line for line in result if line]
-            return bool(result) and \
-                is_int(result[0]) and \
-                convert_to_int(result[0]) > 0
+            return bool(result) and result[0] == 'Y'
         return False
-
-
-VIRT_TYPE_VMWARE = 'vmware'
-VIRT_TYPE_VIRTUALBOX = 'virtualbox'
-VIRT_TYPE_VIRTUALPC = 'virtualpc'
-VIRT_TYPE_KVM = 'kvm'
-VIRT_TYPE_XEN = 'xen'
 
 
 class ProcessVirtType(process.Processor):
