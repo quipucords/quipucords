@@ -123,14 +123,15 @@ class PerItemProcessor(process.Processor):
         result = {}
         for item in output['results']:
             item_name = item['item']
-            try:
-                val = cls.process_item(item)
-            except Exception as ex:  # pylint: disable=broad-except
-                logger.debug('Processor for %s hit error on %s', cls.KEY, item)
-                logger.exception(ex)
-                val = None
-            if val is not None:
-                result[item_name] = val
+            if item_name:
+                try:
+                    val = cls.process_item(item)
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.debug('Processor for %s hit error on %s', cls.KEY, item)
+                    logger.exception(ex)
+                    val = None
+                if val is not None:
+                    result[item_name] = val
 
         return result
 
