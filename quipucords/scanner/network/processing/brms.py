@@ -169,7 +169,7 @@ class ProcessLocateKieApiFiles(EnclosingWarJarProcessor):
     """Process locate results for kie-api files."""
 
     KEY = 'jboss_brms_locate_kie_api'
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']
     REMOVE_PREFIX = 'kie-api-'
     RETURN_CODE_ANY = True
 
