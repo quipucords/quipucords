@@ -29,7 +29,7 @@ class ProcessJbossEapRunningPaths(process.Processor):
 
     KEY = 'jboss_eap_running_paths'
 
-    DEPS = ['have_java']
+    DEPS = ['internal_have_java']
 
     @staticmethod
     def process(output, dependencies=None):
@@ -142,7 +142,7 @@ class ProcessJbossEapLocate(process.Processor):
 
     KEY = 'jboss_eap_locate_jboss_modules_jar'
 
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']
 
     @staticmethod
     def process(output, dependencies=None):
@@ -154,7 +154,7 @@ class ProcessJbossEapLocate(process.Processor):
 class ProcessJbossEapChkconfig(util.InitLineFinder):
     """Process the output of 'chkconfig'."""
 
-    DEPS = ['have_chkconfig']
+    DEPS = ['internal_have_chkconfig']
     KEY = 'jboss_eap_chkconfig'
     KEYWORDS = ['jboss', 'eap']
 
@@ -162,7 +162,7 @@ class ProcessJbossEapChkconfig(util.InitLineFinder):
 class ProcessJbossEapSystemctl(util.InitLineFinder):
     """Process the output of 'systemctl list-unit-files'."""
 
-    DEPS = ['have_systemctl']
+    DEPS = ['internal_have_systemctl']
     KEY = 'jboss_eap_systemctl_unit_files'
     KEYWORDS = ['jboss', 'eap']
 

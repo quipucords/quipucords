@@ -54,7 +54,7 @@ class ProcessLocateKaraf(process.Processor):
 
     KEY = 'karaf_locate_karaf_jar'
 
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']
 
     @staticmethod
     def process(output, dependencies=None):
@@ -65,7 +65,7 @@ class ProcessLocateKaraf(process.Processor):
 class ProcessJbossFuseChkconfig(util.InitLineFinder):
     """Process the output of 'chkconfig'."""
 
-    DEPS = ['have_chkconfig']
+    DEPS = ['internal_have_chkconfig']
     KEY = 'jboss_fuse_chkconfig'
     KEYWORDS = ['fuse']
 
@@ -73,7 +73,7 @@ class ProcessJbossFuseChkconfig(util.InitLineFinder):
 class ProcessJbossFuseSystemctl(util.InitLineFinder):
     """Process the output of 'systemctl list-unit-files'."""
 
-    DEPS = ['have_systemctl']
+    DEPS = ['internal_have_systemctl']
     KEY = 'jboss_fuse_systemctl_unit_files'
     KEYWORDS = ['fuse']
     IGNORE_WORDS = ['sys-fs-fuse-connections.mount']
@@ -198,18 +198,18 @@ class ProcessLocateCamel(FuseVersionProcessorLocate):
     """Process the output of 'locate camel-core'."""
 
     KEY = 'jboss_fuse_camel_ver'
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']
 
 
 class ProcessLocateActivemq(FuseVersionProcessorLocate):
     """Process the output of 'locate activemq'."""
 
     KEY = 'jboss_fuse_activemq_ver'
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']
 
 
 class ProcessLocateCxf(FuseVersionProcessorLocate):
     """Process the output of 'locate cxf-rt'."""
 
     KEY = 'jboss_fuse_cxf_ver'
-    DEPS = ['have_locate']
+    DEPS = ['internal_have_locate']

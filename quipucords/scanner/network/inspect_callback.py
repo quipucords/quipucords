@@ -12,6 +12,7 @@
 
 import json
 import logging
+import traceback
 
 from ansible.plugins.callback import CallbackBase
 
@@ -65,10 +66,8 @@ def normalize_result(result):
     if result._result is not None and isinstance(result._result, dict):
         if ANSIBLE_FACTS in result._result:
             return [(key, value)
-                    for key, value in result._result[ANSIBLE_FACTS].items()
-                    if not key.startswith(INTERNAL_)]
-        elif (isinstance(result._task.register, str) and
-              not result._task.register.startswith(INTERNAL_)):
+                    for key, value in result._result[ANSIBLE_FACTS].items()]
+        elif isinstance(result._task.register, str):
             return [(result._task.register, result._result)]
 
     return []
@@ -82,6 +81,7 @@ class InspectResultCallback(CallbackBase):
     or writing your own custom callback plugin
     """
 
+    # pylint: disable=protected-access
     def __init__(self, scan_task, display=None):
         """Create result callback."""
         super().__init__(display=display)
@@ -96,17 +96,35 @@ class InspectResultCallback(CallbackBase):
     # results the same way we treat ok ones.
     def v2_runner_on_ok(self, result):
         """Print a json representation of the result."""
-        self.handle_result(result)
+        try:
+            self.handle_result(result)
+        except Exception as error:
+            self.scan_task.log_message(
+                'UNEXPECTED FAILURE in v2_runner_on_ok.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
+                log_level=logging.ERROR)
+            traceback.print_exc()
+            raise error
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """Print a json representation of the result."""
         # pylint: disable=protected-access
-        with_items = result._result.get('results') is not None
-        if not with_items and result._result.get('msg') is not None:
+        try:
+            with_items = result._result.get('results') is not None
+            if not with_items and result._result.get('msg') is not None:
+                self.scan_task.log_message(
+                    'Unexpected ansible error:  %s' % result._result,
+                    log_level=logging.ERROR)
+            self.handle_result(result)
+        except Exception as error:
             self.scan_task.log_message(
-                'Unexpected ansible error:  %s' % result._result,
+                'UNEXPECTED FAILURE in v2_runner_on_failed.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
                 log_level=logging.ERROR)
-        self.handle_result(result)
+            traceback.print_exc()
+            raise error
 
     def handle_result(self, result):
         """Handle an incoming result object."""
@@ -161,6 +179,11 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def _finalize_host(self, host, host_status):
         results = self._ansible_facts.pop(host, {})
+
+        # remove internal facts before saving result
+        results = {fact_key: fact_value
+                   for fact_key, fact_value in results.items(
+                   ) if not fact_key.startswith(INTERNAL_)}
         self.scan_task.log_message('host scan complete for %s.  '
                                    'Status: %s. Facts %s' %
                                    (host, host_status, results),
@@ -202,20 +225,29 @@ class InspectResultCallback(CallbackBase):
     @transaction.atomic
     def v2_runner_on_unreachable(self, result):
         """Print a json representation of the result."""
-        scan_data_log.safe_log_ansible_result(result, self.scan_task)
-        result_obj = _construct_result(result)
-        self.results.append(result_obj)
-        logger.warning('%s', result_obj)
+        try:
+            scan_data_log.safe_log_ansible_result(result, self.scan_task)
+            result_obj = _construct_result(result)
+            self.results.append(result_obj)
+            logger.warning('%s', result_obj)
 
-        # pylint: disable=protected-access
-        unreachable_host = result._host.name
-        result_message = result._result.get(
-            'msg', 'No information given on unreachable warning.  '
-            'Missing msg attribute.')
-        message = 'UNREACHABLE %s. %s' % (unreachable_host,
-                                          result_message)
-        self.scan_task.log_message(
-            message, log_level=logging.ERROR)
+            # pylint: disable=protected-access
+            unreachable_host = result._host.name
+            result_message = result._result.get(
+                'msg', 'No information given on unreachable warning.  '
+                'Missing msg attribute.')
+            message = 'UNREACHABLE %s. %s' % (unreachable_host,
+                                              result_message)
+            self.scan_task.log_message(
+                message, log_level=logging.ERROR)
 
-        self._finalize_host(
-            unreachable_host, SystemInspectionResult.UNREACHABLE)
+            self._finalize_host(
+                unreachable_host, SystemInspectionResult.UNREACHABLE)
+        except Exception as error:
+            self.scan_task.log_message(
+                'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
+                '  Error: %s\nAnsible result: %s' % (
+                    error, result._result),
+                log_level=logging.ERROR)
+            traceback.print_exc()
+            raise error

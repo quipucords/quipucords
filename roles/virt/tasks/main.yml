@@ -6,7 +6,7 @@
 
 - name: check if privcmd exists
   raw: if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
-  register: internal_privcmd_found
+  register: internal_xen_privcmd_found
   ignore_errors: yes
 
 - name: check if kvm exists
@@ -19,184 +19,27 @@
   register: internal_xen_guest
   ignore_errors: yes
 
-- name: check system manufacture for VMware
-  raw: manufacturer=$(/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'); if [[ $manufacturer == *"VMware"* ]]; then echo "Y"; else echo "N"; fi
-  register: internal_sys_manu_vmware_cmd
+- name: set system manufacturer
+  raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  register: internal_sys_manufacturer
   become: yes
   ignore_errors: yes
   when: 'internal_have_dmidecode'
-
-- name: extract result value for internal_sys_manu_vmware_cmd
-  set_fact:
-    internal_sys_manu_vmware: "{{  internal_sys_manu_vmware_cmd['stdout_lines'][0] | trim | default('N') }}"
-  ignore_errors: yes
-  when: '"stdout_lines" in internal_sys_manu_vmware_cmd'
-
-- name: handle failure value for internal_sys_manu_vmware
-  set_fact:
-    internal_sys_manu_vmware: "N"
-  ignore_errors: yes
-  when: '"stdout_lines" not in internal_sys_manu_vmware_cmd'
-
-- name: check system manufacture for innotek GmbH
-  raw: manufacturer=$(/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'); if [[ $manufacturer == *"innotek GmbH"* ]]; then echo "Y"; else echo "N"; fi
-  register: internal_sys_manu_virtualbox_cmd
-  become: yes
-  ignore_errors: yes
-  when: 'internal_have_dmidecode'
-
-- name: extract result value for internal_sys_manu_virtualbox_cmd
-  set_fact:
-    internal_sys_manu_virtualbox: "{{  internal_sys_manu_virtualbox_cmd['stdout_lines'][0] | trim | default('N') }}"
-  ignore_errors: yes
-  when: '"stdout_lines" in internal_sys_manu_virtualbox_cmd'
-
-- name: handle failure value for internal_sys_manu_virtualbox
-  set_fact:
-    internal_sys_manu_virtualbox: "N"
-  ignore_errors: yes
-  when: '"stdout_lines" not in internal_sys_manu_virtualbox_cmd'
-
-- name: check system manufacture for Microsoft
-  raw: manufacturer=$(/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'); if [[ $manufacturer == *"Microsoft"* ]]; then echo "Y"; else echo "N"; fi
-  register: internal_sys_manu_virtualpc_cmd
-  become: yes
-  ignore_errors: yes
-  when: 'internal_have_dmidecode'
-
-- name: extract result value for internal_sys_manu_virtualpc_cmd
-  set_fact:
-    internal_sys_manu_virtualpc: "{{  internal_sys_manu_virtualpc_cmd['stdout_lines'][0] | trim | default('N') }}"
-  ignore_errors: yes
-  when: '"stdout_lines" in internal_sys_manu_virtualpc_cmd'
-
-- name: handle failure value for internal_sys_manu_virtualpc_cmd
-  set_fact:
-    internal_sys_manu_virtualpc: "N"
-  ignore_errors: yes
-  when: '"stdout_lines" not in internal_sys_manu_virtualpc_cmd'
-
-- name: check system manufacture for QEMU
-  raw: manufacturer=$(/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'); if [[ $manufacturer == *"QEMU"* ]]; then echo "Y"; else echo "N"; fi
-  register: internal_sys_manu_kvm_cmd
-  become: yes
-  ignore_errors: yes
-  when: 'internal_have_dmidecode'
-
-- name: extract result value for internal_sys_manu_kvm_cmd
-  set_fact:
-    internal_sys_manu_kvm: "{{  internal_sys_manu_kvm_cmd['stdout_lines'][0] | trim | default('N') }}"
-  ignore_errors: yes
-  when: '"stdout_lines" in internal_sys_manu_kvm_cmd'
-
-- name: handle failure value for internal_sys_manu_kvm
-  set_fact:
-    internal_sys_manu_kvm: "N"
-  ignore_errors: yes
-  when: '"stdout_lines" not in internal_sys_manu_kvm_cmd'
 
 - name: check cpu model name for QEMU
   raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
   register: internal_cpu_model_name_kvm
   ignore_errors: yes
 
-- name: initialize virt.virt
-  set_fact: virt_virt=""
-  ignore_errors: yes
-
 - name: initialize virt.type
-  set_fact: virt_type=""
+  set_fact:
+    virt_type: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
 
-- name: set virt.virt fact due to internal_cpu_model_name_kvm
-  set_fact: virt_virt="virt-guest"
+- name: initialize virt.virt
+  set_fact:
+    virt_virt: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
-  when: '(internal_cpu_model_name_kvm | json_query("stdout_lines[0]")) == "Y"'
-
-- name: set virt.type fact due to internal_cpu_model_name_kvm
-  set_fact: virt_type="kvm"
-  ignore_errors: yes
-  when: '(internal_cpu_model_name_kvm | json_query("stdout_lines[0]")) == "Y"'
-
-- name: set virt.virt fact due to internal_sys_manu_vmware
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_vmware == "Y"'
-
-- name: set virt.type fact due to internal_sys_manu_vmware
-  set_fact: virt_type="vmware"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_vmware == "Y"'
-
-- name: set virt.virt fact due to internal_sys_manu_virtualbox
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_virtualbox == "Y"'
-
-- name: set virt.type fact due to internal_sys_manu_virtualbox
-  set_fact: virt_type="virtualbox"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_virtualbox == "Y"'
-
-- name: set virt.virt fact due to internal_sys_manu_virtualpc
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and  internal_sys_manu_virtualpc == "Y"'
-
-- name: set virt.type fact due to internal_sys_manu_virtualpc
-  set_fact: virt_type="virtualpc"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_virtualpc == "Y"'
-
-- name: set virt.virt fact due to internal_sys_manu_kvm
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_kvm == "Y"'
-
-- name: set virt.type fact due to internal_sys_manu_kvm
-  set_fact: virt_type="kvm"
-  ignore_errors: yes
-  when: 'internal_have_dmidecode and internal_sys_manu_kvm == "Y"'
-
-- name: set virt.virt when dmidecode is not found
-  set_fact: virt_virt=''
-  ignore_errors: yes
-  when: not internal_have_dmidecode
-
-- name: set virt.type when dmidecode is not found
-  set_fact: virt_type=''
-  ignore_errors: yes
-  when: not internal_have_dmidecode
-
-- name: set virt.virt fact due to internal_xen_guest
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: 'internal_xen_guest | int > 0'
-
-- name: set virt.type fact due to internal_xen_guest
-  set_fact: virt_type="xen"
-  ignore_errors: yes
-  when: 'internal_xen_guest | int > 0'
-
-- name: set virt.virt fact due to kvm
-  set_fact: virt_virt="virt-host"
-  ignore_errors: yes
-  when: '(internal_kvm_found | json_query("stdout_lines[0]")) == "Y"'
-
-- name: set virt.type fact due to kvm
-  set_fact: virt_type="kvm"
-  ignore_errors: yes
-  when: '(internal_kvm_found | json_query("stdout_lines[0]")) == "Y"'
-
-- name: set virt.virt fact due to privcmd
-  set_fact: virt_virt="virt-guest"
-  ignore_errors: yes
-  when: '(internal_privcmd_found | json_query("stdout_lines[0]")) == "Y"'
-
-- name: set virt.type fact due to privcmd
-  set_fact: virt_type="xen"
-  ignore_errors: yes
-  when: '(internal_privcmd_found | json_query("stdout_lines[0]")) == "Y"'
 
 - name: gather virt.num_guests fact
   raw: virsh -c qemu:///system --readonly list --all | wc -l

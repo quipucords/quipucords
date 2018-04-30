@@ -56,6 +56,8 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
+if isinstance(DEBUG, str):
+    DEBUG = DEBUG.lower() == 'true'
 
 ALLOWED_HOST_LIST = os.environ.get('DJANGO_ALLOWED_HOST_LIST', '*').split(',')
 ALLOWED_HOSTS = ALLOWED_HOST_LIST
@@ -211,7 +213,9 @@ SCAN_DATA_LOG_FILE = os.getenv('SCAN_DATA_LOG_FILE',
                                DEFAULT_SCAN_DATA_LOG_FILE)
 SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
                                     1 << 30)  # default 1 GB
-DISABLE_SCAN_DATA_LOG = 'DISABLE_SCAN_DATA_LOG' in os.environ
+DISABLE_SCAN_DATA_LOG = os.getenv('DISABLE_SCAN_DATA_LOG', True)
+if isinstance(DISABLE_SCAN_DATA_LOG, str):
+    DISABLE_SCAN_DATA_LOG = DISABLE_SCAN_DATA_LOG.lower() == 'true'
 
 
 LOGGING = {
