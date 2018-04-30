@@ -9,6 +9,6 @@ After the connection between the qpc command line tool and the Quipucords server
 
     # qpc server login
 
-2. Enter the server user name and password at the prompts.
+2. Enter the server user name and password at the prompts.  The default login is ``admin`` and the password is ``pass``.
 
 The ``qpc server login`` command retrieves a token that is used for authentication with subsequent command line interface commands. That token is removed when you log out of the server, and expires daily.
