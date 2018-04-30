@@ -39,11 +39,9 @@
   register: internal_have_java_cmd
   ignore_errors: yes
 
-# have_java is not internal because the inspect callback needs to
-# collect it and pass it to the postprocessor.
-- name: set have_java
+- name: set internal_have_java
   set_fact:
-    have_java: "{{ internal_have_java_cmd.get('rc') == 0 }}"
+    internal_have_java: "{{ internal_have_java_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_rpm_cmd
@@ -91,10 +89,9 @@
   register: internal_have_locate_cmd
   ignore_errors: yes
 
-# Not internal for the same reason as have_java.
-- name: set have_locate
+- name: set internal_have_locate
   set_fact:
-    have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 }}"
+    internal_have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_systemctl_cmd
@@ -102,9 +99,9 @@
   register: internal_have_systemctl_cmd
   ignore_errors: yes
 
-- name: set have_systemctl
+- name: set internal_have_systemctl
   set_fact:
-    have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
+    internal_have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_chkconfig_cmd
@@ -112,9 +109,9 @@
   register: internal_have_chkconfig_cmd
   ignore_errors: yes
 
-- name: set have_chkconfig
+- name: set internal_have_chkconfig
   set_fact:
-    have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
+    internal_have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_whereis_ifconfig_cmd
@@ -127,13 +124,12 @@
     internal_have_ifconfig: "{{ internal_whereis_ifconfig_cmd.get('rc') == 0  }} and {{ internal_whereis_ifconfig_cmd.get('stdout_lines') != ['ifconfig:']}}"
   ignore_errors: yes
 
-# Not internal for the same reason as have_java.
 - name: gather internal_have_unzip_cmd
   raw: command -v unzip
   register: internal_have_unzip_cmd
   ignore_errors: yes
 
-- name: set have_unzip
+- name: set internal_have_unzip
   set_fact:
-    have_unzip: "{{ internal_have_unzip_cmd.get('rc') == 0 }}"
+    internal_have_unzip: "{{ internal_have_unzip_cmd.get('rc') == 0 }}"
   ignore_errors: yes

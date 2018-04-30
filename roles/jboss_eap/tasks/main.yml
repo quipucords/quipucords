@@ -9,13 +9,13 @@
   raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
   register: jboss_eap_running_paths
   ignore_errors: yes
-  when: 'have_java and jboss_eap'
+  when: 'internal_have_java and jboss_eap'
 
 - name: use locate to look for jboss-modules.jar
   raw: locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
   register: jboss_eap_locate_jboss_modules_jar
   ignore_errors: yes
-  when: 'have_locate and jboss_eap'
+  when: 'internal_have_locate and jboss_eap'
 
 - name: use find to look for jboss-modules.jar
   raw: find {{search_directories}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
@@ -66,14 +66,14 @@
   register: eap_home_jboss_modules_manifest
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
-  when: 'jboss_eap and have_unzip'
+  when: 'jboss_eap and internal_have_unzip'
 
 - name: get jboss-modules.jar version
   raw: java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
   register: eap_home_jboss_modules_version
   ignore_errors: yes
   with_items: "{{ eap_home_candidates }}"
-  when: 'jboss_eap and have_java'
+  when: 'jboss_eap and internal_have_java'
 
 # Look for fuse inside EAP_HOME directories
 
@@ -149,27 +149,27 @@
   register: jboss_eap_systemctl_unit_files
   ignore_errors: yes
   become: true
-  when: 'jboss_eap and have_systemctl'
+  when: 'jboss_eap and internal_have_systemctl'
 
 - name: look for jboss in chkconfig
   raw: chkconfig --list
   register: jboss_eap_chkconfig
   ignore_errors: yes
   become: true
-  when: 'jboss_eap and have_chkconfig'
+  when: 'jboss_eap and internal_have_chkconfig'
 
 # Scan linux systems for JBoss EAP or Wildfly Installations
 - name: Gather jboss.eap.jar-ver
   raw: FOUND=""; for jar in `find {{search_directories}} -xdev -name 'jboss-modules.jar' 2>/dev/null | grep -v '\.installation/patches'`; do VERSION=$(java -jar ${jar} -version 2> /dev/null | grep version | sed 's/.*version\s//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | grep "/dev" | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**$ctime"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND}
   register: jboss_eap_jar_ver
   ignore_errors: yes
-  when: 'have_java and jboss_eap_ext'
+  when: 'internal_have_java and jboss_eap_ext'
 
 - name: Gather jboss.eap.run-jar-ver
   raw: FOUND=""; for jar in `find {{search_directories}} -xdev -name 'run.jar' 2>/dev/null`; do VERSION=$(java -jar ${jar} --version 2> /dev/null | grep build  | sed 's/.*[CS]V[NS]Tag.//g' | sed 's/\sdate.*//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | tail -1 | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**${ctime}"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND};
   register: jboss_eap_run_jar_ver
   ignore_errors: yes
-  when: 'have_java and jboss_eap_ext'
+  when: 'internal_have_java and jboss_eap_ext'
 
 - name: check for activemq version on eap
   raw: ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/activemq/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p' | sed 's/\n//'

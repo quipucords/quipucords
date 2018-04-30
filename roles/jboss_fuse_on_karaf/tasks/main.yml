@@ -42,7 +42,7 @@
   raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
   register: karaf_locate_karaf_jar
   ignore_errors: yes
-  when: 'have_locate and jboss_fuse'
+  when: 'internal_have_locate and jboss_fuse'
 
 - name: Use find to look for karaf.jar
   raw: find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
@@ -100,7 +100,7 @@
   raw: locate camel-core | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_camel_ver
   ignore_errors: yes
-  when: 'have_locate and jboss_fuse'
+  when: 'internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/camel/camel-core for camel-ver
   raw: ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
@@ -121,7 +121,7 @@
   raw: locate activemq | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_activemq_ver
   ignore_errors: yes
-  when: 'have_locate and jboss_fuse'
+  when: 'internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/activemq/activemq-camel for activemq-ver
   raw: ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
@@ -142,7 +142,7 @@
   raw: locate cxf-rt| sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_cxf_ver
   ignore_errors: yes
-  when: 'have_locate and jboss_fuse'
+  when: 'internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
   raw: ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
