@@ -127,7 +127,8 @@ class PerItemProcessor(process.Processor):
                 try:
                     val = cls.process_item(item)
                 except Exception as ex:  # pylint: disable=broad-except
-                    logger.debug('Processor for %s hit error on %s', cls.KEY, item)
+                    logger.debug('Processor for %s hit error on %s',
+                                 cls.KEY, item)
                     logger.exception(ex)
                     val = None
                 if val is not None:
@@ -201,4 +202,4 @@ class StdoutPassthroughProcessor(PerItemProcessor):
     @staticmethod
     def process_item(item):
         """Make sure item succeeded and pass stdout through."""
-        return item['rc'] == 0 and item['stdout']
+        return item['rc'] == 0 and item['stdout'].strip()

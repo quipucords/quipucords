@@ -17,7 +17,6 @@
   raw: locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
   register: internal_jboss_eap5_locate_jboss_homes
   ignore_errors: yes
-  ignore_errors: yes
   become: yes
   when: 'internal_have_locate and jboss_eap'
 

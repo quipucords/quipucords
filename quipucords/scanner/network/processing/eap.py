@@ -37,7 +37,7 @@ class ProcessJbossEapRunningPaths(process.Processor):
         if FIND_WARNING in output['stdout']:
             logger.error('Find command failed')
             return process.NO_DATA
-        result = [path for path in output['stdout_lines'] if path]
+        result = [path.strip() for path in output['stdout_lines'] if path]
 
         return result
 
@@ -147,7 +147,7 @@ class ProcessJbossEapLocate(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        result = [path for path in output['stdout_lines'] if path]
+        result = [path.strip() for path in output['stdout_lines'] if path]
         return result
 
 
@@ -187,8 +187,8 @@ class ProcessEapHomeVersionTxt(util.PerItemProcessor):
         """Extract just the version number."""
         if item.get('rc', True):
             return False
-
-        match = ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'])
+        match = \
+            ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'].strip())
         if match:
             return match.group(1)
 
@@ -204,25 +204,6 @@ class ProcessEapHomeReadmeTxt(util.StdoutSearchProcessor):
 
     KEY = 'eap_home_readme_txt'
     SEARCH_STRING = 'Welcome to WildFly'
-
-
-class ProcessEapHomeCandidates(process.Processor):
-    """Process the output of eap home candidates."""
-
-    KEY = 'eap_home_candidates'
-    REQUIRE_DEPS = False
-    DEPS = ['jboss_eap_running_paths',
-            'jboss_eap_locate_jboss_modules_jar',
-            'jboss_eap_find_jboss_modules_jar']
-
-    @staticmethod
-    def process(output, dependencies):
-        """Just preserve the output, except for empty strings."""
-        print('\n\n\n\nOutput:')
-        print(output)
-        result = [path for path in output['stdout_lines'] if path]
-
-        return result
 
 
 class ProcessJbossModulesManifestMf(util.StdoutPassthroughProcessor):

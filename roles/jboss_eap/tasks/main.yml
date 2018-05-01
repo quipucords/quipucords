@@ -31,9 +31,9 @@
 - name: combine EAP_HOME candidates into single list
   set_fact:
     eap_home_candidates: "{{
-        (jboss_eap_running_paths.get('stdout_lines', []) +
+         (jboss_eap_running_paths.get('stdout_lines', []) +
           jboss_eap_locate_jboss_modules_jar.get('stdout_lines', []) +
-          jboss_eap_find_jboss_modules_jar.get('stdout_lines', [])) | unique }}"
+          jboss_eap_find_jboss_modules_jar.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_eap'
 
@@ -43,6 +43,7 @@
   raw: ls -1 "{{ item }}" 2>/dev/null
   register: eap_home_ls
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -50,6 +51,7 @@
   raw: cat '{{ item }}/version.txt' 2>/dev/null
   register: eap_home_version_txt
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -57,6 +59,7 @@
   raw: cat '{{ item }}/README.txt' 2>/dev/null
   register: eap_home_readme_txt
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -86,6 +89,7 @@
   raw: ls -1 "{{ item }}"/bin 2>/dev/null
   register: eap_home_bin
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -93,6 +97,7 @@
   raw: cat '{{ item }}/modules/layers.conf' 2>/dev/null
   register: eap_home_layers_conf
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -100,6 +105,7 @@
   raw: ls -1 "{{ item }}"/modules/system/layers 2>/dev/null
   register: eap_home_layers
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -130,7 +136,7 @@
     - /usr/share/java/jboss-modules.jar
     - /usr/share/jbossas/jboss-modules.jar
     - /etc/init.d/jboss-as-standalone.sh
-  when: 'jboss_eap'
+  when: 'jboss_eap '
 
 - name: gather jboss.eap.processes
   raw: ps -A -o comm -o args e --columns 10000 | grep eap
