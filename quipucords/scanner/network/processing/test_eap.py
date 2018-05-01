@@ -28,7 +28,7 @@ class TestProcessJbossEapRunningPaths(unittest.TestCase):
         self.assertEqual(
             eap.ProcessJbossEapRunningPaths.process(
                 ansible_result(' good ')),
-            'good')
+            ['good'])
 
     def test_find_warning(self):
         """Fail if we get the special find warning string."""

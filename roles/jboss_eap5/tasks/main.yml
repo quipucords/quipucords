@@ -17,6 +17,7 @@
   raw: locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
   register: internal_jboss_eap5_locate_jboss_homes
   ignore_errors: yes
+  become: yes
   when: 'internal_have_locate and jboss_eap'
 
 # This task locates Java processes with arguments like the following
@@ -29,6 +30,7 @@
   raw: ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
   register: internal_jboss_eap5_process_jboss_homes
   ignore_errors: yes
+  become: yes
   when: 'jboss_eap'
 
 
@@ -69,6 +71,7 @@
   raw: java -jar '{{ item }}/jboss-as/bin/run.jar' --version
   register: eap5_home_run_jar_version
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'internal_have_java and jboss_eap'
 
@@ -78,5 +81,6 @@
   raw: unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
   register: eap5_home_run_jar_manifest
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'jboss_eap'

@@ -37,8 +37,9 @@ class ProcessJbossEapRunningPaths(process.Processor):
         if FIND_WARNING in output['stdout']:
             logger.error('Find command failed')
             return process.NO_DATA
+        result = [path.strip() for path in output['stdout_lines'] if path]
 
-        return output['stdout'].strip()
+        return result
 
 
 class ProcessFindJboss(process.Processor):
@@ -146,7 +147,8 @@ class ProcessJbossEapLocate(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        return output['stdout_lines']
+        result = [path.strip() for path in output['stdout_lines'] if path]
+        return result
 
 
 class ProcessJbossEapChkconfig(util.InitLineFinder):
@@ -185,8 +187,8 @@ class ProcessEapHomeVersionTxt(util.PerItemProcessor):
         """Extract just the version number."""
         if item.get('rc', True):
             return False
-
-        match = ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'])
+        match = \
+            ProcessEapHomeVersionTxt.VERSION_RE.match(item['stdout'].strip())
         if match:
             return match.group(1)
 

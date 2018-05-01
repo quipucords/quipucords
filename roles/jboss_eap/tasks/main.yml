@@ -9,18 +9,21 @@
   raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
   register: jboss_eap_running_paths
   ignore_errors: yes
+  become: yes
   when: 'internal_have_java and jboss_eap'
 
 - name: use locate to look for jboss-modules.jar
   raw: locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
   register: jboss_eap_locate_jboss_modules_jar
   ignore_errors: yes
+  become: yes
   when: 'internal_have_locate and jboss_eap'
 
 - name: use find to look for jboss-modules.jar
   raw: find {{search_directories}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
   register: jboss_eap_find_jboss_modules_jar
   ignore_errors: yes
+  become: yes
   when: 'jboss_eap_ext'
 
 # Combine the outputs of the above into a single fact
@@ -28,9 +31,9 @@
 - name: combine EAP_HOME candidates into single list
   set_fact:
     eap_home_candidates: "{{
-        (jboss_eap_running_paths.get('stdout_lines', []) +
+         (jboss_eap_running_paths.get('stdout_lines', []) +
           jboss_eap_locate_jboss_modules_jar.get('stdout_lines', []) +
-          jboss_eap_find_jboss_modules_jar.get('stdout_lines', [])) | unique }}"
+          jboss_eap_find_jboss_modules_jar.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_eap'
 
@@ -40,6 +43,7 @@
   raw: ls -1 "{{ item }}" 2>/dev/null
   register: eap_home_ls
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -47,6 +51,7 @@
   raw: cat '{{ item }}/version.txt' 2>/dev/null
   register: eap_home_version_txt
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -54,6 +59,7 @@
   raw: cat '{{ item }}/README.txt' 2>/dev/null
   register: eap_home_readme_txt
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -65,6 +71,7 @@
   raw: unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF 2>/dev/null
   register: eap_home_jboss_modules_manifest
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap and internal_have_unzip'
 
@@ -72,6 +79,7 @@
   raw: java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
   register: eap_home_jboss_modules_version
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap and internal_have_java'
 
@@ -81,6 +89,7 @@
   raw: ls -1 "{{ item }}"/bin 2>/dev/null
   register: eap_home_bin
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -88,6 +97,7 @@
   raw: cat '{{ item }}/modules/layers.conf' 2>/dev/null
   register: eap_home_layers_conf
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -95,6 +105,7 @@
   raw: ls -1 "{{ item }}"/modules/system/layers 2>/dev/null
   register: eap_home_layers
   ignore_errors: yes
+  become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'jboss_eap'
 
@@ -104,6 +115,7 @@
   raw: test -e "{{ item }}"
   register: jboss_eap_common_files
   ignore_errors: yes
+  become: yes
   with_items:
     - /app/jboss
     - /app/jboss6
@@ -152,10 +164,10 @@
   when: 'jboss_eap and internal_have_systemctl'
 
 - name: look for jboss in chkconfig
-  raw: chkconfig --list
+  raw: /sbin/chkconfig --list
   register: jboss_eap_chkconfig
   ignore_errors: yes
-  become: true
+  become: yes
   when: 'jboss_eap and internal_have_chkconfig'
 
 # Scan linux systems for JBoss EAP or Wildfly Installations
