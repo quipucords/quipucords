@@ -40,7 +40,7 @@
   set_fact:
     eap5_home_candidates: "{{
       (internal_jboss_eap5_locate_jboss_homes.get('stdout_lines', []) +
-       internal_jboss_eap5_process_jboss_homes.get('stdout_lines', [])) | unique }}"
+       internal_jboss_eap5_process_jboss_homes.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_eap'
 

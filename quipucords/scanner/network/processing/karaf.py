@@ -59,7 +59,8 @@ class ProcessLocateKaraf(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        return output['stdout_lines']
+        result = [jar for jar in output.get('stdout_lines', []) if jar.strip()]
+        return result
 
 
 class ProcessJbossFuseChkconfig(util.InitLineFinder):
@@ -123,16 +124,19 @@ class FuseVersionProcessor(process.Processor):
         results = []
         for item in output['results']:
             result = {}
-            item_name = item['item']
-            if item.get('rc', True):
-                pass
-            else:
-                if item['stdout'] != '':
-                    value = str(item['stdout']).splitlines()
-                    result['install_home'] = item_name
-                    result['version'] = list(set(value))
-            if result:
-                results.append(result)
+            item_name = item.get('item')
+            if item_name:
+                if item.get('rc', True):
+                    pass
+                else:
+                    if item.get('stdout', '').strip() != '':
+                        value = \
+                            [version for version in item.get(
+                                'stdout_lines', []) if version.strip()]
+                        result['install_home'] = item_name
+                        result['version'] = list(set(value))
+                if result:
+                    results.append(result)
         return results
 
 
@@ -153,8 +157,11 @@ class FuseVersionProcessorLocate(process.Processor):
         :returns: a list containing the version or an empty list
         """
         results = []
-        if output.get('rc', 1) == 0:
-            results = list(set(output['stdout_lines']))
+        if output.get('rc', 1) == 0 and output.get(
+                'stdout', '').strip() != ['']:
+            results = \
+                list(set([line for line in output.get(
+                    'stdout_lines', []) if line.strip()]))
         return results
 
 

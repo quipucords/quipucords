@@ -42,13 +42,15 @@
   raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
   register: karaf_locate_karaf_jar
   ignore_errors: yes
-  when: 'internal_have_locate and jboss_fuse'
+  become: yes
+  when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
 - name: Use find to look for karaf.jar
   raw: find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
   register: karaf_find_karaf_jar
   ignore_errors: yes
-  when: 'jboss_fuse_ext'
+  become: yes
+  when: 'user_has_sudo and jboss_fuse_ext'
 
 # Combine the outputs of the above into a single fact
 
@@ -57,7 +59,7 @@
       karaf_homes: "{{
           (karaf_running_processes.get('stdout_lines', []) +
             karaf_locate_karaf_jar.get('stdout_lines', []) +
-            karaf_find_karaf_jar.get('stdout_lines', [])) | unique }}"
+            karaf_find_karaf_jar.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
 
@@ -67,16 +69,18 @@
   raw: ls -1 "{{ item }}"/bin/fuse 2>/dev/null
   register: karaf_home_bin_fuse
   ignore_errors: yes
+  become: yes
   with_items: "{{ karaf_homes }}"
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse'
 
 
 - name: check system/org/jboss/fuse
   raw: ls -1 "{{ item }}"/system/org/jboss 2>/dev/null
   register: karaf_home_system_org_jboss
   ignore_errors: yes
+  become: yes
   with_items: "{{ karaf_homes }}"
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse'
 
 
 # Tests that can indicate the presence of Fuse, but can't tell us the
@@ -86,34 +90,36 @@
   raw: /usr/bin/systemctl list-unit-files --no-pager
   register: jboss_fuse_systemctl_unit_files
   ignore_errors: yes
-  become: true
+  become: yes
   when: 'user_has_sudo and jboss_fuse and internal_have_systemctl'
 
 - name: look for fuse in chkconfig
   raw: /sbin/chkconfig --list
   register: jboss_fuse_chkconfig
   ignore_errors: yes
-  become: true
+  become: yes
   when: 'user_has_sudo and jboss_fuse and internal_have_chkconfig'
 
 - name: Use locate to look for camel-ver
   raw: locate camel-core | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_camel_ver
   ignore_errors: yes
-  when: 'internal_have_locate and jboss_fuse'
+  become: yes
+  when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/camel/camel-core for camel-ver
   raw: ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_camel_ver
   ignore_errors: yes
+  become: yes
   with_items: "{{ karaf_homes }}"
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse'
 
 - name: set the camel-ver fact
   set_fact:
       fuse_camel_version: "{{
       (jboss_fuse_camel_ver.get('stdout_lines', []) +
-       jboss_fuse_on_karaf_camel_ver.get('stdout_lines', [])) | unique }}"
+       jboss_fuse_on_karaf_camel_ver.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
 
@@ -121,20 +127,22 @@
   raw: locate activemq | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_activemq_ver
   ignore_errors: yes
-  when: 'internal_have_locate and jboss_fuse'
+  become: yes
+  when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/activemq/activemq-camel for activemq-ver
   raw: ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_activemq_ver
   ignore_errors: yes
+  become: yes
   with_items: "{{ karaf_homes }}"
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse'
 
 - name: set the activemq-version fact
   set_fact:
       fuse_activemq_version: "{{
       (jboss_fuse_activemq_ver.get('stdout_lines', []) +
-       jboss_fuse_on_karaf_activemq_ver.get('stdout_lines', [])) | unique }}"
+       jboss_fuse_on_karaf_activemq_ver.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
 
@@ -142,19 +150,21 @@
   raw: locate cxf-rt| sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_cxf_ver
   ignore_errors: yes
-  when: 'internal_have_locate and jboss_fuse'
+  become: yes
+  when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
 - name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
   raw: ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_on_karaf_cxf_ver
   ignore_errors: yes
+  become: yes
   with_items: "{{ karaf_homes }}"
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse'
 
 - name: set the cxf-rt fact
   set_fact:
       fuse_cxf_version: "{{
       (jboss_fuse_cxf_ver.get('stdout_lines', []) +
-       jboss_fuse_on_karaf_cxf_ver.get('stdout_lines', [])) | unique }}"
+       jboss_fuse_on_karaf_cxf_ver.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
