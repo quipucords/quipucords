@@ -4,28 +4,52 @@
   set_fact:
     internal_host_started_processing_role: "ifconfig"
 
-- name: gather ifconfig.mac-addresses fact
+- name: gather ifconfig.mac-addresses fact (no sudo)
   raw: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
   register: internal_ifconfig_mac_addresses_cmd
   ignore_errors: yes
+  when: '(not user_has_sudo) and internal_have_ifconfig'
+
+- name: gather ifconfig.mac-addresses fact (sudo)
+  raw: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+  register: internal_sudo_ifconfig_mac_addresses_cmd
+  ignore_errors: yes
   become: yes
-  when: 'internal_have_ifconfig'
+  when: 'user_has_sudo and internal_have_ifconfig'
 
 - name: extract result value for ifconfig.mac-addresses
   set_fact:
     ifconfig_mac_addresses: "{{ internal_ifconfig_mac_addresses_cmd | default(None) }}"
   ignore_errors: yes
-  when: '"stdout_lines" in internal_ifconfig_mac_addresses_cmd'
+  when: '(not user_has_sudo) and "stdout_lines" in internal_ifconfig_mac_addresses_cmd'
 
-- name: gather ifconfig.ip-address fact
+- name: extract result value for ifconfig.mac-addresses (sudo)
+  set_fact:
+    ifconfig_mac_addresses: "{{ internal_sudo_ifconfig_mac_addresses_cmd | default(None) }}"
+  ignore_errors: yes
+  when: 'user_has_sudo and "stdout_lines" in internal_sudo_ifconfig_mac_addresses_cmd'
+
+- name: gather ifconfig.ip-address fact (no sudo)
   raw: /sbin/ifconfig -a
   register: internal_ifconfig_ip_addresses_cmd
   ignore_errors: yes
+  when: '(not user_has_sudo) and internal_have_ifconfig'
+
+- name: gather ifconfig.ip-address fact (sudo)
+  raw: /sbin/ifconfig -a
+  register: internal_sudo_ifconfig_ip_addresses_cmd
+  ignore_errors: yes
   become: yes
-  when: 'internal_have_ifconfig'
+  when: 'user_has_sudo and internal_have_ifconfig'
 
 - name: extract result value for ifconfig.ip-address
   set_fact:
     ifconfig_ip_addresses: "{{  internal_ifconfig_ip_addresses_cmd | default(None) }}"
   ignore_errors: yes
-  when: '"stdout_lines" in internal_ifconfig_ip_addresses_cmd'
+  when: '(not user_has_sudo) and "stdout_lines" in internal_ifconfig_ip_addresses_cmd'
+
+- name: extract result value for ifconfig.ip-address (sudo)
+  set_fact:
+    ifconfig_ip_addresses: "{{  internal_sudo_ifconfig_ip_addresses_cmd | default(None) }}"
+  ignore_errors: yes
+  when: 'user_has_sudo and "stdout_lines" in internal_sudo_ifconfig_ip_addresses_cmd'

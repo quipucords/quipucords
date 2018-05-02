@@ -10,7 +10,7 @@
   register: internal_subman_cpu_cpu_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.cpu.cpu(s)
   set_fact:
@@ -24,7 +24,7 @@
   register: internal_subman_cpu_core_per_socket_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.cpu.core(s)_per_socket
   set_fact:
@@ -38,7 +38,7 @@
   register: internal_subman_cpu_cpu_socket_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.cpu.cpu_socket(s)
   set_fact:
@@ -52,7 +52,7 @@
   register: internal_subman_virt_host_type_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.virt.host_type
   set_fact:
@@ -65,7 +65,7 @@
   register: internal_subman_virt_is_guest_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.virt.is_guest
   set_fact:
@@ -79,7 +79,7 @@
   register: internal_subman_virt_uuid_cmd
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'
 
 - name: extract result value for subman.virt.uuid
   set_fact:
@@ -108,4 +108,4 @@
   register: subman_consumed
   ignore_errors: yes
   become: yes
-  when: 'internal_have_subscription_manager'
+  when: 'user_has_sudo and internal_have_subscription_manager'

@@ -14,6 +14,7 @@
   register: internal_date_anaconda_log_cmd
   become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: extract result value for date.anaconda_log
   set_fact:
@@ -43,7 +44,7 @@
   register: internal_date_yum_history_cmd
   become: yes
   ignore_errors: yes
-  when: 'internal_have_yum'
+  when: 'user_has_sudo and internal_have_yum'
 
 - name: extract result value for date.yum_history
   set_fact:

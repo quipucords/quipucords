@@ -74,7 +74,7 @@
   register: internal_cpu_socket_count_cmd
   become: yes
   ignore_errors: yes
-  when: 'internal_have_dmidecode'
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for cpu.socket_count
   set_fact:
