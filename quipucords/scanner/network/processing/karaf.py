@@ -124,7 +124,7 @@ class FuseVersionProcessor(process.Processor):
         results = []
         for item in output['results']:
             result = {}
-            item_name = item['item']
+            item_name = item.get('item')
             if item_name:
                 if item.get('rc', True):
                     pass
