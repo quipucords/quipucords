@@ -95,7 +95,7 @@ class FindJar(process.Processor):
         """Return the command's output."""
         versions = []
         for line in output['stdout_lines']:
-            if line == '':
+            if line.strip() == '':
                 continue
             line_data = line.split('; ')
             versions += line_data
