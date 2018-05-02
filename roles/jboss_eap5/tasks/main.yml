@@ -18,7 +18,7 @@
   register: internal_jboss_eap5_locate_jboss_homes
   ignore_errors: yes
   become: yes
-  when: 'internal_have_locate and jboss_eap'
+  when: 'user_has_sudo and internal_have_locate and jboss_eap'
 
 # This task locates Java processes with arguments like the following
 # (found in a real, running JBoss EAP 5 server):
@@ -31,7 +31,7 @@
   register: internal_jboss_eap5_process_jboss_homes
   ignore_errors: yes
   become: yes
-  when: 'jboss_eap'
+  when: 'user_has_sudo and jboss_eap'
 
 
 # Combine the outputs of the above into a single fact
@@ -73,7 +73,7 @@
   ignore_errors: yes
   become: yes
   with_items: "{{ eap5_home_candidates }}"
-  when: 'internal_have_java and jboss_eap'
+  when: 'user_has_sudo and internal_have_java and jboss_eap'
 
 # This is similar to the previous command, but works even when the EAP
 # installation is broken.
@@ -83,4 +83,4 @@
   ignore_errors: yes
   become: yes
   with_items: "{{ eap5_home_candidates }}"
-  when: 'jboss_eap'
+  when: 'user_has_sudo and jboss_eap'

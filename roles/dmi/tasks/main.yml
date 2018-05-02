@@ -9,6 +9,7 @@
   register: internal_dmi_bios_vendor_cmd
   ignore_errors: yes
   become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for dmi.bios-vendor
   set_fact:
@@ -27,6 +28,7 @@
   register: internal_dmi_bios_version_cmd
   ignore_errors: yes
   become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for dmi.bios-version
   set_fact:
@@ -45,6 +47,7 @@
   register: internal_dmi_system_manufacturer_cmd
   ignore_errors: yes
   become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for dmi.system-manufacturer
   set_fact:
@@ -63,6 +66,7 @@
   register: internal_dmi_processor_family_cmd
   ignore_errors: yes
   become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for dmi.processor-family
   set_fact:
@@ -81,6 +85,7 @@
   register: internal_dmi_system_uuid_cmd
   ignore_errors: yes
   become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: extract result value for dmi.system-uuid
   set_fact:

@@ -28,6 +28,8 @@ from scanner import ScanJobRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+DEFAULT_HEARTBEAT = 60*60
+
 
 class Manager(Thread):
     """Manager of scan job queue."""
@@ -44,9 +46,9 @@ class Manager(Thread):
         """Log the status of the scan manager."""
         try:
             interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT',
-                                          '60'))
+                                          DEFAULT_HEARTBEAT))
         except ValueError:
-            interval = 60
+            interval = DEFAULT_HEARTBEAT
         heartbeat = Timer(interval, self.log_info)
         current_scan_job = None
         if self.current_task:

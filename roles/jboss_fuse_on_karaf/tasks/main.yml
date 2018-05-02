@@ -83,18 +83,18 @@
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
 - name: look for fuse systemd service
-  raw: systemctl list-unit-files --no-pager
+  raw: /usr/bin/systemctl list-unit-files --no-pager
   register: jboss_fuse_systemctl_unit_files
   ignore_errors: yes
   become: true
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse and internal_have_systemctl'
 
 - name: look for fuse in chkconfig
-  raw: chkconfig --list
+  raw: /sbin/chkconfig --list
   register: jboss_fuse_chkconfig
   ignore_errors: yes
   become: true
-  when: 'jboss_fuse'
+  when: 'user_has_sudo and jboss_fuse and internal_have_chkconfig'
 
 - name: Use locate to look for camel-ver
   raw: locate camel-core | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'

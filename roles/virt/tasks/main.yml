@@ -24,7 +24,7 @@
   register: internal_sys_manufacturer
   become: yes
   ignore_errors: yes
-  when: 'internal_have_dmidecode'
+  when: 'user_has_sudo and internal_have_dmidecode'
 
 - name: check cpu model name for QEMU
   raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi

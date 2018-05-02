@@ -85,4 +85,4 @@
   register: yum_enabled_repolist
   become: yes
   ignore_errors: yes
-  when: internal_have_yum
+  when: 'user_has_sudo and internal_have_yum'
