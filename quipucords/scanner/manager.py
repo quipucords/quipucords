@@ -28,7 +28,7 @@ from scanner import ScanJobRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-DEFAULT_HEARTBEAT = 60*60
+DEFAULT_HEARTBEAT = 60 * 60
 
 
 class Manager(Thread):
