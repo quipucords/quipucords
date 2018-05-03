@@ -203,5 +203,5 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                 result[VCENTER_DETECTION_KEY] = True
             elif source.get('source_type') == Source.SATELLITE_SOURCE_TYPE:
                 result[SATELLITE_DETECTION_KEY] = True
-            result[SOURCES_KEY].append(source.get('name'))
+            result[SOURCES_KEY].append(source.get('source_name'))
         return result
