@@ -159,3 +159,13 @@ class ConnectTaskRunnerTest(TestCase):
             status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.COMPLETED, status[1])
             mock_connect.assert_called_once_with()
+
+    def test_cancel(self):
+        """Test the run method with cancel."""
+        status = self.runner.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
+        self.assertEqual(ScanTask.CANCELED, status[1])
+
+    def test_pause(self):
+        """Test the run method with pause."""
+        status = self.runner.run(Value('i', ScanJob.JOB_TERMINATE_PAUSE))
+        self.assertEqual(ScanTask.PAUSED, status[1])

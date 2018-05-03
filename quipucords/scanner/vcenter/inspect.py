@@ -68,7 +68,7 @@ class InspectTaskRunner(ScanTaskRunner):
         self.source = scan_task.source
 
     def run(self, manager_interrupt):
-        """Scan network range ang attempt connections."""
+        """Scan vcenter range and attempt scan."""
         # Make sure job is not cancelled or paused
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK

@@ -130,7 +130,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.scan_task = scan_task
 
     def run(self, manager_interrupt):
-        """Scan network range ang attempt connections."""
+        """Scan network range and attempt connections."""
         # Make sure job is not cancelled or paused
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK

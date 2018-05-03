@@ -29,7 +29,7 @@ from scanner import ScanJobRunner
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 DEFAULT_HEARTBEAT = 60 * 60
-MAX_TIMEOUT_ORDERLY_SHUTDOWN = 30
+DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN = 30
 
 
 class Manager(Thread):
@@ -105,8 +105,15 @@ class Manager(Thread):
                     ScanJob.JOB_TERMINATE_PAUSE
             count = 0
             interrupt = job_runner.manager_interrupt
+            try:
+                timeout_length = int(
+                    os.environ.get('MAX_TIMEOUT_ORDERLY_SHUTDOWN',
+                                   DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN))
+            except ValueError:
+                timeout_length = DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN
+
             while interrupt.value != ScanJob.JOB_TERMINATE_ACK and \
-                    count < MAX_TIMEOUT_ORDERLY_SHUTDOWN:
+                    count < timeout_length:
                 job.log_message(
                     'Waiting for job to perform orderly shutdown.  '
                     'Elapsed time: %ds.' % count)
@@ -117,7 +124,7 @@ class Manager(Thread):
             job_runner.join()
             killed = not job_runner.is_alive()
             job.log_message(
-                'Process successfully terminted=%s.' % killed)
+                'Process successfully terminated=%s.' % killed)
             if not killed:
                 job.log_message(
                     'Request to terminate process failed.',

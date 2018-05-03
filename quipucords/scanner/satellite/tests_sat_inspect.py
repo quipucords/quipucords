@@ -209,3 +209,19 @@ class InspectTaskRunnerTest(TestCase):
                 mock_sat_status.assert_called_once_with(ANY)
                 mock_facts.assert_called_once_with(ANY)
                 self.assertEqual(status[1], ScanTask.COMPLETED)
+
+    def test_run_with_sat_cancel(self):
+        """Test the running connect task with satellite cancelled."""
+        scan_job, inspect_task = self.create_scan_job()
+        task = InspectTaskRunner(scan_job, inspect_task)
+
+        status = task.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
+        self.assertEqual(status[1], ScanTask.CANCELED)
+
+    def test_run_with_sat_pause(self):
+        """Test the running connect task with satellite paused."""
+        scan_job, inspect_task = self.create_scan_job()
+        task = InspectTaskRunner(scan_job, inspect_task)
+
+        status = task.run(Value('i', ScanJob.JOB_TERMINATE_PAUSE))
+        self.assertEqual(status[1], ScanTask.PAUSED)

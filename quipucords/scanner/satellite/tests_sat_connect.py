@@ -173,3 +173,17 @@ class ConnectTaskRunnerTest(TestCase):
                     mock_host_count.assert_called_once_with()
                     mock_hosts.assert_called_once_with()
                     self.assertEqual(status[1], ScanTask.COMPLETED)
+
+    def test_run_sat6_v2_cancel(self):
+        """Test the running connect task (cancel)."""
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
+
+        status = task.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
+        self.assertEqual(status[1], ScanTask.CANCELED)
+
+    def test_run_sat6_v2_pause(self):
+        """Test the running connect task (pause)."""
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
+
+        status = task.run(Value('i', ScanJob.JOB_TERMINATE_PAUSE))
+        self.assertEqual(status[1], ScanTask.PAUSED)
