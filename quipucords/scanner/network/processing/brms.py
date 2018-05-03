@@ -205,7 +205,8 @@ class ProcessFindBRMSKieWarVer(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Return the command's output."""
-        result = [line for line in output.get('stdout_lines', []) if line.strip()]
+        result = [line for line in output.get(
+            'stdout_lines', []) if line.strip()]
         return result
 
 
