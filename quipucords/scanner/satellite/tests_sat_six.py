@@ -9,10 +9,11 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the satellite six interface."""
-
+from multiprocessing import Value
 from unittest.mock import ANY, patch
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanOptions,
                         ScanTask,
                         Source,
@@ -361,7 +362,7 @@ class SatelliteSixV1Test(TestCase):
             url = construct_url(url=hosts_url, sat_host='1.2.3.4', org_id=1)
             mocker.get(url, status_code=500)
             with self.assertRaises(SatelliteException):
-                self.api.hosts_facts()
+                self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
         {'host_name': 'sys10',
@@ -385,7 +386,7 @@ class SatelliteSixV1Test(TestCase):
                                   'per_page': 100,
                                   'total': 3}
                     mocker.get(url, status_code=200, json=jsonresult)
-                    self.api.hosts_facts()
+                    self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
                     inspect_result = self.scan_task.inspection_result
                     self.assertEqual(len(inspect_result.systems.all()), 1)
 
@@ -768,7 +769,7 @@ class SatelliteSixV2Test(TestCase):
             url = construct_url(url=hosts_url, sat_host='1.2.3.4')
             mocker.get(url, status_code=500)
             with self.assertRaises(SatelliteException):
-                self.api.hosts_facts()
+                self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
         {'host_name': 'sys10',
@@ -795,6 +796,6 @@ class SatelliteSixV2Test(TestCase):
                 'results': [{'id': 10, 'name': 'sys10'}]
                 }  # noqa
             mocker.get(url, status_code=200, json=jsonresult)
-            api.hosts_facts()
+            api.hosts_facts(Value('i', ScanJob.JOB_RUN))
             inspect_result = scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 1)

@@ -10,12 +10,13 @@
 #
 """ScanJobRunner runs a group of scan tasks."""
 import logging
-from multiprocessing import Process
+from multiprocessing import Process, Value
 
 from api.fact.util import (build_sources_from_tasks,
                            get_or_create_fact_collection,
                            validate_fact_collection_json)
 from api.models import (FactCollection,
+                        ScanJob,
                         ScanTask,
                         Source)
 
@@ -38,10 +39,21 @@ class ScanJobRunner(Process):
         Process.__init__(self)
         self.scan_job = scan_job
         self.identifier = scan_job.id
+        self.manager_interrupt = Value('i', ScanJob.JOB_RUN)
 
     def run(self):
         """Trigger thread execution."""
         # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-return-statements,too-many-branches
+        # check to see if manager killed job
+        if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return ScanTask.CANCELED
+
+        if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return ScanTask.PAUSED
+
         # Job is not running so start
         self.scan_job.start()
         if self.scan_job.status != ScanTask.RUNNING:
@@ -77,11 +89,18 @@ class ScanJobRunner(Process):
         failed_tasks = []
         for runner in task_runners:
             # Mark runner as running
-            runner.scan_task.start()
+            if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+                return ScanTask.CANCELED
 
+            if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+                return ScanTask.PAUSED
+            runner.scan_task.start()
             # run runner
             try:
-                status_message, task_status = runner.run()
+                status_message, task_status = runner.run(
+                    self.manager_interrupt)
             except Exception as error:
                 failed_task = runner.scan_task
                 context_message = 'Unexpected failure occurred.'
@@ -102,6 +121,12 @@ class ScanJobRunner(Process):
             # Save Task status
             if task_status == ScanTask.FAILED:
                 runner.scan_task.fail(status_message)
+            elif task_status == ScanTask.CANCELED:
+                runner.scan_task.cancel()
+                return ScanTask.CANCELED
+            elif task_status == ScanTask.PAUSED:
+                runner.scan_task.pause()
+                return ScanTask.PAUSED
             elif task_status == ScanTask.COMPLETED:
                 runner.scan_task.complete(status_message)
             else:

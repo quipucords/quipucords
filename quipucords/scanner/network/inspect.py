@@ -16,7 +16,8 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 
 from api.credential.serializer import CredentialSerializer
-from api.models import (ScanOptions,
+from api.models import (ScanJob,
+                        ScanOptions,
                         ScanTask,
                         SystemConnectionResult,
                         SystemInspectionResult)
@@ -95,7 +96,7 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.connect_scan_task = None
 
-    def run(self):
+    def run(self, manager_interrupt):
         """Scan target systems to collect facts.
 
         Attempts connections to a source using a list of credentials
@@ -104,6 +105,19 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
+
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task with id %d failed.' %\

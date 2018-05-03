@@ -13,10 +13,13 @@ import logging
 import xmlrpc.client
 from multiprocessing import Pool
 
-from api.models import SystemInspectionResult
+from api.models import ScanJob, SystemInspectionResult
 
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException, SatelliteInterface
+from scanner.satellite.api import (SatelliteCancelException,
+                                   SatelliteException,
+                                   SatelliteInterface,
+                                   SatellitePauseException)
 
 
 # Get an instance of a logger
@@ -293,7 +296,7 @@ class SatelliteFive(SatelliteInterface):
 
         return physical_hosts
 
-    def hosts_facts(self):
+    def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         if self.inspect_scan_task is None:
             raise SatelliteException(
@@ -318,6 +321,12 @@ class SatelliteFive(SatelliteInterface):
             chunks = [hosts[i:i + self.max_concurrency]
                       for i in range(0, len(hosts), self.max_concurrency)]
             for chunk in chunks:
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                    raise SatelliteCancelException()
+
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                    raise SatellitePauseException()
+
                 host_params = [(host.get(ID),
                                 host.get(NAME),
                                 str(host.get(LAST_CHECKIN, '')),

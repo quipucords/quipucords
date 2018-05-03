@@ -9,12 +9,15 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite inspection task."""
-from api.models import ScanTask
+from api.models import ScanJob, ScanTask
 
 from requests import exceptions
 
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteAuthException, SatelliteException
+from scanner.satellite.api import (SatelliteAuthException,
+                                   SatelliteCancelException,
+                                   SatelliteException,
+                                   SatellitePauseException)
 from scanner.satellite.factory import create
 from scanner.task import ScanTaskRunner
 
@@ -40,8 +43,21 @@ class InspectTaskRunner(ScanTaskRunner):
         self.connect_scan_task = None
 
     # pylint: disable=too-many-return-statements
-    def run(self):
+    def run(self, manager_interrupt):
         """Scan satellite manager and obtain host facts."""
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
+
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task with id %d failed.' %\
@@ -61,7 +77,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     error_message += 'Inspect scan failed for source %s.' % \
                         (self.source.name)
                     return error_message, ScanTask.FAILED
-                api.hosts_facts()
+                api.hosts_facts(manager_interrupt)
             else:
                 error_message = 'Inspect scan failed for source %s.' \
                     % self.source.name
@@ -76,6 +92,14 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message += 'Inspect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
+        except SatelliteCancelException:
+            error_message = 'Inspect scan cancel for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+        except SatellitePauseException:
+            error_message = 'Inspect scan pause for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
         except exceptions.ConnectionError as conn_error:
             error_message = 'Satellite error encountered: %s. ' % conn_error
             error_message += 'Inspect scan failed for %s.' % self.source.name

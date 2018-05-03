@@ -10,14 +10,17 @@
 #
 """Test the inspect scanner capabilities."""
 
+# pylint: disable=ungrouped-imports
 import os.path
 import unittest
+from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 from types import SimpleNamespace  # noqa: I100
 
 from ansible.errors import AnsibleError
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source,
                         SystemConnectionResult)
@@ -297,7 +300,7 @@ class NetworkInspectScannerTest(TestCase):
         """Test scan flow with mocked manager and failure."""
         scanner = InspectTaskRunner(
             self.scan_job, self.scan_task)
-        scan_task_status = scanner.run()
+        scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
         mock_scan.assert_called_with(self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
@@ -311,7 +314,7 @@ class NetworkInspectScannerTest(TestCase):
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
             scanner = InspectTaskRunner(
                 self.scan_job, self.scan_task)
-            scan_task_status = scanner.run()
+            scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
             mock_run.assert_called_with(ANY)
             self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 

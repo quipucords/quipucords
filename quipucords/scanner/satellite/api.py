@@ -39,6 +39,18 @@ class SatelliteException(Exception):
     pass
 
 
+class SatelliteCancelException(Exception):
+    """Exception for Satellite Cancel interrupt."""
+
+    pass
+
+
+class SatellitePauseException(Exception):
+    """Exception for Satellite Pause interrupt."""
+
+    pass
+
+
 class SatelliteInterface(object):
     """Generic interface for dealing with Satellite."""
 
@@ -122,6 +134,6 @@ class SatelliteInterface(object):
         """Obtain the managed hosts."""
         pass
 
-    def hosts_facts(self):
+    def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         pass

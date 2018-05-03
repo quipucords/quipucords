@@ -14,6 +14,7 @@ import logging
 from datetime import datetime
 
 from api.models import (RawFact,
+                        ScanJob,
                         ScanTask,
                         SystemInspectionResult)
 
@@ -66,8 +67,20 @@ class InspectTaskRunner(ScanTaskRunner):
         self.connect_scan_task = None
         self.source = scan_task.source
 
-    def run(self):
+    def run(self, manager_interrupt):
         """Scan network range ang attempt connections."""
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
 

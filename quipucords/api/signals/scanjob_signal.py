@@ -60,7 +60,7 @@ def scan_action(sender, instance, action, **kwargs):
     :returns: None
     """
     if action == PAUSE or action == CANCEL:
-        SCAN_MANAGER.kill(instance)
+        SCAN_MANAGER.kill(instance, action)
 
 
 def scan_pause(sender, instance, **kwargs):

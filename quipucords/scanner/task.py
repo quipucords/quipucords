@@ -34,17 +34,19 @@ class ScanTaskRunner(object):
             # partial results and start over.
             self.scan_task.connection_result.systems.all().delete()
 
-    def run(self):
+    def run(self, manager_interrupt):
         """Block that will be executed.
 
         Results are expected to be persisted.  The state of
         self.scan_task should be updated with status COMPLETE/FAILED
         before returning.
 
+        :param manager_interrupt: Shared memory Value which can inform
+        a task of the need to shutdown immediately
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
         """
-        # pylint: disable=no-self-use
+        # pylint: disable=no-self-use,unused-argument
         return 'Task ran successfully', ScanTask.COMPLETED
 
     def __str__(self):

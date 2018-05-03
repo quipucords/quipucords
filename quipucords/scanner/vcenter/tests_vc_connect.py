@@ -9,10 +9,12 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the vcenter connect capabilities."""
+from multiprocessing import Value
 from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source)
 
@@ -138,7 +140,7 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the run method."""
         with patch.object(ConnectTaskRunner, 'connect',
                           side_effect=invalid_login) as mock_connect:
-            status = self.runner.run()
+            status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
@@ -146,7 +148,7 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the run method with unreachable."""
         with patch.object(ConnectTaskRunner, 'connect',
                           side_effect=unreachable_host) as mock_connect:
-            status = self.runner.run()
+            status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
@@ -154,6 +156,6 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the run method."""
         with patch.object(ConnectTaskRunner, 'connect',
                           return_value=['vm1', 'vm2']) as mock_connect:
-            status = self.runner.run()
+            status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.COMPLETED, status[1])
             mock_connect.assert_called_once_with()

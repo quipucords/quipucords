@@ -11,9 +11,11 @@
 """Test the vcenter inspect capabilities."""
 
 import json
+from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source,
                         SystemInspectionResult)
@@ -227,7 +229,7 @@ class InspectTaskRunnerTest(TestCase):
         """Test the run method."""
         with patch.object(InspectTaskRunner, 'inspect',
                           side_effect=invalid_login) as mock_connect:
-            status = self.runner.run()
+            status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.FAILED, status[1])
             mock_connect.assert_called_once_with()
 
@@ -235,12 +237,12 @@ class InspectTaskRunnerTest(TestCase):
         """Test the run method."""
         self.connect_scan_task.status = ScanTask.FAILED
         self.connect_scan_task.save()
-        status = self.runner.run()
+        status = self.runner.run(Value('i', ScanJob.JOB_RUN))
         self.assertEqual(ScanTask.FAILED, status[1])
 
     def test_run(self):
         """Test the run method."""
         with patch.object(InspectTaskRunner, 'inspect') as mock_connect:
-            status = self.runner.run()
+            status = self.runner.run(Value('i', ScanJob.JOB_RUN))
             self.assertEqual(ScanTask.COMPLETED, status[1])
             mock_connect.assert_called_once_with()

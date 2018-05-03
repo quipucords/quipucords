@@ -16,6 +16,7 @@ from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanOptions,
                         ScanTask,
                         SystemConnectionResult)
@@ -128,8 +129,21 @@ class ConnectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.scan_task = scan_task
 
-    def run(self):
+    def run(self, manager_interrupt):
         """Scan network range ang attempt connections."""
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
+
         result_store = ConnectResultStore(self.scan_task)
         return self.run_with_result_store(result_store)
 

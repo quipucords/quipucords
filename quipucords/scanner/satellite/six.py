@@ -13,12 +13,15 @@
 import logging
 from multiprocessing import Pool
 
-from api.models import (SystemInspectionResult)
+from api.models import (ScanJob, SystemInspectionResult)
 
 import requests
 
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException, SatelliteInterface
+from scanner.satellite.api import (SatelliteCancelException,
+                                   SatelliteException,
+                                   SatelliteInterface,
+                                   SatellitePauseException)
 
 
 # Get an instance of a logger
@@ -435,7 +438,7 @@ class SatelliteSixV1(SatelliteInterface):
                     'status': SystemInspectionResult.FAILED}
         return details
 
-    def hosts_facts(self):
+    def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(
             self.connect_scan_task.connection_result.systems.all())
@@ -471,6 +474,14 @@ class SatelliteSixV1(SatelliteInterface):
                               for i in range(0, len(hosts),
                                              self.max_concurrency)]
                     for chunk in chunks:
+                        if manager_interrupt.value == \
+                                ScanJob.JOB_TERMINATE_CANCEL:
+                            raise SatelliteCancelException()
+
+                        if manager_interrupt.value == \
+                                ScanJob.JOB_TERMINATE_PAUSE:
+                            raise SatellitePauseException()
+
                         host_params = [(host.get(ID), host.get(NAME))
                                        for host in chunk]
                         results = pool.starmap(self.host_details, host_params)
@@ -568,7 +579,7 @@ class SatelliteSixV2(SatelliteInterface):
                     'status': SystemInspectionResult.FAILED}
         return details
 
-    def hosts_facts(self):
+    def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(
             self.connect_scan_task.connection_result.systems.all())
@@ -600,6 +611,12 @@ class SatelliteSixV2(SatelliteInterface):
                 chunks = [hosts[i:i + self.max_concurrency]
                           for i in range(0, len(hosts), self.max_concurrency)]
                 for chunk in chunks:
+                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                        raise SatelliteCancelException()
+
+                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                        raise SatellitePauseException()
+
                     host_params = [(host.get(ID), host.get(NAME))
                                    for host in chunk]
                     results = pool.starmap(self.host_details, host_params)
