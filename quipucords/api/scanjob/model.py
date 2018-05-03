@@ -36,6 +36,11 @@ class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
     # pylint: disable=too-many-instance-attributes
+    JOB_RUN = 0
+    JOB_TERMINATE_PAUSE = 1
+    JOB_TERMINATE_CANCEL = 2
+    JOB_TERMINATE_ACK = 3
+
     scan = models.ForeignKey(Scan, related_name='jobs', null=True)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(

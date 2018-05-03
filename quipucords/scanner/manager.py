@@ -29,6 +29,7 @@ from scanner import ScanJobRunner
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 DEFAULT_HEARTBEAT = 60 * 60
+DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN = 30
 
 
 class Manager(Thread):
@@ -83,7 +84,7 @@ class Manager(Thread):
         """
         self.scan_queue.insert(0, task)
 
-    def kill(self, job):
+    def kill(self, job, command):
         """Kill a task or remove it from the running queue.
 
         :param job: The task to kill.
@@ -91,19 +92,42 @@ class Manager(Thread):
         """
         killed = False
         job_id = job.id
-        job.log_message('TERMINATING JOB PROCESS')
         if (self.current_task is not None and
                 self.current_task.identifier == job_id and
                 self.current_task.is_alive()):
             job_runner = self.current_task
+            job.log_message('Send interrupt to allow job orderly shutdown')
+            if command == 'cancel':
+                job_runner.manager_interrupt.value = \
+                    ScanJob.JOB_TERMINATE_CANCEL
+            if command == 'pause':
+                job_runner.manager_interrupt.value = \
+                    ScanJob.JOB_TERMINATE_PAUSE
+            count = 0
+            interrupt = job_runner.manager_interrupt
+            try:
+                timeout_length = int(
+                    os.environ.get('MAX_TIMEOUT_ORDERLY_SHUTDOWN',
+                                   DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN))
+            except ValueError:
+                timeout_length = DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN
+
+            while interrupt.value != ScanJob.JOB_TERMINATE_ACK and \
+                    count < timeout_length:
+                job.log_message(
+                    'Waiting for job to perform orderly shutdown.  '
+                    'Elapsed time: %ds.' % count)
+                sleep(1)
+                count += 1
+            job.log_message('TERMINATING JOB PROCESS')
             job_runner.terminate()
             job_runner.join()
             killed = not job_runner.is_alive()
             job.log_message(
-                'Process successfully killed=%s.' % killed)
+                'Process successfully terminated=%s.' % killed)
             if not killed:
                 job.log_message(
-                    'Request to kill process failed.',
+                    'Request to terminate process failed.',
                     log_level=logging.ERROR)
             self.current_task = None
         else:

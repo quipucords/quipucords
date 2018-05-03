@@ -11,7 +11,7 @@
 """ScanTask used for satellite connection task."""
 import socket
 
-from api.models import ScanTask
+from api.models import ScanJob, ScanTask
 
 from requests import exceptions
 
@@ -41,8 +41,20 @@ class ConnectTaskRunner(ScanTaskRunner):
         self.source = scan_task.source
 
     # pylint: disable=too-many-return-statements
-    def run(self):
+    def run(self, manager_interrupt):
         """Scan Satellite for system connection data."""
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused for %s.' % self.source.name
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
         try:
             status_code, api_version, satellite_version = \
                 utils.status(self.scan_task)

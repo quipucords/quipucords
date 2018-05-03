@@ -10,9 +10,11 @@
 #
 """Test the satellite five interface."""
 import xmlrpc.client
+from multiprocessing import Value
 from unittest.mock import patch
 
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source,
                         SystemInspectionResult)
@@ -279,7 +281,7 @@ class SatelliteFiveTest(TestCase):
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
         with self.assertRaises(SatelliteException):
-            self.api.hosts_facts()
+            self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
         {'host_name': 'sys10',
@@ -299,7 +301,7 @@ class SatelliteFiveTest(TestCase):
                           return_value=hosts_return_value) as mock_vhosts:
             with patch.object(SatelliteFive, 'physical_hosts',
                               return_value=[]) as mock_physical:
-                self.api.hosts_facts()
+                self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
                 inspect_result = self.scan_task.inspection_result
                 self.assertEqual(len(inspect_result.systems.all()), 1)
                 mock_vhosts.assert_called_once_with()

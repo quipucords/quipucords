@@ -12,7 +12,9 @@
 import logging
 from socket import gaierror
 
-from api.models import (ScanTask, SystemConnectionResult)
+from api.models import (ScanJob,
+                        ScanTask,
+                        SystemConnectionResult)
 
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 
@@ -75,8 +77,20 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         self.scan_task.connection_result.save()
 
-    def run(self):
-        """Scan network range ang attempt connections."""
+    def run(self, manager_interrupt):
+        """Scan vcenter and attempt connections."""
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
         try:

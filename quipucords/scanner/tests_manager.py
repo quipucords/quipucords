@@ -68,5 +68,5 @@ class ScanManagerTest(TestCase):
     def test_kill_missing(self):
         """Test kill on missing id."""
         task = MockTask()
-        killed = self.scan_manager.kill(task)
+        killed = self.scan_manager.kill(task, 'cancel')
         self.assertFalse(killed)
