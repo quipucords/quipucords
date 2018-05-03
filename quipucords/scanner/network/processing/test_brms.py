@@ -115,3 +115,69 @@ class TestProcessFindBRMSKieWarVer(unittest.TestCase):
         self.assertEqual(
             brms.ProcessFindBRMSKieWarVer.process(ansible_result('a\nb\nc')),
             ['a', 'b', 'c'])
+
+
+class TestProcessJbossBRMSBusinessCentralCandidates(unittest.TestCase):
+    """Test using locate to find kie server candidates."""
+
+    def test_success(self):
+        """Found jboss-modules.jar."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSBusinessCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_business_central_candidates':
+                 ansible_result('a\nb\nc')}),
+            ['a', 'b', 'c'])
+
+    def test_not_found(self):
+        """Did not find jboss-modules.jar."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSBusinessCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_business_central_candidates':
+                 ansible_result('')}),
+            [])
+
+
+class TestProcessJbossBRMSDecisionCentralCandidates(unittest.TestCase):
+    """Test using locate to find decision candidates."""
+
+    def test_success(self):
+        """Found candidates."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSDecisionCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_decision_central_candidates':
+                 ansible_result('a\nb\nc')}),
+            ['a', 'b', 'c'])
+
+    def test_not_found(self):
+        """Did not find candidates."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSDecisionCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_decision_central_candidates':
+                 ansible_result('')}),
+            [])
+
+
+class TestProcessJbossBRMSKieCentralCandidates(unittest.TestCase):
+    """Test using locate to find kie server candidates."""
+
+    def test_success(self):
+        """Found candidates."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSKieCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_kie_server_candidates':
+                 ansible_result('a\nb\nc')}),
+            ['a', 'b', 'c'])
+
+    def test_not_found(self):
+        """Did not find candidates."""
+        self.assertEqual(
+            brms.ProcessJbossBRMSKieCentralCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_kie_server_candidates':
+                 ansible_result('')}),
+            [])
