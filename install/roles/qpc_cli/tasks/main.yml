@@ -68,7 +68,7 @@
 
 - name: Set qpc version
   set_fact:
-    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc') }}"
+    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc-0.0.42-1.git.659.23c2bcb.fc27') }}"
   when: qpc_version is not defined
 
 - name: Find installable local QPC rpm
