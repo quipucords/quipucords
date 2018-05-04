@@ -33,5 +33,8 @@ class ProcessEnableYumRepolist(process.Processor):
         for line in out_lines:
             repo, _, remainder = line.partition(' ')
             repo_name, _, _ = remainder.rpartition(' ')
-            repos.append({'repo': repo.strip(), 'name': repo_name.strip()})
+            repo = repo.strip()
+            repo_name = repo_name.strip()
+            if repo != '' and repo_name != '':
+                repos.append({'repo': repo.strip(), 'name': repo_name.strip()})
         return repos
