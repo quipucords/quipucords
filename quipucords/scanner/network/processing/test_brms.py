@@ -181,3 +181,25 @@ class TestProcessJbossBRMSKieCentralCandidates(unittest.TestCase):
                 {'internal_jboss_brms_kie_server_candidates':
                  ansible_result('')}),
             [])
+
+
+class TestProcessKieSearchCandidates(unittest.TestCase):
+    """Test using locate to find kie server candidates."""
+
+    def test_success(self):
+        """Found candidates."""
+        self.assertEqual(
+            brms.ProcessKieSearchCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_kie_server_candidates':
+                 ansible_result('a\nb\nc')}),
+            ['a', 'b', 'c'])
+
+    def test_not_found(self):
+        """Did not find candidates."""
+        self.assertEqual(
+            brms.ProcessKieSearchCandidates.process(
+                'QPC_FORCE_POST_PROCESS',
+                {'internal_jboss_brms_kie_server_candidates':
+                 ansible_result('')}),
+            [])

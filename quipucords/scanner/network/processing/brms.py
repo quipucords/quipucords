@@ -150,7 +150,7 @@ class EnclosingWarJarProcessor(process.Processor):
     def process(cls, output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
-        for line in output['stdout_lines']:
+        for line in output.get('stdout_lines', []):
             if line.strip():
                 filename = posixpath.basename(line)
                 directory = enclosing_war_archive(line)
@@ -259,6 +259,28 @@ class ProcessJbossBRMSKieCentralCandidates(process.Processor):
 
     KEY = 'jboss_brms_kie_server_candidates'
     DEPS = ['internal_jboss_brms_kie_server_candidates']
+    REQUIRE_DEPS = False
+
+    @staticmethod
+    def process(output, dependencies):
+        """Return the command's output."""
+        internal_dep = \
+            dependencies.get(
+                'internal_jboss_brms_kie_server_candidates')
+        result = []
+        if internal_dep:
+            result = \
+                [line for line in internal_dep.get(
+                    'stdout_lines', []) if line.strip()]
+
+        return result
+
+
+class ProcessKieSearchCandidates(process.Processor):
+    """Process the results of a locate command."""
+
+    KEY = 'kie_search_candidates'
+    DEPS = ['internal_jboss_brms_kie_search_candidate']
     REQUIRE_DEPS = False
 
     @staticmethod
