@@ -56,7 +56,8 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
-* Fri Apr 13 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
+* Fri May 4 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
+- Enable merging reports from scan job ids, report ids, and json details report files.<aaiken@redhat.com>
 - Clean up the CLI tests for credential. <aaiken@redhat.com>
 - Enable editing the disable-ssl option for a source. <aaiken@redhat.com>
 - Allow true/false for boolean values in source options. <kholdawa@redhat.com>
