@@ -37,4 +37,4 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 
   - Enter the following command::
 
-      # yum -y install qpc
+      # yum -y install qpc-0.0.42-1.git.659.23c2bcb.fc27

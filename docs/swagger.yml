@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "The models and API for the Quipucords server."
-  version: "1.0.0"
+  version: "0.0.42"
   title: "Quipucords API"
   contact:
     email: "quipucords@redhat.com"
