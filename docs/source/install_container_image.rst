@@ -6,7 +6,7 @@ After Docker is installed, you can obtain and install the container image that e
 
 1. Download the server container image by entering the following command::
 
-    # curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.42/quipucords.0.0.42.tar.gz
+    # curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.42-pilot/quipucords.0.0.42.tar.gz
 
 
 2. Load the container image into the local Docker registry with the following command::

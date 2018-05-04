@@ -16,7 +16,7 @@ After Ansible is installed, use the following steps to obtain the installer for 
 
 1. Download the installer by entering the following command::
 
-    # curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.42/quipucords.install.tar.gz
+    # curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.42-pilot/quipucords.install.tar.gz
 
 2. Unzip the installer by entering the following command::
 
