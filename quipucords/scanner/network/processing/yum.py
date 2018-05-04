@@ -36,5 +36,5 @@ class ProcessEnableYumRepolist(process.Processor):
             repo = repo.strip()
             repo_name = repo_name.strip()
             if repo != '' and repo_name != '':
-                repos.append({'repo': repo.strip(), 'name': repo_name.strip()})
+                repos.append({'repo': repo, 'name': repo_name})
         return repos
