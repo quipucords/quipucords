@@ -62,11 +62,12 @@ class ProcessJbossBRMSManifestMF(process.Processor):
         if item.get('rc', True):
             return None
 
-        directory = normalize_path(item['item'])
-        for line in item['stdout_lines']:
-            match = IMPLEMENTATION_VERSION_RE.match(line)
-            if match:
-                return (normalize_path(directory), match.group(1))
+        directory = normalize_path(item.get('item'))
+        for line in item.get('stdout_lines', []):
+            if line.strip():
+                match = IMPLEMENTATION_VERSION_RE.match(line)
+                if match:
+                    return (normalize_path(directory), match.group(1))
 
         return None
 
@@ -116,12 +117,13 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
                 continue
 
             directory = normalize_path(item['item'])
-            for line in item['stdout_lines']:
-                filename = posixpath.basename(line)
-                match = KIE_FILENAME_RE.match(filename)
-                if not match:
-                    continue
-                results.add((directory, match.group(1)))
+            for line in item.get('stdout_lines', []):
+                if line.strip():
+                    filename = posixpath.basename(line)
+                    match = KIE_FILENAME_RE.match(filename)
+                    if not match:
+                        continue
+                    results.add((directory, match.group(1)))
 
         return list(results)
 
@@ -148,19 +150,20 @@ class EnclosingWarJarProcessor(process.Processor):
     def process(cls, output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
-        for line in output['stdout_lines']:
-            filename = posixpath.basename(line)
-            directory = enclosing_war_archive(line)
-            match = JAR_SUFFIX_RE.match(filename)
-            if not match:
-                continue
-            without_suffix = match.group(1)
-            if without_suffix.endswith(SOURCES):
-                without_suffix = without_suffix[:-len(SOURCES)]
-            if not without_suffix.startswith(cls.REMOVE_PREFIX):
-                continue
-            version_string = without_suffix[len(cls.REMOVE_PREFIX):]
-            results.add((directory, version_string))
+        for line in output.get('stdout_lines', []):
+            if line.strip():
+                filename = posixpath.basename(line)
+                directory = enclosing_war_archive(line)
+                match = JAR_SUFFIX_RE.match(filename)
+                if not match:
+                    continue
+                without_suffix = match.group(1)
+                if without_suffix.endswith(SOURCES):
+                    without_suffix = without_suffix[:-len(SOURCES)]
+                if not without_suffix.startswith(cls.REMOVE_PREFIX):
+                    continue
+                version_string = without_suffix[len(cls.REMOVE_PREFIX):]
+                results.add((directory, version_string))
 
         return list(results)
 
@@ -202,4 +205,94 @@ class ProcessFindBRMSKieWarVer(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Return the command's output."""
-        return output['stdout_lines']
+        result = [line for line in output.get(
+            'stdout_lines', []) if line.strip()]
+        return result
+
+
+class ProcessJbossBRMSBusinessCentralCandidates(process.Processor):
+    """Process the results of a locate command."""
+
+    KEY = 'jboss_brms_business_central_candidates'
+    DEPS = ['internal_jboss_brms_business_central_candidates']
+    REQUIRE_DEPS = False
+
+    @staticmethod
+    def process(output, dependencies):
+        """Return the command's output."""
+        internal_dep = \
+            dependencies.get(
+                'internal_jboss_brms_business_central_candidates')
+        result = []
+        if internal_dep:
+            result = \
+                [line for line in internal_dep.get(
+                    'stdout_lines', []) if line.strip()]
+
+        return result
+
+
+class ProcessJbossBRMSDecisionCentralCandidates(process.Processor):
+    """Process the results of a locate command."""
+
+    KEY = 'jboss_brms_decision_central_candidates'
+    DEPS = ['jboss_brms_decision_central_candidates']
+    REQUIRE_DEPS = False
+
+    @staticmethod
+    def process(output, dependencies):
+        """Return the command's output."""
+        internal_dep = \
+            dependencies.get(
+                'internal_jboss_brms_decision_central_candidates')
+        result = []
+        if internal_dep:
+            result = \
+                [line for line in internal_dep.get(
+                    'stdout_lines', []) if line.strip()]
+
+        return result
+
+
+class ProcessJbossBRMSKieCentralCandidates(process.Processor):
+    """Process the results of a locate command."""
+
+    KEY = 'jboss_brms_kie_server_candidates'
+    DEPS = ['internal_jboss_brms_kie_server_candidates']
+    REQUIRE_DEPS = False
+
+    @staticmethod
+    def process(output, dependencies):
+        """Return the command's output."""
+        internal_dep = \
+            dependencies.get(
+                'internal_jboss_brms_kie_server_candidates')
+        result = []
+        if internal_dep:
+            result = \
+                [line for line in internal_dep.get(
+                    'stdout_lines', []) if line.strip()]
+
+        return result
+
+
+class ProcessKieSearchCandidates(process.Processor):
+    """Process the results of a locate command."""
+
+    KEY = 'kie_search_candidates'
+    DEPS = ['internal_jboss_brms_kie_search_candidate']
+    REQUIRE_DEPS = False
+
+    @staticmethod
+    def process(output, dependencies):
+        """Return the command's output."""
+        internal_dep = \
+            dependencies.get(
+                'internal_jboss_brms_kie_server_candidates')
+        result = []
+        if internal_dep:
+            result = \
+                [line for line in internal_dep.get(
+                    'stdout_lines', []) if line.strip()]
+
+        return result

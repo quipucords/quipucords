@@ -50,7 +50,9 @@ class ProcessFindJboss(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Return the command's output."""
-        return output['stdout_lines']
+        result = [line for line in output.get(
+            'stdout_lines', []) if line.split()]
+        return result
 
 
 class ProcessIdUJboss(process.Processor):
@@ -85,7 +87,7 @@ class ProcessJbossEapCommonFiles(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Find all of the times 'test' succeeded."""
-        items = output['results']
+        items = output.get('results', [])
 
         out_list = []
         for item in items:
