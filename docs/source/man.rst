@@ -21,9 +21,9 @@ Quipucords uses two types of configuration to manage the inspection process. A *
 
 By default, the credentials and sources that are created when using Quipucords are encrypted in a database. The values are encrypted with AES-256 encryption. They are decrypted when the Quipucords server runs a scan, by using a *vault password* to access the encrypted values that are stored in the database.
 
-Quipucords is an *agentless* inspection tool, so there is no need to install the tool on multiple systems. Inspection for the entire network is centralized on a single machine.
+Quipucords is an *agentless* inspection tool, so there is no need to install the tool on the sources to be inspected.
 
-This man page describes the commands, subcommands, and options for the ``qpc`` command and includes usage information and example commands.
+This manual page describes the commands, subcommands, and options for the ``qpc`` command and includes usage information and example commands.
 
 Usage
 -----
@@ -204,7 +204,7 @@ Sources
 
 Use the ``qpc source`` command to create and manage sources.
 
-A source defines a collection of network information, including IP addresses or host names, or systems management solution information, in addition to SSH ports and SSH credentials. The SSH credentials are provided through reference to one or more credentials. A scan can reference a source so that the act of running the scan is repeatable, without a requirement to reenter network information for each scan attempt.
+A source defines a single entity or multiple entities to be inspected. A source can be a single physical machine, virtual machine, or container, or it can be a collection of network information, including IP addresses or host names, or systems management solution information such as vCenter Server or Satellite information. The source also contains information about SSH ports and SSH credentials that are needed to access the systems to be inspected. The SSH credentials are provided through reference to one or more of the Quipucords credentials that you configure. A scan  references a source so that the act of running the scan is repeatable, without a requirement to reenter the information for each scan attempt.
 
 Creating and Editing Sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -261,7 +261,7 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
 ``--ssl-protocol=protocol``
 
-  Optional. Determines the SSL protocol to be used for a secure connection during the scan. The value must be ``SSLv23``, ``TLSv1``, "``LSv1_1``, or ``TLSv1_2``.
+  Optional. Determines the SSL protocol to be used for a secure connection during the scan. The value must be ``SSLv23``, ``TLSv1``, ``LSv1_1``, or ``TLSv1_2``.
 
 ``--disable-ssl={True,False}``
 
@@ -321,7 +321,7 @@ Scans
 
 Use the ``qpc scan`` command to create, run and manage scans.
 
-A scan defines a collection of network information, including the sources to scan and additional options, such as elective products to omit from the scan and the maximum number of parallel system scans. The creation of a scan references information such as sources so that the act of running the scan is repeatable, without a requirement to reenter network information for each scan attempt.
+A scan defines a collection of network or systems management solution information, including the individual sources to scan, and additional options, such as elective products to omit from the scan and the maximum number of parallel system scans. The creation of a scan references information such as sources so that the act of running the scan is repeatable, without a requirement to reenter this information for each scan attempt.
 
 Creating and Editing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -339,15 +339,15 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
 ``--disabled-optional-products=products_list``
 
-  Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+  Optional. The product inspection exclusion. Contains the list of products to exclude from inspection. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
 
 ``--enabled-ext-product-search=products_list``
 
-  Optional. The list of products to include for extended product search. Valid values are jboss_eap, jboss_fuse, and jboss_brms.
+  Optional. The list of products to include for extended product search. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
 
 ``--ext-product-search-dirs=search_dirs_list``
 
-  Optional. A list of fully-qualified paths to search for extended product search.
+  Optional. A list of fully qualified paths to search for extended product search.
 
 The information in a scan might change as the structure of the network changes. Use the ``qpc scan edit`` command to edit an existing scan to accommodate those changes.
 
@@ -359,13 +359,13 @@ For example, if a scan contains a value of ``network1source`` for the ``--source
 
 ``qpc scan edit --name=myscan --sources network1source satellite1source``
 
-If you would like to reset the ``--disabled-optional-products``, ``--enabled-ext-product-search``, or ``--ext-product-search-dirs`` back to their default values, you must provide the flag without any product values.
+If you want to reset the ``--disabled-optional-products``, ``--enabled-ext-product-search``, or ``--ext-product-search-dirs`` back to their default values, you must provide the flag without any product values.
 
-For example, if you would like to reset the ``--disabled-optional-products`` option back to the default values, you would edit the scan as follows:
+For example, if you want to reset the ``--disabled-optional-products`` option back to the default values, you would edit the scan as follows:
 
 ``qpc scan edit --name=myscan --disabled-optional-products``
 
-**TIP:** After editing a scan use the ``qpc scan show`` command to review those edits.
+**TIP:** After editing a scan, use the ``qpc scan show`` command to review those edits.
 
 Listing and Showing Scans
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -475,7 +475,7 @@ Viewing the Detail Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The ``qpc report detail`` command generates a report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans.
 
-**qpc report detail (--scan-job** *scan_job_identifier*|**--report** *report_identifier* **) (--json|--csv)** **--output-file** *PATH*
+**qpc report detail (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
 ``--scan-job=scan_job_identifier``
 
@@ -493,7 +493,7 @@ The ``qpc report detail`` command generates a report that contains the unprocess
 
   Displays the results of the report in CSV format. Mutually exclusive with the ``--json`` option.
 
-``--output-file=PATH``
+``--output-file=path``
 
   Required. Path to a file location where the report data is saved.
 
@@ -503,7 +503,7 @@ The ``qpc report summary`` command generates a report that contains the processe
 
 For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a report summary results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
 
-**qpc report summary (--scan-job** *scan_job_identifier*|**--report** *report_identifier* **) (--json|--csv)** **--output-file** *PATH*
+**qpc report summary (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
 ``--scan-job=scan_job_identifier``
 
@@ -521,7 +521,7 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
   Displays the results of the report in CSV format. Mutually exclusive with the ``--json`` option.
 
-``--output-file=PATH``
+``--output-file=path``
 
   Required. Path to a file location where the report data is saved.
 
@@ -529,7 +529,7 @@ Merging Scan Job Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The ``qpc report merge`` command combines results from two or more scan job identifiers, report identifers, or JSON details report files to create a single report. The ``qpc report summary`` or ``qpc report detail`` can be used to obtain the report.
 
-**qpc report merge (--job-ids** *scan_job_identifiesr*|**--report-ids** *report_identifiers*|**--json-files** *json_details_report_files* **)
+**qpc report merge (--job-ids** *scan_job_identifiers* **|** **--report-ids** *report_identifiers* **|** **--json-files** *json_details_report_files* **)**
 
 ``--job-ids=scan_job_identifiers``
 
