@@ -21,7 +21,7 @@ Quipucords uses two types of configuration to manage the inspection process. A *
 
 By default, the credentials and sources that are created when using Quipucords are encrypted in a database. The values are encrypted with AES-256 encryption. They are decrypted when the Quipucords server runs a scan, by using a *vault password* to access the encrypted values that are stored in the database.
 
-Quipucords is an *agentless* inspection tool, so there is no need to install the tool on multiple systems. Inspection for the entire network is centralized on a single machine.
+Quipucords is an *agentless* inspection tool, so there is no need to install the tool on the sources to be inspected.
 
 This man page describes the commands, subcommands, and options for the ``qpc`` command and includes usage information and example commands.
 
