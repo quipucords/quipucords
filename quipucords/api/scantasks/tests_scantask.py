@@ -170,3 +170,24 @@ class ScanTaskTest(TestCase):
         self.assertEqual(2, task.systems_scanned)
         self.assertEqual(2, task.systems_failed)
         self.assertEqual(2, task.systems_unreachable)
+
+    def test_calculate_counts(self):
+        """Test calculate counts."""
+        task = ScanTask.objects.create(
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        # pylint: disable=invalid-name
+        task.save()
+        task.increment_stats('foo', increment_sys_count=True,
+                             increment_sys_scanned=True,
+                             increment_sys_failed=True,
+                             increment_sys_unreachable=True)
+        systems_count,\
+            systems_scanned,\
+            systems_failed,\
+            systems_unreachable = task.calculate_counts()
+        self.assertEqual(systems_count, 1)
+        self.assertEqual(systems_scanned, 1)
+        self.assertEqual(systems_failed, 1)
+        self.assertEqual(systems_unreachable, 1)
