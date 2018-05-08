@@ -1,10 +1,10 @@
 Remote Scan Commands
 ~~~~~~~~~~~~~~~~~~~~~
-This file documents which programs on the remote host are used to collect different groups of facts.  In addition to the programs below, we depend on standard shell facilities like those provided by bash.
+This section documents which commands on the remote host are required to collect system facts.  In addition to the programs below, we depend on standard shell facilities like those provided by bash.
 
 Basic Commands
 ##############
-Below is a list of commands that require sudo to gather facts.
+Below is a list of commands that do not require sudo or root access.
 
 - cat
 - ctime
@@ -26,7 +26,7 @@ Below is a list of commands that require sudo to gather facts.
 
 Sudo Commands
 #############
-Below is a list of commands that require sudo to gather facts.  Under each command there is a list of facts or categories of facts that will not be included without sudo for that command.
+Below is a list of commands that require sudo to gather facts.  Under each command there is a list of facts or categories of facts that will not be included in reports without sudo for that command.
 
 - chkconfig:
     - EAP
