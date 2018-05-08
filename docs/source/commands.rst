@@ -1,6 +1,6 @@
 Remote Scan Commands
 ~~~~~~~~~~~~~~~~~~~~~
-This section documents which commands on the remote host are required to collect system facts.  In addition to the programs below, we depend on standard shell facilities like those provided by bash.
+This section documents required commands on the remote host for network scans.  In addition to the commands below, we depend on standard shell facilities like those provided by bash.
 
 Basic Commands
 ##############
@@ -30,7 +30,6 @@ Below is a list of commands that require sudo to gather facts.  Under each comma
 
 - chkconfig:
     - EAP
-    - Fuse
     - Fuse on Karaf
 - command
     - see dmicode
@@ -56,26 +55,22 @@ Below is a list of commands that require sudo to gather facts.  Under each comma
 - locate
     - BRMS
     - EAP
-    - Fuse
     - Fuse on Karaf
 - ls
     - date_machine_id
     - EAP
-    - Fuse
     - Fuse on Karaf
     - BRMS
     - redhat_packages_certs
     - subman_consumed
 - ps
     - EAP
-    - Fuse
     - Fuse on Karaf
     - virt type
 - subscription-manager
     - subman_consumed
 - systemctl
     - EAP
-    - Fuse
     - Fuse on Karaf
 - unzip
     - EAP detection
