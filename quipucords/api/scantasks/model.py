@@ -257,6 +257,37 @@ class ScanTask(models.Model):
                           sys_failed=sys_failed,
                           sys_unreachable=sys_unreachable)
 
+    def calculate_counts(self):
+        """Calculate scan counts for task.
+
+        :return: systems_count, systems_scanned, systems_failed
+        """
+        systems_count = 0
+        systems_scanned = 0
+        systems_failed = 0
+        systems_unreachable = 0
+        if self.systems_count is not None:
+            if systems_count is None:
+                systems_count = 0
+            systems_count += self.systems_count
+        if self.systems_scanned is not None:
+            if systems_scanned is None:
+                systems_scanned = 0
+            systems_scanned += self.systems_scanned
+        if self.systems_failed is not None:
+            if systems_failed is None:
+                systems_failed = 0
+            systems_failed += self.systems_failed
+        if self.systems_unreachable is not None:
+            if systems_unreachable is None:
+                systems_unreachable = 0
+            systems_unreachable += self.systems_unreachable
+
+        return systems_count,\
+            systems_scanned,\
+            systems_failed,\
+            systems_unreachable
+
     @transaction.atomic
     def start(self):
         """Start a task."""

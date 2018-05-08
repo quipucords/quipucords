@@ -88,10 +88,13 @@ class SatelliteFive(SatelliteInterface):
             client.auth.logout(key)
 
             for system in systems:
-                name = system.get(NAME)
-                if name is not None:
-                    hosts.append(name)
-                    self.record_conn_result(name, credential)
+                host_name = system.get(NAME)
+                host_id = system.get(ID)
+
+                if host_name is not None and host_id is not None:
+                    unique_name = '%s_%s' % (host_name, host_id)
+                    hosts.append(unique_name)
+                    self.record_conn_result(unique_name, credential)
 
         except xmlrpc.client.Fault as xml_error:
             raise SatelliteException(str(xml_error))
@@ -116,8 +119,9 @@ class SatelliteFive(SatelliteInterface):
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
         details = {}
+        unique_name = '%s_%s' % (host_name, host_id)
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
-            name=host_name).first()
+            name=unique_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
@@ -125,7 +129,7 @@ class SatelliteFive(SatelliteInterface):
             return None
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         try:
-            message = 'REQUESTING HOST DETAILS: %s' % host_name
+            message = 'REQUESTING HOST DETAILS: %s' % unique_name
             self.inspect_scan_task.log_message(message)
 
             key = client.auth.login(user, password)
@@ -203,13 +207,13 @@ class SatelliteFive(SatelliteInterface):
 
             logger.debug('host_id=%s, host_details=%s',
                          host_id, details)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except xmlrpc.client.Fault as xml_error:
             error_message = 'Satellite error encountered: %s\n' % xml_error
             logger.error(error_message)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.FAILED}
 
@@ -338,6 +342,8 @@ class SatelliteFive(SatelliteInterface):
                 for result in results:
                     if result is not None:
                         self.record_inspect_result(
-                            result.get('host_name'),
+                            result.get('name'),
                             result.get('details'),
                             result.get('status'))
+
+        utils.validate_task_stats(self.inspect_scan_task)
