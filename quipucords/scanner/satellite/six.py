@@ -389,10 +389,13 @@ class SatelliteSixV1(SatelliteInterface):
                                              (response.status_code, url))
                 jsonresult = response.json()
                 for result in jsonresult.get(RESULTS, []):
-                    name = result.get(NAME)
-                    if name is not None:
-                        hosts.append(name)
-                        self.record_conn_result(name, credential)
+                    host_name = result.get(NAME)
+                    host_id = result.get(ID)
+
+                    if host_name is not None and host_id is not None:
+                        unique_name = '%s_%s' % (host_name, host_id)
+                        hosts.append(unique_name)
+                        self.record_conn_result(unique_name, credential)
 
         return hosts
 
@@ -408,8 +411,9 @@ class SatelliteSixV1(SatelliteInterface):
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
         details = {}
+        unique_name = '%s_%s' % (host_name, host_id)
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
-            name=host_name).first()
+            name=unique_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
@@ -417,7 +421,7 @@ class SatelliteSixV1(SatelliteInterface):
             return None
 
         try:
-            message = 'REQUESTING HOST DETAILS: %s' % host_name
+            message = 'REQUESTING HOST DETAILS: %s' % unique_name
             self.inspect_scan_task.log_message(message)
             details.update(host_fields(self.inspect_scan_task, 1,
                                        HOSTS_FIELDS_V1_URL,
@@ -427,13 +431,13 @@ class SatelliteSixV1(SatelliteInterface):
                                               org_id, host_id))
             logger.debug('host_id=%s, host_details=%s',
                          host_id, details)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except SatelliteException as sat_error:
             error_message = 'Satellite error encountered: %s\n' % sat_error
             logger.error(error_message)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.FAILED}
         return details
@@ -488,9 +492,10 @@ class SatelliteSixV1(SatelliteInterface):
                         for result in results:
                             if result is not None:
                                 self.record_inspect_result(
-                                    result.get('host_name'),
+                                    result.get('name'),
                                     result.get('details'),
                                     result.get('status'))
+        utils.validate_task_stats(self.inspect_scan_task)
 
 
 class SatelliteSixV2(SatelliteInterface):
@@ -532,10 +537,13 @@ class SatelliteSixV2(SatelliteInterface):
                                          (response.status_code, url))
             jsonresult = response.json()
             for result in jsonresult.get(RESULTS, []):
-                name = result.get(NAME)
-                if name is not None:
-                    hosts.append(name)
-                    self.record_conn_result(name, credential)
+                host_name = result.get(NAME)
+                host_id = result.get(ID)
+
+                if host_name is not None and host_id is not None:
+                    unique_name = '%s_%s' % (host_name, host_id)
+                    hosts.append(unique_name)
+                    self.record_conn_result(unique_name, credential)
 
         return hosts
 
@@ -550,15 +558,16 @@ class SatelliteSixV2(SatelliteInterface):
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
         details = {}
+        unique_name = '%s_%s' % (host_name, host_id)
         sys_result = self.inspect_scan_task.inspection_result.systems.filter(
-            name=host_name).first()
+            name=unique_name).first()
 
         if sys_result:
             logger.debug('Results already captured for host_name=%s',
                          host_name)
             return None
         try:
-            message = 'REQUESTING HOST DETAILS: %s' % host_name
+            message = 'REQUESTING HOST DETAILS: %s' % unique_name
             self.inspect_scan_task.log_message(message)
             details.update(host_fields(self.inspect_scan_task, 2,
                                        HOSTS_FIELDS_V2_URL,
@@ -568,13 +577,13 @@ class SatelliteSixV2(SatelliteInterface):
                                               None, host_id))
             logger.debug('host_id=%s, host_details=%s',
                          host_id, details)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except SatelliteException as sat_error:
             error_message = 'Satellite error encountered: %s\n' % sat_error
             logger.error(error_message)
-            return {'host_name': host_name,
+            return {'name': unique_name,
                     'details': details,
                     'status': SystemInspectionResult.FAILED}
         return details
@@ -623,6 +632,8 @@ class SatelliteSixV2(SatelliteInterface):
                     for result in results:
                         if result is not None:
                             self.record_inspect_result(
-                                result.get('host_name'),
+                                result.get('name'),
                                 result.get('details'),
                                 result.get('status'))
+
+        utils.validate_task_stats(self.inspect_scan_task)

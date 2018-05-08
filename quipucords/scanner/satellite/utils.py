@@ -200,3 +200,25 @@ def data_map(mapping_dict, data):
         for key, mapping_key in mapping_dict.items():
             out[key] = data.get(mapping_key)
     return out
+
+
+def validate_task_stats(task):
+    """Map data keys to new output.
+
+    :param task: ScanTask to evaluate
+    :throws: SatelliteException if task stats are not valid
+    """
+    systems_count,\
+        systems_scanned, \
+        systems_failed, \
+        systems_unreachable = task.calculate_counts()
+    totals = + systems_scanned + systems_failed + systems_unreachable
+    if totals != systems_count:
+        missing_sys = systems_count - totals
+        error = 'Scan failed to inspect %d systems.' % missing_sys
+        task.log_message(error, log_level=logging.ERROR)
+        new_failed = missing_sys + systems_failed
+        task.update_stats(
+            'Missed failed systems', sys_failed=new_failed)
+        raise SatelliteException(
+            'hosts_facts could not scan all systems')
