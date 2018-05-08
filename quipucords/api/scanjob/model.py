@@ -149,7 +149,8 @@ class ScanJob(models.Model):
 
         :param connect_only: counts should only include
         connection scan results
-        :return: systems_count, systems_scanned, systems_failed
+        :return: systems_count, systems_scanned,
+        systems_failed, systems_unreachable
         """
         if self.status == ScanTask.CREATED or \
                 self.status == ScanTask.PENDING:
@@ -189,7 +190,8 @@ class ScanJob(models.Model):
     def _calculate_counts(self, scan_type):
         """Calculate scan counts from tasks.
 
-        :return: systems_count, systems_scanned, systems_failed
+        :return: systems_count, systems_scanned,
+        systems_failed, systems_unreachable
         """
         systems_count = 0
         systems_scanned = 0

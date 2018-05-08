@@ -260,7 +260,8 @@ class ScanTask(models.Model):
     def calculate_counts(self):
         """Calculate scan counts for task.
 
-        :return: systems_count, systems_scanned, systems_failed
+        :return: systems_count, systems_scanned,
+        systems_failed, systems_unreachable
         """
         systems_count = 0
         systems_scanned = 0
