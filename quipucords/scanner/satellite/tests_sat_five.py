@@ -17,7 +17,9 @@ from api.models import (Credential,
                         ScanJob,
                         ScanTask,
                         Source,
-                        SystemInspectionResult)
+                        SystemConnectionResult,
+                        SystemInspectionResult,
+                        TaskConnectionResult)
 
 from django.test import TestCase
 
@@ -60,6 +62,18 @@ class SatelliteFiveTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         self.api = SatelliteFive(self.scan_job, self.scan_task)
+        connection_results = TaskConnectionResult()
+        connection_results.save()
+        self.api.connect_scan_task.connection_result = connection_results
+        self.api.connect_scan_task.connection_result.save()
+
+        sys_result = SystemConnectionResult(
+            name='sys1_1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        self.api.connect_scan_task.connection_result.systems.add(sys_result)
+        self.api.connect_scan_task.connection_result.save()
+        self.api.connect_scan_task.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -86,9 +100,12 @@ class SatelliteFiveTest(TestCase):
     @patch('xmlrpc.client.ServerProxy')
     def test_hosts(self, mock_serverproxy):
         """Test the method hosts."""
-        systems = [{'name': 'sys1'},
-                   {'name': 'sys2'},
-                   {'name': 'sys3'}]
+        systems = [{'name': 'sys1',
+                    'id': 1},
+                   {'name': 'sys2',
+                    'id': 2},
+                   {'name': 'sys3',
+                    'id': 3}]
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'
         client.auth.logout.return_value = 'key'
@@ -97,7 +114,7 @@ class SatelliteFiveTest(TestCase):
         hosts = self.api.hosts()
         self.assertEqual(systems_count, 3)
         self.assertEqual(len(hosts), 3)
-        self.assertEqual(hosts, ['sys1', 'sys2', 'sys3'])
+        self.assertEqual(hosts, ['sys1_1', 'sys2_2', 'sys3_3'])
 
     @patch('xmlrpc.client.ServerProxy')
     def test_hosts_with_err(self, mock_serverproxy):
@@ -137,7 +154,7 @@ class SatelliteFiveTest(TestCase):
                                         last_checkin='', virtual_hosts=virt,
                                         virtual_guests={}, physical_hosts=[])
         self.assertEqual(details, {'details': expected,
-                                   'host_name': 'sys1',
+                                   'name': 'sys1_1',
                                    'status': 'success'})
 
     @patch('xmlrpc.client.ServerProxy')
@@ -172,14 +189,14 @@ class SatelliteFiveTest(TestCase):
                                         virtual_guests={1: 2},
                                         physical_hosts=[])
         self.assertEqual(details, {'details': expected,
-                                   'host_name': 'sys1',
+                                   'name': 'sys1_1',
                                    'status': 'success'})
 
     def test_host_details_skip(self):
         """Test host_details method for already captured data."""
         # pylint: disable=no-member
         sys_result = SystemInspectionResult(
-            name='sys1',
+            name='sys1_1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
         inspect_result = self.scan_task.inspection_result
@@ -208,7 +225,7 @@ class SatelliteFiveTest(TestCase):
         self.assertEqual(len(inspect_result.systems.all()), 0)
         self.assertEqual(
             details, {'details': {},
-                      'host_name': 'sys1',
+                      'name': 'sys1_1',
                       'status': 'failed'})
 
     @patch('xmlrpc.client.ServerProxy')
@@ -284,7 +301,7 @@ class SatelliteFiveTest(TestCase):
             self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'host_name': 'sys10',
+        {'name': 'sys10',
          'details': {},
          'status': SystemInspectionResult.SUCCESS}])
     @patch('xmlrpc.client.ServerProxy')

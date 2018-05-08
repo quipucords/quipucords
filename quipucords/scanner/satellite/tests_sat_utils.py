@@ -33,7 +33,8 @@ from scanner.satellite.utils import (_status5,
                                      get_connect_data,
                                      get_credential,
                                      get_sat5_client,
-                                     status)
+                                     status,
+                                     validate_task_stats)
 from scanner.test_util import create_scan_job
 
 
@@ -193,3 +194,13 @@ class SatelliteUtilsTest(TestCase):
         self.assertIsNotNone(client)
         self.assertEqual(user, 'username')
         self.assertEqual(password, 'password')
+
+    def test_validate_task_stats(self):
+        """Test validate task stats no errors."""
+        validate_task_stats(self.scan_task)
+
+    def test_validate_task_stats_error(self):
+        """Test validate task stats errors."""
+        with self.assertRaises(SatelliteException):
+            self.scan_task.increment_stats('TEST', increment_sys_count=True)
+            validate_task_stats(self.scan_task)
