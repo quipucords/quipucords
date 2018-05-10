@@ -46,6 +46,7 @@ qpc, the command line tool that is installed by RPM, is available for `download 
   - For Fedora 27, enter the following command::
 
       # yum -y install qpc
+
   - For Fedora 26, enter the following command::
 
       # yum -y install qpc
