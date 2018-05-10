@@ -17,7 +17,9 @@ from api.models import (Credential,
                         ScanOptions,
                         ScanTask,
                         Source,
-                        SystemInspectionResult)
+                        SystemConnectionResult,
+                        SystemInspectionResult,
+                        TaskConnectionResult)
 
 from django.test import TestCase
 
@@ -65,6 +67,18 @@ class SatelliteSixV1Test(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         self.api = SatelliteSixV1(self.scan_job, self.scan_task)
+        connection_results = TaskConnectionResult()
+        connection_results.save()
+        self.api.connect_scan_task.connection_result = connection_results
+        self.api.connect_scan_task.connection_result.save()
+
+        sys_result = SystemConnectionResult(
+            name='sys1_1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        self.api.connect_scan_task.connection_result.systems.add(sys_result)
+        self.api.connect_scan_task.connection_result.save()
+        self.api.connect_scan_task.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -136,9 +150,12 @@ class SatelliteSixV1Test(TestCase):
             '/v2/organizations/{org_id}/systems'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host='1.2.3.4', org_id=1)
-            jsonresult = {'results': [{'name': 'sys1'},
-                                      {'name': 'sys2'},
-                                      {'name': 'sys3'}],
+            jsonresult = {'results': [{'name': 'sys1',
+                                       'id': 1},
+                                      {'name': 'sys2',
+                                       'id': 2},
+                                      {'name': 'sys3',
+                                       'id': 3}],
                           'per_page': 100,
                           'total': 3}
             mocker.get(url, status_code=200, json=jsonresult)
@@ -146,7 +163,7 @@ class SatelliteSixV1Test(TestCase):
             hosts = self.api.hosts()
             self.assertEqual(systems_count, 3)
             self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ['sys1', 'sys2', 'sys3'])
+            self.assertEqual(hosts, ['sys1_1', 'sys2_2', 'sys3_3'])
 
     @patch('scanner.satellite.six.SatelliteSixV1.get_orgs')
     def test_hosts_with_err(self, mock_get_orgs):
@@ -235,7 +252,7 @@ class SatelliteSixV1Test(TestCase):
         """Test host_details method for already captured data."""
         # pylint: disable=no-member
         sys_result = SystemInspectionResult(
-            name='sys1',
+            name='sys1_1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
         inspect_result = self.scan_task.inspection_result
@@ -253,7 +270,7 @@ class SatelliteSixV1Test(TestCase):
             inspect_result = self.scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 0)
             self.assertEqual(
-                detail, {'host_name': 'sys1',
+                detail, {'name': 'sys1_1',
                          'details': {},
                          'status': 'failed'})
             mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
@@ -346,7 +363,7 @@ class SatelliteSixV1Test(TestCase):
                                                 host_id=1,
                                                 host_name='sys1')
                 self.assertEqual(
-                    details, {'host_name': 'sys1',
+                    details, {'name': 'sys1_1',
                               'details': expected,
                               'status': 'success'})
                 mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
@@ -365,7 +382,7 @@ class SatelliteSixV1Test(TestCase):
                 self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'host_name': 'sys10',
+        {'name': 'sys10',
          'details': {},
          'status': SystemInspectionResult.SUCCESS}])
     def test_hosts_facts(self, mock_pool):
@@ -420,6 +437,18 @@ class SatelliteSixV2Test(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
         self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
         self.api = SatelliteSixV2(self.scan_job, self.scan_task)
+        connection_results = TaskConnectionResult()
+        connection_results.save()
+        self.api.connect_scan_task.connection_result = connection_results
+        self.api.connect_scan_task.connection_result.save()
+
+        sys_result = SystemConnectionResult(
+            name='sys1_1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        self.api.connect_scan_task.connection_result.systems.add(sys_result)
+        self.api.connect_scan_task.connection_result.save()
+        self.api.connect_scan_task.save()
 
     def tearDown(self):
         """Cleanup test case setup."""
@@ -458,9 +487,12 @@ class SatelliteSixV2Test(TestCase):
         hosts_url = 'https://{sat_host}:{port}/api/v2/hosts'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host='1.2.3.4', org_id=1)
-            jsonresult = {'results': [{'name': 'sys1'},
-                                      {'name': 'sys2'},
-                                      {'name': 'sys3'}],
+            jsonresult = {'results': [{'name': 'sys1',
+                                       'id': 1},
+                                      {'name': 'sys2',
+                                       'id': 2},
+                                      {'name': 'sys3',
+                                       'id': 3}],
                           'per_page': 100,
                           'total': 3}
             mocker.get(url, status_code=200, json=jsonresult)
@@ -468,7 +500,7 @@ class SatelliteSixV2Test(TestCase):
             hosts = self.api.hosts()
             self.assertEqual(systems_count, 3)
             self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ['sys1', 'sys2', 'sys3'])
+            self.assertEqual(hosts, ['sys1_1', 'sys2_2', 'sys3_3'])
 
     def test_hosts_with_err(self):
         """Test the method hosts with error."""
@@ -654,7 +686,7 @@ class SatelliteSixV2Test(TestCase):
             inspect_result = self.scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 0)
             self.assertEqual(
-                detail, {'host_name': 'sys1',
+                detail, {'name': 'sys1_1',
                          'details': {},
                          'status': 'failed'})
             mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
@@ -742,7 +774,7 @@ class SatelliteSixV2Test(TestCase):
                        return_value=subs_return_value) as mock_subs:
                 details = self.api.host_details(host_id=1, host_name='sys1')
                 self.assertEqual(
-                    details, {'host_name': 'sys1',
+                    details, {'name': 'sys1_1',
                               'details': expected,
                               'status': 'success'})
                 mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
@@ -752,7 +784,7 @@ class SatelliteSixV2Test(TestCase):
         """Test host_details method for already captured data."""
         # pylint: disable=no-member
         sys_result = SystemInspectionResult(
-            name='sys1',
+            name='sys1_1',
             status=SystemInspectionResult.SUCCESS)
         sys_result.save()
         inspect_result = self.scan_task.inspection_result
@@ -772,7 +804,7 @@ class SatelliteSixV2Test(TestCase):
                 self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'host_name': 'sys10',
+        {'name': 'sys10',
          'details': {},
          'status': SystemInspectionResult.SUCCESS}])
     def test_hosts_facts(self, mock_pool):
@@ -785,6 +817,18 @@ class SatelliteSixV2Test(TestCase):
             scan_options=scan_options)
         scan_task.update_stats('TEST_SAT.', sys_scanned=0)
         api = SatelliteSixV2(scan_job, scan_task)
+        connection_results = TaskConnectionResult()
+        connection_results.save()
+        api.connect_scan_task.connection_result = connection_results
+        api.connect_scan_task.connection_result.save()
+
+        sys_result = SystemConnectionResult(
+            name='sys1_1',
+            status=SystemInspectionResult.SUCCESS)
+        sys_result.save()
+        api.connect_scan_task.connection_result.systems.add(sys_result)
+        api.connect_scan_task.connection_result.save()
+        api.connect_scan_task.save()
         hosts_url = 'https://{sat_host}:{port}/api/v2/hosts'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host='1.2.3.4')
