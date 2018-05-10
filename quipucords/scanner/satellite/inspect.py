@@ -83,12 +83,14 @@ class InspectTaskRunner(ScanTaskRunner):
                     % self.source.name
                 return error_message, ScanTask.FAILED
         except SatelliteAuthException as auth_error:
-            error_message = 'Satellite error encountered: %s. ' % auth_error
+            error_message = 'Satellite auth error encountered: %s. ' % \
+                auth_error
             error_message += 'Inspect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s. ' % sat_error
+            error_message = 'Satellite unknown error encountered: %s. ' % \
+                sat_error
             error_message += 'Inspect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
@@ -101,11 +103,13 @@ class InspectTaskRunner(ScanTaskRunner):
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
         except exceptions.ConnectionError as conn_error:
-            error_message = 'Satellite error encountered: %s. ' % conn_error
+            error_message = 'Satellite connection error encountered: %s. ' % \
+                conn_error
             error_message += 'Inspect scan failed for %s.' % self.source.name
             return error_message, ScanTask.FAILED
         except TimeoutError as timeout_error:
-            error_message = 'Satellite error encountered: %s. ' % timeout_error
+            error_message = 'Satellite timeout error encountered: %s. ' % \
+                timeout_error
             error_message += 'Inspect scan failed for %s.' % self.source.name
             return error_message, ScanTask.FAILED
 
