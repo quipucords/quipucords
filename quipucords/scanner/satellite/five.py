@@ -211,7 +211,8 @@ class SatelliteFive(SatelliteInterface):
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except xmlrpc.client.Fault as xml_error:
-            error_message = 'Satellite error encountered: %s\n' % xml_error
+            error_message = 'Satellite 5 fault error encountered: %s\n'\
+                % xml_error
             logger.error(error_message)
             return {'name': unique_name,
                     'details': details,

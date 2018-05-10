@@ -75,27 +75,32 @@ class ConnectTaskRunner(ScanTaskRunner):
                     % self.source.name
                 return error_message, ScanTask.FAILED
         except SatelliteAuthException as auth_error:
-            error_message = 'Satellite error encountered: %s. ' % auth_error
+            error_message = 'Satellite auth error encountered: %s. ' \
+                % auth_error
             error_message += 'Connect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s. ' % sat_error
+            error_message = 'Satellite unknown error encountered: %s. ' \
+                % sat_error
             error_message += 'Connect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
         except exceptions.ConnectionError as conn_error:
-            error_message = 'Satellite error encountered: %s. ' % conn_error
+            error_message = 'Satellite connect error encountered: %s. '\
+                % conn_error
             error_message += 'Connect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
         except TimeoutError as timeout_error:
-            error_message = 'Satellite error encountered: %s. ' % timeout_error
+            error_message = 'Satellite timeout error encountered: %s. ' \
+                % timeout_error
             error_message += 'Connect scan failed for source %s.' \
                 % self.source.name
             return error_message, ScanTask.FAILED
         except socket.gaierror as socket_error:
-            error_message = 'Satellite error encountered: %s. ' % socket_error
+            error_message = 'Satellite gaierror error encountered: %s. ' \
+                % socket_error
             error_message += 'Connect scan failed for source %s.' \
                              % self.source.name
             return error_message, ScanTask.FAILED
