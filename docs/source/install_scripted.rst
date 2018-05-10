@@ -8,7 +8,7 @@ When you run the scripted installation, the server is installed and started as d
 
 Installing the Ansible Prerequisite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Prepare the system to install the software. For more information, see the `Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_.
+Prepare the system to install the software by installing Ansible. For more information, see the `Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_.
 
 Obtaining the Installer
 ^^^^^^^^^^^^^^^^^^^^^^^
