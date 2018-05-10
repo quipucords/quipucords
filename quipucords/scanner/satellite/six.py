@@ -435,7 +435,8 @@ class SatelliteSixV1(SatelliteInterface):
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s\n' % sat_error
+            error_message = 'Satellite unknown 6v1 error encountered: %s\n' \
+                % sat_error
             logger.error(error_message)
             return {'name': unique_name,
                     'details': details,
@@ -581,7 +582,8 @@ class SatelliteSixV2(SatelliteInterface):
                     'details': details,
                     'status': SystemInspectionResult.SUCCESS}
         except SatelliteException as sat_error:
-            error_message = 'Satellite error encountered: %s\n' % sat_error
+            error_message = 'Satellite unknown 6v2 error encountered: %s\n' \
+                % sat_error
             logger.error(error_message)
             return {'name': unique_name,
                     'details': details,
