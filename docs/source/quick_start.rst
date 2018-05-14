@@ -31,6 +31,8 @@ Creating Credentials and Sources for a Network
 
 A *network* source is composed of one or more host names, one or more IP addresses, IP ranges, or a combination of these network resources. In addition, the source creation command references one or more credentials. Typically, a network source might include multiple credentials because it is expected that many credentials would be needed to access a broad IP range.
 
+**IMPORTANT:** For a network scan, Quipucords must use the credentials to run some commands with sudo access. For more information about this requirement, see `Commands Used in Scans of Remote Network Assets <commands.html>`_
+
 The following scenario provides examples of how you would create a network source and credential.
 
 To create a network source, use the following steps:

@@ -15,6 +15,8 @@ The following scenarios provide examples of how you would create a network, vcen
 .. _network:
 Creating a Network Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+**IMPORTANT:** For a network scan, Quipucords must use the credentials to run some commands with sudo access. For more information about this requirement, see `Commands Used in Scans of Remote Network Assets <commands.html>`_
+
 To create a network source, use the following steps:
 
 1. Create at least one network credential with root-level access::

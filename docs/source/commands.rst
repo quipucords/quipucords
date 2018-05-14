@@ -1,10 +1,16 @@
-Remote Scan Commands
-~~~~~~~~~~~~~~~~~~~~~
-This section documents required commands on the remote host for network scans.  In addition to the commands below, we depend on standard shell facilities like those provided by bash.
+Commands Used in Scans of Remote Network Assets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When you run a network scan, Quipucords must use the credentials that you provide to run certain commands on the remote systems in your network. Some of those commands must run with the sudo command. That escalated privilege is required to gather the types of facts that Quipucords uses to build the report about your installed products and consumed entitlements.
+
+Although it is possible to run a scan for a network source without sudo access, the results of that scan will be incomplete. The incomplete results from the network scan will affect the accuracy of the generated report for the scan. 
+
+The following information lists the commands that Quipucords runs on remote hosts during a network scan. The information includes the basic commands that can run without sudo and the commands that must run with sudo to gather the most accurate and complete information for the report.
+
+**NOTE:** In addition to the following commands, Quipucords also depends on standard shell facilities, such as those provided by the Bash shell.
 
 Basic Commands
-##############
-Below is a list of commands that do not require sudo or root access.
+++++++++++++++
+The following commands do not require sudo access to gather facts:
 
 - cat
 - ctime
@@ -25,10 +31,10 @@ Below is a list of commands that do not require sudo or root access.
 
 
 Sudo Commands
-#############
-Below is a list of commands that require sudo to gather facts.  Under each command there is a list of facts or categories of facts that will not be included in reports without sudo for that command.
++++++++++++++
+The following commands require sudo access to gather facts. Each command includes a list of individual facts or categories of facts that cannot be included in reports if sudo access is not available for that command.
 
-- chkconfig:
+- chkconfig
     - EAP
     - Fuse on Karaf
 - command
