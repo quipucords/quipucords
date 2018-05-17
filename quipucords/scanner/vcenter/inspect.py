@@ -182,21 +182,24 @@ class InspectTaskRunner(ScanTaskRunner):
             if hasattr(data_center, 'hostFolder'):
                 clusters = data_center.hostFolder.childEntity
                 for cluster in clusters:  # Iterate through the clusters
-                    cluster_name = cluster.name
-                    hosts = cluster.host  # Variable to make pep8 compliance
-                    for host in hosts:  # Iterate through Hosts in the Cluster
-                        vms = host.vm
-                        for virtual_machine in vms:
-                            vm_name = virtual_machine.summary.config.name
-                            sys_result = self.scan_task.inspection_result.\
-                                systems.filter(name=vm_name).first()
-                            if sys_result:
-                                logger.debug('Results already captured'
-                                             ' for vm_name=%s', vm_name)
-                            else:
-                                self.get_vm_info(data_center_name,
-                                                 cluster_name,
-                                                 host, virtual_machine)
+                    if hasattr(cluster, 'name') and hasattr(cluster, 'host'):
+                        cluster_name = cluster.name
+                        # Variable to make pep8 compliance
+                        hosts = cluster.host
+                        # Iterate through Hosts in the Cluster
+                        for host in hosts:
+                            vms = host.vm
+                            for virtual_machine in vms:
+                                vm_name = virtual_machine.summary.config.name
+                                sys_result = self.scan_task.inspection_result.\
+                                    systems.filter(name=vm_name).first()
+                                if sys_result:
+                                    logger.debug('Results already captured'
+                                                 ' for vm_name=%s', vm_name)
+                                else:
+                                    self.get_vm_info(data_center_name,
+                                                     cluster_name,
+                                                     host, virtual_machine)
 
     @transaction.atomic
     def _init_stats(self):
