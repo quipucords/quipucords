@@ -15,7 +15,7 @@ The following scenarios provide examples of how you would create a network, vcen
 .. _network:
 Creating a Network Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-**IMPORTANT:** For a network scan, Quipucords must use the credentials to run some commands with sudo access. For more information about this requirement, see `Commands Used in Scans of Remote Network Assets <commands.html>`_
+**IMPORTANT:** For a network scan, Quipucords must use the credentials to run some commands with elevated privileges. This access is provided by the use of sudo or similar commands. For more information about this requirement, see `Commands Used in Scans of Remote Network Assets <commands.html>`_
 
 To create a network source, use the following steps:
 
@@ -32,7 +32,7 @@ To create a network source, use the following steps:
    # cp ~/.ssh/id_rsa ~/quipucords/sshkeys
    # qpc cred add --type network --name roothost1 --username root --sshkeyfile /sshkeys/id_rsa
 
-   Privilege escalation with the ``become-method``, ``become-user``, and ``become-password`` options is also supported to create a network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
+   Privilege elevation with the ``become-method``, ``become-user``, and ``become-password`` options is also supported to create a network credential for a user to obtain root-level access. You can use the ``become-*`` options with either the ``sshkeyfile`` or the ``password`` option.
 
    For example, for a network credential where the credential name is ``sudouser1``, the user with root-level access is ``sysadmin``, and the access is obtained through the password option, you would enter the following command::
 

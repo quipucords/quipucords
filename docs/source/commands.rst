@@ -1,16 +1,16 @@
 Commands Used in Scans of Remote Network Assets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When you run a network scan, Quipucords must use the credentials that you provide to run certain commands on the remote systems in your network. Some of those commands must run with the sudo command. That escalated privilege is required to gather the types of facts that Quipucords uses to build the report about your installed products and consumed entitlements.
+When you run a network scan, Quipucords must use the credentials that you provide to run certain commands on the remote systems in your network. Some of those commands must run with elevated privileges. This access is typically acquired through the use of the sudo command or similar commands. The elevated privileges are required to gather the types of facts that Quipucords uses to build the report about your installed products and consumed entitlements.
 
-Although it is possible to run a scan for a network source without sudo access, the results of that scan will be incomplete. The incomplete results from the network scan will affect the accuracy of the generated report for the scan. 
+Although it is possible to run a scan for a network source without elevated privileges, the results of that scan will be incomplete. The incomplete results from the network scan will affect the quality of the generated report for the scan.
 
-The following information lists the commands that Quipucords runs on remote hosts during a network scan. The information includes the basic commands that can run without sudo and the commands that must run with sudo to gather the most accurate and complete information for the report.
+The following information lists the commands that Quipucords runs on remote hosts during a network scan. The information includes the basic commands that can run without elevated privileges and the commands that must run with elevated privileges to gather the most accurate and complete information for the report.
 
 **NOTE:** In addition to the following commands, Quipucords also depends on standard shell facilities, such as those provided by the Bash shell.
 
 Basic Commands
 ++++++++++++++
-The following commands do not require sudo access to gather facts:
+The following commands do not require elevated privileges to gather facts:
 
 - cat
 - ctime
@@ -30,9 +30,9 @@ The following commands do not require sudo access to gather facts:
 - xargs
 
 
-Sudo Commands
-+++++++++++++
-The following commands require sudo access to gather facts. Each command includes a list of individual facts or categories of facts that cannot be included in reports if sudo access is not available for that command.
+Commands that Need Elevated Privileges
+++++++++++++++++++++++++++++++++++++++
+The following commands require elevated privileges to gather facts. Each command includes a list of individual facts or categories of facts that cannot be included in reports if elevated privileges are not available for that command.
 
 - chkconfig
     - EAP
