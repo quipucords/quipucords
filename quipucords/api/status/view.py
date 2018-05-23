@@ -10,6 +10,8 @@
 #
 
 """View for server status."""
+import os
+
 
 from api import API_VERSION
 from api.status.model import ServerInformation
@@ -37,4 +39,8 @@ def status(request):
     server_info['python'] = python_version()
     server_info['modules'] = modules()
     server_info['server_id'] = ServerInformation.create_or_retreive_server_id()
+    env_dict = {}
+    for key, value in os.environ.items():
+        env_dict[key] = value
+    server_info['environment_vars'] = env_dict
     return Response(server_info)

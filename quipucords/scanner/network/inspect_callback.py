@@ -21,6 +21,8 @@ from api.models import (RawFact,
 
 from django.db import transaction
 
+from quipucords import settings
+
 from scanner import scan_data_log
 from scanner.network.processing import process
 
@@ -191,10 +193,11 @@ class InspectResultCallback(CallbackBase):
     def _finalize_host(self, host, host_status):
         results = self._ansible_facts.pop(host, {})
 
-        # remove internal facts before saving result
-        results = {fact_key: fact_value
-                   for fact_key, fact_value in results.items(
-                   ) if not fact_key.startswith(INTERNAL_)}
+        if settings.QPC_EXCLUDE_INTERNAL_FACTS:
+            # remove internal facts before saving result
+            results = {fact_key: fact_value
+                       for fact_key, fact_value in results.items(
+                       ) if not fact_key.startswith(INTERNAL_)}
         self.scan_task.log_message('host scan complete for %s.  '
                                    'Status: %s. Facts %s' %
                                    (host, host_status, results),
