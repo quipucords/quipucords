@@ -423,7 +423,7 @@ class ScanTest(TestCase):
                          status.HTTP_204_NO_CONTENT)
 
     def test_get_extra_vars_missing_options(self):
-        """Tests the get_extra_vars with extended search None."""
+        """Tests the get_default_extra_vars."""
         extra_vars = ScanOptions.get_default_extra_vars()
 
         expected_vars = {'jboss_eap': True,
