@@ -116,7 +116,7 @@ Post Processing
 After deduplication and merging are complete, there is a post-processing phase that creates derived system facts. A *derived system fact* is a fact that generated from the evaluation of more than one system fact. The majority of derived system facts are related to product identification data, such as the presence of a specific product and its version. The following information shows how the derived system fact ``system_creation_date`` is created.
 
 System Creation Date
-""""""""""""""""""""
+++++++++++++++++++++
 The ``system_creation_date`` fact is a derived system fact that contains the real system creation time. The value for this fact is determined by the evaluation of the following facts. The value for each fact is examined in the following order of precedence, with the order of precedence determined by the accuracy of the match to the real system creation time. The highest non-empty value is used to determine the value of the ``system_creation_date`` derived system fact.
 
 1. date_machine_id
