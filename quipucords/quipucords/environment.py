@@ -89,5 +89,14 @@ def startup():
         module_list.append(mod)
 
     logger.info('Modules: %s', ', '.join(module_list))
+    env_list = []
+    for key, value in os.environ.items():
+        env = '{} - {}'.format(key, value)
+        env_list.append(env)
+    mark = '-' * 20
+    logger.info('%s BEGIN ENVIRONMENT VARIABLES %s', mark, mark)
+    logger.info('\n'.join(env_list))
+    logger.info('%s END ENVIRONMENT VARIABLES %s', mark, mark)
+
     logger.info('Commit: %s', commit())
     init_server_identifier()

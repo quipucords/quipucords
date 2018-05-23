@@ -15,6 +15,7 @@ import json
 from api.models import (Credential,
                         Scan,
                         ScanJob,
+                        ScanOptions,
                         ScanTask,
                         Source)
 from api.scan.serializer import ScanSerializer
@@ -420,6 +421,18 @@ class ScanTest(TestCase):
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code,
                          status.HTTP_204_NO_CONTENT)
+
+    def test_get_extra_vars_missing_options(self):
+        """Tests the get_default_extra_vars."""
+        extra_vars = ScanOptions.get_default_extra_vars()
+
+        expected_vars = {'jboss_eap': True,
+                         'jboss_fuse': True,
+                         'jboss_brms': True,
+                         'jboss_eap_ext': False,
+                         'jboss_fuse_ext': False,
+                         'jboss_brms_ext': False}
+        self.assertEqual(extra_vars, expected_vars)
 
 
 class TestScanList(TestCase):
