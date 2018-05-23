@@ -250,11 +250,11 @@ class ScanSerializer(NotEmptySerializer):
                      ExtendedProductSearchOptions.EXT_JBOSS_FUSE}
                 real_optional_products = \
                     {ScanOptions.JBOSS_EAP:
-                     DisabledOptionalProductsOptions.OPT_JBOSS_EAP,
+                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_EAP,
                      ScanOptions.JBOSS_BRMS:
-                     DisabledOptionalProductsOptions.OPT_JBOSS_BRMS,
+                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_BRMS,
                      ScanOptions.JBOSS_FUSE:
-                     DisabledOptionalProductsOptions.OPT_JBOSS_FUSE}
+                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_FUSE}
                 # update defaults with old options if they exist
                 if old_extended_search:
                     real_extended_search[ScanOptions.JBOSS_EAP] = \

@@ -8,7 +8,7 @@ Communication with the Quipucords server uses an authentication token. When you 
 
 Network Authentication
 ^^^^^^^^^^^^^^^^^^^^^^
-The Quipucords server inspects the remote systems in a network scan by using the SSH remote connection capabilities of Ansible. The SSH connection can be obtained by using either a user name and password pair or a user name and SSH keyfile pair. If remote systems are accessed with an SSH keyfile, you can also supply a passphrase. Additionally, you can use Quipucords options to escalate privilege to obtain data that requires different privilege levels on the remote system. For more information about authentication that is related to network scans, see `Working with Sources <working_with_sources.html#network>`_.
+The Quipucords server inspects the remote systems in a network scan by using the SSH remote connection capabilities of Ansible. The SSH connection can be obtained by using either a user name and password pair or a user name and SSH keyfile pair. If remote systems are accessed with an SSH keyfile, you can also supply a passphrase. Additionally, you can use Quipucords options to elevate privilege to obtain data that requires different privilege levels on the remote system. For more information about authentication that is related to network scans, see `Working with Sources <working_with_sources.html#network>`_.
 
 .. include:: commands.rst
 

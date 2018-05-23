@@ -1,6 +1,6 @@
 Scripted Installation
 ----------------------
-The scripted installation uses Ansible to install the command line tool and container image and any associated dependencies.
+The scripted installation runs an installer that uses Ansible to install the command line tool and container image and any associated dependencies.
 
 **IMPORTANT:** Red Hat Enterprise Linux 7 users must enable the `Extras <https://access.redhat.com/solutions/912213>`_ (``rhel-7-server-extras-rpms``) and `Optional <https://access.redhat.com/solutions/265523>`_ (``rhel-7-server-optional-rpms``) repositories to use the scripted installation.
 
@@ -18,7 +18,7 @@ After Ansible is installed, use the following steps to obtain the installer for 
 
     # curl -k -O -sSL https://github.com/quipucords/quipucords/releases/download/0.0.42-pilot/quipucords.install.tar.gz
 
-2. Unzip the installer by entering the following command::
+2. Extract the installer by entering the following command::
 
     # tar -xvzf quipucords.install.tar.gz
 
@@ -102,14 +102,14 @@ The installer has various options, each of which has a default value. You can ei
 
 Options:
  - **install_server**
-    - ``true | false`` - Defaults to ``true``. Supply ``false`` to skip the installation of the server.
+    - Contains a ``true`` or ``false`` value. Defaults to ``true``. Supply ``false`` to skip the installation of the server.
  - **install_cli**
-    - ``true | false`` - Defaults to ``true``. Supply ``false`` to skip the installation of the command line tool.
+    - Contains a ``true`` or ``false`` value. Defaults to ``true``. Supply ``false`` to skip the installation of the command line tool.
  - **pkg_install_dir**
-    - ``fully-quailified path`` - Defaults to ``<installer>/packages/``.
+    - Contains the fully qualified path to the downloaded packages for the installer. Defaults to ``<installer>/packages/``.
  - **server_install_dir**
-    - ``fully-quailified path`` - Defaults to ``~/quipucords/``.
+    - Contains the fully qualified path to the installation directory for the Quipucords server. Defaults to ``~/quipucords/``.
  - **server_port**
-    - ``port number`` - Defaults to ``443``.
+    - Contains the port number for the Quipucords server. Defaults to ``443``.
  - **server_name**
-    - ``name`` - Defaults to ``quipucords``.
+    - Contains the name for the Quipucords server. Defaults to ``quipucords``.

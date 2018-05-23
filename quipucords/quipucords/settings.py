@@ -315,3 +315,7 @@ os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
 
 # Token lifespan
 EXPIRING_TOKEN_LIFESPAN = datetime.timedelta(days=1)
+
+QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', True)
+if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
+    QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == 'true'
