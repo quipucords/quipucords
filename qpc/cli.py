@@ -64,7 +64,7 @@ from . import __version__
 class CLI(object):
     """Defines the CLI class.
 
-    Class responsible for displaying ussage or matching inputs
+    Class responsible for displaying usage or matching inputs
     to the valid set of commands supported by qpc.
     """
 
