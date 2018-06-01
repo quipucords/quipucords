@@ -207,3 +207,4 @@ Copyright and License
 Copyright 2017-2018, Red Hat, Inc.
 
 quipucords is released under the `GNU Public License version 3 <LICENSE>`_.
+
