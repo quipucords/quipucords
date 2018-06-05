@@ -137,6 +137,11 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
+            if exclude_hosts_list is not None:
+                error = {
+                    'exclude_hosts': [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
                 error = {
                     'credentials': [_(messages.VC_ONE_CRED)]
@@ -156,6 +161,11 @@ class SourceSerializer(NotEmptySerializer):
             elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            if exclude_hosts_list is not None:
+                error = {
+                    'exclude_hosts': [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]
                 }
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
@@ -246,6 +256,11 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
+            if exclude_hosts_list is not None:
+                error = {
+                    'exclude_hosts': [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]
+                }
+                raise ValidationError(error)
             if credentials and len(credentials) > 1:
                 error = {
                     'credentials': [_(messages.VC_ONE_CRED)]
@@ -263,6 +278,11 @@ class SourceSerializer(NotEmptySerializer):
             elif hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
+                }
+                raise ValidationError(error)
+            if exclude_hosts_list is not None:
+                error = {
+                    'exclude_hosts': [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]
                 }
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
@@ -343,7 +363,6 @@ class SourceSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
-
     @staticmethod
     def validate_name(name):
         """Validate the name of the Source."""
@@ -352,12 +371,10 @@ class SourceSerializer(NotEmptySerializer):
 
         return name
 
-
     # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-    # Used to validate IP addrs in the lists hosts and exclude_hosts
     @staticmethod
     def validate_ipaddr_list(hosts):
-        """Make sure the hosts list is present."""
+        """Make sure the hosts list is present and has valid IP addresses."""
         ipaddr_list = json.loads(hosts)
         if not isinstance(ipaddr_list, list):
             raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
@@ -481,16 +498,15 @@ class SourceSerializer(NotEmptySerializer):
             error_message = [error.detail.pop() for error in host_errors]
             raise ValidationError(error_message)
 
-
     @staticmethod
     def validate_hosts(hosts):
+        """Validate hosts list."""
         return SourceSerializer.validate_ipaddr_list(hosts)
-
 
     @staticmethod
     def validate_exclude_hosts(exclude_hosts):
+        """Validate exclude_hosts list."""
         return SourceSerializer.validate_ipaddr_list(exclude_hosts)
-
 
     # pylint: disable=too-many-locals
     @staticmethod
@@ -573,7 +589,6 @@ class SourceSerializer(NotEmptySerializer):
 
         return '.'.join(ansible_out)
 
-
     @staticmethod
     def validate_port(port):
         """Validate the port."""
@@ -583,7 +598,6 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.NET_INVALID_PORT))
 
         return port
-
 
     @staticmethod
     def validate_credentials(credentials):

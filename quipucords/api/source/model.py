@@ -107,4 +107,3 @@ class Source(models.Model):
         :returns: host as a python list
         """
         return json.loads(self.hosts)
-

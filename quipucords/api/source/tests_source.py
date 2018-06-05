@@ -169,13 +169,8 @@ class SourceTest(TestCase):
     # Network Tests
     #################################################
 
-    # Note: hosts and exclude hosts lists use the same method to validate, so invalid
-    # exclude host testing has not been included.
-    # Currently the only exclude_hosts test included is that a list can indeed be 
-    # created.
-    # Further testing of exclude_hosts feature could include, testing an empty list
-    # (exclude_hosts': []), testing cases where there exist exluded hosts not in the
-    # scope of the (included) hosts, or where the excluded hosts equal the hosts
+    # Note: hosts and exclude hosts lists use the same method to validate, so
+    # invalid exclude host testing has not been included.
 
     def test_source_create_with_false_scan(self):
         """Test creating a source with a valid scan query param of False."""
@@ -359,26 +354,10 @@ class SourceTest(TestCase):
                        '10.10.[1:20].25',
                        '10.10.[1:20].[1:25]'],
              'exclude_hosts': ['10.10.191.9',
-                       '10.10.181.9/16',
-                       '10.10.128.[1:25]',
-                       '10.10.[1:20].25',
-                       '10.10.[1:20].[1:25]'],
-             'port': '22',
-             'credentials': [self.net_cred_for_upload]})
-
-    def test_create_valid_exclude_hosts(self):
-        """Test valid host patterns."""
-        self.create_expect_201(
-            {'name': 'source1',
-             'source_type': Source.NETWORK_SOURCE_TYPE,
-             'hosts': ['10.10.181.9',
-                       '10.10.181.9/16',
-                       '10.10.128.[1:25]',
-                       '10.10.[1:20].25',
-                       '10.10.[1:20].[1:25]'],
-             'exclude_hosts': ['10.10.191.9',
-                       '10.10.181.9/16',
-                       '10.10.128.[1:25]'],
+                               '10.10.181.9/16',
+                               '10.10.128.[1:25]',
+                               '10.10.[1:20].25',
+                               '10.10.[1:20].[1:25]'],
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
 
@@ -936,6 +915,15 @@ class SourceTest(TestCase):
              'hosts': ['1.2.3.4', '1.2.3.5'],
              'credentials': [self.vc_cred_for_upload]})
 
+    def test_create_vc_with_excluded_hosts(self):
+        """A vcenter source must not have any excluded hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.VCENTER_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'exclude_hosts': ['1.2.3.4'],
+             'credentials': [self.vc_cred_for_upload]})
+
     def test_create_vc_with_host_range(self):
         """A vcenter source must not have multiple hosts."""
         self.create_expect_400(
@@ -975,6 +963,27 @@ class SourceTest(TestCase):
 
         data = {'name': 'source',
                 'hosts': ['1.2.3.4', '2.3.4.5'],
+                'port': 22,
+                'credentials': [self.vc_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_vc_with_exclude_host(self):
+        """VC - Fail more than one host."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.VCENTER_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.vc_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'exclude_hosts': ['1.2.3.4'],
                 'port': 22,
                 'credentials': [self.vc_cred_for_upload]}
         url = reverse('source-detail', args=(initial['id'],))
@@ -1082,8 +1091,17 @@ class SourceTest(TestCase):
              'hosts': ['1.2.3.4', '1.2.3.5'],
              'credentials': [self.sat_cred_for_upload]})
 
+    def test_create_sat_with_exclude_hosts(self):
+        """A satellite source does not accept excluded hosts."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'source_type': Source.SATELLITE_SOURCE_TYPE,
+             'hosts': ['1.2.3.4'],
+             'exclude_hosts': ['1.2.3.4'],
+             'credentials': [self.sat_cred_for_upload]})
+
     def test_create_sat_with_host_range(self):
-        """A vcenter source must not have multiple hosts."""
+        """A satellite source must not have multiple hosts."""
         self.create_expect_400(
             {'name': 'source1',
              'source_type': Source.SATELLITE_SOURCE_TYPE,
@@ -1091,7 +1109,7 @@ class SourceTest(TestCase):
              'credentials': [self.sat_cred_for_upload]})
 
     def test_create_req_type(self):
-        """A vcenter source must have an type."""
+        """A satellite source must have an type."""
         self.create_expect_400(
             {'name': 'source1',
              'hosts': ['1.2.3.4'],
@@ -1154,6 +1172,27 @@ class SourceTest(TestCase):
 
         data = {'name': 'source',
                 'hosts': ['1.2.3.4', '2.3.4.5'],
+                'port': 22,
+                'credentials': [self.sat_cred_for_upload]}
+        url = reverse('source-detail', args=(initial['id'],))
+        response = self.client.put(url,
+                                   json.dumps(data),
+                                   content_type='application/json',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_sat_more_exclude_hosts(self):
+        """Sat- Fail update due to multiple hosts."""
+        initial = self.create_expect_201({
+            'name': 'source',
+            'source_type': Source.SATELLITE_SOURCE_TYPE,
+            'hosts': ['1.2.3.4'],
+            'port': '22',
+            'credentials': [self.sat_cred_for_upload]})
+
+        data = {'name': 'source',
+                'hosts': ['1.2.3.4'],
+                'exclude_hosts': ['1.2.3.4'],
                 'port': 22,
                 'credentials': [self.sat_cred_for_upload]}
         url = reverse('source-detail', args=(initial['id'],))
