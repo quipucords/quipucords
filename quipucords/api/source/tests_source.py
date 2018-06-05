@@ -86,6 +86,8 @@ class SourceTest(TestCase):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        if response.status_code != 400:
+            print(response.json())
         if expected_response:
             response_json = response.json()
             self.assertEqual(response_json, expected_response)
@@ -93,6 +95,8 @@ class SourceTest(TestCase):
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create(data)
+        if response.status_code != 201:
+            print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
@@ -164,6 +168,14 @@ class SourceTest(TestCase):
     #################################################
     # Network Tests
     #################################################
+
+    # Note: hosts and exclude hosts lists use the same method to validate, so invalid
+    # exclude host testing has not been included.
+    # Currently the only exclude_hosts test included is that a list can indeed be 
+    # created.
+    # Further testing of exclude_hosts feature could include, testing an empty list
+    # (exclude_hosts': []), testing cases where there exist exluded hosts not in the
+    # scope of the (included) hosts, or where the excluded hosts equal the hosts
 
     def test_source_create_with_false_scan(self):
         """Test creating a source with a valid scan query param of False."""
@@ -332,6 +344,41 @@ class SourceTest(TestCase):
                        'mycentos.com',
                        'my-rhel[a:d].company.com',
                        'my-rhel[120:400].company.com'],
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_valid_exclude_hosts(self):
+        """Test valid host patterns."""
+        self.create_expect_201(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['10.10.181.8',
+                       '10.10.181.9',
+                       '10.10.181.9/16',
+                       '10.10.128.[1:25]',
+                       '10.10.[1:20].25',
+                       '10.10.[1:20].[1:25]'],
+             'exclude_hosts': ['10.10.191.9',
+                       '10.10.181.9/16',
+                       '10.10.128.[1:25]',
+                       '10.10.[1:20].25',
+                       '10.10.[1:20].[1:25]'],
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
+    def test_create_valid_exclude_hosts(self):
+        """Test valid host patterns."""
+        self.create_expect_201(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['10.10.181.9',
+                       '10.10.181.9/16',
+                       '10.10.128.[1:25]',
+                       '10.10.[1:20].25',
+                       '10.10.[1:20].[1:25]'],
+             'exclude_hosts': ['10.10.191.9',
+                       '10.10.181.9/16',
+                       '10.10.128.[1:25]'],
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
 

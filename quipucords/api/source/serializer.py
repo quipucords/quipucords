@@ -80,6 +80,7 @@ class SourceSerializer(NotEmptySerializer):
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = CustomJSONField(required=True)
+    exclude_hosts = CustomJSONField(required=False)
     options = SourceOptionsSerializer(required=False, many=False)
     credentials = CredentialsField(
         many=True,
@@ -109,6 +110,7 @@ class SourceSerializer(NotEmptySerializer):
         source_type = validated_data.get('source_type')
         credentials = validated_data.pop('credentials')
         hosts_list = validated_data.pop('hosts', None)
+        exclude_hosts_list = validated_data.pop('exclude_hosts', None)
         port = None
         if 'port' in validated_data:
             port = validated_data['port']
@@ -121,6 +123,7 @@ class SourceSerializer(NotEmptySerializer):
                     SourceSerializer.check_credential_type(source_type, cred)
             if port is None:
                 validated_data['port'] = 22
+
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if port is None:
                 validated_data['port'] = 443
@@ -225,6 +228,7 @@ class SourceSerializer(NotEmptySerializer):
         source_type = instance.source_type
         credentials = validated_data.pop('credentials', None)
         hosts_list = validated_data.pop('hosts', None)
+        exclude_hosts_list = validated_data.pop('exclude_hosts', None)
         options = validated_data.pop('options', None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
@@ -339,6 +343,7 @@ class SourceSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
 
+
     @staticmethod
     def validate_name(name):
         """Validate the name of the Source."""
@@ -347,18 +352,20 @@ class SourceSerializer(NotEmptySerializer):
 
         return name
 
+
     # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    # Used to validate IP addrs in the lists hosts and exclude_hosts
     @staticmethod
-    def validate_hosts(hosts):
+    def validate_ipaddr_list(hosts):
         """Make sure the hosts list is present."""
-        hosts_list = json.loads(hosts)
-        if not isinstance(hosts_list, list):
+        ipaddr_list = json.loads(hosts)
+        if not isinstance(ipaddr_list, list):
             raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
-        if not hosts_list:
+        if not ipaddr_list:
             raise ValidationError(_(messages.SOURCE_HOSTS_CANNOT_BE_EMPTY))
 
-        for host_value in hosts_list:
+        for host_value in ipaddr_list:
             if not isinstance(host_value, str):
                 raise ValidationError(
                     _(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
@@ -409,7 +416,7 @@ class SourceSerializer(NotEmptySerializer):
 
         normalized_hosts = []
         host_errors = []
-        for host_range in hosts_list:
+        for host_range in ipaddr_list:
             result = None
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
@@ -473,6 +480,17 @@ class SourceSerializer(NotEmptySerializer):
         else:
             error_message = [error.detail.pop() for error in host_errors]
             raise ValidationError(error_message)
+
+
+    @staticmethod
+    def validate_hosts(hosts):
+        return SourceSerializer.validate_ipaddr_list(hosts)
+
+
+    @staticmethod
+    def validate_exclude_hosts(exclude_hosts):
+        return SourceSerializer.validate_ipaddr_list(exclude_hosts)
+
 
     # pylint: disable=too-many-locals
     @staticmethod
@@ -555,6 +573,7 @@ class SourceSerializer(NotEmptySerializer):
 
         return '.'.join(ansible_out)
 
+
     @staticmethod
     def validate_port(port):
         """Validate the port."""
@@ -564,6 +583,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.NET_INVALID_PORT))
 
         return port
+
 
     @staticmethod
     def validate_credentials(credentials):
