@@ -210,6 +210,7 @@ class SourceSerializer(NotEmptySerializer):
             source.options = options
 
         source.hosts = json.dumps(hosts_list)
+        source.exclude_hosts = json.dumps(exclude_hosts_list)
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -305,6 +306,10 @@ class SourceSerializer(NotEmptySerializer):
         if hosts_list:
             hosts_data = json.dumps(hosts_list)
             instance.hosts = hosts_data
+
+        if exclude_hosts_list:
+            exclude_hosts_data = json.dumps(exclude_hosts_list)
+            instance.exclude_hosts = exclude_hosts_data
 
         # credentials is safe to use as a flag for the same reason as
         # hosts_data above.

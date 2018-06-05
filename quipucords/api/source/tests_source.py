@@ -86,8 +86,6 @@ class SourceTest(TestCase):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        if response.status_code != 400:
-            print(response.json())
         if expected_response:
             response_json = response.json()
             self.assertEqual(response_json, expected_response)
@@ -95,8 +93,6 @@ class SourceTest(TestCase):
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create(data)
-        if response.status_code != 201:
-            print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
@@ -343,7 +339,7 @@ class SourceTest(TestCase):
              'credentials': [self.net_cred_for_upload]})
 
     def test_create_valid_exclude_hosts(self):
-        """Test valid host patterns."""
+        """Test valid exclude host patterns."""
         self.create_expect_201(
             {'name': 'source1',
              'source_type': Source.NETWORK_SOURCE_TYPE,
@@ -569,6 +565,7 @@ class SourceTest(TestCase):
             'name': 'source1',
             'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
+            'exclude_hosts':['1.2.3.4'],
             'port': '22',
             'credentials': [self.net_cred_for_upload]})
 
@@ -582,6 +579,7 @@ class SourceTest(TestCase):
         self.assertEqual(creds, [self.net_cred_for_response])
         self.assertIn('hosts', response_json)
         self.assertEqual(response_json['hosts'][0], '1.2.3.4')
+        self.assertEqual(response_json['exclude_hosts'][0], '1.2.3.4')
 
     def test_retrieve_bad_id(self):
         """Get details on a specific Source by bad primary key."""
@@ -973,7 +971,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_vc_with_exclude_host(self):
-        """VC - Fail more than one host."""
+        """VC - Fail when excluded hosts are provided."""
         initial = self.create_expect_201({
             'name': 'source',
             'source_type': Source.VCENTER_SOURCE_TYPE,
@@ -1036,6 +1034,13 @@ class SourceTest(TestCase):
         json_rsp = response.json()
         self.assertEqual(json_rsp['hosts'][0],
                          messages.VC_ONE_HOST)
+
+    def test_create_req_type(self):
+        """A vcenter source must have an type."""
+        self.create_expect_400(
+            {'name': 'source1',
+             'hosts': ['1.2.3.4'],
+             'credentials': [self.vc_cred_for_upload]})
 
     #################################################
     # Satellite Tests
@@ -1108,13 +1113,6 @@ class SourceTest(TestCase):
              'hosts': ['1.2.3.4/5'],
              'credentials': [self.sat_cred_for_upload]})
 
-    def test_create_req_type(self):
-        """A satellite source must have an type."""
-        self.create_expect_400(
-            {'name': 'source1',
-             'hosts': ['1.2.3.4'],
-             'credentials': [self.vc_cred_for_upload]})
-
     def test_update_sat_greenpath(self):
         """Sat - Valid full update."""
         initial = self.create_expect_201({
@@ -1182,7 +1180,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_sat_more_exclude_hosts(self):
-        """Sat- Fail update due to multiple hosts."""
+        """Sat- Fail update due to including excluded hosts."""
         initial = self.create_expect_201({
             'name': 'source',
             'source_type': Source.SATELLITE_SOURCE_TYPE,
