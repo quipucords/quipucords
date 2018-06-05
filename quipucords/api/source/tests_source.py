@@ -565,7 +565,7 @@ class SourceTest(TestCase):
             'name': 'source1',
             'source_type': Source.NETWORK_SOURCE_TYPE,
             'hosts': ['1.2.3.4'],
-            'exclude_hosts':['1.2.3.4'],
+            'exclude_hosts': ['1.2.3.4'],
             'port': '22',
             'credentials': [self.net_cred_for_upload]})
 

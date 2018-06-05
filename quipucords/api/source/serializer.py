@@ -210,7 +210,8 @@ class SourceSerializer(NotEmptySerializer):
             source.options = options
 
         source.hosts = json.dumps(hosts_list)
-        source.exclude_hosts = json.dumps(exclude_hosts_list)
+        if exclude_hosts_list:
+            source.exclude_hosts = json.dumps(exclude_hosts_list)
 
         for credential in credentials:
             source.credentials.add(credential)

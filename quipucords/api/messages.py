@@ -77,11 +77,13 @@ NET_SSL_OPTIONS_NOT_ALLOWED = 'Invalid SSL options for network source: %s'
 
 VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
 VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
-VC_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for source of type vcenter.'
+VC_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for '\
+    'source of type vcenter.'
 
 SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
 SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
-SAT_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for source of type satellite.'
+SAT_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for '\
+    'source of type satellite.'
 
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'
