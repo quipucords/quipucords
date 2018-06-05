@@ -33,7 +33,7 @@ clean-cli:
 	-rm -rf dist/ build/ quipucords.egg-info/
 
 clean: clean-cli
-	quipucords/db.sqlite3
+	rm -rf quipucords/db.sqlite3
 
 install: build
 	$(PYTHON) setup.py install -f
