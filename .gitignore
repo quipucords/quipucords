@@ -76,7 +76,7 @@ target/
 # pyenv
 .python-version
 
-# Pipfile
+# pipenv
 Pipfile
 
 # celery beat schedule file
