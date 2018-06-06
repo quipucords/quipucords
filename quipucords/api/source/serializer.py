@@ -305,12 +305,10 @@ class SourceSerializer(NotEmptySerializer):
         # this point, so it's safe to use hosts_list as an indicator
         # of whether to replace the hosts.
         if hosts_list:
-            hosts_data = json.dumps(hosts_list)
-            instance.hosts = hosts_data
+            instance.hosts = json.dumps(hosts_list)
 
         if exclude_hosts_list:
-            exclude_hosts_data = json.dumps(exclude_hosts_list)
-            instance.exclude_hosts = exclude_hosts_data
+            instance.exclude_hosts = json.dumps(exclude_hosts_list)
 
         # credentials is safe to use as a flag for the same reason as
         # hosts_data above.
