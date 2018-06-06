@@ -32,7 +32,8 @@ class CreateCredentialDialog extends React.Component {
       credentialNameError: '',
       usernameError: '',
       sskKeyFileError: '',
-      becomeUserError: ''
+      becomeUserError: '',
+      sshKeyDisabled: false
     };
 
     this.state = { ...this.initialState };
@@ -67,7 +68,13 @@ class CreateCredentialDialog extends React.Component {
   }
 
   resetInitialState(nextProps) {
+    let sshKeyDisabled = true;
+
     if (nextProps.edit && nextProps.credential) {
+      if (nextProps.credential.cred_type === 'network' || nextProps.credential.ssh_keyfile) {
+        sshKeyDisabled = false;
+      }
+
       this.setState({
         credentialName: nextProps.credential.name,
         credentialType: nextProps.credential.cred_type,
@@ -82,12 +89,18 @@ class CreateCredentialDialog extends React.Component {
         credentialNameError: '',
         usernameError: '',
         sskKeyFileError: '',
-        becomeUserError: ''
+        becomeUserError: '',
+        sshKeyDisabled
       });
     } else {
+      if (nextProps.credentialType === 'network') {
+        sshKeyDisabled = false;
+      }
+
       this.setState({
         ...this.initialState,
-        credentialType: nextProps.credentialType
+        credentialType: nextProps.credentialType,
+        sshKeyDisabled
       });
     }
   }
@@ -249,7 +262,15 @@ class CreateCredentialDialog extends React.Component {
   }
 
   renderAuthForm() {
-    const { authorizationType, password, sshKeyFile, passphrase, passwordError, sskKeyFileError } = this.state;
+    const {
+      authorizationType,
+      password,
+      sshKeyFile,
+      passphrase,
+      passwordError,
+      sskKeyFileError,
+      sshKeyDisabled
+    } = this.state;
 
     switch (authorizationType) {
       case 'usernamePassword':
@@ -268,6 +289,10 @@ class CreateCredentialDialog extends React.Component {
           </Form.FormGroup>
         );
       case 'sshKey':
+        if (sshKeyDisabled) {
+          return null;
+        }
+
         return (
           <React.Fragment>
             <Form.FormGroup validationState={sskKeyFileError ? 'error' : null}>
@@ -387,7 +412,8 @@ class CreateCredentialDialog extends React.Component {
       authorizationType,
       username,
       credentialNameError,
-      usernameError
+      usernameError,
+      sshKeyDisabled
     } = this.state;
 
     return (
@@ -427,38 +453,40 @@ class CreateCredentialDialog extends React.Component {
                 {credentialNameError && <Form.HelpBlock>{credentialNameError}</Form.HelpBlock>}
               </Grid.Col>
             </Form.FormGroup>
-            <Form.FormGroup>
-              {this.renderFormLabel('Authentication Type')}
-              <Grid.Col sm={7}>
-                <div className="quipucords-dropdownselect">
-                  <DropdownSelect
-                    title={helpers.authorizationTypeString(authorizationType)}
-                    id="auth-type-select"
-                    className="form-control"
-                    multiselect={false}
-                  >
-                    <MenuItem
-                      key="usernamePassword"
-                      className={{
-                        'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
-                      }}
-                      eventKey="1"
-                      onClick={() => this.setAuthType('usernamePassword')}
+            {!sshKeyDisabled && (
+              <Form.FormGroup>
+                {this.renderFormLabel('Authentication Type')}
+                <Grid.Col sm={7}>
+                  <div className="quipucords-dropdownselect">
+                    <DropdownSelect
+                      title={helpers.authorizationTypeString(authorizationType)}
+                      id="auth-type-select"
+                      className="form-control"
+                      multiselect={false}
                     >
-                      {helpers.authorizationTypeString('usernamePassword')}
-                    </MenuItem>
-                    <MenuItem
-                      key="sshKey"
-                      className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
-                      eventKey="2"
-                      onClick={() => this.setAuthType('sshKey')}
-                    >
-                      {helpers.authorizationTypeString('sshKey')}
-                    </MenuItem>
-                  </DropdownSelect>
-                </div>
-              </Grid.Col>
-            </Form.FormGroup>
+                      <MenuItem
+                        key="usernamePassword"
+                        className={{
+                          'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
+                        }}
+                        eventKey="1"
+                        onClick={() => this.setAuthType('usernamePassword')}
+                      >
+                        {helpers.authorizationTypeString('usernamePassword')}
+                      </MenuItem>
+                      <MenuItem
+                        key="sshKey"
+                        className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
+                        eventKey="2"
+                        onClick={() => this.setAuthType('sshKey')}
+                      >
+                        {helpers.authorizationTypeString('sshKey')}
+                      </MenuItem>
+                    </DropdownSelect>
+                  </div>
+                </Grid.Col>
+              </Form.FormGroup>
+            )}
             <Form.FormGroup validationState={usernameError ? 'error' : null}>
               {this.renderFormLabel('Username')}
               <Grid.Col sm={7}>
