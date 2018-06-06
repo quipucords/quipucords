@@ -1727,7 +1727,13 @@ definitions:
         items:
           type: "string"
           example: "192.168.0.1"
-        description: "The host(s) to scan.Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
+        description: "The host(s) to scan. Can be an IP or hostname for vcenter/satellite; or ips, hostnames or IP ranges for network."
+      exclude_hosts:
+        type: "array"
+        items:
+          type: "string"
+          example: "192.168.0.1"
+        description: "The host(s) to exclude from the scan. Can be an IP addr or IP ranges for network. The exclude_hosts option is not valid for vcenter or satellite sources."
   SourceDeletionError:
     allOf:
       - $ref: "#/definitions/DeletionError"

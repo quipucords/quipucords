@@ -175,6 +175,7 @@ class SourceViewSet(ModelViewSet):
                 if convert_to_boolean(scan):
                     # Grab the source id
                     source_id = response.data['id']
+
                     # Create the scan job
                     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
                     scan_job.save()

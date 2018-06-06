@@ -43,8 +43,8 @@ SAT_FIELDS_NOT_ALLOWED = 'Satellite cannot use a become password, ssh'\
 # source messages
 SOURCE_NAME_ALREADY_EXISTS = 'Source with name=%s already exists'
 SOURCE_NAME_VALIDATION = 'Source must have printable name.'
-SOURCE_HOSTS_CANNOT_BE_EMPTY = 'hosts cannot be the empty list.'
-SOURCE_HOST_MUST_BE_JSON_ARRAY = 'hosts must be a JSON array of strings'
+SOURCE_HOSTS_CANNOT_BE_EMPTY = 'List cannot be empty.'
+SOURCE_HOST_MUST_BE_JSON_ARRAY = 'Must be a JSON array of strings'
 SOURCE_CRED_DISPLAY = 'Credential: %s'
 SOURCE_CRED_WRONG_TYPE = 'Credentials must have the same type as source.'
 SOURCE_TYPE_REQ = 'A value for source_type must be provided to ' \
@@ -77,9 +77,13 @@ NET_SSL_OPTIONS_NOT_ALLOWED = 'Invalid SSL options for network source: %s'
 
 VC_ONE_HOST = 'Source of type vcenter must have a single hosts.'
 VC_ONE_CRED = 'Source of type vcenter must have a single credential.'
+VC_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for '\
+    'source of type vcenter.'
 
 SAT_ONE_HOST = 'Source of type satellite must have a single hosts.'
 SAT_ONE_CRED = 'Source of type satellite must have a single credential.'
+SAT_EXCLUDE_HOSTS_INCLUDED = 'The exclude_hosts option is not valid for '\
+    'source of type satellite.'
 
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = 'Scan with name=%s already exists'

@@ -83,6 +83,7 @@ class Source(models.Model):
         SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
     hosts = models.TextField(unique=False, null=False)
+    exclude_hosts = models.TextField(unique=False, null=True)
 
     most_recent_connect_scan = models.ForeignKey(
         'api.ScanJob', null=True, on_delete=models.SET_NULL, related_name='+')
