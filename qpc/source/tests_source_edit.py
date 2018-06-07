@@ -130,8 +130,38 @@ class SourceEditCliTests(unittest.TestCase):
                     self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
+    ##################################################
+    # Network Source Test
+    ##################################################
     def test_edit_net_source(self):
         """Testing the edit network source command successfully."""
+        source_out = StringIO()
+        url_get_cred = get_server_location() + CREDENTIAL_URI + \
+            '?name=credential1'
+        url_get_source = get_server_location() + SOURCE_URI + '?name=source1'
+        url_patch = get_server_location() + SOURCE_URI + '1/'
+        cred_results = [{'id': 1, 'name': 'credential1', 'username': 'root',
+                         'password': '********'}]
+        cred_data = {'count': 1, 'results': cred_results}
+        results = [{'id': 1, 'name': 'source1', 'hosts': ['1.2.3.4'],
+                    'exclude_hosts':['1.2.3.4.'],
+                    'credentials':[{'id': 2, 'name': 'cred2'}]}]
+        source_data = {'count': 1, 'results': results}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(url_get_source, status_code=200, json=source_data)
+            mocker.get(url_get_cred, status_code=200, json=cred_data)
+            mocker.patch(url_patch, status_code=200)
+            aec = SourceEditCommand(SUBPARSER)
+            args = Namespace(name='source1', hosts=['1.2.3.4', '2.3.4.5'],
+                             excluded_hosts=['1.2.3.4'], cred=['credential1'],
+                             port=22)
+            with redirect_stdout(source_out):
+                aec.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_UPDATED % 'source1' + '\n')
+
+    def test_edit_source_exclude_host(self):
+        """Testing edit network source command by adding an excluded host."""
         source_out = StringIO()
         url_get_cred = get_server_location() + CREDENTIAL_URI + \
             '?name=credential1'
@@ -148,13 +178,17 @@ class SourceEditCliTests(unittest.TestCase):
             mocker.get(url_get_cred, status_code=200, json=cred_data)
             mocker.patch(url_patch, status_code=200)
             aec = SourceEditCommand(SUBPARSER)
-            args = Namespace(name='source1', hosts=['1.2.3.4'],
-                             cred=['credential1'], port=22)
+            args = Namespace(name='source1', hosts=['1.2.3.[0:255]'],
+                             exclude_hosts=['1.2.3.4'], cred=['credential1'],
+                             port=22)
             with redirect_stdout(source_out):
                 aec.main(args)
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_UPDATED % 'source1' + '\n')
 
+    ##################################################
+    # Vcenter Source Test
+    ##################################################
     def test_edit_vc_source(self):
         """Testing the edit vcenter source command successfully."""
         source_out = StringIO()

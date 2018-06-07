@@ -213,7 +213,7 @@ Creating and Editing Sources
 
 To create a source, supply the type of source with the ``type`` option, one or more host names or IP addresses to connect to with the ``--hosts`` option, and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for the ``hosts`` and ``cred`` options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--exclude-hosts** *ip_address* **]** **[--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
 
 ``--name=name``
 
@@ -245,6 +245,10 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
     ``--hosts /home/user1/hosts_file``
 
+``--exclude-hosts ip_address``
+
+  Optional. Sets the host name, IP address, or IP address range to exclude when running a scan. Follows the same formatting options as ``--hosts`` shown above.
+
 ``--cred credential``
 
   Contains the name of the credential to use to authenticate to the systems that are being scanned. If the individual systems that are being scanned each require different authentication credentials, you can use more than one credential. To add multiple credentials to the source, separate each value with a space, for example:
@@ -273,7 +277,7 @@ The information in a source might change as the structure of the network changes
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
+**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] **[--exclude-hosts** *ip_address* **] [--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
 
 For example, if a source contains a value of ``server1creds`` for the ``--cred`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
 
@@ -571,6 +575,8 @@ Creating a new vcenter type credential
   ``qpc cred add --name=vcenter_cred --type=vcenter --username=vc-user_pass --password``
 Creating a new network source
   ``qpc source add --name=new_source --type network --hosts 1.192.0.19 1.192.0.20 --cred new_creds``
+Creating a new network source with an excluded host
+  ``qpc source add --name=new_source --type network --hosts 1.192.1.[0:255] --exclude-hosts 1.192.1.19 --cred new_creds``
 Creating a new vcenter source
   ``qpc source add --name=new_source --type vcenter --hosts 1.192.0.19 --cred vcenter_cred``
 Editing a source

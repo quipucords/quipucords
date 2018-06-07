@@ -63,6 +63,9 @@ SOURCES_NAME_HELP = 'List of source names.'
 SOURCE_TYPE_HELP = 'Type of source. Valid values: vcenter, network.'
 SOURCE_HOSTS_HELP = 'IP ranges to scan. Run the "man qpc" command for more '\
     'information about supported formats.'
+SOURCE_EXCLUDE_HOSTS_HELP = 'IP ranges to exclude from scan. Only supported '\
+    'for network sources. Run the "man qpc" command for more information '\
+    'about supported formats.'
 SOURCE_CREDS_HELP = 'Credentials to associate with a source.'
 SOURCE_PORT_HELP = 'Port to use for connection for the scan; '\
     'network default is 22, vcenter default is 443.'
