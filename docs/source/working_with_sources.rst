@@ -57,7 +57,7 @@ To create a network source, use the following steps:
    # qpc source add --type network --name mynetwork --hosts /home/user1/hosts_file --cred roothost1 roothost2
 
  
-   **TIP:** You can optionally supply an exclude-hosts field that will omit hosts from a scan.
+   **TIP:** For network sources, you can optionally supply an exclude-hosts field that will omit hosts from a scan.
    ::
    # qpc source add --type network --name mynetwork --hosts 192.0.2.[1:255] --exclude-hosts 192.0.2.255 --cred cred_name
 

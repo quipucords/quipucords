@@ -211,9 +211,9 @@ When you configure a scan, it contains references to one or more sources, includ
 Creating and Editing Sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a source, supply the type of source with the ``type`` option, one or more host names or IP addresses to connect to with the ``--hosts`` option, and the credentials needed to access those systems with the ``--cred`` option. When creating a ``network type`` source, to specify a host or range of hosts to be excluded from the scan use the ``--exclude-hosts`` option. The ``qpc source`` command allows multiple entries for the ``hosts`` and ``cred`` options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
+To create a source, supply the type of source with the ``type`` option, one or more host names or IP addresses to connect to with the ``--hosts`` option, and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for the ``hosts`` and ``cred`` options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **[--exclude-hosts** *ip_address* **]** **--cred** *credential* **[--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--exclude-hosts** *ip_address* **]** **[--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
 
 ``--name=name``
 
@@ -247,7 +247,7 @@ To create a source, supply the type of source with the ``type`` option, one or m
 
 ``--exclude-hosts ip_address``
 
-  Sets the host name, IP address, or IP address range to exclude when running a scan. Follows the same formatting options as ``--hosts`` shown above.
+  Optional. Sets the host name, IP address, or IP address range to exclude when running a scan. Follows the same formatting options as ``--hosts`` shown above.
 
 ``--cred credential``
 
@@ -277,7 +277,7 @@ The information in a source might change as the structure of the network changes
 
 Although ``qpc source`` options can accept more than one value, the ``qpc source edit`` command is not additive. To edit a source and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc source edit`` command. Options that are not included are not changed.
 
-**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] [--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
+**qpc source edit --name** *name* **[--hosts** *ip_address* **] [--cred** *credential* **] **[--exclude-hosts** *ip_address* **] [--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
 
 For example, if a source contains a value of ``server1creds`` for the ``--cred`` option, and you want to change that source to use both the ``server1creds`` and ``server2creds`` credentials, you would edit the source as follows:
 
