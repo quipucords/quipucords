@@ -35,6 +35,7 @@ PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
+# pylint: disable=too-many-public-methods
 class SourceAddCliTests(unittest.TestCase):
     """Class for testing the source add commands for qpc."""
 
@@ -194,8 +195,11 @@ class SourceAddCliTests(unittest.TestCase):
                     self.assertEqual(source_out.getvalue(),
                                      CONNECTION_ERROR_MSG)
 
-    def test_add_source_net(self):
-        """Testing the add network source command successfully."""
+    ##################################################
+    # Network Source Test
+    ##################################################
+    def test_add_source_net_one_host(self):
+        """Testing add network source command successfully with one host."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         cred_results = [{'id': 1, 'name': 'cred1'}]
@@ -213,6 +217,88 @@ class SourceAddCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
 
+    def test_add_source_net_valid_hosts(self):
+        """Testing add network source command with hosts in valid formats."""
+        source_out = StringIO()
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
+        post_source_url = get_server_location() + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=201)
+            nac = SourceAddCommand(SUBPARSER)
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['10.10.181.9',
+                                    '10.10.181.8/16',
+                                    '10.10.128.[1:25]',
+                                    '10.10.[1:20].25',
+                                    'localhost',
+                                    'mycentos.com',
+                                    'my-rhel[a:d].company.com',
+                                    'my-rhel[120:400].company.com'],
+                             type='network',
+                             port=22)
+            with redirect_stdout(source_out):
+                nac.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
+
+    def test_add_source_one_excludehost(self):
+        """Testing the add network source command with one exclude host."""
+        source_out = StringIO()
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
+        post_source_url = get_server_location() + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=201)
+            nac = SourceAddCommand(SUBPARSER)
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['1.2.3.4'], type='network',
+                             exclude_hosts=['1.2.3.4'],
+                             port=22)
+            with redirect_stdout(source_out):
+                nac.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
+
+    def test_add_source_exclude_hosts(self):
+        """Testing add network source command with many valid exclude hosts."""
+        source_out = StringIO()
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
+        post_source_url = get_server_location() + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=201)
+            nac = SourceAddCommand(SUBPARSER)
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['10.10.181.9',
+                                    '10.10.181.8/16',
+                                    '10.10.128.[1:25]',
+                                    '10.10.[1:20].25',
+                                    'localhost',
+                                    'mycentos.com',
+                                    'my-rhel[a:d].company.com',
+                                    'my-rhel[120:400].company.com'],
+                             exclude_hosts=['10.10.181.9',
+                                            '10.10.181.8/16',
+                                            '10.10.[1:20].25',
+                                            'localhost',
+                                            'my-rhel[a:d].company.com'],
+                             type='network',
+                             port=22)
+            with redirect_stdout(source_out):
+                nac.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
+
+    ##################################################
+    # Vcenter Source Test
+    ##################################################
     def test_add_source_vc(self):
         """Testing the add vcenter source command successfully."""
         source_out = StringIO()
@@ -231,6 +317,9 @@ class SourceAddCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
 
+    ##################################################
+    # Satellite Source Test
+    ##################################################
     def test_add_source_sat(self):
         """Testing the add satellite source command successfully."""
         source_out = StringIO()

@@ -58,6 +58,10 @@ class SourceAddCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=True)
+        self.parser.add_argument('--exclude-hosts', dest='exclude_hosts',
+                                 nargs='+', metavar='EXCLUDE_HOSTS',
+                                 help=_(messages.SOURCE_EXCLUDE_HOSTS_HELP),
+                                 required=False)
         self.parser.add_argument('--cred', dest='cred',
                                  metavar='CRED',
                                  nargs='+', default=[],
@@ -91,6 +95,15 @@ class SourceAddCommand(CliCommand):
             # check if a file and read in values
             try:
                 self.args.hosts = read_in_file(self.args.hosts[0])
+            except ValueError:
+                pass
+
+        if ('exclude_hosts' in self.args and self.args.exclude_hosts and
+                len(self.args.exclude_hosts) == 1):
+            # check if a file and read in values
+            try:
+                self.args.exclude_hosts = \
+                    read_in_file(self.args.exclude_hosts[0])
             except ValueError:
                 pass
 

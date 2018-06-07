@@ -51,6 +51,10 @@ class SourceEditCommand(CliCommand):
                                  metavar='HOSTS', default=[],
                                  help=_(messages.SOURCE_HOSTS_HELP),
                                  required=False)
+        self.parser.add_argument('--exclude-hosts', dest='exclude_hosts',
+                                 nargs='+', metavar='EXCLUDE_HOSTS',
+                                 help=_(messages.SOURCE_EXCLUDE_HOSTS_HELP),
+                                 required=False)
         self.parser.add_argument('--cred', dest='cred',
                                  metavar='CRED',
                                  nargs='+', default=[],
@@ -79,9 +83,9 @@ class SourceEditCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
 
-        if not(self.args.hosts or self.args.cred or self.args.port or
-               self.args.ssl_cert_verify or self.args.disable_ssl or
-               self.args.ssl_protocol):
+        if not(self.args.hosts or self.args.exclude_hosts or self.args.cred or
+               self.args.port or self.args.ssl_cert_verify or
+               self.args.disable_ssl or self.args.ssl_protocol):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)
@@ -91,6 +95,15 @@ class SourceEditCommand(CliCommand):
             # check if a file and read in values
             try:
                 self.args.hosts = read_in_file(self.args.hosts[0])
+            except ValueError:
+                pass
+
+        if ('exclude_hosts' in self.args and self.args.exclude_hosts and
+                len(self.args.exclude_hosts) == 1):
+            # check if a file and read in values
+            try:
+                self.args.exclude_hosts = \
+                    read_in_file(self.args.exclude_hosts[0])
             except ValueError:
                 pass
 

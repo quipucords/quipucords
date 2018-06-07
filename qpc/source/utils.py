@@ -57,9 +57,10 @@ def build_source_payload(args, add_none=True):
 
     if hasattr(args, 'type') and args.type:
         req_payload['source_type'] = args.type
-
     if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
+    if hasattr(args, 'exclude_hosts') and args.exclude_hosts:
+        req_payload['exclude_hosts'] = args.exclude_hosts
     if hasattr(args, 'port') and args.port:
         req_payload['port'] = args.port
     elif add_none:
