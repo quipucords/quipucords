@@ -174,18 +174,17 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(expected_facts, sys_fact)
 
     # pylint: disable=too-many-locals
-    def test_recurse_datacenter(self):
-        """Test the recurse_datacenter method."""
+    def test_recurse_folder(self):
+        """Test the recurse_folder method."""
         sys_result = SystemInspectionResult(
             name='vm1', status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        vcenter = Mock()
-        content = Mock()
-        root_folder = Mock()
+
         child_entity = []
         for k in range(0, 2):
             child = Mock()
             child.name = 'dc' + str(k)
+            child.__class__.__name__ = 'vim.Datacenter'
             host_folder = Mock()
             clusters = []
             for j in range(0, 1):
@@ -206,12 +205,33 @@ class InspectTaskRunnerTest(TestCase):
             host_folder.childEntity = clusters
             child.hostFolder = host_folder
             child_entity.append(child)
-        root_folder.childEntity = child_entity
+
+        vcenter = Mock()
+        content = Mock()
+        empty_folder = Mock()
+        empty_folder.__class__.__name__ = 'vim.Folder'
+        empty_folder.name = 'empty_folder'
+        empty_folder.childEntity = []
+
+        invalid_folder = Mock()
+        invalid_folder.__class__.__name__ = 'vim.Folder'
+        invalid_folder.childEntity = None
+        invalid_folder.name = 'invalid_folder'
+
+        regular_folder = Mock()
+        regular_folder.__class__.__name__ = 'vim.Folder'
+        regular_folder.childEntity = child_entity
+        regular_folder.name = 'regular_folder'
+
+        folder_entries = [empty_folder, invalid_folder, regular_folder]
+
+        root_folder = Mock()
+        root_folder.childEntity = folder_entries
         content.rootFolder = root_folder
         vcenter.RetrieveContent = Mock(return_value=content)
         with patch.object(InspectTaskRunner,
                           'get_vm_info') as mock_get_vm_info:
-            self.runner.recurse_datacenter(vcenter)
+            self.runner.recurse_folder(root_folder)
             mock_get_vm_info.assert_called_with(ANY, ANY, ANY, ANY)
 
     def test_inspect(self):
@@ -219,7 +239,7 @@ class InspectTaskRunnerTest(TestCase):
         with patch('scanner.vcenter.inspect.vcenter_connect',
                    return_value=Mock()) as mock_vcenter_connect:
             with patch.object(InspectTaskRunner,
-                              'recurse_datacenter') as mock_recurse:
+                              'recurse_folder') as mock_recurse:
                 self.runner.connect_scan_task = self.connect_scan_task
                 self.runner.inspect()
                 mock_vcenter_connect.assert_called_once_with(ANY)
