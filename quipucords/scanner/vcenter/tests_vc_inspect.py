@@ -176,12 +176,11 @@ class InspectTaskRunnerTest(TestCase):
     # pylint: disable=too-many-locals
     def test_recurse_folder(self):
         """Test the recurse_folder method."""
+        print('#' * 1200)
         sys_result = SystemInspectionResult(
             name='vm1', status=SystemInspectionResult.SUCCESS)
         sys_result.save()
-        vcenter = Mock()
-        content = Mock()
-        root_folder = Mock()
+
         child_entity = []
         for k in range(0, 2):
             child = Mock()
@@ -207,7 +206,28 @@ class InspectTaskRunnerTest(TestCase):
             host_folder.childEntity = clusters
             child.hostFolder = host_folder
             child_entity.append(child)
-        root_folder.childEntity = child_entity
+
+        vcenter = Mock()
+        content = Mock()
+        emptyFolder = Mock()
+        emptyFolder.__class__.__name__ = 'vim.Folder'
+        emptyFolder.name = 'emptyFolder'
+        emptyFolder.childEntity = []
+
+        invalidFolder = Mock()
+        invalidFolder.__class__.__name__ = 'vim.Folder'
+        invalidFolder.childEntity = None
+        invalidFolder.name = 'invalidFolder'
+
+        regularFolder = Mock()
+        regularFolder.__class__.__name__ = 'vim.Folder'
+        regularFolder.childEntity = child_entity
+        regularFolder.name = 'regularFolder'
+
+        folder_entries = [emptyFolder, invalidFolder, regularFolder]
+
+        root_folder = Mock()
+        root_folder.childEntity = folder_entries
         content.rootFolder = root_folder
         vcenter.RetrieveContent = Mock(return_value=content)
         with patch.object(InspectTaskRunner,

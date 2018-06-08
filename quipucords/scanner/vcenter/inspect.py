@@ -170,7 +170,7 @@ class InspectTaskRunner(ScanTaskRunner):
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
     def recurse_folder(self, folder):
-        """Walk datacenter to collect vm facts.
+        """Walk vcenter folders to discover datacenters.
 
         :param folder: The vcenter folder object.
         """
@@ -189,7 +189,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     self.scan_task.log_message(
                         'Not folder or datacenter: %s' % child.name)
         else:
-            self.scan_task.log_message('No children found for %s' % child.name)
+            self.scan_task.log_message('No children found for %s' % folder.name)
 
     def recurse_datacenter(self, data_center):
         """Walk datacenter to collect vm facts.
