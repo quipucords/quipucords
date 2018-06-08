@@ -169,37 +169,57 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
-    def recurse_datacenter(self, vcenter):
+    def recurse_folder(self, folder):
+        """Walk vcenter folders to discover datacenters.
+
+        :param folder: The vcenter folder object.
+        """
+        children = folder.childEntity
+        if children is not None:
+            for child in children:  # pylint: disable=too-many-nested-blocks
+                if child.__class__.__name__ == 'vim.Datacenter':
+                    self.scan_task.log_message(
+                        'Recurse vCenter datacenter: %s' % child.name)
+                    self.recurse_datacenter(child)
+                elif hasattr(child, 'childEntity'):
+                    self.scan_task.log_message(
+                        'Recurse vCenter folder: %s' % child.name)
+                    self.recurse_folder(child)
+                else:
+                    self.scan_task.log_message(
+                        'Not folder or datacenter: %s' % child.name)
+        else:
+            self.scan_task.log_message(
+                'No children found for %s' % folder.name)
+
+    def recurse_datacenter(self, data_center):
         """Walk datacenter to collect vm facts.
 
-        :param vcenter: The vcenter object.
+        :param data_center: The data center object.
         """
-        content = vcenter.RetrieveContent()
-        children = content.rootFolder.childEntity
-        for child in children:  # pylint: disable=too-many-nested-blocks
-            data_center = child
-            data_center_name = data_center.name
-            if hasattr(data_center, 'hostFolder'):
-                clusters = data_center.hostFolder.childEntity
-                for cluster in clusters:  # Iterate through the clusters
-                    if hasattr(cluster, 'name') and hasattr(cluster, 'host'):
-                        cluster_name = cluster.name
-                        # Variable to make pep8 compliance
-                        hosts = cluster.host
-                        # Iterate through Hosts in the Cluster
-                        for host in hosts:
-                            vms = host.vm
-                            for virtual_machine in vms:
-                                vm_name = virtual_machine.summary.config.name
-                                sys_result = self.scan_task.inspection_result.\
-                                    systems.filter(name=vm_name).first()
-                                if sys_result:
-                                    logger.debug('Results already captured'
-                                                 ' for vm_name=%s', vm_name)
-                                else:
-                                    self.get_vm_info(data_center_name,
-                                                     cluster_name,
-                                                     host, virtual_machine)
+        # pylint: disable=too-many-nested-blocks
+        data_center_name = data_center.name
+        if hasattr(data_center, 'hostFolder'):
+            clusters = data_center.hostFolder.childEntity
+            for cluster in clusters:  # Iterate through the clusters
+                if hasattr(cluster, 'name') and hasattr(cluster, 'host'):
+                    cluster_name = cluster.name
+                    # Variable to make pep8 compliance
+                    hosts = cluster.host
+                    # Iterate through Hosts in the Cluster
+                    for host in hosts:
+                        vms = host.vm
+                        for virtual_machine in vms:
+                            vm_name = virtual_machine.summary.config.name
+                            sys_result = self.scan_task.inspection_result.\
+                                systems.filter(name=vm_name).first()
+                            if sys_result:
+                                logger.debug('Results already captured'
+                                             ' for vm_name=%s', vm_name)
+                            else:
+                                self.get_vm_info(data_center_name,
+                                                 cluster_name,
+                                                 host, virtual_machine)
 
     @transaction.atomic
     def _init_stats(self):
@@ -216,4 +236,5 @@ class InspectTaskRunner(ScanTaskRunner):
         self._init_stats()
 
         vcenter = vcenter_connect(self.scan_task)
-        self.recurse_datacenter(vcenter)
+        content = vcenter.RetrieveContent()
+        self.recurse_folder(content.rootFolder)
