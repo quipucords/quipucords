@@ -208,22 +208,22 @@ class InspectTaskRunnerTest(TestCase):
 
         vcenter = Mock()
         content = Mock()
-        emptyFolder = Mock()
-        emptyFolder.__class__.__name__ = 'vim.Folder'
-        emptyFolder.name = 'emptyFolder'
-        emptyFolder.childEntity = []
+        empty_folder = Mock()
+        empty_folder.__class__.__name__ = 'vim.Folder'
+        empty_folder.name = 'empty_folder'
+        empty_folder.childEntity = []
 
-        invalidFolder = Mock()
-        invalidFolder.__class__.__name__ = 'vim.Folder'
-        invalidFolder.childEntity = None
-        invalidFolder.name = 'invalidFolder'
+        invalid_folder = Mock()
+        invalid_folder.__class__.__name__ = 'vim.Folder'
+        invalid_folder.childEntity = None
+        invalid_folder.name = 'invalid_folder'
 
-        regularFolder = Mock()
-        regularFolder.__class__.__name__ = 'vim.Folder'
-        regularFolder.childEntity = child_entity
-        regularFolder.name = 'regularFolder'
+        regular_folder = Mock()
+        regular_folder.__class__.__name__ = 'vim.Folder'
+        regular_folder.childEntity = child_entity
+        regular_folder.name = 'regular_folder'
 
-        folder_entries = [emptyFolder, invalidFolder, regularFolder]
+        folder_entries = [empty_folder, invalid_folder, regular_folder]
 
         root_folder = Mock()
         root_folder.childEntity = folder_entries
