@@ -176,7 +176,6 @@ class InspectTaskRunnerTest(TestCase):
     # pylint: disable=too-many-locals
     def test_recurse_folder(self):
         """Test the recurse_folder method."""
-        print('#' * 1200)
         sys_result = SystemInspectionResult(
             name='vm1', status=SystemInspectionResult.SUCCESS)
         sys_result.save()
