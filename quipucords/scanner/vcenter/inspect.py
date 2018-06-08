@@ -175,8 +175,6 @@ class InspectTaskRunner(ScanTaskRunner):
         :param folder: The vcenter folder object.
         """
         children = folder.childEntity
-        print('#' * 120)
-        print(children)
         if children is not None:
             for child in children:  # pylint: disable=too-many-nested-blocks
                 if child.__class__.__name__ == 'vim.Datacenter':
@@ -202,8 +200,6 @@ class InspectTaskRunner(ScanTaskRunner):
         data_center_name = data_center.name
         if hasattr(data_center, 'hostFolder'):
             clusters = data_center.hostFolder.childEntity
-            print('#' * 120)
-            print(clusters)
             for cluster in clusters:  # Iterate through the clusters
                 if hasattr(cluster, 'name') and hasattr(cluster, 'host'):
                     cluster_name = cluster.name
