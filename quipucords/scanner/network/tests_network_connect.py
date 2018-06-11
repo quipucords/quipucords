@@ -124,11 +124,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
         self.source = Source(
             name='source1',
+            hosts='["1.2.3.4", "1.2.3.5"]',
+            exclude_hosts='["1.2.3.5"]',
+            source_type='network',
             port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.source.hosts = '["1.2.3.4"]'
         self.source.save()
 
         self.scan_job, self.scan_task = create_scan_job(
@@ -172,11 +173,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
-                                                     connection_port)
+                                                     connection_port,
+                                                     exclude_hosts)
         expected = {'all': {'hosts': {'1.2.3.4': None},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
@@ -196,12 +199,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred,
-                    connection_port)
+            connect(hosts, Mock(), cred, connection_port, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -212,10 +215,11 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        connect(hosts, Mock(), cred, connection_port)
+        connect(hosts, Mock(), cred, connection_port, exclude_hosts)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')

@@ -26,7 +26,6 @@ from django.db import transaction
 
 import pexpect
 
-
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (_construct_error,
                                    _construct_vars,
@@ -55,10 +54,19 @@ class ConnectResultStore(object):
         # Sources can contain patterns that describe multiple hosts,
         # like '1.2.3.[4:6]'. Expand the patterns so hosts is a list
         # of single hosts we can try to connect to.
-        hosts = []
+        hosts, exclude_hosts = [], []
+
         hosts_list = source.get_hosts()
+        exclude_hosts_list = source.get_exclude_hosts()
+
         for host in hosts_list:
             hosts.extend(expand_hostpattern(host))
+        for host in exclude_hosts_list:
+            exclude_hosts.extend(expand_hostpattern(host))
+
+        # Removes excluded ip addresses from the hosts list.
+        hosts = [host for host in hosts if host not in exclude_hosts]
+
         self._remaining_hosts = set(hosts)
 
         scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
@@ -200,7 +208,9 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments
-def connect(hosts, callback, credential, connection_port, forks=50):
+# pylint: disable=dangerous-default-value
+def connect(hosts, callback, credential, connection_port, forks=50,
+            exclude_hosts=[]):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
@@ -208,10 +218,12 @@ def connect(hosts, callback, credential, connection_port, forks=50):
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param forks: number of forks to run with, default of 50
+    :param exclude_hosts: Optional. Hosts to exclude from test connections
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
-    inventory = construct_connect_inventory(hosts, credential, connection_port)
+    inventory = construct_connect_inventory(hosts, credential, connection_port,
+                                            exclude_hosts)
     inventory_file = write_inventory(inventory)
     extra_vars = {}
 
@@ -254,18 +266,21 @@ def _handle_ssh_passphrase(credential):
             pass
 
 
-def construct_connect_inventory(hosts, credential, connection_port):
+# pylint: disable=dangerous-default-value
+def construct_connect_inventory(hosts, credential, connection_port,
+                                exclude_hosts=[]):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
     :param credential: The credential used for connections
     :param connection_port: The connection port
-    :returns: A dictionary of the ansible invetory
+    :param exclude_hosts: Optional. Hosts to exclude test connections
+    :returns: A dictionary of the ansible inventory
     """
     inventory = None
     hosts_dict = {}
 
-    for host in hosts:
+    for host in [host for host in hosts if host not in exclude_hosts]:
         hosts_dict[host] = None
 
     vars_dict = _construct_vars(connection_port, credential)
