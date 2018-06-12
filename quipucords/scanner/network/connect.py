@@ -54,6 +54,7 @@ class ConnectResultStore(object):
         # Sources can contain patterns that describe multiple hosts,
         # like '1.2.3.[4:6]'. Expand the patterns so hosts is a list
         # of single hosts we can try to connect to.
+
         hosts, exclude_hosts = [], []
 
         hosts_list = source.get_hosts()
@@ -64,8 +65,8 @@ class ConnectResultStore(object):
         for host in exclude_hosts_list:
             exclude_hosts.extend(expand_hostpattern(host))
 
-        # Removes excluded ip addresses from the hosts list.
-        hosts = [host for host in hosts if host not in exclude_hosts]
+        # Remove excluded ip addresses from the hosts list.
+        hosts = list(set(hosts) - set(exclude_hosts))
 
         self._remaining_hosts = set(hosts)
 
@@ -208,9 +209,8 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments
-# pylint: disable=dangerous-default-value
 def connect(hosts, callback, credential, connection_port, forks=50,
-            exclude_hosts=[]):
+            exclude_hosts=None):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
@@ -266,9 +266,8 @@ def _handle_ssh_passphrase(credential):
             pass
 
 
-# pylint: disable=dangerous-default-value
 def construct_connect_inventory(hosts, credential, connection_port,
-                                exclude_hosts=[]):
+                                exclude_hosts=None):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
@@ -280,8 +279,12 @@ def construct_connect_inventory(hosts, credential, connection_port,
     inventory = None
     hosts_dict = {}
 
-    for host in [host for host in hosts if host not in exclude_hosts]:
-        hosts_dict[host] = None
+    if exclude_hosts is None:
+        for host in hosts:
+            hosts_dict[host] = None
+    else:
+        for host in list(set(hosts) - set(exclude_hosts)):
+            hosts_dict[host] = None
 
     vars_dict = _construct_vars(connection_port, credential)
 

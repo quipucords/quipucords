@@ -104,6 +104,15 @@ class Source(models.Model):
     def get_hosts(self):
         """Access hosts as python list instead of str.
 
-        :returns: host as a python list
+        :returns: hosts as a python list
         """
         return json.loads(self.hosts)
+
+    def get_exclude_hosts(self):
+        """Access exclude_hosts as python list instead of str.
+
+        :returns: excluded hosts as a python list
+        """
+        if self.exclude_hosts:
+            return json.loads(self.exclude_hosts)
+        return []
