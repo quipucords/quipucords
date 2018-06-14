@@ -279,12 +279,11 @@ def construct_connect_inventory(hosts, credential, connection_port,
     inventory = None
     hosts_dict = {}
 
-    if exclude_hosts is None:
-        for host in hosts:
-            hosts_dict[host] = None
-    else:
-        for host in list(set(hosts) - set(exclude_hosts)):
-            hosts_dict[host] = None
+    if exclude_hosts is not None:
+        hosts = list(set(hosts) - set(exclude_hosts))
+
+    for host in hosts:
+        hosts_dict[host] = None
 
     vars_dict = _construct_vars(connection_port, credential)
 
