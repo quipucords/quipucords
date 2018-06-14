@@ -149,7 +149,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source2.save()
 
         self.scan_job2, self.scan_task2 = create_scan_job(
-            self.source,"source2", ScanTask.SCAN_TYPE_CONNECT)
+            self.source, 'source2', ScanTask.SCAN_TYPE_CONNECT)
 
         self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
@@ -167,6 +167,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_become_user': 'root'}
         self.assertEqual(vars_dict, expected)
 
+    # Tests for source1 (has hosts and excluded host)
     def test_result_store(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task)
@@ -247,8 +248,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
-    ########### SAME TESTS WITH SOURCE2 ################################
-    def test_result_store(self):
+    # Same tests as above, modified for source2 (Does not have exclude hosts)
+    def test_result_store_src2(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task2)
 
@@ -265,7 +266,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.assertEqual(result_store.scan_task.systems_scanned, 1)
         self.assertEqual(result_store.scan_task.systems_failed, 0)
 
-    def test_connect_inventory(self):
+    def test_connect_inventory_src2(self):
         """Test construct ansible inventory dictionary."""
         serializer = SourceSerializer(self.source2)
         source = serializer.data
@@ -289,7 +290,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
            side_effect=mock_run_failed)
     @patch('scanner.network.connect._handle_ssh_passphrase',
            side_effect=mock_handle_ssh)
-    def test_connect_failure(self, mock_run, mock_ssh_pass):
+    def test_connect_failure_src2(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure."""
         serializer = SourceSerializer(self.source2)
         source = serializer.data
@@ -304,7 +305,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
     @patch('scanner.network.utils.TaskQueueManager.run',
            side_effect=mock_run_success)
-    def test_connect(self, mock_run):
+    def test_connect_src2(self, mock_run):
         """Test connect flow with mocked manager."""
         serializer = SourceSerializer(self.source2)
         source = serializer.data
@@ -316,11 +317,10 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')
-    def test_connect_runner(self, mock_connect):
+    def test_connect_runner_src2(self, mock_connect):
         """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
-
