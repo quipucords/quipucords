@@ -122,6 +122,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             become_password='become')
         self.cred.save()
 
+        # Source with excluded hosts
         self.source = Source(
             name='source1',
             hosts='["1.2.3.4", "1.2.3.5"]',
@@ -136,6 +137,21 @@ class NetworkConnectTaskRunnerTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
+
+        # Source without excluded hosts
+        self.source2 = Source(
+            name='source2',
+            hosts='["1.2.3.4"]',
+            source_type='network',
+            port=22)
+        self.source2.save()
+        self.source2.credentials.add(self.cred)
+        self.source2.save()
+
+        self.scan_job2, self.scan_task2 = create_scan_job(
+            self.source,"source2", ScanTask.SCAN_TYPE_CONNECT)
+
+        self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -230,3 +246,81 @@ class NetworkConnectTaskRunnerTest(TestCase):
         conn_dict = scanner.run_with_result_store(result_store)
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+
+    ########### SAME TESTS WITH SOURCE2 ################################
+    def test_result_store(self):
+        """Test ConnectResultStore."""
+        result_store = ConnectResultStore(self.scan_task2)
+
+        self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 0)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
+
+        result_store.record_result('1.2.3.4', self.source2, self.cred,
+                                   SystemConnectionResult.SUCCESS)
+
+        self.assertEqual(result_store.remaining_hosts(), [])
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 1)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
+
+    def test_connect_inventory(self):
+        """Test construct ansible inventory dictionary."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        inventory_dict = construct_connect_inventory(hosts, cred,
+                                                     connection_port)
+        expected = {'all': {'hosts': {'1.2.3.4': None},
+                            'vars': {'ansible_become_pass': 'become',
+                                     'ansible_port': 22,
+                                     'ansible_ssh_pass': 'password',
+                                     'ansible_ssh_private_key_file': 'keyfile',
+                                     'ansible_user': 'username',
+                                     'ansible_become_method': 'sudo',
+                                     'ansible_become_user': 'root'}}}
+        self.assertEqual(inventory_dict, expected)
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_failed)
+    @patch('scanner.network.connect._handle_ssh_passphrase',
+           side_effect=mock_handle_ssh)
+    def test_connect_failure(self, mock_run, mock_ssh_pass):
+        """Test connect flow with mocked manager and failure."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        with self.assertRaises(AnsibleError):
+            connect(hosts, Mock(), cred, connection_port)
+            mock_run.assert_called()
+            mock_ssh_pass.assert_called()
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
+    def test_connect(self, mock_run):
+        """Test connect flow with mocked manager."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        connect(hosts, Mock(), cred, connection_port)
+        mock_run.assert_called_with(ANY)
+
+    @patch('scanner.network.connect.connect')
+    def test_connect_runner(self, mock_connect):
+        """Test running a connect scan with mocked connection."""
+        scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
+        result_store = MockResultStore(['1.2.3.4'])
+        conn_dict = scanner.run_with_result_store(result_store)
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
+        self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+
