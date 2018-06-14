@@ -111,7 +111,7 @@ class Source(models.Model):
     def get_exclude_hosts(self):
         """Access exclude_hosts as python list instead of str.
 
-        :returns: excluded hosts as a python list
+        :returns: excluded hosts as a python list. Empty list if none exist.
         """
         if self.exclude_hosts:
             return json.loads(self.exclude_hosts)

@@ -167,6 +167,11 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_become_user': 'root'}
         self.assertEqual(vars_dict, expected)
 
+    def test_get_exclude_host(self):
+        """Test get_exclude_hosts() method."""
+        assert self.source.get_exclude_hosts() != []
+        assert self.source2.get_exclude_hosts() == []
+
     # Tests for source1 (has hosts and excluded host)
     def test_result_store(self):
         """Test ConnectResultStore."""
@@ -248,7 +253,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
-    # Same tests as above, modified for source2 (Does not have exclude hosts)
+    # Similar tests as above modified for source2 (Does not have exclude hosts)
     def test_result_store_src2(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task2)
