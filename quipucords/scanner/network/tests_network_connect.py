@@ -122,19 +122,36 @@ class NetworkConnectTaskRunnerTest(TestCase):
             become_password='become')
         self.cred.save()
 
+        # Source with excluded hosts
         self.source = Source(
             name='source1',
+            hosts='["1.2.3.4", "1.2.3.5"]',
+            exclude_hosts='["1.2.3.5", "1.2.3.6"]',
+            source_type='network',
             port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
-
-        self.source.hosts = '["1.2.3.4"]'
         self.source.save()
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_CONNECT)
 
         self.scan_task.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
+
+        # Source without excluded hosts
+        self.source2 = Source(
+            name='source2',
+            hosts='["1.2.3.4"]',
+            source_type='network',
+            port=22)
+        self.source2.save()
+        self.source2.credentials.add(self.cred)
+        self.source2.save()
+
+        self.scan_job2, self.scan_task2 = create_scan_job(
+            self.source, 'source2', ScanTask.SCAN_TYPE_CONNECT)
+
+        self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -150,6 +167,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
                     'ansible_become_user': 'root'}
         self.assertEqual(vars_dict, expected)
 
+    def test_get_exclude_host(self):
+        """Test get_exclude_hosts() method."""
+        assert self.source.get_exclude_hosts() != []
+        assert self.source2.get_exclude_hosts() == []
+
+    # Tests for source1 (has hosts and excluded host)
     def test_result_store(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task)
@@ -172,11 +195,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
-                                                     connection_port)
+                                                     connection_port,
+                                                     exclude_hosts)
         expected = {'all': {'hosts': {'1.2.3.4': None},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
@@ -196,12 +221,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred,
-                    connection_port)
+            connect(hosts, Mock(), cred, connection_port, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -212,6 +237,84 @@ class NetworkConnectTaskRunnerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        connect(hosts, Mock(), cred, connection_port, exclude_hosts)
+        mock_run.assert_called_with(ANY)
+
+    @patch('scanner.network.connect.connect')
+    def test_connect_runner(self, mock_connect):
+        """Test running a connect scan with mocked connection."""
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
+        result_store = MockResultStore(['1.2.3.4'])
+        conn_dict = scanner.run_with_result_store(result_store)
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
+        self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+
+    # Similar tests as above modified for source2 (Does not have exclude hosts)
+    def test_result_store_src2(self):
+        """Test ConnectResultStore."""
+        result_store = ConnectResultStore(self.scan_task2)
+
+        self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 0)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
+
+        result_store.record_result('1.2.3.4', self.source2, self.cred,
+                                   SystemConnectionResult.SUCCESS)
+
+        self.assertEqual(result_store.remaining_hosts(), [])
+        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertEqual(result_store.scan_task.systems_scanned, 1)
+        self.assertEqual(result_store.scan_task.systems_failed, 0)
+
+    def test_connect_inventory_src2(self):
+        """Test construct ansible inventory dictionary."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        inventory_dict = construct_connect_inventory(hosts, cred,
+                                                     connection_port)
+        expected = {'all': {'hosts': {'1.2.3.4': None},
+                            'vars': {'ansible_become_pass': 'become',
+                                     'ansible_port': 22,
+                                     'ansible_ssh_pass': 'password',
+                                     'ansible_ssh_private_key_file': 'keyfile',
+                                     'ansible_user': 'username',
+                                     'ansible_become_method': 'sudo',
+                                     'ansible_become_user': 'root'}}}
+        self.assertEqual(inventory_dict, expected)
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_failed)
+    @patch('scanner.network.connect._handle_ssh_passphrase',
+           side_effect=mock_handle_ssh)
+    def test_connect_failure_src2(self, mock_run, mock_ssh_pass):
+        """Test connect flow with mocked manager and failure."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        with self.assertRaises(AnsibleError):
+            connect(hosts, Mock(), cred, connection_port)
+            mock_run.assert_called()
+            mock_ssh_pass.assert_called()
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
+    def test_connect_src2(self, mock_run):
+        """Test connect flow with mocked manager."""
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
@@ -219,9 +322,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')
-    def test_connect_runner(self, mock_connect):
+    def test_connect_runner_src2(self, mock_connect):
         """Test running a connect scan with mocked connection."""
-        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
+        scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
         mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
