@@ -101,7 +101,7 @@
   when: 'user_has_sudo and jboss_fuse and internal_have_chkconfig'
 
 - name: Use locate to look for camel-ver
-  raw: locate camel-core | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: locate camel-core | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_camel_ver
   ignore_errors: yes
   become: yes
@@ -124,7 +124,7 @@
   when: 'jboss_fuse'
 
 - name: Use locate to look for activemq-ver
-  raw: locate activemq | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: locate activemq | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_activemq_ver
   ignore_errors: yes
   become: yes
@@ -147,7 +147,7 @@
   when: 'jboss_fuse'
 
 - name: Use locate to look for cxf-rt-ver
-  raw: locate cxf-rt| sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: locate cxf-rt | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: jboss_fuse_cxf_ver
   ignore_errors: yes
   become: yes
