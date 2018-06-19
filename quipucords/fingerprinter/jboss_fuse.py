@@ -76,7 +76,7 @@ def detect_jboss_fuse(source, facts):
     """Detect if JBoss Fuse is present based on system facts.
 
     :param source: The source of the facts
-    :param facts: facts for a system
+    :param facts: dictionary of facts for a system
     :returns: dictionary defining the product presence
     """
     eap_home_bin = facts.get(EAP_HOME_BIN)
