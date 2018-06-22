@@ -183,7 +183,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _traversal_set(self):
         folderToChildEntity = vmodl.query.PropertyCollector.TraversalSpec(
-            name='folderToFolder', type=vim.Folder, path='childEntity', skip=False)
+            name='folderToChildEntity', type=vim.Folder, path='childEntity', skip=False)
 
         folderToChildEntity.selectSet.extend([
             vmodl.query.PropertyCollector.SelectionSpec(name='folderToChildEntity'),
