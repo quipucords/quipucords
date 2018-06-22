@@ -190,7 +190,7 @@ class InspectTaskRunner(ScanTaskRunner):
             vmodl.query.PropertyCollector.SelectionSpec(name='dcToVmFolder')])
 
         dcToVmFolder = vmodl.query.PropertyCollector.TraversalSpec(
-            name='dcToVmFolder', type=vim.Folder, path='vmFolder', skip=False)
+            name='dcToVmFolder', type=vim.Datacenter, path='vmFolder', skip=False)
         dcToVmFolder.selectSet.extend([
             vmodl.query.PropertyCollector.SelectionSpec(name='folderToChildEntity')])
 
