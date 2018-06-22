@@ -48,6 +48,68 @@ def get_nics(guest_net):
     return mac_addresses, ip_addresses
 
 
+def traversal_set():
+    """Build the set of traveral specs."""
+    folder_to_child_entity = vmodl.query.PropertyCollector.TraversalSpec(
+        name='folderToChildEntity',
+        type=vim.Folder,
+        path='childEntity',
+        skip=False)
+
+    folder_to_child_entity.selectSet.extend([
+        vmodl.query.PropertyCollector.SelectionSpec(
+            name='folderToChildEntity'),
+        vmodl.query.PropertyCollector.SelectionSpec(
+            name='dcToVmFolder')])
+
+    dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
+        name='dcToVmFolder',
+        type=vim.Datacenter,
+        path='vmFolder',
+        skip=False)
+    dc_to_vm_folder.selectSet.extend([
+        vmodl.query.PropertyCollector.SelectionSpec(
+            name='folderToChildEntity')
+    ])
+
+    return [folder_to_child_entity, dc_to_vm_folder]
+
+
+def object_set(root_folder):
+    """Build the set of objects to collect."""
+    object_spec = vmodl.query.PropertyCollector.ObjectSpec(
+        obj=root_folder, skip=False, selectSet=traversal_set())
+
+    return [object_spec]
+
+
+def property_set():
+    """Build the set of properties to collect."""
+    vm_path_set = [
+        'guest.net',
+        'name',
+        'summary.runtime.powerState',
+        'summary.config.guestFullName',
+        'summary.config.memorySizeMB',
+        'summary.config.numCpu',
+        'summary.config.uuid'
+    ]
+
+    vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
+        all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
+
+    return [vm_property_spec]
+
+
+def filter_set(root_folder):
+    """Build the set of property filters."""
+    filter_spec = vmodl.query.PropertyCollector.FilterSpec(
+        objectSet=object_set(root_folder),
+        propSet=property_set())
+
+    return [filter_spec]
+
+
 class InspectTaskRunner(ScanTaskRunner):
     """InspectTaskRunner vcenter connection capabilities.
 
@@ -104,11 +166,10 @@ class InspectTaskRunner(ScanTaskRunner):
 
     @transaction.atomic
     def parse_vm_props(self, props):
-        """Parse Virtual Machine properties
+        """Parse Virtual Machine properties.
 
         :param props: Array of Dynamic Properties
         """
-
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
         facts = {}
@@ -116,20 +177,21 @@ class InspectTaskRunner(ScanTaskRunner):
             if prop.name == 'name':
                 facts['vm.name'] = prop.val
             if prop.name == 'guest.net':
-                facts['vm.mac_addresses'], facts['vm.ip_addresses'] = get_nics(prop.val)
+                mac_addresses, ip_addresses = get_nics(prop.val)
+                facts['vm.mac_addresses'] = mac_addresses
+                facts['vm.ip_addresses'] = ip_addresses
             elif prop.name == 'summary.runtime.powerState':
                 facts['vm.state'] = prop.val
                 if facts['vm.state'] == 'poweredOn':
                     facts['vm.last_check_in'] = now
-            elif prop.name == "summary.config.guestFullName":
+            elif prop.name == 'summary.config.guestFullName':
                 facts['vm.os'] = prop.val
-            elif prop.name == "summary.config.memorySizeMB":
+            elif prop.name == 'summary.config.memorySizeMB':
                 facts['vm.memory_size'] = prop.val / 1024
             elif prop.name == 'summary.config.numCpu':
                 facts['vm.cpu_count'] = prop.val
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
-
 
         vm_name = facts['vm.name']
 
@@ -154,15 +216,17 @@ class InspectTaskRunner(ScanTaskRunner):
 
     @transaction.atomic
     def retrieve_properties(self, content):
-        """Retrieve properties from all VirtualMachines
+        """Retrieve properties from all VirtualMachines.
 
         :param content: ServiceInstanceContent from the vCenter connection
         """
-        spec_set = self._filter_set(content.rootFolder)
+        spec_set = filter_set(content.rootFolder)
         options = vmodl.query.PropertyCollector.RetrieveOptions()
 
-        result = content.propertyCollector.RetrievePropertiesEx(specSet=spec_set, options=options)
+        result = content.propertyCollector.RetrievePropertiesEx(
+            specSet=spec_set, options=options)
         while result is not None:
+            token = result.token
             objects = result.objects
             for object_content in objects:
                 obj = object_content.obj
@@ -171,10 +235,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 if obj.__class__.__name__ == 'vim.VirtualMachine':
                     self.parse_vm_props(props)
 
-            if result.token is None:
+            if token is None:
                 break
 
-            result = content.propertyCollector.ContinueRetrievePropertiesEx(result.token)
+            result = content.propertyCollector.ContinueRetrievePropertiesEx(
+                token)
 
     @transaction.atomic
     def _init_stats(self):
@@ -183,50 +248,6 @@ class InspectTaskRunner(ScanTaskRunner):
         self.scan_task.update_stats(
             'INITIAL VCENTER CONNECT STATS.',
             sys_count=self.connect_scan_task.systems_count)
-
-    def _traversal_set(self):
-        folderToChildEntity = vmodl.query.PropertyCollector.TraversalSpec(
-            name='folderToChildEntity', type=vim.Folder, path='childEntity', skip=False)
-
-        folderToChildEntity.selectSet.extend([
-            vmodl.query.PropertyCollector.SelectionSpec(name='folderToChildEntity'),
-            vmodl.query.PropertyCollector.SelectionSpec(name='dcToVmFolder')])
-
-        dcToVmFolder = vmodl.query.PropertyCollector.TraversalSpec(
-            name='dcToVmFolder', type=vim.Datacenter, path='vmFolder', skip=False)
-        dcToVmFolder.selectSet.extend([
-            vmodl.query.PropertyCollector.SelectionSpec(name='folderToChildEntity')])
-
-        return [folderToChildEntity, dcToVmFolder]
-
-    def _object_set(self, root_folder):
-        object_spec = vmodl.query.PropertyCollector.ObjectSpec(
-            obj=root_folder, skip=False, selectSet=self._traversal_set())
-
-        return [object_spec]
-
-    def _property_set(self):
-        vm_path_set = [
-            "guest.net",
-            "name",
-            "summary.runtime.powerState",
-            "summary.config.guestFullName",
-            "summary.config.memorySizeMB",
-            "summary.config.numCpu",
-            "summary.config.uuid"
-        ]
-
-        vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
-            all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
-
-        return [vm_property_spec]
-
-    def _filter_set(self, root_folder):
-        filter_spec = vmodl.query.PropertyCollector.FilterSpec(
-            objectSet=self._object_set(root_folder),
-            propSet=self._property_set())
-
-        return [filter_spec]
 
     # pylint: disable=too-many-locals
     def inspect(self):
