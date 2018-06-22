@@ -49,8 +49,7 @@ def get_vm_names(vm_container_view):
     vm_names = []
     children = vm_container_view.view
     for child in children:
-        summary = child.summary
-        vm_names.append(summary.config.name)
+        vm_names.append(child.summary.config.name)
     return vm_names
 
 
