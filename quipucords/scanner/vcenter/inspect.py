@@ -20,7 +20,7 @@ from api.models import (RawFact,
 
 from django.db import transaction
 
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
@@ -102,53 +102,33 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return None, ScanTask.COMPLETED
 
-    # pylint: disable=too-many-locals
     @transaction.atomic
-    def get_vm_info(self, data_center, cluster, host, virtual_machine):
-        """Get VM information.
+    def parse_vm_props(self, props):
+        """Parse Virtual Machine properties
 
-        :param data_center: The data center name.
-        :param cluster: The cluster name.
-        :param host: The host server.
-        :param virtual_machine: The virtual machine.
+        :param props: Array of Dynamic Properties
         """
-        host_name = host.summary.config.name
-        host_cpu_cores = host.summary.hardware.numCpuCores
-        host_cpu_threads = host.summary.hardware.numCpuThreads
-        host_cpu_count = host_cpu_threads // host_cpu_cores
-        mac_addresses, ip_addresses = get_nics(virtual_machine.guest)
-        summary = virtual_machine.summary
-        config = summary.config
-        vm_name = config.name
-        vm_uuid = config.uuid
-        vm_cpu_count = config.numCpu
-        vm_os = config.guestFullName
-        vm_mem = None
-        if config.memorySizeMB is not None:
-            vm_mem = int(config.memorySizeMB / 1024)
 
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Need to obtain DNS Name
-        facts = {'vm.name': vm_name,  # Name
-                 'vm.state': summary.runtime.powerState,  # State
-                 'vm.uuid': vm_uuid,  # UUID
-                 'vm.cpu_count': vm_cpu_count,  # CPU
-                 'vm.memory_size': vm_mem,  # Memory
-                 'vm.os': vm_os,  # Guest OS
-                 'vm.dns_name': summary.guest.hostName,  # DNS NAME
-                 # Mac Addresses
-                 'vm.mac_addresses': mac_addresses,
-                 'vm.ip_addresses': ip_addresses,  # IP Addresses
-                 'vm.host.name': host_name,  # Host Name
-                 'vm.host.cpu_cores': host_cpu_cores,  # Host CPU Cores
-                 'vm.host.cpu_threads': host_cpu_threads,  # Host CPU Threads
-                 'vm.host.cpu_count': host_cpu_count,  # Host CPU Count
-                 'vm.datacenter': data_center,  # Data Center
-                 'vm.cluster': cluster}  # Cluster
+        facts = {}
+        for prop in props:
+            if prop.name == 'name':
+                facts['vm.name'] = prop.val
+            elif prop.name == 'summary.runtime.powerState':
+                facts['vm.state'] = prop.val
+                if facts['vm.state'] == 'poweredOn':
+                    facts['vm.last_check_in'] = now
+            elif prop.name == "summary.config.guestFullName":
+                facts['vm.os'] = prop.val
+            elif prop.name == "summary.config.memorySizeMB":
+                facts['vm.memory_size'] = prop.val / 1024
+            elif prop.name == 'summary.config.numCpu':
+                facts['vm.cpu_count'] = prop.val
+            elif prop.name == 'summary.config.uuid':
+                facts['vm.uuid'] = prop.val
 
-        if summary.runtime.powerState == 'poweredOn':
-            facts['vm.last_check_in'] = now
+        vm_name = facts['vm.name']
 
         logger.debug('system %s facts=%s', vm_name, facts)
 
@@ -169,57 +149,29 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
-    def recurse_folder(self, folder):
-        """Walk vcenter folders to discover datacenters.
+    @transaction.atomic
+    def retrieve_properties(self, content):
+        """Retrieve properties from all VirtualMachines
 
-        :param folder: The vcenter folder object.
+        :param content: ServiceInstanceContent from the vCenter connection
         """
-        children = folder.childEntity
-        if children is not None:
-            for child in children:  # pylint: disable=too-many-nested-blocks
-                if child.__class__.__name__ == 'vim.Datacenter':
-                    self.scan_task.log_message(
-                        'Recurse vCenter datacenter: %s' % child.name)
-                    self.recurse_datacenter(child)
-                elif hasattr(child, 'childEntity'):
-                    self.scan_task.log_message(
-                        'Recurse vCenter folder: %s' % child.name)
-                    self.recurse_folder(child)
-                else:
-                    self.scan_task.log_message(
-                        'Not folder or datacenter: %s' % child.name)
-        else:
-            self.scan_task.log_message(
-                'No children found for %s' % folder.name)
+        spec_set = self._filter_set(content.rootFolder)
+        options = vmodl.query.PropertyCollector.RetrieveOptions()
 
-    def recurse_datacenter(self, data_center):
-        """Walk datacenter to collect vm facts.
+        result = content.propertyCollector.RetrievePropertiesEx(specSet=spec_set, options=options)
+        while result is not None:
+            objects = result.objects
+            for object_content in objects:
+                obj = object_content.obj
+                props = object_content.propSet
 
-        :param data_center: The data center object.
-        """
-        # pylint: disable=too-many-nested-blocks
-        data_center_name = data_center.name
-        if hasattr(data_center, 'hostFolder'):
-            clusters = data_center.hostFolder.childEntity
-            for cluster in clusters:  # Iterate through the clusters
-                if hasattr(cluster, 'name') and hasattr(cluster, 'host'):
-                    cluster_name = cluster.name
-                    # Variable to make pep8 compliance
-                    hosts = cluster.host
-                    # Iterate through Hosts in the Cluster
-                    for host in hosts:
-                        vms = host.vm
-                        for virtual_machine in vms:
-                            vm_name = virtual_machine.summary.config.name
-                            sys_result = self.scan_task.inspection_result.\
-                                systems.filter(name=vm_name).first()
-                            if sys_result:
-                                logger.debug('Results already captured'
-                                             ' for vm_name=%s', vm_name)
-                            else:
-                                self.get_vm_info(data_center_name,
-                                                 cluster_name,
-                                                 host, virtual_machine)
+                if obj.__class__.__name__ == 'vim.VirtualMachine':
+                    self.parse_vm_props(props)
+
+            if result.token is None:
+                break
+
+            result = content.propertyCollector.ContinueRetrievePropertiesEx(result.token)
 
     @transaction.atomic
     def _init_stats(self):
@@ -229,6 +181,145 @@ class InspectTaskRunner(ScanTaskRunner):
             'INITIAL VCENTER CONNECT STATS.',
             sys_count=self.connect_scan_task.systems_count)
 
+    def _traversal_set(self):
+        """
+        Function to build a traversal set taken from:
+        https://programtalk.com/vs2/python/13804/pyvmomi-community-samples/samples/tools/serviceutil.py/
+
+        Builds a traversal spec that will recurse through all objects
+
+        See com.vmware.apputils.vim25.ServiceUtil.buildFullTraversal in the java
+        API. Extended by Sebastian Tello's examples from pysphere to reach networks
+        and datastores.
+        """
+
+        TraversalSpec = vmodl.query.PropertyCollector.TraversalSpec
+        SelectionSpec = vmodl.query.PropertyCollector.SelectionSpec
+
+        # Recurse through all resourcepools
+        rpToRp = TraversalSpec(name='rpToRp', type=vim.ResourcePool,
+                                path="resourcePool", skip=False)
+
+        rpToRp.selectSet.extend(
+             (
+                 SelectionSpec(name="rpToRp"),
+                 SelectionSpec(name="rpToVm"),
+             )
+         )
+
+        rpToVm = TraversalSpec(name='rpToVm', type=vim.ResourcePool, path="vm",
+                               skip=False)
+
+        # Traversal through resourcepool branch
+        crToRp = TraversalSpec(name='crToRp', type=vim.ComputeResource,
+                               path='resourcePool', skip=False)
+        crToRp.selectSet.extend(
+            (
+                SelectionSpec(name='rpToRp'),
+                SelectionSpec(name='rpToVm'),
+            )
+        )
+
+        # Traversal through host branch
+        crToH = TraversalSpec(name='crToH', type=vim.ComputeResource, path='host',
+                               skip=False)
+
+        # Traversal through hostFolder branch
+        dcToHf = TraversalSpec(name='dcToHf', type=vim.Datacenter,
+                               path='hostFolder', skip=False)
+        dcToHf.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+            )
+        )
+
+        # Traversal through vmFolder branch
+        dcToVmf = TraversalSpec(name='dcToVmf', type=vim.Datacenter,
+                                path='vmFolder', skip=False)
+        dcToVmf.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+            )
+        )
+
+        # Traversal through network folder branch
+        dcToNet = TraversalSpec(name='dcToNet', type=vim.Datacenter,
+                                path='networkFolder', skip=False)
+        dcToNet.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+            )
+        )
+
+        # Traversal through datastore branch
+        dcToDs = TraversalSpec(name='dcToDs', type=vim.Datacenter,
+                               path='datastore', skip=False)
+        dcToDs.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+            )
+        )
+        # Recurse through all hosts
+        hToVm = TraversalSpec(name='hToVm', type=vim.HostSystem, path='vm',
+                              skip=False)
+        hToVm.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+            )
+        )
+        # Recurse through the folders
+        visitFolders = TraversalSpec(name='visitFolders', type=vim.Folder,
+                                     path='childEntity', skip=False)
+        visitFolders.selectSet.extend(
+            (
+                SelectionSpec(name='visitFolders'),
+
+                SelectionSpec(name='dcToHf'),
+                SelectionSpec(name='dcToVmf'),
+                SelectionSpec(name='dcToNet'),
+                SelectionSpec(name='crToH'),
+                SelectionSpec(name='crToRp'),
+                SelectionSpec(name='dcToDs'),
+                SelectionSpec(name='hToVm'),
+                SelectionSpec(name='rpToVm'),
+            )
+        )
+
+        fullTraversal = SelectionSpec.Array(
+             (visitFolders, dcToHf, dcToVmf, dcToNet, crToH, crToRp, dcToDs, rpToRp, hToVm, rpToVm,))
+
+        return fullTraversal
+
+
+    def _object_set(self, root_folder):
+
+        object_spec = vmodl.query.PropertyCollector.ObjectSpec(
+            obj=root_folder, skip=False, selectSet=self._traversal_set())
+
+        return [object_spec]
+
+    def _property_set(self):
+        vm_path_set = [
+            "name",
+            "summary.runtime.powerState",
+            "summary.config.guestFullName",
+            "summary.config.memorySizeMB",
+            "summary.config.numCpu",
+            "summary.config.uuid"
+        ]
+
+        vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
+            all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
+
+        return [vm_property_spec]
+
+    def _filter_set(self, root_folder):
+        filter_spec = vmodl.query.PropertyCollector.FilterSpec(
+            objectSet=self._object_set(root_folder),
+            propSet=self._property_set())
+
+        return [filter_spec]
+
     # pylint: disable=too-many-locals
     def inspect(self):
         """Execute the inspection scan with the initialized source."""
@@ -237,4 +328,4 @@ class InspectTaskRunner(ScanTaskRunner):
 
         vcenter = vcenter_connect(self.scan_task)
         content = vcenter.RetrieveContent()
-        self.recurse_folder(content.rootFolder)
+        self.retrieve_properties(content)
