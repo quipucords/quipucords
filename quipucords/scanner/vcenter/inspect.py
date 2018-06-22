@@ -29,7 +29,7 @@ from scanner.vcenter.utils import vcenter_connect
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-def get_nics(guest):
+def get_nics(guest_net):
     """Get the network information for a VM.
 
     :param guest: The VM guest information.
@@ -37,7 +37,7 @@ def get_nics(guest):
     """
     mac_addresses = []
     ip_addresses = []
-    for nic in guest.net:
+    for nic in guest_net:
         if nic.network:  # Only return adapter backed interfaces
             if nic.ipConfig is not None and nic.ipConfig.ipAddress is not None:
                 mac_addresses.append(nic.macAddress)
@@ -115,6 +115,8 @@ class InspectTaskRunner(ScanTaskRunner):
         for prop in props:
             if prop.name == 'name':
                 facts['vm.name'] = prop.val
+            if prop.name == 'guest.net':
+                facts['vm.mac_addresses'], facts['vm.ip_addresses'] = get_nics(prop.val)
             elif prop.name == 'summary.runtime.powerState':
                 facts['vm.state'] = prop.val
                 if facts['vm.state'] == 'poweredOn':
@@ -127,6 +129,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['vm.cpu_count'] = prop.val
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
+
 
         vm_name = facts['vm.name']
 
@@ -204,6 +207,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _property_set(self):
         vm_path_set = [
+            "guest.net",
             "name",
             "summary.runtime.powerState",
             "summary.config.guestFullName",
