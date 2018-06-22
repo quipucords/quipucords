@@ -183,13 +183,15 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _traversal_set(self):
         """
-        Builds a traversal spec that will recurse through all objects .. or at
-        least I think it does. additions welcome.
+        Function to build a traversal set taken from:
+        https://programtalk.com/vs2/python/13804/pyvmomi-community-samples/samples/tools/serviceutil.py/
 
-           See com.vmware.apputils.vim25.ServiceUtil.buildFullTraversal in the java
-           API. Extended by Sebastian Tello's examples from pysphere to reach networks
-           and datastores.
-           """
+        Builds a traversal spec that will recurse through all objects
+
+        See com.vmware.apputils.vim25.ServiceUtil.buildFullTraversal in the java
+        API. Extended by Sebastian Tello's examples from pysphere to reach networks
+        and datastores.
+        """
 
         TraversalSpec = vmodl.query.PropertyCollector.TraversalSpec
         SelectionSpec = vmodl.query.PropertyCollector.SelectionSpec
