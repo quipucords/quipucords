@@ -20,7 +20,7 @@ from api.models import (RawFact,
 
 from django.db import transaction
 
-from pyVmomi import vim, vmodl, ManagedObject  # pylint: disable=no-name-in-module
+from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
@@ -205,7 +205,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _filter_set(self, root_folder):
         """Create a filter set for the retrieve properties function."""
-
         # Create traversal set
         folder_to_child_entity = vmodl.query.PropertyCollector.TraversalSpec(
             name='folderToChildEntity',
