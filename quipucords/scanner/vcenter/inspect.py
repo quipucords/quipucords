@@ -103,10 +103,29 @@ class InspectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
     @transaction.atomic
-    def parse_vm_props(self, props):
+    def parse_host_props(self, props):
+        """Parse Host properties.
+
+        :param props: Array of Dynamic Properties
+        """
+        facts = {}
+        for prop in props:
+            if prop.name == 'summary.config.name':
+                facts['host.name'] = prop.val
+            elif prop.name == 'summary.hardware.numCpuCores':
+                facts['host.cpu_cores'] = prop.val
+            elif prop.name == 'summary.hardware.numCpuPkgs':
+                facts['host.cpu_count'] = prop.val
+            elif prop.name == 'summary.hardware.numCpuThreads':
+                facts['host.cpu_threads'] = prop.val
+        return facts
+
+    @transaction.atomic
+    def parse_vm_props(self, props, host_dict):
         """Parse Virtual Machine properties.
 
         :param props: Array of Dynamic Properties
+        :param host_dict: Dictionary of host properties
         """
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -130,6 +149,12 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['vm.cpu_count'] = prop.val
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
+            elif prop.name == 'runtime.host':
+                host_facts = host_dict[prop.val._moId]
+                facts['vm.host.name'] = host_facts['host.name']
+                facts['vm.host.cpu_cores'] = host_facts['host.cpu_cores']
+                facts['vm.host.cpu_count'] = host_facts['host.cpu_count']
+                facts['vm.host.cpu_threads'] = host_facts['host.cpu_threads']
 
         vm_name = facts['vm.name']
 
@@ -162,22 +187,33 @@ class InspectTaskRunner(ScanTaskRunner):
         options = vmodl.query.PropertyCollector.RetrieveOptions()
 
         result = content.propertyCollector.RetrievePropertiesEx(
-            specSet=spec_set, options=options)
+            specSet=spec_set,
+            options=options
+        )
+
+        objects = []
+
         while result is not None:
             token = result.token
-            objects = result.objects
-            for object_content in objects:
-                obj = object_content.obj
-                props = object_content.propSet
-
-                if obj.__class__.__name__ == 'vim.VirtualMachine':
-                    self.parse_vm_props(props)
+            objects.extend(result.objects)
 
             if token is None:
                 break
 
             result = content.propertyCollector.ContinueRetrievePropertiesEx(
-                token)
+                token
+            )
+
+        host_dict = {}
+
+        for object_content in objects:
+            if object_content.obj.__class__.__name__ == 'vim.HostSystem':
+                host = object_content.obj
+                host_dict[host._moId] = self.parse_host_props(object_content.propSet)
+
+        for object_content in objects:
+            if object_content.obj.__class__.__name__ == 'vim.VirtualMachine':
+                self.parse_vm_props(object_content.propSet, host_dict)
 
     @transaction.atomic
     def _init_stats(self):
@@ -191,6 +227,7 @@ class InspectTaskRunner(ScanTaskRunner):
         vm_path_set = [
             'guest.net',
             'name',
+            'runtime.host',
             'summary.runtime.powerState',
             'summary.config.guestFullName',
             'summary.config.memorySizeMB',
@@ -198,10 +235,20 @@ class InspectTaskRunner(ScanTaskRunner):
             'summary.config.uuid'
         ]
 
+        host_path_set = [
+            'summary.config.name',
+            'summary.hardware.numCpuCores',
+            'summary.hardware.numCpuPkgs',
+            'summary.hardware.numCpuThreads',
+        ]
+
         vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
 
-        return [vm_property_spec]
+        host_property_spec = vmodl.query.PropertyCollector.PropertySpec(
+            all=False, pathSet=host_path_set, type=vim.HostSystem)
+
+        return [vm_property_spec, host_property_spec]
 
     def _filter_set(self, root_folder):
         """Create a filter set for the retrieve properties function."""
@@ -216,7 +263,12 @@ class InspectTaskRunner(ScanTaskRunner):
             vmodl.query.PropertyCollector.SelectionSpec(
                 name='folderToChildEntity'),
             vmodl.query.PropertyCollector.SelectionSpec(
-                name='dcToVmFolder')])
+                name='dcToVmFolder'),
+            vmodl.query.PropertyCollector.SelectionSpec(
+                name='dcToHostFolder'),
+            vmodl.query.PropertyCollector.SelectionSpec(
+                name='crToHost'),
+        ])
 
         dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
             name='dcToVmFolder',
@@ -228,7 +280,28 @@ class InspectTaskRunner(ScanTaskRunner):
                 name='folderToChildEntity')
         ])
 
-        traversal_set = [folder_to_child_entity, dc_to_vm_folder]
+        dc_to_host_folder = vmodl.query.PropertyCollector.TraversalSpec(
+            name='dcToHostFolder',
+            type=vim.Datacenter,
+            path='hostFolder',
+            skip=False)
+        dc_to_host_folder.selectSet.extend([
+            vmodl.query.PropertyCollector.SelectionSpec(
+                name='folderToChildEntity')
+        ])
+
+        cr_to_host = vmodl.query.PropertyCollector.TraversalSpec(
+            name='crToHost',
+            type=vim.ComputeResource,
+            path='host',
+            skip=False)
+
+        traversal_set = [
+            folder_to_child_entity,
+            dc_to_vm_folder,
+            dc_to_host_folder,
+            cr_to_host,
+        ]
 
         # Create object set
         object_set = [vmodl.query.PropertyCollector.ObjectSpec(
