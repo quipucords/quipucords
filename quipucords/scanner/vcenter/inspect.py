@@ -103,14 +103,29 @@ class InspectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
     @transaction.atomic
-    def parse_host_props(self, props):
-        """Parse Host properties.
+    def parse_cluster_props(self, props):
+        """Parse Cluster properties.
 
         :param props: Array of Dynamic Properties
         """
         facts = {}
         for prop in props:
-            if prop.name == 'summary.config.name':
+            if prop.name == 'name':
+                facts['name'] = prop.val
+        return facts
+
+    @transaction.atomic
+    def parse_host_props(self, props, cluster_dict):
+        """Parse Host properties.
+
+        :param props: Array of Dynamic Properties
+        :param cluster_dict: Dictionary of cluster properties
+        """
+        facts = {}
+        for prop in props:
+            if prop.name == 'parent':
+                facts['host.cluster'] = cluster_dict[prop.val._moId]['name']
+            elif prop.name == 'summary.config.name':
                 facts['host.name'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
                 facts['host.cpu_cores'] = prop.val
@@ -155,6 +170,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['vm.host.cpu_cores'] = host_facts['host.cpu_cores']
                 facts['vm.host.cpu_count'] = host_facts['host.cpu_count']
                 facts['vm.host.cpu_threads'] = host_facts['host.cpu_threads']
+                facts['vm.cluster'] = host_facts['host.cluster']
 
         vm_name = facts['vm.name']
 
@@ -204,16 +220,31 @@ class InspectTaskRunner(ScanTaskRunner):
                 token
             )
 
+        cluster_dict = {}
+
+        for object_content in objects:
+            props = object_content.propSet
+            obj = object_content.obj
+
+            if isinstance(obj, vim.ComputeResource):
+                cluster_dict[obj._moId] = self.parse_cluster_props(props)
+
         host_dict = {}
 
         for object_content in objects:
-            if object_content.obj.__class__.__name__ == 'vim.HostSystem':
-                host = object_content.obj
-                host_dict[host._moId] = self.parse_host_props(object_content.propSet)
+            props = object_content.propSet
+            obj = object_content.obj
+
+            if isinstance(obj, vim.HostSystem):
+                host_dict[obj._moId] = self.parse_host_props(
+                    props, cluster_dict)
 
         for object_content in objects:
-            if object_content.obj.__class__.__name__ == 'vim.VirtualMachine':
-                self.parse_vm_props(object_content.propSet, host_dict)
+            props = object_content.propSet
+            obj = object_content.obj
+
+            if isinstance(obj, vim.VirtualMachine):
+                self.parse_vm_props(props, host_dict)
 
     @transaction.atomic
     def _init_stats(self):
@@ -224,6 +255,18 @@ class InspectTaskRunner(ScanTaskRunner):
             sys_count=self.connect_scan_task.systems_count)
 
     def _property_set(self):
+        cluster_path_set = [
+            'name'
+        ]
+
+        host_path_set = [
+            'parent',
+            'summary.config.name',
+            'summary.hardware.numCpuCores',
+            'summary.hardware.numCpuPkgs',
+            'summary.hardware.numCpuThreads',
+        ]
+
         vm_path_set = [
             'guest.net',
             'name',
@@ -235,20 +278,16 @@ class InspectTaskRunner(ScanTaskRunner):
             'summary.config.uuid'
         ]
 
-        host_path_set = [
-            'summary.config.name',
-            'summary.hardware.numCpuCores',
-            'summary.hardware.numCpuPkgs',
-            'summary.hardware.numCpuThreads',
-        ]
-
-        vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
-            all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
+        cluster_property_spec = vmodl.query.PropertyCollector.PropertySpec(
+            all=False, pathSet=cluster_path_set, type=vim.ComputeResource)
 
         host_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False, pathSet=host_path_set, type=vim.HostSystem)
 
-        return [vm_property_spec, host_property_spec]
+        vm_property_spec = vmodl.query.PropertyCollector.PropertySpec(
+            all=False, pathSet=vm_path_set, type=vim.VirtualMachine)
+
+        return [cluster_property_spec, host_property_spec, vm_property_spec]
 
     def _filter_set(self, root_folder):
         """Create a filter set for the retrieve properties function."""
