@@ -181,6 +181,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['vm.state'] = prop.val
                 if facts['vm.state'] == 'poweredOn':
                     facts['vm.last_check_in'] = now
+            elif prop.name == 'summary.guest.hostName':
+                facts['vm.dns_name'] = prop.val
             elif prop.name == 'summary.config.guestFullName':
                 facts['vm.os'] = prop.val
             elif prop.name == 'summary.config.memorySizeMB':
@@ -321,6 +323,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 'guest.net',
                 'name',
                 'runtime.host',
+                'summary.guest.hostName',
                 'summary.runtime.powerState',
                 'summary.config.guestFullName',
                 'summary.config.memorySizeMB',
