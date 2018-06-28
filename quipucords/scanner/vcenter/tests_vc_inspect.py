@@ -104,31 +104,41 @@ class InspectTaskRunnerTest(TestCase):
 
     def test_parse_parent_props(self):
         """Test the parse_parent_props_method."""
-        obj = Mock()
-        obj.__class__.__name__ = 'type1'
+        obj = vim.ClusterComputeResource('domain-c7')
 
-        prop_cluster = Mock()
-        prop_parent = Mock()
-        prop_cluster.name, prop_cluster.val = 'name', 'cluster1'
-        prop_parent.name, prop_parent.val._moId = 'parent', 'parent1'
-        props = [prop_cluster, prop_parent]
+        folder = vim.Folder('group-h1')
+        props = [
+            vim.DynamicProperty(name='name', val='cluster1'),
+            vim.DynamicProperty(name='parent', val=folder),
+        ]
 
-        expected_facts = {'type': 'type1', 'name': 'cluster1',
-                          'parent': 'parent1'}
+        expected_facts = {
+            'type': 'vim.ClusterComputeResource',
+            'name': 'cluster1',
+            'parent': str(folder)
+        }
         results = self.runner.parse_parent_props(obj, props)
         self.assertEqual(results, expected_facts)
 
     def test_parse_cluster_props(self):
         """Test the parse_cluster_props_method."""
-        parent0_facts = {'type': 'vim.Datacenter', 'name': 'dc1'}
-        parent1_facts = {'type': '', 'parent': 0}
-        parents_dict = [parent0_facts, parent1_facts]
+        datacenter = vim.Datacenter('datacenter-1')
+        folder = vim.Folder('group-h1')
 
-        prop_cluster = Mock()
-        prop_parent = Mock()
-        prop_cluster.name, prop_cluster.val = 'name', 'cluster1'
-        prop_parent.name, prop_parent.val._moId = 'parent', 1
-        props = [prop_cluster, prop_parent]
+        parents_dict = {}
+        parents_dict[str(datacenter)] = {
+            'type': 'vim.Datacenter',
+            'name': 'dc1'
+        }
+        parents_dict[str(folder)] = {
+            'type': 'vim.Folder',
+            'parent': str(datacenter)
+        }
+
+        props = [
+            vim.DynamicProperty(name='name', val='cluster1'),
+            vim.DynamicProperty(name='parent', val=folder)
+        ]
 
         expected_facts = {'cluster.name': 'cluster1',
                           'cluster.datacenter': 'dc1'}
@@ -142,9 +152,11 @@ class InspectTaskRunnerTest(TestCase):
                  'summary.hardware.numCpuPkgs': 2,
                  'summary.hardware.numCpuThreads': 24}
 
+        cluster = vim.ClusterComputeResource('domain-c7')
+
         props = []
         prop_parent = Mock()
-        prop_parent.name, prop_parent.val._moId = 'parent', 0
+        prop_parent.name, prop_parent.val = 'parent', cluster
         props.append(prop_parent)
 
         for key in facts:
@@ -153,9 +165,10 @@ class InspectTaskRunnerTest(TestCase):
             props.append(prop)
 
         cluster_dict = {}
-        cluster_dict[0] = {}
-        cluster_dict[0]['cluster.name'] = 'cluster1'
-        cluster_dict[0]['cluster.datacenter'] = 'dc1'
+        cluster_dict[str(cluster)] = {
+            'cluster.name': 'cluster1',
+            'cluster.datacenter': 'dc1',
+        }
 
         expected_facts = {'host.cluster': 'cluster1',
                           'host.datacenter': 'dc1',
@@ -189,15 +202,17 @@ class InspectTaskRunnerTest(TestCase):
             'host.cluster': 'cluster1',
             'host.datacenter': 'dc1'}
 
-        host_dict = [host_facts]
+        host = vim.HostSystem('host-1')
+
+        host_dict = {}
+        host_dict[str(host)] = host_facts
         props = []
 
         for key in facts:
             prop = Mock()
             prop.name, prop.val = key, facts[key]
             if key == 'runtime.host':
-                prop.val = Mock()
-                prop.val._moId = 0
+                prop.val = host
             props.append(prop)
 
         self.scan_task.update_stats(
@@ -242,14 +257,20 @@ class InspectTaskRunnerTest(TestCase):
         content = Mock()
         content.rootFolder = Mock()
 
-        objects = [Mock(), Mock(), Mock(), Mock()]
-        objects[0].obj = Mock(spec=vim.Folder)
-        objects[1].obj = Mock(spec=vim.ComputeResource)
-        objects[2].obj = Mock(spec=vim.HostSystem)
-        objects[3].obj = Mock(spec=vim.VirtualMachine)
-
-        for object_content in objects:
-            object_content.obj._moId = 0
+        objects = [
+            vim.ObjectContent(
+                obj=vim.Folder('group-d1'),
+            ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource('domain-c1'),
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem('host-1'),
+            ),
+            vim.ObjectContent(
+                obj=vim.VirtualMachine('vm-1'),
+            ),
+        ]
 
         content.propertyCollector.RetrievePropertiesEx(ANY).token = None
         content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects

@@ -106,7 +106,7 @@ class InspectTaskRunner(ScanTaskRunner):
     def parse_parent_props(self, obj, props):
         """Parse Parent properties.
 
-        :param obj: 
+        :param obj: ManagedObject which we are parsing the parent for
         :param props: Array of Dynamic Properties
         """
         facts = {}
@@ -116,7 +116,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['name'] = prop.val
             elif prop.name == 'parent':
                 if prop.val is not None:
-                    facts['parent'] = prop.val._moId
+                    facts['parent'] = str(prop.val)
         return facts
 
     @transaction.atomic
@@ -131,7 +131,7 @@ class InspectTaskRunner(ScanTaskRunner):
             if prop.name == 'name':
                 facts['cluster.name'] = prop.val
             elif prop.name == 'parent':
-                parent = parents_dict[prop.val._moId]
+                parent = parents_dict[str(prop.val)]
                 while parent['type'] != 'vim.Datacenter':
                     parent = parents_dict[parent['parent']]
                 facts['cluster.datacenter'] = parent['name']
@@ -149,9 +149,9 @@ class InspectTaskRunner(ScanTaskRunner):
         for prop in props:
             if prop.name == 'parent':
                 facts['host.cluster'] = \
-                    cluster_dict[prop.val._moId]['cluster.name']
+                    cluster_dict[str(prop.val)]['cluster.name']
                 facts['host.datacenter'] = \
-                    cluster_dict[prop.val._moId]['cluster.datacenter']
+                    cluster_dict[str(prop.val)]['cluster.datacenter']
             elif prop.name == 'summary.config.name':
                 facts['host.name'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
@@ -195,7 +195,7 @@ class InspectTaskRunner(ScanTaskRunner):
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
             elif prop.name == 'runtime.host':
-                host_facts = host_dict[prop.val._moId]
+                host_facts = host_dict[str(prop.val)]
                 facts['vm.host.name'] = host_facts['host.name']
                 facts['vm.host.cpu_cores'] = host_facts['host.cpu_cores']
                 facts['vm.host.cpu_count'] = host_facts['host.cpu_count']
@@ -256,9 +256,9 @@ class InspectTaskRunner(ScanTaskRunner):
         parents_dict = {}
         for object_content in objects:
             obj = object_content.obj
-            if isinstance(obj, vim.Folder) or isinstance(obj, vim.Datacenter):
+            if isinstance(obj, (vim.Datacenter, vim.Folder)):
                 props = object_content.propSet
-                parents_dict[obj._moId] = self.parse_parent_props(obj, props)
+                parents_dict[str(obj)] = self.parse_parent_props(obj, props)
 
         cluster_dict = {}
         for object_content in objects:
@@ -266,7 +266,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if isinstance(obj, vim.ComputeResource):
                 props = object_content.propSet
-                cluster_dict[obj._moId] = \
+                cluster_dict[str(obj)] = \
                     self.parse_cluster_props(props, parents_dict)
 
         host_dict = {}
@@ -274,7 +274,7 @@ class InspectTaskRunner(ScanTaskRunner):
             obj = object_content.obj
             if isinstance(obj, vim.HostSystem):
                 props = object_content.propSet
-                host_dict[obj._moId] = self.parse_host_props(
+                host_dict[str(obj)] = self.parse_host_props(
                     props, cluster_dict)
 
         for object_content in objects:
