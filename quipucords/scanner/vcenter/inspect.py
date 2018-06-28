@@ -123,6 +123,7 @@ class InspectTaskRunner(ScanTaskRunner):
         """Parse Cluster properties.
 
         :param props: Array of Dynamic Properties
+        :param parents_dict: Dictionary of parent properties
         """
         facts = {}
         for prop in props:
@@ -158,6 +159,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['host.cpu_count'] = prop.val
             elif prop.name == 'summary.hardware.numCpuThreads':
                 facts['host.cpu_threads'] = prop.val
+
         return facts
 
     @transaction.atomic
@@ -186,7 +188,7 @@ class InspectTaskRunner(ScanTaskRunner):
             elif prop.name == 'summary.config.guestFullName':
                 facts['vm.os'] = prop.val
             elif prop.name == 'summary.config.memorySizeMB':
-                facts['vm.memory_size'] = prop.val / 1024
+                facts['vm.memory_size'] = int(prop.val / 1024)
             elif prop.name == 'summary.config.numCpu':
                 facts['vm.cpu_count'] = prop.val
             elif prop.name == 'summary.config.uuid':
@@ -208,12 +210,14 @@ class InspectTaskRunner(ScanTaskRunner):
             name=vm_name, status=SystemInspectionResult.SUCCESS,
             source=self.scan_task.source)
         sys_result.save()
+
         for key, val in facts.items():
             if val is not None:
                 final_value = json.dumps(val)
                 stored_fact = RawFact(name=key, value=final_value)
                 stored_fact.save()
                 sys_result.facts.add(stored_fact)
+
         sys_result.save()
 
         self.scan_task.inspection_result.systems.add(sys_result)
@@ -261,7 +265,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if isinstance(obj, vim.ComputeResource):
                 props = object_content.propSet
-                cluster_dict[obj._moId] = self.parse_cluster_props(props, parents_dict)
+                cluster_dict[obj._moId] = \
+                    self.parse_cluster_props(props, parents_dict)
 
         host_dict = {}
         for object_content in objects:
