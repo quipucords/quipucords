@@ -16,41 +16,58 @@ from api.models import (ScanJob,
                         ScanTask,
                         SystemConnectionResult)
 
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from scanner.task import ScanTaskRunner
-from scanner.vcenter.utils import vcenter_connect
+from scanner.vcenter.utils import retrieve_properties, vcenter_connect
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-def get_vm_container(vcenter):
-    """Get the container for virtual machines.
-
-    :param vcenter: The vcenter object.
-    :returns: The vm container object.
-    """
-    content = vcenter.RetrieveContent()
-    container = content.rootFolder  # starting point to look into
-    view_type = [vim.VirtualMachine]  # object types to look for
-    recursive = True  # whether we should look into it recursively
-    container_view = content.viewManager.CreateContainerView(
-        container, view_type, recursive)
-    return container_view
-
-
-def get_vm_names(vm_container_view):
+def get_vm_names(content):
     """Get the vm names from the container view.
 
     :param vm_container_view: The VM container view.
     :returns: list of vm names.
     """
     vm_names = []
-    children = vm_container_view.view
-    for child in children:
-        summary = child.summary
-        vm_names.append(summary.config.name)
+
+    visit_folders = vmodl.query.PropertyCollector.TraversalSpec(
+        name='visitFolders', type=vim.Folder, path='childEntity', skip=False)
+
+    visit_folders.selectSet.extend([
+        vmodl.query.PropertyCollector.SelectionSpec(name='visitFolders'),
+        vmodl.query.PropertyCollector.SelectionSpec(name='dcToVmFolder'),
+    ])
+
+    dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
+        name='dcToVmFolder', type=vim.Datacenter, path='vmFolder', skip=False)
+    dc_to_vm_folder.selectSet.extend([
+        vmodl.query.PropertyCollector.SelectionSpec(name='visitFolders')
+    ])
+
+    filter_spec = vmodl.query.PropertyCollector.FilterSpec(
+        objectSet=[
+            vmodl.query.PropertyCollector.ObjectSpec(
+                obj=content.rootFolder,
+                skip=False,
+                selectSet=[visit_folders, dc_to_vm_folder],
+            ),
+        ],
+        propSet=[
+            vmodl.query.PropertyCollector.PropertySpec(
+                all=False,
+                type=vim.VirtualMachine,
+                pathSet=['name'],
+            ),
+        ],
+    )
+
+    objects = retrieve_properties(content, [filter_spec])
+    for object_content in objects:
+        vm_names.append(object_content.propSet[0].val)
+
     return vm_names
 
 
@@ -120,7 +137,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         vm_names = []
 
         vcenter = vcenter_connect(self.scan_task)
-        container_view = get_vm_container(vcenter)
-        vm_names = get_vm_names(container_view)
+        content = vcenter.RetrieveContent()
+        vm_names = get_vm_names(content)
 
         return set(vm_names)
