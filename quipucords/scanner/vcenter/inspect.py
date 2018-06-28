@@ -106,6 +106,7 @@ class InspectTaskRunner(ScanTaskRunner):
     def parse_parent_props(self, obj, props):
         """Parse Parent properties.
 
+        :param obj: 
         :param props: Array of Dynamic Properties
         """
         facts = {}
@@ -291,6 +292,7 @@ class InspectTaskRunner(ScanTaskRunner):
             sys_count=self.connect_scan_task.systems_count)
 
     def _property_set(self):
+        """Define set of properties for _filter_set."""
         cluster_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.ComputeResource,
@@ -348,7 +350,10 @@ class InspectTaskRunner(ScanTaskRunner):
         return property_set
 
     def _filter_set(self, root_folder):
-        """Create a filter set for the retrieve properties function."""
+        """Create a filter set for the retrieve properties function.
+
+        :param root_folder: root folder of the vcenter hierarchy
+        """
         # Create traversal set
         folder_to_child_entity = vmodl.query.PropertyCollector.TraversalSpec(
             name='folderToChildEntity',
