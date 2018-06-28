@@ -103,6 +103,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
     @transaction.atomic
+    # pylint: disable=no-self-use
     def parse_parent_props(self, obj, props):
         """Parse Parent properties.
 
@@ -120,6 +121,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
+    # pylint: disable=no-self-use
     def parse_cluster_props(self, props, parents_dict):
         """Parse Cluster properties.
 
@@ -139,6 +141,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
+    # pylint: disable=no-self-use
     def parse_host_props(self, props, cluster_dict):
         """Parse Host properties.
 
@@ -164,6 +167,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
+    # pylint: disable=too-many-branches
     def parse_vm_props(self, props, host_dict):
         """Parse Virtual Machine properties.
 
@@ -291,6 +295,7 @@ class InspectTaskRunner(ScanTaskRunner):
             'INITIAL VCENTER CONNECT STATS.',
             sys_count=self.connect_scan_task.systems_count)
 
+    # pylint: disable=no-self-use
     def _property_set(self):
         """Define set of properties for _filter_set."""
         cluster_property_spec = vmodl.query.PropertyCollector.PropertySpec(
@@ -349,6 +354,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return property_set
 
+    # pylint: disable=no-self-use
     def _filter_set(self, root_folder):
         """Create a filter set for the retrieve properties function.
 
