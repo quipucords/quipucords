@@ -11,6 +11,7 @@
 """Test the vcenter inspect capabilities."""
 
 import json
+from datetime import datetime
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
@@ -181,13 +182,16 @@ class InspectTaskRunnerTest(TestCase):
         self.assertEqual(results, expected_facts)
 
     # pylint: disable=too-many-locals
-    def test_parse_vm_props(self):
+    @patch('scanner.vcenter.inspect.datetime')
+    def test_parse_vm_props(self, mock_dt):
         """Test the parse_vm_props method."""
+        mock_dt.utcnow.return_value = datetime(2000, 1, 1, 4, 20)
+
         ip_addresses, mac_addresses = ['1.2.3.4'], ['00:50:56:9e:09:8c']
 
         facts = {'name': 'vm1',
                  'guest.net': '',  # mac/ip addr returned by get_nics
-                 'summary.runtime.powerState': 'poweredOff',
+                 'summary.runtime.powerState': 'poweredOn',
                  'summary.guest.hostName': 'hostname',
                  'summary.config.guestFullName': 'Red Hat 7',
                  'summary.config.memorySizeMB': 1024,
@@ -221,6 +225,7 @@ class InspectTaskRunnerTest(TestCase):
             sys_failed=0,
             sys_scanned=0,
             sys_unreachable=0)
+
         with patch('scanner.vcenter.inspect.get_nics',
                    return_value=(mac_addresses, ip_addresses)):
             self.runner.parse_vm_props(props, host_dict)
@@ -240,7 +245,8 @@ class InspectTaskRunnerTest(TestCase):
                               'vm.memory_size': 1,
                               'vm.name': 'vm1',
                               'vm.os': 'Red Hat 7',
-                              'vm.state': 'poweredOff',
+                              'vm.state': 'poweredOn',
+                              'vm.last_check_in': '2000-01-01 04:20:00',
                               'vm.uuid': '1111'}
             sys_fact = {}
             for raw_fact in sys_results.first().facts.all():
