@@ -159,10 +159,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['host.name'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
                 facts['host.cpu_cores'] = prop.val
-            elif prop.name == 'summary.hardware.numCpuPkgs':
-                facts['host.cpu_count'] = prop.val
             elif prop.name == 'summary.hardware.numCpuThreads':
                 facts['host.cpu_threads'] = prop.val
+
+        facts['host.cpu_count'] = \
+            facts['host.cpu_threads'] // facts['host.cpu_cores']
 
         return facts
 
@@ -323,7 +324,6 @@ class InspectTaskRunner(ScanTaskRunner):
                 'parent',
                 'summary.config.name',
                 'summary.hardware.numCpuCores',
-                'summary.hardware.numCpuPkgs',
                 'summary.hardware.numCpuThreads',
             ],
         )
