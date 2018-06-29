@@ -187,7 +187,7 @@ class InspectTaskRunnerTest(TestCase):
 
         facts = {'name': 'vm1',
                  'guest.net': '',  # mac/ip addr returned by get_nics
-                 'summary.runtime.powerState': 'powerOn',
+                 'summary.runtime.powerState': 'poweredOff',
                  'summary.guest.hostName': 'hostname',
                  'summary.config.guestFullName': 'Red Hat 7',
                  'summary.config.memorySizeMB': 1024,
@@ -240,7 +240,7 @@ class InspectTaskRunnerTest(TestCase):
                               'vm.memory_size': 1,
                               'vm.name': 'vm1',
                               'vm.os': 'Red Hat 7',
-                              'vm.state': 'powerOn',
+                              'vm.state': 'poweredOff',
                               'vm.uuid': '1111'}
             sys_fact = {}
             for raw_fact in sys_results.first().facts.all():
@@ -255,7 +255,7 @@ class InspectTaskRunnerTest(TestCase):
     def test_retrieve_properties(self):
         """Test the retrieve_properties method."""
         content = Mock()
-        content.rootFolder = Mock()
+        content.rootFolder = vim.Folder('group-d1')
 
         objects = [
             vim.ObjectContent(
@@ -275,9 +275,7 @@ class InspectTaskRunnerTest(TestCase):
         content.propertyCollector.RetrievePropertiesEx(ANY).token = None
         content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects
 
-        with patch.object(InspectTaskRunner, '_filter_set') \
-            as mock_filter_set, patch.object(InspectTaskRunner,
-                                             'parse_parent_props') \
+        with patch.object(InspectTaskRunner, 'parse_parent_props') \
             as mock_parse_parent_props, patch.object(InspectTaskRunner,
                                                      'parse_cluster_props') \
             as mock_parse_cluster_props, patch.object(InspectTaskRunner,
@@ -287,7 +285,6 @@ class InspectTaskRunnerTest(TestCase):
                 as mock_parse_vm_props:
 
             self.runner.retrieve_properties(content)
-            mock_filter_set.assert_called_once_with(ANY)
             mock_parse_parent_props.assert_called_with(ANY, ANY)
             mock_parse_cluster_props.assert_called_with(ANY, ANY)
             mock_parse_host_props.assert_called_with(ANY, ANY)
