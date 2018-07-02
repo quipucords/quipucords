@@ -263,13 +263,16 @@ class InspectTaskRunnerTest(TestCase):
         content = Mock()
         content.rootFolder = vim.Folder('group-d1')
 
-        objects = [
+        objects_first_page = [
             vim.ObjectContent(
                 obj=vim.Folder('group-d1'),
             ),
             vim.ObjectContent(
                 obj=vim.ClusterComputeResource('domain-c1'),
             ),
+        ]
+
+        objects_second_page = [
             vim.ObjectContent(
                 obj=vim.HostSystem('host-1'),
             ),
@@ -278,8 +281,13 @@ class InspectTaskRunnerTest(TestCase):
             ),
         ]
 
-        content.propertyCollector.RetrievePropertiesEx(ANY).token = None
-        content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects
+        content.propertyCollector.RetrievePropertiesEx(ANY).token = '1'
+        content.propertyCollector.RetrievePropertiesEx(ANY).objects = \
+            objects_first_page
+        content.propertyCollector.ContinueRetrievePropertiesEx(ANY).token = \
+            None
+        content.propertyCollector.ContinueRetrievePropertiesEx(ANY).objects = \
+            objects_second_page
 
         with patch.object(InspectTaskRunner, 'parse_parent_props') \
             as mock_parse_parent_props, patch.object(InspectTaskRunner,
