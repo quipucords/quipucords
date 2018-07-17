@@ -85,6 +85,6 @@ manpage:
 	pandoc docs/source/man.rst \
 	  --standalone -t man -o build/qpc.1 \
 	  --variable=section:1 \
-	  --variable=date:'March 18, 2018' \
-	  --variable=footer:'version 0.0.42' \
+	  --variable=date:'July 17, 2018' \
+	  --variable=footer:'version 0.0.43' \
 	  --variable=header:'QPC Command Line Guide'
