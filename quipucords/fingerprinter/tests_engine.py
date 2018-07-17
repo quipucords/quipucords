@@ -30,7 +30,7 @@ from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            _remove_duplicate_fingerprints)
 
 
-SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse (Pilot)',
+SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]
 SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
 
