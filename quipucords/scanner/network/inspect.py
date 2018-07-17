@@ -50,6 +50,7 @@ DEFAULT_ROLES = [
     'jboss_eap5',
     'jboss_brms',
     'jboss_fuse',
+    'jboss_ws',
     'jboss_fuse_on_karaf',
     'ifconfig',
     'redhat_packages',

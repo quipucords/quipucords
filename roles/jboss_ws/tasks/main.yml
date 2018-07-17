@@ -1,0 +1,91 @@
+---
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "jboss_web_server"
+
+# ----------------------------- FIND JWS_HOME ---------------------------------
+
+# If JWS is not on target server, this will only return whatever directory is above TOMCAT_HOME
+- name: search for JWS_HOME in tomcat process
+  raw: ps -ef | grep tomcat | grep java |awk -F"catalina.base=" '{split($2,a," ");print FS a[1]}' |  awk 'BEGIN {FS="/";OFS="/";}{ $1=""; $NF="";print}'
+  register: jws_find_home_from_tomcat_process
+  ignore_errors: yes
+
+  # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be here.
+- name: search JWS_HOME in opt folder
+  raw: find /opt -type d | egrep '*(ews|jws)*[0-99]\.[0-99]$'
+  register: jws_find_home_from_opt
+  ignore_errors: yes
+
+- name: combine JWS_HOME candidates into a list
+  set_fact:
+    jws_home_candidates: "{{
+        (jws_find_home_from_opt.get('stdout_lines', []) +
+         jws_find_home_from_tomcat_process.get('stdout_lines', []))|difference(['']) | unique }}"
+  ignore_errors: yes
+
+- name: ls JWS_HOME
+  raw: ls -d1 "{{ item }}" 2>/dev/null
+  register: find_jws_home
+  with_items: "{{ jws_home_candidates }}"
+  ignore_errors: yes
+
+- name: set jws_home based on find_jws_home
+  set_fact:
+      jws_home: "{{ find_jws_home['results'][0]['stdout_lines'][0] }}" 
+  ignore_errors: yes
+
+# ------------------------------ DETECT JWS/EWS -------------------------------
+- name: check jws presence with yum
+  raw: yum grouplist jws3 jws3plus jws5 | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'
+  register: check_installed_with_rpm
+  ignore_errors: yes
+
+- name: determine if tomcat is installed from upstream or as part of redhat product
+  raw: \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo True || echo False
+  register: tomcat_is_not_upstream
+  ignore_errors: yes
+
+- name: set tomcat_is_part_of_redhat_product based on tomcat_is_not_upstream 
+  set_fact:
+      tomcat_is_part_of_redhat_product: "{{ tomcat_is_not_upstream['stdout_lines'][0] }}"
+  ignore_errors: yes
+
+- name: set installed_with_rpm based on check_installed_with_rpm 
+  set_fact:
+      installed_with_rpm: "{{ check_installed_with_rpm['stdout_lines']}}"
+  ignore_errors: yes
+
+  # detect jws if installed with zip even when no tomcat process is running
+- name: see if JBossEULA.txt exists 
+  raw: ls "{{ jws_home }}"/JBossEULA.txt
+  register: jboss_eula_txt_file
+  ignore_errors: yes
+
+- name: set jboss_eula_location based on jboss_eula_txt_file 
+  set_fact:
+      jboss_eula_location: "{{ jboss_eula_txt_file['stdout_lines'][0] }}"
+  ignore_errors: yes
+# Can't detect when all packages are installed with rpm, but not as a group...
+
+# ------------------------------ FIND JWS VERSION -----------------------------
+  # Currently only able to find version for 3.x.x and up. This implementation allows 
+  # additional methods of finding different versions to be appended to the list 
+  # under 'with_items' to create array of possibilities for the version. A map of
+  # the raw stdout value to the correctly formatted version string should be appended
+  # to JWS_CLASSIFICATIONS in jboss_web_server.py
+  
+  # 'with_items' raw commands find:
+  # Ver 3.x.x mentioned in id tags in “TOMCAT_HOME/webapps/docs/changelog.html”
+  # Ver 5.0.0 has version.txt in JWS_HOME when installed with zip file
+  # Ver 5.x.x has a jws5-tomcat.service unit installed.
+
+- name: find JWS version 
+  raw: "{{ item }}"
+  register: jws_version
+  ignore_errors: yes
+  with_items: 
+    - awk -F 'id=' '/JWS/ {print substr($2,16,9)}' "{{ jws_home }}"/tomcat?/webapps/docs/changelog.html | grep JWS | head -n1 2>/dev/null
+    - cat "{{ jws_home }}"/version.txt | grep "Red Hat JBoss Web Server" 2>/dev/null
+    - systemctl status jws5-tomcat.service | grep "Apache Tomcat Web" | grep -o jws5
