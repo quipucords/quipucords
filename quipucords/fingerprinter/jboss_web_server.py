@@ -15,15 +15,16 @@ import logging
 
 from api.models import Product
 
+from fingerprinter.utils import product_entitlement_found
+
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-PRODUCT = 'JBoss WS'
+PRODUCT = 'JBoss Web Server'
 PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
 META_DATA_KEY = 'metadata'
 SUBMAN_CONSUMED = 'subman_consumed'
-ENTITLEMENTS = 'entitlements'
 
 JWS_CLASSIFICATIONS = {
     # Versions below 3.0.0 referred to as EWS, above referred to as JWS
@@ -107,9 +108,13 @@ def detect_jboss_ws(source, facts):
     product_dict[META_DATA_KEY] = metadata
     product_dict[VERSION_KEY] = get_version(facts.get('jws_version'))
 
+    subman_consumed = facts.get(SUBMAN_CONSUMED, [])
+    print('\n', subman_consumed)
+
     if installed_with_rpm(facts.get('installed_with_rpm')):
         product_dict[PRESENCE_KEY] = Product.PRESENT
-
+    elif product_entitlement_found(subman_consumed, PRODUCT):
+        product_dict[PRESENCE_KEY] = Product.POTENTIAL
     # If JWS not installed with rpm, detect a potential presence by the
     # presence of a JBossEULA file or tomcat server in JWS_HOME
     elif facts.get('tomcat_is_part_of_redhat_product') is True or \

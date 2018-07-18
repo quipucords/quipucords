@@ -60,7 +60,7 @@ class ProductFuseTest(TestCase):
                   'source_name': 'source1', 'source_type': 'network'}
         facts = {}
         product = detect_jboss_ws(source, facts)
-        expected = {'name': 'JBoss WS',
+        expected = {'name': 'JBoss Web Server',
                     'presence': 'present',
                     'version': ['version1'],
                     'metadata':
@@ -83,7 +83,7 @@ class ProductFuseTest(TestCase):
                   'source_name': 'source1', 'source_type': 'network'}
         facts = {'tomcat_is_part_of_redhat_product': True}
         product = detect_jboss_ws(source, facts)
-        expected = {'name': 'JBoss WS',
+        expected = {'name': 'JBoss Web Server',
                     'presence': 'potential',
                     'version': ['version1'],
                     'metadata':
@@ -96,6 +96,11 @@ class ProductFuseTest(TestCase):
         facts = {'tomcat_is_part_of_redhat_product': False}
         product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
+
+        # Test where server has JWS entitlement
+        with patch('fingerprinter.utils.product_entitlement_found',
+                   return_value=True):
+            self.assertEqual(product, expected)
 
     # pylint: disable=unused-argument
     @patch('fingerprinter.jboss_web_server.get_version',
@@ -111,7 +116,7 @@ class ProductFuseTest(TestCase):
                   'source_name': 'source1', 'source_type': 'network'}
         facts = {'tomcat_is_part_of_redhat_product': False}
         product = detect_jboss_ws(source, facts)
-        expected = {'name': 'JBoss WS',
+        expected = {'name': 'JBoss Web Server',
                     'presence': 'absent',
                     'version': [],
                     'metadata':
