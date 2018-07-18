@@ -22,9 +22,22 @@ PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
 META_DATA_KEY = 'metadata'
+SUBMAN_CONSUMED = 'subman_consumed'
+ENTITLEMENTS = 'entitlements'
 
 JWS_CLASSIFICATIONS = {
+    # Versions below 3.0.0 referred to as EWS, above referred to as JWS
+    # Version component information: https://access.redhat.com/articles/111723
+    'Apache/2.2.10 (Unix)Apache Tomcat/5.5.23': 'EWS 1.0.0',
+    'Apache/2.2.14 (Unix)Apache Tomcat/5.5.28': 'EWS 1.0.1',
+    'Apache/2.2.17 (Unix)Apache Tomcat/5.5.33': 'EWS 1.0.2',
+    'Apache/2.2.22 (Unix)Apache Tomcat/6.0.35': 'EWS 2.0.0',
+    'Apache/2.2.22 (Unix)Apache Tomcat/6.0.37': 'EWS 2.0.1',
+    'Apache/2.2.26 (Unix)Apache Tomcat/6.0.41': 'EWS 2.1.x',
+    'JWS_3.0.1': 'JWS 3.0.1',
+    'JWS_3.0.2': 'JWS 3.0.2',
     'JWS_3.0.3': 'JWS 3.0.3',
+    'Server version: Apache/2.4.6 (Red Hat)': 'JWS 3.0.3',
     'JWS_3.1.0': 'JWS 3.1.0',
     'Red Hat JBoss Web Server - Version 5.0.0 GA': 'JWS 5.0.0',
     'jws5': 'JWS 5.x.x',
