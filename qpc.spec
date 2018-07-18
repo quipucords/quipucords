@@ -56,7 +56,7 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
-* Tue Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
+* Wed Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
 - Added ability to exlude ip addresses from network scan via CLI
 * Fri May 4 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
 - Enable merging reports from scan job ids, report ids, and json details report files.<aaiken@redhat.com>
@@ -164,7 +164,7 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 - Add max_concurrency flag to the scan start command.
 * Tue Oct 31 2017 Chris Hambridge <chambrid@redhat.com> 0.0.2-1
 - Consolidate messages for content review.
-* Fri Oct 17 2017 Chris Hambridge <chambrid@redhat.com> 0.0.1-1
+* Tue Oct 17 2017 Chris Hambridge <chambrid@redhat.com> 0.0.1-1
 - Initial release of quipucords command line.
 - Allows credential management for hosts.
 - Enables source management.
