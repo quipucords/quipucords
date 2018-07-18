@@ -56,7 +56,7 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
-* Tue July 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
+* Tue Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
 - Added ability to exlude ip addresses from network scan via CLI
 * Fri May 4 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
 - Enable merging reports from scan job ids, report ids, and json details report files.<aaiken@redhat.com>
