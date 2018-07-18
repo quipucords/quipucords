@@ -109,7 +109,6 @@ def detect_jboss_ws(source, facts):
     product_dict[VERSION_KEY] = get_version(facts.get('jws_version'))
 
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
-    print('\n', subman_consumed)
 
     if installed_with_rpm(facts.get('installed_with_rpm')):
         product_dict[PRESENCE_KEY] = Product.PRESENT
