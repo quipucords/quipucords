@@ -165,7 +165,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
             headers += self.source_headers
             headers = sorted(list(set(headers)))
 
-        # Add source heaaders
+        # Add source headers
         csv_writer.writerow(headers)
         for system in systems_list:
             row = []
