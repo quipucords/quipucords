@@ -1934,7 +1934,7 @@ definitions:
         name:
           type: "string"
           description: "The entitlement name"
-          example: "Red Hat Enterprise Linux, Company-Wide Subscription (Pilot)"
+          example: "Red Hat Enterprise Linux, Company-Wide Subscription"
         entitlement_id:
           type: "string"
           description: "The entitlement id"

@@ -24,7 +24,6 @@ from pyVmomi import vim  # pylint: disable=no-name-in-module
 
 from scanner.test_util import create_scan_job
 from scanner.vcenter.connect import (ConnectTaskRunner,
-                                     get_vm_container,
                                      get_vm_names)
 
 
@@ -83,47 +82,36 @@ class ConnectTaskRunnerTest(TestCase):
 
     def test_get_vm_names(self):
         """Test the get vm names method."""
-        children = []
-        for ident in range(1, 3):
-            name = 'vm' + str(ident)
-            config = Mock()
-            config.name = name
-            summary = Mock()
-            summary.config = config
-            child = Mock()
-            child.summary = summary
-            children.append(child)
-        vm_container_view = Mock(view=children)
-        vm_names = get_vm_names(vm_container_view)
+        objects = [
+            vim.ObjectContent(
+                obj=vim.VirtualMachine('vm-1'),
+                propSet=[vim.DynamicProperty(name='name', val='vm1')]
+            ),
+            vim.ObjectContent(
+                obj=vim.VirtualMachine('vm-2'),
+                propSet=[vim.DynamicProperty(name='name', val='vm2')]
+            ),
+        ]
+
+        content = Mock()
+        content.rootFolder = vim.Folder('group-d1')
+        content.propertyCollector.RetrievePropertiesEx(ANY).token = None
+        content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects
+
+        vm_names = get_vm_names(content)
         self.assertTrue(isinstance(vm_names, list))
         self.assertEqual(vm_names, ['vm1', 'vm2'])
-
-    def test_get_vm_container(self):
-        """Get the VM container."""
-        vcenter = Mock()
-        content = Mock()
-        content.rootFolder = Mock()
-        view_manager = Mock()
-        container_view = Mock()
-        view_manager.CreateContainerView = Mock(return_value=container_view)
-        content.viewManager = view_manager
-        vcenter.RetrieveContent = Mock(return_value=content)
-        c_view = get_vm_container(vcenter)
-        self.assertEqual(c_view, container_view)
 
     def test_connect(self):
         """Test the VCenter connect method."""
         with patch('scanner.vcenter.connect.vcenter_connect',
                    return_value=Mock()) as mock_vcenter_connect:
-            with patch('scanner.vcenter.connect.get_vm_container',
-                       return_value=Mock()) as mock_get_vm_container:
-                with patch('scanner.vcenter.connect.get_vm_names',
-                           return_value=['vm1', 'vm2']) as mock_names:
-                    vm_names = self.runner.connect()
-                    self.assertEqual(vm_names, set(['vm1', 'vm2']))
-                    mock_vcenter_connect.assert_called_once_with(ANY)
-                    mock_get_vm_container.assert_called_once_with(ANY)
-                    mock_names.assert_called_once_with(ANY)
+            with patch('scanner.vcenter.connect.get_vm_names',
+                       return_value=['vm1', 'vm2']) as mock_names:
+                vm_names = self.runner.connect()
+                self.assertEqual(vm_names, set(['vm1', 'vm2']))
+                mock_vcenter_connect.assert_called_once_with(ANY)
+                mock_names.assert_called_once_with(ANY)
 
     def test_get_result_none(self):
         """Test get result method when no results exist."""

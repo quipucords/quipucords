@@ -16,6 +16,8 @@ from api.vault import decrypt_data_as_unicode
 
 from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
 
+from pyVmomi import vmodl  # pylint: disable=no-name-in-module
+
 
 def vcenter_connect(scan_task):
     """Connect to VCenter.
@@ -63,3 +65,34 @@ def vcenter_connect(scan_task):
     atexit.register(Disconnect, vcenter)
 
     return vcenter
+
+
+def retrieve_properties(content, filter_spec_set, max_objects=None):
+    """Retrieve properties from a vCenter in an efficient manner.
+
+    :param content: Service content from vcenter.RetrieveContent() call
+    :param max_objects: An optional maximum number of objects to return in
+                        in a single page
+    :returns: Array of Object Content
+    """
+    options = vmodl.query.PropertyCollector.RetrieveOptions(
+        maxObjects=max_objects
+    )
+
+    retrieve_properties_ex = content.propertyCollector.RetrievePropertiesEx
+    continue_retrieve_properties_ex = \
+        content.propertyCollector.ContinueRetrievePropertiesEx
+
+    objects = []
+
+    result = retrieve_properties_ex(specSet=filter_spec_set, options=options)
+    while result is not None:
+        objects.extend(result.objects)
+
+        token = result.token
+        if token is None:
+            break
+
+        result = continue_retrieve_properties_ex(token)
+
+    return objects

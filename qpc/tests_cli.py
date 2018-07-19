@@ -40,4 +40,4 @@ class CliTests(unittest.TestCase):
             with redirect_stdout(version_out):
                 sys.argv = ['/bin/qpc', '--version']
                 CLI().main()
-                self.assertEqual(version_out.getvalue(), '0.0.42')
+                self.assertEqual(version_out.getvalue(), '0.0.43')
