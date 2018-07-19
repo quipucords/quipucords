@@ -30,6 +30,12 @@ SATELLITE_DETECTION_KEY = 'detection-satellite'
 SOURCES_KEY = 'sources'
 
 
+def sanitize_row(row):
+    """Replace commas in fact values to prevent false csv parsing."""
+    return [fact.replace(',', ';')
+            if isinstance(fact, str) else fact for fact in row]
+
+
 class DetailsCSVRenderer(renderers.BaseRenderer):
     """Class to render detailed report as CSV."""
 
@@ -102,7 +108,7 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
                     fact_value = fact.get(header)
                     row.append(csv_helper.serialize_value(header, fact_value))
 
-                csv_writer.writerow(row)
+                csv_writer.writerow(sanitize_row(row))
 
             csv_writer.writerow([])
             csv_writer.writerow([])
@@ -159,7 +165,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
             headers += self.source_headers
             headers = sorted(list(set(headers)))
 
-        # Add source heaaders
+        # Add source headers
         csv_writer.writerow(headers)
         for system in systems_list:
             row = []
@@ -180,7 +186,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                 else:
                     fact_value = system.get(header)
                 row.append(csv_helper.serialize_value(header, fact_value))
-            csv_writer.writerow(row)
+            csv_writer.writerow(sanitize_row(row))
 
         csv_writer.writerow([])
 
