@@ -49,6 +49,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
     jboss_eap = BooleanField(required=False)
     jboss_fuse = BooleanField(required=False)
     jboss_brms = BooleanField(required=False)
+    jboss_ws = BooleanField(required=False)
     search_directories = CustomJSONField(required=False)
 
     class Meta:
@@ -58,6 +59,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
         fields = ['jboss_eap',
                   'jboss_fuse',
                   'jboss_brms',
+                  'jboss_ws',
                   'search_directories']
 
     @staticmethod
@@ -88,6 +90,7 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
     jboss_eap = BooleanField(required=False)
     jboss_fuse = BooleanField(required=False)
     jboss_brms = BooleanField(required=False)
+    jboss_ws = BooleanField(required=False)
 
     class Meta:
         """Metadata for serializer."""
@@ -95,7 +98,8 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
         model = DisabledOptionalProductsOptions
         fields = ['jboss_eap',
                   'jboss_fuse',
-                  'jboss_brms']
+                  'jboss_brms',
+                  'jboss_ws']
 
 
 class ScanOptionsSerializer(NotEmptySerializer):
@@ -247,14 +251,18 @@ class ScanSerializer(NotEmptySerializer):
                      ScanOptions.JBOSS_BRMS:
                      ExtendedProductSearchOptions.EXT_JBOSS_BRMS,
                      ScanOptions.JBOSS_FUSE:
-                     ExtendedProductSearchOptions.EXT_JBOSS_FUSE}
+                     ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
+                     ScanOptions.JBOSS_WS:
+                     ExtendedProductSearchOptions.EXT_JBOSS_WS}
                 real_optional_products = \
                     {ScanOptions.JBOSS_EAP:
                      DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_EAP,
                      ScanOptions.JBOSS_BRMS:
                      DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_BRMS,
                      ScanOptions.JBOSS_FUSE:
-                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_FUSE}
+                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_FUSE,
+                     ScanOptions.JBOSS_WS:
+                     DisabledOptionalProductsOptions.MODEL_OPT_JBOSS_WS}
                 # update defaults with old options if they exist
                 if old_extended_search:
                     real_extended_search[ScanOptions.JBOSS_EAP] = \
@@ -263,6 +271,8 @@ class ScanSerializer(NotEmptySerializer):
                         old_extended_search.jboss_brms
                     real_extended_search[ScanOptions.JBOSS_FUSE] = \
                         old_extended_search.jboss_fuse
+                    real_extended_search[ScanOptions.JBOSS_WS] = \
+                        old_extended_search.jboss_ws
                     if old_extended_search.search_directories:
                         real_extended_search['search_directories'] = \
                             old_extended_search.search_directories
@@ -273,6 +283,8 @@ class ScanSerializer(NotEmptySerializer):
                         old_optional_products.jboss_brms
                     real_optional_products[ScanOptions.JBOSS_FUSE] = \
                         old_optional_products.jboss_fuse
+                    real_optional_products[ScanOptions.JBOSS_WS] = \
+                        old_optional_products.jboss_ws
                 # grab the new options
                 optional_products = options.pop(
                     'disabled_optional_products', None)
@@ -286,6 +298,8 @@ class ScanSerializer(NotEmptySerializer):
                         extended_search.pop(ScanOptions.JBOSS_FUSE, None)
                     jboss_brms_ext = \
                         extended_search.pop(ScanOptions.JBOSS_BRMS, None)
+                    jboss_ws_ext = \
+                        extended_search.pop(ScanOptions.JBOSS_WS, None)
                     search_directories = extended_search.pop(
                         'search_directories', None)
 
@@ -300,6 +314,9 @@ class ScanSerializer(NotEmptySerializer):
                     if jboss_fuse_ext is not None:
                         real_extended_search[ScanOptions.JBOSS_FUSE] = \
                             jboss_fuse_ext
+                    if jboss_ws_ext is not None:
+                        real_extended_search[ScanOptions.JBOSS_WS] = \
+                            jboss_ws_ext
                     if search_directories is not None:
                         real_extended_search['search_directories'] = \
                             search_directories
@@ -318,6 +335,8 @@ class ScanSerializer(NotEmptySerializer):
                         optional_products.pop(ScanOptions.JBOSS_FUSE, None)
                     jboss_brms = \
                         optional_products.pop(ScanOptions.JBOSS_BRMS, None)
+                    jboss_ws = \
+                        optional_products.pop(ScanOptions.JBOSS_WS, None)
 
                     if jboss_eap is not None:
                         real_optional_products[ScanOptions.JBOSS_EAP] = \
@@ -328,6 +347,9 @@ class ScanSerializer(NotEmptySerializer):
                     if jboss_fuse is not None:
                         real_optional_products[ScanOptions.JBOSS_FUSE] = \
                             jboss_fuse
+                    if jboss_ws is not None:
+                        real_optional_products[ScanOptions.JBOSS_WS] = \
+                            jboss_ws
                     optional_products = \
                         DisabledOptionalProductsOptions.objects.create(
                             **real_optional_products)

@@ -110,15 +110,14 @@ def detect_jboss_ws(source, facts):
 
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
 
-    if installed_with_rpm(facts.get('installed_with_rpm')):
+    if installed_with_rpm(facts.get('jws_installed_with_rpm')):
         product_dict[PRESENCE_KEY] = Product.PRESENT
     elif product_entitlement_found(subman_consumed, PRODUCT):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     # If JWS not installed with rpm, detect a potential presence by the
     # presence of a JBossEULA file or tomcat server in JWS_HOME
     elif facts.get('tomcat_is_part_of_redhat_product') is True or \
-            has_jboss_eula_file(facts.get('jboss_eula_location')):
-
+            has_jboss_eula_file(facts.get('jws_jboss_eula_location')):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
 
     return product_dict
