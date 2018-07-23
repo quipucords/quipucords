@@ -14,8 +14,7 @@
 
   # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
 - name: search JWS_HOME in search directories
-  raw: find /opt -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$' 
-  #raw: find {{search_directories}} -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$' 
+  raw: find {{search_directories}} -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$' 
   register: jws_find_home_from_search
   ignore_errors: yes
   when: 'jboss_ws_ext'
@@ -39,51 +38,30 @@
   ignore_errors: yes
   when: 
     - 'jws_find_home is defined'
-      #- "'results' in jws_find_home"
-      #- "jws_find_home['results'] | length > 1"
-      #- "'stdout_lines' in jws_find_home['results'][0]"
-      #- "jws_find_home['results'][0]['stdout_lines'] | length > 1"
+    - "'results' in jws_find_home"
+    - "jws_find_home['results'] | length > 0"
+    - "'stdout_lines' in jws_find_home['results'][0]"
+    - "jws_find_home['results'][0]['stdout_lines'] | length > 0"
 
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
-  raw: yum grouplist jws3 jws3plus jws5 | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]' 2>/dev/null
-  register: jws_check_installed_with_rpm
+  raw: yum grouplist jws3 jws3plus jws5 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]' 
+  register: jws_installed_with_rpm
   ignore_errors: yes
 
+  # If tomcat was installed with a Redhat product, a 'redhat' string can be found in certain files
 - name: determine if tomcat is installed from upstream or as part of redhat product
-  raw: \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo True || echo False
-  register: jws_tomcat_is_not_upstream
+  raw: \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo False || echo True
+  register: tomcat_is_part_of_redhat_product
   ignore_errors: yes
   when: 'jws_home is defined'
-
-- name: set tomcat_is_part_of_redhat_product based on jws_tomcat_is_not_upstream
-  set_fact:
-      tomcat_is_part_of_redhat_product: "{{ jws_tomcat_is_not_upstream['stdout_lines'][0] }}" 
-  ignore_errors: yes
-  when: 
-    - 'jws_tomcat_is_not_upstream is defined'
-      #- "'stdout_lines' in jws_tomcat_is_not_upstream"
-      #- "jws_tomcat_is_not_upstream['stdout_lines'] | length > 1"
-
-
-- name: set jws_installed_with_rpm based on jws_check_installed_with_rpm
-  set_fact:
-      jws_installed_with_rpm: "{{ jws_check_installed_with_rpm['stdout_lines']}}"
-  ignore_errors: yes
-  when: 'jws_check_installed_with_rpm is defined'
 
   # detect jws if installed with zip even when no tomcat process is running
 - name: see if JBossEULA.txt exists
   raw: ls "{{ jws_home }}"/JBossEULA.txt
-  register: jws_jboss_eula_txt_file
+  register: jws_has_eula_txt_file
   ignore_errors: yes
   when: 'jws_home is defined'
-
-- name: set jboss_eula_location based on jboss_eula_txt_file
-  set_fact:
-      jboss_eula_location: "{{ jboss_eula_txt_file['stdout_lines'][0] }}"
-  ignore_errors: yes
-  when: 'jboss_eula_txt_file is defined'
 
 # ------------------------------ FIND JWS VERSION -----------------------------
   # Additional methods of finding different versions can be appended to the list
@@ -103,7 +81,7 @@
   ignore_errors: yes
   with_items:
     - ."{{ jws_home }}"/httpd/sbin/httpd -v | grep Apache 2>/dev/null
-    - awk -F 'id=' '/JWS/ {print substr($2,16,9)}' "{{ jws_home }}"/tomcat?/webapps/docs/changelog.html 2>/dev/null | grep JWS | head -n1
+    - awk -F 'id=' '/JWS/ {print substr($2,16,9)}' "{{ jws_home }}"/tomcat?/webapps/docs/changelog.html 2>/dev/null | grep JWS | head -n1 
     - cat "{{ jws_home }}"/version.txt  2>/dev/null| grep "Red Hat JBoss Web Server"
     - systemctl status jws5-tomcat.service 2>/dev/null | grep "Apache Tomcat Web" | grep -o jws5 
     - (echo -n $("{{ jws_home }}"/httpd/sbin/httpd -v | grep Apache); echo $(./"{{ jws_home }}"/tomcat*/bin/version.sh 2>/dev/null | grep "Server version")) | sed -e 's/Server version: //g'

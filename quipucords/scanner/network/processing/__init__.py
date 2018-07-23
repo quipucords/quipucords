@@ -14,6 +14,7 @@ from . import eap
 from . import eap5
 from . import brms
 from . import fuse
+from . import jws
 from . import karaf
 from . import cpu
 from . import ifconfig

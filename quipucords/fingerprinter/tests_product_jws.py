@@ -11,15 +11,11 @@
 
 """Test the product JBoss Web Server."""
 
-from unittest.mock import patch
-
 from api.models import ServerInformation
 
 from django.test import TestCase
 
-from fingerprinter.jboss_web_server import (detect_jboss_ws,
-                                            get_version, has_jboss_eula_file,
-                                            installed_with_rpm)
+from fingerprinter.jboss_web_server import detect_jboss_ws, get_version
 
 
 class ProductFuseTest(TestCase):
@@ -31,38 +27,22 @@ class ProductFuseTest(TestCase):
 
     def test_get_version(self):
         """Test the get_version method."""
-        rawjson = {'results': [{'stdout_lines': ['JWS_3.0.3']}]}
-        versions = get_version(rawjson)
+        raw_versions = ['JWS_3.0.3', 'Not a version']
+        versions = get_version(raw_versions)
         expected = ['JWS 3.0.3']
 
         self.assertEqual(versions, expected)
 
-    def test_installed_with_rpm(self):
-        """Test the installed_with_rpm method."""
-        expected = ['Red Hat JBoss Web Server']
-        self.assertEqual(installed_with_rpm('not installed'), False)
-        self.assertEqual(installed_with_rpm(expected), True)
-
-    def test_has_jboss_eula_file(self):
-        """Test the has_jboss_eula_file method."""
-        ls_err = 'No such file or directory'
-        self.assertEqual(has_jboss_eula_file('JBossEula.txt'), True)
-        self.assertEqual(has_jboss_eula_file(ls_err), False)
-
     # pylint: disable=unused-argument
-    @patch('fingerprinter.jboss_web_server.get_version',
-           return_value=['version1'])
-    @patch('fingerprinter.jboss_web_server.installed_with_rpm',
-           return_value=True)
-    def test_detect_ws_present(self, mock_version, mock_rpm):
+    def test_detect_ws_present(self):
         """Test the detect_jboss_ws method."""
         source = {'server_id': self.server_id,
                   'source_name': 'source1', 'source_type': 'network'}
-        facts = {}
+        facts = {'jws_installed_with_rpm': True}
         product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'present',
-                    'version': ['version1'],
+                    'version': [],
                     'metadata':
                         {'server_id': self.server_id,
                          'source_name': 'source1',
@@ -70,22 +50,18 @@ class ProductFuseTest(TestCase):
         self.assertEqual(product, expected)
 
     # pylint: disable=unused-argument
-    @patch('fingerprinter.jboss_web_server.get_version',
-           return_value=['version1'])
-    @patch('fingerprinter.jboss_web_server.installed_with_rpm',
-           return_value=False)
-    @patch('fingerprinter.jboss_web_server.has_jboss_eula_file',
-           return_value=True)
-    def test_detect_ws_potential(self, mock_version, mock_rpm, mock_eula):
+    def test_detect_ws_potential(self):
         """Test the detect_jboss_ws method."""
         # Test where tomcat is part of red hat product
         source = {'server_id': self.server_id,
                   'source_name': 'source1', 'source_type': 'network'}
-        facts = {'tomcat_is_part_of_redhat_product': True}
+        facts = {'jws_has_eula_txt_file': False,
+                 'jws_installed_with_rpm': False,
+                 'tomcat_is_part_of_redhat_product': True}
         product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'potential',
-                    'version': ['version1'],
+                    'version': [],
                     'metadata':
                         {'server_id': self.server_id,
                          'source_name': 'source1',
@@ -93,28 +69,25 @@ class ProductFuseTest(TestCase):
         self.assertEqual(product, expected)
 
         # Test where JWS_HOME contains jboss eula file
-        facts = {'tomcat_is_part_of_redhat_product': False}
+        facts['tomcat_is_part_of_redhat_product'] = False
+        facts['jws_has_eula_txt_file'] = True
         product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
 
         # Test where server has JWS entitlement
-        with patch('fingerprinter.utils.product_entitlement_found',
-                   return_value=True):
-            self.assertEqual(product, expected)
+        facts['jws_has_eula_txt_file'] = False
+        facts['subman_consumed'] = True
+        self.assertEqual(product, expected)
 
     # pylint: disable=unused-argument
-    @patch('fingerprinter.jboss_web_server.get_version',
-           return_value=[])
-    @patch('fingerprinter.jboss_web_server.installed_with_rpm',
-           return_value=False)
-    @patch('fingerprinter.jboss_web_server.has_jboss_eula_file',
-           return_value=False)
-    def test_detect_ws_absent(self, mock_version, mock_rpm, mock_eula):
+    def test_detect_ws_absent(self):
         """Test the detect_jboss_ws method."""
         # Test where tomcat is part of red hat product
         source = {'server_id': self.server_id,
                   'source_name': 'source1', 'source_type': 'network'}
-        facts = {'tomcat_is_part_of_redhat_product': False}
+        facts = {'jboss_has_eula_txt_file': False,
+                 'jws_installed_with_rpm': False,
+                 'tomcat_is_part_of_redhat_product': False}
         product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'absent',

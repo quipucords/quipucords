@@ -45,49 +45,19 @@ JWS_CLASSIFICATIONS = {
 }
 
 
-def get_version(rawjson):
+def get_version(raw_versions):
     """Classify a version string.
 
-    :param rawjson: raw json of results from ansible query of possible versions
+    :param raw_versions: array of possible version strings
     """
     versions = []
 
-    if rawjson is not None:
-        results = rawjson['results']
-
-        for i in range(0, len(results)):
-            num_versions = len(results[i]['stdout_lines'])
-            if num_versions > 0:
-                version = results[i]['stdout_lines'][0]
-                # Turn the found version string into a standard format
-                if version in JWS_CLASSIFICATIONS:
-                    versions.append(JWS_CLASSIFICATIONS[version])
+    if raw_versions is not None:
+        for version in raw_versions:
+            # Turn the found version string into a standard format
+            if version in JWS_CLASSIFICATIONS:
+                versions.append(JWS_CLASSIFICATIONS[version])
     return versions
-
-
-def installed_with_rpm(stdout):
-    """Determine if jws was installed with rpm. Version 3 and up.
-
-    :param stdout: array of installed groups as result of command
-    'yum grouplist jws...'
-    """
-    # it matters not if there are multiple versions installed with rpm. Param
-    # stdout only lists zero or one installed jws group
-    if stdout is not None and len(stdout) == 1 and 'Red Hat JBoss Web Server' \
-       in stdout[0]:
-        return True
-    return False
-
-
-def has_jboss_eula_file(jboss_eula_location):
-    """Check if JBossEULA.txt exists in JWS_Home directory.
-
-    :param jboss_eula_location: Result of $(ls $JWS_HOME/JBossEULA.txt)
-    """
-    if jboss_eula_location is not None and 'No such file or directory' not in \
-       jboss_eula_location:
-        return True
-    return False
 
 
 def detect_jboss_ws(source, facts):
@@ -110,14 +80,14 @@ def detect_jboss_ws(source, facts):
 
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
 
-    if installed_with_rpm(facts.get('jws_installed_with_rpm')):
+    if facts.get('jws_installed_with_rpm'):
         product_dict[PRESENCE_KEY] = Product.PRESENT
     elif product_entitlement_found(subman_consumed, PRODUCT):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     # If JWS not installed with rpm, detect a potential presence by the
     # presence of a JBossEULA file or tomcat server in JWS_HOME
-    elif facts.get('tomcat_is_part_of_redhat_product') is True or \
-            has_jboss_eula_file(facts.get('jws_jboss_eula_location')):
+    elif facts.get('tomcat_is_part_of_redhat_product') or \
+            facts.get('jws_has_eula_txt_file'):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
 
     return product_dict

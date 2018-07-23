@@ -87,6 +87,7 @@ class DisabledOptionalProductsOptions(models.Model):
     jboss_ws = models.BooleanField(
         null=False, default=MODEL_OPT_JBOSS_WS)
 
+    # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
@@ -190,7 +191,7 @@ class ScanOptions(models.Model):
                 not(disable_products.jboss_brms and
                     disable_products.jboss_fuse and
                     disable_products.jboss_eap and
-                    disable_products.jboss_ws )
+                    disable_products.jboss_ws)
             extra_vars[self.JBOSS_FUSE] = not disable_products.jboss_fuse
             extra_vars[self.JBOSS_BRMS] = not disable_products.jboss_brms
             extra_vars[self.JBOSS_WS] = not disable_products.jboss_ws
