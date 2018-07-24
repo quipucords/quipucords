@@ -19,7 +19,9 @@ from api.models import (Credential,
                         FactCollection,
                         ServerInformation,
                         Source)
-from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
+from api.report.renderer import (DeploymentCSVRenderer,
+                                 DetailsCSVRenderer,
+                                 sanitize_row)
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -382,6 +384,11 @@ class DeploymentReportTest(TestCase):
     ##############################################################
     # Test CSV Renderer
     ##############################################################
+    def test_sanitize_row(self):
+        """Test sanitize_row function."""
+        self.assertEqual(sanitize_row(['data', None, 'data,data']),
+                         ['data', None, 'data;data'])
+
     def test_csv_renderer(self):
         """Test DeploymentCSVRenderer."""
         renderer = DeploymentCSVRenderer()
