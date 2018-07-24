@@ -11,6 +11,8 @@
 
 """Test the product JBoss Web Server."""
 
+from unittest.mock import patch
+
 from api.models import ServerInformation
 
 from django.test import TestCase
@@ -36,10 +38,6 @@ class ProductFuseTest(TestCase):
     # pylint: disable=unused-argument
     def test_detect_ws_present(self):
         """Test the detect_jboss_ws method."""
-        source = {'server_id': self.server_id,
-                  'source_name': 'source1', 'source_type': 'network'}
-        facts = {'jws_installed_with_rpm': True}
-        product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'present',
                     'version': [],
@@ -47,18 +45,25 @@ class ProductFuseTest(TestCase):
                         {'server_id': self.server_id,
                          'source_name': 'source1',
                          'source_type': 'network'}}
+
+        # Test where jws was installed with rpm
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1', 'source_type': 'network'}
+        facts = {'jws_installed_with_rpm': True}
+        product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
+
+        # Test where valid version string is found
+        facts = {'jws_installed_with_rpm': False, 'jws_version': 'JWS_3.0.1'}
+        expected['version'] = ['JWS 3.0.1']
+        with patch('fingerprinter.jboss_web_server.get_version',
+                   return_value=['JWS 3.0.1']):
+            product = detect_jboss_ws(source, facts)
+            self.assertEqual(product, expected)
 
     # pylint: disable=unused-argument
     def test_detect_ws_potential(self):
         """Test the detect_jboss_ws method."""
-        # Test where tomcat is part of red hat product
-        source = {'server_id': self.server_id,
-                  'source_name': 'source1', 'source_type': 'network'}
-        facts = {'jws_has_eula_txt_file': False,
-                 'jws_installed_with_rpm': False,
-                 'tomcat_is_part_of_redhat_product': True}
-        product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'potential',
                     'version': [],
@@ -66,6 +71,14 @@ class ProductFuseTest(TestCase):
                         {'server_id': self.server_id,
                          'source_name': 'source1',
                          'source_type': 'network'}}
+
+        # Test where tomcat is part of red hat product
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1', 'source_type': 'network'}
+        facts = {'jws_has_eula_txt_file': False,
+                 'jws_installed_with_rpm': False,
+                 'tomcat_is_part_of_redhat_product': True}
+        product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
 
         # Test where JWS_HOME contains jboss eula file
@@ -74,10 +87,19 @@ class ProductFuseTest(TestCase):
         product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
 
-        # Test where server has JWS entitlement
+        # Test where server only has JWS entitlement
         facts['jws_has_eula_txt_file'] = False
-        facts['subman_consumed'] = True
-        self.assertEqual(product, expected)
+        with patch('fingerprinter.jboss_web_server.product_entitlement_found',
+                   return_value=True):
+            product = detect_jboss_ws(source, facts)
+            self.assertEqual(product, expected)
+
+        # Test where only valid EWS version is found
+        expected['version'] = ['EWS 1.0.0']
+        with patch('fingerprinter.jboss_web_server.get_version',
+                   return_value=['EWS 1.0.0']):
+            product = detect_jboss_ws(source, facts)
+            self.assertEqual(product, expected)
 
     # pylint: disable=unused-argument
     def test_detect_ws_absent(self):
@@ -88,7 +110,6 @@ class ProductFuseTest(TestCase):
         facts = {'jboss_has_eula_txt_file': False,
                  'jws_installed_with_rpm': False,
                  'tomcat_is_part_of_redhat_product': False}
-        product = detect_jboss_ws(source, facts)
         expected = {'name': 'JBoss Web Server',
                     'presence': 'absent',
                     'version': [],
@@ -96,4 +117,5 @@ class ProductFuseTest(TestCase):
                         {'server_id': self.server_id,
                          'source_name': 'source1',
                          'source_type': 'network'}}
+        product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)

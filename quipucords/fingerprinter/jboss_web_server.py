@@ -27,7 +27,7 @@ META_DATA_KEY = 'metadata'
 SUBMAN_CONSUMED = 'subman_consumed'
 
 JWS_CLASSIFICATIONS = {
-    # Versions below 3.0.0 referred to as EWS, above referred to as JWS
+    # Versions below 3.0.0 referred to as EWS, above are referred to as JWS
     # Version component information: https://access.redhat.com/articles/111723
     'Apache/2.2.10 (Unix)Apache Tomcat/5.5.23': 'EWS 1.0.0',
     'Apache/2.2.14 (Unix)Apache Tomcat/5.5.28': 'EWS 1.0.1',
@@ -76,16 +76,27 @@ def detect_jboss_ws(source, facts):
         'source_type': source['source_type'],
     }
     product_dict[META_DATA_KEY] = metadata
-    product_dict[VERSION_KEY] = get_version(facts.get('jws_version'))
-
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
+    version = get_version(facts.get('jws_version'))
+    product_dict[VERSION_KEY] = version
 
     if facts.get('jws_installed_with_rpm'):
         product_dict[PRESENCE_KEY] = Product.PRESENT
+    # Versions 3.0.0 and over explicitely mention 'JWS' in version string
+    elif version:
+        for ver in version:
+            if 'EWS' not in ver:
+                product_dict[PRESENCE_KEY] = Product.PRESENT
+                break
+    # Versions prior to 3.0.0 can only be detected by the presence of certain
+    # EWS components and don't guarantee the installation of EWS
+            else:
+                product_dict[PRESENCE_KEY] = Product.POTENTIAL
+    # System is subscribed to jws repo, but may or may not have it installed
     elif product_entitlement_found(subman_consumed, PRODUCT):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
-    # If JWS not installed with rpm, detect a potential presence by the
-    # presence of a JBossEULA file or tomcat server in JWS_HOME
+    # If JWS not installed with rpm, detect potential presence by the presence
+    # of a JBossEULA file or tomcat server in JWS_HOME directory
     elif facts.get('tomcat_is_part_of_redhat_product') or \
             facts.get('jws_has_eula_txt_file'):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
