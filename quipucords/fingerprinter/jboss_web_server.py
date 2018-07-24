@@ -38,7 +38,6 @@ JWS_CLASSIFICATIONS = {
     'JWS_3.0.1': 'JWS 3.0.1',
     'JWS_3.0.2': 'JWS 3.0.2',
     'JWS_3.0.3': 'JWS 3.0.3',
-    'Server version: Apache/2.4.6 (Red Hat)': 'JWS 3.0.3',
     'JWS_3.1.0': 'JWS 3.1.0',
     'Red Hat JBoss Web Server - Version 5.0.0 GA': 'JWS 5.0.0',
     'jws5': 'JWS 5.x.x',
@@ -101,4 +100,7 @@ def detect_jboss_ws(source, facts):
             facts.get('jws_has_eula_txt_file'):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
 
+    print(facts.get('tomcat_is_part_of_redhat_product'))
+    print(facts.get('jws_has_eula_txt_file'))
+    print('product dict', product_dict)
     return product_dict

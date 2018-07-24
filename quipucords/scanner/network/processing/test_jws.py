@@ -15,8 +15,7 @@
 import unittest
 
 from scanner.network.processing import jws
-from scanner.network.processing.util_for_test import (ansible_result,
-                                                      ansible_results)
+from scanner.network.processing.util_for_test import (ansible_result)
 
 
 class TestProcessJWSInstalledWithRpm(unittest.TestCase):
@@ -47,17 +46,6 @@ class TestProcessHasJBossEula(unittest.TestCase):
         ls_err = 'No such file or directory'
         self.assertEqual(jws.ProcessHasJBossEULA.
                          process(ansible_result(ls_err)), False)
-
-
-class TestProcessGetVersion(unittest.TestCase):
-    """Test ProcessGetVersion."""
-
-    def test_parse_versions(self):
-        """Return stdout_lines of ansible result as an array."""
-        self.assertEqual(jws.ProcessGetVersion.
-                         process(ansible_results(
-                             [{'stdout': 'some version string'}])),
-                         ['some version string'])
 
 
 class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):

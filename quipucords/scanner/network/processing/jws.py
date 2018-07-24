@@ -15,14 +15,8 @@ from scanner.network.processing import process
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+
 # pylint: disable=too-few-public-methods
-
-# #### Processors ####
-
-FIND_WARNING = 'find: WARNING: Hard link count is wrong for /proc: this may' \
-               ' be a bug in your filesystem driver.'
-
-
 class ProcessJWSInstalledWithRpm(process.Processor):
     """Process the results of 'yum grouplist jws3 jws3plus jws5...'."""
 
@@ -37,6 +31,7 @@ class ProcessJWSInstalledWithRpm(process.Processor):
         return False
 
 
+# pylint: disable=too-few-public-methods
 class ProcessHasJBossEULA(process.Processor):
     """Process result of $(ls $JWS_HOME/JBossEULA.txt)."""
 
@@ -51,25 +46,7 @@ class ProcessHasJBossEULA(process.Processor):
         return False
 
 
-class ProcessGetVersion(process.Processor):
-    """Process output of various searches for version strings."""
-
-    KEY = 'jws_version'
-
-    @staticmethod
-    def process(output, dependencies=None):
-        """Return array of possible version strings."""
-        versions = output.get('results', [])
-        results = []
-
-        for version in versions:
-            version = version.get('stdout_lines', [])
-            if version:
-                results.append(version[0])
-
-        return results
-
-
+# pylint: disable=too-few-public-methods
 class ProcessTomcatPartOfRedhatProduct(process.Processor):
     """Process output of search for redhat string in tomcat files."""
 
