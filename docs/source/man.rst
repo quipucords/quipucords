@@ -347,11 +347,11 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
 ``--disabled-optional-products=products_list``
 
-  Optional. Contains the list of products to exclude from inspection. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
+  Optional. Contains the list of products to exclude from inspection. Valid values are ``jboss_eap``, ``jboss_fuse``, ``jboss_ws``, and ``jboss_brms``.
 
 ``--enabled-ext-product-search=products_list``
 
-  Optional. Contains the list of products to include for the extended product search. Extended product search is used to find products that might be installed in nondefault locations. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
+  Optional. Contains the list of products to include for the extended product search. Extended product search is used to find products that might be installed in nondefault locations. Valid values are ``jboss_eap``, ``jboss_fuse``, ``jboss_ws``, and ``jboss_brms``.
 
 ``--ext-product-search-dirs=search_dirs_list``
 
