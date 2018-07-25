@@ -100,7 +100,4 @@ def detect_jboss_ws(source, facts):
             facts.get('jws_has_eula_txt_file'):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
 
-    print(facts.get('tomcat_is_part_of_redhat_product'))
-    print(facts.get('jws_has_eula_txt_file'))
-    print('product dict', product_dict)
     return product_dict
