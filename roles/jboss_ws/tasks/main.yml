@@ -2,17 +2,24 @@
 
 - name: internal_host_started_processing_role
   set_fact:
-    internal_host_started_processing_role: "jboss_web_server"
+    internal_host_started_processing_role: "jboss_ws"
 
 # ----------------------------- FIND JWS_HOME ---------------------------------
 
-# If JWS is not on target server, this will only return whatever directory is above TOMCAT_HOME
-- name: search for JWS_HOME in tomcat process
+- name: search for folder above TOMCAT_HOME listed in tomcat process
   raw: ps -ef | grep tomcat | grep java |awk -F"catalina.base=" '{split($2,a," ");print FS a[1]}' |  awk 'BEGIN {FS="/";OFS="/";}{ $1=""; $NF="";print}'
   register: internal_jws_find_home_from_tomcat_process
   ignore_errors: yes
+  when: 'jboss_ws'
 
-  # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
+# Only works if locate is installed
+- name: search for folder above tomcat home with locate
+  raw: locate tomcat?/bin/startup.sh | awk -F 'tomcat' '{print $1}' | head -1
+  register: internal_jws_find_home_from_tomcat_file
+  ignore_errors: yes
+  when: 'user_has_sudo and internal_have_locate and jboss_ws'
+
+# If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
 - name: search JWS_HOME in search directories
   raw: find {{search_directories}} -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$' 
   register: internal_jws_find_home_from_search
@@ -23,20 +30,24 @@
   set_fact:
     jws_home_candidates: "{{
         (internal_jws_find_home_from_search.get('stdout_lines', []) +
+         internal_jws_find_home_from_tomcat_file.get('stdout_lines', []) +
          internal_jws_find_home_from_tomcat_process.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
+  when: 'jboss_ws'
 
 - name: ls JWS_HOME
   raw: ls -d1 "{{ item }}" 2>/dev/null
   register: internal_jws_find_home
   with_items: "{{ jws_home_candidates }}"
   ignore_errors: yes
+  when: 'jboss_ws'
 
 - name: set jws_home based on jws_find_home
   set_fact:
       jws_home: "{{ internal_jws_find_home['results'][0]['stdout_lines'][0] }}"
   ignore_errors: yes
   when: 
+    - 'jboss_ws'
     - 'internal_jws_find_home is defined'
     - "'results' in internal_jws_find_home"
     - "internal_jws_find_home['results'] | length > 0"
@@ -48,20 +59,21 @@
   raw: yum grouplist jws3 jws3plus jws5 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]' 
   register: jws_installed_with_rpm
   ignore_errors: yes
+  when: 'jboss_ws'
 
   # If tomcat was installed with a Redhat product, a 'redhat' string can be found in certain files
 - name: determine if tomcat is installed from upstream or as part of redhat product
   raw: \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo False || echo True
   register: tomcat_is_part_of_redhat_product
   ignore_errors: yes
-  when: 'jws_home is defined'
+  when: 'jws_home is defined and jboss_ws'
 
   # detect jws if installed with zip even when no tomcat process is running
 - name: see if JBossEULA.txt exists
   raw: ls "{{ jws_home }}"/JBossEULA.txt
   register: jws_has_eula_txt_file
   ignore_errors: yes
-  when: 'jws_home is defined'
+  when: 'jws_home is defined and jboss_ws'
 
 # ------------------------------ FIND JWS VERSION -----------------------------
 
@@ -74,14 +86,14 @@
       | sed -e 's/Server version\: //g' 
   register: internal_jws_version_2
   ignore_errors: yes
-  when: 'jws_home is defined' 
+  when: 'jws_home is defined and jboss_ws'
 
   # Ver 3.x.x mentioned in id tags in “TOMCAT_HOME/webapps/docs/changelog.html”
 - name: find JWS version 3.x.x
   raw: awk -F 'id=' '/JWS/ {print substr($2,16,9)}' "{{ jws_home }}"/tomcat?/webapps/docs/changelog.html 2>/dev/null | grep JWS | head -n1 
   register: internal_jws_version_3
   ignore_errors: yes
-  when: 'jws_home is defined' 
+  when: 'jws_home is defined and jboss_ws'
 
   # JWS version 4 does not exist.
   
@@ -91,7 +103,7 @@
   raw: cat "{{ jws_home }}"/version.txt  2>/dev/null| grep "Red Hat JBoss Web Server"
   register: internal_jws_version_5_txtfile
   ignore_errors: yes
-  when: 'jws_home is defined' 
+  when: 'jws_home is defined and jboss_ws'
 
   # Ver 5.x.x has a jws5-tomcat.service unit installed.
   # Only provides major version (5).
@@ -99,7 +111,7 @@
   raw: systemctl status jws5-tomcat.service 2>/dev/null | grep "Apache Tomcat Web" | grep -o jws5
   register: internal_jws_version_5_systemctl
   ignore_errors: yes
-  when: 'internal_have_systemctl'
+  when: 'internal_have_systemctl and jboss_ws'
 
   # Additional methods of finding different versions can be appended to
   # jws_version. A map of the raw stdout value to the correctly formatted 
@@ -112,3 +124,4 @@
          internal_jws_version_5_txtfile.get('stdout_lines', []) +
          internal_jws_version_5_systemctl.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
+  when: 'jboss_ws'
