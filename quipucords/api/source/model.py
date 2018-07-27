@@ -79,6 +79,7 @@ class Source(models.Model):
         null=False
     )
     port = models.IntegerField(null=True)
+    use_paramiko = models.NullBooleanField(default=False)
     options = models.ForeignKey(
         SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
@@ -94,12 +95,14 @@ class Source(models.Model):
             'name:%s, '\
             'type:%s, '\
             'options:%s, '\
-            'port:%s}' %\
+            'port:%s,' \
+            'use paramiko:%s}' %\
             (self.id,
              self.name,
              self.source_type,
              self.options,
-             self.port)
+             self.port,
+             self.use_paramiko)
 
     def get_hosts(self):
         """Access hosts as python list instead of str.

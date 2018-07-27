@@ -79,6 +79,7 @@ class SourceSerializer(NotEmptySerializer):
     source_type = ValidStringChoiceField(
         required=False, choices=Source.SOURCE_TYPE_CHOICES)
     port = IntegerField(required=False, min_value=0, allow_null=True)
+    use_paramiko = NullBooleanField(required=False)
     hosts = CustomJSONField(required=True)
     exclude_hosts = CustomJSONField(required=False)
     options = SourceOptionsSerializer(required=False, many=False)
@@ -112,8 +113,11 @@ class SourceSerializer(NotEmptySerializer):
         hosts_list = validated_data.pop('hosts', None)
         exclude_hosts_list = validated_data.pop('exclude_hosts', None)
         port = None
+        use_paramiko = False
         if 'port' in validated_data:
             port = validated_data['port']
+        if 'use_paramiko' in validated_data:
+            use_paramiko = validated_data['use_paramiko']
 
         options = validated_data.pop('options', None)
 
@@ -238,6 +242,7 @@ class SourceSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
         source_type = instance.source_type
+        use_paramiko = validated_data.get('use_paramiko')
         credentials = validated_data.pop('credentials', None)
         hosts_list = validated_data.pop('hosts', None)
         exclude_hosts_list = validated_data.pop('exclude_hosts', None)

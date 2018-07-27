@@ -55,26 +55,26 @@ class SourceEditCommand(CliCommand):
                                  nargs='+', metavar='EXCLUDE_HOSTS',
                                  help=_(messages.SOURCE_EXCLUDE_HOSTS_HELP),
                                  required=False)
-        self.parser.add_argument('--cred', dest='cred',
-                                 metavar='CRED',
+        self.parser.add_argument('--cred', dest='cred', metavar='CRED',
                                  nargs='+', default=[],
                                  help=_(messages.SOURCE_CREDS_HELP),
                                  required=False)
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP))
-        self.parser.add_argument('--ssl-cert-verify',
-                                 dest='ssl_cert_verify',
+        self.parser.add_argument('--use-paramiko', dest='use_paramiko',
+                                 choices=source.BOOLEAN_CHOICES,
+                                 help=_(messages.SOURCE_PARAMIKO_HELP),
+                                 required=False)
+        self.parser.add_argument('--ssl-cert-verify', dest='ssl_cert_verify',
                                  choices=source.BOOLEAN_CHOICES,
                                  help=_(messages.SOURCE_SSL_CERT_HELP),
                                  required=False)
-        self.parser.add_argument('--ssl-protocol',
-                                 dest='ssl_protocol',
+        self.parser.add_argument('--ssl-protocol', dest='ssl_protocol',
                                  choices=source.VALID_SSL_PROTOCOLS,
                                  help=_(messages.SOURCE_SSL_PROTOCOL_HELP),
                                  required=False)
-        self.parser.add_argument('--disable-ssl',
-                                 dest='disable_ssl',
+        self.parser.add_argument('--disable-ssl', dest='disable_ssl',
                                  choices=source.BOOLEAN_CHOICES,
                                  help=_(messages.SOURCE_SSL_DISABLE_HELP),
                                  required=False)
@@ -84,8 +84,9 @@ class SourceEditCommand(CliCommand):
         CliCommand._validate_args(self)
 
         if not(self.args.hosts or self.args.exclude_hosts or self.args.cred or
-               self.args.port or self.args.ssl_cert_verify or
-               self.args.disable_ssl or self.args.ssl_protocol):
+               self.args.port or self.args.use_paramiko or
+               self.args.ssl_cert_verify or self.args.disable_ssl or
+               self.args.ssl_protocol):
             print(_(messages.SOURCE_EDIT_NO_ARGS % (self.args.name)))
             self.parser.print_help()
             sys.exit(1)

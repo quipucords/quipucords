@@ -162,11 +162,12 @@ class ConnectTaskRunner(ScanTaskRunner):
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
-        if self.scan_job.options is None:
-            forks = ScanOptions.get_default_forks()
-        else:
+        if self.scan_job.options is not None:
             forks = self.scan_job.options.max_concurrency
+        else:
+            forks = ScanOptions.get_default_forks()
         connection_port = source['port']
+        use_paramiko = source['use_paramiko']
         credentials = source['credentials']
 
         remaining_hosts = result_store.remaining_hosts()
@@ -186,8 +187,8 @@ class ConnectTaskRunner(ScanTaskRunner):
             callback = ConnectResultCallback(result_store, credential,
                                              self.scan_task.source)
             try:
-                connect(remaining_hosts, callback, cred_data,
-                        connection_port, forks=forks)
+                connect(remaining_hosts, callback, cred_data, connection_port,
+                        use_paramiko, forks=forks)
             except AnsibleError as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
                 error_message = 'Connect scan task failed with credential %s.'\
@@ -209,14 +210,15 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments
-def connect(hosts, callback, credential, connection_port, forks=50,
-            exclude_hosts=None):
+def connect(hosts, callback, credential, connection_port, use_paramiko=False,
+            forks=50, exclude_hosts=None):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
     :param callback: The Ansible callback to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
+    :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with, default of 50
     :param exclude_hosts: Optional. Hosts to exclude from test connections
     :returns: list of connected hosts credential tuples and
@@ -235,7 +237,7 @@ def connect(hosts, callback, credential, connection_port, forks=50,
 
     _handle_ssh_passphrase(credential)
     result = run_playbook(inventory_file, callback, playbook,
-                          extra_vars, forks=forks)
+                          extra_vars, use_paramiko, forks=forks)
 
     if (result != TaskQueueManager.RUN_OK and
             result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and

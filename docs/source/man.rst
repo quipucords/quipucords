@@ -213,7 +213,7 @@ Creating and Editing Sources
 
 To create a source, supply the type of source with the ``type`` option, one or more host names or IP addresses to connect to with the ``--hosts`` option, and the credentials needed to access those systems with the ``--cred`` option. The ``qpc source`` command allows multiple entries for the ``hosts`` and ``cred`` options. Therefore, a single source can access a collection of servers and subnets as needed to create an accurate and complete scan.
 
-**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--exclude-hosts** *ip_address* **]** **[--port=** *port* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
+**qpc source add --name=** *name*  **--type=** *(network | vcenter | satellite)* **--hosts** *ip_address* **--cred** *credential* **[--exclude-hosts** *ip_address* **]** **[--port=** *port* **]** **[--use-paramiko=** *(True | False)* **]** **[--ssl-cert-verify=** *(True | False)* **]** **[--ssl-protocol=** *protocol* **]** **[--disable-ssl=** *(True | False)* **]**
 
 ``--name=name``
 
@@ -260,6 +260,10 @@ To create a source, supply the type of source with the ``type`` option, one or m
 ``--port=port``
 
   Optional. Sets a port to be used for the scan. This value supports connection and inspection on a non-standard port. By default, a network scan runs on port 22 and a vcenter or satellite scan runs on port 443.
+
+``--use-paramiko=(True | False)``
+
+  Optional. Changes the Ansible connection method from the default open-ssh to the python ssh implementation.
 
 ``--ssl-cert-verify=(True | False)``
 

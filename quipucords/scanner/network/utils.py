@@ -67,7 +67,7 @@ def _credential_vars(credential):
 
 
 def _construct_vars(connection_port, credential=None):
-    """Get the Ansible host vars that implement an credential.
+    """Get the Ansible host vars that implement a credential.
 
     :param connection_port: The connection port
     :param credential: The credential used for connections
@@ -92,23 +92,32 @@ def write_inventory(inventory):
     return write_to_yaml(inventory)
 
 
-def create_ansible_objects(inventory_file, extra_vars, forks=50):
+def create_ansible_objects(inventory_file, extra_vars, use_paramiko=False, forks=50):
     """Create the default ansible objects needed to run a playbook.
 
     :param inventory_file: The path to the inventory file
     :param extra_vars: The dictionary containing
            the collection status of the optional products.
+    :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with, default of 50
     :returns: tuple of (options, variable_manager, loader, inventory)
     """
     named_options = namedtuple('Options', ['connection', 'module_path',
                                            'forks', 'become', 'become_method',
                                            'become_user', 'check'])
-    options = named_options(connection='ssh',
-                            module_path=C.DEFAULT_MODULE_PATH,
-                            forks=forks, become=False,
-                            become_method='sudo', become_user='root',
-                            check=False)
+    if use_paramiko:
+        # Change connection method from default ssh to paramiko
+        options = named_options(connection='paramiko',
+                                module_path=C.DEFAULT_MODULE_PATH,
+                                forks=forks, become=False,
+                                become_method='sudo', become_user='root',
+                                check=False)
+    else:
+        options = named_options(connection='ssh',
+                                module_path=C.DEFAULT_MODULE_PATH,
+                                forks=forks, become=False,
+                                become_method='sudo', become_user='root',
+                                check=False)
 
     variable_manager = VariableManager()
     loader = DataLoader()
@@ -125,7 +134,7 @@ def create_ansible_objects(inventory_file, extra_vars, forks=50):
 
 
 def run_playbook(inventory_file, callback, play,
-                 extra_vars, forks=50):
+                 extra_vars, use_paramiko=False, forks=50):
     """Run an ansible playbook.
 
     :param inventory_file: The path to the inventory file
@@ -133,11 +142,12 @@ def run_playbook(inventory_file, callback, play,
     :param play: The playbook dictionary to run
     :param extra_vars: The dictionary containing
            the collection status of the optional products.
+    :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with, default of 50
     :returns: The result of executing the play (return code)
     """
     options, variable_manager, loader, ansible_inventory = \
-        create_ansible_objects(inventory_file, extra_vars, forks)
+        create_ansible_objects(inventory_file, extra_vars, use_paramiko, forks)
 
     playbook = Play().load(play,
                            variable_manager=variable_manager,

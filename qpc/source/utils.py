@@ -61,6 +61,8 @@ def build_source_payload(args, add_none=True):
         req_payload['hosts'] = args.hosts
     if hasattr(args, 'exclude_hosts') and args.exclude_hosts:
         req_payload['exclude_hosts'] = args.exclude_hosts
+    if hasattr(args, 'use_paramiko') and args.use_paramiko:
+        req_payload['use_paramiko'] = args.use_paramiko
     if hasattr(args, 'port') and args.port:
         req_payload['port'] = args.port
     elif add_none:

@@ -221,6 +221,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     'strategy': 'free',
                     'roles': roles}
         connection_port = self.scan_task.source.port
+        use_paramiko = self.scan_task.source.use_paramiko
 
         if self.scan_job.options is not None:
             forks = self.scan_job.options.max_concurrency
@@ -275,7 +276,7 @@ class InspectTaskRunner(ScanTaskRunner):
                         'roles': roles}
             result = run_playbook(
                 inventory_file, callback, playbook,
-                extra_vars, forks=forks)
+                extra_vars, use_paramiko, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
