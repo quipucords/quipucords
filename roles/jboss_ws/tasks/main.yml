@@ -68,7 +68,6 @@
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'
 
-  # detect jws if installed with zip even when no tomcat process is running
 - name: see if JBossEULA.txt exists
   raw: ls "{{ jws_home }}"/JBossEULA.txt
   register: jws_has_eula_txt_file
