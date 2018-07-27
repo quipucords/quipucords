@@ -20,11 +20,13 @@
   when: 'user_has_sudo and internal_have_locate and jboss_ws'
 
 # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
-- name: search JWS_HOME in search directories
+- name: search for JWS_HOME in search directories
   raw: find {{search_directories}} -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$' 
   register: internal_jws_find_home_from_search
   ignore_errors: yes
   when: 'jboss_ws_ext'
+
+# Find directory above tomcat home with find
 
 - name: combine JWS_HOME candidates into a list
   set_fact:

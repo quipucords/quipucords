@@ -13,8 +13,6 @@ import logging
 
 from scanner.network.processing import process
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
 
 # pylint: disable=too-few-public-methods
 class ProcessJWSInstalledWithRpm(process.Processor):
@@ -56,8 +54,6 @@ class ProcessTomcatPartOfRedhatProduct(process.Processor):
     def process(output, dependencies=None):
         """Return either True or False."""
         result = output.get('stdout_lines', False)
-        if result:
-            result = result[0]
-        if result == 'True':
+        if result and result[0] == 'True':
             return True
         return False

@@ -20,8 +20,8 @@ from django.test import TestCase
 from fingerprinter.jboss_web_server import detect_jboss_ws, get_version
 
 
-class ProductFuseTest(TestCase):
-    """Tests Product Fuse class."""
+class ProductJWSTest(TestCase):
+    """Tests Product JWS class."""
 
     def setUp(self):
         """Create test case setup."""

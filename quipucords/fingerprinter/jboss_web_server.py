@@ -17,8 +17,6 @@ from api.models import Product
 
 from fingerprinter.utils import product_entitlement_found
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
 PRODUCT = 'JBoss Web Server'
 PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
