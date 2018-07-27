@@ -92,7 +92,8 @@ def write_inventory(inventory):
     return write_to_yaml(inventory)
 
 
-def create_ansible_objects(inventory_file, extra_vars, use_paramiko=False, forks=50):
+def create_ansible_objects(inventory_file, extra_vars, use_paramiko=False,
+                           forks=50):
     """Create the default ansible objects needed to run a playbook.
 
     :param inventory_file: The path to the inventory file
@@ -133,6 +134,7 @@ def create_ansible_objects(inventory_file, extra_vars, use_paramiko=False, forks
     return options, variable_manager, loader, inventory
 
 
+# pylint: disable=too-many-arguments
 def run_playbook(inventory_file, callback, play,
                  extra_vars, use_paramiko=False, forks=50):
     """Run an ansible playbook.

@@ -113,11 +113,8 @@ class SourceSerializer(NotEmptySerializer):
         hosts_list = validated_data.pop('hosts', None)
         exclude_hosts_list = validated_data.pop('exclude_hosts', None)
         port = None
-        use_paramiko = False
         if 'port' in validated_data:
             port = validated_data['port']
-        if 'use_paramiko' in validated_data:
-            use_paramiko = validated_data['use_paramiko']
 
         options = validated_data.pop('options', None)
 
@@ -242,7 +239,6 @@ class SourceSerializer(NotEmptySerializer):
             }
             raise ValidationError(error)
         source_type = instance.source_type
-        use_paramiko = validated_data.get('use_paramiko')
         credentials = validated_data.pop('credentials', None)
         hosts_list = validated_data.pop('hosts', None)
         exclude_hosts_list = validated_data.pop('exclude_hosts', None)
