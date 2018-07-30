@@ -9,8 +9,6 @@
 
 """Initial processing of raw shell output from Ansible commands."""
 
-import logging
-
 from scanner.network.processing import process
 
 
