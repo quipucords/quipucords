@@ -166,8 +166,13 @@ class ConnectTaskRunner(ScanTaskRunner):
             forks = self.scan_job.options.max_concurrency
         else:
             forks = ScanOptions.get_default_forks()
+
+        if self.scan_task.source.options is not None:
+            use_paramiko = self.scan_task.source.use_paramiko
+        else:
+            use_paramiko = False
+
         connection_port = source['port']
-        use_paramiko = source['use_paramiko']
         credentials = source['credentials']
 
         remaining_hosts = result_store.remaining_hosts()

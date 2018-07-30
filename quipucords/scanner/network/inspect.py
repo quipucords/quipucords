@@ -221,7 +221,11 @@ class InspectTaskRunner(ScanTaskRunner):
                     'strategy': 'free',
                     'roles': roles}
         connection_port = self.scan_task.source.port
-        use_paramiko = self.scan_task.source.use_paramiko
+
+        if self.scan_task.source.options is not None:
+            use_paramiko = self.scan_task.source.use_paramiko
+        else:
+            use_paramiko = False
 
         if self.scan_job.options is not None:
             forks = self.scan_job.options.max_concurrency

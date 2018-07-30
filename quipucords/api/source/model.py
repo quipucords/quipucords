@@ -46,6 +46,7 @@ class SourceOptions(models.Model):
 
     ssl_cert_verify = models.NullBooleanField()
     disable_ssl = models.NullBooleanField()
+    use_paramiko = models.NullBooleanField(default=False)
 
     def get_ssl_protocol(self):
         """Obtain the SSL protocol to be used."""
@@ -54,12 +55,13 @@ class SourceOptions(models.Model):
             protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
         return protocol
 
+    # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
         return '{ id:%s, ssl_protocol:%s,'\
             'ssl_cert_verify:%s, disable_ssl:%s}' %\
-            (self.id, self.ssl_protocol,
-             self.ssl_cert_verify, self.disable_ssl)
+            (self.id, self.ssl_protocol, self.ssl_cert_verify,
+             self.disable_ssl, self.use_paramiko)
 
 
 class Source(models.Model):
@@ -79,7 +81,6 @@ class Source(models.Model):
         null=False
     )
     port = models.IntegerField(null=True)
-    use_paramiko = models.NullBooleanField(default=False)
     options = models.ForeignKey(
         SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
@@ -95,14 +96,12 @@ class Source(models.Model):
             'name:%s, '\
             'type:%s, '\
             'options:%s, '\
-            'port:%s,' \
-            'use paramiko:%s}' %\
+            'port:%s}' %\
             (self.id,
              self.name,
              self.source_type,
              self.options,
-             self.port,
-             self.use_paramiko)
+             self.port)
 
     def get_hosts(self):
         """Access hosts as python list instead of str.

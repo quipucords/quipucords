@@ -62,10 +62,6 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--port', dest='port',
                                  metavar='PORT', type=validate_port,
                                  help=_(messages.SOURCE_PORT_HELP))
-        self.parser.add_argument('--use-paramiko', dest='use_paramiko',
-                                 choices=source.BOOLEAN_CHOICES,
-                                 help=_(messages.SOURCE_PARAMIKO_HELP),
-                                 required=False)
         self.parser.add_argument('--ssl-cert-verify', dest='ssl_cert_verify',
                                  choices=source.BOOLEAN_CHOICES,
                                  help=_(messages.SOURCE_SSL_CERT_HELP),
@@ -77,6 +73,10 @@ class SourceEditCommand(CliCommand):
         self.parser.add_argument('--disable-ssl', dest='disable_ssl',
                                  choices=source.BOOLEAN_CHOICES,
                                  help=_(messages.SOURCE_SSL_DISABLE_HELP),
+                                 required=False)
+        self.parser.add_argument('--use-paramiko', dest='use_paramiko',
+                                 choices=source.BOOLEAN_CHOICES,
+                                 help=_(messages.SOURCE_PARAMIKO_HELP),
                                  required=False)
 
     # pylint: disable=too-many-branches

@@ -106,19 +106,16 @@ def create_ansible_objects(inventory_file, extra_vars, use_paramiko=False,
     named_options = namedtuple('Options', ['connection', 'module_path',
                                            'forks', 'become', 'become_method',
                                            'become_user', 'check'])
+    conn = 'ssh'
+    # Change connection method from default ssh to paramiko if needed
     if use_paramiko:
-        # Change connection method from default ssh to paramiko
-        options = named_options(connection='paramiko',
-                                module_path=C.DEFAULT_MODULE_PATH,
-                                forks=forks, become=False,
-                                become_method='sudo', become_user='root',
-                                check=False)
-    else:
-        options = named_options(connection='ssh',
-                                module_path=C.DEFAULT_MODULE_PATH,
-                                forks=forks, become=False,
-                                become_method='sudo', become_user='root',
-                                check=False)
+        conn = 'paramiko'
+
+    options = named_options(connection=conn,
+                            module_path=C.DEFAULT_MODULE_PATH,
+                            forks=forks, become=False,
+                            become_method='sudo', become_user='root',
+                            check=False)
 
     variable_manager = VariableManager()
     loader = DataLoader()
