@@ -533,7 +533,8 @@ class SourceTest(TestCase):
             'port': 443,
             'hosts': ['1.2.3.4'],
             'options': {
-                'ssl_cert_verify': True
+                'ssl_cert_verify': True,
+                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -546,7 +547,8 @@ class SourceTest(TestCase):
             'port': 443,
             'hosts': ['1.2.3.4'],
             'options': {
-                'ssl_cert_verify': True
+                'ssl_cert_verify': True,
+                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -1155,7 +1157,8 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected = {'id': 1, 'name': 'source', 'source_type': 'satellite',
                     'port': 22, 'hosts': ['1.2.3.4'],
-                    'options': {'ssl_cert_verify': False},
+                    'options': {'ssl_cert_verify': False,
+                                'use_paramiko': False},
                     'credentials': [{'id': 3, 'name': 'sat_cred1'}]}
         self.assertEqual(response.json(), expected)
 

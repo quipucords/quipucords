@@ -168,7 +168,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             forks = ScanOptions.get_default_forks()
 
         if self.scan_task.source.options is not None:
-            use_paramiko = self.scan_task.source.use_paramiko
+            use_paramiko = self.scan_task.source.options.use_paramiko
         else:
             use_paramiko = False
 

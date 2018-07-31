@@ -55,13 +55,12 @@ class SourceOptions(models.Model):
             protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
         return protocol
 
-    # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, ssl_protocol:%s,'\
-            'ssl_cert_verify:%s, disable_ssl:%s}' %\
-            (self.id, self.ssl_protocol, self.ssl_cert_verify,
-             self.disable_ssl, self.use_paramiko)
+        return '{ id:%s, ssl_protocol:%s, ssl_cert_verify:%s,' \
+               'disable_ssl:%s, use_paramiko:%s}' %\
+               (self.id, self.ssl_protocol, self.ssl_cert_verify,
+                self.disable_ssl, self.use_paramiko)
 
 
 class Source(models.Model):

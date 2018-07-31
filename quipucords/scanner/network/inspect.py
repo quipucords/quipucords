@@ -223,7 +223,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connection_port = self.scan_task.source.port
 
         if self.scan_task.source.options is not None:
-            use_paramiko = self.scan_task.source.use_paramiko
+            use_paramiko = self.scan_task.source.options.use_paramiko
         else:
             use_paramiko = False
 
@@ -262,8 +262,8 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with %d forks' \
-            ' and extra_vars=%s' % (forks, extra_vars)
+        log_message = 'START PROCESSING GROUPS with use_paramiko: %d, \
+                %d forks and extra_vars=%s' % (use_paramiko, forks, extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
