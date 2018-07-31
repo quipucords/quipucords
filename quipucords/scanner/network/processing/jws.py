@@ -17,6 +17,7 @@ class ProcessJWSInstalledWithRpm(process.Processor):
     """Process the results of 'yum grouplist jws3 jws3plus jws5...'."""
 
     KEY = 'jws_installed_with_rpm'
+    RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
@@ -32,6 +33,7 @@ class ProcessHasJBossEULA(process.Processor):
     """Process result of $(ls $JWS_HOME/JBossEULA.txt)."""
 
     KEY = 'jws_has_eula_txt_file'
+    RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
