@@ -139,10 +139,7 @@ class ScanOptions(models.Model):
 
     @staticmethod
     def get_default_forks():
-        """Create the default set of extra_vars.
-
-        :returns: a dictionary representing extra vars
-        """
+        """Create the default number of forks."""
         return 50
 
     @staticmethod

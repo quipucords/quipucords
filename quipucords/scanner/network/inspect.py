@@ -223,6 +223,10 @@ class InspectTaskRunner(ScanTaskRunner):
                     'roles': roles}
         connection_port = self.scan_task.source.port
 
+        use_paramiko = False
+        if self.scan_task.source.options is not None:
+            use_paramiko = self.scan_task.source.options.use_paramiko
+
         if self.scan_job.options is not None:
             forks = self.scan_job.options.max_concurrency
             extra_vars = self.scan_job.options.get_extra_vars()
@@ -258,8 +262,10 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with %d forks' \
-            ' and extra_vars=%s' % (forks, extra_vars)
+        scan_method = 'paramiko' if use_paramiko else 'openssh'
+        log_message = 'START PROCESSING GROUPS ' \
+            'with %s connection configuration using ' \
+            '%d forks and extra_vars=%s' % (scan_method, forks, extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
@@ -276,7 +282,7 @@ class InspectTaskRunner(ScanTaskRunner):
                         'roles': roles}
             result = run_playbook(
                 inventory_file, callback, playbook,
-                extra_vars, forks=forks)
+                extra_vars, use_paramiko, forks=forks)
 
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
