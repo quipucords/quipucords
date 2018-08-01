@@ -31,8 +31,7 @@ from requests import codes
 class ScanAddCommand(CliCommand):
     """Defines the add command.
 
-    This command is for creating scans with a source to gather system
-    facts.
+    This command is for creating scans with a source to gather system facts.
     """
 
     SUBCOMMAND = scan.SUBCOMMAND
