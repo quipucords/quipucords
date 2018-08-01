@@ -69,3 +69,21 @@ class ProcessDateMachineId(unittest.TestCase):
             date.ProcessDateMachineId.process(
                 ansible_result('')),
             process.NO_DATA)
+
+
+class ProcessDateYumHistory(unittest.TestCase):
+    """Test ProcessDateYumHistory."""
+
+    def test_success_case(self):
+        """Found date yum history."""
+        self.assertEqual(
+            date.ProcessDateYumHistory.process(
+                ansible_result('\n2017-07-25')),
+            '2017-07-25')
+
+    def test_not_found(self):
+        """Did not find date yum history."""
+        self.assertEqual(
+            date.ProcessDateYumHistory.process(
+                ansible_result('')),
+            process.NO_DATA)
