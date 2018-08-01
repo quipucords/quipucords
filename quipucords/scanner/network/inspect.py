@@ -261,7 +261,7 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with use_paramiko: %d, \
+        log_message = 'START PROCESSING GROUPS with use_paramiko: %s, \
                 %d forks and extra_vars=%s' % (use_paramiko, forks, extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
