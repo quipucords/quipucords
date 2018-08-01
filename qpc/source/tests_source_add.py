@@ -268,6 +268,7 @@ class SourceAddCliTests(unittest.TestCase):
 
     def test_add_source_with_paramiko_and_ssl(self):
         """Testing add network source command with use_paramiko set to true."""
+        # pylint: disable=invalid-name
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
         cred_results = [{'id': 1, 'name': 'cred1'}]
