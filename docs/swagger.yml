@@ -1323,7 +1323,11 @@ definitions:
         default: false
       jboss_brms:
         type: "boolean"
-        description: "The setting for JBoss Fuse"
+        description: "The setting for JBoss BRMS"
+        default: false
+      jboss_ws:
+        type: "boolean"
+        description: "The setting for JBoss Web Server"
         default: false
   ScanExtendedSearchProducts:
     type: "object"
@@ -1334,11 +1338,15 @@ definitions:
         default: false
       jboss_fuse:
         type: "boolean"
-        description: "The setting for JBoss Fuse"
+        description: "The setting for JBoss BRMS"
         default: false
       jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
+        default: false
+      jboss_ws:
+        type: "boolean"
+        description: "The setting for JBoss Web Server"
         default: false
       search_directories:
         type: "array"
