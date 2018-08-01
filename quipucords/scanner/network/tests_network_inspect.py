@@ -21,6 +21,8 @@ from ansible.errors import AnsibleError
 
 from api.models import (Credential,
                         ScanJob,
+                        ExtendedProductSearchOptions,
+                        ScanOptions,
                         ScanTask,
                         Source,
                         SystemConnectionResult)
@@ -161,10 +163,16 @@ class NetworkInspectScannerTest(TestCase):
         self.host_list = [('1.2.3.4', self.cred_data)]
 
         # setup scan options
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(
+            enabled_extended_product_search=extended)
+        scan_options.save()
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source,
-            ScanTask.SCAN_TYPE_INSPECT)
+            ScanTask.SCAN_TYPE_INSPECT,
+            scan_options=scan_options)
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         self.connect_scan_task.update_stats(

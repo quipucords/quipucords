@@ -26,6 +26,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from rest_framework import status
+from rest_framework.serializers import ValidationError
 
 
 from scanner.test_util import create_scan_job
@@ -133,6 +134,31 @@ class SourceTest(TestCase):
     #################################################
     # Function Tests
     #################################################
+    def test_validate_opts(self):
+        """Test the validate_opts function."""
+        source_type, options = Source.SATELLITE_SOURCE_TYPE, \
+                {'use_paramiko': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
+        options = {}
+        SourceSerializer.validate_opts(options, source_type)
+        self.assertEqual(options['ssl_cert_verify'], True)
+
+        source_type, options = Source.VCENTER_SOURCE_TYPE, \
+                {'use_paramiko': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
+        options = {}
+        SourceSerializer.validate_opts(options, source_type)
+        self.assertEqual(options['ssl_cert_verify'], True)
+
+        source_type, options = Source.NETWORK_SOURCE_TYPE, \
+                {'disable_ssl': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
     def test_format_source(self):
         """Test the format source method."""
         start = datetime.now()
@@ -668,6 +694,7 @@ class SourceTest(TestCase):
                                      format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    #necessary?
     def test_partial_update_network_ssl_options_not_allowed(self):
         """Partial update should succeed with missing hosts."""
         initial = self.create_expect_201({
