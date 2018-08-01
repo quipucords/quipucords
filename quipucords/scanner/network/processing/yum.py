@@ -24,6 +24,7 @@ class ProcessEnableYumRepolist(process.Processor):
     """Process the list of enabled yum repositories."""
 
     KEY = 'yum_enabled_repolist'
+    RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
