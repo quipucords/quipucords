@@ -390,4 +390,4 @@ class NetworkInspectScannerTest(TestCase):
 
         scanner.connect_scan_task = self.connect_scan_task
         scanner._inspect_scan(self.host_list)
-        mock_run.assert_called()
+        mock_run.assert_called_with(ANY)
