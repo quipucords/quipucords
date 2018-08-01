@@ -136,8 +136,8 @@ class SourceTest(TestCase):
     #################################################
     def test_validate_opts(self):
         """Test the validate_opts function."""
-        source_type, options = Source.SATELLITE_SOURCE_TYPE, \
-                {'use_paramiko': True}
+        source_type = Source.SATELLITE_SOURCE_TYPE
+        options = {'use_paramiko': True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
 
@@ -145,8 +145,8 @@ class SourceTest(TestCase):
         SourceSerializer.validate_opts(options, source_type)
         self.assertEqual(options['ssl_cert_verify'], True)
 
-        source_type, options = Source.VCENTER_SOURCE_TYPE, \
-                {'use_paramiko': True}
+        source_type = Source.VCENTER_SOURCE_TYPE
+        options = {'use_paramiko': True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
 
@@ -154,8 +154,8 @@ class SourceTest(TestCase):
         SourceSerializer.validate_opts(options, source_type)
         self.assertEqual(options['ssl_cert_verify'], True)
 
-        source_type, options = Source.NETWORK_SOURCE_TYPE, \
-                {'disable_ssl': True}
+        source_type = Source.NETWORK_SOURCE_TYPE
+        options = {'disable_ssl': True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
 
@@ -694,7 +694,6 @@ class SourceTest(TestCase):
                                      format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    #necessary?
     def test_partial_update_network_ssl_options_not_allowed(self):
         """Partial update should succeed with missing hosts."""
         initial = self.create_expect_201({

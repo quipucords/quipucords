@@ -244,7 +244,7 @@ class SourceAddCliTests(unittest.TestCase):
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
 
-    def test_add_source_with_use_paramiko(self):
+    def test_add_source_with_paramiko(self):
         """Testing add network source command with use_paramiko set to true."""
         source_out = StringIO()
         get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
@@ -333,6 +333,29 @@ class SourceAddCliTests(unittest.TestCase):
             nac = SourceAddCommand(SUBPARSER)
             args = Namespace(name='source1', cred=['cred1'],
                              hosts=['1.2.3.4'], type='vcenter')
+            with redirect_stdout(source_out):
+                nac.main(args)
+                self.assertEqual(source_out.getvalue(),
+                                 messages.SOURCE_ADDED % 'source1' + '\n')
+
+    def test_add_source_with_ssl_params(self):
+        """Testing add vcenter source command with all ssl params."""
+        source_out = StringIO()
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
+        post_source_url = get_server_location() + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=201)
+            nac = SourceAddCommand(SUBPARSER)
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['10.10.181.9'],
+                             ssl_cert_verify='True',
+                             disable_ssl='False',
+                             ssl_protocol='SSL_PROTOCOL_SSLv23',
+                             type='vcenter',
+                             port=22)
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),

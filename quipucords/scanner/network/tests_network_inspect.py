@@ -20,8 +20,8 @@ from types import SimpleNamespace  # noqa: I100
 from ansible.errors import AnsibleError
 
 from api.models import (Credential,
-                        ScanJob,
                         ExtendedProductSearchOptions,
+                        ScanJob,
                         ScanOptions,
                         ScanTask,
                         Source,
