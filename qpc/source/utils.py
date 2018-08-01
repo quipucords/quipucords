@@ -88,9 +88,10 @@ def build_source_payload(args, add_none=True):
         else:
             options['ssl_protocol'] = args.ssl_protocol
     if hasattr(args, 'use_paramiko') and args.use_paramiko is not None:
-        # Don't have to to check if options is None because paramiko is the
-        # only valid option for network source
-        options = {'use_paramiko': args.use_paramiko}
+        if options is None:
+            options = {'use_paramiko': args.use_paramiko}
+        else:
+            options['use_paramiko'] = args.use_paramiko
 
     if options is not None:
         req_payload['options'] = options

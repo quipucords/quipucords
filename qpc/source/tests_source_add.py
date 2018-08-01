@@ -260,10 +260,33 @@ class SourceAddCliTests(unittest.TestCase):
                              use_paramiko=True,
                              type='network',
                              port=22)
+
             with redirect_stdout(source_out):
                 nac.main(args)
                 self.assertEqual(source_out.getvalue(),
                                  messages.SOURCE_ADDED % 'source1' + '\n')
+
+    def test_add_source_with_paramiko_and_ssl(self):
+        """Testing add network source command with use_paramiko set to true."""
+        source_out = StringIO()
+        get_cred_url = get_server_location() + CREDENTIAL_URI + '?name=cred1'
+        cred_results = [{'id': 1, 'name': 'cred1'}]
+        get_cred_data = {'count': 1, 'results': cred_results}
+        post_source_url = get_server_location() + SOURCE_URI
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_cred_url, status_code=200, json=get_cred_data)
+            mocker.post(post_source_url, status_code=400)
+            nac = SourceAddCommand(SUBPARSER)
+
+            args = Namespace(name='source1', cred=['cred1'],
+                             hosts=['10.10.181.9'],
+                             ssl_cert_verify='False',
+                             use_paramiko=True,
+                             type='network',
+                             port=22)
+            with self.assertRaises(SystemExit):
+                with redirect_stdout(source_out):
+                    nac.main(args)
 
     def test_add_source_one_excludehost(self):
         """Testing the add network source command with one exclude host."""
