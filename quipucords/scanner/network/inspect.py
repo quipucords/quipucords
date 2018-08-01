@@ -261,8 +261,10 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with use_paramiko: %s, \
-                %d forks and extra_vars=%s' % (use_paramiko, forks, extra_vars)
+        scan_method = 'paramiko' if use_paramiko else 'openssh'
+        log_message = 'START PROCESSING GROUPS ' \
+            'with %s connection configuration using ' \
+            '%d forks and extra_vars=%s' % (scan_method, forks, extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
