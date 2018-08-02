@@ -10,7 +10,7 @@ When you run the command to start the Quipucords server, you supply values for s
 
 - Accepting or changing the default exposed server port
 - Selecting a directory for SSH keys
-- Selecting a directory for the SQLlite database
+- Selecting a directory for the database
 - Selecting a directory for log output
 
 The following steps guide you through those choices.
@@ -20,7 +20,7 @@ The following steps guide you through those choices.
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
    - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
+2. Select values for the directory for SSH keys, the directory for the database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
    \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
@@ -38,7 +38,7 @@ The following steps guide you through those choices.
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, SQLlite database, and log output during the Quipucords server configuration.
+After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, database, and log output during the Quipucords server configuration.
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
 
@@ -72,6 +72,12 @@ To change the default password for the Quipucords server, use the following step
 3. Click **Change password** to enter a new password for the Quipucords server. Record the new password in an enterprise password management solution or other password management tool, as determined by the best practices for your organization.
 
 **TIP:** You can also enter the local or remote URL (as applicable) for the Quipucords server in a browser window to verify that the Quipucords server is responding.
+
+Changing the Default Database Management System
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SQLite limits concurrency, and users who have already set up a PostgreSQL database may prefer to use Postgres. The Quipucords server uses SQLite by default but can be configured to use PostgreSQL by changing the environment variable ``DBMS`` to ``postgresql``. To enable qpc to properly use the PostgreSQL database you have created, set the PGDATABASE and PGUSER environment variables to correspond with the name and user of your database. Optionally, set PGPASSWORD, PGHOST, PGPORT accordingly. If these are not configured the PostgreSQL defaults will be used. Make sure the package `psycopg2` is installed and that the server is authenticated to access the database. To complete the switch, `make server-init` must be run prior to starting the server. To change the Database Management System back to SQLite, set ``DBMS`` to ``sqlite3`` and run make server-init. For example::
+
+  # export DBMS=postgresql
 
 Next Steps
 ~~~~~~~~~~

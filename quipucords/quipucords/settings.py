@@ -131,17 +131,37 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
-PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
-                       'db.sqlite3')
-DB_PATH = PROD_DB if PRODUCTION else DEV_DB
+# Database Management System could be 'sqlite3' or 'postgresql'
+DBMS = os.getenv('DBMS', 'sqlite3').lower()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_PATH,
+if DBMS == 'sqlite3':
+    DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
+    PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
+                           'db.sqlite3')
+    DB_PATH = PROD_DB if PRODUCTION else DEV_DB
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': DB_PATH,
+        }
     }
-}
+
+elif DBMS == 'postgresql':
+    PGDATABASE = os.getenv('PGDATABASE')
+    PGUSER = os.getenv('PGUSER')
+    PGPASSWORD = os.getenv('PGPASSWORD', '')
+    PGHOST = os.getenv('PGHOST', '::')  # :: means localhost but allows IPv4
+    PGPORT = os.getenv('PGPORT', '')    # and IPv6 connections
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': PGDATABASE,
+            'USER': PGUSER,
+            'PASSWORD': PGPASSWORD,
+            'HOST': PGHOST,
+            'PORT': PGPORT,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

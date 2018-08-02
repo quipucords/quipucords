@@ -42,7 +42,7 @@ class SystemFingerprint(models.Model):
     os_version = models.CharField(max_length=64, unique=False, null=True)
 
     infrastructure_type = models.CharField(
-        max_length=10, choices=INFRASTRUCTURE_TYPE, default='unknown')
+        max_length=12, choices=INFRASTRUCTURE_TYPE, default='unknown')
 
     mac_addresses = models.TextField(unique=False, null=True)
     ip_addresses = models.TextField(unique=False, null=True)
