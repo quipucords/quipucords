@@ -26,12 +26,17 @@
   ignore_errors: yes
   when: 'jboss_ws_ext'
 
-# Find directory above tomcat home with find
+- name: search for JWS_HOME environment variable
+  raw: echo $JWS_HOME
+  register: internal_jws_find_home_from_environment
+  ignore_errors: yes
+  when: 'jboss_ws_ext'
 
 - name: combine JWS_HOME candidates into a list
   set_fact:
     jws_home_candidates: "{{
         (internal_jws_find_home_from_search.get('stdout_lines', []) +
+         internal_jws_find_home_from_tomcat_file.get('stdout_lines', []) +
          internal_jws_find_home_from_tomcat_file.get('stdout_lines', []) +
          internal_jws_find_home_from_tomcat_process.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes

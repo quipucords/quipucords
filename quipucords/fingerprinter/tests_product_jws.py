@@ -42,9 +42,10 @@ class ProductJWSTest(TestCase):
                     'presence': 'present',
                     'version': [],
                     'metadata':
-                        {'server_id': self.server_id,
+                        {'raw_fact_key': 'jws_installed_with_rpm',
                          'source_name': 'source1',
-                         'source_type': 'network'}}
+                         'source_type': 'network',
+                         'server_id': self.server_id}}
 
         # Test where jws was installed with rpm
         source = {'server_id': self.server_id,
@@ -56,6 +57,7 @@ class ProductJWSTest(TestCase):
         # Test where valid version string is found
         facts = {'jws_installed_with_rpm': False, 'jws_version': 'JWS_3.0.1'}
         expected['version'] = ['JWS 3.0.1']
+        expected['metadata']['raw_fact_key'] = 'jws_version'
         with patch('fingerprinter.jboss_web_server.get_version',
                    return_value=['JWS 3.0.1']):
             product = detect_jboss_ws(source, facts)
@@ -68,9 +70,10 @@ class ProductJWSTest(TestCase):
                     'presence': 'potential',
                     'version': [],
                     'metadata':
-                        {'server_id': self.server_id,
+                        {'raw_fact_key': None,
                          'source_name': 'source1',
-                         'source_type': 'network'}}
+                         'source_type': 'network',
+                         'server_id': self.server_id}}
 
         # Test where tomcat is part of red hat product
         source = {'server_id': self.server_id,
@@ -85,10 +88,12 @@ class ProductJWSTest(TestCase):
         facts['tomcat_is_part_of_redhat_product'] = False
         facts['jws_has_eula_txt_file'] = True
         product = detect_jboss_ws(source, facts)
+        expected['metadata']['raw_fact_key'] = 'jws_has_eula_txt_file'
         self.assertEqual(product, expected)
 
         # Test where server only has JWS entitlement
         facts['jws_has_eula_txt_file'] = False
+        expected['metadata']['raw_fact_key'] = None
         with patch('fingerprinter.jboss_web_server.product_entitlement_found',
                    return_value=True):
             product = detect_jboss_ws(source, facts)
@@ -114,8 +119,9 @@ class ProductJWSTest(TestCase):
                     'presence': 'absent',
                     'version': [],
                     'metadata':
-                        {'server_id': self.server_id,
+                        {'raw_fact_key': None,
                          'source_name': 'source1',
-                         'source_type': 'network'}}
+                         'source_type': 'network',
+                         'server_id': self.server_id}}
         product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
