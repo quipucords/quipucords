@@ -93,7 +93,7 @@ class ProductJWSTest(TestCase):
 
         # Test where server only has JWS entitlement
         facts['jws_has_eula_txt_file'] = False
-        expected['metadata']['raw_fact_key'] = None
+        expected['metadata']['raw_fact_key'] = None#
         with patch('fingerprinter.jboss_web_server.product_entitlement_found',
                    return_value=True):
             product = detect_jboss_ws(source, facts)
