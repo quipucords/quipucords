@@ -250,7 +250,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
@@ -327,5 +327,5 @@ class NetworkConnectTaskRunnerTest(TestCase):
         scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY, ANY, 22, forks=50)
+        mock_connect.assert_called_with(ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)

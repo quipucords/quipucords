@@ -53,29 +53,27 @@ def build_source_payload(args, add_none=True):
     :returns: the dictionary for the request payload
     """
     req_payload = {'name': args.name}
-    options = None
 
+    # Add necessary source parameters
     if hasattr(args, 'type') and args.type:
         req_payload['source_type'] = args.type
     if hasattr(args, 'hosts') and args.hosts:
         req_payload['hosts'] = args.hosts
     if hasattr(args, 'exclude_hosts') and args.exclude_hosts:
         req_payload['exclude_hosts'] = args.exclude_hosts
+    if hasattr(args, 'credentials') and args.credentials:
+        req_payload['credentials'] = args.credentials
     if hasattr(args, 'port') and args.port:
         req_payload['port'] = args.port
     elif add_none:
         req_payload['port'] = None
-    if hasattr(args, 'credentials') and args.credentials:
-        req_payload['credentials'] = args.credentials
-    elif add_none:
-        req_payload['credentials'] = None
+
+    # Add source options
+    options = None
     if (hasattr(args, 'ssl_cert_verify') and
             args.ssl_cert_verify is not None):
         ssl_cert_verify = args.ssl_cert_verify.lower() == 'true'
-        if options is None:
-            options = {'ssl_cert_verify': ssl_cert_verify}
-        else:
-            options['ssl_cert_verify'] = ssl_cert_verify
+        options = {'ssl_cert_verify': ssl_cert_verify}
     if (hasattr(args, 'disable_ssl') and
             args.disable_ssl is not None):
         disable_ssl = args.disable_ssl.lower() == 'true'
@@ -89,6 +87,11 @@ def build_source_payload(args, add_none=True):
             options = {'ssl_protocol': args.ssl_protocol}
         else:
             options['ssl_protocol'] = args.ssl_protocol
+    if hasattr(args, 'use_paramiko') and args.use_paramiko is not None:
+        if options is None:
+            options = {'use_paramiko': args.use_paramiko}
+        else:
+            options['use_paramiko'] = args.use_paramiko
 
     if options is not None:
         req_payload['options'] = options

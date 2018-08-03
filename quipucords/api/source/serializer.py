@@ -62,6 +62,7 @@ class SourceOptionsSerializer(NotEmptySerializer):
         required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES)
     ssl_cert_verify = NullBooleanField(required=False)
     disable_ssl = NullBooleanField(required=False)
+    use_paramiko = NullBooleanField(required=False)
 
     class Meta:
         """Metadata for serializer."""
@@ -69,7 +70,8 @@ class SourceOptionsSerializer(NotEmptySerializer):
         model = SourceOptions
         fields = ['ssl_protocol',
                   'ssl_cert_verify',
-                  'disable_ssl']
+                  'disable_ssl',
+                  'use_paramiko']
 
 
 class SourceSerializer(NotEmptySerializer):
@@ -91,6 +93,54 @@ class SourceSerializer(NotEmptySerializer):
 
         model = Source
         fields = '__all__'
+
+    @classmethod
+    def validate_opts(cls, options, source_type):
+        """Raise an error if options are invalid for the source type.
+
+        :param options: dictionary of source options
+        :param source_type: string denoting source type
+        """
+        valid_net_options = ['use_paramiko']
+        valid_vc_options = ['ssl_cert_verify', 'ssl_protocol', 'disable_ssl']
+        valid_sat_options = ['ssl_cert_verify', 'ssl_protocol', 'disable_ssl']
+
+        if source_type == Source.SATELLITE_SOURCE_TYPE:
+            invalid_options = [opt for opt in options
+                               if opt not in valid_sat_options]
+            if invalid_options:
+                error = {
+                    'options': [_(messages.SAT_INVALID_OPTIONS %
+                                  ', '.join([key for key in
+                                             invalid_options]))]
+                }
+                raise ValidationError(error)
+            if options.get('ssl_cert_verify') is None:
+                options['ssl_cert_verify'] = True
+
+        elif source_type == Source.VCENTER_SOURCE_TYPE:
+            invalid_options = [opt for opt in options
+                               if opt not in valid_vc_options]
+            if invalid_options:
+                error = {
+                    'options': [_(messages.VC_INVALID_OPTIONS %
+                                  ', '.join([key for key in
+                                             invalid_options]))]
+                }
+                raise ValidationError(error)
+            if options.get('ssl_cert_verify') is None:
+                options['ssl_cert_verify'] = True
+
+        elif source_type == Source.NETWORK_SOURCE_TYPE:
+            invalid_options = [opt for opt in options
+                               if opt not in valid_net_options]
+            if invalid_options:
+                error = {
+                    'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
+                                  ', '.join([key for key in
+                                             invalid_options]))]
+                }
+                raise ValidationError(error)
 
     # pylint: disable=too-many-branches,too-many-statements
     @transaction.atomic
@@ -180,21 +230,7 @@ class SourceSerializer(NotEmptySerializer):
         source = Source.objects.create(**validated_data)
 
         if options:
-            if source_type == Source.SATELLITE_SOURCE_TYPE:
-                if options.get('ssl_cert_verify') is None:
-                    options['ssl_cert_verify'] = True
-            if (source_type == Source.VCENTER_SOURCE_TYPE and
-                    options.get('ssl_cert_verify') is None):
-                options['ssl_cert_verify'] = True
-            if source_type == Source.NETWORK_SOURCE_TYPE and \
-                    bool(options):
-                invalid_options = ', '.join([key for key in options.keys()])
-                error = {
-                    'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
-                                  invalid_options)]
-                }
-                raise ValidationError(error)
-
+            SourceSerializer.validate_opts(options, source_type)
             options = SourceOptions.objects.create(**options)
             options.save()
             source.options = options
@@ -316,17 +352,8 @@ class SourceSerializer(NotEmptySerializer):
             instance.credentials.set(credentials)
 
         if options:
+            SourceSerializer.validate_opts(options, source_type)
             if instance.options is None:
-                if source_type == Source.NETWORK_SOURCE_TYPE and \
-                        bool(options):
-                    invalid_options = ', '.join(
-                        [key for key in options.keys()])
-                    error = {
-                        'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
-                                      invalid_options)]
-                    }
-                    raise ValidationError(error)
-
                 options = SourceOptions.objects.create(**options)
                 options.save()
                 instance.options = options
@@ -346,12 +373,15 @@ class SourceSerializer(NotEmptySerializer):
         ssl_protocol = options.pop('ssl_protocol', None)
         ssl_cert_verify = options.pop('ssl_cert_verify', None)
         disable_ssl = options.pop('disable_ssl', None)
+        use_paramiko = options.pop('use_paramiko', None)
         if ssl_protocol is not None:
             instance_options.ssl_protocol = ssl_protocol
         if ssl_cert_verify is not None:
             instance_options.ssl_cert_verify = ssl_cert_verify
         if disable_ssl is not None:
             instance_options.disable_ssl = disable_ssl
+        if use_paramiko is not None:
+            instance_options.use_paramiko = use_paramiko
         instance_options.save()
 
     @staticmethod

@@ -126,8 +126,15 @@ class InspectResultCallback(CallbackBase):
             if not with_items and result._result.get('msg') is not None:
                 result_obj = _construct_result(result)
                 if result_obj.get('key') != 'internal_user_has_sudo_cmd':
+                    host = result._host
+                    if host is not None:
+                        hostname = host.name
+                    else:
+                        hostname = 'unknown host'
+
                     self.scan_task.log_message(
-                        'Unexpected ansible error:  %s' % result._result,
+                        'FAILING HOST %s - Unexpected ansible error:  %s' % (
+                            hostname, result._result),
                         log_level=logging.ERROR)
             self.handle_result(result)
         except Exception as error:
