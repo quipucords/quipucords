@@ -20,9 +20,12 @@ from types import SimpleNamespace  # noqa: I100
 from ansible.errors import AnsibleError
 
 from api.models import (Credential,
+                        ExtendedProductSearchOptions,
                         ScanJob,
+                        ScanOptions,
                         ScanTask,
                         Source,
+                        SourceOptions,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
 
@@ -151,6 +154,7 @@ class NetworkInspectScannerTest(TestCase):
         hc_serializer = CredentialSerializer(self.cred)
         self.cred_data = hc_serializer.data
 
+        # setup source for scan
         self.source = Source(
             name='source1',
             port=22,
@@ -159,8 +163,6 @@ class NetworkInspectScannerTest(TestCase):
         self.source.credentials.add(self.cred)
 
         self.host_list = [('1.2.3.4', self.cred_data)]
-
-        # setup scan options
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source,
@@ -353,3 +355,39 @@ class NetworkInspectScannerTest(TestCase):
             roles=['redhat_release'],
             base_ssh_executable=path,
             ssh_timeout='0.1s')
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
+    def test_scan_with_options(self, mock_run):
+        """Setup second scan with scan and source options."""
+        # setup source with paramiko option for scan
+        source_options = SourceOptions()
+        source_options.save()
+        self.source = Source(
+            name='source2',
+            port=22,
+            options=source_options,
+            hosts='["1.2.3.4"]')
+        self.source.save()
+        self.source.credentials.add(self.cred)
+
+        # setup scan with options
+        extended = ExtendedProductSearchOptions()
+        extended.save()
+        scan_options = ScanOptions(
+            enabled_extended_product_search=extended)
+        scan_options.save()
+
+        self.scan_job, self.scan_task = create_scan_job(
+            self.source,
+            ScanTask.SCAN_TYPE_INSPECT,
+            'scan2',
+            scan_options=scan_options)
+
+        # run scan
+        scanner = InspectTaskRunner(
+            self.scan_job, self.scan_task)
+
+        scanner.connect_scan_task = self.connect_scan_task
+        scanner._inspect_scan(self.host_list)
+        mock_run.assert_called_with(ANY)

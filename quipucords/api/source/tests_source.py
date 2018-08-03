@@ -26,6 +26,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from rest_framework import status
+from rest_framework.serializers import ValidationError
 
 
 from scanner.test_util import create_scan_job
@@ -133,6 +134,31 @@ class SourceTest(TestCase):
     #################################################
     # Function Tests
     #################################################
+    def test_validate_opts(self):
+        """Test the validate_opts function."""
+        source_type = Source.SATELLITE_SOURCE_TYPE
+        options = {'use_paramiko': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
+        options = {}
+        SourceSerializer.validate_opts(options, source_type)
+        self.assertEqual(options['ssl_cert_verify'], True)
+
+        source_type = Source.VCENTER_SOURCE_TYPE
+        options = {'use_paramiko': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
+        options = {}
+        SourceSerializer.validate_opts(options, source_type)
+        self.assertEqual(options['ssl_cert_verify'], True)
+
+        source_type = Source.NETWORK_SOURCE_TYPE
+        options = {'disable_ssl': True}
+        with self.assertRaises(ValidationError):
+            SourceSerializer.validate_opts(options, source_type)
+
     def test_format_source(self):
         """Test the format source method."""
         start = datetime.now()
@@ -533,7 +559,8 @@ class SourceTest(TestCase):
             'port': 443,
             'hosts': ['1.2.3.4'],
             'options': {
-                'ssl_cert_verify': True
+                'ssl_cert_verify': True,
+                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -546,7 +573,8 @@ class SourceTest(TestCase):
             'port': 443,
             'hosts': ['1.2.3.4'],
             'options': {
-                'ssl_cert_verify': True
+                'ssl_cert_verify': True,
+                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -1155,7 +1183,8 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected = {'id': 1, 'name': 'source', 'source_type': 'satellite',
                     'port': 22, 'hosts': ['1.2.3.4'],
-                    'options': {'ssl_cert_verify': False},
+                    'options': {'ssl_cert_verify': False,
+                                'use_paramiko': False},
                     'credentials': [{'id': 3, 'name': 'sat_cred1'}]}
         self.assertEqual(response.json(), expected)
 
