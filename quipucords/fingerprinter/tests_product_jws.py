@@ -54,8 +54,17 @@ class ProductJWSTest(TestCase):
         product = detect_jboss_ws(source, facts)
         self.assertEqual(product, expected)
 
+        # Test where jws certificate was found
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1', 'source_type': 'network'}
+        facts = {'jws_installed_with_rpm': False, 'jws_has_cert': True}
+        expected['metadata']['raw_fact_key'] = 'jws_has_cert'
+        product = detect_jboss_ws(source, facts)
+        self.assertEqual(product, expected)
+
         # Test where valid version string is found
-        facts = {'jws_installed_with_rpm': False, 'jws_version': 'JWS_3.0.1'}
+        facts = {'jws_installed_with_rpm': False, 'jws_has_cert': False,
+                 'jws_version': 'JWS_3.0.1'}
         expected['version'] = ['JWS 3.0.1']
         expected['metadata']['raw_fact_key'] = 'jws_version'
         with patch('fingerprinter.jboss_web_server.get_version',
@@ -70,7 +79,7 @@ class ProductJWSTest(TestCase):
                     'presence': 'potential',
                     'version': [],
                     'metadata':
-                        {'raw_fact_key': None,
+                        {'raw_fact_key': 'tomcat_is_part_of_redhat_product',
                          'source_name': 'source1',
                          'source_type': 'network',
                          'server_id': self.server_id}}

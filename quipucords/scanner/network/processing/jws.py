@@ -56,3 +56,17 @@ class ProcessTomcatPartOfRedhatProduct(process.Processor):
         if result and result[0] == 'True':
             return True
         return False
+
+
+# pylint: disable=too-few-public-methods
+class ProcessJWSHasCert(process.Processor):
+    """Process output of 'ls /etc/pki/product/185.pem 2>/dev/null'."""
+
+    KEY = 'jws_has_cert'
+
+    @staticmethod
+    def process(output, dependencies=None):
+        """Return either True or False."""
+        if output.get('stdout_lines', False):
+            return True
+        return False

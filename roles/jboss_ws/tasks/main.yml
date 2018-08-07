@@ -74,6 +74,12 @@
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'
 
+- name: check for jws cert
+  raw: ls /etc/pki/product/185.pem 2>/dev/null
+  register: jws_has_cert
+  ignore_errors: yes
+  when: 'jboss_ws'
+
 # ------------------------------ FIND JWS VERSION -----------------------------
 
   # Ver 2.0.1 and below have a unique combination of httpd and tomcat versions

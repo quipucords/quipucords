@@ -60,3 +60,17 @@ class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
         """Return False if tomcat is not part of a redhat product."""
         self.assertEqual(jws.ProcessTomcatPartOfRedhatProduct.
                          process(ansible_result('False')), False)
+
+
+class TestProcessJWSHasCert(unittest.TestCase):
+    """Test ProcessJWSHasCert."""
+
+    def test_true(self):
+        """Return True if /etc/pki/product/185.pem exists."""
+        self.assertEqual(jws.ProcessJWSHasCert.process(
+            ansible_result('/etc/pki/product/185.pem')), True)
+
+    def test_false(self):
+        """Return False if /etc/pki/product/185.pem does not exist."""
+        self.assertEqual(jws.ProcessJWSHasCert.
+                         process(ansible_result('')), False)

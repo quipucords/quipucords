@@ -26,8 +26,9 @@ SUBMAN_CONSUMED = 'subman_consumed'
 
 JWS_INSTALLED_WITH_RPM = 'jws_installed_with_rpm'
 JWS_HAS_EULA_TXT_FILE = 'jws_has_eula_txt_file'
-TOMCAT_PART_OF_REDHAT_PRODUCT = 'tomcat_part_of_redhat_product'
+TOMCAT_PART_OF_REDHAT_PRODUCT = 'tomcat_is_part_of_redhat_product'
 JWS_VERSION = 'jws_version'
+JWS_HAS_CERT = 'jws_has_cert'
 
 JWS_CLASSIFICATIONS = {
     # Versions below 3.0.0 referred to as EWS, above are referred to as JWS
@@ -80,16 +81,26 @@ def detect_jboss_ws(source, facts):
     subman_consumed = facts.get(SUBMAN_CONSUMED, [])
     installed_with_rpm = facts.get(JWS_INSTALLED_WITH_RPM)
     has_eula_file = facts.get(JWS_HAS_EULA_TXT_FILE)
+    jws_has_cert = facts.get(JWS_HAS_CERT)
     tomcat_part_of_redhat = facts.get(TOMCAT_PART_OF_REDHAT_PRODUCT)
     version = get_version(facts.get(JWS_VERSION))
     product_dict[VERSION_KEY] = version
     raw_facts = {}
 
-    if facts.get('jws_installed_with_rpm'):
-        product_dict[PRESENCE_KEY] = Product.PRESENT
-        raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
+    # System is subscribed to jws repo, but may or may not have it installed
+    if product_entitlement_found(subman_consumed, PRODUCT):
+        product_dict[PRESENCE_KEY] = Product.POTENTIAL
+        raw_facts[SUBMAN_CONSUMED] = subman_consumed
+    # If JWS not installed with rpm, detect potential presence by the presence
+    # of a JBossEULA file or tomcat server in JWS_HOME directory
+    if tomcat_part_of_redhat:
+        product_dict[PRESENCE_KEY] = Product.POTENTIAL
+        raw_facts[TOMCAT_PART_OF_REDHAT_PRODUCT] = tomcat_part_of_redhat
+    if has_eula_file:
+        product_dict[PRESENCE_KEY] = Product.POTENTIAL
+        raw_facts[JWS_HAS_EULA_TXT_FILE] = has_eula_file
     # Versions 3.0.0 and over explicitely mention 'JWS' in version string
-    elif version:
+    if version:
         raw_facts[JWS_VERSION] = facts.get(JWS_VERSION)
         for ver in version:
             if 'EWS' not in ver:
@@ -100,18 +111,14 @@ def detect_jboss_ws(source, facts):
             else:
                 product_dict[PRESENCE_KEY] = Product.POTENTIAL
                 break
-    # System is subscribed to jws repo, but may or may not have it installed
-    elif product_entitlement_found(subman_consumed, PRODUCT):
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-        raw_facts[SUBMAN_CONSUMED] = subman_consumed
-    # If JWS not installed with rpm, detect potential presence by the presence
-    # of a JBossEULA file or tomcat server in JWS_HOME directory
-    elif facts.get('tomcat_is_part_of_redhat_product'):
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-        raw_facts[TOMCAT_PART_OF_REDHAT_PRODUCT] = tomcat_part_of_redhat
-    elif facts.get('jws_has_eula_txt_file'):
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-        raw_facts[JWS_HAS_EULA_TXT_FILE] = has_eula_file
+    if facts.get(JWS_INSTALLED_WITH_RPM):
+        product_dict[PRESENCE_KEY] = Product.PRESENT
+        raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
+    # If jws was installed (not as zip) it will have a certifcate
+    # https://mojo.redhat.com/docs/DOC-103535
+    if jws_has_cert:
+        product_dict[PRESENCE_KEY] = Product.PRESENT
+        raw_facts[JWS_HAS_CERT] = jws_has_cert
 
     raw_facts = generate_raw_fact_members(raw_facts)
     metadata[RAW_FACT_KEY] = raw_facts
