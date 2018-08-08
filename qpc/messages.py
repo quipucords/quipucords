@@ -154,7 +154,7 @@ SCAN_EDIT_SOURCES_PROCESS_ERR = 'An error occurred while processing the '\
     'information, see the server log file.'
 SCAN_ENABLED_PRODUCT_HELP = \
     'Contains the list of products to include for extended product search. '\
-    'Valid values: jboss_eap, jboss_fuse, jboss_brms.'
+    'Valid values: jboss_eap, jboss_fuse, jboss_brms, jboss_ws.'
 SCAN_EXT_SEARCH_DIRS_HELP = \
     'A list of fully-qualified paths to search for extended product '\
     'search.'
@@ -195,7 +195,7 @@ REPORT_SUCCESSFULLY_MERGED = 'Scan job results successfully merged.  '\
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\
-    'Valid values: jboss_eap, jboss_fuse, jboss_brms.'
+    'Valid values: jboss_eap, jboss_fuse, jboss_brms, jboss_ws.'
 
 VERBOSITY_HELP = 'Verbose mode. Use up to -vvvv for more verbosity.'
 

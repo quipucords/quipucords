@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sourceoptions',
             name='use_paramiko',
-            field=models.NullBooleanField(default=False),
+            field=models.NullBooleanField(),
         ),
     ]
