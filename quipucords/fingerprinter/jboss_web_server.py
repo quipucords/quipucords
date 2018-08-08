@@ -116,6 +116,8 @@ def detect_jboss_ws(source, facts):
         raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
     # If jws was installed (not as zip) it will have a certifcate
     # https://mojo.redhat.com/docs/DOC-103535
+    # The cert may only be installed when a product is installed with RPM,
+    # which we already check for. This step may be unnecessary.
     if jws_has_cert:
         product_dict[PRESENCE_KEY] = Product.PRESENT
         raw_facts[JWS_HAS_CERT] = jws_has_cert
