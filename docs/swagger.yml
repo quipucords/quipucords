@@ -1872,6 +1872,9 @@ definitions:
       disable_ssl:
         type: "boolean"
         description: "If true disable SSL communication."
+      use_paramiko:
+        type: "boolean"
+        description: "If true use paramiko instead of open ssh for ansible connection"
   SourceOut:
     allOf:
       - $ref: "#/definitions/Source"
