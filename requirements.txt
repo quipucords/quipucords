@@ -41,6 +41,7 @@ requests==2.18.4
 six==1.10.0
 whitenoise==3.3.1
 wrapt==1.10.11
+psycopg2==2.7.5
 
 # These requirements are for DEVELOPMENT ONLY!
 -r dev-requirements.txt
