@@ -22,6 +22,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import datetime
 import os
+import django.db
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -134,7 +135,25 @@ REST_FRAMEWORK = {
 # Database Management System could be 'sqlite3' or 'postgresql'
 DBMS = os.getenv('DBMS', 'sqlite3').lower()
 
-if DBMS == 'sqlite3':
+if DBMS == 'postgresql':
+    # The following variables are only relevant when using a postgres database:
+    PGDATABASE = os.getenv('PGDATABASE', 'postgres')
+    PGUSER = os.getenv('PGUSER', 'postgres')
+    PGPASSWORD = os.getenv('PGPASSWORD', 'postgres')
+    PGHOST = os.getenv('PGHOST', 'localhost' or '::')  # :: means localhost but allows IPv4
+    PGPORT = os.getenv('PGPORT', 5432)    # and IPv6 connections
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': PGDATABASE,
+            'USER': PGUSER,
+            'PASSWORD': PGPASSWORD,
+            'HOST': PGHOST,
+            'PORT': PGPORT,
+        }
+    }
+else:
+    DBMS = 'sqlite3' # If user enters an invalid DBMS, just use default sqlite3
     DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
     PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
                            'db.sqlite3')
@@ -146,22 +165,6 @@ if DBMS == 'sqlite3':
         }
     }
 
-elif DBMS == 'postgresql':
-    PGDATABASE = os.getenv('PGDATABASE')
-    PGUSER = os.getenv('PGUSER')
-    PGPASSWORD = os.getenv('PGPASSWORD', '')
-    PGHOST = os.getenv('PGHOST', '::')  # :: means localhost but allows IPv4
-    PGPORT = os.getenv('PGPORT', '')    # and IPv6 connections
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': PGDATABASE,
-            'USER': PGUSER,
-            'PASSWORD': PGPASSWORD,
-            'HOST': PGHOST,
-            'PORT': PGPORT,
-        }
-    }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
