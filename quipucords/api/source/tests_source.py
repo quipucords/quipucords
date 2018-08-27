@@ -321,6 +321,16 @@ class SourceTest(TestCase):
              'port': -1,
              'credentials': [self.net_cred_for_upload]})
 
+    def test_create_empty_ip(self):
+        """An empty string passed with valid ips."""
+        self.create_expect_201(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['10.10.181.9',
+                       ''],
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
     def test_create_valid_hosts(self):
         """Test valid host patterns."""
         self.create_expect_201(

@@ -380,6 +380,9 @@ class SourceSerializer(NotEmptySerializer):
     def validate_ipaddr_list(hosts):
         """Make sure the hosts list is present and has valid IP addresses."""
         ipaddr_list = json.loads(hosts)
+        if isinstance(ipaddr_list, list):
+            ipaddr_list = [item for item in ipaddr_list if item]
+
         if not isinstance(ipaddr_list, list):
             raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
