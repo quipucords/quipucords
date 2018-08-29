@@ -4,7 +4,7 @@ about: Create a report to help us improve
 
 ---
 
-## Specify type:
+## Issue type:
 - Bug
 ___
 
