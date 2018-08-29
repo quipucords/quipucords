@@ -33,9 +33,11 @@ class ExtendedProductSearchOptions(models.Model):
     EXT_JBOSS_EAP = False
     EXT_JBOSS_FUSE = False
     EXT_JBOSS_BRMS = False
+    EXT_JBOSS_WS = False
     jboss_eap = models.BooleanField(null=False, default=EXT_JBOSS_EAP)
     jboss_fuse = models.BooleanField(null=False, default=EXT_JBOSS_FUSE)
     jboss_brms = models.BooleanField(null=False, default=EXT_JBOSS_BRMS)
+    jboss_ws = models.BooleanField(null=False, default=EXT_JBOSS_WS)
     search_directories = models.TextField(null=True)
 
     def __str__(self):
@@ -44,11 +46,13 @@ class ExtendedProductSearchOptions(models.Model):
             'jboss_eap: {}, '\
             'jboss_fuse: {}, '\
             'jboss_brms: {}, '\
+            'jboss_ws: {}, '\
             'search_directories:' \
                      ' {}'.format(self.id,
                                   self.jboss_eap,
                                   self.jboss_fuse,
                                   self.jboss_brms,
+                                  self.jboss_ws,
                                   self.get_search_directories()) + '}'
 
     def get_search_directories(self):
@@ -71,23 +75,31 @@ class DisabledOptionalProductsOptions(models.Model):
     MODEL_OPT_JBOSS_BRMS = False
     EXTRA_VAR_OPT_JBOSS_BRMS = not MODEL_OPT_JBOSS_BRMS
 
+    MODEL_OPT_JBOSS_WS = False
+    EXTRA_VAR_OPT_JBOSS_WS = not MODEL_OPT_JBOSS_WS
+
     jboss_eap = models.BooleanField(
         null=False, default=MODEL_OPT_JBOSS_EAP)
     jboss_fuse = models.BooleanField(
         null=False, default=MODEL_OPT_JBOSS_FUSE)
     jboss_brms = models.BooleanField(
         null=False, default=MODEL_OPT_JBOSS_BRMS)
+    jboss_ws = models.BooleanField(
+        null=False, default=MODEL_OPT_JBOSS_WS)
 
+    # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
             'jboss_eap: {}, '\
             'jboss_fuse: {}, '\
             'jboss_brms:' \
+            'jboss_ws:' \
                      ' {}'.format(self.id,
                                   self.jboss_eap,
                                   self.jboss_fuse,
-                                  self.jboss_brms) + '}'
+                                  self.jboss_brms,
+                                  self.jboss_ws) + '}'
 
 
 class ScanOptions(models.Model):
@@ -96,11 +108,13 @@ class ScanOptions(models.Model):
     JBOSS_EAP = 'jboss_eap'
     JBOSS_FUSE = 'jboss_fuse'
     JBOSS_BRMS = 'jboss_brms'
+    JBOSS_WS = 'jboss_ws'
 
     EXT_PRODUCT_SEARCH_DIRS = 'search_directories'
     JBOSS_EAP_EXT = 'jboss_eap_ext'
     JBOSS_FUSE_EXT = 'jboss_fuse_ext'
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
+    JBOSS_WS_EXT = 'jboss_ws_ext'
 
     max_concurrency = models.PositiveIntegerField(default=50)
     disabled_optional_products = \
@@ -141,12 +155,16 @@ class ScanOptions(models.Model):
              DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_FUSE,
              ScanOptions.JBOSS_BRMS:
              DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_BRMS,
+             ScanOptions.JBOSS_WS:
+             DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_WS,
              ScanOptions.JBOSS_EAP_EXT:
              ExtendedProductSearchOptions.EXT_JBOSS_EAP,
              ScanOptions.JBOSS_FUSE_EXT:
              ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
              ScanOptions.JBOSS_BRMS_EXT:
-             ExtendedProductSearchOptions.EXT_JBOSS_BRMS}
+             ExtendedProductSearchOptions.EXT_JBOSS_BRMS,
+             ScanOptions.JBOSS_WS_EXT:
+             ExtendedProductSearchOptions.EXT_JBOSS_WS}
         return defaults
 
     def get_extra_vars(self):
@@ -169,9 +187,11 @@ class ScanOptions(models.Model):
             extra_vars[self.JBOSS_EAP] = \
                 not(disable_products.jboss_brms and
                     disable_products.jboss_fuse and
-                    disable_products.jboss_eap)
+                    disable_products.jboss_eap and
+                    disable_products.jboss_ws)
             extra_vars[self.JBOSS_FUSE] = not disable_products.jboss_fuse
             extra_vars[self.JBOSS_BRMS] = not disable_products.jboss_brms
+            extra_vars[self.JBOSS_WS] = not disable_products.jboss_ws
 
         # Scan for EAP if fuse or brms are in scan
         extended_search = self.enabled_extended_product_search
@@ -179,6 +199,7 @@ class ScanOptions(models.Model):
             extra_vars[self.JBOSS_EAP_EXT] = extended_search.jboss_eap
             extra_vars[self.JBOSS_FUSE_EXT] = extended_search.jboss_fuse
             extra_vars[self.JBOSS_BRMS_EXT] = extended_search.jboss_brms
+            extra_vars[self.JBOSS_WS_EXT] = extended_search.jboss_ws
 
             # Add search directories if it is not None, not empty
             if extended_search.search_directories is not None:

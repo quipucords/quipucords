@@ -351,11 +351,11 @@ Use the ``qpc scan add`` command to create scan objects with one or more sources
 
 ``--disabled-optional-products=products_list``
 
-  Optional. Contains the list of products to exclude from inspection. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
+  Optional. Contains the list of products to exclude from inspection. Valid values are ``jboss_eap``, ``jboss_fuse``, ``jboss_ws``, and ``jboss_brms``.
 
 ``--enabled-ext-product-search=products_list``
 
-  Optional. Contains the list of products to include for the extended product search. Extended product search is used to find products that might be installed in nondefault locations. Valid values are ``jboss_eap``, ``jboss_fuse``, and ``jboss_brms``.
+  Optional. Contains the list of products to include for the extended product search. Extended product search is used to find products that might be installed in nondefault locations. Valid values are ``jboss_eap``, ``jboss_fuse``, ``jboss_ws``, and ``jboss_brms``.
 
 ``--ext-product-search-dirs=search_dirs_list``
 
@@ -365,7 +365,7 @@ The information in a scan might change as the structure of the network changes. 
 
 Although ``qpc scan`` options can accept more than one value, the ``qpc scan edit`` command is not additive. To edit a scan and add a new value for an option, you must enter both the current and the new values for that option. Include only the options that you want to change in the ``qpc scan edit`` command. Options that are not included are not changed.
 
-**qpc scan edit --name** *name* **[--sources=** *source_list* **]** **[--max-concurrency=** *concurrency* **]** **[--disabled-optional-products=** *products_list* **]** **[--enabled-extended-product-search=** *products_list* **]** **[--ext-product-search-dirs=** *search_dirs_list* **]**
+**qpc scan edit --name** *name* **[--sources=** *source_list* **]** **[--max-concurrency=** *concurrency* **]** **[--disabled-optional-products=** *products_list* **]** **[--enabled-ext-product-search=** *products_list* **]** **[--ext-product-search-dirs=** *search_dirs_list* **]**
 
 For example, if a scan contains a value of ``network1source`` for the ``--sources`` option, and you want to change that scan to use both the ``network1source`` and ``satellite1source`` sources, you would edit the scan as follows:
 

@@ -1410,7 +1410,8 @@ class ScanJobTest(TestCase):
                 'options': {'disabled_optional_products':
                             {'jboss_eap': True,
                              'jboss_fuse': True,
-                             'jboss_brms': True}}}
+                             'jboss_brms': True,
+                             'jboss_ws': True}}}
         url = reverse('scanjob-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -1558,9 +1559,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_missing_disable_product(self):
@@ -1578,9 +1581,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_missing_extended_search(self):
@@ -1598,9 +1603,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_missing_search_directories_empty(self):
@@ -1645,6 +1652,7 @@ class ScanJobTest(TestCase):
             jboss_eap=True,
             jboss_fuse=True,
             jboss_brms=True,
+            jboss_ws=True,
             search_directories='["a", "b"]')
         extended.save()
         disabled = DisabledOptionalProductsOptions()
@@ -1661,9 +1669,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': True,
                          'jboss_fuse_ext': True,
                          'jboss_brms_ext': True,
+                         'jboss_ws_ext': True,
                          'search_directories': 'a b'}
         self.assertEqual(extra_vars, expected_vars)
 
@@ -1674,7 +1684,8 @@ class ScanJobTest(TestCase):
         disabled = DisabledOptionalProductsOptions(
             jboss_eap=True,
             jboss_fuse=True,
-            jboss_brms=False)
+            jboss_brms=False,
+            jboss_ws=False)
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,
@@ -1688,9 +1699,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': False,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     def test_get_extra_vars_false(self):
@@ -1700,7 +1713,8 @@ class ScanJobTest(TestCase):
         disabled = DisabledOptionalProductsOptions(
             jboss_eap=True,
             jboss_fuse=True,
-            jboss_brms=True)
+            jboss_brms=True,
+            jboss_ws=True)
         disabled.save()
         scan_options = ScanOptions(
             disabled_optional_products=disabled,
@@ -1715,9 +1729,11 @@ class ScanJobTest(TestCase):
         expected_vars = {'jboss_eap': False,
                          'jboss_fuse': False,
                          'jboss_brms': False,
+                         'jboss_ws': False,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
     # ############################################################

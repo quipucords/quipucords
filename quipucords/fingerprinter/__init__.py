@@ -26,6 +26,7 @@ import django.dispatch
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
+from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -614,7 +615,8 @@ def add_products_to_fingerprint(source,
     eap = detect_jboss_eap(source, raw_fact)
     fuse = detect_jboss_fuse(source, raw_fact)
     brms = detect_jboss_brms(source, raw_fact)
-    fingerprint['products'] = [eap, fuse, brms]
+    jws = detect_jboss_ws(source, raw_fact)
+    fingerprint['products'] = [eap, fuse, brms, jws]
 
 
 def add_entitlements_to_fingerprint(source,

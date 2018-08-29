@@ -347,6 +347,16 @@ class SourceTest(TestCase):
              'port': -1,
              'credentials': [self.net_cred_for_upload]})
 
+    def test_create_empty_ip(self):
+        """An empty string passed with valid ips."""
+        self.create_expect_201(
+            {'name': 'source1',
+             'source_type': Source.NETWORK_SOURCE_TYPE,
+             'hosts': ['10.10.181.9',
+                       ''],
+             'port': '22',
+             'credentials': [self.net_cred_for_upload]})
+
     def test_create_valid_hosts(self):
         """Test valid host patterns."""
         self.create_expect_201(
@@ -560,7 +570,6 @@ class SourceTest(TestCase):
             'hosts': ['1.2.3.4'],
             'options': {
                 'ssl_cert_verify': True,
-                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -574,7 +583,6 @@ class SourceTest(TestCase):
             'hosts': ['1.2.3.4'],
             'options': {
                 'ssl_cert_verify': True,
-                'use_paramiko': False
             },
             'credentials': [{
                 'id': 2,
@@ -1183,8 +1191,7 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected = {'id': 1, 'name': 'source', 'source_type': 'satellite',
                     'port': 22, 'hosts': ['1.2.3.4'],
-                    'options': {'ssl_cert_verify': False,
-                                'use_paramiko': False},
+                    'options': {'ssl_cert_verify': False},
                     'credentials': [{'id': 3, 'name': 'sat_cred1'}]}
         self.assertEqual(response.json(), expected)
 
