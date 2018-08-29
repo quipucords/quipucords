@@ -11,13 +11,13 @@ ___
 ## Description:
 Provide a description of the issue being raised.
 
-## Expected behavior:
+### Expected behavior:
 Describe the expected behavior for the program.
 
-## Actual behavior:
+### Actual behavior:
 Provide the actual behavior for the program.
 
-## Steps to reproduce:
+### Steps to reproduce:
 List clear steps to reproduce the bug.
 
 ___
