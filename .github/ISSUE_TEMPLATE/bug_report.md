@@ -4,11 +4,7 @@ about: Create a report to help us improve
 
 ---
 
-## Issue type:
-- Bug
-___
-
-## Description:
+## Bug Description:
 Provide a description of the issue being raised.
 
 ### Expected behavior:
