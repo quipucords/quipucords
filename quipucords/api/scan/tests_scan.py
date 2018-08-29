@@ -107,7 +107,8 @@ class ScanTest(TestCase):
                 'options': {'disabled_optional_products':
                             {'jboss_eap': True,
                              'jboss_fuse': True,
-                             'jboss_brms': True}}}
+                             'jboss_brms': True,
+                             'jboss_ws': True}}}
         self.create_expect_400(
             data, {'scan_type': ['foo, is an invalid choice. '
                                  'Valid values are connect,inspect.']})
@@ -145,7 +146,8 @@ class ScanTest(TestCase):
                 'options': {'disabled_optional_products':
                             {'jboss_eap': True,
                              'jboss_fuse': True,
-                             'jboss_brms': True}}}
+                             'jboss_brms': True,
+                             'jboss_ws': True}}}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
         self.assertIn('scan_type', response)
@@ -239,7 +241,8 @@ class ScanTest(TestCase):
                           'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                                       'jboss_brms': True,
+                                       'jboss_ws': True}}}
         initial = self.create_expect_201(data_discovery)
 
         data = {'name': 'test2',
@@ -248,7 +251,8 @@ class ScanTest(TestCase):
                 'options': {'disabled_optional_products':
                             {'jboss_eap': False,
                              'jboss_fuse': True,
-                             'jboss_brms': True}}}
+                             'jboss_brms': True,
+                             'jboss_ws': True}}}
         url = reverse('scan-detail', args=(initial['id'],))
         response = self.client.put(url,
                                    json.dumps(data),
@@ -270,7 +274,8 @@ class ScanTest(TestCase):
                           'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                                       'jboss_brms': True,
+                                       'jboss_ws': True}}}
         initial = self.create_expect_201(data_discovery)
 
         data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
@@ -287,7 +292,8 @@ class ScanTest(TestCase):
                 'options': {'disabled_optional_products':
                             {'jboss_eap': False,
                              'jboss_fuse': True,
-                             'jboss_brms': True}}}
+                             'jboss_brms': True,
+                             'jboss_ws': True}}}
         response = self.client.patch(url,
                                      json.dumps(data),
                                      content_type='application/json',
@@ -306,7 +312,8 @@ class ScanTest(TestCase):
                           'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                                       'jboss_brms': True,
+                                       'jboss_ws': True}}}
         initial = self.create_expect_201(data_discovery)
 
         data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
@@ -324,6 +331,7 @@ class ScanTest(TestCase):
                             {'jboss_eap': False,
                              'jboss_fuse': False,
                              'jboss_brms': True,
+                             'jboss_ws': True,
                              'search_directories': ['/foo/bar/']}}}
         response = self.client.patch(url,
                                      json.dumps(data),
@@ -333,12 +341,14 @@ class ScanTest(TestCase):
         options = {'disabled_optional_products':
                    {'jboss_eap': True,
                     'jboss_fuse': True,
-                    'jboss_brms': True},
+                    'jboss_brms': True,
+                    'jboss_ws': True},
                    'max_concurrency': 50,
                    'enabled_extended_product_search':
                    {'jboss_eap': False,
                     'jboss_fuse': False,
                     'jboss_brms': True,
+                    'jboss_ws': True,
                     'search_directories': ['/foo/bar/']}}
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
@@ -353,7 +363,8 @@ class ScanTest(TestCase):
                           'options': {'enabled_extended_product_search':
                                       {'jboss_eap': False,
                                        'jboss_fuse': False,
-                                       'jboss_brms': True}}}
+                                       'jboss_brms': True,
+                                       'jboss_ws': True}}}
         initial = self.create_expect_201(data_discovery)
 
         data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
@@ -379,6 +390,7 @@ class ScanTest(TestCase):
                    {'jboss_eap': False,
                     'jboss_fuse': False,
                     'jboss_brms': True,
+                    'jboss_ws': True,
                     'search_directories': ['/foo/bar/']}}
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
@@ -414,7 +426,8 @@ class ScanTest(TestCase):
                           'options': {'disabled_optional_products':
                                       {'jboss_eap': True,
                                        'jboss_fuse': True,
-                                       'jboss_brms': True}}}
+                                       'jboss_brms': True,
+                                       'jboss_ws': True}}}
         response = self.create_expect_201(data_discovery)
 
         url = reverse('scan-detail', args=(response['id'],))
@@ -429,9 +442,11 @@ class ScanTest(TestCase):
         expected_vars = {'jboss_eap': True,
                          'jboss_fuse': True,
                          'jboss_brms': True,
+                         'jboss_ws': True,
                          'jboss_eap_ext': False,
                          'jboss_fuse_ext': False,
-                         'jboss_brms_ext': False}
+                         'jboss_brms_ext': False,
+                         'jboss_ws_ext': False}
         self.assertEqual(extra_vars, expected_vars)
 
 

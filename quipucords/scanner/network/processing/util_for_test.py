@@ -20,7 +20,7 @@ def ansible_result(stdout, rc=0):  # pylint: disable=invalid-name
 def ansible_results(results):
     """Make an Ansible result dictionary for a with_items task."""
     return {'results':
-            [{'item': result['item'],
+            [{'item': result.get('item', ''),
               'stdout': result['stdout'],
               'stdout_lines': result['stdout'].splitlines(),
               'rc': result.get('rc', 0)}
