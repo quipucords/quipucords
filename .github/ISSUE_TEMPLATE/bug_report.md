@@ -11,6 +11,15 @@ ___
 ## Description:
 Provide a description of the issue being raised.
 
+## Expected behavior:
+Describe the expected behavior for the program.
+
+## Actual behavior:
+Provide the actual behavior for the program.
+
+## Steps to reproduce:
+List clear steps to reproduce the bug.
+
 ___
 
 ## Acceptance Criteria:
@@ -20,19 +29,11 @@ ___
 
 ___
 
-## Bug Report
+## Additional Context
 
 ### Version Information:
 CLI Server Version or commit information.
 
-### Expected behavior:
-Describe the expected behavior for the program.
-
-### Actual behavior:
-Provide the actual behavior for the program.
-
-### Steps to reproduce:
-List clear steps to reproduce the bug.
 
 ### Environment information:
 Provide detailed information on the *scanning* and *target* systems (if applicable); see example below.
