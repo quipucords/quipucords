@@ -32,7 +32,7 @@ ___
 ## Additional Context
 
 ### Version Information:
-CLI Server Version or commit information.
+CLI version, server version or git commit information.
 
 
 ### Environment information:
