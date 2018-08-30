@@ -1,16 +1,20 @@
-## Specify type:
-- Bug
-- Enhancement
+---
+name: Bug report
+about: Create a report to help us improve
 
-### Priority:
-- Blocker
-- High
-- Medium
-- Low
-___
+---
 
-## Description:
+## Bug Description:
 Provide a description of the issue being raised.
+
+### Expected behavior:
+Describe the expected behavior for the program.
+
+### Actual behavior:
+Provide the actual behavior for the program.
+
+### Steps to reproduce:
+List clear steps to reproduce the bug.
 
 ___
 
@@ -21,19 +25,11 @@ ___
 
 ___
 
-## Bug Report
+## Additional Context
 
 ### Version Information:
-CLI Server Version or commit information.
+CLI version, server version or git commit information.
 
-### Expected behavior:
-Describe the expected behavior for the program.
-
-### Actual behavior:
-Provide the actual behavior for the program.
-
-### Steps to reproduce:
-List clear steps to reproduce the bug.
 
 ### Environment information:
 Provide detailed information on the *scanning* and *target* systems (if applicable); see example below.
