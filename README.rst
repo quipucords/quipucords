@@ -88,7 +88,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
     make build-ui
 
-  ** NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
+  **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
 
 3. Build the Docker image::
 
