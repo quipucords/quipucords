@@ -97,12 +97,13 @@ def startup():
     logger.info('%s BEGIN ENVIRONMENT VARIABLES %s', mark, mark)
     logger.info('\n'.join(env_list))
     logger.info('%s END ENVIRONMENT VARIABLES %s', mark, mark)
-    if not (os.environ.get('DBMS') == 'sqlite3' or \
-       os.environ.get('DBMS') == 'postgresql'):
-        logger.info("'" + os.environ.get('DBMS') + "' is not a valid " \
-                    "database management system. Valid options: 'sqlite3' "\
-                    "'postgreql'.")
-        logger.info("Currently using default 'sqlite3'.")
+    if os.environ.get('QPC_DBMS') == 'postgresql':
+        logger.info("QPC_DBMS set to 'postgresql'.")
+    elif not os.environ.get('QPC_DBMS'):
+        logger.info("QPC_DBMS not set using default of 'sqlite3'.")
+    else:
+        logger.info("QPC_DBMS set to %s. %s is not a valid so using default of 'sqlite3'." % (
+            os.environ.get('QPC_DBMS'), os.environ.get('QPC_DBMS')))
 
     logger.info('Commit: %s', commit())
     init_server_identifier()
