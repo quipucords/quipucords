@@ -84,19 +84,28 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
     git clone git@github.com:quipucords/quipucords.git
 
-2. Build the Docker image::
+2. *Optional* - Build UI.::
+
+    make build-ui
+
+  ** NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
+
+3. Build the Docker image::
 
     docker -D build . -t quipucords:latest
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-3. Run the Docker image::
+4. Run the Docker image::
 
     docker run -d -p443:443 -i quipucords:latest
 
-After you complete these steps and the server is running, you can launch the `server login function <https://127.0.0.1/>`_. You can work with the APIs directly or you can use the command line interface. Use the following command to configure the command line interface::
+5. Configure the CLI by using the following commands::
 
     qpc server config --host 127.0.0.1
+    qpc server login
+
+6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
 
 
 Command Syntax and Usage
