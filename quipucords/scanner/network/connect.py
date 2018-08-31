@@ -27,6 +27,8 @@ from django.db import transaction
 
 import pexpect
 
+from quipucords import settings
+
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (_construct_error,
                                    _construct_vars,
@@ -35,9 +37,6 @@ from scanner.network.utils import (_construct_error,
                                    run_playbook,
                                    write_inventory)
 from scanner.task import ScanTaskRunner
-
-# Timeout for individual tasks. Must match format in 'man timeout'.
-DEFAULT_TIMEOUT = '120s'
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -244,7 +243,7 @@ def connect(hosts, callback, credential, connection_port, use_paramiko=False,
                      '../../../bin/timeout_ssh'))
 
     base_ssh_executable = base_ssh_executable or 'ssh'
-    ssh_timeout = ssh_timeout or DEFAULT_TIMEOUT
+    ssh_timeout = ssh_timeout or settings.DEFAULT_TIMEOUT
 
     # pylint: disable=line-too-long
     # the ssh arg is required for become-pass because

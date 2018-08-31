@@ -22,6 +22,8 @@ from api.models import (ScanJob,
                         SystemConnectionResult,
                         SystemInspectionResult)
 
+from quipucords import settings
+
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
                                    _construct_vars,
@@ -33,9 +35,6 @@ from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-# Timeout for individual tasks. Must match format in 'man timeout'.
-DEFAULT_TIMEOUT = '120s'
 
 DEFAULT_ROLES = [
     'check_dependencies',
@@ -244,7 +243,7 @@ class InspectTaskRunner(ScanTaskRunner):
                          '../../../bin/timeout_ssh'))
 
         base_ssh_executable = base_ssh_executable or 'ssh'
-        ssh_timeout = ssh_timeout or DEFAULT_TIMEOUT
+        ssh_timeout = ssh_timeout or settings.DEFAULT_TIMEOUT
 
         # pylint: disable=line-too-long
         # the ssh arg is required for become-pass because

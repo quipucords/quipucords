@@ -31,6 +31,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 PRODUCTION = bool(os.environ.get('PRODUCTION', False))
+# Timeout for individual tasks. Must match format in 'man timeout'.
+DEFAULT_TIMEOUT = os.environ.get('DEFAULT_TIMEOUT', '120s')
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
