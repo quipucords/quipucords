@@ -279,7 +279,7 @@ def _connect(scan_task,
     _handle_ssh_passphrase(cred_data)
 
     error_msg = ''
-    log_message = 'START INSPECT PROCESSING GROUPS'\
+    log_message = 'START CONNECT PROCESSING GROUPS'\
         ' with use_paramiko: %s,' \
         '%d forks and extra_vars=%s' % (use_paramiko,
                                         forks,
@@ -289,7 +289,7 @@ def _connect(scan_task,
         group_ips = inventory.get('all').get(
             'children').get(group_name).get('hosts').keys()
         group_ip_string = ', '.join(group_ips)
-        log_message = 'START PROCESSING GROUP %d of %d. '\
+        log_message = 'START CONNECT PROCESSING GROUP %d of %d. '\
             'About to connecting to hosts [%s]' % (
                 (idx + 1), len(group_names), group_ip_string)
         scan_task.log_message(log_message)

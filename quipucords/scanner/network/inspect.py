@@ -266,7 +266,7 @@ class InspectTaskRunner(ScanTaskRunner):
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
         for idx, group_name in enumerate(group_names):
-            log_message = 'START PROCESSING GROUP %d of %d' % (
+            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
                 (idx + 1), len(group_names))
             self.scan_task.log_message(log_message)
             callback =\
