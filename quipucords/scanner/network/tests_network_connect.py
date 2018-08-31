@@ -10,6 +10,7 @@
 #
 """Test the discovery scanner capabilities."""
 
+import os.path
 import unittest
 from unittest.mock import ANY, Mock, patch
 
@@ -202,7 +203,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port,
                                                      exclude_hosts)
-        expected = {'all': {'hosts': {'1.2.3.4': None},
+        expected = {'all': {'hosts': {'1.2.3.4': {}},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
@@ -244,6 +245,45 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connect(hosts, Mock(), cred, connection_port, exclude_hosts)
         mock_run.assert_called_with(ANY)
 
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
+    def test_connect_ssh_crash(self, mock_run):
+        """Simulate an ssh crash."""
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../../test_util/crash.py'))
+        connect(
+            hosts, Mock(), cred, connection_port,
+            exclude_hosts, base_ssh_executable=path)
+
+    @patch('scanner.network.utils.TaskQueueManager.run',
+           side_effect=mock_run_success)
+    def test_connect_ssh_hang(self, mock_run):
+        """Simulate an ssh hang."""
+        serializer = SourceSerializer(self.source)
+        source = serializer.data
+        hosts = source['hosts']
+        exclude_hosts = source['exclude_hosts']
+        connection_port = source['port']
+        hc_serializer = CredentialSerializer(self.cred)
+        cred = hc_serializer.data
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../../test_util/hang.py'))
+        connect(
+            hosts,
+            Mock(), cred, connection_port,
+            exclude_hosts,
+            base_ssh_executable=path,
+            ssh_timeout='0.1s')
+
     @patch('scanner.network.connect.connect')
     def test_connect_runner(self, mock_connect):
         """Test running a connect scan with mocked connection."""
@@ -281,7 +321,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         cred = hc_serializer.data
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port)
-        expected = {'all': {'hosts': {'1.2.3.4': None},
+        expected = {'all': {'hosts': {'1.2.3.4': {}},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',

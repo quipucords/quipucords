@@ -10,6 +10,7 @@
 #
 """ScanTask used for network connection discovery."""
 import logging
+import os.path
 
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -34,6 +35,9 @@ from scanner.network.utils import (_construct_error,
                                    run_playbook,
                                    write_inventory)
 from scanner.task import ScanTaskRunner
+
+# Timeout for individual tasks. Must match format in 'man timeout'.
+DEFAULT_TIMEOUT = '120s'
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -214,9 +218,10 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-locals
 def connect(hosts, callback, credential, connection_port, use_paramiko=False,
-            forks=50, exclude_hosts=None):
+            forks=50, exclude_hosts=None, base_ssh_executable=None,
+            ssh_timeout=None):
     """Attempt to connect to hosts using the given credential.
 
     :param hosts: The collection of hosts to test connections
@@ -226,11 +231,33 @@ def connect(hosts, callback, credential, connection_port, use_paramiko=False,
     :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with, default of 50
     :param exclude_hosts: Optional. Hosts to exclude from test connections
+    :param base_ssh_executable: ssh executable, or None for
+            'ssh'. Will be wrapped with a timeout before being passed
+            to Ansible.
+        :param ssh_timeout: string in the format of the 'timeout'
+            command. Timeout for individual tasks.
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
+    ssh_executable = os.path.abspath(
+        os.path.join(os.path.dirname(__file__),
+                     '../../../bin/timeout_ssh'))
+
+    base_ssh_executable = base_ssh_executable or 'ssh'
+    ssh_timeout = ssh_timeout or DEFAULT_TIMEOUT
+
+    # pylint: disable=line-too-long
+    # the ssh arg is required for become-pass because
+    # ansible checks for an exact string match of ssh
+    # anywhere in the command array
+    # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
+    # timeout_ssh will remove the ssh argument before running the command
+    ssh_args = ['--executable=' + base_ssh_executable,
+                '--timeout=' + ssh_timeout,
+                'ssh']
     inventory = construct_connect_inventory(hosts, credential, connection_port,
-                                            exclude_hosts)
+                                            exclude_hosts, ssh_executable,
+                                            ssh_args)
     inventory_file = write_inventory(inventory)
     extra_vars = {}
 
@@ -274,13 +301,16 @@ def _handle_ssh_passphrase(credential):
 
 
 def construct_connect_inventory(hosts, credential, connection_port,
-                                exclude_hosts=None):
+                                exclude_hosts=None, ssh_executable=None,
+                                ssh_args=None):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param exclude_hosts: Optional. Hosts to exclude test connections
+    :param ssh_executable: the ssh executable to use, or None for 'ssh'
+    :param ssh_args: a list of extra ssh arguments, or None
     :returns: A dictionary of the ansible inventory
     """
     inventory = None
@@ -290,7 +320,12 @@ def construct_connect_inventory(hosts, credential, connection_port,
         hosts = list(set(hosts) - set(exclude_hosts))
 
     for host in hosts:
-        hosts_dict[host] = None
+        host_vars = {}
+        if ssh_executable:
+            host_vars['ansible_ssh_executable'] = ssh_executable
+        if ssh_args:
+            host_vars['ansible_ssh_common_args'] = ' '.join(ssh_args)
+        hosts_dict[host] = host_vars
 
     vars_dict = _construct_vars(connection_port, credential)
 
