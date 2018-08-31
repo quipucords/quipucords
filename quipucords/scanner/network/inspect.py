@@ -243,7 +243,7 @@ class InspectTaskRunner(ScanTaskRunner):
                          '../../../bin/timeout_ssh'))
 
         base_ssh_executable = base_ssh_executable or 'ssh'
-        ssh_timeout = ssh_timeout or settings.DEFAULT_TIMEOUT
+        ssh_timeout = ssh_timeout or settings.QPC_DEFAULT_SSH_TIMEOUT
 
         # pylint: disable=line-too-long
         # the ssh arg is required for become-pass because

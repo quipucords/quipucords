@@ -21,7 +21,11 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import datetime
+import logging
 import os
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,9 +35,32 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 PRODUCTION = bool(os.environ.get('PRODUCTION', False))
+
+
+def is_int(value):
+    """Check if a value is convertable to int.
+
+    :param value: The value to convert
+    :returns: The int or None if not convertable
+    """
+    if isinstance(value, int):
+        return True
+
+    try:
+        int(value)
+        return True
+    except ValueError:
+        return False
+
+
+QPC_DEFAULT_SSH_TIMEOUT = os.environ.get('QPC_DEFAULT_SSH_TIMEOUT', '120')
+if not is_int(QPC_DEFAULT_SSH_TIMEOUT):
+    logger.error('QPC_DEFAULT_SSH_TIMEOUT "%s" not an int.'
+                 'Setting to default of 120.', QPC_DEFAULT_SSH_TIMEOUT)
+    QPC_DEFAULT_SSH_TIMEOUT = '120'
+
 # Timeout for individual tasks. Must match format in 'man timeout'.
-DEFAULT_TIMEOUT = os.environ.get('DEFAULT_TIMEOUT', '120')
-DEFAULT_TIMEOUT = f'{DEFAULT_TIMEOUT}s'
+QPC_DEFAULT_SSH_TIMEOUT = '%ss' % (QPC_DEFAULT_SSH_TIMEOUT)
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
