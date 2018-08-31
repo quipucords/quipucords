@@ -200,10 +200,26 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../../test_util/hang.py'))
+        ssh_timeout = '0.1s'
+        ssh_args = ['--executable=' + path,
+                    '--timeout=' + ssh_timeout,
+                    'ssh']
         inventory_dict = construct_connect_inventory(hosts, cred,
                                                      connection_port,
-                                                     exclude_hosts)
-        expected = {'all': {'hosts': {'1.2.3.4': {}},
+                                                     exclude_hosts,
+                                                     ssh_executable=path,
+                                                     ssh_args=ssh_args)
+        expected = {'all': {'hosts': {'1.2.3.4':
+                                      {'ansible_ssh_executable':
+                                       '/Users/ashleybaiken/quipucords/'
+                                       'test_util/hang.py',
+                                       'ansible_ssh_common_args':
+                                       '--executable=/Users/ashleybaiken/'
+                                       'quipucords/test_util/hang.py '
+                                       '--timeout=0.1s ssh'}},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
                                      'ansible_ssh_pass': 'password',
@@ -262,6 +278,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connect(
             hosts, Mock(), cred, connection_port,
             exclude_hosts, base_ssh_executable=path)
+        mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
            side_effect=mock_run_success)
@@ -283,6 +300,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             exclude_hosts,
             base_ssh_executable=path,
             ssh_timeout='0.1s')
+        mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect.connect')
     def test_connect_runner(self, mock_connect):
