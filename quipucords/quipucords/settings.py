@@ -135,7 +135,7 @@ REST_FRAMEWORK = {
 # Database Management System could be 'sqlite3' or 'postgresql'
 QPC_DBMS = os.getenv('QPC_DBMS', 'sqlite3').lower()
 
-if QPC_DBMS == 'postgresql':
+if QPC_DBMS == 'postgres':
     # The following variables are only relevant when using a postgres database:
     PGDATABASE = os.getenv('PGDATABASE', 'postgres')
     PGUSER = os.getenv('PGUSER', 'postgres')
