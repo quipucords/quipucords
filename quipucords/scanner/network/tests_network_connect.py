@@ -200,9 +200,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__),
-                         '../../../test_util/hang.py'))
+        path = '/path/to/executable.py'
         ssh_timeout = '0.1s'
         ssh_args = ['--executable=' + path,
                     '--timeout=' + ssh_timeout,
@@ -214,11 +212,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
                                                      ssh_args=ssh_args)
         expected = {'all': {'hosts': {'1.2.3.4':
                                       {'ansible_ssh_executable':
-                                       '/Users/ashleybaiken/quipucords/'
-                                       'test_util/hang.py',
+                                       '/path/to/executable.py',
                                        'ansible_ssh_common_args':
-                                       '--executable=/Users/ashleybaiken/'
-                                       'quipucords/test_util/hang.py '
+                                       '--executable=/path/to/executable.py '
                                        '--timeout=0.1s ssh'}},
                             'vars': {'ansible_become_pass': 'become',
                                      'ansible_port': 22,
