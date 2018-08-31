@@ -27,8 +27,8 @@ from django.test import TestCase
 
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import (ConnectResultStore,
-                                     connect,
-                                     construct_connect_inventory)
+                                     _connect,
+                                     _construct_connect_inventory)
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import _construct_vars
 from scanner.test_util import create_scan_job
@@ -205,24 +205,30 @@ class NetworkConnectTaskRunnerTest(TestCase):
         ssh_args = ['--executable=' + path,
                     '--timeout=' + ssh_timeout,
                     'ssh']
-        inventory_dict = construct_connect_inventory(hosts, cred,
-                                                     connection_port,
-                                                     exclude_hosts,
-                                                     ssh_executable=path,
-                                                     ssh_args=ssh_args)
-        expected = {'all': {'hosts': {'1.2.3.4':
-                                      {'ansible_ssh_executable':
-                                       '/path/to/executable.py',
-                                       'ansible_ssh_common_args':
-                                       '--executable=/path/to/executable.py '
-                                       '--timeout=0.1s ssh'}},
-                            'vars': {'ansible_become_pass': 'become',
-                                     'ansible_port': 22,
-                                     'ansible_ssh_pass': 'password',
-                                     'ansible_ssh_private_key_file': 'keyfile',
-                                     'ansible_user': 'username',
-                                     'ansible_become_method': 'sudo',
-                                     'ansible_become_user': 'root'}}}
+        _, inventory_dict = _construct_connect_inventory(hosts, cred,
+                                                         connection_port,
+                                                         1,
+                                                         exclude_hosts,
+                                                         ssh_executable=path,
+                                                         ssh_args=ssh_args)
+        # pylint: disable=line-too-long
+        expected = {'all':
+                    {'children':
+                     {'group_0':
+                      {'hosts':
+                       {'1.2.3.4':
+                        {'ansible_host': '1.2.3.4',
+                         'ansible_ssh_executable':
+                         '/path/to/executable.py',
+                         'ansible_ssh_common_args': '--executable=/path/to/executable.py --timeout=0.1s ssh'}}}},  # noqa
+                     'vars':
+                     {'ansible_port': 22,
+                      'ansible_user': 'username',
+                      'ansible_ssh_pass': 'password',
+                      'ansible_ssh_private_key_file': 'keyfile',
+                      'ansible_become_pass': 'become',
+                      'ansible_become_method': 'sudo',
+                      'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -236,10 +242,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred, connection_port, exclude_hosts)
+            _connect(self.scan_task, hosts, Mock(), self.cred,
+                     connection_port, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -252,9 +257,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        connect(hosts, Mock(), cred, connection_port, exclude_hosts)
+        _connect(self.scan_task, hosts, Mock(), self.cred,
+                 connection_port, exclude_hosts)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -266,14 +270,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
-        connect(
-            hosts, Mock(), cred, connection_port,
-            exclude_hosts, base_ssh_executable=path)
+        _connect(self.scan_task,
+                 hosts, Mock(), self.cred, connection_port,
+                 exclude_hosts, base_ssh_executable=path)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -285,26 +287,26 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))
-        connect(
+        _connect(
+            self.scan_task,
             hosts,
-            Mock(), cred, connection_port,
+            Mock(), self.cred, connection_port,
             exclude_hosts,
             base_ssh_executable=path,
             ssh_timeout='0.1s')
         mock_run.assert_called_with(ANY)
 
-    @patch('scanner.network.connect.connect')
+    @patch('scanner.network.connect._connect')
     def test_connect_runner(self, mock_connect):
         """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY, ANY, 22, False, forks=50)
+        mock_connect.assert_called_with(
+            self.scan_task, ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
@@ -333,16 +335,22 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        inventory_dict = construct_connect_inventory(hosts, cred,
-                                                     connection_port)
-        expected = {'all': {'hosts': {'1.2.3.4': {}},
-                            'vars': {'ansible_become_pass': 'become',
-                                     'ansible_port': 22,
-                                     'ansible_ssh_pass': 'password',
-                                     'ansible_ssh_private_key_file': 'keyfile',
-                                     'ansible_user': 'username',
-                                     'ansible_become_method': 'sudo',
-                                     'ansible_become_user': 'root'}}}
+        _, inventory_dict = _construct_connect_inventory(hosts, cred,
+                                                         connection_port, 1)
+        expected = {'all':
+                    {'children':
+                     {'group_0':
+                      {'hosts':
+                       {'1.2.3.4':
+                        {'ansible_host': '1.2.3.4'}}}},
+                     'vars':
+                     {'ansible_port': 22,
+                      'ansible_user': 'username',
+                      'ansible_ssh_pass': 'password',
+                      'ansible_ssh_private_key_file': 'keyfile',
+                      'ansible_become_pass': 'become',
+                      'ansible_become_method': 'sudo',
+                      'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -355,10 +363,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         source = serializer.data
         hosts = source['hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
         with self.assertRaises(AnsibleError):
-            connect(hosts, Mock(), cred, connection_port)
+            _connect(self.scan_task, hosts, Mock(), self.cred, connection_port)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -370,16 +376,15 @@ class NetworkConnectTaskRunnerTest(TestCase):
         source = serializer.data
         hosts = source['hosts']
         connection_port = source['port']
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
-        connect(hosts, Mock(), cred, connection_port)
+        _connect(self.scan_task, hosts, Mock(), self.cred, connection_port)
         mock_run.assert_called_with(ANY)
 
-    @patch('scanner.network.connect.connect')
+    @patch('scanner.network.connect._connect')
     def test_connect_runner_src2(self, mock_connect):
         """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(result_store)
-        mock_connect.assert_called_with(ANY, ANY, ANY, 22, False, forks=50)
+        mock_connect.assert_called_with(
+            self.scan_task2, ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)

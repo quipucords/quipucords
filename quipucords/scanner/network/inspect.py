@@ -215,11 +215,6 @@ class InspectTaskRunner(ScanTaskRunner):
         :returns: An array of dictionaries of facts
 
         """
-        playbook = {'name': 'scan systems for product fingerprint facts',
-                    'hosts': 'all',
-                    'gather_facts': False,
-                    'strategy': 'free',
-                    'roles': roles}
         connection_port = self.scan_task.source.port
 
         if self.scan_task.source.options is not None:
@@ -262,8 +257,11 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_inventory(inventory)
 
         error_msg = ''
-        log_message = 'START PROCESSING GROUPS with use_paramiko: %s, \
-                %d forks and extra_vars=%s' % (use_paramiko, forks, extra_vars)
+        log_message = 'START INSPECT PROCESSING GROUPS'\
+            ' with use_paramiko: %s, '\
+            '%d forks and extra_vars=%s' % (use_paramiko,
+                                            forks,
+                                            extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
