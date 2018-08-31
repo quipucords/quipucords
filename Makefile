@@ -72,10 +72,14 @@ server-set-superuser:
 server-init: server-makemigrations server-migrate server-set-superuser
 
 server-static:
+	mkdir -p quipucords/client
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver
+
+build-ui:
+	cd client;npm install;npm run build
 
 html:
 	@cd docs; $(MAKE) html
