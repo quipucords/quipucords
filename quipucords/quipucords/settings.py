@@ -32,7 +32,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PRODUCTION = bool(os.environ.get('PRODUCTION', False))
 # Timeout for individual tasks. Must match format in 'man timeout'.
-DEFAULT_TIMEOUT = os.environ.get('DEFAULT_TIMEOUT', '120s')
+DEFAULT_TIMEOUT = os.environ.get('DEFAULT_TIMEOUT', '120')
+DEFAULT_TIMEOUT = f'{DEFAULT_TIMEOUT}s'
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
