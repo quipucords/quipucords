@@ -38,6 +38,18 @@ usage() {
          -e server_port=8443
     * Specify server container name (defaults to quipucords):
          -e server_name=qpc_server
+    * Specify postgresql as database management system (default is to use SQLite):
+         -e use_postgres=false
+    * Specify postgresql db name:
+         -e QPC_DBMS_DATABASE=postgres
+    * Specify postgresql db user:
+         -e QPC_DBMS_USER=postgres
+    * Specify postgresql db password:
+         -e QPC_DBMS_PASSWORD=None
+    * Specify postgresql db host:
+         -e QPC_DBMS_HOST=None
+    * Specify postgresql db port:
+         -e QPC_DBMS_PORT=5432
 EOM
     exit 0
 }
