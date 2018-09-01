@@ -295,7 +295,7 @@ def _connect(scan_task,
         scan_task.log_message(log_message)
         callback = ConnectResultCallback(result_store, credential,
                                          scan_task.source)
-        playbook = {'name': 'scan systems for product fingerprint facts',
+        playbook = {'name': 'attempt connection to systems',
                     'hosts': group_name,
                     'gather_facts': False,
                     'tasks': [

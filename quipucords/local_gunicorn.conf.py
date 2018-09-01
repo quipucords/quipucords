@@ -234,4 +234,3 @@ def worker_int(worker):
 def worker_abort(worker):
     """Abort logging for worker."""
     worker.log.info('worker received SIGABRT signal')
-    print(worker)
