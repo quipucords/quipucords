@@ -75,9 +75,9 @@ To change the default password for the Quipucords server, use the following step
 
 Changing the Default Database Management System
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-SQLite limits concurrency, and users who have already set up a PostgreSQL database may prefer to use Postgres. The Quipucords server uses SQLite by default but can be configured to use PostgreSQL by changing the environment variable ``QPC_DBMS`` to ``postgresql``. To enable qpc to properly use the PostgreSQL database you have created, set the PGDATABASE and PGUSER environment variables to correspond with the name and user of your database. Optionally, set PGPASSWORD, PGHOST, and PGPORT accordingly. If these are not configured the PostgreSQL defaults will be used. Make sure that the server is authenticated to access the database. To complete the switch, `make server-init` must be run prior to starting the server. To change the Database Management System back to SQLite, set ``QPC_DBMS`` to ``sqlite3`` and run `make server-init`. For example::
+SQLite limits concurrency, and users who have already set up a PostgreSQL database may prefer to use Postgres. The Quipucords server uses SQLite by default but can be configured to use PostgreSQL by changing the environment variable ``QPC_DBMS`` to ``postgres``. To enable qpc to properly use the PostgreSQL database you have created, set the PGDATABASE and PGUSER environment variables to correspond with the name and user of your database. Optionally, set PGPASSWORD, PGHOST, and PGPORT accordingly. If these are not configured the PostgreSQL defaults will be used. Make sure that the server is authenticated to access the database. To complete the switch, `make server-init` must be run prior to starting the server. To change the Database Management System back to SQLite, set ``QPC_DBMS`` to ``sqlite3`` and run `make server-init`. For example::
 
-  # export QPC_DBMS=postgresql
+  # export QPC_DBMS=postgres
 
 Next Steps
 ~~~~~~~~~~

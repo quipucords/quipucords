@@ -69,13 +69,17 @@ server-migrate:
 server-set-superuser:
 	echo "from django.contrib.auth.models import User; admin_not_present = User.objects.filter(email='admin@example.com').count() == 0;User.objects.create_superuser('admin', 'admin@example.com', 'pass') if admin_not_present else print('admin present');print(User.objects.filter(email='admin@example.com'))" | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
 
-server-init: server-makemigrations server-migrate server-set-superuser
+server-init: server-migrate server-set-superuser
 
 server-static:
+	mkdir -p quipucords/client
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver
+
+build-ui:
+	cd client;npm install;npm run build
 
 html:
 	@cd docs; $(MAKE) html
