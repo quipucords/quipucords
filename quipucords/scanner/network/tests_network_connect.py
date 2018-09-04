@@ -10,14 +10,17 @@
 #
 """Test the discovery scanner capabilities."""
 
+# pylint: disable=ungrouped-imports
 import os.path
 import unittest
+from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
 from ansible.errors import AnsibleError
 
 from api.connresults.model import SystemConnectionResult
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source)
 from api.serializers import CredentialSerializer, SourceSerializer
@@ -243,7 +246,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
         with self.assertRaises(AnsibleError):
-            _connect(self.scan_task, hosts, Mock(), self.cred,
+            _connect(Value('i', ScanJob.JOB_RUN),
+                     self.scan_task, hosts, Mock(), self.cred,
                      connection_port, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
@@ -257,7 +261,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        _connect(self.scan_task, hosts, Mock(), self.cred,
+        _connect(Value('i', ScanJob.JOB_RUN),
+                 self.scan_task, hosts, Mock(), self.cred,
                  connection_port, exclude_hosts)
         mock_run.assert_called_with(ANY)
 
@@ -273,7 +278,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
-        _connect(self.scan_task,
+        _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
                  hosts, Mock(), self.cred, connection_port,
                  exclude_hosts, base_ssh_executable=path)
         mock_run.assert_called_with(ANY)
@@ -291,6 +296,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))
         _connect(
+            Value('i', ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(), self.cred, connection_port,
@@ -304,9 +310,10 @@ class NetworkConnectTaskRunnerTest(TestCase):
         """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
-        conn_dict = scanner.run_with_result_store(result_store)
+        conn_dict = scanner.run_with_result_store(
+            Value('i', ScanJob.JOB_RUN), result_store)
         mock_connect.assert_called_with(
-            self.scan_task, ANY, ANY, ANY, 22, False, forks=50)
+            ANY, self.scan_task, ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
@@ -364,7 +371,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         connection_port = source['port']
         with self.assertRaises(AnsibleError):
-            _connect(self.scan_task, hosts, Mock(), self.cred, connection_port)
+            _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
+                     hosts, Mock(), self.cred, connection_port)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -376,7 +384,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         source = serializer.data
         hosts = source['hosts']
         connection_port = source['port']
-        _connect(self.scan_task, hosts, Mock(), self.cred, connection_port)
+        _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
+                 hosts, Mock(), self.cred, connection_port)
         mock_run.assert_called_with(ANY)
 
     @patch('scanner.network.connect._connect')
@@ -384,7 +393,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         """Test running a connect scan with mocked connection."""
         scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
         result_store = MockResultStore(['1.2.3.4'])
-        conn_dict = scanner.run_with_result_store(result_store)
+        conn_dict = scanner.run_with_result_store(
+            Value('i', ScanJob.JOB_RUN), result_store)
         mock_connect.assert_called_with(
-            self.scan_task2, ANY, ANY, ANY, 22, False, forks=50)
+            ANY, self.scan_task2, ANY, ANY, ANY, 22, False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)

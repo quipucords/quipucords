@@ -24,6 +24,9 @@ from api.models import (ScanJob,
 
 from quipucords import settings
 
+from scanner.network.exceptions import (NetworkCancelException,
+                                        NetworkPauseException,
+                                        ScannerException)
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_error_msg,
                                    _construct_vars,
@@ -62,19 +65,6 @@ DEFAULT_ROLES = [
 
 DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']
 NETWORK_SCAN_IDENTITY_KEY = 'connection_host'
-
-
-class ScannerException(Exception):
-    """Exception for issues detected during scans."""
-
-    def __init__(self, message=''):
-        """Exception for issues detected during scans.
-
-        :param message: An error message describing the problem encountered
-        during scan.
-        """
-        self.message = 'Scan task failed.  Error: {}'.format(message)
-        super().__init__(self.message)
 
 
 class InspectTaskRunner(ScanTaskRunner):
@@ -147,7 +137,8 @@ class InspectTaskRunner(ScanTaskRunner):
             remaining = [
                 unprocessed for unprocessed in connected
                 if unprocessed[0] not in processed_hosts]
-            scan_message, scan_result = self._inspect_scan(remaining)
+            scan_message, scan_result = self._inspect_scan(
+                manager_interrupt, remaining)
 
             self.scan_task.cleanup_facts(NETWORK_SCAN_IDENTITY_KEY)
             temp_facts = self.scan_task.get_facts()
@@ -166,6 +157,16 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = 'Scan task encountered error: %s' % \
                 assertion_error
             return error_message, ScanTask.FAILED
+        except NetworkCancelException:
+            error_message = 'Inspect scan cancel for %s.' % (
+                self.scan_task.source.name)
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+        except NetworkPauseException:
+            error_message = 'Inspect scan pause for %s.' % (
+                self.scan_task.source.name)
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
         except ScannerException as scan_error:
             error_message = 'Scan task encountered error: %s' % \
                 scan_error
@@ -199,12 +200,14 @@ class InspectTaskRunner(ScanTaskRunner):
             self.scan_task.inspection_result.systems.add(sys_result)
             self.scan_task.inspection_result.save()
 
-    # pylint: disable=too-many-locals,W0102
-    def _inspect_scan(self, connected, roles=DEFAULT_ROLES,
+    # pylint: disable=too-many-locals,W0102,too-many-arguments
+    def _inspect_scan(self, manager_interrupt, connected, roles=DEFAULT_ROLES,
                       base_ssh_executable=None,
                       ssh_timeout=None):
         """Execute the host scan with the initialized source.
 
+        :param manager_interrupt: Signal used to communicate termination
+            of scan
         :param connected: list of (host, credential) pairs to inspect
         :param roles: list of roles to execute
         :param base_ssh_executable: ssh executable, or None for
@@ -266,6 +269,12 @@ class InspectTaskRunner(ScanTaskRunner):
         scan_result = ScanTask.COMPLETED
         scan_message = 'success'
         for idx, group_name in enumerate(group_names):
+            if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                raise NetworkCancelException()
+
+            if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                raise NetworkPauseException()
+
             log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
                 (idx + 1), len(group_names))
             self.scan_task.log_message(log_message)
