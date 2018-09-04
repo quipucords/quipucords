@@ -288,6 +288,7 @@ def _connect(scan_task,
     for idx, group_name in enumerate(group_names):
         group_ips = inventory.get('all').get(
             'children').get(group_name).get('hosts').keys()
+        group_ips = ["'%s'" % ip for ip in group_ips]
         group_ip_string = ', '.join(group_ips)
         log_message = 'START CONNECT PROCESSING GROUP %d of %d. '\
             'About to connecting to hosts [%s]' % (
