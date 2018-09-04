@@ -7,7 +7,7 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*
+OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*,*/local_gunicorn.conf.py
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -53,10 +53,10 @@ swagger-valid:
 	node_modules/swagger-cli/bin/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
-	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy
+	flake8 . --ignore D203 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy,quipucords/local_gunicorn.conf.py
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" -not -path "./quipucords/local_gunicorn.conf.py" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code
 
 lint: lint-flake8 lint-pylint
 

@@ -30,7 +30,7 @@ import pexpect
 from quipucords import settings
 
 from scanner.network.connect_callback import ConnectResultCallback
-from scanner.network.utils import (_construct_error,
+from scanner.network.utils import (_construct_error_msg,
                                    _construct_vars,
                                    decrypt_data_as_unicode,
                                    expand_hostpattern,
@@ -191,12 +191,14 @@ class ConnectTaskRunner(ScanTaskRunner):
             message = 'Attempting credential %s.' % credential.name
             self.scan_task.log_message(message)
 
-            cred_data = CredentialSerializer(credential).data
-            callback = ConnectResultCallback(result_store, credential,
-                                             self.scan_task.source)
             try:
-                connect(remaining_hosts, callback, cred_data, connection_port,
-                        use_paramiko, forks=forks)
+                _connect(self.scan_task,
+                         remaining_hosts,
+                         result_store,
+                         credential,
+                         connection_port,
+                         use_paramiko,
+                         forks=forks)
             except AnsibleError as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
                 error_message = 'Connect scan task failed with credential %s.'\
@@ -218,13 +220,21 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def connect(hosts, callback, credential, connection_port, use_paramiko=False,
-            forks=50, exclude_hosts=None, base_ssh_executable=None,
-            ssh_timeout=None):
+def _connect(scan_task,
+             hosts,
+             result_store,
+             credential,
+             connection_port,
+             use_paramiko=False,
+             forks=50,
+             exclude_hosts=None,
+             base_ssh_executable=None,
+             ssh_timeout=None):
     """Attempt to connect to hosts using the given credential.
 
+    :param scan_task: The scan task for this connection job
     :param hosts: The collection of hosts to test connections
-    :param callback: The Ansible callback to accept the results.
+    :param result_store: The result store to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param use_paramiko: use paramiko instead of ssh for connection
@@ -238,6 +248,8 @@ def connect(hosts, callback, credential, connection_port, use_paramiko=False,
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
+    cred_data = CredentialSerializer(credential).data
+
     ssh_executable = os.path.abspath(
         os.path.join(os.path.dirname(__file__),
                      '../../../bin/timeout_ssh'))
@@ -254,26 +266,54 @@ def connect(hosts, callback, credential, connection_port, use_paramiko=False,
     ssh_args = ['--executable=' + base_ssh_executable,
                 '--timeout=' + ssh_timeout,
                 'ssh']
-    inventory = construct_connect_inventory(hosts, credential, connection_port,
-                                            exclude_hosts, ssh_executable,
-                                            ssh_args)
+    group_names, inventory = _construct_connect_inventory(hosts,
+                                                          cred_data,
+                                                          connection_port,
+                                                          forks,
+                                                          exclude_hosts,
+                                                          ssh_executable,
+                                                          ssh_args)
     inventory_file = write_inventory(inventory)
     extra_vars = {}
 
-    playbook = {'name': 'discovery play',
-                'hosts': 'all',
-                'gather_facts': 'no',
-                'tasks': [{'action': {'module': 'raw',
-                                      'args': parse_kv('echo "Hello"')}}]}
+    _handle_ssh_passphrase(cred_data)
 
-    _handle_ssh_passphrase(credential)
-    result = run_playbook(inventory_file, callback, playbook,
-                          extra_vars, use_paramiko, forks=forks)
+    error_msg = ''
+    log_message = 'START CONNECT PROCESSING GROUPS'\
+        ' with use_paramiko: %s,' \
+        '%d forks and extra_vars=%s' % (use_paramiko,
+                                        forks,
+                                        extra_vars)
+    scan_task.log_message(log_message)
+    for idx, group_name in enumerate(group_names):
+        group_ips = inventory.get('all').get(
+            'children').get(group_name).get('hosts').keys()
+        group_ips = ["'%s'" % ip for ip in group_ips]
+        group_ip_string = ', '.join(group_ips)
+        log_message = 'START CONNECT PROCESSING GROUP %d of %d. '\
+            'About to connecting to hosts [%s]' % (
+                (idx + 1), len(group_names), group_ip_string)
+        scan_task.log_message(log_message)
+        callback = ConnectResultCallback(result_store, credential,
+                                         scan_task.source)
+        playbook = {'name': 'attempt connection to systems',
+                    'hosts': group_name,
+                    'gather_facts': False,
+                    'tasks': [
+                        {'action': {'module': 'raw',
+                                    'args': parse_kv('echo "Hello"')}}]}
+        result = run_playbook(
+            inventory_file, callback, playbook,
+            extra_vars, use_paramiko, forks=forks)
 
-    if (result != TaskQueueManager.RUN_OK and
-            result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and
-            result != TaskQueueManager.RUN_FAILED_HOSTS):
-        raise _construct_error(result)
+        if result != TaskQueueManager.RUN_OK:
+            new_error_msg = _construct_error_msg(result)
+            if result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and \
+                    result != TaskQueueManager.RUN_FAILED_HOSTS:
+                error_msg += '{}\n'.format(new_error_msg)
+
+    if error_msg != '':
+        raise AnsibleError(error_msg)
 
 
 def _handle_ssh_passphrase(credential):
@@ -299,34 +339,53 @@ def _handle_ssh_passphrase(credential):
             pass
 
 
-def construct_connect_inventory(hosts, credential, connection_port,
-                                exclude_hosts=None, ssh_executable=None,
-                                ssh_args=None):
+def _construct_connect_inventory(hosts,
+                                 credential,
+                                 connection_port,
+                                 concurrency_count,
+                                 exclude_hosts=None,
+                                 ssh_executable=None,
+                                 ssh_args=None):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
     :param credential: The credential used for connections
     :param connection_port: The connection port
+    :param concurrency_count: The number of concurrent scans
     :param exclude_hosts: Optional. Hosts to exclude test connections
     :param ssh_executable: the ssh executable to use, or None for 'ssh'
     :param ssh_args: a list of extra ssh arguments, or None
     :returns: A dictionary of the ansible inventory
     """
-    inventory = None
-    hosts_dict = {}
-
     if exclude_hosts is not None:
         hosts = list(set(hosts) - set(exclude_hosts))
 
-    for host in hosts:
-        host_vars = {}
-        if ssh_executable:
-            host_vars['ansible_ssh_executable'] = ssh_executable
-        if ssh_args:
-            host_vars['ansible_ssh_common_args'] = ' '.join(ssh_args)
-        hosts_dict[host] = host_vars
+    concurreny_groups = \
+        list(
+            [hosts[i:i + concurrency_count]
+             for i in range(0,
+                            len(hosts),
+                            concurrency_count)])
 
     vars_dict = _construct_vars(connection_port, credential)
+    children = {}
+    inventory = {'all': {'children': children, 'vars': vars_dict}}
+    i = 0
+    group_names = []
+    for concurreny_group in concurreny_groups:
+        hosts_dict = {}
+        for host in concurreny_group:
+            host_vars = {}
+            host_vars['ansible_host'] = host
+            if ssh_executable:
+                host_vars['ansible_ssh_executable'] = ssh_executable
+            if ssh_args:
+                host_vars['ansible_ssh_common_args'] = ' '.join(ssh_args)
+            hosts_dict[host] = host_vars
 
-    inventory = {'all': {'hosts': hosts_dict, 'vars': vars_dict}}
-    return inventory
+        group_name = 'group_{}'.format(i)
+        i += 1
+        group_names.append(group_name)
+        children[group_name] = {'hosts': hosts_dict}
+
+    return group_names, inventory
