@@ -34,7 +34,7 @@ pycparser==2.18
 pycrypto==2.6.1
 PyNaCl==1.2.1
 python-dateutil==2.7.3
-pytz==2017.2
+pytz==2018.5
 pyvmomi
 PyYAML==3.12
 requests==2.18.4
