@@ -120,15 +120,19 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
     cd quipucords
 
 3. Make symbolic link to ansible roles::
+
     ln -s ../roles/ roles
 
 4. Install gunicorn::
+
     pip install gunicorn==19.7.1
 
 5. Start gunicorn::
+
     gunicorn quipucords.wsgi -c ./local_gunicorn.conf.py
 
 6. Configure the CLI by using the following commands::
+
     qpc server config --host 127.0.0.1 --port 8000
     qpc server login
 
