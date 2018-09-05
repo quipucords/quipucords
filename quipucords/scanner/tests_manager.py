@@ -61,9 +61,11 @@ class ScanManagerTest(TestCase):
     def test_work(self):
         """Test the work function."""
         task = MockTask()
+        self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.put(task)
+        self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.work()
-        self.assertIsNone(self.scan_manager.current_task)
+        self.assertEqual(task, self.scan_manager.current_task_runner)
 
     def test_kill_missing(self):
         """Test kill on missing id."""
