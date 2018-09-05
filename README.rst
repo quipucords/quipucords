@@ -107,6 +107,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
 
+
 Command Syntax and Usage
 ------------------------
 The complete list of options for each qpc command and subcommand are listed in the qpc man page. The man page information also contains usage examples and some best practice recommendations.
