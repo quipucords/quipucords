@@ -187,8 +187,9 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
 1. Clone the repository::
 
     git clone git@github.com:quipucords/quipucords.git
+    cd quipucords
 
-2. Switch to quipucords directory::
+2. Switch to quipucords django app module::
 
     cd quipucords
 
