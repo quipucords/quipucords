@@ -64,7 +64,6 @@ class Manager(Thread):
             interval = DEFAULT_HEARTBEAT
         heartbeat = Timer(interval, self.log_info)
         current_scan_job = None
-        scan_job_message = None
         if self.current_task_runner:
             current_scan_job = self.current_task_runner.identifier
             scan_job_message = 'Currently running scan job %s' % \
