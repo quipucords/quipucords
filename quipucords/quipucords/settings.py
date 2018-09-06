@@ -22,7 +22,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import datetime
 import os
-import django.db
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -137,23 +136,26 @@ QPC_DBMS = os.getenv('QPC_DBMS', 'sqlite3').lower()
 
 if QPC_DBMS == 'postgres':
     # The following variables are only relevant when using a postgres database:
-    PGDATABASE = os.getenv('PGDATABASE', 'postgres')
-    PGUSER = os.getenv('PGUSER', 'postgres')
-    PGPASSWORD = os.getenv('PGPASSWORD', 'postgres')
-    PGHOST = os.getenv('PGHOST', 'localhost' or '::')  # :: means localhost but allows IPv4
-    PGPORT = os.getenv('PGPORT', 5432)    # and IPv6 connections
+    QPC_DBMS_DATABASE = os.getenv('QPC_DBMS_DATABASE', 'postgres')
+    QPC_DBMS_USER = os.getenv('QPC_DBMS_USER', 'postgres')
+    QPC_DBMS_PASSWORD = os.getenv('QPC_DBMS_PASSWORD', 'postgres')
+    # In the following env variable, :: means localhost but allows IPv4
+    #  and IPv6 connections
+    QPC_DBMS_HOST = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
+    QPC_DBMS_PORT = os.getenv('QPC_DBMS_PORT', 5432)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': PGDATABASE,
-            'USER': PGUSER,
-            'PASSWORD': PGPASSWORD,
-            'HOST': PGHOST,
-            'PORT': PGPORT,
+            'NAME': QPC_DBMS_DATABASE,
+            'USER': QPC_DBMS_USER,
+            'PASSWORD': QPC_DBMS_PASSWORD,
+            'HOST': QPC_DBMS_HOST,
+            'PORT': QPC_DBMS_PORT,
         }
     }
 else:
-    QPC_DBMS = 'sqlite3' # If user enters an invalid QPC_DBMS, just use default sqlite3
+    # If user enters an invalid QPC_DBMS, use default sqlite3
+    QPC_DBMS = 'sqlite3'
     DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
     PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
                            'db.sqlite3')
