@@ -100,7 +100,7 @@ def startup():
     if os.environ.get('QPC_DBMS') == 'postgres':
         logger.info('QPC_DBMS set to "postgres".')
     elif not os.environ.get('QPC_DBMS'):
-        logger.info('QPC_DBMS not set using default of "sqlite3".')
+        logger.info('QPC_DBMS not set. Using default of "sqlite3".')
     else:
         logger.info('QPC_DBMS was set to "%s" which is not a valid option. '
                     'Using default of "sqlite3".',
