@@ -22,6 +22,7 @@ from api.models import (Credential,
 from api.serializers import SourceSerializer
 from api.source.view import format_source
 
+from django.core import management
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -43,6 +44,7 @@ class SourceTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
+        management.call_command('flush', '--no-input')
         self.net_cred = Credential.objects.create(
             name='net_cred1',
             cred_type=Credential.NETWORK_CRED_TYPE,

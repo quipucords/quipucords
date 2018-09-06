@@ -16,6 +16,7 @@ import api.messages as messages
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 
+from django.core import management
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -24,6 +25,14 @@ from rest_framework import status
 
 class CredentialTest(TestCase):
     """Tests against the Credential model and view set."""
+
+    def setUp(self):
+        """Create test case setup."""
+        management.call_command('flush', '--no-input')
+
+    def tearDown(self):
+        """Create test case tear down."""
+        pass
 
     # pylint: disable= no-self-use,invalid-name
     def create_credential(self, name='test_cred',
