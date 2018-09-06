@@ -88,6 +88,7 @@ class Manager(Thread):
                             SCAN_MANAGER_LOG_PREFIX,
                             self.current_task_runner.scan_job.id)
                 self.current_task_runner.start()
+                self.log_info()
             else:
                 error = '%s: Could not start job. Job was not in %s state.' % \
                     (SCAN_MANAGER_LOG_PREFIX, ScanTask.PENDING)
@@ -100,6 +101,7 @@ class Manager(Thread):
         :param task: Task to be performed.
         """
         self.scan_queue.insert(0, task)
+        self.log_info()
 
     def kill(self, job, command):
         """Kill a task or remove it from the running queue.
@@ -135,6 +137,7 @@ class Manager(Thread):
                 if queued_job.identifier == job_id:
                     self.scan_queue.remove(queued_job)
                     removed = True
+                    self.log_info()
                     break
             if removed:
                 killed = True
@@ -178,7 +181,7 @@ class Manager(Thread):
         while self.running:
             queue_len = len(self.scan_queue)
             if self.terminated_task_runner is not None:
-                # Occurs when current jobs was terminated
+                # Occurs when current job was terminated
                 killed = not self.terminated_task_runner.is_alive()
                 interrupt = self.terminated_task_runner.manager_interrupt
                 if killed:
