@@ -13,7 +13,6 @@
 from collections import namedtuple
 
 from ansible import constants as C
-from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.inventory import Inventory
 from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
@@ -173,10 +172,6 @@ def _construct_error_msg(return_code):
     elif return_code == TaskQueueManager.RUN_FAILED_BREAK_PLAY:
         message = ANSIBLE_PLAYBOOK_ERR_MSG
     return message
-
-
-def _construct_error(return_code):
-    return AnsibleError(message=_construct_error_msg(return_code))
 
 
 def expand_hostpattern(hostpattern):

@@ -75,7 +75,7 @@
 
 # subman_virt_uuid fact
 - name: gather subman.virt.uuid fact
-  raw: subscription-manager facts --list | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
+  raw: subscription-manager facts --list 2>/dev/null | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
   register: internal_subman_virt_uuid_cmd
   ignore_errors: yes
   become: yes
@@ -104,7 +104,7 @@
 
 # subman_consumed fact
 - name: gather subman.consumed fact
-  raw: subscription-manager list --consumed | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
+  raw: subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
   register: subman_consumed
   ignore_errors: yes
   become: yes

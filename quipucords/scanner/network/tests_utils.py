@@ -13,8 +13,6 @@
 import unittest
 from unittest import mock
 
-from ansible.executor.task_queue_manager import TaskQueueManager
-
 from scanner.network import utils
 
 
@@ -41,20 +39,6 @@ class TestConstructVars(unittest.TestCase):
                     'ansible_become_user': 'root',
                     'ansible_become_method': 'sudo'}
         self.assertEqual(vars_dict, expected)
-
-
-class TestConstructError(unittest.TestCase):
-    """Test _construct_error."""
-
-    # pylint: disable=protected-access
-    def test_construct_error(self):
-        """Test the creation of different errors."""
-        error = utils._construct_error(TaskQueueManager.RUN_FAILED_HOSTS)
-        self.assertEqual(error.message, utils.ANSIBLE_FAILED_HOST_ERR_MSG)
-        error = utils._construct_error(TaskQueueManager.RUN_UNREACHABLE_HOSTS)
-        self.assertEqual(error.message, utils.ANSIBLE_UNREACHABLE_HOST_ERR_MSG)
-        error = utils._construct_error(TaskQueueManager.RUN_FAILED_BREAK_PLAY)
-        self.assertEqual(error.message, utils.ANSIBLE_PLAYBOOK_ERR_MSG)
 
 
 class TestExpandHostpattern(unittest.TestCase):
