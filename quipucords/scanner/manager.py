@@ -40,6 +40,12 @@ try:
 except ValueError:
     ORDERLY_SHUTDOWN_TIMEOUT_LENGTH = DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN
 
+try:
+    HEART_BEAT_INTERVAL = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT',
+                                             DEFAULT_HEARTBEAT))
+except ValueError:
+    HEART_BEAT_INTERVAL = DEFAULT_HEARTBEAT
+
 
 class Manager(Thread):
     """Manager of scan job queue."""
@@ -55,14 +61,15 @@ class Manager(Thread):
         logger.info('%s: Scan manager instance created.',
                     SCAN_MANAGER_LOG_PREFIX)
 
+    def start_log_timer(self):
+        """Start log timer."""
+        self.log_info()
+        heartbeat = Timer(HEART_BEAT_INTERVAL, self.start_log_timer)
+        if self.running:
+            heartbeat.start()
+
     def log_info(self):
         """Log the status of the scan manager."""
-        try:
-            interval = int(os.environ.get('QUIPUCORDS_MANAGER_HEARTBEAT',
-                                          DEFAULT_HEARTBEAT))
-        except ValueError:
-            interval = DEFAULT_HEARTBEAT
-        heartbeat = Timer(interval, self.log_info)
         current_scan_job = None
         if self.current_task_runner:
             current_scan_job = self.current_task_runner.identifier
@@ -71,12 +78,15 @@ class Manager(Thread):
         else:
             scan_job_message = 'No scan job currently running'
 
-        logger.info('%s: %s.  Scan queue length is %s.',
+        scan_queue_ids = [
+            scan_runner.scan_job.id for scan_runner in self.scan_queue]
+        scan_queue_ids.reverse()
+
+        logger.info('%s: %s.  Scan queue length is %s. Queued jobs: %s',
                     SCAN_MANAGER_LOG_PREFIX,
                     scan_job_message,
-                    len(self.scan_queue))
-        if self.running:
-            heartbeat.start()
+                    len(self.scan_queue),
+                    scan_queue_ids)
 
     def work(self):
         """Start to excute scans in the queue."""
@@ -177,7 +187,7 @@ class Manager(Thread):
         """Trigger thread execution."""
         self.restart_incomplete_scansjobs()
         logger.info('%s: Started run loop.', SCAN_MANAGER_LOG_PREFIX)
-        self.log_info()
+        self.start_log_timer()
         while self.running:
             queue_len = len(self.scan_queue)
             if self.terminated_task_runner is not None:

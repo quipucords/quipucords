@@ -30,6 +30,7 @@ class MockTask(Thread):
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
+        self.identifier = 'TestScan'
 
     def log_message(self, message):
         """Fake log message."""
