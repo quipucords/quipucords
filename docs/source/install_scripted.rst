@@ -113,3 +113,16 @@ Options:
     - Contains the port number for the Quipucords server. Defaults to ``443``.
  - **server_name**
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
+- **QPC_DBMS**
+    - Contains ``postgres`` or ``sqlite3``. Defaults to ``sqlite3``. Supply ``postgres`` to change the database management system to postgres.
+- **QPC_DBMS_PORT**
+    - (Optional) Specifies the database port for postgres. Defaults to ``5432``.
+- **QPC_DBMS_DATABASE**
+    - (Optional) Specifies the database name for postgres. Defaults to ``postgres``.
+- **QPC_DBMS_USER**
+    - (Optional) Specifies the database user for postgres. Defaults to ``postgres``.
+- **QPC_DBMS_PASSWORD**
+    - (Required if ``QPC_DBMS=postgres``) Specifies the database password for postgres.
+- **QPC_DBMS_HOST**
+    - (Required if ``QPC_DBMS=postgres``) Specifies the database host for postgres.
+
