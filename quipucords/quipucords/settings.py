@@ -161,8 +161,8 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-# Database Management System could be 'sqlite3' or 'postgresql'
-QPC_DBMS = os.getenv('QPC_DBMS', 'sqlite3').lower()
+# Database Management System could be 'sqlite' or 'postgresql'
+QPC_DBMS = os.getenv('QPC_DBMS', 'sqlite').lower()
 
 if QPC_DBMS == 'postgres':
     # The following variables are only relevant when using a postgres database:
@@ -184,8 +184,8 @@ if QPC_DBMS == 'postgres':
         }
     }
 else:
-    # If user enters an invalid QPC_DBMS, use default sqlite3
-    QPC_DBMS = 'sqlite3'
+    # If user enters an invalid QPC_DBMS, use default sqlite
+    QPC_DBMS = 'sqlite'
     DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
     PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
                            'db.sqlite3')
