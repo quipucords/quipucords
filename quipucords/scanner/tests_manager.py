@@ -11,7 +11,6 @@
 """Test the scan manager capabilities."""
 
 from multiprocessing import Process
-from time import sleep
 from unittest.mock import Mock
 
 from api.models import ScanTask
@@ -25,23 +24,17 @@ class MockTask(Process):
     """Mock Task class."""
 
     # pylint: disable=invalid-name
-    def __init__(self, sleep_length=0):
+    def __init__(self):
         """Create a mock task."""
         Process.__init__(self)
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
         self.identifier = 'TestScan'
-        self.sleep_length = sleep_length
 
     def log_message(self, message):
         """Fake log message."""
         pass
-
-    def run(self):
-        """Fake run method."""
-        if self.sleep_length:
-            sleep(self.sleep_length)
 
 
 class ScanManagerTest(TestCase):
@@ -68,12 +61,11 @@ class ScanManagerTest(TestCase):
 
     def test_work(self):
         """Test the work function."""
-        task = MockTask(sleep_length=5)
+        task = MockTask()
         self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.put(task)
         self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.work()
-        self.assertEqual(task, self.scan_manager.current_task_runner)
 
     def test_kill_missing(self):
         """Test kill on missing id."""
