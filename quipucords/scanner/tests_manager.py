@@ -10,7 +10,8 @@
 #
 """Test the scan manager capabilities."""
 
-from threading import Thread
+from multiprocessing import Process
+from time import sleep
 from unittest.mock import Mock
 
 from api.models import ScanTask
@@ -20,21 +21,27 @@ from django.test import TestCase
 from scanner.manager import Manager
 
 
-class MockTask(Thread):
+class MockTask(Process):
     """Mock Task class."""
 
     # pylint: disable=invalid-name
-    def __init__(self):
+    def __init__(self, sleep_length=0):
         """Create a mock task."""
-        Thread.__init__(self)
+        Process.__init__(self)
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
         self.identifier = 'TestScan'
+        self.sleep_length = sleep_length
 
     def log_message(self, message):
         """Fake log message."""
         pass
+
+    def run(self):
+        """Fake run method."""
+        if self.sleep_length:
+            sleep(self.sleep_length)
 
 
 class ScanManagerTest(TestCase):
@@ -61,7 +68,7 @@ class ScanManagerTest(TestCase):
 
     def test_work(self):
         """Test the work function."""
-        task = MockTask()
+        task = MockTask(sleep_length=5)
         self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.put(task)
         self.assertIsNone(self.scan_manager.current_task_runner)
