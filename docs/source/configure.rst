@@ -10,9 +10,9 @@ When you run the command to start the Quipucords server, you supply values for s
 
 - Accepting or changing the default exposed server port
 - Selecting a directory for SSH keys
-- Selecting a directory for the SQLlite database
+- Selecting a directory for the SQLite database
 - Selecting a directory for log output
-- Selecting a database (postgres or sqlite3) by setting `QPC_DBMS`
+- Selecting a database (postgres or sqlite) by setting `QPC_DBMS`
    - If you are using postgres as your database, you will also have the following options:
 
      - (Optional) Specifying the database name via `QPC_DBMS_DATABASE`
@@ -28,7 +28,7 @@ The following steps guide you through those choices.
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
    - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
+2. Select values for the directory for SSH keys, the directory for the SQLite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
    \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
@@ -44,9 +44,10 @@ The following steps guide you through those choices.
        # mkdir data
        # mkdir log
 
-3. Accept or change the default database management system used by Quipucords. By default, SQLite is used. You can choose to use SQLite or PostgreSQL.
+3. Accept or change the default database management system used by Quipucords. The Quipucords server uses SQLite by default but can be configured to use PostgreSQL. SQLite limits concurrency, and users who have already set up a PostgreSQL database may prefer to use Postgres.
 
    - If you choose to use SQLite, no further configuration is required when you run the Docker command to start the server.
+      - Although further configuration is not necessary, you may optionally provide the following when you run the Docker command to start the server: ``"QPC_DBMS=sqlite"``.
    - If you choose to use PostgreSQL, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS=postgres"``.
       - Additionally, you must provide the following information about your preconfigured postgres database:
          - `QPC_DBMS_DATABASE` (Optional) The database name used by postgres. By default, the name postgres is used.
@@ -65,7 +66,7 @@ The following steps guide you through those choices.
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, SQLlite database, and log output during the Quipucords server configuration.
+After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, SQLite database, and log output during the Quipucords server configuration.
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
 

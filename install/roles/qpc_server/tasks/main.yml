@@ -167,9 +167,9 @@
     docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
   when: "'stdout_lines' in docker_ps_raw"
 
-- name: Set QPC_DBMS (defaults to use sqlite3)
+- name: Set QPC_DBMS (defaults to use sqlite)
   set_fact:
-    QPC_DBMS: "{{ ansible_env['QPC_DBMS'] | default('sqlite3') }}"
+    QPC_DBMS: "{{ ansible_env['QPC_DBMS'] | default('sqlite') }}"
   when:
     - QPC_DBMS is not defined
 

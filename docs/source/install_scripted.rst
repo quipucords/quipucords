@@ -114,7 +114,7 @@ Options:
  - **server_name**
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
 - **QPC_DBMS**
-    - Contains ``postgres`` or ``sqlite3``. Defaults to ``sqlite3``. Supply ``postgres`` to change the database management system to postgres.
+    - Contains ``postgres`` or ``sqlite``. Defaults to ``sqlite``. Supply ``postgres`` to change the database management system to postgres.
 - **QPC_DBMS_PORT**
     - (Optional) Specifies the database port for postgres. Defaults to ``5432``.
 - **QPC_DBMS_DATABASE**
