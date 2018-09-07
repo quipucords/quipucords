@@ -15,6 +15,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='systemfingerprint',
             name='infrastructure_type',
-            field=models.CharField(choices=[('bare_metal', 'Bare Metal'), ('virtualized', 'Virtualized'), ('unknown', 'Unknown')], default='unknown', max_length=12),
+            field=models.CharField(choices=[('bare_metal', 'Bare Metal'), (
+                'virtualized', 'Virtualized'), ('unknown', 'Unknown')], default='unknown', max_length=12),
+        ),
+        migrations.AlterField(
+            model_name='source',
+            name='source_type',
+            field=models.CharField(choices=[(
+                'network', 'network'), ('vcenter', 'vcenter'), ('satellite', 'satellite')], max_length=12),
         ),
     ]
