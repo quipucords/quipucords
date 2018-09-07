@@ -118,3 +118,6 @@ db.sqlite3
 # node
 node_modules
 package-lock.json
+
+# symbolic link to roles
+quipucords/roles/
