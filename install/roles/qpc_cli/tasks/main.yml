@@ -38,20 +38,6 @@
     - qpc_repo_file is not defined
     - is_rhel_centos_6
 
-- name: Set qpc repo url for Fedora 26
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-26/group_quipucords-qpc-fedora-26.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_fedora_26
-
-- name: Set qpc repo file for Fedora 26
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-26.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_fedora_26
-
 - name: Set qpc repo url for Fedora 27
   set_fact:
     qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-27/group_quipucords-qpc-fedora-27.repo') }}"
@@ -66,12 +52,19 @@
     - qpc_repo_file is not defined
     - is_fedora_27
 
-- name: Set qpc version for Fedora 26
+- name: Set qpc repo url for Fedora 28
   set_fact:
-    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc') }}"
+    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora-28.repo') }}"
   when:
-    - qpc_version is not defined
-    - is_fedora_26
+    - qpc_repo_url is not defined
+    - is_fedora_28
+
+- name: Set qpc repo file for Fedora 28
+  set_fact:
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-26.repo') }}"
+  when:
+    - qpc_repo_file is not defined
+    - is_fedora_28
 
 - name: Set qpc version for Fedora 27
   set_fact:
@@ -79,6 +72,13 @@
   when:
     - qpc_version is not defined
     - is_fedora_27
+
+- name: Set qpc version for Fedora 28
+  set_fact:
+    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc') }}"
+  when:
+    - qpc_version is not defined
+    - is_fedora_28
 
 - name: Set qpc version for RHEL/CentOS 6
   set_fact:

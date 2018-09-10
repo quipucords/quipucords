@@ -11,6 +11,6 @@ The Quipucords server is delivered as a container image that runs on your server
 .. include:: install_server_rhel7.rst
 .. include:: install_server_centos7.rst
 .. include:: install_server_rhel6_centos6.rst
-.. include:: install_server_fedora26_fedora27.rst
+.. include:: install_server_fedora.rst
 .. include:: install_container_image.rst
 .. include:: configure.rst

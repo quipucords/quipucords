@@ -29,9 +29,9 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 
       # wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-27.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-27/group_quipucords-qpc-fedora-27.repo
 
-  - For Fedora 26, enter the following command::
+  - For Fedora 28, enter the following command::
 
-      # wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-26.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-26/group_quipucords-qpc-fedora-26.repo
+      # wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-28.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora-28.repo
 
 3. Install the qpc package:
 
@@ -47,6 +47,6 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 
       # yum -y install qpc
 
-  - For Fedora 26, enter the following command::
+  - For Fedora 28, enter the following command::
 
       # yum -y install qpc
