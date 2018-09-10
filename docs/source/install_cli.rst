@@ -37,16 +37,16 @@ qpc, the command line tool that is installed by RPM, is available for `download 
 
   - For Red Hat Enterprise Linux 7 or CentOS 7, enter the following command::
 
-      # yum -y install qpc
+      # yum -y install qpc-0.0.44-1.git.714.f444cdd.el7
 
   - For Red Hat Enterprise Linux 6 or CentOS 6, enter the following command::
 
-      # yum -y install qpc
+      # yum -y install qpc-0.0.44-1.git.714.f444cdd.el6
 
   - For Fedora 27, enter the following command::
 
-      # yum -y install qpc
+      # yum -y install qpc-0.0.44-1.git.714.f444cdd.fc27
 
   - For Fedora 28, enter the following command::
 
-      # yum -y install qpc
+      # yum -y install qpc-0.0.44-1.git.714.f444cdd.fc28
