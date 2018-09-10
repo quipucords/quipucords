@@ -73,7 +73,7 @@ qpc is available for `download <https://copr.fedorainfracloud.org/coprs/g/quipuc
 
 3. Install the qpc package::
 
-    yum -y install qpc
+    yum -y install qpc-0.0.44-1.git.714.f444cdd.fc28
 
 Container Image
 ^^^^^^^^^^^^^^^
