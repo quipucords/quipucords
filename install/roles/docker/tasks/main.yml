@@ -109,7 +109,7 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Add Docker CE repository for Fedora 26/27
+- name: Add Docker CE repository for Fedora 27/28
   yum_repository:
     name: docker-ce
     description: Docker CE repo
@@ -118,7 +118,7 @@
     gpgcheck: yes
   become: true
   when:
-    - is_fedora_26_27
+    - is_fedora_27_28
     - not have_docker
     - not find_docker_rpm_local
 
