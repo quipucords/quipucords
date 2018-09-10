@@ -1701,7 +1701,7 @@ definitions:
       platform:
         type: "object"
         description: "name/value string pairs describing the server"
-        example: {"system": "Fedora", "node": "26aec4157585", "release": "26", "version": "Fedora 26", "machine": "x86_64", "processor": "i386"}
+        example: {"system": "Fedora", "node": "26aec4157585", "release": "28", "version": "Fedora 28", "machine": "x86_64", "processor": "i386"}
       server_id:
         type: "string"
         description: "Globally unique server identifier"
