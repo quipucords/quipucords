@@ -61,7 +61,7 @@
 
 - name: Set qpc repo file for Fedora 28
   set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-26.repo') }}"
+    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-28.repo') }}"
   when:
     - qpc_repo_file is not defined
     - is_fedora_28
