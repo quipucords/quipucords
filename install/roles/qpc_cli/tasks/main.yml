@@ -68,14 +68,14 @@
 
 - name: Set qpc version for Fedora 27
   set_fact:
-    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc-0.0.44-1.git.714.f444cdd.fc28') }}"
+    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc-0.0.44-1.git.714.f444cdd.fc27') }}"
   when:
     - qpc_version is not defined
     - is_fedora_27
 
 - name: Set qpc version for Fedora 28
   set_fact:
-    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc-0.0.44-1.git.714.f444cdd.fc27') }}"
+    qpc_version: "{{ ansible_env['QPC_VERSION'] | default('qpc-0.0.44-1.git.714.f444cdd.fc28') }}"
   when:
     - qpc_version is not defined
     - is_fedora_28
