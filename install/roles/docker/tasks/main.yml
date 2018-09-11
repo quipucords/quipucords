@@ -27,11 +27,21 @@
   set_fact:
     have_docker: "{{ have_docker_raw.rc == 0 }}"
 
-- name: Install yum-utils
+- name: Install yum-utils on RHEL/Centos
   yum:
     name: yum-utils
     state: present
   become: true
+  when:
+    - not is_fedora
+
+- name: Install yum-utils on Fedora
+  dnf:
+    name: yum-utils
+    state: present
+  become: true
+  when:
+    - is_fedora
 
 - name: Install device-mapper-persistent-data
   yum:
@@ -65,7 +75,7 @@
     state: present
   become: true
   when:
-    - is_rhel_centos_6
+    - is_rhel_centos_6 or is_fedora
     - selinux_on
 
 - name: Find installable local epel rpm
@@ -118,7 +128,7 @@
     gpgcheck: yes
   become: true
   when:
-    - is_fedora_27_28
+    - is_fedora
     - not have_docker
     - not find_docker_rpm_local
 
@@ -138,7 +148,7 @@
     state: latest
   become: true
   when:
-    - is_centos_7
+    - is_centos_7 or is_fedora
     - not have_docker
     - not find_docker_rpm_local
 
