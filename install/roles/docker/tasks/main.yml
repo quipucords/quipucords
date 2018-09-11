@@ -43,17 +43,37 @@
   when:
     - is_fedora
 
-- name: Install device-mapper-persistent-data
+- name: Install device-mapper-persistent-data RHEL/Centos
   yum:
     name: device-mapper-persistent-data
     state: present
   become: true
+  when:
+    - not is_fedora
 
-- name: Install lvm2
+- name: Install device-mapper-persistent-data Fedora
+  dnf:
+    name: device-mapper-persistent-data
+    state: present
+  become: true
+  when:
+    - is_fedora
+
+- name: Install lvm2 on RHEL/Centos
   yum:
     name: lvm2
     state: present
   become: true
+  when:
+    - not is_fedora
+
+- name: Install lvm2 on Fedora
+  dnf:
+    name: lvm2
+    state: present
+  become: true
+  when:
+    - is_fedora
 
 - name: Install libcgroup
   yum:
@@ -69,13 +89,22 @@
   become: true
   when: is_rhel_centos_6
 
-- name: Install libselinux-python
+- name: Install libselinux-python on RHEL 6
   yum:
     name: libselinux-python
     state: present
   become: true
   when:
-    - is_rhel_centos_6 or is_fedora
+    - is_rhel_centos_6
+    - selinux_on
+
+- name: Install libselinux-python on Fedora
+  dnf:
+    name: libselinux-python
+    state: present
+  become: true
+  when:
+    - is_fedora
     - selinux_on
 
 - name: Find installable local epel rpm
@@ -142,13 +171,23 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Install the latest version of docker-ce
+- name: Install the latest version of docker-ce Centos 7
   yum:
     name: docker-ce
     state: latest
   become: true
   when:
-    - is_centos_7 or is_fedora
+    - is_centos_7
+    - not have_docker
+    - not find_docker_rpm_local
+
+- name: Install the latest version of docker-ce Fedora
+  dnf:
+    name: docker-ce
+    state: latest
+  become: true
+  when:
+    - is_fedora
     - not have_docker
     - not find_docker_rpm_local
 
