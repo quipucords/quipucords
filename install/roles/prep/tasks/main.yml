@@ -9,19 +9,19 @@
     is_fedora_27: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '27') }}"
     is_fedora_28: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '28') }}"
 
-- name: Set is_fedora_27_28 to true
+- name: Set is_fedora to true
   set_fact:
-    is_fedora_27_28: true
+    is_fedora: true
   when: is_fedora_28 or is_fedora_27
 
-- name: Set is_fedora_27_28 to false
+- name: Set is_fedora to false
   set_fact:
-    is_fedora_27_28: false
+    is_fedora: false
   when: not (is_fedora_28 or is_fedora_27)
 
 - fail:
     msg: "This is not a supported system for installation. Must be RHEL 6/7, CentOS 6/7, or Fedora 27/28."
-  when: not (is_rhel_centos_6 or is_rhel_centos_7 or is_fedora_27_28)
+  when: not (is_rhel_centos_6 or is_rhel_centos_7 or is_fedora)
 
 - name: Get local package directory
   set_fact:
@@ -32,7 +32,17 @@
   set_fact:
     selinux_on: false
 
-- name: Get selinux_on setting from ansible
+- name: Get selinux_on setting from ansible for Fedora
   set_fact:
     selinux_on: true
-  when: ansible_selinux is defined and ansible_selinux != False and ansible_selinux.status == 'enabled'
+  when:
+    - is_fedora
+    - ansible_selinux is defined and ansible_selinux != False
+
+
+- name: Get selinux_on setting from ansible for RHEL/Centos
+  set_fact:
+    selinux_on: true
+  when:
+    - not is_fedora
+    - ansible_selinux is defined and ansible_selinux != False and ansible_selinux.status == 'enabled'
