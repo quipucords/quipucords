@@ -130,12 +130,23 @@
     - install_cli
     - not find_qpc_rpm_local
 
-- name: Install the latest version of QPC
+- name: Install the latest version of QPC RHEL/Centos
   yum:
     name: '{{ qpc_version }}'
     state: present
   become: true
   when:
+    - not is_fedora
+    - install_cli
+    - not find_qpc_rpm_local
+
+- name: Install the latest version of QPC Fedora
+  dnf:
+    name: '{{ qpc_version }}'
+    state: present
+  become: true
+  when:
+    - is_fedora
     - install_cli
     - not find_qpc_rpm_local
 
