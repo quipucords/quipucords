@@ -27,7 +27,7 @@
   set_fact:
     have_docker: "{{ have_docker_raw.rc == 0 }}"
 
-- name: Install yum-utils on RHEL/Centos
+- name: Install yum-utils (RHEL/Centos)
   yum:
     name: yum-utils
     state: present
@@ -35,7 +35,7 @@
   when:
     - not is_fedora
 
-- name: Install yum-utils on Fedora
+- name: Install yum-utils (Fedora)
   dnf:
     name: yum-utils
     state: present
@@ -43,39 +43,68 @@
   when:
     - is_fedora
 
-- name: Install device-mapper-persistent-data
+- name: Install device-mapper-persistent-data (RHEL/Centos)
   yum:
     name: device-mapper-persistent-data
     state: present
   become: true
+  when:
+    - not is_fedora
 
-- name: Install lvm2
+- name: Install device-mapper-persistent-data (Fedora)
+  dnf:
+    name: device-mapper-persistent-data
+    state: present
+  become: true
+  when:
+    - is_fedora
+
+- name: Install lvm2 (RHEL/Centos)
   yum:
     name: lvm2
     state: present
   become: true
+  when:
+    - not is_fedora
 
-- name: Install libcgroup
+- name: Install lvm2 (Fedora)
+  dnf:
+    name: lvm2
+    state: present
+  become: true
+  when:
+    - is_fedora
+
+- name: Install libcgroup (RHEL 6)
   yum:
     name: libcgroup
     state: present
   become: true
   when: is_rhel_centos_6
 
-- name: Install xz
+- name: Install xz (RHEL 6)
   yum:
     name: xz
     state: present
   become: true
   when: is_rhel_centos_6
 
-- name: Install libselinux-python
+- name: Install libselinux-python (RHEL/Centos 6)
   yum:
     name: libselinux-python
     state: present
   become: true
   when:
-    - is_rhel_centos_6 or is_fedora
+    - is_rhel_centos_6
+    - selinux_on
+
+- name: Install libselinux-python (Fedora)
+  dnf:
+    name: libselinux-python
+    state: present
+  become: true
+  when:
+    - is_fedora
     - selinux_on
 
 - name: Find installable local epel rpm
@@ -106,7 +135,7 @@
     - not have_docker
     - find_docker_rpm_local
 
-- name: Add Docker CE repository for Centos 7
+- name: Add Docker CE repository (Centos 7)
   yum_repository:
     name: docker-ce
     description: Docker CE repo
@@ -119,7 +148,7 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Add Docker CE repository for Fedora 27/28
+- name: Add Docker CE repository (Fedora 27/28)
   yum_repository:
     name: docker-ce
     description: Docker CE repo
@@ -132,7 +161,7 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Install the latest version of docker for RHEL 7
+- name: Install the latest version of docker (RHEL 7)
   yum:
     name: docker
     state: latest
@@ -142,13 +171,23 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Install the latest version of docker-ce
+- name: Install the latest version of docker-ce (Centos 7)
   yum:
     name: docker-ce
     state: latest
   become: true
   when:
-    - is_centos_7 or is_fedora
+    - is_centos_7
+    - not have_docker
+    - not find_docker_rpm_local
+
+- name: Install the latest version of docker-ce (Fedora)
+  dnf:
+    name: docker-ce
+    state: latest
+  become: true
+  when:
+    - is_fedora
     - not have_docker
     - not find_docker_rpm_local
 
@@ -159,7 +198,7 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Obtain Docker Engine for Centos/RHEL 6 family
+- name: Obtain Docker Engine for (Centos/RHEL 6)
   get_url:
     url: http://yum.dockerproject.org/repo/main/centos/6/Packages/docker-engine-1.7.1-1.el6.x86_64.rpm
     dest: "{{ pkg_install_dir }}"
@@ -169,7 +208,7 @@
     - not have_docker
     - not find_docker_rpm_local
 
-- name: Find installable local epel rpm
+- name: Find installable local epel rpm (RHEL/Centos 6)
   find:
     paths: "{{ pkg_install_dir }}"
     patterns: 'docker*.rpm'
@@ -192,7 +231,7 @@
     - find_docker_rpm_local is defined
     - find_docker_rpm_local
 
-- name: Install Docker from local path
+- name: Install Docker from local path (RHEL/Centos 6)
   shell: rpm -Uvh --force "{{find_docker_rpm_local_path}}"
   become: true
   when:
@@ -205,7 +244,7 @@
     state: started
   become: true
 
-- name: Setup chkconfig to start docker
+- name: Setup chkconfig to start docker (RHEL/Centos 6)
   shell: chkconfig docker on
   become: true
   ignore_errors: yes
@@ -213,7 +252,7 @@
     - is_rhel_centos_6
     - have_chkconfig
 
-- name: Setup systemctl to start docker
+- name: Setup systemctl to start docker (RHEL/Centos 7)
   shell: systemctl enable docker
   become: true
   ignore_errors: yes
