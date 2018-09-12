@@ -1,4 +1,4 @@
-Installing Docker on Fedora 26 or Fedora 27
+Installing Docker on Fedora 27 or Fedora 28
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can install Docker in different ways, depending on your needs:
 
@@ -38,7 +38,7 @@ To install from a package, use the following steps:
 
     # sudo yum install /path/to/package.rpm
 
-Starting Docker on Fedora 26 or Fedora 27
+Starting Docker on Fedora 27 or Fedora 28
 +++++++++++++++++++++++++++++++++++++++++
 
 After you install Docker, you must start it and verify that it is running.
@@ -51,4 +51,4 @@ After you install Docker, you must start it and verify that it is running.
 
     # sudo docker run hello-world
 
-After you complete the steps to install Docker for Fedora 26 or Fedora 27, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image  <install.html#container>`_.
+After you complete the steps to install Docker for Fedora 27 or Fedora 28, continue with the Quipucords server installation steps in `Installing the Quipucords Server Container Image  <install.html#container>`_.

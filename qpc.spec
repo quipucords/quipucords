@@ -1,7 +1,7 @@
 %{!?python3_sitelib: %define python3_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: qpc
-Version: 0.0.43
+Version: 0.0.44
 Release: 1%{?dist}
 Summary: A tool for discovery and inspection of an IT environment.
 
@@ -56,6 +56,8 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
+* Fri Sep 7 2018 Cecilia Carter <cecarter@redhat.com> 0.0.44-1
+- Add JBoss Web Server detection to QPC
 * Wed Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
 - Added ability to exlude ip addresses from network scan via CLI
 * Fri May 4 2018 Kevan Holdaway <kholdawa@redhat.com> 0.0.42-1
