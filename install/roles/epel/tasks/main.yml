@@ -18,7 +18,7 @@
   set_fact:
     have_rpm: "{{ have_rpm_raw.rc == 0 }}"
 
-- name: Check for EPEL rpm
+- name: Check for EPEL rpm (RHEL/Centos)
   shell: rpm -qa | grep epel-release
   register: have_epel_rpm_raw
   become: true
@@ -27,21 +27,21 @@
     - not is_fedora
     - have_rpm
 
-- name: Set have_epel_rpm
+- name: Set have_epel_rpm (RHEL/Centos)
   set_fact:
     have_epel_rpm: "{{ have_epel_rpm_raw['stdout_lines']| length > 0 }}"
   when:
     - not is_fedora
     - "'stdout_lines' in have_epel_rpm_raw"
 
-- name: Default have_epel_rpm
+- name: Default have_epel_rpm (RHEL/Centos)
   set_fact:
     have_epel_rpm: false
   when:
     - not is_fedora
     - have_epel_rpm is not defined
 
-- name: Find installable local epel rpm
+- name: Find installable local epel rpm (RHEL/Centos)
   find:
     paths: "{{ pkg_install_dir }}"
     patterns: 'epel*.rpm'
@@ -50,7 +50,7 @@
     - not is_fedora
     - not have_epel_rpm
 
-- name: Set find_epel_rpm_local
+- name: Set find_epel_rpm_local (RHEL/Centos)
   set_fact:
     find_epel_rpm_local: "{{ find_epel_rpm_local_raw['matched'] == 1 }}"
   when:
@@ -58,7 +58,7 @@
     - find_epel_rpm_local_raw is defined
     - "'matched' in find_epel_rpm_local_raw"
 
-- name: Set find_epel_rpm_local_path
+- name: Set find_epel_rpm_local_path (RHEL/Centos)
   set_fact:
     find_epel_rpm_local_path: "{{ find_epel_rpm_local_raw['files'][0]['path'] }}"
   when:
@@ -66,7 +66,7 @@
     - find_epel_rpm_local is defined
     - find_epel_rpm_local
 
-- name: Install EPEL from local path
+- name: Install EPEL from local path (RHEL/Centos)
   shell: rpm -Uvh --force "{{find_epel_rpm_local_path}}"
   become: true
   when:
@@ -74,14 +74,14 @@
     - not have_epel_rpm
     - find_epel_rpm_local
 
-- name: Install EPEL for RHEL 6 from internet
+- name: Install EPEL for RHEL 6 from internet (RHEL/Centos 6)
   shell: rpm -Uvh  --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   become: true
   when:
     - is_rhel_centos_6
     - not have_epel_rpm
 
-- name: Install EPEL for RHEL 7 from internet
+- name: Install EPEL for RHEL 7 from internet (RHEL/Centos 7)
   shell: rpm -Uvh --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   become: true
   when:
