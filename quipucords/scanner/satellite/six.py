@@ -151,7 +151,8 @@ def host_fields(scan_task, api_version, url, org_id, host_id,
     :param url: The endpoint URL to get data from
     :param org_id: The organization identifier
     :param host_id: The identifier of the host being queried.
-    :param ssl_cert_verify: The value defined for ssl_verify cert verify.
+    :param ssl_cert_verify: The value defined for ssl_cert_verify
+            via source options.
     :param host: The host defined by the inspect scan task source.
     :param port: The port defined by the inspect scan task source.
     :param user: The user defined by the credential of the inspect
@@ -267,7 +268,8 @@ def host_subscriptions(scan_task, url, org_id, host_id, ssl_cert_verify=None,
     :param url: The endpoint URL to get data from
     :param org_id: The organization identifier
     :param host_id: The identifier of the host being queried.
-    :param ssl_cert_verify: The value defined for ssl_verify cert verify.
+    :param ssl_cert_verify: The value defined for ssl_cert_verify
+            via source options.
     :param host: The host defined by the inspect scan task source.
     :param port: The port defined by the inspect scan task source.
     :param user: The user defined by the credential of the inspect
@@ -584,7 +586,8 @@ class SatelliteSixV2(SatelliteInterface):
 
         :param host_id: The identifier of the host
         :param host_name: The name of the host
-        :param ssl_cert_verify: The value defined for ssl_verify cert verify.
+        :param ssl_cert_verify: The value defined for ssl_cert_verify
+            via source options.
         :param host: The host defined by the inspect scan task source.
         :param port: The port defined by the inspect scan task source.
         :param user: The user defined by the credential of the inspect
@@ -633,8 +636,8 @@ class SatelliteSixV2(SatelliteInterface):
             'INITIAL STATELLITE STATS', sys_count=systems_count)
         defined_host, port, user, password = utils.get_connect_data(
             self.inspect_scan_task)
+        ssl_cert_verify = None
         source_options = self.inspect_scan_task.source.options
-        ssl_cert_verify = True
         if source_options:
             ssl_cert_verify = source_options.ssl_cert_verify
         deduplicated_hosts = []

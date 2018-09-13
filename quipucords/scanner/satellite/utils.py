@@ -106,7 +106,8 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param org_id: The organization id being queried
     :param host_id: The identifier of a satellite host
     :param query_params: A dictionary to use for query_params in the url
-    :param ssl_cert_verify: The value defined for ssl_verify cert verify.
+    :param ssl_cert_verify: The value defined for ssl_cert_verify
+            via source options.
     :param host: The host defined by the inspect scan task source.
     :param port: The port defined by the inspect scan task source.
     :param user: The user defined by the credential of the inspect
