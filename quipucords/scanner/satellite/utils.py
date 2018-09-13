@@ -95,8 +95,10 @@ def construct_url(url, sat_host, port='443', org_id=None, host_id=None):
                       org_id=org_id, host_id=host_id)
 
 
+# pylint: disable=too-many-arguments
 def execute_request(scan_task, url, org_id=None, host_id=None,
-                    query_params=None):
+                    query_params=None, ssl_cert_verify=None, host=None,
+                    port=None, user=None, password=None):
     """Execute a request to the Satellite server.
 
     :param scan_task: The scan task
@@ -104,13 +106,25 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param org_id: The organization id being queried
     :param host_id: The identifier of a satellite host
     :param query_params: A dictionary to use for query_params in the url
+    :param ssl_cert_verify: The value defined for ssl_cert_verify
+            via source options.
+    :param host: The host defined by the inspect scan task source.
+    :param port: The port defined by the inspect scan task source.
+    :param user: The user defined by the credential of the inspect
+        scan task source.
+    :param: password: The password defined by the credential of the
+        inspect scan task source.
     :returns: The response object
     """
-    source_options = scan_task.source.options
     ssl_verify = True
-    if source_options:
-        ssl_verify = source_options.ssl_cert_verify
-    host, port, user, password = get_connect_data(scan_task)
+    if ssl_cert_verify is not None:
+        ssl_verify = ssl_cert_verify
+    else:
+        source_options = scan_task.source.options
+        if source_options:
+            ssl_verify = source_options.ssl_cert_verify
+    if not host:
+        host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
     response = requests.get(url, auth=(user, password),
                             params=query_params, verify=ssl_verify)

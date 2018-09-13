@@ -33,6 +33,7 @@ from api.scan.serializer import ExtendedProductSearchOptionsSerializer
 from api.scanjob.serializer import ScanJobSerializer
 from api.scanjob.view import expand_scanjob
 
+from django.core import management
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -51,6 +52,7 @@ class ScanJobTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
+        management.call_command('flush', '--no-input')
         self.server_id = ServerInformation.create_or_retreive_server_id()
         self.cred = Credential.objects.create(
             name='cred1',
@@ -1164,7 +1166,7 @@ class ScanJobTest(TestCase):
         url += '?source_id=' + str(source2.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        json_response = response.json()
+        json_resp = response.json()
         expected = {'count': 2,
                     'next': None,
                     'previous': None,
@@ -1181,7 +1183,9 @@ class ScanJobTest(TestCase):
                                     'name': 'source2',
                                     'source_type': 'network'},
                          'facts': []}]}
-        self.assertEqual(json_response, expected)
+        diff = \
+            [x for x in expected['results'] if x not in json_resp['results']]
+        self.assertEqual(diff, [])
 
     def test_inspection_two_tasks(self):
         """Tests inspection result ordering across tasks."""

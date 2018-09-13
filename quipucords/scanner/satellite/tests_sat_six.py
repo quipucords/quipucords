@@ -32,8 +32,10 @@ from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
 
 
-# pylint: disable=unused-argument
-def mock_sat_exception(param1, param2, param3, param4, param5):
+# pylint: disable=unused-argument, too-many-arguments
+def mock_sat_exception(param1, param2, param3, param4, param5,
+                       param6=None, param7=None, param8=None,
+                       param9=None, param10=None):
     """Mock method to throw satellite error."""
     raise SatelliteException()
 
@@ -682,14 +684,20 @@ class SatelliteSixV2Test(TestCase):
         """Test host_details method for error mark a failed system."""
         with patch('scanner.satellite.six.host_fields',
                    side_effect=mock_sat_exception) as mock_fields:
-            detail = self.api.host_details(1, 'sys1')
+            detail = self.api.host_details(1, 'sys1',
+                                           ssl_cert_verify=False,
+                                           host=self.scan_task.source.hosts[0],
+                                           port=self.scan_task.source.port,
+                                           user=self.cred.username,
+                                           password=self.cred.password)
             inspect_result = self.scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 0)
             self.assertEqual(
                 detail, {'name': 'sys1_1',
                          'details': {},
                          'status': 'failed'})
-            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
+            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY,
+                                                ANY, ANY, ANY, ANY, ANY, ANY)
 
     def test_host_details(self):
         """Test host_details method with mock data."""
@@ -772,27 +780,21 @@ class SatelliteSixV2Test(TestCase):
                    return_value=fields_return_value) as mock_fields:
             with patch('scanner.satellite.six.host_subscriptions',
                        return_value=subs_return_value) as mock_subs:
-                details = self.api.host_details(host_id=1, host_name='sys1')
+                details = self.api.host_details(
+                    host_id=1, host_name='sys1',
+                    ssl_cert_verify=False,
+                    host=self.scan_task.source.hosts[0],
+                    port=self.scan_task.source.port,
+                    user=self.cred.username,
+                    password=self.cred.password)
                 self.assertEqual(
                     details, {'name': 'sys1_1',
                               'details': expected,
                               'status': 'success'})
-                mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
-                mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY)
-
-    def test_host_details_skip(self):
-        """Test host_details method for already captured data."""
-        # pylint: disable=no-member
-        sys_result = SystemInspectionResult(
-            name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
-        sys_result.save()
-        inspect_result = self.scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        detail = self.api.host_details(1, 'sys1')
-        self.assertEqual(len(inspect_result.systems.all()), 1)
-        self.assertEqual(detail, None)
+                mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY,
+                                                    ANY, ANY, ANY, ANY, ANY)
+                mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY,
+                                                  ANY, ANY, ANY, ANY, ANY)
 
     def test_hosts_facts_with_err(self):
         """Test the hosts_facts method."""

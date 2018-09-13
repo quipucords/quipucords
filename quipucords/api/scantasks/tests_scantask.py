@@ -16,6 +16,7 @@ import api.messages as messages
 from api.models import Credential, ScanTask, Source
 from api.serializers import ScanTaskSerializer
 
+from django.core import management
 from django.test import TestCase
 
 
@@ -30,6 +31,7 @@ class ScanTaskTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
+        management.call_command('flush', '--no-input')
         self.cred = Credential.objects.create(
             name='cred1',
             username='username',

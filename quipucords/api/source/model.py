@@ -75,7 +75,7 @@ class Source(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
-        max_length=7,
+        max_length=12,
         choices=SOURCE_TYPE_CHOICES,
         null=False
     )

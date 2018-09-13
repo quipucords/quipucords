@@ -78,6 +78,7 @@ def init_server_identifier():
 
 def startup():
     """Log environment at startup."""
+    # pylint: disable=too-many-locals
     logger.info('Platform:')
     for name, value in platform_info().items():
         logger.info('%s - %s ', name, value)
@@ -97,6 +98,28 @@ def startup():
     logger.info('%s BEGIN ENVIRONMENT VARIABLES %s', mark, mark)
     logger.info('\n'.join(env_list))
     logger.info('%s END ENVIRONMENT VARIABLES %s', mark, mark)
+
+    QPC_POSTGRES_DBMS = 'postgres'
+    QPC_SQLITE_DBMS = 'sqlite'
+    valid_dbms = [QPC_POSTGRES_DBMS, QPC_SQLITE_DBMS]
+    qpc_dbms = os.environ.get('QPC_DBMS')
+    if qpc_dbms in valid_dbms:
+        logger.info('QPC_DBMS set to "%s".', qpc_dbms)
+        if qpc_dbms == QPC_POSTGRES_DBMS:
+            database = os.getenv('QPC_DBMS_DATABASE', 'postgres')
+            user = os.getenv('QPC_DBMS_USER', 'postgres')
+            host = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
+            port = os.getenv('QPC_DBMS_PORT', 5432)
+            logger.info('QPC_DBMS_HOST set to "%s"', host)
+            logger.info('QPC_DBMS_PORT set to "%s"', port)
+            logger.info('QPC_DBMS_DATABASE set to "%s"', database)
+            logger.info('QPC_DBMS_USER set to "%s"', user)
+    elif not qpc_dbms:
+        logger.info('QPC_DBMS not set. Using default of "sqlite".')
+    else:
+        logger.info('QPC_DBMS was set to "%s" which is not a valid option. '
+                    'Using default of "sqlite.',
+                    (qpc_dbms))
 
     logger.info('Commit: %s', commit())
     init_server_identifier()

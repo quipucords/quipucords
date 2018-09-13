@@ -21,6 +21,7 @@ from api.models import (Credential,
 from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
 
+from django.core import management
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -36,6 +37,7 @@ class ScanTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
+        management.call_command('flush', '--no-input')
         self.cred = Credential.objects.create(
             name='cred1',
             username='username',
@@ -461,6 +463,7 @@ class TestScanList(TestCase):
 
     def setUp(self):
         """Create test setup."""
+        management.call_command('flush', '--no-input')
         self.cred = Credential.objects.create(
             name='cred1',
             username='username',
