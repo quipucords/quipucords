@@ -11,8 +11,8 @@ const CredentialsEmptyState = ({ onAddCredential, onAddSource }) => {
           <EmptyState.Icon />
           <EmptyState.Title>Welcome to {helpers.RH_BRAND && 'Red Hat'} Entitlements Reporting</EmptyState.Title>
           <EmptyState.Info>
-            Credentials contain authentication information needed to scan a source. A credential includes <br />
-            a username and a password or SSH key. Entitlements Reporting uses SSH to connect to servers <br /> on the
+            Credentials contain authentication information needed to scan a source. A credential includes <br />a
+            username and a password or SSH key. Entitlements Reporting uses SSH to connect to servers <br /> on the
             network and uses credentials to access those servers.
           </EmptyState.Info>
           <EmptyState.Action>

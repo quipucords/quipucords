@@ -539,4 +539,7 @@ const mapStateToProps = function(state) {
   return { ...state.addSourceWizard.view };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddSourceWizardStepTwo);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AddSourceWizardStepTwo);

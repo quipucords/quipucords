@@ -399,9 +399,9 @@ class CreateCredentialDialog extends React.Component {
           <strong>Error</strong> {errorMessage}
         </Alert>
       );
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   render() {
@@ -544,4 +544,7 @@ const mapStateToProps = function(state) {
   });
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateCredentialDialog);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CreateCredentialDialog);
