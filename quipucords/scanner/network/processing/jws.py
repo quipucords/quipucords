@@ -63,6 +63,7 @@ class ProcessJWSHasCert(process.Processor):
     """Process output of 'ls /etc/pki/product/185.pem 2>/dev/null'."""
 
     KEY = 'jws_has_cert'
+    RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
