@@ -139,38 +139,16 @@ ERRATA_MAPPING = {
 }
 
 
-# pylint: disable=too-many-locals,too-many-statements
-# pylint: disable=too-many-branches,too-many-arguments
-def host_fields(scan_task, api_version, url, org_id, host_id,
-                ssl_cert_verify=None, host=None, port=None, user=None,
-                password=None):
+# pylint: disable=too-many-locals,too-many-statements,too-many-branches
+def host_fields(api_version, response, url):
     """Obtain the fields for a given host id.
 
-    :param scan_task: The scan task being executed
     :param api_version: The version of the Satellite api
-    :param url: The endpoint URL to get data from
-    :param org_id: The organization identifier
-    :param host_id: The identifier of the host being queried.
-    :param ssl_cert_verify: The value defined for ssl_cert_verify
-            via source options.
-    :param host: The host defined by the inspect scan task source.
-    :param port: The port defined by the inspect scan task source.
-    :param user: The user defined by the credential of the inspect
-        scan task source.
-    :param: password: The password defined by the credential of the
-        inspect scan task source.
-    :returns: dictionary of facts from fields endpoint
+    :param response: The response returned from the fields
+        endpoint
+    :param url: The endpoint URL
+    :returns: dictionary of facts created from response object.
     """
-    response, url = utils.execute_request(scan_task,
-                                          url=url,
-                                          org_id=org_id,
-                                          host_id=host_id,
-                                          query_params=QUERY_PARAMS_FIELDS,
-                                          ssl_cert_verify=ssl_cert_verify,
-                                          host=host,
-                                          port=port,
-                                          user=user,
-                                          password=password)
     # pylint: disable=no-member
     if response.status_code != requests.codes.ok:
         raise SatelliteException('Invalid response code %s'
@@ -260,34 +238,15 @@ def host_fields(scan_task, api_version, url, org_id, host_id,
     return host_info
 
 
-def host_subscriptions(scan_task, url, org_id, host_id, ssl_cert_verify=None,
-                       host=None, port=None, user=None, password=None):
+def host_subscriptions(scan_task, response, url):
     """Obtain the subscriptions for a given host id.
 
     :param scan_task: The scan task being executed
-    :param url: The endpoint URL to get data from
-    :param org_id: The organization identifier
-    :param host_id: The identifier of the host being queried.
-    :param ssl_cert_verify: The value defined for ssl_cert_verify
-            via source options.
-    :param host: The host defined by the inspect scan task source.
-    :param port: The port defined by the inspect scan task source.
-    :param user: The user defined by the credential of the inspect
-        scan task source.
-    :param: password: The password defined by the credential of the
-        inspect scan task source.
-    :returns: dictionary of facts from subscriptions endpoint
+    :param response: The response returned from the subs
+        endpoint
+    :param url: The endpoint URL
+    :returns: dictionary of facts created from response object.
     """
-    # pylint: disable=too-many-arguments
-    response, url = utils.execute_request(scan_task,
-                                          url=url,
-                                          org_id=org_id,
-                                          host_id=host_id,
-                                          ssl_cert_verify=ssl_cert_verify,
-                                          host=host,
-                                          port=port,
-                                          user=user,
-                                          password=password)
     # pylint: disable=no-member
     if response.status_code == 400 or response.status_code == 404:
         content_type = response.headers.get(CONTENT_TYPE)
@@ -330,6 +289,113 @@ def host_subscriptions(scan_task, url, org_id, host_id, ssl_cert_verify=None,
 
     subs_dict = {ENTITLEMENTS: subscriptons}
     return subs_dict
+
+
+def log_message(message, inspect_task_id, scan_type,
+                log_level=logging.INFO):
+    """Log a message for the information provided.
+
+    :param message: A string containing the message
+    :param inspect_task_id: The id of the running task
+    :param scan_type: The type of scan running
+        (inspect, connect)
+    :param log_level: The level to log at
+    """
+    # elapsed_time = self._compute_elapsed_time()
+    actual_message = 'Job %d (%s, elapsed_time:) - ' % \
+        (inspect_task_id,
+         scan_type)
+    actual_message += message
+    logger.log(log_level, actual_message)
+
+
+# pylint: disable=too-many-arguments
+def get_http_responses(scan_task, inspect_task_id,
+                       scan_type, host_id, host_name,
+                       fields_url, subs_url, request_options):
+    """Execute both http responses to gather satallite data.
+
+    :param scan_task: The current scan task
+    :param inspect_task_id: The id of the running task
+    :param scan_type: The type of scan running
+        (inspect, connect)
+    :param host_id: The id of the host we're inspecting
+    :param host_name: The name of the host we're inspecting
+    :param fields_url: The sat61 or sat62 fields url
+    :param subs_url: The sat61 or sat62 subs url
+    :param request_options: A dictionary containing host, port,
+        ssl_cert_verify, user, and password
+    :returns: A list containing the unique name for the host,
+        the response & url for host_fields request, and the
+        response & url for the host_subs request.
+    """
+    unique_name = '%s_%s' % (host_name, host_id)
+    host_fields_response = None
+    host_fields_url = None
+    host_subscriptions_response = None
+    host_subscriptions_url = None
+    try:
+        message = 'REQUESTING HOST DETAILS: %s' % unique_name
+        log_message(message, inspect_task_id, scan_type)
+        host_fields_response, host_fields_url = \
+            utils.execute_request(scan_task,
+                                  url=fields_url,
+                                  org_id=None,
+                                  host_id=host_id,
+                                  query_params=QUERY_PARAMS_FIELDS,
+                                  options=request_options)
+
+        host_subscriptions_response, host_subscriptions_url = \
+            utils.execute_request(scan_task,
+                                  url=subs_url,
+                                  org_id=None,
+                                  host_id=host_id,
+                                  options=request_options)
+        return(unique_name, SystemInspectionResult.SUCCESS,
+               (host_fields_response, host_fields_url),
+               (host_subscriptions_response, host_subscriptions_url))
+    except SatelliteException as sat_error:
+        error_message = 'Satellite unknown 6v2 error encountered: %s\n' \
+            % sat_error
+        logger.error(error_message)
+        return (unique_name, SystemInspectionResult.FAILED,
+                (host_fields_response, host_fields_url),
+                (host_subscriptions_response, host_subscriptions_url))
+
+
+# pylint: disable=too-many-arguments
+def post_processing_results(unique_name,
+                            inspect_result_status,
+                            scan_task,
+                            api_version,
+                            host_fields_response,
+                            host_subscriptions_response):
+    """Process the responses returned from the satellite requests.
+
+    :param unique_name: The unique name for the host
+    :param inspect_result_status: Whether or not the System Inspection
+        result succeeded or failed
+    :param scan_task: The current scan task
+    :param api_version: The satellite api version
+    :param host_fields_response: A tuple containing the response
+        returned from the fields endpoint
+    :param host_subscriptions_response: A tuple containing the response
+        returned from the subs endpoint
+    :returns: A dictionary containing the host name, details, and status.
+    """
+    details = {}
+    if inspect_result_status == SystemInspectionResult.SUCCESS:
+        details.update(host_fields(api_version,
+                                   host_fields_response[0],
+                                   host_fields_response[1]))
+        details.update(host_subscriptions(scan_task,
+                                          host_subscriptions_response[0],
+                                          host_subscriptions_response[1]))
+        logger.debug('name=%s, host_details=%s',
+                     unique_name, details)
+    return {'name': unique_name,
+            'details': details,
+            'status': inspect_result_status}
 
 
 class SatelliteSixV1(SatelliteInterface):
@@ -430,49 +496,32 @@ class SatelliteSixV1(SatelliteInterface):
 
         return hosts
 
-    def host_details(self, org_id, host_id, host_name):
-        """Obtain the details for a given host id and name.
+    def prepare_host(self, chunk):
+        """Prepare each host with necessary information.
 
-        :param org_id: The organization identifier
-        :param host_id: The identifier of the host
-        :param host_name: The name of the host
-        :returns: dictionary of host details
+        :param chunk: A list of hosts
+        :returns A list of tuples that contain information about
+            each host.
         """
         if self.inspect_scan_task is None:
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
-        details = {}
-        unique_name = '%s_%s' % (host_name, host_id)
-        sys_result = self.inspect_scan_task.inspection_result.systems.filter(
-            name=unique_name).first()
+        defined_host, port, user, password = utils.get_connect_data(
+            self.inspect_scan_task)
+        ssl_cert_verify = True
+        source_options = self.inspect_scan_task.source.options
+        if source_options:
+            ssl_cert_verify = source_options.ssl_cert_verify
+        request_options = {'host': defined_host, 'port': port, 'user': user,
+                           'password': password,
+                           'ssl_cert_verify': ssl_cert_verify}
+        host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
+                        self.inspect_scan_task.scan_type,
+                        host.get(ID), host.get(NAME), HOSTS_FIELDS_V1_URL,
+                        HOSTS_SUBS_V1_URL, request_options)
+                       for host in chunk]
 
-        if sys_result:
-            logger.debug('Results already captured for host_name=%s',
-                         host_name)
-            return None
-
-        try:
-            message = 'REQUESTING HOST DETAILS: %s' % unique_name
-            self.inspect_scan_task.log_message(message)
-            details.update(host_fields(self.inspect_scan_task, 1,
-                                       HOSTS_FIELDS_V1_URL,
-                                       org_id, host_id))
-            details.update(host_subscriptions(self.inspect_scan_task,
-                                              HOSTS_SUBS_V1_URL,
-                                              org_id, host_id))
-            logger.debug('host_id=%s, host_details=%s',
-                         host_id, details)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.SUCCESS}
-        except SatelliteException as sat_error:
-            error_message = 'Satellite unknown 6v1 error encountered: %s\n' \
-                % sat_error
-            logger.error(error_message)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.FAILED}
-        return details
+        return host_params
 
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
@@ -483,7 +532,9 @@ class SatelliteSixV1(SatelliteInterface):
                 'hosts_facts cannot be called for a connection scan')
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
+        deduplicated_hosts = []
 
+        # pylint: disable=too-many-nested-blocks
         with Pool(processes=self.max_concurrency) as pool:
             orgs = self.get_orgs()
             for org_id in orgs:
@@ -505,7 +556,14 @@ class SatelliteSixV1(SatelliteInterface):
                                                  ' for url: %s' %
                                                  (response.status_code, url))
                     jsonresult = response.json()
-                    hosts = jsonresult.get(RESULTS, [])
+
+                    hosts_before_dedup = jsonresult.get(RESULTS, [])
+                    hosts_after_dedup = []
+                    for host in hosts_before_dedup:
+                        if host not in deduplicated_hosts:
+                            hosts_after_dedup.append(host)
+                            deduplicated_hosts.append(host)
+                    hosts = hosts_after_dedup
                     chunks = [hosts[i:i + self.max_concurrency]
                               for i in range(0, len(hosts),
                                              self.max_concurrency)]
@@ -518,15 +576,23 @@ class SatelliteSixV1(SatelliteInterface):
                                 ScanJob.JOB_TERMINATE_PAUSE:
                             raise SatellitePauseException()
 
-                        host_params = [(host.get(ID), host.get(NAME))
-                                       for host in chunk]
-                        results = pool.starmap(self.host_details, host_params)
-                        for result in results:
-                            if result is not None:
-                                self.record_inspect_result(
-                                    result.get('name'),
-                                    result.get('details'),
-                                    result.get('status'))
+                        host_params = self.prepare_host(chunk)
+                        results = pool.starmap(get_http_responses, host_params)
+                        for each in results:
+                            if each:
+                                result = post_processing_results(
+                                    each[0],
+                                    each[1],
+                                    self.inspect_scan_task,
+                                    1,
+                                    each[2],
+                                    each[3])
+
+                                if result is not None:
+                                    self.record_inspect_result(
+                                        result.get('name'),
+                                        result.get('details'),
+                                        result.get('status'))
         utils.validate_task_stats(self.inspect_scan_task)
 
 
@@ -579,51 +645,32 @@ class SatelliteSixV2(SatelliteInterface):
 
         return hosts
 
-    # pylint: disable=too-many-arguments
-    def host_details(self, host_id, host_name, ssl_cert_verify, host,
-                     port, user, password):
-        """Obtain the details for a given host id and name.
+    def prepare_host(self, chunk):
+        """Prepare each host with necessary information.
 
-        :param host_id: The identifier of the host
-        :param host_name: The name of the host
-        :param ssl_cert_verify: The value defined for ssl_cert_verify
-            via source options.
-        :param host: The host defined by the inspect scan task source.
-        :param port: The port defined by the inspect scan task source.
-        :param user: The user defined by the credential of the inspect
-            scan task source.
-        :param: password: The password defined by the credential of the
-            inspect scan task source.
-        :returns: dictionary of host details
+        :param chunk: A list of hosts
+        :returns A list of tuples that contain information about
+            each host.
         """
         if self.inspect_scan_task is None:
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
-        details = {}
-        unique_name = '%s_%s' % (host_name, host_id)
-        try:
-            message = 'REQUESTING HOST DETAILS: %s' % unique_name
-            self.inspect_scan_task.log_message(message)
-            details.update(host_fields(self.inspect_scan_task, 2,
-                                       HOSTS_FIELDS_V2_URL,
-                                       None, host_id, ssl_cert_verify, host,
-                                       port, user, password))
-            details.update(host_subscriptions(self.inspect_scan_task,
-                                              HOSTS_SUBS_V2_URL,
-                                              None, host_id, ssl_cert_verify,
-                                              host, port, user, password))
-            logger.debug('host_id=%s, host_details=%s',
-                         host_id, details)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.SUCCESS}
-        except SatelliteException as sat_error:
-            error_message = 'Satellite unknown 6v2 error encountered: %s\n' \
-                % sat_error
-            logger.error(error_message)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.FAILED}
+        defined_host, port, user, password = utils.get_connect_data(
+            self.inspect_scan_task)
+        ssl_cert_verify = True
+        source_options = self.inspect_scan_task.source.options
+        if source_options:
+            ssl_cert_verify = source_options.ssl_cert_verify
+        request_options = {'host': defined_host, 'port': port, 'user': user,
+                           'password': password,
+                           'ssl_cert_verify': ssl_cert_verify}
+        host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
+                        self.inspect_scan_task.scan_type,
+                        host.get(ID), host.get(NAME), HOSTS_FIELDS_V2_URL,
+                        HOSTS_SUBS_V2_URL, request_options)
+                       for host in chunk]
+
+        return host_params
 
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
@@ -634,12 +681,6 @@ class SatelliteSixV2(SatelliteInterface):
                 'hosts_facts cannot be called for a connection scan')
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
-        defined_host, port, user, password = utils.get_connect_data(
-            self.inspect_scan_task)
-        ssl_cert_verify = None
-        source_options = self.inspect_scan_task.source.options
-        if source_options:
-            ssl_cert_verify = source_options.ssl_cert_verify
         deduplicated_hosts = []
 
         with Pool(processes=self.max_concurrency) as pool:
@@ -675,15 +716,22 @@ class SatelliteSixV2(SatelliteInterface):
 
                     if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                         raise SatellitePauseException()
-                    host_params = [(host.get(ID), host.get(NAME),
-                                    ssl_cert_verify, defined_host, port, user,
-                                    password)
-                                   for host in chunk]
-                    results = pool.starmap(self.host_details, host_params)
-                    for result in results:
-                        if result is not None:
-                            self.record_inspect_result(
-                                result.get('name'),
-                                result.get('details'),
-                                result.get('status'))
+                    host_params = self.prepare_host(chunk)
+                    results = pool.starmap(get_http_responses,
+                                           host_params)
+                    for each in results:
+                        if each:
+                            result = post_processing_results(
+                                each[0],
+                                each[1],
+                                self.inspect_scan_task,
+                                2,
+                                each[2],
+                                each[3])
+
+                            if result is not None:
+                                self.record_inspect_result(
+                                    result.get('name'),
+                                    result.get('details'),
+                                    result.get('status'))
         utils.validate_task_stats(self.inspect_scan_task)
