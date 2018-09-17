@@ -201,8 +201,9 @@ def is_eap_manifest_version(manifest_dict):
                     if classification and 'EAP' in classification:
                         return Product.PRESENT
         else:
-            logger.warning('Expected a dictionary of strings for %s',
-                           EAP_HOME_MODULES_VERSION)
+            logger.warning('Expected a dictionary of strings for %s, '
+                           'but found %s.  Invalid value: %s',
+                           EAP_HOME_MODULES_VERSION, type(manifest), manifest)
     return Product.ABSENT
 
 
@@ -218,8 +219,9 @@ def get_eap_manifest_version(manifest_dict):
                     if classification:
                         versions.add(classification)
         else:
-            logger.warning('Expected a dictionary of strings for %s',
-                           EAP_HOME_MODULES_VERSION)
+            logger.warning('Expected a dictionary of strings for %s, '
+                           'but found %s.  Invalid value: %s',
+                           EAP_HOME_MODULES_VERSION, type(manifest), manifest)
 
     return versions
 

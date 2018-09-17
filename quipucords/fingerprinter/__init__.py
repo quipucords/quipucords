@@ -60,11 +60,12 @@ SOURCES_KEY = 'sources'
 
 # keys are in reverse order of accuracy (last most accurate)
 # (date_key, date_pattern)
-RAW_DATE_KEYS = [('date_yum_history', '%Y-%m-%d'),
-                 ('date_filesystem_create', '%Y-%m-%d'),
-                 ('date_anaconda_log', '%Y-%m-%d'),
-                 ('registration_time', '%Y-%m-%d %H:%M:%S'),
-                 ('date_machine_id', '%Y-%m-%d')]
+RAW_DATE_KEYS = \
+    [('date_yum_history', ['%Y-%m-%d']),
+     ('date_filesystem_create', ['%Y-%m-%d']),
+     ('date_anaconda_log', ['%Y-%m-%d']),
+     ('registration_time', ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S %z']),
+     ('date_machine_id', ['%Y-%m-%d'])]
 
 
 def process_fact_collection(sender, instance, **kwargs):
@@ -247,17 +248,16 @@ def _compute_system_creation_time(fingerprint):
     for date_key, date_pattern in RAW_DATE_KEYS:
         date_value = fingerprint.pop(date_key, None)
         if date_value is not None:
-            try:
-                system_creation_date = datetime.strptime(
-                    date_value, date_pattern)
-                system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
-                    date_key, None)
-            except ValueError as date_err:
-                logger.error('Could not parse date %s: %s',
-                             date_value, date_err)
+            system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
+                date_key, None)
+            system_creation_date = multi_format_dateparse(
+                system_creation_date_metadata,
+                date_key,
+                date_value,
+                date_pattern)
 
     if system_creation_date is not None:
-        fingerprint['system_creation_date'] = system_creation_date.date()
+        fingerprint['system_creation_date'] = system_creation_date
         fingerprint[META_DATA_KEY]['system_creation_date'] = \
             system_creation_date_metadata
 
@@ -592,6 +592,10 @@ def add_fact_to_fingerprint(source,
     elif raw_fact.get(raw_fact_key) is not None:
         actual_fact_value = raw_fact.get(raw_fact_key)
 
+    # Remove empty string values
+    if isinstance(actual_fact_value, str) and not actual_fact_value:
+        actual_fact_value = None
+
     if actual_fact_value is not None:
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
@@ -731,16 +735,15 @@ def _process_network_fact(source, fact):
                             fact, 'date_yum_history', fingerprint)
 
     if fact.get('connection_timestamp'):
-        try:
-            last_checkin = datetime.strptime(fact['connection_timestamp'],
-                                             '%Y%m%d%H%M%S')
-            add_fact_to_fingerprint(source, 'connection_timestamp',
-                                    fact, 'system_last_checkin_date',
-                                    fingerprint,
-                                    fact_value=last_checkin.date())
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s',
-                         fact['connection_timestamp'], date_err)
+        last_checkin = multi_format_dateparse(
+            source,
+            'connection_timestamp',
+            fact['connection_timestamp'],
+            ['%Y%m%d%H%M%S'])
+        add_fact_to_fingerprint(source, 'connection_timestamp',
+                                fact, 'system_last_checkin_date',
+                                fingerprint,
+                                fact_value=last_checkin)
 
     # Determine if running on VM or bare metal
     virt_what_type = fact.get('virt_what_type')
@@ -820,16 +823,14 @@ def _process_vcenter_fact(source, fact):
     add_fact_to_fingerprint(source, 'vm.uuid', fact, 'vm_uuid', fingerprint)
 
     if fact.get('vm.last_check_in'):
-        try:
-            last_checkin = datetime.strptime(fact['vm.last_check_in'],
-                                             '%Y-%m-%d %H:%M:%S')
-            add_fact_to_fingerprint(source, 'vm.last_check_in',
-                                    fact, 'system_last_checkin_date',
-                                    fingerprint,
-                                    fact_value=last_checkin.date())
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s',
-                         fact['vm.last_check_in'], date_err)
+        last_checkin = multi_format_dateparse(
+            source, 'vm.last_check_in',
+            fact['vm.last_check_in'],
+            ['%Y-%m-%d %H:%M:%S'])
+        add_fact_to_fingerprint(source, 'vm.last_check_in',
+                                fact, 'system_last_checkin_date',
+                                fingerprint,
+                                fact_value=last_checkin)
 
     add_fact_to_fingerprint(source, 'vm.dns_name', fact,
                             'vm_dns_name', fingerprint)
@@ -945,16 +946,16 @@ def _process_satellite_fact(source, fact):
 
     last_checkin = fact.get('last_checkin_time')
     if last_checkin:
-        try:
-            last_checkin = strip_suffix(last_checkin, ' UTC')
-            dt_obj = datetime.strptime(last_checkin, '%Y-%m-%d %H:%M:%S')
-            add_fact_to_fingerprint(source, 'last_checkin_time',
-                                    fact, 'system_last_checkin_date',
-                                    fingerprint,
-                                    fact_value=dt_obj.date())
-        except ValueError as date_err:
-            logger.error('Could not parse date %s: %s',
-                         last_checkin, date_err)
+        last_checkin = multi_format_dateparse(source,
+                                              'last_checkin_time',
+                                              last_checkin,
+                                              ['%Y-%m-%d %H:%M:%S',
+                                               '%Y-%m-%d %H:%M:%S %z'])
+
+        add_fact_to_fingerprint(source, 'last_checkin_time',
+                                fact, 'system_last_checkin_date',
+                                fingerprint,
+                                fact_value=last_checkin)
 
     add_entitlements_to_fingerprint(source, 'entitlements',
                                     fact, fingerprint)
@@ -968,3 +969,32 @@ pfc_signal = django.dispatch.Signal(providing_args=[
     'instance'])
 
 pfc_signal.connect(process_fact_collection)
+
+
+def multi_format_dateparse(source, raw_fact_key, date_value, patterns):
+    """Attempt multiple patterns for strptime.
+
+    :param source: The source that provided this fact.
+    :param raw_fact_key: fact key with date.
+    :param date_value: date value to parse
+    :returns: parsed date
+    """
+    if date_value:
+        raw_date_value = strip_suffix(date_value, ' UTC')
+        date_error = None
+        for pattern in patterns:
+            try:
+                date_date_value = datetime.strptime(raw_date_value, pattern)
+                return date_date_value.date()
+            except ValueError as error:
+                date_error = error
+
+        logger.error('Fingerprinter (%s, %s) - '
+                     'Could not parse date for %s. '
+                     'Unsupported date format: \'%s\'. Error: %s',
+                     source['source_type'],
+                     source['source_name'],
+                     raw_fact_key,
+                     raw_date_value,
+                     date_error)
+    return None
