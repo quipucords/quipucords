@@ -235,8 +235,9 @@ def is_eap_jar_version(version_dict):
             if classification and 'EAP' in classification:
                 return Product.PRESENT
         else:
-            logger.warning('Expected a dictionary of strings for %s',
-                           JBOSS_EAP_JAR_VER)
+            logger.warning('Expected a dictionary of strings for %s, '
+                           'but found %s.  Invalid value: %s',
+                           JBOSS_EAP_JAR_VER, type(version), version)
     return Product.ABSENT
 
 
@@ -250,8 +251,9 @@ def get_eap_jar_version(version_dict):
             if classification:
                 versions.add(classification)
         else:
-            logger.warning('Expected a dictionary of strings for %s',
-                           JBOSS_EAP_JAR_VER)
+            logger.warning('Expected a dictionary of strings for %s, '
+                           'but found %s.  Invalid value: %s',
+                           JBOSS_EAP_JAR_VER, type(version), version)
 
     return versions
 
