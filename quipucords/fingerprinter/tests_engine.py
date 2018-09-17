@@ -779,7 +779,7 @@ class EngineTest(TestCase):
         metadata = fp['metadata']['system_creation_date']['raw_fact_key']
         self.assertEqual('registration_time', metadata)
 
-  ################################################################
+    ################################################################
     # Test multi_format_dateparse
     ################################################################
     def test_multi_format_dateparse(self):

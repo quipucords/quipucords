@@ -947,10 +947,10 @@ def _process_satellite_fact(source, fact):
     last_checkin = fact.get('last_checkin_time')
     if last_checkin:
         last_checkin = _multi_format_dateparse(source,
-                                              'last_checkin_time',
-                                              last_checkin,
-                                              ['%Y-%m-%d %H:%M:%S',
-                                               '%Y-%m-%d %H:%M:%S %z'])
+                                               'last_checkin_time',
+                                               last_checkin,
+                                               ['%Y-%m-%d %H:%M:%S',
+                                                '%Y-%m-%d %H:%M:%S %z'])
 
         add_fact_to_fingerprint(source, 'last_checkin_time',
                                 fact, 'system_last_checkin_date',
