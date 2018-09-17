@@ -250,7 +250,7 @@ def _compute_system_creation_time(fingerprint):
         if date_value is not None:
             system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
                 date_key, None)
-            system_creation_date = multi_format_dateparse(
+            system_creation_date = _multi_format_dateparse(
                 system_creation_date_metadata,
                 date_key,
                 date_value,
@@ -735,7 +735,7 @@ def _process_network_fact(source, fact):
                             fact, 'date_yum_history', fingerprint)
 
     if fact.get('connection_timestamp'):
-        last_checkin = multi_format_dateparse(
+        last_checkin = _multi_format_dateparse(
             source,
             'connection_timestamp',
             fact['connection_timestamp'],
@@ -823,7 +823,7 @@ def _process_vcenter_fact(source, fact):
     add_fact_to_fingerprint(source, 'vm.uuid', fact, 'vm_uuid', fingerprint)
 
     if fact.get('vm.last_check_in'):
-        last_checkin = multi_format_dateparse(
+        last_checkin = _multi_format_dateparse(
             source, 'vm.last_check_in',
             fact['vm.last_check_in'],
             ['%Y-%m-%d %H:%M:%S'])
@@ -946,7 +946,7 @@ def _process_satellite_fact(source, fact):
 
     last_checkin = fact.get('last_checkin_time')
     if last_checkin:
-        last_checkin = multi_format_dateparse(source,
+        last_checkin = _multi_format_dateparse(source,
                                               'last_checkin_time',
                                               last_checkin,
                                               ['%Y-%m-%d %H:%M:%S',
@@ -971,7 +971,7 @@ pfc_signal = django.dispatch.Signal(providing_args=[
 pfc_signal.connect(process_fact_collection)
 
 
-def multi_format_dateparse(source, raw_fact_key, date_value, patterns):
+def _multi_format_dateparse(source, raw_fact_key, date_value, patterns):
     """Attempt multiple patterns for strptime.
 
     :param source: The source that provided this fact.

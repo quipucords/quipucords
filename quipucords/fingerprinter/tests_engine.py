@@ -25,6 +25,7 @@ from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            _merge_fingerprint,
                            _merge_fingerprints_from_source_types,
                            _merge_matching_fingerprints,
+                           _multi_format_dateparse,
                            _process_network_fact,
                            _process_source,
                            _remove_duplicate_fingerprints)
@@ -777,3 +778,37 @@ class EngineTest(TestCase):
         self.assertEqual(fp['system_creation_date'], test_date)
         metadata = fp['metadata']['system_creation_date']['raw_fact_key']
         self.assertEqual('registration_time', metadata)
+
+  ################################################################
+    # Test multi_format_dateparse
+    ################################################################
+    def test_multi_format_dateparse(self):
+        """Test multi_format_dateparse with various formats."""
+        source = {
+            'source_type': 'network',
+            'source_name': 'test_source'
+        }
+        test_date = datetime.strptime(
+            '2018-4-7', '%Y-%m-%d').date()
+        date_value = _multi_format_dateparse(
+            source,
+            'fake_key',
+            '2018-4-7 12:45:02',
+            ['%Y-%m-%d %H:%M:%S',
+             '%Y-%m-%d %H:%M:%S %z'])
+        self.assertEqual(date_value, test_date)
+
+        date_value = _multi_format_dateparse(
+            source,
+            'fake_key',
+            '2018-4-7 12:45:02 -0400',
+            ['%Y-%m-%d %H:%M:%S',
+             '%Y-%m-%d %H:%M:%S %z'])
+        self.assertEqual(date_value, test_date)
+
+        date_value = _multi_format_dateparse(
+            source,
+            'fake_key',
+            '2018-4-7 12:45:02 -0400',
+            ['%Y-%m-%d %H:%M:%S'])
+        self.assertIsNone(date_value)
