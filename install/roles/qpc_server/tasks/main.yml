@@ -51,7 +51,7 @@
     QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
   when: QPC_SERVER_TIMEOUT is not defined
 
-  - name: Default directory mounting to empty string
+- name: Default directory mounting to empty string
   set_fact:
     dir_mount_selinux: ""
 
