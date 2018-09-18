@@ -51,6 +51,8 @@ usage() {
          -e QPC_DBMS_HOST=host
     * If using postgres, specify the db port (if not specified the default value is 5432):
          -e QPC_DBMS_PORT=5432
+    * Override default server timeout for HTTP requests (if not specified the default value is 120):
+         -e QPC_SERVER_TIMEOUT=120
 EOM
     exit 0
 }
