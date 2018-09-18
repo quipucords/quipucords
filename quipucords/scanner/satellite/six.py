@@ -265,27 +265,10 @@ def host_subscriptions(response):
     return subs_dict
 
 
-def log_message(message, inspect_task_id, scan_type,
-                log_level=logging.INFO):
-    """Log a message for the information provided.
-
-    :param message: A string containing the message
-    :param inspect_task_id: The id of the running task
-    :param scan_type: The type of scan running
-        (inspect, connect)
-    :param log_level: The level to log at
-    """
-    # elapsed_time = self._compute_elapsed_time()
-    actual_message = 'Job %d (%s, elapsed_time:) - ' % \
-        (inspect_task_id,
-         scan_type)
-    actual_message += message
-    logger.log(log_level, actual_message)
-
-
 # pylint: disable=too-many-arguments
 def get_http_responses(scan_task, inspect_task_id,
-                       scan_type, host_id, host_name,
+                       scan_type, source_type, source_name,
+                       host_id, host_name,
                        fields_url, subs_url, request_options):
     """Execute both http responses to gather satallite data.
 
@@ -293,6 +276,8 @@ def get_http_responses(scan_task, inspect_task_id,
     :param inspect_task_id: The id of the running task
     :param scan_type: The type of scan running
         (inspect, connect)
+    :param source_type: The source type for logging
+    :param source_name: The source name for logging
     :param host_id: The id of the host we're inspecting
     :param host_name: The name of the host we're inspecting
     :param fields_url: The sat61 or sat62 fields url
@@ -309,7 +294,8 @@ def get_http_responses(scan_task, inspect_task_id,
     results = {}
     try:
         message = 'REQUESTING HOST DETAILS: %s' % unique_name
-        log_message(message, inspect_task_id, scan_type)
+        scan_task.log_message(message, inspect_task_id, scan_type, source_type,
+                              source_name)
         host_fields_response, host_fields_url = \
             utils.execute_request(scan_task,
                                   url=fields_url,
@@ -340,15 +326,17 @@ def get_http_responses(scan_task, inspect_task_id,
                     (host_subscriptions_response.status_code,
                      host_subscriptions_url,
                      host_subscriptions_response.json())
-                log_message(message, inspect_task_id, scan_type,
-                            log_level=logging.WARN)
+                scan_task.log_message(message, logging.WARN, inspect_task_id,
+                                      scan_type, source_type,
+                                      source_name)
             else:
                 message = 'Invalid status code %s for url: %s. ' \
                           'Response not JSON' % \
                           (host_subscriptions_response.status_code,
                            host_subscriptions_url)
-                log_message(message, inspect_task_id, scan_type,
-                            log_level=logging.WARN)
+                scan_task.log_message(message, logging.WARN, inspect_task_id,
+                                      scan_type, source_type,
+                                      source_name)
         elif host_subscriptions_response.status_code != requests.codes.ok:
             raise SatelliteException(
                 'Invalid response code %s for url: %s' % (
@@ -521,6 +509,8 @@ class SatelliteSixV1(SatelliteInterface):
                            'ssl_cert_verify': ssl_cert_verify}
         host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
                         self.inspect_scan_task.scan_type,
+                        self.inspect_scan_task.source.source_type,
+                        self.inspect_scan_task.source.name,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V1_URL,
                         HOSTS_SUBS_V1_URL, request_options)
                        for host in chunk]
@@ -669,6 +659,8 @@ class SatelliteSixV2(SatelliteInterface):
                            'ssl_cert_verify': ssl_cert_verify}
         host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
                         self.inspect_scan_task.scan_type,
+                        self.inspect_scan_task.source.source_type,
+                        self.inspect_scan_task.source.name,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V2_URL,
                         HOSTS_SUBS_V2_URL, request_options)
                        for host in chunk]

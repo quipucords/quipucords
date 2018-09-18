@@ -251,6 +251,34 @@ class SatelliteSixV1Test(TestCase):
                 'os_name': 'RedHat', 'os_version': '7.4'}
             self.assertEqual(host_info, expected)
 
+    def test_prepare_host_s61(self):
+        """Test the prepare host method for satellite 6.1."""
+        HOSTS_FIELDS_V1_URL = \
+            'https://{sat_host}:{port}/katello/api' \
+            '/v2/organizations/{org_id}/systems/{host_id}'
+        HOSTS_SUBS_V1_URL = \
+            'https://{sat_host}:{port}/katello/api' \
+            '/v2/organizations/{org_id}/systems/{host_id}/subscriptions'
+        expected = [(self.scan_task, self.scan_task.id,
+                    self.scan_task.scan_type,
+                    self.scan_task.source.source_type,
+                    self.scan_task.source.name, 1, 'sys',
+                    HOSTS_FIELDS_V1_URL, HOSTS_SUBS_V1_URL,
+                    {'host': {'id': 1, 'name': 'sys'}, 'port': '443',
+                     'user': self.cred.username,
+                     'password': self.cred.password,
+                     'ssl_cert_verify': True})]
+        host = {'id': 1, 'name': 'sys'}
+        chunk = [host]
+        port = '443'
+        user = self.cred.username
+        password = self.cred.password
+        connect_data_return_value = host, port, user, password
+        with patch('scanner.satellite.utils.get_connect_data',
+                   return_value=connect_data_return_value) as mock_connect:
+            host_params = SatelliteSixV1.prepare_host(self.api, chunk)
+            self.assertEqual(expected, host_params)
+
     def test_get_http_responses_err(self):
         """Test get_http_responses for error mark a failed system."""
         host_field_url = 'https://{sat_host}:{port}/api/v2/hosts/{host_id}'
@@ -259,7 +287,9 @@ class SatelliteSixV1Test(TestCase):
                                 host_id=1)
             mocker.get(url, status_code=500)
             result = get_http_responses(self.scan_task, self.scan_task.id,
-                                        self.scan_task.scan_type, 1, 'sys',
+                                        self.scan_task.scan_type,
+                                        self.scan_task.source.source_type,
+                                        self.scan_task.source.name, 1, 'sys',
                                         url, url, {})
             expected = {'unique_name': 'sys_1',
                         'system_inspection_result': 'failed',
@@ -523,7 +553,9 @@ class SatelliteSixV2Test(TestCase):
                                 host_id=1)
             mocker.get(url, status_code=500)
             result = get_http_responses(self.scan_task, self.scan_task.id,
-                                        self.scan_task.scan_type, 1, 'sys',
+                                        self.scan_task.scan_type,
+                                        self.scan_task.source.source_type,
+                                        self.scan_task.source.name, 1, 'sys',
                                         url, url, {})
             expected = {'unique_name': 'sys_1',
                         'system_inspection_result': 'failed',
@@ -611,7 +643,9 @@ class SatelliteSixV2Test(TestCase):
                                 host_id=1)
             mocker.get(url, status_code=500)
             result = get_http_responses(self.scan_task, self.scan_task.id,
-                                        self.scan_task.scan_type, 1, 'sys',
+                                        self.scan_task.scan_type,
+                                        self.scan_task.source.source_type,
+                                        self.scan_task.source.name, 1, 'sys',
                                         url, url, {})
             expected = {'unique_name': 'sys_1',
                         'system_inspection_result': 'failed',
@@ -629,7 +663,9 @@ class SatelliteSixV2Test(TestCase):
                                 host_id=1)
             mocker.get(url, status_code=404, text='error message')
             result = get_http_responses(self.scan_task, self.scan_task.id,
-                                        self.scan_task.scan_type, 1, 'sys',
+                                        self.scan_task.scan_type,
+                                        self.scan_task.source.source_type,
+                                        self.scan_task.source.name, 1, 'sys',
                                         url, url, {})
             response = post_processing_results(
                 result['unique_name'],
@@ -653,7 +689,9 @@ class SatelliteSixV2Test(TestCase):
                 }  # noqa
             mocker.get(url, status_code=400, json=err_msg)
             result = get_http_responses(self.scan_task, self.scan_task.id,
-                                        self.scan_task.scan_type, 1, 'sys',
+                                        self.scan_task.scan_type,
+                                        self.scan_task.source.source_type,
+                                        self.scan_task.source.name, 1, 'sys',
                                         url, url, {})
         response = post_processing_results(
             result['unique_name'],

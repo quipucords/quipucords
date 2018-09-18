@@ -148,15 +148,24 @@ class ScanTask(models.Model):
              sys_unreachable)
         self.log_message(message)
 
-    def log_message(self, message, log_level=logging.INFO):
+    def log_message(self, message, log_level=logging.INFO,
+                    inspect_task_id=None, scan_type=None,
+                    source_type=None, source_name=None):
         """Log a message for this task."""
-        elapsed_time = self._compute_elapsed_time()
-        actual_message = 'Task %d (%s, %s, %s, elapsed_time: %ds) - ' % \
-            (self.id,
-             self.scan_type,
-             self.source.source_type,
-             self.source.name,
-             elapsed_time)
+        if inspect_task_id is not None and scan_type is not None and \
+                source_type is not None and source_name is not None:
+            actual_message = 'Task %d (%s, %s, %s) - ' % (inspect_task_id,
+                                                          scan_type,
+                                                          source_type,
+                                                          source_name)
+        else:
+            elapsed_time = self._compute_elapsed_time()
+            actual_message = 'Task %d (%s, %s, %s, elapsed_time: %ds) - ' % \
+                (self.id,
+                 self.scan_type,
+                 self.source.source_type,
+                 self.source.name,
+                 elapsed_time)
         actual_message += message.strip()
         logger.log(log_level, actual_message)
 
