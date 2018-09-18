@@ -266,10 +266,10 @@ def host_subscriptions(response):
 
 
 # pylint: disable=too-many-arguments
-def get_http_responses(scan_task, inspect_task_id,
-                       scan_type, source_type, source_name,
-                       host_id, host_name,
-                       fields_url, subs_url, request_options):
+def request_host_details(scan_task, inspect_task_id,
+                         scan_type, source_type, source_name,
+                         host_id, host_name,
+                         fields_url, subs_url, request_options):
     """Execute both http responses to gather satallite data.
 
     :param scan_task: The current scan task
@@ -294,8 +294,8 @@ def get_http_responses(scan_task, inspect_task_id,
     results = {}
     try:
         message = 'REQUESTING HOST DETAILS: %s' % unique_name
-        scan_task.log_message(message, inspect_task_id, scan_type, source_type,
-                              source_name)
+        scan_task.log_message(message, logging.INFO, inspect_task_id,
+                              scan_type, source_type, source_name)
         host_fields_response, host_fields_url = \
             utils.execute_request(scan_task,
                                   url=fields_url,
@@ -571,7 +571,8 @@ class SatelliteSixV1(SatelliteInterface):
                             raise SatellitePauseException()
 
                         host_params = self.prepare_host(chunk)
-                        results = pool.starmap(get_http_responses, host_params)
+                        results = pool.starmap(request_host_details,
+                                               host_params)
                         for each in results:
                             if each:
                                 result = post_processing_results(
@@ -712,7 +713,7 @@ class SatelliteSixV2(SatelliteInterface):
                     if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                         raise SatellitePauseException()
                     host_params = self.prepare_host(chunk)
-                    results = pool.starmap(get_http_responses,
+                    results = pool.starmap(request_host_details,
                                            host_params)
                     for each in results:
                         if each:
