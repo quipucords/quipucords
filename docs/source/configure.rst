@@ -91,7 +91,7 @@ Changing Other Quipucords Server Settings
 You may also configure the quipucords server by setting the following environment variables:
 
   - QPC_SERVER_TIMEOUT
-    - The default http request timeout.  For example, this can be raised if you are merging a large number of jobs.
+    - The default http request timeout.  For example, this can be raised if you are merging a large number of reports.
   - QUIPUCORDS_LOGGING_LEVEL
     - Application logging level
   - DJANGO_LOGGING_LEVEL
