@@ -266,8 +266,7 @@ def host_subscriptions(response):
 
 
 # pylint: disable=too-many-arguments
-def request_host_details(scan_task, inspect_task_id,
-                         scan_type, source_type, source_name,
+def request_host_details(scan_task, logging_options,
                          host_id, host_name,
                          fields_url, subs_url, request_options):
     """Execute both http responses to gather satallite data.
@@ -294,8 +293,7 @@ def request_host_details(scan_task, inspect_task_id,
     results = {}
     try:
         message = 'REQUESTING HOST DETAILS: %s' % unique_name
-        scan_task.log_message(message, logging.INFO, inspect_task_id,
-                              scan_type, source_type, source_name)
+        scan_task.log_message(message, logging.INFO, logging_options)
         host_fields_response, host_fields_url = \
             utils.execute_request(scan_task,
                                   url=fields_url,
@@ -326,17 +324,13 @@ def request_host_details(scan_task, inspect_task_id,
                     (host_subscriptions_response.status_code,
                      host_subscriptions_url,
                      host_subscriptions_response.json())
-                scan_task.log_message(message, logging.WARN, inspect_task_id,
-                                      scan_type, source_type,
-                                      source_name)
+                scan_task.log_message(message, logging.WARN, logging_options)
             else:
                 message = 'Invalid status code %s for url: %s. ' \
                           'Response not JSON' % \
                           (host_subscriptions_response.status_code,
                            host_subscriptions_url)
-                scan_task.log_message(message, logging.WARN, inspect_task_id,
-                                      scan_type, source_type,
-                                      source_name)
+                scan_task.log_message(message, logging.WARN, logging_options)
         elif host_subscriptions_response.status_code != requests.codes.ok:
             raise SatelliteException(
                 'Invalid response code %s for url: %s' % (
@@ -357,37 +351,34 @@ def request_host_details(scan_task, inspect_task_id,
     return results
 
 
-# pylint: disable=too-many-arguments
-def post_processing_results(unique_name,
-                            system_inspection_result,
-                            api_version,
-                            host_fields_response,
-                            host_subscriptions_response):
-    """Process the responses returned from the satellite requests.
+def process_results(self, results, api_version):
+    """Process & record the responses returned from satellite requests.
 
-    :param unique_name: The unique name for the host
-    :param system_inspection_result: Whether or not the System Inspection
-        result succeeded or failed
-    :param api_version: The satellite api version
-    :param host_fields_response: A tuple containing the response
-        returned from the fields endpoint
-    :param host_subscriptions_response: A tuple containing the response
-        returned from the subs endpoint
-    :returns: A dictionary containing the host name, details, and status.
+    :param results: A list of responses returned from the sat endpoint.
     """
-    details = {}
-    if system_inspection_result == SystemInspectionResult.SUCCESS:
-        details.update(host_fields(api_version,
-                                   host_fields_response))
-        details.update(host_subscriptions(host_subscriptions_response))
-        logger.debug('name=%s, host_details=%s',
-                     unique_name, details)
-    else:
-        subs_dict = {ENTITLEMENTS: []}
-        details.update(subs_dict)
-    return {'name': unique_name,
-            'details': details,
-            'status': system_inspection_result}
+    for raw_result in results:
+        name = raw_result['unique_name']
+        system_inspection_result = raw_result['system_inspection_result']
+        host_fields_response = raw_result['host_fields_response']
+        host_subscriptions_response = raw_result['host_subscriptions_response']
+        details = {}
+        if system_inspection_result == SystemInspectionResult.SUCCESS:
+            details.update(host_fields(api_version,
+                                       host_fields_response))
+            details.update(host_subscriptions(host_subscriptions_response))
+            logger.debug('name=%s, host_details=%s',
+                         name, details)
+        else:
+            subs_dict = {ENTITLEMENTS: []}
+            details.update(subs_dict)
+        result = {'name': name,
+                  'details': details,
+                  'status': system_inspection_result}
+        if result is not None:
+            self.record_inspect_result(
+                result.get('name'),
+                result.get('details'),
+                result.get('status'))
 
 
 class SatelliteSixV1(SatelliteInterface):
@@ -507,10 +498,12 @@ class SatelliteSixV1(SatelliteInterface):
         request_options = {'host': defined_host, 'port': port, 'user': user,
                            'password': password,
                            'ssl_cert_verify': ssl_cert_verify}
-        host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
-                        self.inspect_scan_task.scan_type,
-                        self.inspect_scan_task.source.source_type,
-                        self.inspect_scan_task.source.name,
+        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
+                           'scan_type': self.inspect_scan_task.scan_type,
+                           'source_type':
+                               self.inspect_scan_task.source.source_type,
+                           'source_name': self.inspect_scan_task.source.name}
+        host_params = [(self.inspect_scan_task, logging_options,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V1_URL,
                         HOSTS_SUBS_V1_URL, request_options)
                        for host in chunk]
@@ -573,20 +566,7 @@ class SatelliteSixV1(SatelliteInterface):
                         host_params = self.prepare_host(chunk)
                         results = pool.starmap(request_host_details,
                                                host_params)
-                        for each in results:
-                            if each:
-                                result = post_processing_results(
-                                    each['unique_name'],
-                                    each['system_inspection_result'],
-                                    1,
-                                    each['host_fields_response'],
-                                    each['host_subscriptions_response'])
-
-                                if result is not None:
-                                    self.record_inspect_result(
-                                        result.get('name'),
-                                        result.get('details'),
-                                        result.get('status'))
+                        process_results(self, results, 1)
         utils.validate_task_stats(self.inspect_scan_task)
 
 
@@ -658,10 +638,12 @@ class SatelliteSixV2(SatelliteInterface):
         request_options = {'host': defined_host, 'port': port, 'user': user,
                            'password': password,
                            'ssl_cert_verify': ssl_cert_verify}
-        host_params = [(self.inspect_scan_task, self.inspect_scan_task.id,
-                        self.inspect_scan_task.scan_type,
-                        self.inspect_scan_task.source.source_type,
-                        self.inspect_scan_task.source.name,
+        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
+                           'scan_type': self.inspect_scan_task.scan_type,
+                           'source_type':
+                               self.inspect_scan_task.source.source_type,
+                           'source_name': self.inspect_scan_task.source.name}
+        host_params = [(self.inspect_scan_task, logging_options,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V2_URL,
                         HOSTS_SUBS_V2_URL, request_options)
                        for host in chunk]
@@ -715,18 +697,5 @@ class SatelliteSixV2(SatelliteInterface):
                     host_params = self.prepare_host(chunk)
                     results = pool.starmap(request_host_details,
                                            host_params)
-                    for each in results:
-                        if each:
-                            result = post_processing_results(
-                                each['unique_name'],
-                                each['system_inspection_result'],
-                                1,
-                                each['host_fields_response'],
-                                each['host_subscriptions_response'])
-
-                            if result is not None:
-                                self.record_inspect_result(
-                                    result.get('name'),
-                                    result.get('details'),
-                                    result.get('status'))
+                    process_results(self, results, 2)
         utils.validate_task_stats(self.inspect_scan_task)

@@ -148,17 +148,15 @@ class ScanTask(models.Model):
              sys_unreachable)
         self.log_message(message)
 
-    # pylint: disable=too-many-arguments
     def log_message(self, message, log_level=logging.INFO,
-                    inspect_task_id=None, scan_type=None,
-                    source_type=None, source_name=None):
+                    static_options=None):
         """Log a message for this task."""
-        if inspect_task_id is not None and scan_type is not None and \
-                source_type is not None and source_name is not None:
-            actual_message = 'Task %d (%s, %s, %s) - ' % (inspect_task_id,
-                                                          scan_type,
-                                                          source_type,
-                                                          source_name)
+        if static_options is not None:
+            actual_message = 'Task %d (%s, %s, %s) - ' % \
+                (static_options['inspect_task_id'],
+                 static_options['scan_type'],
+                 static_options['source_type'],
+                 static_options['source_name'])
         else:
             elapsed_time = self._compute_elapsed_time()
             actual_message = 'Task %d (%s, %s, %s, elapsed_time: %ds) - ' % \
