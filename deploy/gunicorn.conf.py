@@ -73,7 +73,6 @@ workers = 1
 worker_class = 'sync'
 worker_connections = 1000
 timeout = os.getenv('QPC_SERVER_TIMEOUT', 120)
-print('gunicorn server started with timeout of %s' % timeout)
 keepalive = 2
 
 #
