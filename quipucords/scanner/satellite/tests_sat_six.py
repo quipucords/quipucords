@@ -253,21 +253,21 @@ class SatelliteSixV1Test(TestCase):
 
     def test_prepare_host_s61(self):
         """Test the prepare host method for satellite 6.1."""
-        HOSTS_FIELDS_V1_URL = \
+        url1 = \
             'https://{sat_host}:{port}/katello/api' \
             '/v2/organizations/{org_id}/systems/{host_id}'
-        HOSTS_SUBS_V1_URL = \
+        url2 = \
             'https://{sat_host}:{port}/katello/api' \
             '/v2/organizations/{org_id}/systems/{host_id}/subscriptions'
         expected = [(self.scan_task, self.scan_task.id,
-                    self.scan_task.scan_type,
-                    self.scan_task.source.source_type,
-                    self.scan_task.source.name, 1, 'sys',
-                    HOSTS_FIELDS_V1_URL, HOSTS_SUBS_V1_URL,
-                    {'host': {'id': 1, 'name': 'sys'}, 'port': '443',
-                     'user': self.cred.username,
-                     'password': self.cred.password,
-                     'ssl_cert_verify': True})]
+                     self.scan_task.scan_type,
+                     self.scan_task.source.source_type,
+                     self.scan_task.source.name, 1, 'sys',
+                     url1, url2,
+                     {'host': {'id': 1, 'name': 'sys'}, 'port': '443',
+                      'user': self.cred.username,
+                      'password': self.cred.password,
+                      'ssl_cert_verify': True})]
         host = {'id': 1, 'name': 'sys'}
         chunk = [host]
         port = '443'
@@ -278,6 +278,7 @@ class SatelliteSixV1Test(TestCase):
                    return_value=connect_data_return_value) as mock_connect:
             host_params = SatelliteSixV1.prepare_host(self.api, chunk)
             self.assertEqual(expected, host_params)
+            mock_connect.assert_called_once_with(ANY)
 
     def test_get_http_responses_err(self):
         """Test get_http_responses for error mark a failed system."""

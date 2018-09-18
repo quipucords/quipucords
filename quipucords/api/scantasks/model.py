@@ -148,6 +148,7 @@ class ScanTask(models.Model):
              sys_unreachable)
         self.log_message(message)
 
+    # pylint: disable=too-many-arguments
     def log_message(self, message, log_level=logging.INFO,
                     inspect_task_id=None, scan_type=None,
                     source_type=None, source_name=None):
