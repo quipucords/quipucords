@@ -86,6 +86,22 @@ To view the status of the server after it is running, enter the following comman
 
   # sudo docker ps
 
+Changing Other Quipucords Server Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You may also configure the quipucords server by setting the following environment variables:
+
+  - QPC_SERVER_TIMEOUT
+    - The default http request timeout.  For example, this can be raised if you are merging a large number of jobs.
+  - QUIPUCORDS_LOGGING_LEVEL
+    - Application logging level
+  - DJANGO_LOGGING_LEVEL
+    - Infrastructure logging level
+
+To set these values, pass the ``docker run`` command the ``-e "NAME=VALUE`` argument.  For example to set ``QPC_SERVER_TIMEOUT`` do::
+
+    # sudo docker run --name quipucords -d -e "QPC_SERVER_TIMEOUT=240" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
+
+
 .. _change-default-pw:
 
 Changing the Default Password for the Quipucords Server
