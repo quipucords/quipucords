@@ -140,21 +140,15 @@ ERRATA_MAPPING = {
 
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-def host_fields(api_version, response, url):
+def host_fields(api_version, response):
     """Obtain the fields for a given host id.
 
     :param api_version: The version of the Satellite api
     :param response: The response returned from the fields
         endpoint
-    :param url: The endpoint URL
     :returns: dictionary of facts created from response object.
     """
-    # pylint: disable=no-member
-    if response.status_code != requests.codes.ok:
-        raise SatelliteException('Invalid response code %s'
-                                 ' for url: %s' %
-                                 (response.status_code, url))
-    fields = response.json()
+    fields = response
     host_info = {}
     sub_virt_host = None
     sub_virt_guest = None
@@ -238,34 +232,14 @@ def host_fields(api_version, response, url):
     return host_info
 
 
-def host_subscriptions(scan_task, response, url):
+def host_subscriptions(response):
     """Obtain the subscriptions for a given host id.
 
-    :param scan_task: The scan task being executed
-    :param response: The response returned from the subs
+    :param response: The response json returned from the subs
         endpoint
-    :param url: The endpoint URL
     :returns: dictionary of facts created from response object.
     """
-    # pylint: disable=no-member
-    if response.status_code == 400 or response.status_code == 404:
-        content_type = response.headers.get(CONTENT_TYPE)
-        if content_type and APP_JSON in content_type:
-            message = 'Invalid status code %s for url: %s. Response: %s' %\
-                (response.status_code, url, response.json())
-            scan_task.log_message(message, log_level=logging.WARN)
-        else:
-            message = 'Invalid status code %s for url: %s. '\
-                'Response not JSON' %\
-                (response.status_code, url)
-            scan_task.log_message(message, log_level=logging.WARN)
-        subs_dict = {ENTITLEMENTS: []}
-        return subs_dict
-    elif response.status_code != requests.codes.ok:
-        raise SatelliteException('Invalid response code %s'
-                                 ' for url: %s' %
-                                 (response.status_code, url))
-    entitlements = response.json().get(RESULTS, [])
+    entitlements = response.get(RESULTS, [])
     subscriptons = []
     for entitlement in entitlements:
         sub = {
@@ -325,15 +299,14 @@ def get_http_responses(scan_task, inspect_task_id,
     :param subs_url: The sat61 or sat62 subs url
     :param request_options: A dictionary containing host, port,
         ssl_cert_verify, user, and password
-    :returns: A list containing the unique name for the host,
+    :returns: A dictionary containing the unique name for the host,
         the response & url for host_fields request, and the
         response & url for the host_subs request.
     """
     unique_name = '%s_%s' % (host_name, host_id)
-    host_fields_response = None
-    host_fields_url = None
-    host_subscriptions_response = None
-    host_subscriptions_url = None
+    host_fields_json = {}
+    host_subscriptions_json = {}
+    results = {}
     try:
         message = 'REQUESTING HOST DETAILS: %s' % unique_name
         log_message(message, inspect_task_id, scan_type)
@@ -344,38 +317,69 @@ def get_http_responses(scan_task, inspect_task_id,
                                   host_id=host_id,
                                   query_params=QUERY_PARAMS_FIELDS,
                                   options=request_options)
-
+        # pylint: disable=no-member
+        if host_fields_response.status_code != requests.codes.ok:
+            raise SatelliteException('Invalid response code %s'
+                                     ' for url: %s' %
+                                     (host_fields_response.status_code,
+                                      host_fields_url))
         host_subscriptions_response, host_subscriptions_url = \
             utils.execute_request(scan_task,
                                   url=subs_url,
                                   org_id=None,
                                   host_id=host_id,
                                   options=request_options)
-        return(unique_name, SystemInspectionResult.SUCCESS,
-               (host_fields_response, host_fields_url),
-               (host_subscriptions_response, host_subscriptions_url))
+        # pylint: disable=no-member
+        if host_subscriptions_response.status_code == 400 or \
+                host_subscriptions_response.status_code == 404:
+            content_type = \
+                host_subscriptions_response.headers.get(CONTENT_TYPE)
+            if content_type and APP_JSON in content_type:
+                message = \
+                    'Invalid status code %s for url: %s. Response: %s' % \
+                    (host_subscriptions_response.status_code,
+                     host_subscriptions_url,
+                     host_subscriptions_response.json())
+                log_message(message, inspect_task_id, scan_type,
+                            log_level=logging.WARN)
+            else:
+                message = 'Invalid status code %s for url: %s. ' \
+                          'Response not JSON' % \
+                          (host_subscriptions_response.status_code,
+                           host_subscriptions_url)
+                log_message(message, inspect_task_id, scan_type,
+                            log_level=logging.WARN)
+        elif host_subscriptions_response.status_code != requests.codes.ok:
+            raise SatelliteException(
+                'Invalid response code %s for url: %s' % (
+                    host_subscriptions_response.status_code,
+                    host_subscriptions_url))
+        system_inspection_result = SystemInspectionResult.SUCCESS
+        host_fields_json = host_fields_response.json()
+        host_subscriptions_json = host_subscriptions_response.json()
     except SatelliteException as sat_error:
         error_message = 'Satellite unknown 6v2 error encountered: %s\n' \
             % sat_error
         logger.error(error_message)
-        return (unique_name, SystemInspectionResult.FAILED,
-                (host_fields_response, host_fields_url),
-                (host_subscriptions_response, host_subscriptions_url))
+        system_inspection_result = SystemInspectionResult.FAILED
+    results['unique_name'] = unique_name
+    results['system_inspection_result'] = system_inspection_result
+    results['host_fields_response'] = host_fields_json
+    results['host_subscriptions_response'] = host_subscriptions_json
+    return results
 
 
 # pylint: disable=too-many-arguments
 def post_processing_results(unique_name,
-                            inspect_result_status,
-                            scan_task,
+                            system_inspection_result,
                             api_version,
                             host_fields_response,
                             host_subscriptions_response):
     """Process the responses returned from the satellite requests.
 
     :param unique_name: The unique name for the host
-    :param inspect_result_status: Whether or not the System Inspection
+    :param system_inspection_result: Whether or not the System Inspection
         result succeeded or failed
-    :param scan_task: The current scan task
     :param api_version: The satellite api version
     :param host_fields_response: A tuple containing the response
         returned from the fields endpoint
@@ -384,18 +388,18 @@ def post_processing_results(unique_name,
     :returns: A dictionary containing the host name, details, and status.
     """
     details = {}
-    if inspect_result_status == SystemInspectionResult.SUCCESS:
+    if system_inspection_result == SystemInspectionResult.SUCCESS:
         details.update(host_fields(api_version,
-                                   host_fields_response[0],
-                                   host_fields_response[1]))
-        details.update(host_subscriptions(scan_task,
-                                          host_subscriptions_response[0],
-                                          host_subscriptions_response[1]))
+                                   host_fields_response))
+        details.update(host_subscriptions(host_subscriptions_response))
         logger.debug('name=%s, host_details=%s',
                      unique_name, details)
+    else:
+        subs_dict = {ENTITLEMENTS: []}
+        details.update(subs_dict)
     return {'name': unique_name,
             'details': details,
-            'status': inspect_result_status}
+            'status': system_inspection_result}
 
 
 class SatelliteSixV1(SatelliteInterface):
@@ -581,12 +585,11 @@ class SatelliteSixV1(SatelliteInterface):
                         for each in results:
                             if each:
                                 result = post_processing_results(
-                                    each[0],
-                                    each[1],
-                                    self.inspect_scan_task,
+                                    each['unique_name'],
+                                    each['system_inspection_result'],
                                     1,
-                                    each[2],
-                                    each[3])
+                                    each['host_fields_response'],
+                                    each['host_subscriptions_response'])
 
                                 if result is not None:
                                     self.record_inspect_result(
@@ -722,12 +725,11 @@ class SatelliteSixV2(SatelliteInterface):
                     for each in results:
                         if each:
                             result = post_processing_results(
-                                each[0],
-                                each[1],
-                                self.inspect_scan_task,
-                                2,
-                                each[2],
-                                each[3])
+                                each['unique_name'],
+                                each['system_inspection_result'],
+                                1,
+                                each['host_fields_response'],
+                                each['host_subscriptions_response'])
 
                             if result is not None:
                                 self.record_inspect_result(

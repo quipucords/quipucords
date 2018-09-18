@@ -27,7 +27,9 @@ import requests_mock
 
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
-                                   host_fields, host_subscriptions)
+                                   get_http_responses,
+                                   host_fields, host_subscriptions,
+                                   post_processing_results)
 from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
 
@@ -227,8 +229,7 @@ class SatelliteSixV1Test(TestCase):
                 },
             }
             mocker.get(url, status_code=200, json=jsonresult)
-            host_info = host_fields(self.scan_task, 1,
-                                    host_field_url, None, 1)
+            host_info = host_fields(1, jsonresult)
             expected = {
                 'uuid': '00c7a108-48ec-4a97-835c-aa3369777f64',
                 'hostname': 'mac52540071bafe.prov.lan',
@@ -250,35 +251,26 @@ class SatelliteSixV1Test(TestCase):
                 'os_name': 'RedHat', 'os_version': '7.4'}
             self.assertEqual(host_info, expected)
 
-    def test_host_details_skip(self):
-        """Test host_details method for already captured data."""
-        # pylint: disable=no-member
-        sys_result = SystemInspectionResult(
-            name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
-        sys_result.save()
-        inspect_result = self.scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        detail = self.api.host_details(1, 1, 'sys1')
-        self.assertEqual(len(inspect_result.systems.all()), 1)
-        self.assertEqual(detail, None)
-
-    def test_host_details_err(self):
-        """Test host_details method for error mark a failed system."""
-        with patch('scanner.satellite.six.host_fields',
-                   side_effect=mock_sat_exception) as mock_fields:
-            detail = self.api.host_details(1, 1, 'sys1')
+    def test_get_http_responses_err(self):
+        """Test get_http_responses for error mark a failed system."""
+        host_field_url = 'https://{sat_host}:{port}/api/v2/hosts/{host_id}'
+        with requests_mock.Mocker() as mocker:
+            url = construct_url(url=host_field_url, sat_host='1.2.3.4',
+                                host_id=1)
+            mocker.get(url, status_code=500)
+            result = get_http_responses(self.scan_task, self.scan_task.id,
+                                        self.scan_task.scan_type, 1, 'sys',
+                                        url, url, {})
+            expected = {'unique_name': 'sys_1',
+                        'system_inspection_result': 'failed',
+                        'host_fields_response': {},
+                        'host_subscriptions_response': {}}
+            self.assertEqual(result, expected)
             inspect_result = self.scan_task.inspection_result
             self.assertEqual(len(inspect_result.systems.all()), 0)
-            self.assertEqual(
-                detail, {'name': 'sys1_1',
-                         'details': {},
-                         'status': 'failed'})
-            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
 
-    def test_host_details(self):
-        """Test host_details method with mock data."""
+    def test_post_processing(self):
+        """Test post_processing_results method with mock data."""
         fields_return_value = {
             'uuid': '00c7a108-48ec-4a97-835c-aa3369777f64',
             'hostname': 'mac52540071bafe.prov.lan',
@@ -361,15 +353,19 @@ class SatelliteSixV1Test(TestCase):
                    return_value=fields_return_value) as mock_fields:
             with patch('scanner.satellite.six.host_subscriptions',
                        return_value=subs_return_value) as mock_subs:
-                details = self.api.host_details(org_id=1,
-                                                host_id=1,
-                                                host_name='sys1')
+                details = post_processing_results(
+                    'sys1_1',
+                    SystemInspectionResult.SUCCESS,
+                    1,
+                    fields_return_value,
+                    subs_return_value)
+
                 self.assertEqual(
                     details, {'name': 'sys1_1',
                               'details': expected,
                               'status': 'success'})
-                mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY)
-                mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY)
+                mock_fields.assert_called_once_with(ANY, ANY)
+                mock_subs.assert_called_once_with(ANY)
 
     @patch('scanner.satellite.six.SatelliteSixV1.get_orgs')
     def test_hosts_facts_with_err(self, mock_get_orgs):
@@ -384,17 +380,18 @@ class SatelliteSixV1Test(TestCase):
                 self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'name': 'sys10',
-         'details': {},
-         'status': SystemInspectionResult.SUCCESS}])
+        {'unique_name': 'sys_1',
+         'system_inspection_result': 'failed',
+         'host_fields_response': {},
+         'host_subscriptions_response': {}}])
     def test_hosts_facts(self, mock_pool):
         """Test the method hosts."""
         hosts_url = 'https://{sat_host}:{port}/katello/api' \
             '/v2/organizations/{org_id}/systems'
         with patch.object(SatelliteSixV1, 'get_orgs',
                           return_value=[1]):
-            with patch.object(SatelliteSixV1, 'host_details',
-                              return_value={}):
+            with patch('scanner.satellite.six.get_http_responses',
+                       return_value={}):
                 with requests_mock.Mocker() as mocker:
                     url = construct_url(url=hosts_url,
                                         sat_host='1.2.3.4',
@@ -518,15 +515,27 @@ class SatelliteSixV2Test(TestCase):
             with self.assertRaises(SatelliteException):
                 self.api.hosts()
 
-    def test_host_fields_with_err(self):
-        """Test the method host_fields with error."""
+    def test_processing_fields_with_err(self):
+        """Test the post_processing with error."""
         host_field_url = 'https://{sat_host}:{port}/api/v2/hosts/{host_id}'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=host_field_url, sat_host='1.2.3.4',
                                 host_id=1)
             mocker.get(url, status_code=500)
-            with self.assertRaises(SatelliteException):
-                host_fields(self.scan_task, 2, host_field_url, None, 1)
+            result = get_http_responses(self.scan_task, self.scan_task.id,
+                                        self.scan_task.scan_type, 1, 'sys',
+                                        url, url, {})
+            expected = {'unique_name': 'sys_1',
+                        'system_inspection_result': 'failed',
+                        'host_fields_response': {},
+                        'host_subscriptions_response': {}}
+            self.assertEqual(result, expected)
+            response = post_processing_results(
+                result['unique_name'],
+                result['system_inspection_result'],
+                1, result['host_fields_response'],
+                result['host_subscriptions_response'])
+            self.assertEqual(response['details'], {'entitlements': []})
 
     def test_host_fields(self):
         """Test the method host_fields."""
@@ -571,8 +580,7 @@ class SatelliteSixV2Test(TestCase):
                 },
             }
             mocker.get(url, status_code=200, json=jsonresult)
-            host_info = host_fields(self.scan_task, 2,
-                                    host_field_url, None, 1)
+            host_info = host_fields(2, jsonresult)
             expected = {
                 'uuid': '00c7a108-48ec-4a97-835c-aa3369777f64',
                 'hostname': 'mac52540071bafe.prov.lan',
@@ -594,7 +602,7 @@ class SatelliteSixV2Test(TestCase):
                 'os_name': 'RedHat', 'os_version': '7.4'}
             self.assertEqual(host_info, expected)
 
-    def test_host_subs_with_err(self):
+    def test_get_https_with_err(self):
         """Test the host subscriptons method with bad status code."""
         sub_url = 'https://{sat_host}:{port}/' \
             'api/v2/hosts/{host_id}/subscriptions'
@@ -602,19 +610,33 @@ class SatelliteSixV2Test(TestCase):
             url = construct_url(url=sub_url, sat_host='1.2.3.4',
                                 host_id=1)
             mocker.get(url, status_code=500)
-            with self.assertRaises(SatelliteException):
-                host_subscriptions(self.scan_task, sub_url, None, 1)
+            result = get_http_responses(self.scan_task, self.scan_task.id,
+                                        self.scan_task.scan_type, 1, 'sys',
+                                        url, url, {})
+            expected = {'unique_name': 'sys_1',
+                        'system_inspection_result': 'failed',
+                        'host_fields_response': {},
+                        'host_subscriptions_response': {}}
+            self.assertEqual(result,
+                             expected)
 
-    def test_host_subs_err_nojson(self):
-        """Test the host subscriptons method with bad code and not json."""
+    def test_processing_subs_err_nojson(self):
+        """Test the flow of post processing with bad code and not json."""
         sub_url = 'https://{sat_host}:{port}/' \
             'api/v2/hosts/{host_id}/subscriptions'
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=sub_url, sat_host='1.2.3.4',
                                 host_id=1)
             mocker.get(url, status_code=404, text='error message')
-            subs = host_subscriptions(self.scan_task, sub_url, None, 1)
-            self.assertEqual(subs, {'entitlements': []})
+            result = get_http_responses(self.scan_task, self.scan_task.id,
+                                        self.scan_task.scan_type, 1, 'sys',
+                                        url, url, {})
+            response = post_processing_results(
+                result['unique_name'],
+                result['system_inspection_result'],
+                1, result['host_fields_response'],
+                result['host_subscriptions_response'])
+            self.assertEqual(response['details'], {'entitlements': []})
 
     def test_host_not_subscribed(self):
         """Test the host subscriptons method for not subscribed error."""
@@ -630,8 +652,16 @@ class SatelliteSixV2Test(TestCase):
                            ' with subscription-manager']
                 }  # noqa
             mocker.get(url, status_code=400, json=err_msg)
-            subs = host_subscriptions(self.scan_task, sub_url, None, 1)
-            self.assertEqual(subs, {'entitlements': []})
+            result = get_http_responses(self.scan_task, self.scan_task.id,
+                                        self.scan_task.scan_type, 1, 'sys',
+                                        url, url, {})
+        response = post_processing_results(
+            result['unique_name'],
+            result['system_inspection_result'],
+            1, result['host_fields_response'],
+            result['host_subscriptions_response'])
+
+        self.assertEqual(response['details'], {'entitlements': []})
 
     def test_host_subscriptons(self):
         """Test the host subscriptons method."""
@@ -662,7 +692,7 @@ class SatelliteSixV2Test(TestCase):
                 ]
             }
             mocker.get(url, status_code=200, json=jsonresult)
-            subs = host_subscriptions(self.scan_task, sub_url, None, 1)
+            subs = host_subscriptions(jsonresult)
             expected = {'entitlements':
                         [{'derived_entitlement': False,
                           'name': 'Satellite Tools 6.3',
@@ -680,27 +710,26 @@ class SatelliteSixV2Test(TestCase):
                           'end_date': '2022-01-01 04:59:59 UTC'}]}
             self.assertEqual(subs, expected)
 
-    def test_host_details_err(self):
-        """Test host_details method for error mark a failed system."""
-        with patch('scanner.satellite.six.host_fields',
-                   side_effect=mock_sat_exception) as mock_fields:
-            detail = self.api.host_details(1, 'sys1',
-                                           ssl_cert_verify=False,
-                                           host=self.scan_task.source.hosts[0],
-                                           port=self.scan_task.source.port,
-                                           user=self.cred.username,
-                                           password=self.cred.password)
-            inspect_result = self.scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 0)
-            self.assertEqual(
-                detail, {'name': 'sys1_1',
-                         'details': {},
-                         'status': 'failed'})
-            mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY,
-                                                ANY, ANY, ANY, ANY, ANY, ANY)
+    def test_post_processing_err(self):
+        """Test error flow & check that a failed system is marked."""
+        response = {'system_inspection_result': SystemInspectionResult.FAILED,
+                    'host_fields_response': {},
+                    'host_subscriptions_response': {}}
 
-    def test_host_details(self):
-        """Test host_details method with mock data."""
+        detail = post_processing_results(
+            'sys1_1', response['system_inspection_result'], 1,
+            response['host_fields_response'],
+            response['host_subscriptions_response'])
+
+        inspect_result = self.scan_task.inspection_result
+        self.assertEqual(len(inspect_result.systems.all()), 0)
+        self.assertEqual(
+            detail, {'name': 'sys1_1',
+                     'details': {'entitlements': []},
+                     'status': 'failed'})
+
+    def test_post_processing(self):
+        """Test post_processing_results method with mock data."""
         fields_return_value = {
             'uuid': '00c7a108-48ec-4a97-835c-aa3369777f64',
             'hostname': 'mac52540071bafe.prov.lan',
@@ -780,21 +809,17 @@ class SatelliteSixV2Test(TestCase):
                    return_value=fields_return_value) as mock_fields:
             with patch('scanner.satellite.six.host_subscriptions',
                        return_value=subs_return_value) as mock_subs:
-                details = self.api.host_details(
-                    host_id=1, host_name='sys1',
-                    ssl_cert_verify=False,
-                    host=self.scan_task.source.hosts[0],
-                    port=self.scan_task.source.port,
-                    user=self.cred.username,
-                    password=self.cred.password)
+                details = post_processing_results(
+                    'sys1_1', SystemInspectionResult.SUCCESS,
+                    2,
+                    fields_return_value,
+                    subs_return_value)
                 self.assertEqual(
                     details, {'name': 'sys1_1',
                               'details': expected,
                               'status': 'success'})
-                mock_fields.assert_called_once_with(ANY, ANY, ANY, ANY, ANY,
-                                                    ANY, ANY, ANY, ANY, ANY)
-                mock_subs.assert_called_once_with(ANY, ANY, ANY, ANY,
-                                                  ANY, ANY, ANY, ANY, ANY)
+                mock_fields.assert_called_once_with(ANY, ANY)
+                mock_subs.assert_called_once_with(ANY)
 
     def test_hosts_facts_with_err(self):
         """Test the hosts_facts method."""
@@ -806,9 +831,10 @@ class SatelliteSixV2Test(TestCase):
                 self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'name': 'sys10',
-         'details': {},
-         'status': SystemInspectionResult.SUCCESS}])
+        {'unique_name': 'sys_1',
+         'system_inspection_result': 'success',
+         'host_fields_response': {},
+         'host_subscriptions_response': {}}])
     def test_hosts_facts(self, mock_pool):
         """Test the hosts_facts method."""
         scan_options = ScanOptions(max_concurrency=10)
