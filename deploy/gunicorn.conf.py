@@ -1,4 +1,8 @@
 """Gunicorn configuration."""
+
+import os
+
+
 #
 # Server socket
 #
@@ -68,7 +72,7 @@ backlog = 2048
 workers = 1
 worker_class = 'sync'
 worker_connections = 1000
-timeout = 120
+timeout = os.getenv('QPC_SERVER_TIMEOUT', 120)
 keepalive = 2
 
 #
@@ -154,7 +158,6 @@ raw_env = [
 # SSL configuration
 keyfile = '/etc/ssl/server.key'
 certfile = '/etc/ssl/server.crt'
-
 
 
 #
