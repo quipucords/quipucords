@@ -113,7 +113,7 @@ Options:
     - Contains the port number for the Quipucords server. Defaults to ``443``.
  - **server_name**
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
- - **server_timeout**
+ - **QPC_SERVER_TIMEOUT**
     - Contains the HTTP timeout length for the Quipucords server. Defaults to ``120``.
 - **QPC_DBMS**
     - Contains ``postgres`` or ``sqlite``. Defaults to ``sqlite``. Supply ``postgres`` to change the database management system to postgres.

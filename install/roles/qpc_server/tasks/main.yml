@@ -48,8 +48,8 @@
 
 - name: Set server timeout
   set_fact:
-    server_timeout: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
-  when: server_timeout is not defined
+    QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
+  when: QPC_SERVER_TIMEOUT is not defined
 
   - name: Default directory mounting to empty string
   set_fact:
@@ -215,7 +215,7 @@
     - QPC_DBMS_PORT is defined
 
 - name: Start server using SQLite
-  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ server_timeout }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
   when:
     - install_server
@@ -223,7 +223,7 @@
     - not use_postgres
 
 - name: Start server using Postgres
-  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ server_timeout }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="{{ QPC_DBMS_HOST }}" -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="{{ QPC_DBMS_HOST }}" -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
   when:
     - use_postgres
