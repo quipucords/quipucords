@@ -113,3 +113,5 @@ Options:
     - Contains the port number for the Quipucords server. Defaults to ``443``.
  - **server_name**
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
+ - **QPC_SERVER_TIMEOUT**
+    - Contains the HTTP timeout length for the Quipucords server. Defaults to ``120``.
