@@ -15,11 +15,12 @@ When you run the command to start the Quipucords server, you supply values for s
 - Selecting a database (postgres or sqlite) by setting `QPC_DBMS`
    - If you are using postgres as your database, you will also have the following options:
 
+     - (Optional) Specifying an external postgres setup via 'EXTERNAL_POSTGRES'
      - (Optional) Specifying the database name via `QPC_DBMS_DATABASE`
      - (Optional) Specifying the database port via `QPC_DBMS_PORT`
      - (Optional) Specifying the database user via `QPC_DBMS_USER`
-     - (Required) Specifying the database password via `QPC_DBMS_PASSWORD`
-     - (Required) Specifying the database host via `QPC_DBMS_HOST`
+     - (Required with external postgres) Specifying the database password via `QPC_DBMS_PASSWORD`
+     - (Required with external postgres) Specifying the database host via `QPC_DBMS_HOST`
 
 The following steps guide you through those choices.
 
@@ -44,11 +45,12 @@ The following steps guide you through those choices.
        # mkdir data
        # mkdir log
 
-3. Accept or change the default database management system used by Quipucords. The Quipucords server uses SQLite by default but can be configured to use PostgreSQL. SQLite limits concurrency, and users who have already set up a PostgreSQL database may prefer to use Postgres.
+3. Accept or change the default database management system used by Quipucords. The Quipucords server uses an internal PostgreSQL container by default but can be configured to use SQLite or an external PostgreSQL database. SQLite limits concurrency, and for users who already have PostgreSQL setup may prefer to use that database with the ```EXTERNAL_POSTGRES`` flag.
 
-   - If you choose to use SQLite, no further configuration is required when you run the Docker command to start the server.
-      - Although further configuration is not necessary, you may optionally provide the following when you run the Docker command to start the server: ``"QPC_DBMS=sqlite"``.
-   - If you choose to use PostgreSQL, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS=postgres"``.
+   - If you choose to use the default PostgreSQL container, no further configuration is required when you run the Docker command to start the server.
+      - Although further configuration is not necessary, we recommend that you change the default PostgreSQL password when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
+   - If you choose to use SQLite, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS=sqlite"``.
+   - If you choose to use an external PostgreSQL database, you would use the following option when you run the Docker command to start the server: ``"EXTERNAL_POSTGRES=True"``.
       - Additionally, you must provide the following information about your preconfigured postgres database:
          - `QPC_DBMS_DATABASE` (Optional) The database name used by postgres. By default, the name postgres is used.
             - If you choose to use the name postgres, no option is needed when you run the Docker command to start the server.
@@ -59,10 +61,10 @@ The following steps guide you through those choices.
          - `QPC_DBMS_USER` (Optional) The database user for postgres. By default, the user is set to postgres.
             - If you select to keep the user as postgres, no option is needed when you run the Docker command to start the server.
             - If you select to specify a different user, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_USER=yourUser"``.
-         - `QPC_DBMS_PASSWORD` (Required if ``QPC_DBMS=postgres``) The database password for postgres. This option is required when postgres is specified. You can set it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
-         - `QPC_DBMS_HOST` (Required if ``QPC_DBMS=postgres``) The database host for postgres. This option is required when when postgres is specified. You can set it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_HOST=yourHost"``.
+         - `QPC_DBMS_PASSWORD` (Required) The database password for postgres. This option is required when `EXTERNAL_POSTGRES` is specified. You can set it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
+         - `QPC_DBMS_HOST` (Required) The database host for postgres. This option is required when when `EXTERNAL_POSTGRES` is specified. You can set it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_HOST=yourHost"``.
 
-      **NOTE:** You should make sure that each of the above arguments matches the equivalent values in your preconfigured postgres database. If you choose to use postgres but fail to provide the required arguments, Quipucords will ignore your request and start the server using sqlite.
+      **NOTE:** You should make sure that each of the above arguments matches the equivalent values in your preconfigured external postgres database. If you choose to use `EXTERNAL_POSTGRES` but fail to provide the required arguments, Quipucords will ignore your request and start the server using sqlite.
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

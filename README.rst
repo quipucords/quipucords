@@ -144,26 +144,37 @@ Run the following commands from within the local clone root directory to install
     pip install -r dev-requirements.txt
 
 
-Linting
-^^^^^^^
-To lint changes that are made to the source code, run the following command::
+Database Options
+^^^^^^^^^^^^^^^^
+Quipucords currently supports development in both sqlite and postgres. The default database is an internal postgres container.
 
-    make lint
+1. Create the postgres container (make sure that the container is create with `docker ps --all`)
 
+    make setup-postgres
 
 Initializing the Server
 ^^^^^^^^^^^^^^^^^^^^^^^
 To set up the server, run the following command::
 
+1. Initializing with Postgres
+
     make server-init
 
-This command creates a superuser with name *admin* and password of *pass*.
+2. Initializing with Sqlite
+
+    make server-init-sqlite
+
+Both commands creates a superuser with name *admin* and password of *pass*.
 
 Running the Server
 ^^^^^^^^^^^^^^^^^^
 To run the development server, run the following command::
 
+1. Server using Postgres Database
     make serve
+
+2. Server using Sqlite Database
+    make serve-sqlite
 
 To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials.
 
@@ -179,6 +190,11 @@ If you intend to run on Mac OS, there are several more steps that are required.
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
   See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
 
+Linting
+^^^^^^^
+To lint changes that are made to the source code, run the following command::
+
+    make lint
 
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
