@@ -9,9 +9,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the satellite five interface."""
+import json
 import xmlrpc.client
 from multiprocessing import Value
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from api.models import (Credential,
                         ScanJob,
@@ -24,7 +25,8 @@ from api.models import (Credential,
 from django.test import TestCase
 
 from scanner.satellite.api import SatelliteException
-from scanner.satellite.five import (SatelliteFive)
+from scanner.satellite.five import (SatelliteFive,
+                                    request_host_details)
 from scanner.test_util import create_scan_job
 
 
@@ -150,12 +152,27 @@ class SatelliteFiveTest(TestCase):
         client.system.get_network_devices.return_value = net_devices
         client.system.get_registration_date.return_value = 'datetime'
         virt = {1: {'id': 1, 'num_virtual_guests': 3}}
-        details = self.api.host_details(host_id=1, host_name='sys1',
-                                        last_checkin='', virtual_hosts=virt,
-                                        virtual_guests={}, physical_hosts=[])
-        self.assertEqual(details, {'details': expected,
-                                   'name': 'sys1_1',
-                                   'status': 'success'})
+        logging_options = {
+            'inspect_task_id': self.scan_task.id,
+            'scan_type': self.scan_task.scan_type,
+            'source_type': self.scan_task.source.source_type,
+            'source_name': self.scan_task.source.name
+        }
+        raw_result = request_host_details(host_id=1, host_name='sys1',
+                                          last_checkin='',
+                                          scan_task=self.scan_task,
+                                          request_options={},
+                                          logging_options=logging_options)
+        self.api.process_results([raw_result], virt, {1: 2}, [])
+        inspect_results = \
+            self.scan_task.inspection_result.systems.all()
+        sys_1_result = inspect_results.filter(name='sys1_1').first()
+        self.assertEqual(sys_1_result.name, 'sys1_1')
+        self.assertEqual(sys_1_result.status, 'success')
+        result = {}
+        for fact in sys_1_result.facts.all():
+            result[fact.name] = json.loads(fact.value)
+        self.assertEqual(result, expected)
 
     @patch('xmlrpc.client.ServerProxy')
     def test_host_details_virt_guest(self, mock_serverproxy):
@@ -184,31 +201,44 @@ class SatelliteFiveTest(TestCase):
         client.system.get_network_devices.return_value = net_devices
         client.system.get_registration_date.return_value = 'datetime'
         virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
-        details = self.api.host_details(host_id=1, host_name='sys1',
-                                        last_checkin='', virtual_hosts=virt,
-                                        virtual_guests={1: 2},
-                                        physical_hosts=[])
-        self.assertEqual(details, {'details': expected,
-                                   'name': 'sys1_1',
-                                   'status': 'success'})
+        raw_result = request_host_details(host_id=1, host_name='sys1',
+                                          last_checkin='',
+                                          scan_task=self.scan_task,
+                                          request_options={},
+                                          logging_options=None)
+        self.api.process_results([raw_result], virt, {1: 2}, [])
+        inspect_results = \
+            self.scan_task.inspection_result.systems.all()
+        sys_1_result = inspect_results.filter(name='sys1_1').first()
+        self.assertEqual(sys_1_result.name, 'sys1_1')
+        self.assertEqual(sys_1_result.status, 'success')
+        result = {}
+        for fact in sys_1_result.facts.all():
+            result[fact.name] = json.loads(fact.value)
+        self.assertEqual(result, expected)
 
-    def test_host_details_skip(self):
-        """Test host_details method for already captured data."""
-        # pylint: disable=no-member
-        sys_result = SystemInspectionResult(
-            name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
-        sys_result.save()
-        inspect_result = self.scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
-        virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
-        detail = self.api.host_details(host_id=1, host_name='sys1',
-                                       last_checkin='', virtual_hosts=virt,
-                                       virtual_guests={1: 2},
-                                       physical_hosts=[])
-        self.assertEqual(len(inspect_result.systems.all()), 1)
-        self.assertEqual(detail, None)
+    def test_prepare_host_s5(self):
+        """Test the prepare host method for satellite 5."""
+        expected = [(1, 'sys', '', self.scan_task,
+                     {'host': {'id': 1, 'name': 'sys', 'last_checkin': ''},
+                      'port': '443', 'user': self.cred.username,
+                      'password': self.cred.password,
+                      'ssl_cert_verify': True},
+                     {'inspect_task_id': self.scan_task.id,
+                      'scan_type': self.scan_task.scan_type,
+                      'source_type': self.scan_task.source.source_type,
+                      'source_name': self.scan_task.source.name})]
+        host = {'id': 1, 'name': 'sys', 'last_checkin': ''}
+        chunk = [host]
+        port = '443'
+        user = self.cred.username
+        password = self.cred.password
+        connect_data_return_value = host, port, user, password
+        with patch('scanner.satellite.utils.get_connect_data',
+                   return_value=connect_data_return_value) as mock_connect:
+            host_params = self.api.prepare_host(chunk)
+            self.assertEqual(expected, host_params)
+            mock_connect.assert_called_once_with(ANY)
 
     @patch('xmlrpc.client.ServerProxy')
     def test_host_details_with_err(self, mock_serverproxy):
@@ -216,17 +246,22 @@ class SatelliteFiveTest(TestCase):
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
         virt = {2: {'uuid': 2, 'name': 'sys2', 'num_virtual_guests': 3}}
-        details = self.api.host_details(host_id=1, host_name='sys1',
-                                        last_checkin='',
-                                        virtual_hosts=virt,
-                                        virtual_guests={1: 2},
-                                        physical_hosts=[])
-        inspect_result = self.scan_task.inspection_result
-        self.assertEqual(len(inspect_result.systems.all()), 0)
-        self.assertEqual(
-            details, {'details': {},
-                      'name': 'sys1_1',
-                      'status': 'failed'})
+        raw_result = request_host_details(host_id=2, host_name='sys2',
+                                          last_checkin='',
+                                          scan_task=self.scan_task,
+                                          request_options={},
+                                          logging_options=None)
+
+        self.api.process_results([raw_result], virt, {1: 2}, [])
+        inspect_results = \
+            self.scan_task.inspection_result.systems.all()
+        sys_1_result = inspect_results.filter(name='sys2_2').first()
+        self.assertEqual(sys_1_result.name, 'sys2_2')
+        self.assertEqual(sys_1_result.status, 'failed')
+        result = {}
+        for fact in sys_1_result.facts.all():
+            result[fact.name] = json.loads(fact.value)
+        self.assertEqual(result, {})
 
     @patch('xmlrpc.client.ServerProxy')
     def test_virtual_guests_with_err(self, mock_serverproxy):
@@ -301,9 +336,17 @@ class SatelliteFiveTest(TestCase):
             self.api.hosts_facts(Value('i', ScanJob.JOB_RUN))
 
     @patch('multiprocessing.pool.Pool.starmap', return_value=[
-        {'name': 'sys10',
-         'details': {},
-         'status': SystemInspectionResult.SUCCESS}])
+        {'host_name': 'sys10',
+         'last_checkin': '',
+         'host_id': 1,
+         'cpu': {},
+         'uuid': 1,
+         'system_details': {},
+         'kernel': '',
+         'subs': [],
+         'network_devices': [],
+         'registration_date': '',
+         'system_inspection_result': SystemInspectionResult.SUCCESS}])
     @patch('xmlrpc.client.ServerProxy')
     def test_hosts_facts(self, mock_serverproxy, mock_pool):
         """Test the hosts_facts method."""

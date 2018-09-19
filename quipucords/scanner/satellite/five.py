@@ -59,6 +59,65 @@ VIRTUAL_HOST_NAME = 'virtual_host_name'
 HYPERVISOR = 'hypervisor'
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+# pylint: disable=too-many-arguments
+def request_host_details(host_id, host_name, last_checkin, scan_task,
+                         request_options, logging_options):
+    """Execute http responses to gather satellite data.
+
+    :param host_id: The identifier of the host
+    :param host_name: The name of the host
+    :param last_checkin: The date of last checkin
+    :param scan_task: The current scan task
+    :param request_options: A dictionary containing the host, port,
+        user, and password for the source
+    :param: logging_options: A dictionary containing the scan_task type,
+        scan_task id, and source_type, and the source_name
+    """
+    unique_name = '%s_%s' % (host_name, host_id)
+    results = {}
+    client, user, password = utils.get_sat5_client(scan_task,
+                                                   request_options)
+    try:
+        message = 'REQUESTING HOST DETAILS: %s' % unique_name
+        scan_task.log_message(message, logging.INFO,
+                              logging_options)
+
+        key = client.auth.login(user, password)
+        uuid = client.system.get_uuid(key, host_id)
+        cpu = client.system.get_cpu(key, host_id)
+        system_details = client.system.get_details(key, host_id)
+        kernel = client.system.get_running_kernel(key, host_id)
+        subs = client.system.get_entitlements(key, host_id)
+
+        network_devices = client.system.get_network_devices(key, host_id)
+        registration_date = client.system.get_registration_date(key,
+                                                                host_id)
+
+        client.auth.logout(key)
+        system_inspection_result = SystemInspectionResult.SUCCESS
+        results['uuid'] = uuid
+        results['cpu'] = cpu
+        results['system_details'] = system_details
+        results['kernel'] = kernel
+        results['subs'] = subs
+        results['network_devices'] = network_devices
+        results['registration_date'] = registration_date
+
+    except xmlrpc.client.Fault as xml_error:
+        error_message = 'Satellite 5 fault error encountered: %s\n' \
+                        % xml_error
+        logger.error(error_message)
+        system_inspection_result = SystemInspectionResult.FAILED
+
+    results['host_name'] = host_name
+    results['host_id'] = host_id
+    results['last_checkin'] = last_checkin
+    results['system_inspection_result'] = system_inspection_result
+
+    return results
+
+
 class SatelliteFive(SatelliteInterface):
     """Interact with Satellite 5."""
 
@@ -101,130 +160,141 @@ class SatelliteFive(SatelliteInterface):
 
         return hosts
 
-    # pylint: disable=too-many-arguments, too-many-locals, too-many-statements
-    # pylint: disable=too-many-branches
-    def host_details(self, host_id, host_name, last_checkin,
-                     virtual_hosts, virtual_guests, physical_hosts):
-        """Obtain the details for a given host id and name.
+    def prepare_host(self, chunk):
+        """Prepare each host with necessary information.
 
-        :param host_id: The identifier of the host
-        :param host_name: The name of the host
-        :param last_checkin: The date of last checkin
-        :param virtual_hosts: A dictionary of virtual host data
-        :param virtual_guests: A dictionary of guest to host data
-        :param physical_hosts: A list of phyiscal host ids
-        :returns: dictionary of host details
+        :param chunk: A list of hosts
+        :returns A list of tuples that contain information about
+            each host.
         """
         if self.inspect_scan_task is None:
             raise SatelliteException(
                 'host_details cannot be called for a connection scan')
-        details = {}
-        unique_name = '%s_%s' % (host_name, host_id)
-        sys_result = self.inspect_scan_task.inspection_result.systems.filter(
-            name=unique_name).first()
+        ssl_cert_verify = True
+        source_options = self.inspect_scan_task.source.options
+        if source_options:
+            ssl_cert_verify = source_options.ssl_cert_verify
+        host, port, user, password = \
+            utils.get_connect_data(self.inspect_scan_task)
+        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
+                           'scan_type': self.inspect_scan_task.scan_type,
+                           'source_type':
+                               self.inspect_scan_task.source.source_type,
+                           'source_name': self.inspect_scan_task.source.name}
+        request_options = {'host': host, 'port': port, 'user': user,
+                           'password': password,
+                           'ssl_cert_verify': ssl_cert_verify}
+        host_params = [(host.get(ID), host.get(NAME),
+                        str(host.get(LAST_CHECKIN, '')),
+                        self.inspect_scan_task, request_options,
+                        logging_options) for host in chunk]
+        return host_params
 
-        if sys_result:
-            logger.debug('Results already captured for host_name=%s',
-                         host_name)
-            return None
-        client, user, password = utils.get_sat5_client(self.inspect_scan_task)
-        try:
-            message = 'REQUESTING HOST DETAILS: %s' % unique_name
-            self.inspect_scan_task.log_message(message)
+    # pylint: disable=too-many-locals
+    def process_results(self, results, virtual_hosts, virtual_guests,
+                        physical_hosts):
+        """Process & record the list of responses returned from sat5 endpoint.
 
-            key = client.auth.login(user, password)
-            uuid = client.system.get_uuid(key, host_id)
-            if uuid is None or uuid == '':
-                uuid = host_id
+        :param results: A list of responses
+        :param virtual_hosts: A dictionary of virtual host data
+        :param virtual_guests: A dictionary of guest to host data
+        :param physical_hosts: A list of phyiscal host ids
 
-            cpu = client.system.get_cpu(key, host_id)
-            arch = cpu.get(ARCH, UNKNOWN)
-            cpu_count = cpu.get(COUNT)
-            cpu_core_count = cpu_count
-            cpu_socket_count = cpu.get(SOCKET_COUNT)
+        """
+        for raw_result in results:
+            host_name = raw_result['host_name']
+            host_id = raw_result['host_id']
+            unique_name = '%s_%s' % (host_name, host_id)
+            last_checkin = raw_result['last_checkin']
+            system_inspection_result = raw_result['system_inspection_result']
 
-            system_details = client.system.get_details(key, host_id)
-            hostname = system_details.get(HOSTNAME)
-            release = system_details.get(RELEASE)
+            details = {}
+            if system_inspection_result == SystemInspectionResult.SUCCESS:
+                uuid = raw_result['uuid']
+                cpu = raw_result['cpu']
+                host_id = raw_result['host_id']
+                system_details = raw_result['system_details']
+                kernel = raw_result['kernel']
+                subs = raw_result['subs']
+                network_devices = raw_result['network_devices']
+                registration_date = raw_result['registration_date']
 
-            kernel = client.system.get_running_kernel(key, host_id)
+                if uuid is None or uuid == '':
+                    uuid = host_id
+                arch = cpu.get(ARCH, UNKNOWN)
+                cpu_count = cpu.get(COUNT)
+                cpu_core_count = cpu_count
+                cpu_socket_count = cpu.get(SOCKET_COUNT)
+                hostname = system_details.get(HOSTNAME)
+                release = system_details.get(RELEASE)
 
-            entitlements = []
-            subs = client.system.get_entitlements(key, host_id)
-            for sub in subs:
-                entitlement = {NAME: sub}
-                entitlements.append(entitlement)
+                entitlements = []
+                for sub in subs:
+                    entitlement = {NAME: sub}
+                    entitlements.append(entitlement)
 
-            network_devices = client.system.get_network_devices(key, host_id)
-            ip_addresses = []
-            mac_addresses = []
-            for device in network_devices:
-                interface = device.get(INTERFACE)
-                if interface and interface.startswith(ETHERNET):
-                    ip_addr = device.get(IP)
-                    if ip_addr:
-                        ip_addresses.append(ip_addr)
-                    mac = device.get(HARDWARE_ADDRESS)
-                    if mac:
-                        mac_addresses.append(mac)
-            registration_date = client.system.get_registration_date(key,
-                                                                    host_id)
+                ip_addresses = []
+                mac_addresses = []
+                for device in network_devices:
+                    interface = device.get(INTERFACE)
+                    if interface and interface.startswith(ETHERNET):
+                        ip_addr = device.get(IP)
+                        if ip_addr:
+                            ip_addresses.append(ip_addr)
+                        mac = device.get(HARDWARE_ADDRESS)
+                        if mac:
+                            mac_addresses.append(mac)
 
-            details[UUID] = uuid
-            details[NAME] = host_name
-            details[HOSTNAME] = hostname
-            details[LAST_CHECKIN_TIME] = str(last_checkin)
-            details[REGISTRATION_TIME] = str(registration_date)
-            details[ARCHITECTURE] = arch
-            details[KERNEL] = kernel
-            details[CORES] = cpu_core_count
-            details[SOCKETS] = cpu_socket_count
-            details[OS_RELEASE] = release
-            details[ENTITLEMENTS] = entitlements
-            details[IP_ADDRESSES] = ip_addresses
-            details[MAC_ADDRESSES] = mac_addresses
+                details[UUID] = uuid
+                details[NAME] = host_name
+                details[HOSTNAME] = hostname
+                details[LAST_CHECKIN_TIME] = str(last_checkin)
+                details[REGISTRATION_TIME] = str(registration_date)
+                details[ARCHITECTURE] = arch
+                details[KERNEL] = kernel
+                details[CORES] = cpu_core_count
+                details[SOCKETS] = cpu_socket_count
+                details[OS_RELEASE] = release
+                details[ENTITLEMENTS] = entitlements
+                details[IP_ADDRESSES] = ip_addresses
+                details[MAC_ADDRESSES] = mac_addresses
 
-            if host_id in physical_hosts:
-                details[IS_VIRT] = False
+                if host_id in physical_hosts:
+                    details[IS_VIRT] = False
 
-            if virtual_hosts.get(host_id):
-                virtual_host = virtual_hosts.get(host_id)
-                details[VIRTUAL] = HYPERVISOR
-                guests = virtual_host.get(NUM_VIRTUAL_GUESTS, 0)
-                details[NUM_VIRTUAL_GUESTS] = guests
-                details[IS_VIRT] = False
+                if virtual_hosts.get(host_id):
+                    virtual_host = virtual_hosts.get(host_id)
+                    details[VIRTUAL] = HYPERVISOR
+                    guests = virtual_host.get(NUM_VIRTUAL_GUESTS, 0)
+                    details[NUM_VIRTUAL_GUESTS] = guests
+                    details[IS_VIRT] = False
 
-            elif virtual_guests.get(host_id):
-                virt_host_id = virtual_guests.get(host_id)
-                virtual_host = virtual_hosts.get(virt_host_id)
-                details[IS_VIRT] = True
-                if virtual_host.get(UUID):
-                    details[VIRTUAL_HOST] = virtual_host.get(UUID)
-                if virtual_host.get(NAME):
-                    details[VIRTUAL_HOST_NAME] = virtual_host.get(NAME)
+                elif virtual_guests.get(host_id):
+                    virt_host_id = virtual_guests.get(host_id)
+                    virtual_host = virtual_hosts.get(virt_host_id)
+                    details[IS_VIRT] = True
+                    if virtual_host.get(UUID):
+                        details[VIRTUAL_HOST] = virtual_host.get(UUID)
+                    if virtual_host.get(NAME):
+                        details[VIRTUAL_HOST_NAME] = virtual_host.get(NAME)
 
-            client.auth.logout(key)
+                logger.debug('host_id=%s, host_details=%s',
+                             host_id, details)
+            result = {'name': unique_name,
+                      'details': details,
+                      'status': system_inspection_result}
 
-            logger.debug('host_id=%s, host_details=%s',
-                         host_id, details)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.SUCCESS}
-        except xmlrpc.client.Fault as xml_error:
-            error_message = 'Satellite 5 fault error encountered: %s\n'\
-                % xml_error
-            logger.error(error_message)
-            return {'name': unique_name,
-                    'details': details,
-                    'status': SystemInspectionResult.FAILED}
-
-        return details
+            if result is not None:
+                self.record_inspect_result(
+                    result.get('name'),
+                    result.get('details'),
+                    result.get('status'))
 
     def virtual_guests(self, virtual_host_id):
         """Obtain the virtual guest information for a virtual host.
 
         :param virtual_host_id: The identifier for a virtual host
-        :returns: a tule of a dictionary of virtual guest id, virtual_host_id
+        :returns: a tuple of a dictionary of virtual guest id, virtual_host_id
             and the number of guests
         """
         virtual_guests = {}
@@ -311,18 +381,24 @@ class SatelliteFive(SatelliteInterface):
         self.inspect_scan_task.update_stats(
             'INITIAL STATELLITE STATS', sys_count=systems_count)
 
-        hosts = []
+        hosts_before_dedup = []
+        deduplicated_hosts = []
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         with Pool(processes=self.max_concurrency) as pool:
             try:
                 key = client.auth.login(user, password)
-                hosts = client.system.list_user_systems(key)
+                hosts_before_dedup = client.system.list_user_systems(key)
                 client.auth.logout(key)
             except xmlrpc.client.Fault as xml_error:
                 raise SatelliteException(str(xml_error))
             virtual_hosts, virtual_guests = self.virtual_hosts()
             physical_hosts = self.physical_hosts()
-
+            hosts_after_dedup = []
+            for host in hosts_before_dedup:
+                if host not in deduplicated_hosts:
+                    hosts_after_dedup.append(host)
+                    deduplicated_hosts.append(host)
+            hosts = hosts_before_dedup
             chunks = [hosts[i:i + self.max_concurrency]
                       for i in range(0, len(hosts), self.max_concurrency)]
             for chunk in chunks:
@@ -331,20 +407,9 @@ class SatelliteFive(SatelliteInterface):
 
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                     raise SatellitePauseException()
-
-                host_params = [(host.get(ID),
-                                host.get(NAME),
-                                str(host.get(LAST_CHECKIN, '')),
-                                virtual_hosts,
-                                virtual_guests,
-                                physical_hosts)
-                               for host in chunk]
-                results = pool.starmap(self.host_details, host_params)
-                for result in results:
-                    if result is not None:
-                        self.record_inspect_result(
-                            result.get('name'),
-                            result.get('details'),
-                            result.get('status'))
+                host_params = self.prepare_host(chunk)
+                results = pool.starmap(request_host_details, host_params)
+                self.process_results(results, virtual_hosts, virtual_guests,
+                                     physical_hosts)
 
         utils.validate_task_stats(self.inspect_scan_task)

@@ -55,17 +55,26 @@ def get_connect_data(scan_task):
     return (host, port, user, password)
 
 
-def get_sat5_client(scan_task):
+def get_sat5_client(scan_task, options=None):
     """Create xmlrpc client and credential for Satellite 5.
 
     :param scan_task: The scan tasks
+    :param options: A dictionary containing the values for ssl_cert_verify,
+        host, port, user, and password.
     :returns: A tuple of (client, user, password)
     """
-    source_options = scan_task.source.options
-    ssl_verify = True
-    if source_options:
-        ssl_verify = source_options.ssl_cert_verify
-    host, port, user, password = get_connect_data(scan_task)
+    if options:
+        ssl_verify = options.get('ssl_cert_verify')
+        host = options.get('host')
+        port = options.get('port')
+        user = options.get('user')
+        password = options.get('password')
+    else:
+        ssl_verify = True
+        source_options = scan_task.source.options
+        if source_options:
+            ssl_verify = source_options.ssl_cert_verify
+        host, port, user, password = get_connect_data(scan_task)
 
     ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
     if ssl_verify is False:
