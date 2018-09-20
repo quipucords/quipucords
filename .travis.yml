@@ -2,11 +2,9 @@ language: python
 cache: pip
 python:
   - "3.6"
-  - "3.5"
-  - "3.4"
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install -r dev-requirements.txt
   - pip install codecov
   - nvm install node
   - npm install swagger-cli

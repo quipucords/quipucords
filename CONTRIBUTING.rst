@@ -38,7 +38,7 @@ branch should correspond to an associated issue opened on the main repository
 
     git checkout -b issues/my_issue_#
 
-    pip install -r requirements.txt
+    pip install -r dev-requirements.txt
 
     make all
 
