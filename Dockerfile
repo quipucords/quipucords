@@ -1,17 +1,18 @@
 FROM fedora:26
 
-RUN yum -y groupinstall "Development tools"
-RUN yum -y install python-devel python-tools python3-devel python3-tools sshpass which supervisor
+RUN dnf -y groupinstall "Development tools" \
+    && dnf -y install python-devel python-tools python3-devel python3-tools sshpass which supervisor \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
 
-RUN pip install virtualenv
+RUN pip install --no-cache-dir virtualenv
 RUN virtualenv -p python3 ~/venv
 # Create base directory
 RUN mkdir -p /app
 
 # Setup dependencies
 COPY requirements.txt /app/requirements.txt
-RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt
-RUN . ~/venv/bin/activate; pip install gunicorn==19.7.1
+RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==19.7.1
 
 # Create /etc/ssl
 RUN mkdir -p /etc/ssl/
