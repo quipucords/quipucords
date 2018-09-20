@@ -23,3 +23,7 @@ pandoc==1.0.2
 sphinx
 sphinx-autobuild==0.7.1
 sphinx-rtd-theme==0.2.4
+
+# Include Production Server Requirements!
+-r requirements.txt
+--editable .

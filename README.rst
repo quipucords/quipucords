@@ -141,7 +141,7 @@ Run the following commands from within the local clone root directory to install
 
 2. Install the rest of the packages locally in your virtual environment::
 
-    pip install -r requirements.txt
+    pip install -r dev-requirements.txt
 
 
 Linting
