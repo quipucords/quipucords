@@ -52,7 +52,7 @@ Before installing quipucords on a system, review the following guidelines about 
  * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain files, such as privilege escalation required for the ``systemctl`` command.
  * The user account that quipucords uses for a machine requires an sh shell or a similar shell. For example, the shell *cannot* be a /sbin/nologin or /bin/false shell.
 
-The Python packages that are required for running quipucords on a system can be found in the ``requirements.txt`` file. The Python packages that are required to build and test quipucords from source can be found in the ``requirements.txt`` and ``dev-requirements.txt`` files.
+The Python packages that are required for running quipucords on a system can be found in the ``dev-requirements.txt`` file. The Python packages that are required to build and test quipucords from source can be found in the ``requirements.txt`` and ``dev-requirements.txt`` files.
 
 Installation
 ------------
