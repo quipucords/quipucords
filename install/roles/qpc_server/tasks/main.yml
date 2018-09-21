@@ -182,12 +182,6 @@
   set_fact:
     use_postgres: false
 
-- name: Set EXTERNAL_POSTGRES (defaults to false)
-  set_fact:
-    EXTERNAL_POSTGRES: "{{ansible_env['EXTERNAL_POSTGRES'] | default(false)}}"
-  when:
-    - EXTERNAL_POSTGRES is not defined
-
 - name: Set QPC_DBMS_DATABASE (defaults to use postgres)
   set_fact:
     QPC_DBMS_DATABASE: "{{ ansible_env['QPC_DBMS_DATABASE'] | default('postgres') }}"
@@ -215,7 +209,6 @@
   when:
     - QPC_DBMS_PASSWORD is not defined
     - QPC_DBMS == "postgres"
-    - not EXTERNAL_POSTGRES
 
 - name: Set QPC_DBMS_HOST
   set_fact:
@@ -223,7 +216,6 @@
   when:
     - QPC_DBMS_HOST is not defined
     - QPC_DBMS == "postgres"
-    - not EXTERNAL_POSTGRES
 
 - name: Change value for use_postgres if all env variables are specified
   set_fact:
@@ -249,18 +241,9 @@
   become: true
   when:
     - use_postgres
-    - not EXTERNAL_POSTGRES
 
 - name: Start server using Internal Postgres
   shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST=qpc-db -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
   when:
     - use_postgres
-    - not EXTERNAL_POSTGRES
-
-- name: Start server using External Postgres
-  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="{{ QPC_DBMS_HOST }}" -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
-  become: true
-  when:
-    - use_postgres
-    - EXTERNAL_POSTGRES
