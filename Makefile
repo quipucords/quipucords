@@ -28,6 +28,7 @@ help:
 	@echo "  serve-sqlite        to run the server with a sqlite db"
 	@echo "  manpage             to build the manpage"
 	@echo "  html                to build the docs"
+	@echo "  build-ui       to build ui and place result in django server"
 
 all: build lint test-coverage
 
