@@ -162,13 +162,26 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Database Management System could be 'sqlite' or 'postgresql'
-QPC_DBMS = os.getenv('QPC_DBMS', 'sqlite').lower()
+QPC_DBMS = os.getenv('QPC_DBMS', 'postgres').lower()
 
-if QPC_DBMS == 'postgres':
+if QPC_DBMS == 'sqlite':
+    # If user enters an invalid QPC_DBMS, use default postgresql
+    DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
+    PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
+                           'db.sqlite3')
+    DB_PATH = PROD_DB if PRODUCTION else DEV_DB
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': DB_PATH,
+        }
+    }
+else:
+    QPC_DBMS = 'postgres'
     # The following variables are only relevant when using a postgres database:
     QPC_DBMS_DATABASE = os.getenv('QPC_DBMS_DATABASE', 'postgres')
     QPC_DBMS_USER = os.getenv('QPC_DBMS_USER', 'postgres')
-    QPC_DBMS_PASSWORD = os.getenv('QPC_DBMS_PASSWORD', 'postgres')
+    QPC_DBMS_PASSWORD = os.getenv('QPC_DBMS_PASSWORD', 'password')
     # In the following env variable, :: means localhost but allows IPv4
     #  and IPv6 connections
     QPC_DBMS_HOST = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
@@ -183,20 +196,6 @@ if QPC_DBMS == 'postgres':
             'PORT': QPC_DBMS_PORT,
         }
     }
-else:
-    # If user enters an invalid QPC_DBMS, use default sqlite
-    QPC_DBMS = 'sqlite'
-    DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
-    PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
-                           'db.sqlite3')
-    DB_PATH = PROD_DB if PRODUCTION else DEV_DB
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': DB_PATH,
-        }
-    }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

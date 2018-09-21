@@ -96,9 +96,19 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-4. Run the Docker image::
+4a. Run the Docker image with Postgres container::
 
-    docker run -d -p443:443 -i quipucords:latest
+    docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres
+    docker run --name qpc-server --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -e
+
+4b. Run the Docker image with external Postgres container::
+
+    ifconfig (get your computer's external IP if Postgres is local)
+    docker run -d --name qpc-server -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:latest
+
+4c. Run the Docker image with SQLite::
+
+    docker run -d --name qpc-server -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:latest
 
 5. Configure the CLI by using the following commands::
 
@@ -144,26 +154,39 @@ Run the following commands from within the local clone root directory to install
     pip install -r dev-requirements.txt
 
 
-Linting
-^^^^^^^
-To lint changes that are made to the source code, run the following command::
+Database Options
+^^^^^^^^^^^^^^^^
+Quipucords currently supports development in both SQLite and Postgres. The default database is an internal postgres container.
 
-    make lint
+1. Create the Postgres container::
 
+    make setup-postgres
+
+2. Check that the container has been created and is running::
+
+    docker ps
 
 Initializing the Server
 ^^^^^^^^^^^^^^^^^^^^^^^
-To set up the server, run the following command::
+1. To initialize the server with Postgres, run the following command::
 
     make server-init
 
-This command creates a superuser with name *admin* and password of *pass*.
+2. To initialize the server with SQLite, run the following command::
+
+    make server-init-sqlite
+
+Both of the above commands create a superuser with name *admin* and password of *pass*.
 
 Running the Server
 ^^^^^^^^^^^^^^^^^^
-To run the development server, run the following command::
+1. To run the development server using Postgres, run the following command::
 
     make serve
+
+2. To run the development server using SQLite, run the following command::
+
+    make serve-sqlite
 
 To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials.
 
@@ -179,6 +202,11 @@ If you intend to run on Mac OS, there are several more steps that are required.
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
   See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
 
+Linting
+^^^^^^^
+To lint changes that are made to the source code, run the following command::
+
+    make lint
 
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
