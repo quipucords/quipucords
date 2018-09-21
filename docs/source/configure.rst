@@ -40,7 +40,7 @@ The following steps guide you through those choices.
 
 3. Accept or change the default variables used to configure and access the PostgreSQL Database:
 
-   - `QPC_DBMS_PASSWORD` (Optional) The database password for Postgres. By default, the password is set to password. We recommend that you change it by using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
+   - `QPC_DBMS_PASSWORD` (Optional) The database password for Postgres. By default, the password is set to ``password``. We recommend that you change it by using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
    - `QPC_DBMS_USER` (Optional) The database user for Postgres. By default, the user is set to ``postgres``.
        - If you select to keep the user as ``postgres``, no option is needed when you run the Docker command to start the server.
        - If you select to specify a different user, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_USER=yourUser"``.
