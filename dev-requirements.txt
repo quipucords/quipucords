@@ -1,4 +1,4 @@
-# Include Production Server Requirements!
+# Include Production Server Requirements
 -r requirements.txt
 --editable .
 
