@@ -6,7 +6,7 @@ cffi==1.10.0
 cryptography==2.3
 Django==1.11.5
 django-factory-boy==1.0.0
-django-filter==1.0.4
+django-filter==2.0.0
 djangorestframework==3.6.4
 djangorestframework-expiring-authtoken==0.1.4
 dnspython==1.15.0
