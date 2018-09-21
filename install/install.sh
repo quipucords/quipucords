@@ -38,19 +38,10 @@ usage() {
          -e server_port=8443
     * Specify server container name (defaults to quipucords):
          -e server_name=qpc_server
-    * Specify a database management system. Valid options include: postgres, sqlite (if not specified, the default is to use sqlite).
-      If the database management system is specified to use postgres, the following extra variables must also be set: QPC_DBMS_HOST, QPC_DBMS_PASSWORD
-         -e QPC_DBMS=sqlite
-    * If using postgres, specify the db name (if not specified the default value is postgres):
-         -e QPC_DBMS_DATABASE=postgres
-    * If using postgres, specify the db user (if not specified the default value is postgres):
+    * Optionally specify the postgres db user (if not specified the default value is 'postgres'):
          -e QPC_DBMS_USER=postgres
-    * If using postgres, you must specify the db password:
+    * Optionally specify the postgres db password (if not specified the default value is 'password')
          -e QPC_DBMS_PASSWORD=password
-    * If using postgres, you must specify the db host:
-         -e QPC_DBMS_HOST=host
-    * If using postgres, specify the db port (if not specified the default value is 5432):
-         -e QPC_DBMS_PORT=5432
     * Override default server timeout for HTTP requests (if not specified the default value is 120):
          -e QPC_SERVER_TIMEOUT=120
 EOM
