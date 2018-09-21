@@ -23,13 +23,15 @@ env:
   QPC_DBMS_PASSWORD=password
   QPC_DBMS_HOST=127.0.0.1
 
-install: # command to install dependencies
+# command to install dependencies
+install:
   - pip install -r dev-requirements.txt
   - pip install codecov
   - nvm install node
   - npm install swagger-cli
 
-script: # command to run tests
+# command to run tests
+script:
   - make build
   - make lint
   - make server-init

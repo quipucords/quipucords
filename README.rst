@@ -96,14 +96,14 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-4a. Run the Docker image with posgres container::
+4a. Run the Docker image with Postgres container::
 
     docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres
     docker run --name qpc-server --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -e
 
-4b. Run the Docker image with external postgres container::
+4b. Run the Docker image with external Postgres container::
 
-    ifconfig (get your computer's external IP if postgres is local)
+    ifconfig (get your computer's external IP if Postgres is local)
     docker run -d --name qpc-server -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:latest
 
 4c. Run the Docker image with SQLite::
@@ -156,9 +156,9 @@ Run the following commands from within the local clone root directory to install
 
 Database Options
 ^^^^^^^^^^^^^^^^
-Quipucords currently supports development in both sqlite and postgres. The default database is an internal postgres container.
+Quipucords currently supports development in both SQLite and Postgres. The default database is an internal postgres container.
 
-1. Create the postgres container::
+1. Create the Postgres container::
 
     make setup-postgres
 
@@ -168,11 +168,11 @@ Quipucords currently supports development in both sqlite and postgres. The defau
 
 Initializing the Server
 ^^^^^^^^^^^^^^^^^^^^^^^
-1. To initialize the server with postgres, run the following command::
+1. To initialize the server with Postgres, run the following command::
 
     make server-init
 
-2. To initialize the server with sqlite, run the following command::
+2. To initialize the server with SQLite, run the following command::
 
     make server-init-sqlite
 
@@ -180,11 +180,11 @@ Both of the above commands create a superuser with name *admin* and password of 
 
 Running the Server
 ^^^^^^^^^^^^^^^^^^
-1. To run the development server using postgres, run the following command::
+1. To run the development server using Postgres, run the following command::
 
     make serve
 
-2. To run the development server using sqlite, run the following command::
+2. To run the development server using SQLite, run the following command::
 
     make serve-sqlite
 
