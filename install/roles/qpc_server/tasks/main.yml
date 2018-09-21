@@ -46,6 +46,11 @@
     server_name: "{{ ansible_env['SERVER_NAME'] | default('quipucords') }}"
   when: server_name is not defined
 
+- name: Set server timeout
+  set_fact:
+    QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
+  when: QPC_SERVER_TIMEOUT is not defined
+
 - name: Default directory mounting to empty string
   set_fact:
     dir_mount_selinux: ""
@@ -167,9 +172,22 @@
     docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
   when: "'stdout_lines' in docker_ps_raw"
 
-- name: Start server
-  shell: docker run --name "{{ server_name }}" -d -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
-  become: true
+- name: Set QPC_DBMS_USER
+  set_fact:
+    QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
   when:
-    - install_server
-    - not docker_server_running
+    - QPC_DBMS_USER is not defined
+
+- name: Set QPC_DBMS_PASSWORD
+  set_fact:
+    QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
+  when:
+    - QPC_DBMS_PASSWORD is not defined
+
+- name: Create internal Postgres container
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -d postgres
+  become: true
+
+- name: Start server using internal Postgres
+  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  become: true

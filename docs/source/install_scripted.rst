@@ -113,3 +113,9 @@ Options:
     - Contains the port number for the Quipucords server. Defaults to ``443``.
  - **server_name**
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
+ - **QPC_SERVER_TIMEOUT**
+    - Contains the HTTP timeout length for the Quipucords server. Defaults to ``120``.
+ - **QPC_DBMS_USER**
+    - (Optional) Specifies the database user for postgres. Defaults to ``postgres``.
+ - **QPC_DBMS_PASSWORD**
+    - (Optional) Specifies the database password for postgres. Defaults to ``password``.

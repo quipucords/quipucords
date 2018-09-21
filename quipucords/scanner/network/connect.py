@@ -30,6 +30,8 @@ import pexpect
 from quipucords import settings
 
 from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.exceptions import (NetworkCancelException,
+                                        NetworkPauseException)
 from scanner.network.utils import (_construct_error_msg,
                                    _construct_vars,
                                    decrypt_data_as_unicode,
@@ -157,10 +159,23 @@ class ConnectTaskRunner(ScanTaskRunner):
             return error_message, ScanTask.PAUSED
 
         result_store = ConnectResultStore(self.scan_task)
-        return self.run_with_result_store(result_store)
-
+        try:
+            scan_message, scan_result = self.run_with_result_store(
+                manager_interrupt, result_store)
+        except NetworkCancelException:
+            error_message = 'Connect scan cancel for %s.' % (
+                self.scan_task.source.name)
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+        except NetworkPauseException:
+            error_message = 'Connect scan pause for %s.' % (
+                self.scan_task.source.name)
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
+        return scan_message, scan_result
     # pylint: disable=too-many-locals
-    def run_with_result_store(self, result_store):
+
+    def run_with_result_store(self, manager_interrupt, result_store):
         """Run with a given ConnectResultStore."""
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
@@ -192,7 +207,8 @@ class ConnectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(message)
 
             try:
-                _connect(self.scan_task,
+                _connect(manager_interrupt,
+                         self.scan_task,
                          remaining_hosts,
                          result_store,
                          credential,
@@ -220,7 +236,8 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def _connect(scan_task,
+def _connect(manager_interrupt,
+             scan_task,
              hosts,
              result_store,
              credential,
@@ -232,6 +249,7 @@ def _connect(scan_task,
              ssh_timeout=None):
     """Attempt to connect to hosts using the given credential.
 
+    :param manager_interrupt: Signal used to communicate termination of scan
     :param scan_task: The scan task for this connection job
     :param hosts: The collection of hosts to test connections
     :param result_store: The result store to accept the results.
@@ -286,6 +304,12 @@ def _connect(scan_task,
                                         extra_vars)
     scan_task.log_message(log_message)
     for idx, group_name in enumerate(group_names):
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            raise NetworkCancelException()
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            raise NetworkPauseException()
+
         group_ips = inventory.get('all').get(
             'children').get(group_name).get('hosts').keys()
         group_ips = ["'%s'" % ip for ip in group_ips]

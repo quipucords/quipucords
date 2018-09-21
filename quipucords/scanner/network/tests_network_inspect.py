@@ -53,8 +53,9 @@ def mock_run_failed(play):  # pylint: disable=unused-argument
     return 255
 
 
-def mock_scan_error(hosts):  # pylint: disable=unused-argument
+def mock_scan_error(manager_interrupt, hosts):
     """Throws error."""
+    # pylint: disable=unused-argument
     raise AnsibleError('an error')
 
 
@@ -293,7 +294,7 @@ class NetworkInspectScannerTest(TestCase):
         # Init for unit test as run is not called
         scanner.connect_scan_task = self.connect_scan_task
         with self.assertRaises(AnsibleError):
-            scanner._inspect_scan(self.host_list)
+            scanner._inspect_scan(Value('i', ScanJob.JOB_RUN), self.host_list)
             mock_run.assert_called()
 
     @patch('scanner.network.inspect.InspectTaskRunner._inspect_scan',
@@ -303,7 +304,7 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(
             self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
-        mock_scan.assert_called_with(self.host_list)
+        mock_scan.assert_called_with(ANY, self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
     @patch('scanner.network.utils.TaskQueueManager.run',
@@ -339,6 +340,7 @@ class NetworkInspectScannerTest(TestCase):
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/crash.py'))
         _, result = scanner._inspect_scan(
+            Value('i', ScanJob.JOB_RUN),
             self.host_list,
             base_ssh_executable=path)
         self.assertEqual(result, ScanTask.COMPLETED)
@@ -351,6 +353,7 @@ class NetworkInspectScannerTest(TestCase):
             os.path.join(os.path.dirname(__file__),
                          '../../../test_util/hang.py'))
         scanner._inspect_scan(
+            Value('i', ScanJob.JOB_RUN),
             self.host_list,
             roles=['redhat_release'],
             base_ssh_executable=path,
@@ -389,5 +392,5 @@ class NetworkInspectScannerTest(TestCase):
             self.scan_job, self.scan_task)
 
         scanner.connect_scan_task = self.connect_scan_task
-        scanner._inspect_scan(self.host_list)
+        scanner._inspect_scan(Value('i', ScanJob.JOB_RUN), self.host_list)
         mock_run.assert_called_with(ANY)

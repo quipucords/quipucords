@@ -10,7 +10,7 @@
 #
 """Test the scan manager capabilities."""
 
-from threading import Thread
+from multiprocessing import Process
 from unittest.mock import Mock
 
 from api.models import ScanTask
@@ -20,16 +20,17 @@ from django.test import TestCase
 from scanner.manager import Manager
 
 
-class MockTask(Thread):
+class MockTask(Process):
     """Mock Task class."""
 
     # pylint: disable=invalid-name
     def __init__(self):
         """Create a mock task."""
-        Thread.__init__(self)
+        Process.__init__(self)
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
+        self.identifier = 'TestScan'
 
     def log_message(self, message):
         """Fake log message."""
@@ -61,9 +62,10 @@ class ScanManagerTest(TestCase):
     def test_work(self):
         """Test the work function."""
         task = MockTask()
+        self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.put(task)
+        self.assertIsNone(self.scan_manager.current_task_runner)
         self.scan_manager.work()
-        self.assertIsNone(self.scan_manager.current_task)
 
     def test_kill_missing(self):
         """Test kill on missing id."""

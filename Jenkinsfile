@@ -1,4 +1,4 @@
-node('f25-os') {
+node('f28-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients nodejs"
         sh "which oc"
@@ -18,17 +18,17 @@ node('f25-os') {
         sh "sudo docker -v"
         sh "sudo setenforce 0"
     }
-    stage('Build Client') {
+    stage('Build UI') {
         dir('client') {
-          sh "node -v"
-          sh "npm -v"
-          sh "sudo npm install -g n"
-          sh "sudo n lts"
-          sh "node -v"
-          sh "npm -v"
-          sh "npm install"
-          sh "npm rebuild node-sass --force"
-          sh "npm run build"
+            sh "node -v"
+            sh "npm -v"
+            sh "sudo npm install -g n"
+            sh "sudo n lts"
+            sh "node -v"
+            sh "npm -v"
+            sh "npm install"
+            sh "npm rebuild node-sass --force"
+            sh "npm run build"
         }
     }
     stage('Build Docker Image') {
@@ -64,6 +64,5 @@ node('f25-os') {
 
         archive targzfile
         archive install_targzfile
-
     }
 }

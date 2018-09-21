@@ -10,8 +10,10 @@ When you run the command to start the Quipucords server, you supply values for s
 
 - Accepting or changing the default exposed server port
 - Selecting a directory for SSH keys
-- Selecting a directory for the SQLlite database
+- Selecting a directory for the SQLite database
 - Selecting a directory for log output
+- Accepting or changing the default postgres user by specifying `QPC_DBMS_USER`
+- Accepting or changing the default postgres password by specifying `QPC_DBMS_PASSWORD`
 
 The following steps guide you through those choices.
 
@@ -20,7 +22,7 @@ The following steps guide you through those choices.
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
    - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLlite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
+2. Select values for the directory for SSH keys, the directory for the SQLite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
    \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
@@ -36,23 +38,52 @@ The following steps guide you through those choices.
        # mkdir data
        # mkdir log
 
+3. Accept or change the default variables used to configure and access the PostgreSQL Database:
+
+   - `QPC_DBMS_PASSWORD` (Optional) The database password for Postgres. By default, the password is set to ``password``. We recommend that you change it by using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
+   - `QPC_DBMS_USER` (Optional) The database user for Postgres. By default, the user is set to ``postgres``.
+       - If you select to keep the user as ``postgres``, no option is needed when you run the Docker command to start the server.
+       - If you select to specify a different user, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_USER=yourUser"``.
+
+Starting the Postgres DB
+~~~~~~~~~~~~~~~~~~~~~~~~
+Quipucords server requires the Postgres container to be running.  Run the following docker command::
+
+  docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -d postgres
+
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, SQLlite database, and log output during the Quipucords server configuration.
+After you make the decisions on the configuration options for the server, you can start the Quipucords server. The following commands assume that you used the default port and the recommended steps to create a home directory and subdirectories for the SSH keys, the default options for the PostgreSQL database, and the default log output during the Quipucords server configuration.
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
 
-  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
+  # sudo docker run --name quipucords --link qpc-db:qpc-link -d -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=qpc-db" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
 
 If your system does have SELinux enabled, you must append ``:z`` to each volume as follows::
 
-  # sudo docker run --name quipucords -d -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:1.0.0
+  # sudo docker run --name quipucords --link qpc-db:qpc-link -d -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=qpc-db" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:1.0.0
 
 These commands start the server on port ``443`` and map the ``sshkeys``, ``data``, and ``log`` directories to the ``~/quipucords`` home directory for the server.
 
 To view the status of the server after it is running, enter the following command::
 
   # sudo docker ps
+
+Changing Other Quipucords Server Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You may also configure the quipucords server by setting the following environment variables:
+
+  - QPC_SERVER_TIMEOUT
+    - The default http request timeout.  For example, this can be raised if you are merging a large number of reports.
+  - QUIPUCORDS_LOGGING_LEVEL
+    - Application logging level
+  - DJANGO_LOGGING_LEVEL
+    - Infrastructure logging level
+
+To set these values, pass the ``docker run`` command the ``-e "NAME=VALUE`` argument.  For example to set ``QPC_SERVER_TIMEOUT`` do::
+
+    # sudo docker run --name quipucords -d -e "QPC_SERVER_TIMEOUT=240" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
+
 
 .. _change-default-pw:
 

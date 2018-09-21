@@ -55,17 +55,26 @@ def get_connect_data(scan_task):
     return (host, port, user, password)
 
 
-def get_sat5_client(scan_task):
+def get_sat5_client(scan_task, options=None):
     """Create xmlrpc client and credential for Satellite 5.
 
     :param scan_task: The scan tasks
+    :param options: A dictionary containing the values for ssl_cert_verify,
+        host, port, user, and password.
     :returns: A tuple of (client, user, password)
     """
-    source_options = scan_task.source.options
-    ssl_verify = True
-    if source_options:
-        ssl_verify = source_options.ssl_cert_verify
-    host, port, user, password = get_connect_data(scan_task)
+    if options:
+        ssl_verify = options.get('ssl_cert_verify')
+        host = options.get('host')
+        port = options.get('port')
+        user = options.get('user')
+        password = options.get('password')
+    else:
+        ssl_verify = True
+        source_options = scan_task.source.options
+        if source_options:
+            ssl_verify = source_options.ssl_cert_verify
+        host, port, user, password = get_connect_data(scan_task)
 
     ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
     if ssl_verify is False:
@@ -95,8 +104,9 @@ def construct_url(url, sat_host, port='443', org_id=None, host_id=None):
                       org_id=org_id, host_id=host_id)
 
 
+# pylint: disable=too-many-arguments
 def execute_request(scan_task, url, org_id=None, host_id=None,
-                    query_params=None):
+                    query_params=None, options=None):
     """Execute a request to the Satellite server.
 
     :param scan_task: The scan task
@@ -104,13 +114,22 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param org_id: The organization id being queried
     :param host_id: The identifier of a satellite host
     :param query_params: A dictionary to use for query_params in the url
+    :param options: A dictionary containing the values for ssl_cert_verify,
+        host, port, user, and password.
     :returns: The response object
     """
-    source_options = scan_task.source.options
-    ssl_verify = True
-    if source_options:
-        ssl_verify = source_options.ssl_cert_verify
-    host, port, user, password = get_connect_data(scan_task)
+    if options:
+        ssl_verify = options.get('ssl_cert_verify')
+        host = options.get('host')
+        port = options.get('port')
+        user = options.get('user')
+        password = options.get('password')
+    else:
+        ssl_verify = True
+        source_options = scan_task.source.options
+        if source_options:
+            ssl_verify = source_options.ssl_cert_verify
+        host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
     response = requests.get(url, auth=(user, password),
                             params=query_params, verify=ssl_verify)

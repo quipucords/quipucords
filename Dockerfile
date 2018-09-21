@@ -5,16 +5,13 @@ RUN yum -y install python-devel python-tools python3-devel python3-tools sshpass
 
 RUN pip install virtualenv
 RUN virtualenv -p python3 ~/venv
-
 # Create base directory
 RUN mkdir -p /app
 
 # Setup dependencies
-COPY requirements.txt /app/reqs.txt
-# Remove last 2 lines
-RUN sed -e :a -e '$d;N;2,3ba' -e 'P;D' /app/reqs.txt > /app/requirements.txt
-RUN . ~/venv/bin/activate;pip install -r /app/requirements.txt
-RUN . ~/venv/bin/activate;pip install gunicorn==19.7.1
+COPY requirements.txt /app/requirements.txt
+RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt
+RUN . ~/venv/bin/activate; pip install gunicorn==19.7.1
 
 # Create /etc/ssl
 RUN mkdir -p /etc/ssl/
@@ -66,7 +63,7 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
 # Initialize database & Collect static files
-RUN . ~/venv/bin/activate;make server-init server-static
+RUN . ~/venv/bin/activate;make server-static
 RUN ls -lta /var/data
 
 WORKDIR /var/log
