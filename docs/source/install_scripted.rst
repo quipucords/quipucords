@@ -115,8 +115,6 @@ Options:
     - Contains the name for the Quipucords server. Defaults to ``quipucords``.
  - **QPC_SERVER_TIMEOUT**
     - Contains the HTTP timeout length for the Quipucords server. Defaults to ``120``.
- - **QPC_DBMS**
-    - Contains ``postgres`` or ``sqlite``. Defaults to ``sqlite``. Supply ``postgres`` to change the database management system to postgres.
  - **QPC_DBMS_PORT**
     - (Optional) Specifies the database port for postgres. Defaults to ``5432``.
  - **QPC_DBMS_DATABASE**
@@ -124,7 +122,7 @@ Options:
  - **QPC_DBMS_USER**
     - (Optional) Specifies the database user for postgres. Defaults to ``postgres``.
  - **QPC_DBMS_PASSWORD**
-    - (Required if ``QPC_DBMS=postgres``) Specifies the database password for postgres.
+    - (Optional) Specifies the database password for postgres. Defaults to ``password``.
  - **QPC_DBMS_HOST**
-    - (Required if ``QPC_DBMS=qpc-db``) Specifies the database host for postgres.
+    - (Optional) Specifies the database host for postgres. Defaults to ``qpc-db``.
 

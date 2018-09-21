@@ -15,6 +15,8 @@ When you run the command to start the Quipucords server, you supply values for s
 - Accepting or changing the default postgres user by specifying `QPC_DBMS_USER`
 - Accepting or changing the default postgres password by specifying `QPC_DBMS_PASSWORD`
 - Accepting or changing the default postgres port by specifying `QPC_DBMS_PORT`
+- Accepting or changing the default postgres host by specifying `QPC_DBMS_HOST`
+- Accepting or changing the default postgres database by specifying `QPC_DBMS_DATABASE`
 
 The following steps guide you through those choices.
 
@@ -48,6 +50,8 @@ The following steps guide you through those choices.
    - `QPC_DBMS_USER` (Optional) The database user for postgres. By default, the user is set to postgres.
        - If you select to keep the user as postgres, no option is needed when you run the Docker command to start the server.
        - If you select to specify a different user, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_USER=yourUser"``.
+   - `QPC_DBMS_HOST` (Optional) The database host for postgres. By default, the host is set to qpc-db. You can change it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_HOST=yourHost"``.
+   - `QPC_DBMS_DATABASE` (Optional) The database name for postgres. By default, the database name is set to postgres. You can change it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_DATABASE=postgres"```.
 
 
 Starting the Quipucords Server
