@@ -11,18 +11,24 @@ OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migra
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
-	@echo "  help           to show this message"
-	@echo "  all            to to execute all following targets (except test)"
-	@echo "  lint           to run all linters"
-	@echo "  lint-flake8    to run the flake8 linter"
-	@echo "  lint-pylint    to run the pylint linter"
-	@echo "  test           to run unit tests"
-	@echo "  test-coverage  to run unit tests and measure test coverage"
-	@echo "  swagger-valid  to run swagger-cli validation"
-	@echo "  server-init    to run server initializion steps"
-	@echo "  serve          to run the server"
-	@echo "  manpage        to build the manpage"
-	@echo "  html           to build the docs"
+	@echo "  help                to show this message"
+	@echo "  all                 to execute all following targets (except test)"
+	@echo "  lint                to run all linters"
+	@echo "  clean               to remove postgres docker container"
+	@echo "  clean-sqlite        to remove sqlite file"
+	@echo "  lint-flake8         to run the flake8 linter"
+	@echo "  lint-pylint         to run the pylint linter"
+	@echo "  test                to run unit tests"
+	@echo "  test-coverage       to run unit tests and measure test coverage"
+	@echo "  swagger-valid       to run swagger-cli validation"
+	@echo "  setup-postgres      to create a default postgres container"
+	@echo "  server-init         to run server initializion steps"
+	@echo "  server-init-sqlite  to run server initialization steps with sqlite"
+	@echo "  serve               to run the server with default db"
+	@echo "  serve-sqlite        to run the server with a sqlite db"
+	@echo "  manpage             to build the manpage"
+	@echo "  html                to build the docs"
+	@echo "  build-ui       to build ui and place result in django server"
 
 all: build lint test-coverage
 
@@ -33,6 +39,9 @@ clean-cli:
 	-rm -rf dist/ build/ quipucords.egg-info/
 
 clean: clean-cli
+	docker rm -f qpc-db
+
+clean-sqlite: clean-cli
 	rm -rf quipucords/db.sqlite3
 
 install: build
@@ -66,10 +75,21 @@ server-makemigrations:
 server-migrate:
 	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
 
+server-migrate-sqlite:
+	QPC_DBMS=sqlite $(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
+
 server-set-superuser:
 	echo "from django.contrib.auth.models import User; admin_not_present = User.objects.filter(email='admin@example.com').count() == 0;User.objects.create_superuser('admin', 'admin@example.com', 'pass') if admin_not_present else print('admin present');print(User.objects.filter(email='admin@example.com'))" | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
 
+server-set-superuser-sqlite:
+	echo "from django.contrib.auth.models import User; admin_not_present = User.objects.filter(email='admin@example.com').count() == 0;User.objects.create_superuser('admin', 'admin@example.com', 'pass') if admin_not_present else print('admin present');print(User.objects.filter(email='admin@example.com'))" | QPC_DBMS=sqlite $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
+
 server-init: server-migrate server-set-superuser
+
+server-init-sqlite: server-migrate-sqlite server-set-superuser-sqlite
+
+setup-postgres:
+	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
 
 server-static:
 	mkdir -p quipucords/client
@@ -77,6 +97,9 @@ server-static:
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver
+
+serve-sqlite:
+	QPC_DBMS=sqlite $(PYTHON) quipucords/manage.py runserver
 
 build-ui:
 	cd client;npm install;npm run build

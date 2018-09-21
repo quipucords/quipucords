@@ -115,10 +115,10 @@ def startup():
             logger.info('QPC_DBMS_DATABASE set to "%s"', database)
             logger.info('QPC_DBMS_USER set to "%s"', user)
     elif not qpc_dbms:
-        logger.info('QPC_DBMS not set. Using default of "sqlite".')
+        logger.info('QPC_DBMS not set. Using default of "postgres".')
     else:
         logger.info('QPC_DBMS was set to "%s" which is not a valid option. '
-                    'Using default of "sqlite.',
+                    'Using default of "postgres".',
                     (qpc_dbms))
 
     logger.info('Commit: %s', commit())
