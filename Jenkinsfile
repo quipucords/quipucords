@@ -1,4 +1,4 @@
-node('f25-os') {
+node('f28-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients nodejs"
         sh "which oc"
@@ -18,52 +18,52 @@ node('f25-os') {
         sh "sudo docker -v"
         sh "sudo setenforce 0"
     }
-    stage('Build Client') {
-        dir('client') {
-          sh "node -v"
-          sh "npm -v"
-          sh "sudo npm install -g n"
-          sh "sudo n lts"
-          sh "node -v"
-          sh "npm -v"
-          sh "npm install"
-          sh "npm rebuild node-sass --force"
-          sh "npm run build"
+    stage('Build') {
+        parallel 'Build Client': {
+            dir('client') {
+            sh "node -v"
+            sh "npm -v"
+            sh "sudo npm install -g n"
+            sh "sudo n lts"
+            sh "node -v"
+            sh "npm -v"
+            sh "npm install"
+            sh "npm rebuild node-sass --force"
+            sh "npm run build"
+            }
+        }, 'Build Docker Image': {
+            sh "ls -lta"
+            sh "cat Dockerfile"
+
+            sh "git rev-parse HEAD > GIT_COMMIT"
+            sh 'cat GIT_COMMIT'
+            def commitHash = readFile('GIT_COMMIT').trim()
+
+            def image_name = "quipucords:1.0.0"
+
+            sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
+            sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/$image_name"
+            sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/quipucords:latest"
+            sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
+            sh "sudo docker push $DOCKER_REGISTRY/quipucords/$image_name"
+            sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
+
+            def tarfile = "quipucords.1.0.0.tar"
+            def targzfile = tarfile + ".gz"
+            sh "sudo docker save -o $tarfile $image_name"
+            sh "sudo chmod 755 $tarfile"
+            sh "sudo gzip -f --best $tarfile"
+            sh "sudo chmod 755 $targzfile"
+
+            def install_tar = "quipucords.install.tar"
+            def install_targzfile = install_tar + ".gz"
+            sh "sudo tar -cvf $install_tar install/*"
+            sh "sudo chmod 755 $install_tar"
+            sh "sudo gzip -f --best $install_tar"
+            sh "sudo chmod 755 $install_targzfile"
+
+            archive targzfile
+            archive install_targzfile
         }
-    }
-    stage('Build Docker Image') {
-        sh "ls -lta"
-        sh "cat Dockerfile"
-
-        sh "git rev-parse HEAD > GIT_COMMIT"
-        sh 'cat GIT_COMMIT'
-        def commitHash = readFile('GIT_COMMIT').trim()
-
-        def image_name = "quipucords:1.0.0"
-
-        sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
-        sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/$image_name"
-        sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/quipucords:latest"
-        sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/$image_name"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
-
-        def tarfile = "quipucords.1.0.0.tar"
-        def targzfile = tarfile + ".gz"
-        sh "sudo docker save -o $tarfile $image_name"
-        sh "sudo chmod 755 $tarfile"
-        sh "sudo gzip -f --best $tarfile"
-        sh "sudo chmod 755 $targzfile"
-
-        def install_tar = "quipucords.install.tar"
-        def install_targzfile = install_tar + ".gz"
-        sh "sudo tar -cvf $install_tar install/*"
-        sh "sudo chmod 755 $install_tar"
-        sh "sudo gzip -f --best $install_tar"
-        sh "sudo chmod 755 $install_targzfile"
-
-        archive targzfile
-        archive install_targzfile
-
     }
 }
