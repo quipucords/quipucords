@@ -38,15 +38,11 @@ usage() {
          -e server_port=8443
     * Specify server container name (defaults to quipucords):
          -e server_name=qpc_server
-    * If using postgres, specify the db name (if not specified the default value is 'postgres'):
-         -e QPC_DBMS_DATABASE=postgres
-    * If using postgres, specify the db user (if not specified the default value is 'postgres'):
+    * Optionally specify the postgres db user (if not specified the default value is 'postgres'):
          -e QPC_DBMS_USER=postgres
-    * The default postgres db password (if not specified the default value is 'password')
+    * Optionally specify the postgres db password (if not specified the default value is 'password')
          -e QPC_DBMS_PASSWORD=password
-    * The default postgres host (if not specified the default value is set to the postgres docker container name)
-         -e QPC_DBMS_HOST=host
-    * If using postgres, specify the db port (if not specified the default value is 5432):
+    * Optionally specify the postgres db port (if not specified the default value is 5432):
          -e QPC_DBMS_PORT=5432
     * Override default server timeout for HTTP requests (if not specified the default value is 120):
          -e QPC_SERVER_TIMEOUT=120

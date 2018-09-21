@@ -98,7 +98,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 4. Run the Docker image::
 
-    docker run -d -p443:443 -i quipucords:latest
+    docker run -d -e "QPC_DBMS=postgres" -e "QPC_DBMS_PORT=5432" -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_DATABASE=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=host" -p443:443 -i quipucords:latest
 
 5. Configure the CLI by using the following commands::
 
@@ -148,32 +148,34 @@ Database Options
 ^^^^^^^^^^^^^^^^
 Quipucords currently supports development in both sqlite and postgres. The default database is an internal postgres container.
 
-1. Create the postgres container (make sure that the container is create with `docker ps --all`)
+1. Create the postgres container::
 
     make setup-postgres
 
+2. Check that the container has been created and is running::
+
+    docker ps
+
 Initializing the Server
 ^^^^^^^^^^^^^^^^^^^^^^^
-To set up the server, run the following command::
-
-1. Initializing with Postgres
+1. To initialize the server with postgres, run the following command::
 
     make server-init
 
-2. Initializing with Sqlite
+2. To initialize the server with sqlite, run the following command::
 
     make server-init-sqlite
 
-Both commands creates a superuser with name *admin* and password of *pass*.
+Both of the above commands create a superuser with name *admin* and password of *pass*.
 
 Running the Server
 ^^^^^^^^^^^^^^^^^^
-To run the development server, run the following command::
+1. To run the development server using postgres, run the following command::
 
-1. Server using Postgres Database
     make serve
 
-2. Server using Sqlite Database
+2. To run the development server using sqlite, run the following command::
+
     make serve-sqlite
 
 To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials.
