@@ -126,5 +126,5 @@ Options:
  - **QPC_DBMS_PASSWORD**
     - (Required if ``QPC_DBMS=postgres``) Specifies the database password for postgres.
  - **QPC_DBMS_HOST**
-    - (Required if ``QPC_DBMS=postgres``) Specifies the database host for postgres.
+    - (Required if ``QPC_DBMS=qpc-db``) Specifies the database host for postgres.
 

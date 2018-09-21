@@ -212,7 +212,7 @@
 
 - name: Set QPC_DBMS_HOST
   set_fact:
-    QPC_DBMS_HOST: "{{default('qpc-db')}}"
+    QPC_DBMS_HOST: "{{ansible_env['QPC_DBMS_HOST'] | default('qpc-db') }}"
   when:
     - QPC_DBMS_HOST is not defined
     - QPC_DBMS == "postgres"
@@ -237,13 +237,13 @@
     - not use_postgres
 
 - name: Create Internal postgres container
-  shell: docker run --name qpc-db -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -p "{{QPC_DBMS_PORT}}":"{{server_port}}" -d "{{QPC_DBMS_DATABASE}}"
+  shell: docker run --name "{{ QPC_DBMS_HOST }}"  -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -p "{{QPC_DBMS_PORT}}":"{{server_port}}" -d "{{QPC_DBMS_DATABASE}}"
   become: true
   when:
     - use_postgres
 
 - name: Start server using Internal Postgres
-  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST=qpc-db -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  shell: docker run --name "{{ server_name }}" --link {{ QPC_DBMS_HOST }}:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="{{ QPC_DBMS_HOST }}" -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
   when:
     - use_postgres

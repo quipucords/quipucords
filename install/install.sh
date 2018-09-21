@@ -38,6 +38,8 @@ usage() {
          -e server_port=8443
     * Specify server container name (defaults to quipucords):
          -e server_name=qpc_server
+    * Specify postgres container name (defaults to qpc-db):
+         -e QPC_DBMS_HOST=qpc-db
     * Optionally specify the postgres db user (if not specified the default value is 'postgres'):
          -e QPC_DBMS_USER=postgres
     * Optionally specify the postgres db password (if not specified the default value is 'password')
