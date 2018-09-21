@@ -35,7 +35,7 @@ pycrypto==2.6.1
 PyNaCl==1.1.2
 python-dateutil==2.6.1
 pytz==2017.2
-pyvmomi
+pyvmomi==6.7.0.2018.9
 PyYAML==3.12
 requests==2.18.4
 six==1.10.0
