@@ -172,78 +172,22 @@
     docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
   when: "'stdout_lines' in docker_ps_raw"
 
-- name: Set QPC_DBMS (defaults to use postgres)
-  set_fact:
-    QPC_DBMS: "{{ ansible_env['QPC_DBMS'] | default('postgres') }}"
-  when:
-    - QPC_DBMS is not defined
-
-- name: Set default for use_postgres to False
-  set_fact:
-    use_postgres: false
-
-- name: Set QPC_DBMS_DATABASE (defaults to use postgres)
-  set_fact:
-    QPC_DBMS_DATABASE: "{{ ansible_env['QPC_DBMS_DATABASE'] | default('postgres') }}"
-  when:
-    - QPC_DBMS_DATABASE is not defined
-    - QPC_DBMS == "postgres"
-
 - name: Set QPC_DBMS_USER (defaults to use postgres)
   set_fact:
     QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
   when:
     - QPC_DBMS_USER is not defined
-    - QPC_DBMS == "postgres"
-
-- name: Set QPC_DBMS_PORT (defaults to use 5432)
-  set_fact:
-    QPC_DBMS_PORT: "{{ ansible_env['QPC_DBMS_PORT'] | default('5432') }}"
-  when:
-    - QPC_DBMS_PORT is not defined
-    - QPC_DBMS == "postgres"
 
 - name: Set QPC_DBMS_PASSWORD
   set_fact:
     QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
   when:
     - QPC_DBMS_PASSWORD is not defined
-    - QPC_DBMS == "postgres"
-
-- name: Set QPC_DBMS_HOST
-  set_fact:
-    QPC_DBMS_HOST: "{{ansible_env['QPC_DBMS_HOST'] | default('qpc-db') }}"
-  when:
-    - QPC_DBMS_HOST is not defined
-    - QPC_DBMS == "postgres"
-
-- name: Change value for use_postgres if all env variables are specified
-  set_fact:
-    use_postgres: true
-  when:
-    - QPC_DBMS == "postgres"
-    - QPC_DBMS_DATABASE is defined
-    - QPC_DBMS_USER is defined
-    - QPC_DBMS_PASSWORD is defined
-    - QPC_DBMS_HOST is defined
-    - QPC_DBMS_PORT is defined
-
-- name: Start server using SQLite
-  shell: docker run --name "{{ server_name }}" -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
-  become: true
-  when:
-    - install_server
-    - not docker_server_running
-    - not use_postgres
 
 - name: Create Internal postgres container
-  shell: docker run --name "{{ QPC_DBMS_HOST }}"  -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -p "{{QPC_DBMS_PORT}}":"{{server_port}}" -d "{{QPC_DBMS_DATABASE}}"
+  shell: docker run --name qpc-db  -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -d postgres
   become: true
-  when:
-    - use_postgres
 
 - name: Start server using Internal Postgres
-  shell: docker run --name "{{ server_name }}" --link {{ QPC_DBMS_HOST }}:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS="{{ QPC_DBMS }}" -e QPC_DBMS_DATABASE="{{ QPC_DBMS_DATABASE }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="{{ QPC_DBMS_HOST }}" -e QPC_DBMS_PORT="{{ QPC_DBMS_PORT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
-  when:
-    - use_postgres

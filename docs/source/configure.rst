@@ -14,9 +14,6 @@ When you run the command to start the Quipucords server, you supply values for s
 - Selecting a directory for log output
 - Accepting or changing the default postgres user by specifying `QPC_DBMS_USER`
 - Accepting or changing the default postgres password by specifying `QPC_DBMS_PASSWORD`
-- Accepting or changing the default postgres port by specifying `QPC_DBMS_PORT`
-- Accepting or changing the default postgres host by specifying `QPC_DBMS_HOST`
-- Accepting or changing the default postgres database by specifying `QPC_DBMS_DATABASE`
 
 The following steps guide you through those choices.
 
@@ -44,15 +41,15 @@ The following steps guide you through those choices.
 3. Accept or change the default variables used to configure and access the PostgreSQL Database:
 
    - `QPC_DBMS_PASSWORD` (Optional) The database password for postgres. By default, the password is set to password. We recommend that you change it by using the following option when you run the Docker command to start the server: ``"QPC_DBMS_PASSWORD=yourPass"``.
-   - `QPC_DBMS_PORT` (Optional) The database port used by postgres. By default, the port is set to 5432.
-       - If you select to use port 5432, no option is needed when you run the Docker command to start the server.
-       - If you select to use a different port, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_PORT=5432"``.
    - `QPC_DBMS_USER` (Optional) The database user for postgres. By default, the user is set to postgres.
        - If you select to keep the user as postgres, no option is needed when you run the Docker command to start the server.
        - If you select to specify a different user, you would use the following option when you run the Docker command to start the server: ``"QPC_DBMS_USER=yourUser"``.
-   - `QPC_DBMS_HOST` (Optional) The database host for postgres. By default, the host is set to qpc-db. You can change it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_HOST=yourHost"``.
-   - `QPC_DBMS_DATABASE` (Optional) The database name for postgres. By default, the database name is set to postgres. You can change it using the following option when you run the Docker command to start the server: ``"QPC_DBMS_DATABASE=postgres"```.
 
+Starting the Postgres DB
+~~~~~~~~~~~~~~~~~~~~~~~~
+Quipucords server requires the Postgres container to be running.  Run the following docker command::
+
+  docker run --name qpc-db  -e POSTGRES_PASSWORD="password" -d postgres
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,11 +57,11 @@ After you make the decisions on the configuration options for the server, you ca
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command::
 
-  # sudo docker run --name quipucords -d -e "QPC_DBMS=postgres" -e "QPC_DBMS_PORT=5432" -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_DATABASE=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=host" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
+  # sudo docker run --name quipucords --link qpc-db:qpc-link -d -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=qpc-db" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:1.0.0
 
 If your system does have SELinux enabled, you must append ``:z`` to each volume as follows::
 
-  # sudo docker run --name quipucords -d -e "QPC_DBMS=postgres" -e "QPC_DBMS_PORT=5432" -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_DATABASE=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=host" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:1.0.0
+  # sudo docker run --name quipucords --link qpc-db:qpc-link -d -e "QPC_DBMS_USER=postgres" -e "QPC_DBMS_PASSWORD=password" -e "QPC_DBMS_HOST=qpc-db" -p 443:443 -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:1.0.0
 
 These commands start the server on port ``443`` and map the ``sshkeys``, ``data``, and ``log`` directories to the ``~/quipucords`` home directory for the server.
 
