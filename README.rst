@@ -92,23 +92,23 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 3. Build the Docker image::
 
-    docker -D build . -t quipucords:latest
+    docker -D build . -t quipucords:1.0.0
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
 4a. Run the Docker image with Postgres container::
 
     docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-    docker run --name qpc-server --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -e
+    docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -e
 
 4b. Run the Docker image with external Postgres container::
 
     ifconfig (get your computer's external IP if Postgres is local)
-    docker run -d --name qpc-server -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:latest
+    docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
 
 4c. Run the Docker image with SQLite::
 
-    docker run -d --name qpc-server -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:latest
+    docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
 
 5. Configure the CLI by using the following commands::
 
