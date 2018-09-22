@@ -89,7 +89,7 @@ server-init: server-migrate server-set-superuser
 server-init-sqlite: server-migrate-sqlite server-set-superuser-sqlite
 
 setup-postgres:
-	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6.10
 
 server-static:
 	mkdir -p quipucords/client
