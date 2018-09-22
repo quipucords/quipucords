@@ -49,7 +49,7 @@ Starting the Postgres DB
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Quipucords server requires the Postgres container to be running.  Run the following docker command::
 
-  docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -d postgres
+  docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -d postgres:9.6.10
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

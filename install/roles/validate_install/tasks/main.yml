@@ -1,0 +1,16 @@
+---
+
+- name: Ping quipucords server to validate it is up
+  uri:
+    url: https://127.0.0.1:{{ server_port}}/api/v1/status
+    validate_certs: no
+    return_content: yes
+  retries: 30
+  delay: 5
+  register: result
+  until: result.status == 200 or result.status == 401
+  changed_when: false
+
+- name: Validate status endpoint responded with valid JSON content
+  fail:
+  when: "'server_id' not in result.content"

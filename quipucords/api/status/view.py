@@ -41,6 +41,7 @@ def status(request):
     server_info['server_id'] = ServerInformation.create_or_retreive_server_id()
     env_dict = {}
     for key, value in os.environ.items():
-        env_dict[key] = value
+        if 'password' not in key.lower():
+            env_dict[key] = value
     server_info['environment_vars'] = env_dict
     return Response(server_info)

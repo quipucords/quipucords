@@ -185,7 +185,7 @@
     - QPC_DBMS_PASSWORD is not defined
 
 - name: Create internal Postgres container
-  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -d postgres
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -d postgres:9.6.10
   become: true
 
 - name: Start server using internal Postgres
