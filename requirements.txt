@@ -41,4 +41,4 @@ requests==2.18.4
 six==1.10.0
 whitenoise==3.3.1
 wrapt==1.10.11
-psycopg2==2.7.5
+psycopg2-binary==2.7.5
