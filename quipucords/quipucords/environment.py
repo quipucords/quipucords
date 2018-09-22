@@ -92,6 +92,8 @@ def startup():
     logger.info('Modules: %s', ', '.join(module_list))
     env_list = []
     for key, value in os.environ.items():
+        if 'password' in key.lower():
+            value = '*' * 8
         env = '{} - {}'.format(key, value)
         env_list.append(env)
     mark = '-' * 20

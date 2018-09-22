@@ -9,3 +9,4 @@
     - docker
     - qpc_server
     - qpc_cli
+    - validate_install
