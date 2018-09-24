@@ -1,4 +1,4 @@
-ansible==2.3.2.0
+ansible==2.6.4
 asn1crypto==0.22.0
 astroid==1.5.3
 bcrypt==3.1.3
