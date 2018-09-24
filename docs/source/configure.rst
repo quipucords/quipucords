@@ -47,9 +47,15 @@ The following steps guide you through those choices.
 
 Starting the Postgres DB
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Quipucords server requires the Postgres container to be running.  Run the following docker command::
+Quipucords server requires the Postgres container to be running.   Run the following docker command::
 
-  docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -d postgres:9.6.10
+For Centos 6 or Rhel 6
+
+  # docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+
+For Centos7, Rhel 7, Fedora 27, or Fedora 28
+
+  # docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
