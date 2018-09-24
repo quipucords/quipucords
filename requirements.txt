@@ -14,7 +14,7 @@ drf-generators==0.3.0
 drf-url-filters==0.5.1
 email-validator==1.0.3
 factory-boy==2.11.1
-Faker==0.8.3
+Faker==0.9.1
 idna==2.6
 isort==4.2.15
 Jinja2==2.9.6
