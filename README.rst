@@ -99,7 +99,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 4a. Run the Docker image with Postgres container::
 
     docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-    docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -e
+    docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
 
 4b. Run the Docker image with external Postgres container::
 
