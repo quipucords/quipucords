@@ -180,13 +180,13 @@
   when:
     - QPC_DBMS_PASSWORD is not defined
 
-- name: Create internal Postgres container & docker volume (Rhel 6 & Centos 6)
+- name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
   become: true
   when:
     - is_rhel_centos_6
 
-- name: Create internal Postgres container & docker volume (Rhel 7, Centos 7, Fedora)
+- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
   become: true
   when:
