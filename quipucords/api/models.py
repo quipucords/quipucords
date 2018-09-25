@@ -22,8 +22,8 @@ from api.scan.model import (Scan,
                             DisabledOptionalProductsOptions)
 from api.scanjob.model import ScanJob
 from api.connresult.model import (JobConnectionResult, TaskConnectionResult,
-                                   SystemConnectionResult)
+                                  SystemConnectionResult)
 from api.inspectresult.model import (JobInspectionResult, TaskInspectionResult,
-                                      SystemInspectionResult, RawFact)
+                                     SystemInspectionResult, RawFact)
 from api.scantask.model import ScanTask
 from api.status.model import ServerInformation

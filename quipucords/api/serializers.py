@@ -21,9 +21,9 @@ from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import SourceField, ScanJobSerializer
 from api.scantask.serializer import ScanTaskSerializer
 from api.connresult.serializer import (JobConnectionResultSerializer,
-                                        TaskConnectionResultSerializer,
-                                        SystemConnectionResultSerializer)
+                                       TaskConnectionResultSerializer,
+                                       SystemConnectionResultSerializer)
 from api.inspectresult.serializer import(JobInspectionResultSerializer,
-                                          TaskInspectionResultSerializer,
-                                          SystemInspectionResultSerializer,
-                                          RawFactSerializer)
+                                         TaskInspectionResultSerializer,
+                                         SystemInspectionResultSerializer,
+                                         RawFactSerializer)

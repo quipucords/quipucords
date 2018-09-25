@@ -17,9 +17,9 @@ from datetime import datetime
 
 import api.messages as messages
 from api.connresult.model import (JobConnectionResult,
-                                   TaskConnectionResult)
+                                  TaskConnectionResult)
 from api.inspectresult.model import (JobInspectionResult,
-                                      TaskInspectionResult)
+                                     TaskInspectionResult)
 from api.scan.model import Scan, ScanOptions
 from api.scantask.model import ScanTask
 from api.source.model import Source
