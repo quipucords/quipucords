@@ -53,11 +53,35 @@ then
   usage;
 fi
 
+if [ ! -f /etc/redhat-release ]; then
+  echo '/etc/redhat-release not found. You need to run this on a Red Hat based OS.'
+  exit 1
+fi
+
+if dnf --version; then
+  PKG_MGR=dnf
+else
+  PKG_MGR=yum
+fi
+
+echo 'Checking if ansible is installed...'
 command -v ansible > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
-  echo "Installation failed. Ansible prerequisite could not be found."
+  echo 'Ansible prerequisite could not be found. Trying to install ansible...'
+  ansible_not_installed=1
+fi
+
+if [$ansible_not_installed]; then
+  sudo "${PKG_MGR}" install -y ansible
+fi
+
+command -v ansible > /dev/null 2>&1
+
+if [ $? -ne 0 ]
+then
+  echo "Installation failed. Ansible prerequisite could not be installed."
   echo "Follow installation documentation for installing Ansible."
   exit 1
 fi
