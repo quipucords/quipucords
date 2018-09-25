@@ -273,7 +273,7 @@ def _connect(manager_interrupt,
                      '../../../bin/timeout_ssh'))
 
     base_ssh_executable = base_ssh_executable or 'ssh'
-    ssh_timeout = ssh_timeout or settings.QPC_DEFAULT_SSH_TIMEOUT
+    ssh_timeout = ssh_timeout or settings.QPC_SSH_CONNECT_TIMEOUT
 
     # pylint: disable=line-too-long
     # the ssh arg is required for become-pass because
@@ -315,7 +315,7 @@ def _connect(manager_interrupt,
         group_ips = ["'%s'" % ip for ip in group_ips]
         group_ip_string = ', '.join(group_ips)
         log_message = 'START CONNECT PROCESSING GROUP %d of %d. '\
-            'About to connecting to hosts [%s]' % (
+            'About to connect to hosts [%s]' % (
                 (idx + 1), len(group_names), group_ip_string)
         scan_task.log_message(log_message)
         callback = ConnectResultCallback(result_store, credential,
