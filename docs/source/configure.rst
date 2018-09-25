@@ -22,7 +22,7 @@ The following steps guide you through those choices.
    - If you select to expose port 443, you would use the following option when you run the Docker command to start the server: ``-p 443:443``.
    - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
-2. Select values for the directory for SSH keys, the directory for the SQLite database, and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
+2. Select values for the directory for SSH key and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
    \a. Create the home directory. The following example command creates the home directory  ``~/quipucords``::
 
@@ -35,7 +35,6 @@ The following steps guide you through those choices.
    \c. Create subdirectories to house the SSH keys, (``~/quipucords/sshkeys``), database (``~/quipucords/data``), and log output (``~/quipucords/log``). For example::
 
        # mkdir sshkeys
-       # mkdir data
        # mkdir log
 
 3. Accept or change the default variables used to configure and access the PostgreSQL Database:
@@ -47,9 +46,15 @@ The following steps guide you through those choices.
 
 Starting the Postgres DB
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Quipucords server requires the Postgres container to be running.  Run the following docker command::
+Quipucords server requires the Postgres container to be running.   Run the following docker command::
 
-  docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -d postgres:9.6.10
+For Centos 6 or RHEL 6
+
+  # docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+
+For Centos7, RHEL 7, Fedora 27, or Fedora 28
+
+  # docker run --name qpc-db  -e POSTGRES_USER="postgres" POSTGRES_PASSWORD="password" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
 
 Starting the Quipucords Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

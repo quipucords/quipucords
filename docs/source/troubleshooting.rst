@@ -33,3 +33,15 @@ If your system does have SELinux enabled, you must append ``:z`` to each volume 
   # sudo docker run --name quipucords -d -p 443:443 -e QUIPUCORDS_LOGGING_LEVEL=DEBUG -e DJANGO_LOGGING_LEVEL=DEBUG -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:1.0.0
 
 These commands start the server on port ``443`` and map the ``sshkeys``, ``data``, and ``log`` directories to the ``~/quipucords`` home directory for the server with increased logging information.
+
+Cleaning out the database
+-------------------------
+Our command to run a postgres container does implement docker volumes. Volumes allow our postgres data to be persistent, which means that the data will remain even if the postgres container is removed and recreated. If for any reason if you would like to delete your postgres database, you will need to remove the docker volume.
+
+Removing the volume for RHEL 6 or Centos 6
+
+# rm -rf /var/lib/docker/volumes/qpc-data
+
+Removing the volume for RHEL 7, Centos 7, Fedora 27, or Fedora 28
+
+# docker volume rm qpc-data
