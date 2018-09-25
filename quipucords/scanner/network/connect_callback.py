@@ -15,7 +15,7 @@ import traceback
 
 from ansible.plugins.callback import CallbackBase
 
-from api.connresults.model import SystemConnectionResult
+from api.connresult.model import SystemConnectionResult
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

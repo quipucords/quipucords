@@ -23,7 +23,7 @@ from api.models import (Scan,
                         ScanTask,
                         Source)
 from api.serializers import SourceSerializer
-from api.signals.scanjob_signal import start_scan
+from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
 
 from django.db import transaction

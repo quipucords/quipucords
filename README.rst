@@ -96,19 +96,20 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-4a. Run the Docker image with Postgres container::
+4. There are 3 different options for running the QPC server.
+    A. Run the Docker image with Postgres container::
 
-    docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-    docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
+        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
+        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
 
-4b. Run the Docker image with external Postgres container::
+    B. Run the Docker image with external Postgres container::
 
-    ifconfig (get your computer's external IP if Postgres is local)
-    docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
+        ifconfig (get your computer's external IP if Postgres is local)
+        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
 
-4c. Run the Docker image with SQLite::
+    C. Run the Docker image with SQLite::
 
-    docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
+        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
 
 5. Configure the CLI by using the following commands::
 
@@ -158,23 +159,20 @@ Database Options
 ^^^^^^^^^^^^^^^^
 Quipucords currently supports development in both SQLite and Postgres. The default database is an internal postgres container.
 
-1. Create the Postgres container::
+- Using a Postgres container::
 
     make setup-postgres
-
-2. Check that the container has been created and is running::
-
     docker ps
+
+- Using a SQLite DB::
+
+    export QPC_DBMS=SQLite
 
 Initializing the Server
 ^^^^^^^^^^^^^^^^^^^^^^^
 1. To initialize the server with Postgres, run the following command::
 
     make server-init
-
-2. To initialize the server with SQLite, run the following command::
-
-    make server-init-sqlite
 
 Both of the above commands create a superuser with name *admin* and password of *pass*.
 
@@ -183,10 +181,6 @@ Running the Server
 1. To run the development server using Postgres, run the following command::
 
     make serve
-
-2. To run the development server using SQLite, run the following command::
-
-    make serve-sqlite
 
 To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials.
 

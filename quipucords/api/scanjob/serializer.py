@@ -19,7 +19,7 @@ from api.models import (Scan,
                         ScanTask,
                         Source)
 from api.scan.serializer import ScanOptionsSerializer
-from api.scantasks.serializer import ScanTaskSerializer, SourceField
+from api.scantask.serializer import ScanTaskSerializer, SourceField
 
 from django.utils.translation import ugettext as _
 

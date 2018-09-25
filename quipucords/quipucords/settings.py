@@ -316,7 +316,7 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.scantasks': {
+        'api.scantask': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
@@ -332,7 +332,7 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.signals.scanjob_signal': {
+        'api.signal.scanjob_signal': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },

@@ -16,7 +16,7 @@ import json
 import logging
 
 import api.messages as messages
-from api.scantasks.model import ScanTask
+from api.scantask.model import ScanTask
 from api.source.model import Source
 
 from django.db import models

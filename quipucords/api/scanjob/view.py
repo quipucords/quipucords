@@ -26,7 +26,7 @@ from api.scanjob.serializer import expand_scanjob
 from api.serializers import (ScanJobSerializer,
                              SystemConnectionResultSerializer,
                              SystemInspectionResultSerializer)
-from api.signals.scanjob_signal import (cancel_scan,
+from api.signal.scanjob_signal import (cancel_scan,
                                         pause_scan,
                                         restart_scan)
 
