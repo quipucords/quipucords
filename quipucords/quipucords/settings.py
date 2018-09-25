@@ -53,14 +53,22 @@ def is_int(value):
         return False
 
 
-QPC_DEFAULT_SSH_TIMEOUT = os.environ.get('QPC_DEFAULT_SSH_TIMEOUT', '120')
-if not is_int(QPC_DEFAULT_SSH_TIMEOUT):
-    logger.error('QPC_DEFAULT_SSH_TIMEOUT "%s" not an int.'
-                 'Setting to default of 120.', QPC_DEFAULT_SSH_TIMEOUT)
-    QPC_DEFAULT_SSH_TIMEOUT = '120'
+QPC_SSH_CONNECT_TIMEOUT = os.environ.get('QPC_SSH_CONNECT_TIMEOUT', '60')
+if not is_int(QPC_SSH_CONNECT_TIMEOUT):
+    logger.error('QPC_SSH_CONNECT_TIMEOUT "%s" not an int.'
+                 'Setting to default of 60.', QPC_SSH_CONNECT_TIMEOUT)
+    QPC_SSH_CONNECT_TIMEOUT = '60'
 
-# Timeout for individual tasks. Must match format in 'man timeout'.
-QPC_DEFAULT_SSH_TIMEOUT = '%ss' % (QPC_DEFAULT_SSH_TIMEOUT)
+# Timeout for individual tasks. Must match format in 'man timeout'
+QPC_SSH_CONNECT_TIMEOUT = '%ss' % (QPC_SSH_CONNECT_TIMEOUT)
+
+QPC_SSH_INSPECT_TIMEOUT = os.environ.get('QPC_SSH_INSPECT_TIMEOUT', '120')
+if not is_int(QPC_SSH_INSPECT_TIMEOUT):
+    logger.error('QPC_SSH_INSPECT_TIMEOUT "%s" not an int.'
+                 'Setting to default of 120.', QPC_SSH_INSPECT_TIMEOUT)
+    QPC_SSH_INSPECT_TIMEOUT = '120'
+
+QPC_SSH_INSPECT_TIMEOUT = '%ss' % (QPC_SSH_INSPECT_TIMEOUT)
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
