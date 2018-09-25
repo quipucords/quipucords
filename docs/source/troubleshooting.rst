@@ -38,10 +38,10 @@ Cleaning out the database
 -------------------------
 Our command to run a postgres container does implement docker volumes. Volumes allow our postgres data to be persistent, which means that the data will remain even if the postgres container is removed and recreated. If for any reason if you would like to delete your postgres database, you will need to remove the docker volume.
 
-Removing the volume for Rhel 6 or Centos 6
+Removing the volume for RHEL 6 or Centos 6
 
 # rm -rf /var/lib/docker/volumes/qpc-data
 
-Removing the volume for Rhel 7, Centos 7, Fedora 27, or Fedora 28
+Removing the volume for RHEL 7, Centos 7, Fedora 27, or Fedora 28
 
 # docker volume rm qpc-data
