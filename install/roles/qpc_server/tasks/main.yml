@@ -152,10 +152,6 @@
   shell: mkdir -p "{{server_install_dir}}/log"
   when: install_server
 
-- name: Make server data directory
-  shell: mkdir -p "{{server_install_dir}}/data"
-  when: install_server
-
 - name: Make server sshkeys directory
   shell: mkdir -p "{{server_install_dir}}/sshkeys"
   when: install_server
