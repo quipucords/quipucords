@@ -18,7 +18,7 @@ from unittest.mock import ANY, Mock, patch
 
 from ansible.errors import AnsibleError
 
-from api.connresults.model import SystemConnectionResult
+from api.connresult.model import SystemConnectionResult
 from api.models import (Credential,
                         ScanJob,
                         ScanTask,

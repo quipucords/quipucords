@@ -17,8 +17,8 @@ import logging
 from datetime import datetime
 
 import api.messages as messages
-from api.connresults.model import TaskConnectionResult
-from api.inspectresults.model import TaskInspectionResult
+from api.connresult.model import TaskConnectionResult
+from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
 
 from django.db import models, transaction

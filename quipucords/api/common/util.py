@@ -14,7 +14,7 @@
 import logging
 import os
 
-from api.scantasks.model import ScanTask
+from api.scantask.model import ScanTask
 
 from rest_framework.serializers import ValidationError
 

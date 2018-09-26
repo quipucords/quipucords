@@ -25,7 +25,7 @@ from api.models import (DisabledOptionalProductsOptions,
                         ScanOptions,
                         ScanTask,
                         Source)
-from api.scantasks.serializer import SourceField
+from api.scantask.serializer import SourceField
 
 from django.db import transaction
 from django.utils.translation import ugettext as _

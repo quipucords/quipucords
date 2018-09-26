@@ -20,7 +20,7 @@ from api.filters import ListFilter
 from api.models import (Scan, ScanJob, ScanTask, Source)
 from api.scanjob.serializer import expand_scanjob
 from api.serializers import (ScanJobSerializer, ScanSerializer)
-from api.signals.scanjob_signal import (cancel_scan, start_scan)
+from api.signal.scanjob_signal import (cancel_scan, start_scan)
 
 from django.db import transaction
 from django.db.models import Q

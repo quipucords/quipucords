@@ -16,12 +16,12 @@ import logging
 from datetime import datetime
 
 import api.messages as messages
-from api.connresults.model import (JobConnectionResult,
-                                   TaskConnectionResult)
-from api.inspectresults.model import (JobInspectionResult,
-                                      TaskInspectionResult)
+from api.connresult.model import (JobConnectionResult,
+                                  TaskConnectionResult)
+from api.inspectresult.model import (JobInspectionResult,
+                                     TaskInspectionResult)
 from api.scan.model import Scan, ScanOptions
-from api.scantasks.model import ScanTask
+from api.scantask.model import ScanTask
 from api.source.model import Source
 
 from django.db import (OperationalError, models, transaction)
