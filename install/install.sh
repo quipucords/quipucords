@@ -62,9 +62,14 @@ then
   exit 1
 fi
 
-
-echo ansible-playbook $PLAYBOOKFILE -v -K $*
-ansible-playbook $PLAYBOOKFILE -v -K $*
+if [[ $EUID -ne 0 ]]
+then
+  echo ansible-playbook $PLAYBOOKFILE -v -K $*
+  ansible-playbook $PLAYBOOKFILE -v -K $*
+else
+  echo ansible-playbook $PLAYBOOKFILE -v $*
+  ansible-playbook $PLAYBOOKFILE -v $*
+fi
 
 if [ $? -eq 0 ]
 then
