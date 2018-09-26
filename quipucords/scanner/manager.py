@@ -54,8 +54,8 @@ class Manager(Thread):
         """Initialize the manager."""
         Thread.__init__(self)
         self.scan_queue = []
-        self.current_task_runner = None
-        self.terminated_task_runner = None
+        self.current_job_runner = None
+        self.terminated_job_runner = None
         self.termination_elapsed_time = 0
         self.running = True
         logger.info('%s: Scan manager instance created.',
@@ -71,8 +71,8 @@ class Manager(Thread):
     def log_info(self):
         """Log the status of the scan manager."""
         current_scan_job = None
-        if self.current_task_runner:
-            current_scan_job = self.current_task_runner.identifier
+        if self.current_job_runner:
+            current_scan_job = self.current_job_runner.identifier
             scan_job_message = 'Currently running scan job %s' % \
                 current_scan_job
         else:
@@ -91,52 +91,52 @@ class Manager(Thread):
     def work(self):
         """Start to excute scans in the queue."""
         if len(self.scan_queue) > 0:  # pylint: disable=C1801
-            self.current_task_runner = self.scan_queue.pop()
-            if self.current_task_runner.scan_job.status in \
+            self.current_job_runner = self.scan_queue.pop()
+            if self.current_job_runner.scan_job.status in \
                     [ScanTask.PENDING, ScanTask.RUNNING]:
                 logger.info('%s: Loading scan job %s.',
                             SCAN_MANAGER_LOG_PREFIX,
-                            self.current_task_runner.scan_job.id)
-                self.current_task_runner.start()
+                            self.current_job_runner.scan_job.id)
+                self.current_job_runner.start()
                 self.log_info()
             else:
                 error = '%s: Could not start job. Job was not in %s state.' % \
                     (SCAN_MANAGER_LOG_PREFIX, ScanTask.PENDING)
-                self.current_task_runner.scan_job.log_message(
+                self.current_job_runner.scan_job.log_message(
                     error, log_level=logging.ERROR)
 
-    def put(self, task):
-        """Add task to scan queue.
+    def put(self, job):
+        """Add job to scan queue.
 
-        :param task: Task to be performed.
+        :param job: Job to be performed.
         """
-        self.scan_queue.insert(0, task)
+        self.scan_queue.insert(0, job)
         self.log_info()
 
     def kill(self, job, command):
-        """Kill a task or remove it from the running queue.
+        """Kill a job or remove it from the running queue.
 
-        :param job: The task to kill.
+        :param job: The job to kill.
         :returns: True if killed, False otherwise.
         """
         killed = False
         job_id = job.id
-        if (self.current_task_runner is not None and
-                self.current_task_runner.identifier == job_id and
-                self.current_task_runner.is_alive()):
+        if (self.current_job_runner is not None and
+                self.current_job_runner.identifier == job_id and
+                self.current_job_runner.is_alive()):
 
-            # record which task is terminated
-            self.terminated_task_runner = self.current_task_runner
-            self.current_task_runner = None
+            # record which job is terminated
+            self.terminated_job_runner = self.current_job_runner
+            self.current_job_runner = None
 
             job.log_message(
                 '%s: Send interrupt to allow job orderly shutdown' %
                 SCAN_MANAGER_LOG_PREFIX)
             if command == 'cancel':
-                self.terminated_task_runner.manager_interrupt.value = \
+                self.terminated_job_runner.manager_interrupt.value = \
                     ScanJob.JOB_TERMINATE_CANCEL
             if command == 'pause':
-                self.terminated_task_runner.manager_interrupt.value = \
+                self.terminated_job_runner.manager_interrupt.value = \
                     ScanJob.JOB_TERMINATE_PAUSE
             self.termination_elapsed_time = 0
         else:
@@ -190,22 +190,22 @@ class Manager(Thread):
         self.start_log_timer()
         while self.running:
             queue_len = len(self.scan_queue)
-            if self.terminated_task_runner is not None:
+            if self.terminated_job_runner is not None:
                 # Occurs when current job was terminated
-                killed = not self.terminated_task_runner.is_alive()
-                interrupt = self.terminated_task_runner.manager_interrupt
+                killed = not self.terminated_job_runner.is_alive()
+                interrupt = self.terminated_job_runner.manager_interrupt
                 if killed:
                     # Set this to None so another job can run.
-                    self.terminated_task_runner.scan_job.log_message(
+                    self.terminated_job_runner.scan_job.log_message(
                         '%s: Process successfully terminated.' %
                         SCAN_MANAGER_LOG_PREFIX)
-                    self.terminated_task_runner = None
+                    self.terminated_job_runner = None
                 elif interrupt.value == ScanJob.JOB_TERMINATE_ACK:
-                    self.terminated_task_runner.log_message(
+                    self.terminated_job_runner.log_message(
                         '%s: Scan job acknowledged request to terminate'
                         ' but still processing.' % SCAN_MANAGER_LOG_PREFIX)
                 else:
-                    self.terminated_task_runner.scan_job.log_message(
+                    self.terminated_job_runner.scan_job.log_message(
                         '%s: Scan job has not acknowledged request'
                         ' to terminate after %ds.' %
                         (SCAN_MANAGER_LOG_PREFIX,
@@ -215,20 +215,20 @@ class Manager(Thread):
                     self.termination_elapsed_time += RUN_QUEUE_SLEEP_TIME
                     if self.termination_elapsed_time == \
                             ORDERLY_SHUTDOWN_TIMEOUT_LENGTH:
-                        self.terminated_task_runner.scan_job.log_message(
+                        self.terminated_job_runner.scan_job.log_message(
                             'FORCEFUL TERMINATION OF JOB PROCESS')
-                        self.terminated_task_runner.terminate()
-            elif self.current_task_runner is not None:
+                        self.terminated_job_runner.terminate()
+            elif self.current_job_runner is not None:
                 # Occurs when current jobs ends and at least 1 in queue
-                killed = not self.current_task_runner.is_alive()
+                killed = not self.current_job_runner.is_alive()
                 if killed:
-                    self.current_task_runner.scan_job.log_message(
+                    self.current_job_runner.scan_job.log_message(
                         '%s: scan job has completed.' %
                         SCAN_MANAGER_LOG_PREFIX)
-                    self.current_task_runner = None
+                    self.current_job_runner = None
                     if queue_len > 0:
                         self.work()
-            elif queue_len > 0 and self.current_task_runner is None:
+            elif queue_len > 0 and self.current_job_runner is None:
                 # Occurs when no current job, but new one added
                 self.work()
             sleep(RUN_QUEUE_SLEEP_TIME)
