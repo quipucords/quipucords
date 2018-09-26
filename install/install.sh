@@ -73,7 +73,7 @@ then
   ansible_not_installed=1
 fi
 
-if [$ansible_not_installed]; then
+if [ $ansible_not_installed ]; then
   sudo "${PKG_MGR}" install -y ansible
 fi
 
