@@ -22,12 +22,12 @@
 
 - name: Set server url
   set_fact:
-    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/1.0.0/quipucords.1.0.0.tar.gz') }}"
+    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/0.0.44/quipucords.0.0.44.tar.gz') }}"
   when: server_url is not defined
 
 - name: Set server image and tag name
   set_fact:
-    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:1.0.0') }}"
+    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:0.0.44') }}"
   when: server_image_and_tag is not defined
 
 - name: Split server image and tag name
@@ -83,7 +83,7 @@
 - name: Find installable local Quipucords server
   find:
     paths: "{{ pkg_install_dir }}"
-    patterns: 'quipucords*.tar.gz'
+    patterns: 'quipucords"{{ tag }}"".tar.gz'
   register: find_qpc_server_local_raw
 
 - name: Set find_qpc_server_local
@@ -120,7 +120,7 @@
 - name: Find installable local Quipucords server
   find:
     paths: "{{ pkg_install_dir }}"
-    patterns: 'quipucords*.tar.gz'
+    patterns: 'quipucords"{{ tag }}".tar.gz'
   register: find_qpc_server_local_raw
 
 - name: Set find_qpc_server_local
@@ -137,61 +137,61 @@
     - find_qpc_server_local is defined
     - find_qpc_server_local
 
-- name: Load Quipucords image into local Docker registry
-  shell: docker load -i "{{find_qpc_server_local_path}}"
-  become: true
-  when:
-    - install_server
-    - not docker_image_present
-
-- name: Make server home directory
-  shell: mkdir -p "{{server_install_dir}}"
-  when: install_server
-
-- name: Make server log directory
-  shell: mkdir -p "{{server_install_dir}}/log"
-  when: install_server
-
-- name: Make server sshkeys directory
-  shell: mkdir -p "{{server_install_dir}}/sshkeys"
-  when: install_server
-
-- name: Check for server already running
-  shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
-  become: true
-  register: docker_ps_raw
-  ignore_errors: yes
-  when: install_server
-
-- name: Set docker_server_running
-  set_fact:
-    docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
-  when: "'stdout_lines' in docker_ps_raw"
-
-- name: Set QPC_DBMS_USER
-  set_fact:
-    QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
-  when:
-    - QPC_DBMS_USER is not defined
-
-- name: Set QPC_DBMS_PASSWORD
-  set_fact:
-    QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
-  when:
-    - QPC_DBMS_PASSWORD is not defined
-
-- name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
-  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
-  become: true
-  when:
-    - is_rhel_centos_6
-
-- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
-  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
-  become: true
-  when:
-    - is_rhel_centos_7 or is_fedora
-
-- name: Start server using internal Postgres
-  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
-  become: true
+# - name: Load Quipucords image into local Docker registry
+#   shell: docker load -i "{{find_qpc_server_local_path}}"
+#   become: true
+#   when:
+#     - install_server
+#     - not docker_image_present
+#
+# - name: Make server home directory
+#   shell: mkdir -p "{{server_install_dir}}"
+#   when: install_server
+#
+# - name: Make server log directory
+#   shell: mkdir -p "{{server_install_dir}}/log"
+#   when: install_server
+#
+# - name: Make server sshkeys directory
+#   shell: mkdir -p "{{server_install_dir}}/sshkeys"
+#   when: install_server
+#
+# - name: Check for server already running
+#   shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
+#   become: true
+#   register: docker_ps_raw
+#   ignore_errors: yes
+#   when: install_server
+#
+# - name: Set docker_server_running
+#   set_fact:
+#     docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
+#   when: "'stdout_lines' in docker_ps_raw"
+#
+# - name: Set QPC_DBMS_USER
+#   set_fact:
+#     QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
+#   when:
+#     - QPC_DBMS_USER is not defined
+#
+# - name: Set QPC_DBMS_PASSWORD
+#   set_fact:
+#     QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
+#   when:
+#     - QPC_DBMS_PASSWORD is not defined
+#
+# - name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
+#   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+#   become: true
+#   when:
+#     - is_rhel_centos_6
+#
+# - name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
+#   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+#   become: true
+#   when:
+#     - is_rhel_centos_7 or is_fedora
+#
+# - name: Start server using internal Postgres
+#   shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+#   become: true
