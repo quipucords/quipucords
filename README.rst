@@ -195,6 +195,7 @@ If you intend to run on Mac OS, there are several more steps that are required.
 - If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
   See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
+- Install gtimeout using ``brew install coreutils``
 
 Linting
 ^^^^^^^
