@@ -81,7 +81,7 @@
 - name: Set qpc_local_server_path
   set_fact:
     qpc_server_local_path: "{{ pkg_install_dir }}quipucords.{{RELEASE_TAG}}.tar.gz"
-  when: release_path is not defined
+  when: qpc_server_local_path is not defined
 
 - name: Check if local server release exists
   stat:
@@ -145,7 +145,7 @@
   ignore_errors: yes
   when: install_server
 
-- name: Shutdown running postgres server
+- name: Remove running postgres server
   shell: docker rm -f qpc-db
   become: true
   ignore_errors: yes
