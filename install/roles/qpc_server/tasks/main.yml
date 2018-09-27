@@ -124,17 +124,33 @@
   shell: mkdir -p "{{server_install_dir}}/sshkeys"
   when: install_server
 
-- name: Check for server already running
-  shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
+- name: Check for QPC server already running
+  shell: docker ps -a -f name="{{ server_name }}" | grep "{{server_name}}"
   become: true
-  register: docker_ps_raw
+  register: qpc_ps_raw
   ignore_errors: yes
   when: install_server
 
-- name: Set docker_server_running
-  set_fact:
-    docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
-  when: "'stdout_lines' in docker_ps_raw"
+- name: Remove running QPC server
+  shell: docker rm -f "{{server_name}}"
+  become: true
+  ignore_errors: yes
+  when:
+    - qpc_ps_raw['stdout_lines'] | length > 0
+
+- name: Check if postgres server already running
+  shell: docker ps -a -f name="qpc-db" | grep "qpc-db"
+  become: true
+  register: postgres_ps_raw
+  ignore_errors: yes
+  when: install_server
+
+- name: Shutdown running postgres server
+  shell: docker rm -f qpc-db
+  become: true
+  ignore_errors: yes
+  when:
+    - postgres_ps_raw['stdout_lines'] | length > 0
 
 - name: Set QPC_DBMS_USER
   set_fact:
@@ -149,13 +165,13 @@
     - QPC_DBMS_PASSWORD is not defined
 
 - name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
-  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
   become: true
   when:
     - is_rhel_centos_6
 
 - name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
-  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
   become: true
   when:
     - is_rhel_centos_7 or is_fedora

@@ -13,10 +13,11 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-declare -a args
 RELEASE_TAG='-e RELEASE_TAG=0.0.43'
+POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
+declare -a args
 args=("$*")
-args+=("${arr[@]}" "$RELEASE_TAG" )
+args+=("$RELEASE_TAG" "$POSTGRES_VERSION")
 set -- ${args[@]}
 
 usage() {
