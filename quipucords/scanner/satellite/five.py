@@ -177,6 +177,7 @@ class SatelliteFive(SatelliteInterface):
         host, port, user, password = \
             utils.get_connect_data(self.inspect_scan_task)
         logging_options = {
+            'job_id': self.scan_job.id,
             'task_sequence_number': self.inspect_scan_task.sequence_number,
             'scan_type': self.inspect_scan_task.scan_type,
             'source_type':

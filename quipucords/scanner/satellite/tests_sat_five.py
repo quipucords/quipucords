@@ -226,7 +226,8 @@ class SatelliteFiveTest(TestCase):
                       'port': '443', 'user': self.cred.username,
                       'password': self.cred.password,
                       'ssl_cert_verify': True},
-                     {'task_sequence_number': self.scan_task.id,
+                     {'job_id': self.scan_job.id,
+                      'task_sequence_number': self.scan_task.id,
                       'scan_type': self.scan_task.scan_type,
                       'source_type': self.scan_task.source.source_type,
                       'source_name': self.scan_task.source.name})]
