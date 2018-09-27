@@ -227,7 +227,7 @@ class SatelliteFiveTest(TestCase):
                       'password': self.cred.password,
                       'ssl_cert_verify': True},
                      {'job_id': self.scan_job.id,
-                      'task_sequence_number': self.scan_task.id,
+                      'task_sequence_number': self.scan_task.sequence_number,
                       'scan_type': self.scan_task.scan_type,
                       'source_type': self.scan_task.source.source_type,
                       'source_name': self.scan_task.source.name})]
