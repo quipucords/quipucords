@@ -13,7 +13,11 @@
 from datetime import datetime
 
 import api.messages as messages
-from api.models import Credential, ScanTask, Source
+from api.models import (Credential,
+                        Scan,
+                        ScanJob,
+                        ScanTask,
+                        Source)
 from api.serializers import ScanTaskSerializer
 
 from django.core import management
@@ -47,9 +51,22 @@ class ScanTaskTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
+        # Create scan configuration
+        scan = Scan(name='scan_name',
+                    scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan.save()
+
+        # Add source to scan
+        scan.sources.add(self.source)
+
+        # Create Job
+        self.scan_job = ScanJob(scan=scan)
+        self.scan_job.save()
+
     def test_successful_create(self):
         """Create a scan task and serialize it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -65,6 +82,7 @@ class ScanTaskTest(TestCase):
     def test_successful_start(self):
         """Create a scan task and start it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -80,6 +98,7 @@ class ScanTaskTest(TestCase):
     def test_successful_restart(self):
         """Create a scan task and restart it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -92,6 +111,7 @@ class ScanTaskTest(TestCase):
     def test_successful_pause(self):
         """Create a scan task and pause it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -104,6 +124,7 @@ class ScanTaskTest(TestCase):
     def test_successful_cancel(self):
         """Create a scan task and cancel it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -119,6 +140,7 @@ class ScanTaskTest(TestCase):
     def test_successful_complete(self):
         """Create a scan task and complete it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -134,6 +156,7 @@ class ScanTaskTest(TestCase):
     def test_scantask_fail(self):
         """Create a scan task and fail it."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -151,6 +174,7 @@ class ScanTaskTest(TestCase):
     def test_scantask_increment(self):
         """Test scan task increment feature."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)
@@ -176,6 +200,7 @@ class ScanTaskTest(TestCase):
     def test_calculate_counts(self):
         """Test calculate counts."""
         task = ScanTask.objects.create(
+            job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING)

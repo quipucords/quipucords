@@ -127,7 +127,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.PENDING)
 
         # Queue should have created scan tasks
-        tasks = scan_job.tasks.all()
+        tasks = scan_job.tasks.all().order_by('sequence_number')
         self.assertEqual(len(tasks), 2)
 
         # Validate connect task created and correct

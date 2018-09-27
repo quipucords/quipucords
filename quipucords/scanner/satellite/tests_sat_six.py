@@ -261,7 +261,8 @@ class SatelliteSixV1Test(TestCase):
             'https://{sat_host}:{port}/katello/api' \
             '/v2/organizations/{org_id}/systems/{host_id}/subscriptions'
         expected = [(self.scan_task,
-                     {'inspect_task_id': self.scan_task.id,
+                     {'job_id': self.scan_job.id,
+                      'task_sequence_number': self.scan_task.sequence_number,
                       'scan_type': self.scan_task.scan_type,
                       'source_type': self.scan_task.source.source_type,
                       'source_name': self.scan_task.source.name},
@@ -292,7 +293,8 @@ class SatelliteSixV1Test(TestCase):
             mocker.get(url, status_code=500)
             result = request_host_details(
                 self.scan_task,
-                {'inspect_task_id': self.scan_task.id,
+                {'job_id': self.scan_job.id,
+                 'task_sequence_number': self.scan_task.id,
                  'scan_type': self.scan_task.scan_type,
                  'source_type': self.scan_task.source.source_type,
                  'source_name': self.scan_task.source.name},
@@ -559,7 +561,8 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=500)
             result = request_host_details(
                 self.scan_task,
-                {'inspect_task_id': self.scan_task.id,
+                {'job_id': self.scan_job.id,
+                 'task_sequence_number': self.scan_task.id,
                  'scan_type': self.scan_task.scan_type,
                  'source_type': self.scan_task.source.source_type,
                  'source_name': self.scan_task.source.name},
@@ -650,7 +653,8 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=500)
             result = request_host_details(
                 self.scan_task,
-                {'inspect_task_id': self.scan_task.id,
+                {'job_id': self.scan_job.id,
+                 'task_sequence_number': self.scan_task.id,
                  'scan_type': self.scan_task.scan_type,
                  'source_type': self.scan_task.source.source_type,
                  'source_name': self.scan_task.source.name},
@@ -673,7 +677,8 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=404, text='error message')
             result = request_host_details(
                 self.scan_task,
-                {'inspect_task_id': self.scan_task.id,
+                {'job_id': self.scan_job.id,
+                 'task_sequence_number': self.scan_task.id,
                  'scan_type': self.scan_task.scan_type,
                  'source_type': self.scan_task.source.source_type,
                  'source_name': self.scan_task.source.name},
@@ -701,7 +706,8 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=400, json=err_msg)
             result = request_host_details(
                 self.scan_task,
-                {'inspect_task_id': self.scan_task.id,
+                {'job_id': self.scan_job.id,
+                 'task_sequence_number': self.scan_task.id,
                  'scan_type': self.scan_task.scan_type,
                  'source_type': self.scan_task.source.source_type,
                  'source_name': self.scan_task.source.name},
