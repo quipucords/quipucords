@@ -13,7 +13,11 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-
+declare -a args
+RELEASE_TAG='-e RELEASE_TAG=0.0.43'
+args=("$*")
+args+=("${arr[@]}" "$RELEASE_TAG" )
+set -- ${args[@]}
 
 usage() {
     cat <<EOM

@@ -20,26 +20,24 @@
     server_port: "{{ ansible_env['SERVER_PORT'] | default('443') }}"
   when: server_port is not defined
 
+- name: set default server url
+  set_fact:
+    default_server_url: "https://github.com/quipucords/quipucords/releases/download/{{RELEASE_TAG}}/quipucords.{{RELEASE_TAG}}.tar.gz"
+
 - name: Set server url
   set_fact:
-    server_url: "{{ ansible_env['SERVER_URL'] | default('https://github.com/quipucords/quipucords/releases/download/0.0.44/quipucords.0.0.44.tar.gz') }}"
+    server_url: "{{ ansible_env['SERVER_URL'] |  default(default_server_url)}}"
   when: server_url is not defined
 
-- name: Set server image and tag name
+- name: set image
   set_fact:
-    server_image_and_tag: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords:0.0.44') }}"
+    image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords') }}"
+  when: image is not defined
+
+- name: set server_image_and_tag
+  set_fact:
+    server_image_and_tag: "{{image}}:{{RELEASE_TAG}}"
   when: server_image_and_tag is not defined
-
-- name: Split server image and tag name
-  set_fact:
-    image_and_tag: "{{ server_image_and_tag.split(':') }}"
-  when: server_image_and_tag is defined
-
-- name: Set container image and tag name
-  set_fact:
-    image: "{{ image_and_tag[0] }}"
-    tag: "{{ image_and_tag[1] }}"
-  when: image_and_tag is defined
 
 - name: Set server name
   set_fact:
@@ -61,7 +59,7 @@
   when: selinux_on
 
 - name: Check for server image presence
-  shell: docker images | grep "{{ image }}" | grep "{{ tag }}"
+  shell: docker images | grep "{{ image }}" | grep "{{ RELEASE_TAG }}"
   become: true
   register: docker_image_raw
   ignore_errors: yes
@@ -80,31 +78,21 @@
     - docker_image_raw.rc == 0
     - "'stdout_lines' in docker_image_raw"
 
-- name: Find installable local Quipucords server
-  find:
-    paths: "{{ pkg_install_dir }}"
-    patterns: 'quipucords"{{ tag }}"".tar.gz'
-  register: find_qpc_server_local_raw
-
-- name: Set find_qpc_server_local
+- name: Set qpc_local_server_path
   set_fact:
-    find_qpc_server_local: "{{ find_qpc_server_local_raw['matched'] == 1 }}"
-  when:
-    - find_qpc_server_local_raw is defined
-    - "'matched' in find_qpc_server_local_raw"
+    qpc_server_local_path: "{{ pkg_install_dir }}quipucords.{{RELEASE_TAG}}.tar.gz"
+  when: release_path is not defined
 
-- name: Set find_qpc_server_local_path
-  set_fact:
-    find_qpc_server_local_path: "{{ find_qpc_server_local_raw['files'][0]['path'] }}"
-  when:
-    - find_qpc_server_local is defined
-    - find_qpc_server_local
+- name: Check if local server release exists
+  stat:
+    path: "{{qpc_server_local_path}}"
+  register: find_qpc_server_local
 
 - name: Ensure packages directory exists
   shell: mkdir -p "{{ pkg_install_dir }}"
   when:
     - install_server
-    - not find_qpc_server_local
+    - find_qpc_server_local.stat.exists == false
     - not docker_image_present
 
 - name: Obtain Quipucords server container image
@@ -114,84 +102,64 @@
     mode: 0644
   when:
     - install_server
-    - not find_qpc_server_local
+    - find_qpc_server_local.stat.exists == false
     - not docker_image_present
 
-- name: Find installable local Quipucords server
-  find:
-    paths: "{{ pkg_install_dir }}"
-    patterns: 'quipucords"{{ tag }}".tar.gz'
-  register: find_qpc_server_local_raw
-
-- name: Set find_qpc_server_local
-  set_fact:
-    find_qpc_server_local: "{{ find_qpc_server_local_raw['matched'] == 1 }}"
+- name: Load Quipucords image into local Docker registry
+  shell: docker load -i "{{qpc_server_local_path}}"
+  become: true
   when:
-    - find_qpc_server_local_raw is defined
-    - "'matched' in find_qpc_server_local_raw"
+    - install_server
+    - not docker_image_present
 
-- name: Set find_qpc_server_local_path
+- name: Make server home directory
+  shell: mkdir -p "{{server_install_dir}}"
+  when: install_server
+
+- name: Make server log directory
+  shell: mkdir -p "{{server_install_dir}}/log"
+  when: install_server
+
+- name: Make server sshkeys directory
+  shell: mkdir -p "{{server_install_dir}}/sshkeys"
+  when: install_server
+
+- name: Check for server already running
+  shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
+  become: true
+  register: docker_ps_raw
+  ignore_errors: yes
+  when: install_server
+
+- name: Set docker_server_running
   set_fact:
-    find_qpc_server_local_path: "{{ find_qpc_server_local_raw['files'][0]['path'] }}"
-  when:
-    - find_qpc_server_local is defined
-    - find_qpc_server_local
+    docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
+  when: "'stdout_lines' in docker_ps_raw"
 
-# - name: Load Quipucords image into local Docker registry
-#   shell: docker load -i "{{find_qpc_server_local_path}}"
-#   become: true
-#   when:
-#     - install_server
-#     - not docker_image_present
-#
-# - name: Make server home directory
-#   shell: mkdir -p "{{server_install_dir}}"
-#   when: install_server
-#
-# - name: Make server log directory
-#   shell: mkdir -p "{{server_install_dir}}/log"
-#   when: install_server
-#
-# - name: Make server sshkeys directory
-#   shell: mkdir -p "{{server_install_dir}}/sshkeys"
-#   when: install_server
-#
-# - name: Check for server already running
-#   shell: docker ps -f name="{{ server_name }}" | grep "{{ server_name }}"
-#   become: true
-#   register: docker_ps_raw
-#   ignore_errors: yes
-#   when: install_server
-#
-# - name: Set docker_server_running
-#   set_fact:
-#     docker_server_running: "{{ docker_ps_raw['stdout_lines']|length > 0 }}"
-#   when: "'stdout_lines' in docker_ps_raw"
-#
-# - name: Set QPC_DBMS_USER
-#   set_fact:
-#     QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
-#   when:
-#     - QPC_DBMS_USER is not defined
-#
-# - name: Set QPC_DBMS_PASSWORD
-#   set_fact:
-#     QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
-#   when:
-#     - QPC_DBMS_PASSWORD is not defined
-#
-# - name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
-#   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
-#   become: true
-#   when:
-#     - is_rhel_centos_6
-#
-# - name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
-#   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
-#   become: true
-#   when:
-#     - is_rhel_centos_7 or is_fedora
-#
-# - name: Start server using internal Postgres
-#   shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
-#   become: true
+- name: Set QPC_DBMS_USER
+  set_fact:
+    QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
+  when:
+    - QPC_DBMS_USER is not defined
+
+- name: Set QPC_DBMS_PASSWORD
+  set_fact:
+    QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
+  when:
+    - QPC_DBMS_PASSWORD is not defined
+
+- name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+  become: true
+  when:
+    - is_rhel_centos_6
+
+- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
+  shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:9.6.10
+  become: true
+  when:
+    - is_rhel_centos_7 or is_fedora
+
+- name: Start server using internal Postgres
+  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  become: true
