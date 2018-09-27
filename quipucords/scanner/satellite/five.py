@@ -176,11 +176,12 @@ class SatelliteFive(SatelliteInterface):
             ssl_cert_verify = source_options.ssl_cert_verify
         host, port, user, password = \
             utils.get_connect_data(self.inspect_scan_task)
-        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
-                           'scan_type': self.inspect_scan_task.scan_type,
-                           'source_type':
-                               self.inspect_scan_task.source.source_type,
-                           'source_name': self.inspect_scan_task.source.name}
+        logging_options = {
+            'task_sequence_number': self.inspect_scan_task.sequence_number,
+            'scan_type': self.inspect_scan_task.scan_type,
+            'source_type':
+            self.inspect_scan_task.source.source_type,
+            'source_name': self.inspect_scan_task.source.name}
         request_options = {'host': host, 'port': port, 'user': user,
                            'password': password,
                            'ssl_cert_verify': ssl_cert_verify}

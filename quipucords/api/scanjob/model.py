@@ -57,7 +57,6 @@ class ScanJob(models.Model):
         max_length=256,
         null=True,
         default=_(messages.SJ_STATUS_MSG_CREATED))
-    tasks = models.ManyToManyField(ScanTask)
     options = models.ForeignKey(
         ScanOptions, null=True, on_delete=models.CASCADE)
     report_id = models.IntegerField(null=True)
@@ -306,11 +305,12 @@ class ScanJob(models.Model):
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
 
-        count = 0
+        count = 1
         conn_tasks = []
         for source in self.sources.all():
             # Create connect tasks
-            conn_task = ScanTask(source=source,
+            conn_task = ScanTask(job=self,
+                                 source=source,
                                  scan_type=ScanTask.SCAN_TYPE_CONNECT,
                                  status=ScanTask.PENDING,
                                  status_message=_(
@@ -337,7 +337,8 @@ class ScanJob(models.Model):
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             for conn_task in conn_tasks:
                 # Create inspect tasks
-                inspect_task = ScanTask(source=conn_task.source,
+                inspect_task = ScanTask(job=self,
+                                        source=conn_task.source,
                                         scan_type=ScanTask.SCAN_TYPE_INSPECT,
                                         status=ScanTask.PENDING,
                                         status_message=_(

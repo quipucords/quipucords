@@ -8,7 +8,7 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 """Unit tests for the process module."""
-from api.models import (Credential, ScanTask, Source)
+from api.models import (Credential, Scan, ScanJob, ScanTask, Source)
 
 from django.test import TestCase
 
@@ -143,7 +143,20 @@ class TestProcess(TestCase):
         self.source.hosts = '["1.2.3.4"]'
         self.source.save()
 
+        # Create scan configuration
+        scan = Scan(name='scan_name',
+                    scan_type=ScanTask.SCAN_TYPE_INSPECT)
+        scan.save()
+
+        # Add source to scan
+        scan.sources.add(self.source)
+
+        # Create Job
+        self.scan_job = ScanJob(scan=scan)
+        self.scan_job.save()
+
         self.scan_task = ScanTask(
+            job=self.scan_job,
             source=self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
         self.scan_task.save()
 

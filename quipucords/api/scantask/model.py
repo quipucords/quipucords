@@ -66,11 +66,13 @@ class ScanTask(models.Model):
     status_message = models.CharField(
         max_length=256, null=True, default=_(messages.ST_STATUS_MSG_PENDING))
     prerequisites = models.ManyToManyField('ScanTask')
+    job = models.ForeignKey(
+        'api.ScanJob', models.CASCADE, related_name='tasks')
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
     systems_unreachable = models.PositiveIntegerField(null=True)
-    sequence_number = models.PositiveIntegerField(null=True)
+    sequence_number = models.PositiveIntegerField(default=0)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
     connection_result = models.ForeignKey(
@@ -80,7 +82,9 @@ class ScanTask(models.Model):
 
     def __str__(self):
         """Convert to string."""
+        # pylint: disable=no-member
         return '{' + 'id:{}, '\
+            'job:{}, '\
             'scan_type:{}, '\
             'status:{}, '\
             'source:{}, '\
@@ -93,6 +97,7 @@ class ScanTask(models.Model):
             'end_time: {}, '\
             'connection_result: {}, '\
             'inspection_result: {}'.format(self.id,
+                                           self.job.id,
                                            self.scan_type,
                                            self.status,
                                            self.source,
@@ -151,16 +156,20 @@ class ScanTask(models.Model):
     def log_message(self, message, log_level=logging.INFO,
                     static_options=None):
         """Log a message for this task."""
+        # pylint: disable=no-member
         if static_options is not None:
-            actual_message = 'Task %d (%s, %s, %s) - ' % \
-                (static_options['inspect_task_id'],
+            actual_message = 'Job %d, Task %d (%s, %s, %s) - ' % \
+                (static_options['job_id'],
+                 static_options['task_sequence_number'],
                  static_options['scan_type'],
                  static_options['source_type'],
                  static_options['source_name'])
         else:
             elapsed_time = self._compute_elapsed_time()
-            actual_message = 'Task %d (%s, %s, %s, elapsed_time: %ds) - ' % \
-                (self.id,
+            actual_message = 'Job %d, Task %d '\
+                '(%s, %s, %s, elapsed_time: %ds) - ' % \
+                (self.job.id,
+                 self.sequence_number,
                  self.scan_type,
                  self.source.source_type,
                  self.source.name,

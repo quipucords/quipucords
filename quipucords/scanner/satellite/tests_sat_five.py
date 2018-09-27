@@ -152,8 +152,10 @@ class SatelliteFiveTest(TestCase):
         client.system.get_network_devices.return_value = net_devices
         client.system.get_registration_date.return_value = 'datetime'
         virt = {1: {'id': 1, 'num_virtual_guests': 3}}
+
         logging_options = {
-            'inspect_task_id': self.scan_task.id,
+            'job_id': self.scan_job.id,
+            'task_sequence_number': self.scan_task.sequence_number,
             'scan_type': self.scan_task.scan_type,
             'source_type': self.scan_task.source.source_type,
             'source_name': self.scan_task.source.name
@@ -224,7 +226,7 @@ class SatelliteFiveTest(TestCase):
                       'port': '443', 'user': self.cred.username,
                       'password': self.cred.password,
                       'ssl_cert_verify': True},
-                     {'inspect_task_id': self.scan_task.id,
+                     {'task_sequence_number': self.scan_task.id,
                       'scan_type': self.scan_task.scan_type,
                       'source_type': self.scan_task.source.source_type,
                       'source_name': self.scan_task.source.name})]
