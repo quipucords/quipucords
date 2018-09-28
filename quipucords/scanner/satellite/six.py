@@ -272,7 +272,7 @@ def request_host_details(scan_task, logging_options,
     """Execute both http responses to gather satallite data.
 
     :param scan_task: The current scan task
-    :param inspect_task_id: The id of the running task
+    :param task_sequence_number: The id of the running task
     :param scan_type: The type of scan running
         (inspect, connect)
     :param source_type: The source type for logging
@@ -498,11 +498,13 @@ class SatelliteSixV1(SatelliteInterface):
         request_options = {'host': defined_host, 'port': port, 'user': user,
                            'password': password,
                            'ssl_cert_verify': ssl_cert_verify}
-        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
-                           'scan_type': self.inspect_scan_task.scan_type,
-                           'source_type':
-                               self.inspect_scan_task.source.source_type,
-                           'source_name': self.inspect_scan_task.source.name}
+        logging_options = {
+            'job_id': self.scan_job.id,
+            'task_sequence_number': self.inspect_scan_task.sequence_number,
+            'scan_type': self.inspect_scan_task.scan_type,
+            'source_type':
+            self.inspect_scan_task.source.source_type,
+            'source_name': self.inspect_scan_task.source.name}
         host_params = [(self.inspect_scan_task, logging_options,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V1_URL,
                         HOSTS_SUBS_V1_URL, request_options)
@@ -638,11 +640,13 @@ class SatelliteSixV2(SatelliteInterface):
         request_options = {'host': defined_host, 'port': port, 'user': user,
                            'password': password,
                            'ssl_cert_verify': ssl_cert_verify}
-        logging_options = {'inspect_task_id': self.inspect_scan_task.id,
-                           'scan_type': self.inspect_scan_task.scan_type,
-                           'source_type':
-                               self.inspect_scan_task.source.source_type,
-                           'source_name': self.inspect_scan_task.source.name}
+        logging_options = {
+            'job_id': self.scan_job.id,
+            'task_sequence_number': self.inspect_scan_task.sequence_number,
+            'scan_type': self.inspect_scan_task.scan_type,
+            'source_type':
+            self.inspect_scan_task.source.source_type,
+            'source_name': self.inspect_scan_task.source.name}
         host_params = [(self.inspect_scan_task, logging_options,
                         host.get(ID), host.get(NAME), HOSTS_FIELDS_V2_URL,
                         HOSTS_SUBS_V2_URL, request_options)

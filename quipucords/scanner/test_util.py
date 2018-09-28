@@ -90,7 +90,7 @@ def create_scan_job_two_tasks(source,
     scan_job.queue()
 
     # grab the scan tasks
-    scan_tasks = scan_job.tasks.all()
+    scan_tasks = scan_job.tasks.all().order_by('sequence_number')
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         for task in scan_tasks:
             task.complete()

@@ -68,9 +68,7 @@ class ScanJobRunner(Process):
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by('sequence_number')
-        task_info_message = ''
         for scan_task in incomplete_scan_tasks:
-            task_info_message += str(scan_task.id) + ', '
             runner = self._create_task_runner(scan_task)
             if not runner:
                 error_message = 'Scan task does not  have recognized '\
@@ -82,9 +80,8 @@ class ScanJobRunner(Process):
 
             task_runners.append(runner)
 
-        task_info_message = task_info_message[:-2]
         self.scan_job.log_message(
-            'Queuing the following incomplete tasks: %s' % task_info_message)
+            'Job has %d remaining tasks' % len(incomplete_scan_tasks))
 
         failed_tasks = []
         for runner in task_runners:
