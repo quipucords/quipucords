@@ -102,7 +102,8 @@ class ReportDetailTests(unittest.TestCase):
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=[1, 2],
                              json_files=None,
-                             report_ids=None)
+                             report_ids=None,
+                             json_dir=None)
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
@@ -131,7 +132,8 @@ class ReportDetailTests(unittest.TestCase):
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=[1, 2],
                              json_files=None,
-                             report_ids=None)
+                             report_ids=None,
+                             json_dir=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
                     nac.main(args)
@@ -148,7 +150,8 @@ class ReportDetailTests(unittest.TestCase):
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=None,
                              json_files=None,
-                             report_ids=[1, 2])
+                             report_ids=[1, 2],
+                             json_dir=None)
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
@@ -167,7 +170,8 @@ class ReportDetailTests(unittest.TestCase):
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=None,
                              json_files=None,
-                             report_ids=[1, 2])
+                             report_ids=[1, 2],
+                             json_dir=None)
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
                     nac.main(args)
@@ -198,7 +202,8 @@ class ReportDetailTests(unittest.TestCase):
         args = Namespace(scan_job_ids=None,
                          json_files=[TMP_DETAILSFILE1,
                                      TMP_NOTJSONFILE],
-                         report_ids=None)
+                         report_ids=None,
+                         json_dir=None)
         with self.assertRaises(SystemExit):
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -209,7 +214,8 @@ class ReportDetailTests(unittest.TestCase):
         nac = ReportMergeCommand(SUBPARSER)
         args = Namespace(scan_job_ids=None,
                          json_files=None,
-                         report_ids=None)
+                         report_ids=None,
+                         json_dir=None)
         with self.assertRaises(SystemExit):
             with redirect_stdout(report_out):
                 nac.main(args)
