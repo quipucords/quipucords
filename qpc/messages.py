@@ -171,11 +171,9 @@ REPORT_JSON_DIR_NO_FILES = \
     'No files with extension .json found in the provided path.'
 REPORT_JSON_DIR_CHECK_FILES = \
     'Checking files for the correct structure. %s'
-REPORT_JSON_DIR_FILE_FAILED = \
-    'FAILED: (%s) failed to have the correct structue.'
-REPORT_JSON_DIR_FILE_SUCCESS = \
-    'Success: (%s) structure passed.'
-REPORT_JSON_DIR_ALL_FAIL = 'All json files failed to have the right structure'
+REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report.'
+REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a details report.'
+REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
@@ -199,7 +197,7 @@ REPORT_NO_DETAIL_REPORT_FOR_REPORT_ID = \
 REPORT_OUTPUT_CANNOT_BE_EMPTY = '%s cannot be empty string.'
 REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
-    'The directory %s does not exist.  Cannot write here'
+    'The directory %s does not exist.  Cannot write here.'
 REPORT_JSON_DIR_NOT_FOUND = '--json-dir path was not a directory'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
 REPORT_SUCCESSFULLY_MERGED = 'Scan job results successfully merged.  '\

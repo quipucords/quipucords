@@ -157,19 +157,16 @@ class ReportMergeCommand(CliCommand):
             print(_(messages.REPORT_JSON_DIR_CHECK_FILES % json_files))
 
         for file in json_files:
+            error = True
             with open(file) as lint_f:
-                error = False
                 json_data = json.load(lint_f)
-                try:
-                    # pylint: disable=pointless-statement
-                    json_data['sources']
-                    # pylint: disable=pointless-statement
-                    json_data['sources'][0]['facts']
-                    # pylint: disable=pointless-statement
-                    json_data['sources'][0]['server_id']
-                except KeyError:
-                    error = True
-                    print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                sources = json_data.get('sources')
+                if sources:
+                    facts = sources[0].get('facts')
+                    if facts:
+                        server_id = facts.get('server_id')
+                        if server_id:
+                            error=False
             if error is not True:
                 print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
                 try:
@@ -178,10 +175,11 @@ class ReportMergeCommand(CliCommand):
                 except ValueError:
                     print(_(messages.REPORT_INVALID_JSON_FILE % file))
                     sys.exit(1)
+            else:
+                print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
         if all_sources == []:
             print(_(messages.REPORT_JSON_DIR_ALL_FAIL))
             sys.exit(1)
-        sys.exit(1)
         self.json = {'id': report_id,
                      'sources': all_sources}
 
