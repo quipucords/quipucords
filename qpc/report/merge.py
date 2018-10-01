@@ -232,4 +232,5 @@ class ReportMergeCommand(CliCommand):
 
     def _handle_response_error(self):
         json_data = self.response.json()
+        print(json_data['reports'][0])
         sys.exit(1)
