@@ -24,8 +24,8 @@ from api.report.renderer import (DeploymentCSVRenderer,
                                  sanitize_row)
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 

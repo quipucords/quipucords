@@ -41,7 +41,8 @@ class ScanJob(models.Model):
     JOB_TERMINATE_CANCEL = 2
     JOB_TERMINATE_ACK = 3
 
-    scan = models.ForeignKey(Scan, related_name='jobs', null=True)
+    scan = models.ForeignKey(Scan, related_name='jobs', null=True,
+                             on_delete=models.SET_NULL)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
