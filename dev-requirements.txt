@@ -7,7 +7,7 @@ coverage==4.5.1
 
 # Test runner/testing utils
 pytest==3.8.1
-pytest-django==3.1.2
+pytest-django==3.4.3
 requests-mock==1.5.2
 
 
@@ -16,14 +16,14 @@ flake8==3.5.0
 flake8-docstrings==1.3.0
 flake8-import-order==0.18
 flake8-quotes==1.0.0
-pyflakes==1.6.0
-pylint==1.7.2
-pylint-django==0.7.2
+pyflakes==2.0.0
+pylint==2.1.1
+pylint-django==2.0.2
 pylint-plugin-utils==0.4
 
 
 #Doc
 pandoc==1.0.2
-sphinx
+sphinx==1.8.1
 sphinx-autobuild==0.7.1
-sphinx-rtd-theme==0.2.4
+sphinx-rtd-theme==0.4.1
