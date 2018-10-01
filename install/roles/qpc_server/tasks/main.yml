@@ -20,7 +20,7 @@
     server_port: "{{ ansible_env['SERVER_PORT'] | default('443') }}"
   when: server_port is not defined
 
-- name: set default server url
+- name: Set default server url
   set_fact:
     default_server_url: "https://github.com/quipucords/quipucords/releases/download/{{RELEASE_TAG}}/quipucords.{{RELEASE_TAG}}.tar.gz"
 
@@ -29,12 +29,12 @@
     server_url: "{{ ansible_env['SERVER_URL'] |  default(default_server_url)}}"
   when: server_url is not defined
 
-- name: set image
+- name: Set image
   set_fact:
     image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords') }}"
   when: image is not defined
 
-- name: set server_image_and_tag
+- name: Set server_image_and_tag
   set_fact:
     server_image_and_tag: "{{image}}:{{RELEASE_TAG}}"
   when: server_image_and_tag is not defined
