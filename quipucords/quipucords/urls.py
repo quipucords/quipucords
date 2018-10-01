@@ -27,7 +27,7 @@ Including another URLconf
 from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
@@ -42,12 +42,12 @@ urlpatterns = [
          name='home'),
 
     # ui routing
-    path(r'^(?i)(client/(sources|scans|credentials|)(/|)(index.html|))$',
-         TemplateView.as_view(template_name='client/index.html'),
-         name='client'),
+    re_path(r'^(client/(sources|scans|credentials|)(/|)(index.html|))$',
+            TemplateView.as_view(template_name='client/index.html'),
+            name='client'),
 
     # static files (*.css, *.js, *.jpg etc.)
-    path(r'^(?!/?client/)(?P<path>.*\..*)$',
-         RedirectView.as_view(url='/client/%(path)s', permanent=False),
-         name='client'),
+    re_path(r'^(?!/?client/)(?P<path>.*\..*)$',
+            RedirectView.as_view(url='/client/%(path)s', permanent=False),
+            name='client'),
 ]
