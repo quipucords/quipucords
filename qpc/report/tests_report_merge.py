@@ -32,18 +32,15 @@ TMP_DETAILSFILE2 = ('/tmp/testdetailsreport2.json',
 TMP_NOTJSONFILE = ('/tmp/testnotjson.txt',
                    'not a json file')
 TMP_BADDETAILS1 = ('/tmp/testbaddetailsreport_source.json',
-                 '{"id": 3, \n "sources_bad": [{"facts": [{"server_id":"ABC"}]}]}')
+                   '{"id": 4,"bsources":[{"facts": ["A"],"server_id": "8"}]}')
 TMP_BADDETAILS2 = ('/tmp/testbadetailsreport_facts.json',
-                   '{"id": 3, \n "sources_bad": [{"facts": [{"server_id":"ABC"}]}]}')
+                   '{"id": 4,"sources":[{"bfacts": ["A"],"server_id": "8"}]}')
 TMP_BADDETAILS3 = ('/tmp/testbaddetailsreport_server_id.json',
-                   '{"id": 3, \n "sources_bad": [{"facts": "here","server_id":"here"}]}')
+                   '{"id": 4,"sources":[{"facts": ["A"],"bserver_id": "8"}]}')
 TMP_BADDETAILS4 = ('/tmp/testbaddetailsreport_bad_json.json',
                    '{"id":3,"sources"[this is bad]')
 TMP_GOODDETAILS = ('/tmp/testgooddetailsreport.json',
                    '{"id": 4,"sources":[{"facts": ["A"],"server_id": "8"}]}')
-
-
-
 JSON_FILES_LIST = [TMP_DETAILSFILE1, TMP_DETAILSFILE2, TMP_NOTJSONFILE,
                    TMP_BADDETAILS1, TMP_BADDETAILS2, TMP_BADDETAILS3,
                    TMP_GOODDETAILS]
@@ -240,25 +237,24 @@ class ReportDetailTests(unittest.TestCase):
     def test_detail_merge_json_directory(self):
         """Testing report merge command with json directory."""
         report_out = StringIO()
-        put_report_data = {'id':1}
+        put_report_data = {'id': 1}
         put_merge_url = get_server_location() + JSON_FILE_MERGE_URI
         with requests_mock.Mocker() as mocker:
-            mocker.post(put_merge_url,status_code=201,
+            mocker.post(put_merge_url, status_code=201,
                         json=put_report_data)
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=None,
                              json_files=None,
                              report_ids=None,
-                             json_dir=["/tmp/"])
+                             json_dir=['/tmp/'])
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
                               report_out.getvalue().strip())
-                              
+
     def test_detail_merge_json_directory_error_dir_not_found(self):
-        """Testing report merge command with json directory parameter
-            not a directory."""
-        bad_json_directory = "/tmp/does/not/exist/1316"
+        """Testing report merge command with json_dir parameter (notdir)."""
+        bad_json_directory = '/tmp/does/not/exist/1316'
         report_out = StringIO()
         nac = ReportMergeCommand(SUBPARSER)
         args = Namespace(scan_job_ids=None,
@@ -270,8 +266,7 @@ class ReportDetailTests(unittest.TestCase):
                 nac.main(args)
 
     def test_detail_merge_json_directory_error_path_passed(self):
-        """Testing report merge command with json directory parameter
-           as a file."""
+        """Testing report merge command with json_dir parameter (file)."""
         report_out = StringIO()
         nac = ReportMergeCommand(SUBPARSER)
         args = Namespace(scan_job_ids=None,
@@ -283,8 +278,7 @@ class ReportDetailTests(unittest.TestCase):
                 nac.main(args)
 
     def test_detail_merge_json_directory_no_detail_reports(self):
-        """Testing report merge command with json directory, but all of
-           the files in directory are not detail reports."""
+        """Testing report merge command with json_dir (no details)."""
         files_that_pass = [TMP_GOODDETAILS]
         for file in files_that_pass:
             if os.path.isfile(file[0]):

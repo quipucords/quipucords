@@ -27,12 +27,14 @@ from qpc.translation import _
 
 from requests import codes
 
+# pylint: disable=invalid-name
 try:
-    JSON_EXCEPTION_CLASS = json.decoder.JSONDecodeError
+    json_exception_class = json.decoder.JSONDecodeError
 except AttributeError:
-    JSON_EXCEPTION_CLASS = ValueError
-
+    json_exception_class = ValueError
 # pylint: disable=too-few-public-methods
+
+
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
 
@@ -165,7 +167,7 @@ class ReportMergeCommand(CliCommand):
             with open(file) as lint_f:
                 try:
                     json_data = json.load(lint_f)
-                except JSON_EXCEPTION_CLASS:
+                except json_exception_class:
                     print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
                     continue
                 sources = json_data.get('sources')
@@ -173,7 +175,7 @@ class ReportMergeCommand(CliCommand):
                     facts = sources[0].get('facts')
                     server_id = sources[0].get('server_id')
                     if facts and server_id:
-                        error=False
+                        error = False
             if error is not True:
                 print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
                 try:
