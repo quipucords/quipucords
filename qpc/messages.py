@@ -170,7 +170,7 @@ REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
 REPORT_JSON_DIR_NO_FILES = \
     'No files with extension .json found in the provided path.'
 REPORT_JSON_DIR_CHECK_FILES = \
-    'Checking files for the correct structure. %s'
+    'Checking files for valid json details report. %s'
 REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report.'
 REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a details report.'
 REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
