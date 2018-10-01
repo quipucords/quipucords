@@ -27,6 +27,10 @@ from qpc.translation import _
 
 from requests import codes
 
+try:
+    JSON_EXCEPTION_CLASS = json.decoder.JSONDecodeError
+except AttributeError:
+    JSON_EXCEPTION_CLASS = ValueError
 
 # pylint: disable=too-few-public-methods
 class ReportMergeCommand(CliCommand):
@@ -152,21 +156,24 @@ class ReportMergeCommand(CliCommand):
         json_files = glob(os.path.join(path, '*.json'))
         if json_files == []:
             print(_(messages.REPORT_JSON_DIR_NO_FILES))
-            sys.exit(1)
+            sys.exit(path)
         else:
             print(_(messages.REPORT_JSON_DIR_CHECK_FILES % json_files))
 
         for file in json_files:
             error = True
             with open(file) as lint_f:
-                json_data = json.load(lint_f)
+                try:
+                    json_data = json.load(lint_f)
+                except JSON_EXCEPTION_CLASS:
+                    print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                    continue
                 sources = json_data.get('sources')
                 if sources:
                     facts = sources[0].get('facts')
-                    if facts:
-                        server_id = facts.get('server_id')
-                        if server_id:
-                            error=False
+                    server_id = sources[0].get('server_id')
+                    if facts and server_id:
+                        error=False
             if error is not True:
                 print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
                 try:
@@ -225,5 +232,4 @@ class ReportMergeCommand(CliCommand):
 
     def _handle_response_error(self):
         json_data = self.response.json()
-        print(json_data['reports'][0])
         sys.exit(1)
