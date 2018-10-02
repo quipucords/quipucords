@@ -23,7 +23,6 @@ from api.models import (DisabledOptionalProductsOptions,
                         ExtendedProductSearchOptions,
                         Scan,
                         ScanOptions,
-                        ScanTask,
                         Source)
 from api.scantask.serializer import SourceField
 
@@ -137,7 +136,7 @@ class ScanSerializer(NotEmptySerializer):
     name = CharField(required=True, read_only=False, max_length=64)
     sources = SourceField(many=True, queryset=Source.objects.all())
     scan_type = ValidStringChoiceField(required=False,
-                                       choices=ScanTask.SCAN_TYPE_CHOICES)
+                                       choices=Scan.SCAN_TYPE_CHOICES)
     options = ScanOptionsSerializer(required=False, many=False)
     jobs = JobField(required=False, many=True, read_only=True)
 

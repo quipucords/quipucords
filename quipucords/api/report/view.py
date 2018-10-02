@@ -15,9 +15,11 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.fact.util import (get_or_create_fact_collection,
+from api.fact.util import (create_fact_collection,
                            validate_fact_collection_json)
 from api.models import (FactCollection,
+                        ScanJob,
+                        ScanTask,
                         SystemFingerprint)
 from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 from api.serializers import FactCollectionSerializer, FingerprintSerializer
@@ -26,8 +28,6 @@ from django.core.exceptions import FieldError
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-
-from fingerprinter import pfc_signal
 
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
@@ -44,6 +44,7 @@ from rest_framework.serializers import ValidationError
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
 
+from scanner.job import ScanJobRunner
 
 # pylint: disable=invalid-name
 # Get an instance of a logger
@@ -238,27 +239,19 @@ def merge(request):
         raise ValidationError(error)
 
     # Create FC model and save data
-    fact_collection = get_or_create_fact_collection(fact_collection_json)
+    fact_collection = create_fact_collection(fact_collection_json)
+    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                       fact_collection=fact_collection)
+    scan_job.save()
+    scan_job.queue()
+    runner = ScanJobRunner(scan_job)
+    runner.run()
 
-    # Send signal so fingerprint engine processes raw facts
-    try:
-        pfc_signal.send(sender=FactCollection.__class__,
-                        instance=fact_collection)
-        # Transition from persisted to complete after processing
-        fact_collection.status = FactCollection.FC_STATUS_COMPLETE
-        fact_collection.save()
-        logger.debug(
-            'Fact collection %d successfully processed.',
-            fact_collection.id)
-    except Exception as error:
-        # Transition from persisted to failed after engine failed
-        fact_collection.status = FactCollection.FC_STATUS_FAILED
-        fact_collection.save()
-        logger.error(
-            'Fact collection %d failed to be processed.',
-            fact_collection.id)
-        logger.error('%s:%s', error.__class__.__name__, error)
-        raise ValidationError(error)
+    if scan_job.status != ScanTask.COMPLETED:
+        raise Exception(scan_job.status_message)
+
+    scan_job = ScanJob.objects.get(pk=scan_job.id)
+    fact_collection = FactCollection.objects.get(pk=fact_collection.id)
 
     # Prepare REST response body
     serializer = FactCollectionSerializer(fact_collection)

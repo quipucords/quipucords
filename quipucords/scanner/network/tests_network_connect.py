@@ -153,7 +153,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source2.save()
 
         self.scan_job2, self.scan_task2 = create_scan_job(
-            self.source, 'source2', ScanTask.SCAN_TYPE_CONNECT)
+            self.source, ScanTask.SCAN_TYPE_CONNECT, 'source2')
 
         self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 

@@ -128,7 +128,7 @@ class ScanJobTest(TestCase):
 
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all().order_by('sequence_number')
-        self.assertEqual(len(tasks), 2)
+        self.assertEqual(len(tasks), 3)
 
         # Validate connect task created and correct
         connect_task = tasks[0]
