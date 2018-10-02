@@ -12,11 +12,11 @@
 import atexit
 import ssl
 
-from api.vault import decrypt_data_as_unicode
-
 from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
 
 from pyVmomi import vmodl  # pylint: disable=no-name-in-module
+
+from api.vault import decrypt_data_as_unicode  # noqa I100
 
 
 def vcenter_connect(scan_task):

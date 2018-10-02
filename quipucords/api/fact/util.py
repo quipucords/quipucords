@@ -13,15 +13,15 @@
 
 import logging
 
-import api.messages as messages
+from django.db import transaction
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 from api.models import (FactCollection,
                         ScanTask,
                         ServerInformation,
                         Source)
 from api.serializers import FactCollectionSerializer
-
-from django.db import transaction
-from django.utils.translation import ugettext as _
 
 
 ERRORS_KEY = 'errors'

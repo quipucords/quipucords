@@ -17,10 +17,10 @@ from threading import Thread, Timer
 from time import sleep
 
 
-from api.models import (ScanJob,
-                        ScanTask)
-
 from django.db.models import Q
+
+from api.models import (ScanJob,  # noqa I100
+                        ScanTask)
 
 from scanner import ScanJobRunner
 
@@ -113,6 +113,7 @@ class Manager(Thread):
         self.scan_queue.insert(0, job)
         self.log_info()
 
+    # pylint: disable=inconsistent-return-statements
     def kill(self, job, command):
         """Kill a job or remove it from the running queue.
 

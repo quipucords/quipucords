@@ -9,7 +9,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Describes the urls and patterns for the API application."""
-from api.views import (CredentialViewSet,
+
+from django.urls import path
+
+from rest_framework.routers import SimpleRouter
+
+from rest_framework_expiring_authtoken import views
+
+from api.views import (CredentialViewSet,  # noqa I100
                        FactViewSet,
                        ScanJobViewSet,
                        ScanViewSet,
@@ -20,12 +27,6 @@ from api.views import (CredentialViewSet,
                        jobs,
                        merge,
                        status)
-
-from django.urls import path
-
-from rest_framework.routers import SimpleRouter
-
-from rest_framework_expiring_authtoken import views
 
 ROUTER = SimpleRouter()
 

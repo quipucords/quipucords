@@ -12,13 +12,13 @@
 import json
 import logging
 
-from api.models import (RawFact,
+from django.db import transaction
+
+from api.models import (RawFact,  # noqa I100
                         ScanOptions,
                         ScanTask,
                         SystemConnectionResult,
                         SystemInspectionResult)
-
-from django.db import transaction
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -51,7 +51,7 @@ class SatellitePauseException(Exception):
     pass
 
 
-class SatelliteInterface(object):
+class SatelliteInterface():
     """Generic interface for dealing with Satellite."""
 
     def __init__(self, scan_job, scan_task):

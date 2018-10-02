@@ -15,8 +15,8 @@ from __future__ import print_function
 
 from argparse import SUPPRESS
 
-import qpc.messages as messages
 import qpc.server as config
+from qpc import messages
 from qpc.clicommand import CliCommand
 from qpc.source.utils import validate_port
 from qpc.translation import _

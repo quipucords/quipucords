@@ -16,16 +16,16 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 
-from api.models import (Credential,
+from django.db import transaction
+
+import pexpect
+
+from api.models import (Credential,  # noqa I100
                         ScanJob,
                         ScanOptions,
                         ScanTask,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
-
-from django.db import transaction
-
-import pexpect
 
 from quipucords import settings
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # The ConnectTaskRunner creates a new ConnectResultCallback for each
 # credential it tries to connect with, and the ConnectResultCallbacks
 # all forward their information to a single ConnectResultStore.
-class ConnectResultStore(object):
+class ConnectResultStore():
     """This object knows how to record and retrieve connection results."""
 
     def __init__(self, scan_task):
@@ -332,8 +332,8 @@ def _connect(manager_interrupt,
 
         if result != TaskQueueManager.RUN_OK:
             new_error_msg = _construct_error_msg(result)
-            if result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and \
-                    result != TaskQueueManager.RUN_FAILED_HOSTS:
+            if result not in [TaskQueueManager.RUN_UNREACHABLE_HOSTS,
+                              TaskQueueManager. RUN_FAILED_HOSTS]:
                 error_msg += '{}\n'.format(new_error_msg)
 
     if error_msg != '':

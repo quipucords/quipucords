@@ -12,11 +12,11 @@
 import logging
 from socket import gaierror
 
-from api.models import (ScanJob,
+from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
+
+from api.models import (ScanJob,  # noqa I100
                         ScanTask,
                         SystemConnectionResult)
-
-from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import retrieve_properties, vcenter_connect

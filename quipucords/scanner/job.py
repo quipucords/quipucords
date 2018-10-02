@@ -12,15 +12,15 @@
 import logging
 from multiprocessing import Process, Value
 
-from api.fact.util import (build_sources_from_tasks,
+from django.db.models import Q
+
+from api.fact.util import (build_sources_from_tasks,  # noqa I100
                            get_or_create_fact_collection,
                            validate_fact_collection_json)
 from api.models import (FactCollection,
                         ScanJob,
                         ScanTask,
                         Source)
-
-from django.db.models import Q
 
 from fingerprinter import pfc_signal
 
@@ -41,6 +41,7 @@ class ScanJobRunner(Process):
         self.identifier = scan_job.id
         self.manager_interrupt = Value('i', ScanJob.JOB_RUN)
 
+    # pylint: disable=inconsistent-return-statements
     def run(self):
         """Trigger thread execution."""
         # pylint: disable=too-many-locals,too-many-statements
@@ -183,6 +184,7 @@ class ScanJobRunner(Process):
                 self.scan_job, scan_task)
         return runner
 
+    # pylint: disable=inconsistent-return-statements
     def _send_facts_to_engine(self):
         """Send collected host scan facts to fact endpoint.
 

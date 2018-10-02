@@ -12,11 +12,11 @@
 
 These models are used in the REST definitions
 """
-import api.messages as messages
-from api.vault import encrypt_data_as_unicode
-
 from django.db import models
 from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
+from api.vault import encrypt_data_as_unicode
 
 
 class Credential(models.Model):
@@ -110,11 +110,13 @@ class Credential(models.Model):
     def update(self, request, *args, **kwargs):
         """Update the model object."""
         self.encrypt_fields()
+        # pylint:disable=no-member
         super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         """Update the model object."""
         self.encrypt_fields()
+        # pylint:disable=no-member
         super().partial_update(request, *args, **kwargs)
 
     class Meta:

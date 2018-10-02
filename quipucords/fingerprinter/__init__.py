@@ -10,18 +10,19 @@
 #
 
 """Fingerprint engine ingests raw facts and produces system finger prints."""
-
+# pylint: disable=too-many-lines
 import logging
 import uuid
 from datetime import datetime
 
-from api.models import (FactCollection,
+import django.dispatch
+
+# pylint: disable=wrong-import-order
+from api.models import (FactCollection,    # noqa
                         Product,
                         Source,
                         SystemFingerprint)
 from api.serializers import FingerprintSerializer
-
-import django.dispatch
 
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap

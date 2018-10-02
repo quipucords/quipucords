@@ -13,21 +13,10 @@
 import logging
 import os
 
-import api.messages as messages
-from api.common.util import is_int
-from api.fact.util import (get_or_create_fact_collection,
-                           validate_fact_collection_json)
-from api.models import (FactCollection,
-                        SystemFingerprint)
-from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
-from api.serializers import FactCollectionSerializer, FingerprintSerializer
-
 from django.core.exceptions import FieldError
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-
-from fingerprinter import pfc_signal
 
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
@@ -43,6 +32,17 @@ from rest_framework.serializers import ValidationError
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
+
+from api import messages  # noqa I100
+from api.common.util import is_int
+from api.fact.util import (get_or_create_fact_collection,
+                           validate_fact_collection_json)
+from api.models import (FactCollection,
+                        SystemFingerprint)
+from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
+from api.serializers import FactCollectionSerializer, FingerprintSerializer
+
+from fingerprinter import pfc_signal
 
 
 # pylint: disable=invalid-name
@@ -83,6 +83,7 @@ def details(request, pk=None):
     return Response(json_details)
 
 
+# pylint: disable=inconsistent-return-statements
 @api_view(['GET'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
