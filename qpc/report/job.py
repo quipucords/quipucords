@@ -42,16 +42,21 @@ class ReportJobCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            report.REPORT_URI, [codes.ok])
+                            report.JOB_URI, [codes.ok])
         id_group = self.parser.add_mutually_exclusive_group(required=True)
         id_group.add_argument('--id', dest='job_id',
                               metavar='JOB_ID',
-                              help=_(messages.REPORT_JOB_HELP))
-        self.report_id = None
+                              help=_(messages.REPORT_JOB_ID_HELP))
+        self.job_id = None
 
     def _validate_args(self):
-        # TODO: This needs to be done.
-        pass
+        CliCommand._validate_args(self)
+        try:
+            #TODO: test if id is valid arguement
+            pass
+        except Exception as e:
+            #TODO: error if the --id is not valid
+            pass
 
     def _handle_response_success(self):
         # TODO: Figure out what needs to be returned from the backend.

@@ -15,7 +15,11 @@ SUBCOMMAND = 'report'
 SUMMARY = 'summary'
 DETAIL = 'detail'
 MERGE = 'merge'
+JOB = 'job'
 
+#TODO: Switch to correct uri, once #1357 is merged
+#JOB_URI = 'api/v1/reports/merge/job/'
+JOB_URI = '/api/v1/facts/'
 REPORT_URI = '/api/v1/reports/'
 DETAILS_PATH_SUFFIX = '/details/'
 DEPLOYMENTS_PATH_SUFFIX = '/deployments/'

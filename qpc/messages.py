@@ -176,6 +176,7 @@ REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
+REPORT_JOB_ID_HELP = 'Merge report job identifier'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_REPORT_IDS_HELP = 'Report identifiers.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
