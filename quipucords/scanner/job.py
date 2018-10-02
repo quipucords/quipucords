@@ -139,7 +139,7 @@ class ScanJobRunner(Process):
             self.scan_job.report_id = fact_collection.id
             self.scan_job.save()
             self.scan_job.log_message('Report %d created.' %
-                                    self.scan_job.report_id)
+                                      self.scan_job.report_id)
         self.scan_job.complete()
         return ScanTask.COMPLETED
 
