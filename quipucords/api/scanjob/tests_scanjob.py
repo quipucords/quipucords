@@ -34,8 +34,8 @@ from api.scanjob.serializer import ScanJobSerializer
 from api.scanjob.view import expand_scanjob
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 

@@ -85,8 +85,8 @@ def format_credential(cred):
 class CredentialFilter(FilterSet):
     """Filter for host credentials by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
 
