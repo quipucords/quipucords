@@ -27,6 +27,7 @@ from qpc.utils import (pretty_print,
 
 from requests import codes
 
+
 class ReportJobCommand(CliCommand):
     """Defines the job command.
 
@@ -49,10 +50,13 @@ class ReportJobCommand(CliCommand):
         self.report_id = None
 
     def _validate_args(self):
-        #TODO: This needs to be done.
+        # TODO: This needs to be done.
+        pass
 
     def _handle_response_success(self):
-        #TODO: Figure out what needs to be returned from the backend.
+        # TODO: Figure out what needs to be returned from the backend.
+        pass
 
     def _handle_response_error(self):
-        #TODO: Figure out what nees to be returned from the backend.
+        # TODO: Figure out what nees to be returned from the backend.
+        pass
