@@ -130,6 +130,7 @@ class ScanTask(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_TASKS_MSG)
+        ordering = ('sequence_number',)
 
     # all task types
     def log_current_status(self,

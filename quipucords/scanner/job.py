@@ -135,11 +135,11 @@ class ScanJobRunner(Process):
                 # something went wrong or cancel/pause
                 return task_status
 
-        # All tasks completed successfully and sent to endpoint
-        self.scan_job.report_id = fact_collection.id
-        self.scan_job.save()
-        self.scan_job.log_message('Report %d created.' %
-                                  self.scan_job.report_id)
+            # All tasks completed successfully and sent to endpoint
+            self.scan_job.report_id = fact_collection.id
+            self.scan_job.save()
+            self.scan_job.log_message('Report %d created.' %
+                                    self.scan_job.report_id)
         self.scan_job.complete()
         return ScanTask.COMPLETED
 
