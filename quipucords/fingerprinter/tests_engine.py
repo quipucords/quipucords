@@ -525,6 +525,62 @@ class EngineTest(TestCase):
                 self.assertNotEqual(
                     result_fingerprint.get('cpu_count'), n_cpu_count)
 
+    def test_merge_network_and_vcenter_infrastructure_type(self):
+        """Test if VCenter infrastructure_type is prefered over network."""
+        nfingerprints = [
+            self._create_network_fingerprint(dmi_system_uuid='match',
+                                             ifconfig_mac_addresses=['1'])]
+        vfingerprints = [
+            self._create_vcenter_fingerprint(vm_uuid='match')]
+        # change infrastructure_type to bypass the validation
+        nfingerprints[0]['infrastructure_type'] = 'unknown'
+        vfingerprints[0]['infrastructure_type'] = 'virtualized'
+        self.assertNotEqual(nfingerprints[0]['infrastructure_type'],
+                            vfingerprints[0]['infrastructure_type'])
+
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
+        _, result_fingerprints = _merge_fingerprints_from_source_types(
+            NETWORK_VCENTER_MERGE_KEYS,
+            nfingerprints,
+            vfingerprints,
+            reverse_priority_keys=reverse_priority_keys)
+        for result_fingerprint in result_fingerprints:
+            if result_fingerprint.get('vm_uuid') == 'match':
+                self.assertEqual(result_fingerprint.get(
+                    'infrastructure_type'), 'virtualized')
+
+    def test_merge_net_sate_vcenter_infrastructure_type(self):
+        """Test if VCenter infrastructure_type is prefered over the others."""
+        nfingerprints = [
+            self._create_network_fingerprint(dmi_system_uuid='match',
+                                             ifconfig_mac_addresses=['1'])]
+        vfingerprints = [
+            self._create_vcenter_fingerprint(vm_uuid='match')]
+        sfingerprints = [
+            self._create_satellite_fingerprint(uuid='match')]
+        # change infrastructure_type to bypass the validation
+        nfingerprints[0]['infrastructure_type'] = 'unknown'
+        sfingerprints[0]['infrastructure_type'] = 'test'
+        vfingerprints[0]['infrastructure_type'] = 'virtualized'
+        _, result_fingerprints = _merge_fingerprints_from_source_types(
+            NETWORK_SATELLITE_MERGE_KEYS,
+            nfingerprints,
+            sfingerprints)
+        for result_fingerprint in result_fingerprints:
+            if result_fingerprint.get('vm_uuid') == 'match':
+                self.assertEqual(result_fingerprint.get(
+                    'infrastructure_type'), 'test')
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
+        _, result_fingerprints = _merge_fingerprints_from_source_types(
+            NETWORK_VCENTER_MERGE_KEYS,
+            nfingerprints,
+            vfingerprints,
+            reverse_priority_keys=reverse_priority_keys)
+        for result_fingerprint in result_fingerprints:
+            if result_fingerprint.get('vm_uuid') == 'match':
+                self.assertEqual(result_fingerprint.get(
+                    'infrastructure_type'), 'virtualized')
+
     def test_merge_matching_fingerprints(self):
         """Test merge of two lists of fingerprints."""
         nmetadata = {
