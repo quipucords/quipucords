@@ -22,8 +22,8 @@ from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 

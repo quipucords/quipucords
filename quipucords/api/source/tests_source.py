@@ -23,8 +23,8 @@ from api.serializers import SourceSerializer
 from api.source.view import format_source
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.serializers import ValidationError
