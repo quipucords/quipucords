@@ -12,15 +12,14 @@
 
 import os
 
-import api.messages as messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
-from api.common.util import check_for_existing_name
-from api.models import Credential
-
 from django.utils.translation import ugettext as _
 
 from rest_framework.serializers import (CharField,
                                         ValidationError)
+from api import messages  # noqa I100
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.util import check_for_existing_name
+from api.models import Credential
 
 
 def expand_filepath(filepath):

@@ -21,9 +21,9 @@ from ansible.parsing.utils.addresses import parse_address
 from ansible.playbook.play import Play
 from ansible.vars import VariableManager
 
-from api.vault import decrypt_data_as_unicode, write_to_yaml
-
 from django.conf import settings
+
+from api.vault import decrypt_data_as_unicode, write_to_yaml  # noqa I100
 
 
 ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \
@@ -183,11 +183,11 @@ def expand_hostpattern(hostpattern):
     """
     # Can the given hostpattern be parsed as a host with an optional port
     # specification?
-
+    # pylint: disable=bare-except
     try:
         # pylint: disable=unused-variable
         (pattern, port) = parse_address(hostpattern, allow_ranges=True)
-    except:  # noqa pylint: disable=bare-except
+    except:  # noqa
         # not a recognizable host pattern
         pattern = hostpattern
 

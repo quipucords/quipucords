@@ -13,14 +13,14 @@ import json
 import logging
 from datetime import datetime
 
-from api.models import (RawFact,
-                        ScanJob,
-                        ScanTask,
-                        SystemInspectionResult)
-
 from django.db import transaction
 
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
+
+from api.models import (RawFact,  # noqa I100
+                        ScanJob,
+                        ScanTask,
+                        SystemInspectionResult)
 
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect
@@ -167,7 +167,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches,too-many-locals
     def parse_vm_props(self, props, host_dict):
         """Parse Virtual Machine properties.
 

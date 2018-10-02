@@ -83,6 +83,7 @@ class ProcessJbossBRMSManifestMF(process.Processor):
         return list(results)
 
 
+# pylint: disable=inconsistent-return-statements
 def enclosing_war_archive(path):
     """Find the BRMS war archive containing path.
 

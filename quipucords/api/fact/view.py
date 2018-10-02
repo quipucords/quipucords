@@ -14,14 +14,6 @@
 import logging
 import os
 
-from api.fact.util import (get_or_create_fact_collection,
-                           validate_fact_collection_json)
-from api.models import FactCollection
-from api.serializers import FactCollectionSerializer
-
-
-from fingerprinter import pfc_signal
-
 from rest_framework import mixins, status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -29,6 +21,14 @@ from rest_framework.response import Response
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
+
+from api.fact.util import (get_or_create_fact_collection,  # noqa I100
+                           validate_fact_collection_json)
+from api.models import FactCollection
+from api.serializers import FactCollectionSerializer
+
+
+from fingerprinter import pfc_signal
 
 
 # Get an instance of a logger

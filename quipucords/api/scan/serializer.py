@@ -12,8 +12,17 @@
 
 import json
 
+from django.db import transaction
+from django.utils.translation import ugettext as _
 
-import api.messages as messages
+from rest_framework.serializers import (BooleanField,
+                                        CharField,
+                                        IntegerField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
+
+
+from api import messages  # noqa
 from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer,
                                    ValidStringChoiceField)
@@ -27,14 +36,6 @@ from api.models import (DisabledOptionalProductsOptions,
                         Source)
 from api.scantask.serializer import SourceField
 
-from django.db import transaction
-from django.utils.translation import ugettext as _
-
-from rest_framework.serializers import (BooleanField,
-                                        CharField,
-                                        IntegerField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
 
 # pylint: disable=invalid-name
 try:

@@ -13,9 +13,11 @@
 
 from datetime import datetime
 
-from api.models import ServerInformation, Source
 
 from django.test import TestCase
+
+# pylint: disable=wrong-import-order
+from api.models import ServerInformation, Source  # noqa
 
 from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
                            NETWORK_SATELLITE_MERGE_KEYS,

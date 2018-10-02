@@ -16,7 +16,11 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import qpc.messages as messages
+import requests
+
+import requests_mock
+
+from qpc import messages  # noqa I100
 from qpc.cli import CLI
 from qpc.cred import CREDENTIAL_URI
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -26,10 +30,6 @@ from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import (get_server_location,
                        read_in_file,
                        write_server_config)
-
-import requests
-
-import requests_mock
 
 TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()

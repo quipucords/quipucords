@@ -17,7 +17,7 @@ import json
 import logging
 import os
 
-import qpc.messages as messages
+from qpc import messages
 from qpc.translation import _ as t
 
 QPC_PATH = 'qpc'
@@ -274,8 +274,7 @@ def handle_error_response(response):
         if isinstance(response_data, dict):
             for err_key, err_cases in response_data.items():
                 error_context = 'Error'
-                if (err_key != 'non_field_errors' and
-                        err_key != 'detail' and err_key != 'options'):
+                if err_key not in ['non_field_errors', 'detail', 'options']:
                     error_context = err_key
                 if isinstance(err_cases, str):
                     log.error('%s: %s', error_context, err_cases)
@@ -313,6 +312,7 @@ def read_in_file(filename):
     """
     result = None
     input_path = os.path.expanduser(os.path.expandvars(filename))
+    # pylint: disable=no-else-return
     if os.path.isfile(input_path):
         try:
             with open(input_path, 'r') as in_file:

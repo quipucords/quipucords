@@ -15,7 +15,11 @@ These models are used in the REST definitions.
 import logging
 from datetime import datetime
 
-import api.messages as messages
+from django.db import (OperationalError, models, transaction)
+from django.db.models import Q
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 from api.connresult.model import (JobConnectionResult,
                                   TaskConnectionResult)
 from api.inspectresult.model import (JobInspectionResult,
@@ -23,10 +27,6 @@ from api.inspectresult.model import (JobInspectionResult,
 from api.scan.model import Scan, ScanOptions
 from api.scantask.model import ScanTask
 from api.source.model import Source
-
-from django.db import (OperationalError, models, transaction)
-from django.db.models import Q
-from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -86,6 +86,7 @@ class ScanJob(models.Model):
                                             self.sources,
                                             self.scan_type,
                                             self.status,
+                                            # pylint: disable=no-member
                                             self.tasks,
                                             self.options,
                                             self.report_id,
