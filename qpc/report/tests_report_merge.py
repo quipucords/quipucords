@@ -26,7 +26,7 @@ from qpc.utils import get_server_location, write_server_config
 
 import requests_mock
 TMP_DETAILSFILE1 = ('/tmp/testdetailsreport1.json',
-                    '{"id": 1, \n "sources": [{"source_name": "source1"}]}')
+                    '{"id": 1,"sources":[{"facts": ["AB"],"server_id": "8"}]}')
 TMP_DETAILSFILE2 = ('/tmp/testdetailsreport2.json',
                     '{"id": 2, \n "sources": [{"source_name": "source2"}]}')
 TMP_NOTJSONFILE = ('/tmp/testnotjson.txt',
@@ -191,12 +191,12 @@ class ReportDetailTests(unittest.TestCase):
             nac = ReportMergeCommand(SUBPARSER)
             args = Namespace(scan_job_ids=None,
                              json_files=[TMP_DETAILSFILE1[0],
-                                         TMP_DETAILSFILE1[0]],
+                                         TMP_GOODDETAILS[0]],
                              report_ids=None)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_MERGED % '1')
+                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                              report_out.getvalue().strip())
 
     def test_detail_merge_error_json_files(self):
         """Testing report merge error with json files."""
