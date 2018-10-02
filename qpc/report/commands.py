@@ -15,3 +15,4 @@
 from qpc.report.summary import ReportSummaryCommand
 from qpc.report.detail import ReportDetailCommand
 from qpc.report.merge import ReportMergeCommand
+from qpc.report.job import ReportJobCommand
