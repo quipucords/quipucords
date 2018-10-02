@@ -170,11 +170,11 @@ def expand_scan(json_scan):
 class ScanFilter(FilterSet):
     """Filter for sources by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
-    search_sources_by_name = CharFilter(name='sources__name',
+    search_sources_by_name = CharFilter(field_name='sources__name',
                                         lookup_expr='contains',
                                         distinct=True)
 

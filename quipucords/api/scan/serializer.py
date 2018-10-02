@@ -209,8 +209,11 @@ class ScanSerializer(NotEmptySerializer):
         if not self.partial:
             instance.name = name
             instance.scan_type = scan_type
-            instance.sources = sources
-
+            # clear all the sources and re-add them
+            instance.sources.clear()
+            for source in sources:
+                instance.sources.add(source)
+            instance.save()
             if options:
                 optional_products = options.pop(
                     'disabled_optional_products', None)
