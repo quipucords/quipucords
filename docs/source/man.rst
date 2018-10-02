@@ -555,6 +555,10 @@ The ``qpc report merge`` command combines results from two or more scan job iden
 
   Contains the JSON details report files that will be merged.  Mutually exclusive with the ``--job-ids`` option and the ``--report-ids`` option.
 
+``--json-directory=path_to_json_files``
+
+  A Path to a directory with JSON details report files that will be merged. Mutually exclusive with the ``--job-ids`` and the ``--report-ids`` option.
+
 Options for All Commands
 ------------------------
 
