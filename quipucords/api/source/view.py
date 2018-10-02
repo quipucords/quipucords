@@ -98,11 +98,11 @@ def format_source(json_source):
 class SourceFilter(FilterSet):
     """Filter for sources by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
-    search_credentials_by_name = CharFilter(name='credentials__name',
+    search_credentials_by_name = CharFilter(field_name='credentials__name',
                                             lookup_expr='contains',
                                             distinct=True)
 

@@ -24,8 +24,8 @@ from api.report.renderer import (DeploymentCSVRenderer,
                                  sanitize_row)
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 
@@ -349,7 +349,7 @@ class DeploymentReportTest(TestCase):
         # Query API
         response = self.client.get(url)
         self.assertEqual(response.status_code,
-                         status.HTTP_400_BAD_REQUEST)
+                         status.HTTP_404_NOT_FOUND)
 
     def test_group_count_400_invalid_field(self):
         """Fail to get report with invalid field for group_count."""
