@@ -9,9 +9,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the satellite factory."""
-from django.test import TestCase
+from api.models import (Credential, ScanTask, Source)
 
-from api.models import (Credential, ScanTask, Source)  # noqa I100
+from django.test import TestCase
 
 from scanner.satellite.api import (SATELLITE_VERSION_5,
                                    SATELLITE_VERSION_6)

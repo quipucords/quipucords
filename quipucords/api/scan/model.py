@@ -15,12 +15,12 @@ These models are used in the REST definitions.
 import json
 import logging
 
-from django.db import models
-from django.utils.translation import ugettext as _
-
-from api import messages  # noqa I100
+from api import messages
 from api.scantask.model import ScanTask
 from api.source.model import Source
+
+from django.db import models
+from django.utils.translation import ugettext as _
 
 
 # Get an instance of a logger

@@ -15,12 +15,12 @@ import sys
 import unittest
 from argparse import ArgumentParser, Namespace
 
-import requests_mock
-
-from qpc.server import LOGOUT_URI  # noqa I100
+from qpc.server import LOGOUT_URI
 from qpc.server.logout_host import LogoutHostCommand
 from qpc.tests_utilities import HushUpStderr
 from qpc.utils import QPC_CLIENT_TOKEN, get_server_location
+
+import requests_mock
 
 
 PARSER = ArgumentParser()

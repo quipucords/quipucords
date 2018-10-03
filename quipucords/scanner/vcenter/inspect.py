@@ -13,14 +13,14 @@ import json
 import logging
 from datetime import datetime
 
-from django.db import transaction
-
-from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
-
-from api.models import (RawFact,  # noqa I100
+from api.models import (RawFact,
                         ScanJob,
                         ScanTask,
                         SystemInspectionResult)
+
+from django.db import transaction
+
+from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import vcenter_connect

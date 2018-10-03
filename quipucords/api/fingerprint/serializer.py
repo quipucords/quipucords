@@ -11,6 +11,12 @@
 
 """Serializer for system fingerprint models."""
 
+from api.common.serializer import CustomJSONField
+from api.models import (Entitlement,
+                        FactCollection,
+                        Product,
+                        SystemFingerprint)
+
 from rest_framework.serializers import (CharField,
                                         ChoiceField,
                                         DateField,
@@ -19,12 +25,6 @@ from rest_framework.serializers import (CharField,
                                         ModelSerializer,
                                         NullBooleanField,
                                         PrimaryKeyRelatedField)
-
-from api.common.serializer import CustomJSONField  # noqa I100
-from api.models import (Entitlement,
-                        FactCollection,
-                        Product,
-                        SystemFingerprint)
 
 
 class ProductSerializer(ModelSerializer):

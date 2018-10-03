@@ -14,6 +14,22 @@ import json
 import logging
 import os
 
+from api import messages
+from api.common.pagination import StandardResultsSetPagination
+from api.common.util import is_int
+from api.models import (Credential,
+                        RawFact,
+                        ScanJob,
+                        ScanTask,
+                        Source)
+from api.scanjob.serializer import expand_scanjob
+from api.serializers import (ScanJobSerializer,
+                             SystemConnectionResultSerializer,
+                             SystemInspectionResultSerializer)
+from api.signal.scanjob_signal import (cancel_scan,
+                                       pause_scan,
+                                       restart_scan)
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
@@ -30,22 +46,6 @@ from rest_framework.serializers import ValidationError
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
-
-from api import messages  # noqa I100
-from api.common.pagination import StandardResultsSetPagination
-from api.common.util import is_int
-from api.models import (Credential,
-                        RawFact,
-                        ScanJob,
-                        ScanTask,
-                        Source)
-from api.scanjob.serializer import expand_scanjob
-from api.serializers import (ScanJobSerializer,
-                             SystemConnectionResultSerializer,
-                             SystemInspectionResultSerializer)
-from api.signal.scanjob_signal import (cancel_scan,
-                                       pause_scan,
-                                       restart_scan)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -13,14 +13,14 @@
 
 from __future__ import print_function
 
-from requests import codes
-
-import qpc.cred as credential  # noqa I100
+import qpc.cred as credential
 from qpc import messages
 from qpc.clicommand import CliCommand
 from qpc.cred.utils import build_credential_payload
 from qpc.request import POST
 from qpc.translation import _
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

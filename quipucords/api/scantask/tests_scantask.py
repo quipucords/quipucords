@@ -12,16 +12,16 @@
 
 from datetime import datetime
 
-from django.core import management
-from django.test import TestCase
-
-from api import  messages  # noqa I100
+from api import messages
 from api.models import (Credential,
                         Scan,
                         ScanJob,
                         ScanTask,
                         Source)
 from api.serializers import ScanTaskSerializer
+
+from django.core import management
+from django.test import TestCase
 
 
 def dummy_start():
