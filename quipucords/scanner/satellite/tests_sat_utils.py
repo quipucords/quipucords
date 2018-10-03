@@ -12,14 +12,14 @@
 import xmlrpc.client
 from unittest.mock import ANY, patch
 
-from django.test import TestCase
-
-import requests_mock
-
-from api.models import (Credential,  # noqa I100
+from api.models import (Credential,
                         ScanTask,
                         Source,
                         SourceOptions)
+
+from django.test import TestCase
+
+import requests_mock
 
 
 from scanner.satellite.api import (SATELLITE_VERSION_5,

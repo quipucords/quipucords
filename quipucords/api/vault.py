@@ -13,10 +13,10 @@
 import tempfile
 
 
-from django.conf import settings
-
-from ansible.parsing.vault import VaultLib  # noqa I100
+from ansible.parsing.vault import VaultLib
 from ansible.parsing.yaml.dumper import AnsibleDumper
+
+from django.conf import settings
 
 import yaml
 

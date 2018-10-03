@@ -21,9 +21,9 @@ from ansible.parsing.utils.addresses import parse_address
 from ansible.playbook.play import Play
 from ansible.vars import VariableManager
 
-from django.conf import settings
+from api.vault import decrypt_data_as_unicode, write_to_yaml
 
-from api.vault import decrypt_data_as_unicode, write_to_yaml  # noqa I100
+from django.conf import settings
 
 
 ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \

@@ -14,9 +14,9 @@
 import logging
 import os
 
-from rest_framework.serializers import ValidationError
+from api.scantask.model import ScanTask
 
-from api.scantask.model import ScanTask  # noqa I100
+from rest_framework.serializers import ValidationError
 
 
 # Get an instance of a logger

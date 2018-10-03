@@ -10,13 +10,7 @@
 #
 """Describes the urls and patterns for the API application."""
 
-from django.urls import path
-
-from rest_framework.routers import SimpleRouter
-
-from rest_framework_expiring_authtoken import views
-
-from api.views import (CredentialViewSet,  # noqa I100
+from api.views import (CredentialViewSet,
                        FactViewSet,
                        ScanJobViewSet,
                        ScanViewSet,
@@ -27,6 +21,12 @@ from api.views import (CredentialViewSet,  # noqa I100
                        jobs,
                        merge,
                        status)
+
+from django.urls import path
+
+from rest_framework.routers import SimpleRouter
+
+from rest_framework_expiring_authtoken import views
 
 ROUTER = SimpleRouter()
 

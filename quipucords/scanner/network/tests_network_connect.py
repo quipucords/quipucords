@@ -18,14 +18,14 @@ from unittest.mock import ANY, Mock, patch
 
 from ansible.errors import AnsibleError
 
-from django.test import TestCase
-
-from api.connresult.model import SystemConnectionResult  # noqa I100
+from api.connresult.model import SystemConnectionResult
 from api.models import (Credential,
                         ScanJob,
                         ScanTask,
                         Source)
 from api.serializers import CredentialSerializer, SourceSerializer
+
+from django.test import TestCase
 
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import (ConnectResultStore,

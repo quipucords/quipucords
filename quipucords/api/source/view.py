@@ -12,6 +12,20 @@
 
 import os
 
+from api import messages
+from api.common.util import (convert_to_boolean,
+                             expand_scanjob_with_times,
+                             is_boolean,
+                             is_int)
+from api.filters import ListFilter
+from api.models import (Scan,
+                        ScanJob,
+                        ScanTask,
+                        Source)
+from api.serializers import SourceSerializer
+from api.signal.scanjob_signal import start_scan
+from api.source.util import expand_credential
+
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -31,20 +45,6 @@ from rest_framework.viewsets import ModelViewSet
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
-
-from api import messages  # noqa I100
-from api.common.util import (convert_to_boolean,
-                             expand_scanjob_with_times,
-                             is_boolean,
-                             is_int)
-from api.filters import ListFilter
-from api.models import (Scan,
-                        ScanJob,
-                        ScanTask,
-                        Source)
-from api.serializers import SourceSerializer
-from api.signal.scanjob_signal import start_scan
-from api.source.util import expand_credential
 
 
 IDENTIFIER_KEY = 'id'

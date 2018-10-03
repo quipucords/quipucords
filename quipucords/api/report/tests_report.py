@@ -14,13 +14,7 @@ import copy
 import json
 import uuid
 
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-
-from api import messages  # noqa I100
+from api import messages
 from api.models import (Credential,
                         FactCollection,
                         ServerInformation,
@@ -28,6 +22,12 @@ from api.models import (Credential,
 from api.report.renderer import (DeploymentCSVRenderer,
                                  DetailsCSVRenderer,
                                  sanitize_row)
+
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
 
 
 class DetailReportTest(TestCase):

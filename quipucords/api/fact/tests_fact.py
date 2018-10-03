@@ -12,16 +12,16 @@
 
 import json
 
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-
-from api import messages  # noqa I100
+from api import messages
 from api.models import (Credential,
                         FactCollection,
                         ServerInformation,
                         Source)
+
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
 
 
 class FactCollectionTest(TestCase):

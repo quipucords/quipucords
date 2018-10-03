@@ -12,6 +12,12 @@
 
 import os
 
+from api import messages
+from api.common.util import is_int
+from api.filters import ListFilter
+from api.models import Credential, Source
+from api.serializers import CredentialSerializer
+
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -33,12 +39,6 @@ from rest_framework.viewsets import ModelViewSet
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
-
-from api import messages  # noqa I100
-from api.common.util import is_int
-from api.filters import ListFilter
-from api.models import Credential, Source
-from api.serializers import CredentialSerializer
 
 
 IDENTIFIER_KEY = 'id'

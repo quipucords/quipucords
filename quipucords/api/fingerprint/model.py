@@ -10,9 +10,9 @@
 #
 
 """Models system fingerprints."""
-from django.db import models
+from api.fact.model import FactCollection
 
-from api.fact.model import FactCollection  # noqa I100
+from django.db import models
 
 
 class SystemFingerprint(models.Model):
