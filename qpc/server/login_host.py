@@ -15,13 +15,13 @@ from __future__ import print_function
 
 from getpass import getpass
 
-from requests import codes
-
-from qpc import messages, server  # noqa I100
+from qpc import messages, server
 from qpc.clicommand import CliCommand
 from qpc.request import POST
 from qpc.translation import _
 from qpc.utils import delete_client_token, write_client_token
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

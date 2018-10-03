@@ -12,9 +12,9 @@
 
 from collections import OrderedDict
 
-from django.test import TestCase
+from api.common.util import CSVHelper
 
-from api.common.util import CSVHelper  # noqa I100
+from django.test import TestCase
 
 
 class CommonUtilTest(TestCase):

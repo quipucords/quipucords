@@ -14,6 +14,13 @@ import json
 import logging
 import re
 
+from api import messages
+from api.common.serializer import (CustomJSONField,
+                                   NotEmptySerializer,
+                                   ValidStringChoiceField)
+from api.common.util import check_for_existing_name
+from api.models import Credential, Source, SourceOptions
+
 from django.db import transaction
 from django.utils.translation import ugettext as _
 
@@ -22,13 +29,6 @@ from rest_framework.serializers import (CharField,
                                         NullBooleanField,
                                         PrimaryKeyRelatedField,
                                         ValidationError)
-
-from api import messages  # noqa I100
-from api.common.serializer import (CustomJSONField,
-                                   NotEmptySerializer,
-                                   ValidStringChoiceField)
-from api.common.util import check_for_existing_name
-from api.models import Credential, Source, SourceOptions
 
 
 class CredentialsField(PrimaryKeyRelatedField):

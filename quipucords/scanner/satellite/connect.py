@@ -11,9 +11,9 @@
 """ScanTask used for satellite connection task."""
 import socket
 
-from requests import exceptions
+from api.models import ScanJob, ScanTask
 
-from api.models import ScanJob, ScanTask  # noqa I100
+from requests import exceptions
 
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteAuthException, SatelliteException

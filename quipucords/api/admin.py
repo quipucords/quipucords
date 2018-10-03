@@ -10,9 +10,7 @@
 #
 """Admin module for Django server application."""
 
-from django.contrib import admin
-
-from api.models import (Credential,  # noqa I100
+from api.models import (Credential,
                         FactCollection,
                         JobConnectionResult,
                         JobInspectionResult,
@@ -21,6 +19,8 @@ from api.models import (Credential,  # noqa I100
                         ServerInformation,
                         Source,
                         SystemFingerprint)
+
+from django.contrib import admin
 
 admin.site.register(ServerInformation)
 admin.site.register(FactCollection)

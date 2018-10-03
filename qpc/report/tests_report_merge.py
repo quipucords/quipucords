@@ -17,14 +17,14 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import requests_mock
-
-from qpc import messages  # noqa I100
+from qpc import messages
 from qpc.report import JSON_FILE_MERGE_URI, MERGE_URI
 from qpc.report.merge import ReportMergeCommand
 from qpc.scan import SCAN_JOB_URI
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
+
+import requests_mock
 
 TMP_DETAILSFILE1 = ('/tmp/testdetailsreport1.json',
                     '{"id": 1,"sources":[{"facts": ["AB"],"server_id": "8"}]}')

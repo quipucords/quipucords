@@ -16,10 +16,10 @@ import traceback
 
 from ansible.plugins.callback import CallbackBase
 
-from django.db import transaction
-
-from api.models import (RawFact,  # noqa I100
+from api.models import (RawFact,
                         SystemInspectionResult)
+
+from django.db import transaction
 
 from quipucords import settings
 

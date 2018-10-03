@@ -13,11 +13,7 @@ import json
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from django.test import TestCase
-
-import requests_mock
-
-from api.models import (Credential,  # noqa I100
+from api.models import (Credential,
                         ScanJob,
                         ScanOptions,
                         ScanTask,
@@ -25,6 +21,10 @@ from api.models import (Credential,  # noqa I100
                         SystemConnectionResult,
                         SystemInspectionResult,
                         TaskConnectionResult)
+
+from django.test import TestCase
+
+import requests_mock
 
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2,
