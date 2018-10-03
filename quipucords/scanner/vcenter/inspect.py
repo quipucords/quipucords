@@ -133,11 +133,10 @@ class InspectTaskRunner(ScanTaskRunner):
             if prop.name == 'name':
                 facts['cluster.name'] = prop.val
             elif prop.name == 'parent':
-                parent = parents_dict[str(prop.val)]
-                while parent['type'] != 'vim.Datacenter':
-                    parent = parents_dict[parent['parent']]
-                facts['cluster.datacenter'] = parent['name']
-
+                parent = parents_dict.get(str(prop.val))
+                while parent.get('type') != 'vim.Datacenter':
+                    parent = parents_dict.get(parent.get('parent'))
+                facts['cluster.datacenter'] = parent.get('name')
         return facts
 
     @transaction.atomic
@@ -151,10 +150,13 @@ class InspectTaskRunner(ScanTaskRunner):
         facts = {}
         for prop in props:
             if prop.name == 'parent':
-                facts['host.cluster'] = \
-                    cluster_dict[str(prop.val)]['cluster.name']
-                facts['host.datacenter'] = \
-                    cluster_dict[str(prop.val)]['cluster.datacenter']
+                c_src = cluster_dict.get(str(prop.val))
+                if c_src is not None:
+                    facts['host.cluster'] = c_src.get('cluster.name')
+                    facts['host.datacenter'] = c_src.get('cluster.datacenter')
+                else:
+                    facts['host.cluster'] = None
+                    facts['host.datacenter'] = None
             elif prop.name == 'summary.config.name':
                 facts['host.name'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
@@ -199,13 +201,17 @@ class InspectTaskRunner(ScanTaskRunner):
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
             elif prop.name == 'runtime.host':
-                host_facts = host_dict[str(prop.val)]
-                facts['vm.host.name'] = host_facts['host.name']
-                facts['vm.host.cpu_cores'] = host_facts['host.cpu_cores']
-                facts['vm.host.cpu_count'] = host_facts['host.cpu_count']
-                facts['vm.host.cpu_threads'] = host_facts['host.cpu_threads']
-                facts['vm.cluster'] = host_facts['host.cluster']
-                facts['vm.datacenter'] = host_facts['host.datacenter']
+                if host_dict.get(str(prop.val)):
+                    host_facts = host_dict[str(prop.val)]
+                    facts['vm.host.name'] = host_facts.get('host.name')
+                    facts['vm.host.cpu_cores'] = \
+                        host_facts.get('host.cpu_cores')
+                    facts['vm.host.cpu_count'] = \
+                        host_facts.get('host.cpu_count')
+                    facts['vm.host.cpu_threads'] = \
+                        host_facts.get('host.cpu_threads')
+                    facts['vm.cluster'] = host_facts.get('host.cluster')
+                    facts['vm.datacenter'] = host_facts.get('host.datacenter')
 
         vm_name = facts['vm.name']
 
