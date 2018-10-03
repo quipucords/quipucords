@@ -711,7 +711,7 @@ class AsyncMergeReports(TestCase):
     ##############################################################
 
     @patch('api.report.view.start_scan', side_effect=dummy_start)
-    def test_greenpath_create(self):
+    def test_greenpath_create(self, start_scan):
         """Create report merge job object via API."""
         request_json = {'sources':
                         [{'server_id': self.server_id,
