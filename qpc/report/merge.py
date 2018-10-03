@@ -20,7 +20,7 @@ from glob import glob
 
 from requests import codes
 
-from qpc import messages, report # noqa I100
+from qpc import messages, report  # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import GET, POST, PUT, request
 from qpc.scan import SCAN_JOB_URI
@@ -233,4 +233,3 @@ class ReportMergeCommand(CliCommand):
         print('No reports found.  Error json: ')
         print(json_data)
         sys.exit(1)
-
