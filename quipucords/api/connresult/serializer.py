@@ -10,12 +10,14 @@
 #
 """Module for serializing all model object for database storage."""
 
-from api.common.serializer import NotEmptySerializer
+
+from rest_framework.serializers import CharField, ChoiceField
+
+# pylint: disable=wrong-import-order
+from api.common.serializer import NotEmptySerializer  # noqa
 from api.models import (JobConnectionResult,
                         SystemConnectionResult,
                         TaskConnectionResult)
-
-from rest_framework.serializers import CharField, ChoiceField
 
 
 class SystemConnectionResultSerializer(NotEmptySerializer):

@@ -192,6 +192,7 @@ else:
     QPC_DBMS_PASSWORD = os.getenv('QPC_DBMS_PASSWORD', 'password')
     # In the following env variable, :: means localhost but allows IPv4
     #  and IPv6 connections
+    # pylint: disable=invalid-envvar-default
     QPC_DBMS_HOST = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
     QPC_DBMS_PORT = os.getenv('QPC_DBMS_PORT', 5432)
     DATABASES = {
@@ -273,6 +274,7 @@ LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
 DEFAULT_SCAN_DATA_LOG_FILE = os.path.join(LOG_DIRECTORY, 'scan_data.log')
 SCAN_DATA_LOG_FILE = os.getenv('SCAN_DATA_LOG_FILE',
                                DEFAULT_SCAN_DATA_LOG_FILE)
+# pylint: disable=invalid-envvar-default
 SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
                                     1 << 30)  # default 1 GB
 DISABLE_SCAN_DATA_LOG = os.getenv('DISABLE_SCAN_DATA_LOG', True)

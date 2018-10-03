@@ -11,25 +11,20 @@
 
 """Test the fact engine API."""
 
+import json
 from datetime import datetime
 
 from api.models import ServerInformation, Source
 
-from django.test import TestCase
+from django.test import TestCase  # pylint: disable=wrong-import-order
 
-from fingerprinter import (FINGERPRINT_GLOBAL_ID_KEY,
-                           NETWORK_SATELLITE_MERGE_KEYS,
-                           NETWORK_VCENTER_MERGE_KEYS,
-                           _compute_system_creation_time,
-                           _create_index_for_fingerprints,
-                           _merge_fingerprint,
-                           _merge_fingerprints_from_source_types,
-                           _merge_matching_fingerprints,
-                           _multi_format_dateparse,
-                           _process_network_fact,
-                           _process_source,
-                           _remove_duplicate_fingerprints)
+from fingerprinter.task import (FINGERPRINT_GLOBAL_ID_KEY,
+                                FingerprintTaskRunner,
+                                NETWORK_SATELLITE_MERGE_KEYS,
+                                NETWORK_VCENTER_MERGE_KEYS)
 
+
+from scanner.test_util import create_scan_job
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]
@@ -42,6 +37,15 @@ class EngineTest(TestCase):
     def setUp(self):
         """Create test case setup."""
         self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.source = Source(
+            name='source1',
+            hosts=json.dumps(['1.2.3.4']),
+            source_type='network',
+            port=22)
+        self.source.save()
+        scan_job, _ = create_scan_job(self.source)
+        self.fp_task = scan_job.tasks.last()  # pylint: disable=no-member
+        self.fp_task_runner = FingerprintTaskRunner(scan_job, self.fp_task)
 
     # pylint: disable=no-self-use,too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
@@ -413,8 +417,9 @@ class EngineTest(TestCase):
                   'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': n_fact_collection['facts']}
-        nfingerprints = _process_source(n_fact_collection['id'],
-                                        source)
+        nfingerprints = self.fp_task_runner._process_source(
+            n_fact_collection['id'],
+            source)
         nfingerprint = nfingerprints[0]
         self._validate_network_result(nfingerprint, nfact)
 
@@ -428,8 +433,9 @@ class EngineTest(TestCase):
                   'source_name': 'source2',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
-        vfingerprints = _process_source(v_fact_collection['id'],
-                                        source)
+        vfingerprints = self.fp_task_runner._process_source(
+            v_fact_collection['id'],
+            source)
         vfingerprint = vfingerprints[0]
         self._validate_vcenter_result(vfingerprint, vfact)
         return vfingerprint
@@ -442,8 +448,9 @@ class EngineTest(TestCase):
                   'source_name': 'source3',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': s_fact_collection['facts']}
-        sfingerprints = _process_source(s_fact_collection['id'],
-                                        source)
+        sfingerprints = self.fp_task_runner._process_source(
+            s_fact_collection['id'],
+            source)
         sfingerprint = sfingerprints[0]
         self._validate_satellite_result(sfingerprint, vfact)
         return sfingerprint
@@ -459,8 +466,9 @@ class EngineTest(TestCase):
                   'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
-        fingerprints = _process_source(fact_collection['id'],
-                                       source)
+        fingerprints = self.fp_task_runner._process_source(
+            fact_collection['id'],
+            source)
         fingerprint = fingerprints[0]
         self._validate_network_result(fingerprint, fact)
 
@@ -472,8 +480,9 @@ class EngineTest(TestCase):
                   'source_name': 'source1',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
-        fingerprints = _process_source(fact_collection['id'],
-                                       source)
+        fingerprints = self.fp_task_runner._process_source(
+            fact_collection['id'],
+            source)
         fingerprint = fingerprints[0]
         self._validate_vcenter_result(fingerprint, fact)
 
@@ -485,8 +494,9 @@ class EngineTest(TestCase):
                   'source_name': 'source1',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
-        fingerprints = _process_source(fact_collection['id'],
-                                       source)
+        fingerprints = self.fp_task_runner._process_source(
+            fact_collection['id'],
+            source)
         fingerprint = fingerprints[0]
         self._validate_satellite_result(fingerprint, fact)
 
@@ -509,11 +519,12 @@ class EngineTest(TestCase):
         self.assertNotEqual(n_cpu_count, v_cpu_count)
 
         reverse_priority_keys = {'cpu_count'}
-        _, result_fingerprints = _merge_fingerprints_from_source_types(
-            NETWORK_VCENTER_MERGE_KEYS,
-            nfingerprints,
-            vfingerprints,
-            reverse_priority_keys=reverse_priority_keys)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_VCENTER_MERGE_KEYS,
+                nfingerprints,
+                vfingerprints,
+                reverse_priority_keys=reverse_priority_keys)
         self.assertEqual(len(result_fingerprints), 3)
 
         for result_fingerprint in result_fingerprints:
@@ -537,11 +548,12 @@ class EngineTest(TestCase):
                             vfingerprints[0]['infrastructure_type'])
 
         reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
-        _, result_fingerprints = _merge_fingerprints_from_source_types(
-            NETWORK_VCENTER_MERGE_KEYS,
-            nfingerprints,
-            vfingerprints,
-            reverse_priority_keys=reverse_priority_keys)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_VCENTER_MERGE_KEYS,
+                nfingerprints,
+                vfingerprints,
+                reverse_priority_keys=reverse_priority_keys)
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get('vm_uuid') == 'match':
                 self.assertEqual(result_fingerprint.get(
@@ -560,20 +572,22 @@ class EngineTest(TestCase):
         nfingerprints[0]['infrastructure_type'] = 'unknown'
         sfingerprints[0]['infrastructure_type'] = 'test'
         vfingerprints[0]['infrastructure_type'] = 'virtualized'
-        _, result_fingerprints = _merge_fingerprints_from_source_types(
-            NETWORK_SATELLITE_MERGE_KEYS,
-            nfingerprints,
-            sfingerprints)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_SATELLITE_MERGE_KEYS,
+                nfingerprints,
+                sfingerprints)
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get('vm_uuid') == 'match':
                 self.assertEqual(result_fingerprint.get(
                     'infrastructure_type'), 'test')
         reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
-        _, result_fingerprints = _merge_fingerprints_from_source_types(
-            NETWORK_VCENTER_MERGE_KEYS,
-            nfingerprints,
-            vfingerprints,
-            reverse_priority_keys=reverse_priority_keys)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_VCENTER_MERGE_KEYS,
+                nfingerprints,
+                vfingerprints,
+                reverse_priority_keys=reverse_priority_keys)
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get('vm_uuid') == 'match':
                 self.assertEqual(result_fingerprint.get(
@@ -641,8 +655,9 @@ class EngineTest(TestCase):
             vfingerprint_no_key
         ]
 
-        _, merge_list, no_match_found_list = _merge_matching_fingerprints(
-            'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
+        _, merge_list, no_match_found_list = \
+            self.fp_task_runner._merge_matching_fingerprints(
+                'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
         merged_sources = {'source1': {'source_name': 'source1',
                                       'source_type':
                                           Source.NETWORK_SOURCE_TYPE}}
@@ -683,8 +698,9 @@ class EngineTest(TestCase):
             {'id': 3,
              'os_release': 'RHEL 6'}
         ]
-        index, no_key_found = _create_index_for_fingerprints(
-            'mac_addresses', fingerprints)
+        index, no_key_found = \
+            self.fp_task_runner._create_index_for_fingerprints(
+                'mac_addresses', fingerprints)
 
         self.assertEqual(len(no_key_found), 1)
         self.assertEqual(no_key_found[0]['id'], 3)
@@ -697,7 +713,7 @@ class EngineTest(TestCase):
 
         # deplicate but leave unique key
         leave_key_list = list(index.values())
-        unique_list = _remove_duplicate_fingerprints(
+        unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list)
         self.assertEqual(len(unique_list), 2)
         self.assertIsNotNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
@@ -705,13 +721,13 @@ class EngineTest(TestCase):
         # same test, but add value that doesn't have key
         leave_key_list = list(index.values())
         leave_key_list.append({'id': 3, 'os_release': 'RHEL 6'})
-        unique_list = _remove_duplicate_fingerprints(
+        unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list)
         self.assertEqual(len(unique_list), 3)
 
         # now pass flag to strip id key
         remove_key_list = list(index.values())
-        unique_list = _remove_duplicate_fingerprints(
+        unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], remove_key_list, True)
         self.assertEqual(len(unique_list), 2)
         self.assertIsNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
@@ -725,13 +741,15 @@ class EngineTest(TestCase):
         ]
 
         # Test that unique id not in objects
-        index, no_key_found = _create_index_for_fingerprints(
-            'bios_uuid', fingerprints, False)
+        index, no_key_found = \
+            self.fp_task_runner._create_index_for_fingerprints(
+                'bios_uuid', fingerprints, False)
         self.assertIsNone(no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY))
 
         # Tests with unique id in objects
-        index, no_key_found = _create_index_for_fingerprints(
-            'bios_uuid', fingerprints)
+        index, no_key_found = \
+            self.fp_task_runner._create_index_for_fingerprints(
+                'bios_uuid', fingerprints)
 
         self.assertEqual(len(no_key_found), 1)
         self.assertEqual(no_key_found[0]['id'], 3)
@@ -759,7 +777,8 @@ class EngineTest(TestCase):
         self.assertIsNone(vfingerprint.get('cpu_socket_count'))
         self.assertIsNone(vfingerprint.get('cpu_core_count'))
 
-        new_fingerprint = _merge_fingerprint(nfingerprint, vfingerprint)
+        new_fingerprint = self.fp_task_runner._merge_fingerprint(
+            nfingerprint, vfingerprint)
 
         self.assertIsNotNone(new_fingerprint.get('vm_state'))
         self.assertIsNotNone(new_fingerprint.get('vm_uuid'))
@@ -785,22 +804,20 @@ class EngineTest(TestCase):
         self.assertNotEqual(vfingerprint.get('os_release'),
                             nfingerprint['os_release'])
 
-        new_fingerprint = _merge_fingerprint(nfingerprint, vfingerprint)
+        new_fingerprint = self.fp_task_runner._merge_fingerprint(
+            nfingerprint, vfingerprint)
 
         self.assertEqual(new_fingerprint.get(
             'os_release'), nfingerprint['os_release'])
 
     def test_source_name_in_metadata(self):
         """Test that adding facts includes source_name in metadata."""
-        source = Source(
-            name='source1',
-            source_type='network',
-            port=22)
-        source.save()
         sourcetopass = {'server_id': self.server_id,
-                        'source_name': 'source1', 'source_type': 'network'}
+                        'source_name': self.source.name,
+                        'source_type': self.source.source_type}
         fingerprint = {'metadata': {}}
-        result = _process_network_fact(sourcetopass, fingerprint)
+        result = self.fp_task_runner._process_network_fact(
+            sourcetopass, fingerprint)
         self.assertEqual(
             result['metadata']['infrastructure_type']['source_name'],
             'source1')
@@ -816,10 +833,11 @@ class EngineTest(TestCase):
         sfingerprints = [
             self._create_satellite_fingerprint(mac_addresses=['1'])]
 
-        _, result_fingerprints = _merge_fingerprints_from_source_types(
-            NETWORK_SATELLITE_MERGE_KEYS,
-            nfingerprints,
-            sfingerprints)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_SATELLITE_MERGE_KEYS,
+                nfingerprints,
+                sfingerprints)
         self.assertEqual(len(result_fingerprints), 1)
         fp = result_fingerprints[0]
         fp['date_yum_history'] = '2018-1-7'
@@ -827,7 +845,7 @@ class EngineTest(TestCase):
         fp['date_anaconda_log'] = '201837'
         fp['registration_time'] = '2018-4-7 12:45:02'
         fp['date_machine_id'] = None
-        _compute_system_creation_time(fp)
+        self.fp_task_runner._compute_system_creation_time(fp)
         test_date = datetime.strptime(
             '2018-4-7', '%Y-%m-%d').date()
 
@@ -846,7 +864,7 @@ class EngineTest(TestCase):
         }
         test_date = datetime.strptime(
             '2018-4-7', '%Y-%m-%d').date()
-        date_value = _multi_format_dateparse(
+        date_value = self.fp_task_runner._multi_format_dateparse(
             source,
             'fake_key',
             '2018-4-7 12:45:02',
@@ -854,7 +872,7 @@ class EngineTest(TestCase):
              '%Y-%m-%d %H:%M:%S %z'])
         self.assertEqual(date_value, test_date)
 
-        date_value = _multi_format_dateparse(
+        date_value = self.fp_task_runner._multi_format_dateparse(
             source,
             'fake_key',
             '2018-4-7 12:45:02 -0400',
@@ -862,7 +880,7 @@ class EngineTest(TestCase):
              '%Y-%m-%d %H:%M:%S %z'])
         self.assertEqual(date_value, test_date)
 
-        date_value = _multi_format_dateparse(
+        date_value = self.fp_task_runner._multi_format_dateparse(
             source,
             'fake_key',
             '2018-4-7 12:45:02 -0400',

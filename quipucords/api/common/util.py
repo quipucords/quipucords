@@ -14,9 +14,9 @@
 import logging
 import os
 
-from api.scantask.model import ScanTask
-
 from rest_framework.serializers import ValidationError
+
+from api.scantask.model import ScanTask  # noqa I100
 
 
 # Get an instance of a logger
@@ -67,6 +67,7 @@ def convert_to_boolean(value):
     """
     if is_boolean(value):
         return value.lower() == 'true'
+    return False
 
 
 def check_for_existing_name(queryset, name, error_message, search_id=None):
@@ -111,6 +112,7 @@ class CSVHelper:
 
     def serialize_value(self, header, fact_value):
         """Serialize a fact value to a CSV value."""
+        # pylint: disable=no-else-return
         if isinstance(fact_value, dict):
             return self.serialize_dict(header, fact_value)
         elif isinstance(fact_value, list):
@@ -198,7 +200,8 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     systems_count, \
         systems_scanned, \
         systems_failed, \
-        systems_unreachable = scanjob.calculate_counts(connect_only)
+        systems_unreachable,\
+        system_fingerprint_count = scanjob.calculate_counts(connect_only)
     report_id = scanjob.report_id
     start_time = scanjob.start_time
     end_time = scanjob.end_time
@@ -225,6 +228,8 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
         job_json['systems_failed'] = systems_failed
     if systems_unreachable is not None:
         job_json['systems_unreachable'] = systems_unreachable
+    if system_fingerprint_count is not None:
+        job_json['system_fingerprint_count'] = system_fingerprint_count
     if not connect_only and scan_type is not None:
         job_json['scan_type'] = scan_type
     if job_status_message is not None:

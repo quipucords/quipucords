@@ -14,15 +14,16 @@ import xmlrpc.client
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from api.models import (Credential,
+
+from django.test import TestCase
+
+from api.models import (Credential,  # noqa I100
                         ScanJob,
                         ScanTask,
                         Source,
                         SystemConnectionResult,
                         SystemInspectionResult,
                         TaskConnectionResult)
-
-from django.test import TestCase
 
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import (SatelliteFive,

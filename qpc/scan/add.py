@@ -15,16 +15,15 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.scan as scan
+from requests import codes
+
+from qpc import messages, scan # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import POST
 from qpc.scan.utils import (get_enabled_products,
                             get_optional_products,
                             get_source_ids)
 from qpc.translation import _
-
-from requests import codes
 
 
 # pylint: disable=too-few-public-methods

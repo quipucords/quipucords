@@ -12,8 +12,17 @@
 
 import json
 
+from django.db import transaction
+from django.utils.translation import ugettext as _
 
-import api.messages as messages
+from rest_framework.serializers import (BooleanField,
+                                        CharField,
+                                        IntegerField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
+
+
+from api import messages  # noqa
 from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer,
                                    ValidStringChoiceField)
@@ -23,18 +32,9 @@ from api.models import (DisabledOptionalProductsOptions,
                         ExtendedProductSearchOptions,
                         Scan,
                         ScanOptions,
-                        ScanTask,
                         Source)
 from api.scantask.serializer import SourceField
 
-from django.db import transaction
-from django.utils.translation import ugettext as _
-
-from rest_framework.serializers import (BooleanField,
-                                        CharField,
-                                        IntegerField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
 
 # pylint: disable=invalid-name
 try:
@@ -137,7 +137,7 @@ class ScanSerializer(NotEmptySerializer):
     name = CharField(required=True, read_only=False, max_length=64)
     sources = SourceField(many=True, queryset=Source.objects.all())
     scan_type = ValidStringChoiceField(required=False,
-                                       choices=ScanTask.SCAN_TYPE_CHOICES)
+                                       choices=Scan.SCAN_TYPE_CHOICES)
     options = ScanOptionsSerializer(required=False, many=False)
     jobs = JobField(required=False, many=True, read_only=True)
 

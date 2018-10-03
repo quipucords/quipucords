@@ -12,11 +12,11 @@
 
 These models are used in the REST definitions
 """
-import api.messages as messages
-from api.source.model import Source
-
 from django.db import models
 from django.utils.translation import ugettext as _
+
+from api import messages  # noqa
+from api.source.model import Source
 
 
 class RawFact(models.Model):

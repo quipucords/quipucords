@@ -13,14 +13,14 @@ from multiprocessing import Value
 from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
-from api.models import (Credential,
-                        ScanJob,
-                        ScanTask,
-                        Source)
-
 from django.test import TestCase
 
 from pyVmomi import vim  # pylint: disable=no-name-in-module
+
+from api.models import (Credential,  # noqa I100
+                        ScanJob,
+                        ScanTask,
+                        Source)
 
 from scanner.test_util import create_scan_job
 from scanner.vcenter.connect import (ConnectTaskRunner,

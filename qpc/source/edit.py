@@ -15,16 +15,14 @@ from __future__ import print_function
 
 import sys
 
-import qpc.cred as cred
-import qpc.messages as messages
-import qpc.source as source
+from requests import codes
+
+from qpc import cred, messages, source  # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import GET, PATCH, request
 from qpc.source.utils import build_source_payload, validate_port
 from qpc.translation import _
 from qpc.utils import read_in_file
-
-from requests import codes
 
 
 # pylint: disable=too-few-public-methods

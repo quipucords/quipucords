@@ -13,9 +13,9 @@
 import logging
 from multiprocessing import Pool
 
-from api.models import (ScanJob, SystemInspectionResult)
-
 import requests
+
+from api.models import (ScanJob, SystemInspectionResult)  # noqa I100
 
 from scanner.satellite import utils
 from scanner.satellite.api import (SatelliteCancelException,
@@ -272,11 +272,7 @@ def request_host_details(scan_task, logging_options,
     """Execute both http responses to gather satallite data.
 
     :param scan_task: The current scan task
-    :param task_sequence_number: The id of the running task
-    :param scan_type: The type of scan running
-        (inspect, connect)
-    :param source_type: The source type for logging
-    :param source_name: The source name for logging
+    :param logging_options: The metadata for logging
     :param host_id: The id of the host we're inspecting
     :param host_name: The name of the host we're inspecting
     :param fields_url: The sat61 or sat62 fields url

@@ -15,14 +15,14 @@ from unittest.mock import ANY, patch
 from argparse import ArgumentParser, Namespace  # noqa: I100
 from io import StringIO
 
-from qpc.cred import CREDENTIAL_URI
-from qpc.cred.list import CredListCommand
-from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
-from qpc.utils import get_server_location, write_server_config
-
 import requests
 
 import requests_mock
+
+from qpc.cred import CREDENTIAL_URI  # noqa I100
+from qpc.cred.list import CredListCommand
+from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
+from qpc.utils import get_server_location, write_server_config
 
 
 PARSER = ArgumentParser()

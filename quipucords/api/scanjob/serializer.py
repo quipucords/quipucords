@@ -10,7 +10,15 @@
 #
 """Module for serializing all model object for database storage."""
 
-import api.messages as messages
+from django.utils.translation import ugettext as _
+
+from rest_framework.serializers import (CharField,
+                                        DateTimeField,
+                                        IntegerField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
+
+from api import messages  # noqa I100
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField)
 from api.common.util import convert_to_int, is_int
@@ -21,14 +29,6 @@ from api.models import (Scan,
 from api.scan.serializer import ScanOptionsSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
 
-from django.utils.translation import ugettext as _
-
-from rest_framework.serializers import (CharField,
-                                        DateTimeField,
-                                        IntegerField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
-
 SCAN_KEY = 'scan'
 SOURCES_KEY = 'sources'
 TASKS_KEY = 'tasks'
@@ -36,6 +36,7 @@ SYSTEMS_COUNT_KEY = 'systems_count'
 SYSTEMS_SCANNED_KEY = 'systems_scanned'
 SYSTEMS_FAILED_KEY = 'systems_failed'
 SYSTEMS_UNREACHABLE_KEY = 'systems_unreachable'
+SYSTEM_FINGERPRINTS_KEY = 'system_fingerprint_count'
 
 
 def expand_scanjob(json_scan):
@@ -61,12 +62,18 @@ def expand_scanjob(json_scan):
         systems_count,\
             systems_scanned,\
             systems_failed,\
-            systems_unreachable = scan_job.calculate_counts()
+            systems_unreachable,\
+            system_fingerprint_count = scan_job.calculate_counts()
 
         json_scan[SYSTEMS_COUNT_KEY] = systems_count
         json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
         json_scan[SYSTEMS_FAILED_KEY] = systems_failed
         json_scan[SYSTEMS_UNREACHABLE_KEY] = systems_unreachable
+
+        json_scan[SYSTEM_FINGERPRINTS_KEY] = system_fingerprint_count
+        for task_json in json_scan[TASKS_KEY]:
+            if task_json['scan_type'] == ScanTask.SCAN_TYPE_FINGERPRINT:
+                task_json[SYSTEM_FINGERPRINTS_KEY] = system_fingerprint_count
     return json_scan
 
 
@@ -107,7 +114,7 @@ class ScanJobSerializer(NotEmptySerializer):
     scan = ScanField(required=True, many=False, queryset=Scan.objects.all())
     sources = SourceField(many=True, read_only=True)
     scan_type = ValidStringChoiceField(read_only=True,
-                                       choices=ScanTask.SCAN_TYPE_CHOICES)
+                                       choices=ScanTask.SCANTASK_TYPE_CHOICES)
     status = ValidStringChoiceField(read_only=True,
                                     choices=ScanTask.STATUS_CHOICES)
     status_message = CharField(read_only=True)
