@@ -50,7 +50,8 @@ def create_scan_job(source,
     scan_task = scan_job.tasks.first()
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         scan_task.complete()
-        scan_task = scan_job.tasks.last()
+        scan_task = scan_job.tasks.filter(
+            scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
 
     return scan_job, scan_task
 

@@ -200,7 +200,8 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     systems_count, \
         systems_scanned, \
         systems_failed, \
-        systems_unreachable = scanjob.calculate_counts(connect_only)
+        systems_unreachable,\
+        system_fingerprint_count = scanjob.calculate_counts(connect_only)
     report_id = scanjob.report_id
     start_time = scanjob.start_time
     end_time = scanjob.end_time
@@ -227,6 +228,8 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
         job_json['systems_failed'] = systems_failed
     if systems_unreachable is not None:
         job_json['systems_unreachable'] = systems_unreachable
+    if system_fingerprint_count is not None:
+        job_json['system_fingerprint_count'] = system_fingerprint_count
     if not connect_only and scan_type is not None:
         job_json['scan_type'] = scan_type
     if job_status_message is not None:
