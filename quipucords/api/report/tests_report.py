@@ -723,14 +723,14 @@ class AsyncMergeReports(TestCase):
         job_id = response_json.pop('id')
         self.assertEqual(response_json, expected)
 
-        url = f'/api/v1/reports/merge/jobs/{job_id}/'
+        url = '/api/v1/reports/merge/jobs/{}/'.format(job_id)
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code,
                          status.HTTP_200_OK)
 
     def test_create_report_merge_bad_url(self):
         """Create merge report job bad url."""
-        url = f'/api/v1/reports/merge/jobs/1/'
+        url = '/api/v1/reports/merge/jobs/1/'
         get_response = self.client.post(url)
         self.assertEqual(get_response.status_code,
                          status.HTTP_405_METHOD_NOT_ALLOWED)
