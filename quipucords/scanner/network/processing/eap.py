@@ -105,7 +105,7 @@ class ProcessJbossEapCommonFiles(process.Processor):
 class ProcessJbossEapProcesses(process.Processor):
     """Process the output of a process search."""
 
-    KEY = 'jboss_eap_processes'
+    KEY = 'jboss_processes'
 
     IGNORE_PROCESSES = ['bash', 'grep', 'oom_reaper']
 
