@@ -643,6 +643,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             actual_fact_value = fact_value
         elif raw_fact.get(raw_fact_key) is not None:
             actual_fact_value = raw_fact.get(raw_fact_key)
+            if fingerprint_key == 'mac_addresses':
+                actual_fact_value[0] = actual_fact_value[0].lower()
 
         # Remove empty string values
         if isinstance(actual_fact_value, str) and not actual_fact_value:

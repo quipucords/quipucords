@@ -559,6 +559,39 @@ class EngineTest(TestCase):
                 self.assertEqual(result_fingerprint.get(
                     'infrastructure_type'), 'virtualized')
 
+    def test_merge_mac_address_case_insensitive(self):
+        """Test if fingerprints will be merged with mixed mac addr."""
+        n_mac = ['00:50:56:A3:A2:E8']
+        v_mac = ['00:50:56:a3:a2:e8']
+        s_mac = ['00:50:56:A3:a2:E8']
+        self.assertNotEqual(v_mac, n_mac)
+        self.assertNotEqual(v_mac, s_mac)
+        nfingerprints = [
+            self._create_network_fingerprint(ifconfig_mac_addresses=n_mac)]
+        vfingerprints = [
+            self._create_vcenter_fingerprint(vm_mac_addresses=v_mac)]
+        sfingerprints = [
+            self._create_satellite_fingerprint(mac_addresses=s_mac)]
+        v_mac_addresses = vfingerprints[0]['mac_addresses']
+        n_mac_addresses = nfingerprints[0]['mac_addresses']
+        s_mac_addresses = sfingerprints[0]['mac_addresses']
+        self.assertEqual(v_mac_addresses, n_mac_addresses)
+        self.assertEqual(v_mac_addresses, s_mac_addresses)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_SATELLITE_MERGE_KEYS,
+                nfingerprints,
+                sfingerprints)
+        self.assertEqual(len(result_fingerprints), 1)
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_VCENTER_MERGE_KEYS,
+                nfingerprints,
+                vfingerprints,
+                reverse_priority_keys=reverse_priority_keys)
+        self.assertEqual(len(result_fingerprints), 1)
+
     def test_merge_net_sate_vcenter_infrastructure_type(self):
         """Test if VCenter infrastructure_type is prefered over the others."""
         nfingerprints = [
