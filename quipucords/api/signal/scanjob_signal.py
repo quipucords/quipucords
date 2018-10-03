@@ -13,12 +13,12 @@
 
 import logging
 
-import api.messages as messages
+from api import messages
 
 import django.dispatch
 from django.utils.translation import ugettext as _
 
-from scanner import ScanJobRunner
+from scanner.job import ScanJobRunner
 from scanner.manager import SCAN_MANAGER
 
 # Get an instance of a logger
@@ -59,7 +59,7 @@ def scan_action(sender, instance, action, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    if action == PAUSE or action == CANCEL:
+    if action in [PAUSE, CANCEL]:
         SCAN_MANAGER.kill(instance, action)
 
 

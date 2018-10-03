@@ -14,7 +14,7 @@ import json
 import logging
 import re
 
-import api.messages as messages
+from api import messages
 from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer,
                                    ValidStringChoiceField)
@@ -531,9 +531,8 @@ class SourceSerializer(NotEmptySerializer):
                                 host_range)
         if len(host_errors) is 0:
             return normalized_hosts
-        else:
-            error_message = [error.detail.pop() for error in host_errors]
-            raise ValidationError(error_message)
+        error_message = [error.detail.pop() for error in host_errors]
+        raise ValidationError(error_message)
 
     @staticmethod
     def validate_hosts(hosts):

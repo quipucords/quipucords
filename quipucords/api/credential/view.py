@@ -12,7 +12,7 @@
 
 import os
 
-import api.messages as messages
+from api import messages
 from api.common.util import is_int
 from api.filters import ListFilter
 from api.models import Credential, Source
@@ -85,8 +85,8 @@ def format_credential(cred):
 class CredentialFilter(FilterSet):
     """Filter for host credentials by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
 
@@ -114,7 +114,8 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     ordering_fields = ('name', 'cred_type')
     ordering = ('name',)
 
-    def list(self, request):  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,arguments-differ
+    def list(self, request):
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -140,7 +141,8 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         return Response(cred, status=status.HTTP_201_CREATED,
                         headers=headers)
 
-    def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,arguments-differ
+    def retrieve(self, request, pk=None):
         """Get a host credential."""
         if not pk or (pk and not is_int(pk)):
             error = {
@@ -177,7 +179,7 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
         return Response(cred)
 
     @transaction.atomic
-    def destroy(self, request, pk):
+    def destroy(self, request, pk):  # pylint: disable=arguments-differ
         """Delete a cred."""
         try:
             cred = Credential.objects.get(pk=pk)

@@ -13,9 +13,8 @@
 
 from __future__ import print_function
 
-
 import qpc.cred as credential
-import qpc.messages as messages
+from qpc import messages
 from qpc.clicommand import CliCommand
 from qpc.cred.utils import build_credential_payload
 from qpc.request import POST

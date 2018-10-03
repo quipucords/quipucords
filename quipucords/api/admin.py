@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Admin module for Django server application."""
+
 from api.models import (Credential,
                         FactCollection,
                         JobConnectionResult,

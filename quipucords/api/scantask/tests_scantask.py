@@ -12,7 +12,7 @@
 
 from datetime import datetime
 
-import api.messages as messages
+from api import messages
 from api.models import (Credential,
                         Scan,
                         ScanJob,

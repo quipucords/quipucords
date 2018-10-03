@@ -12,14 +12,14 @@
 
 import json
 
-import api.messages as messages
+from api import messages
 from api.models import (Credential,
                         FactCollection,
                         ServerInformation,
                         Source)
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 

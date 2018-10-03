@@ -10,12 +10,12 @@
 #
 
 """Serializer for system fingerprint models."""
+
 from api.common.serializer import CustomJSONField
 from api.models import (Entitlement,
                         FactCollection,
                         Product,
                         SystemFingerprint)
-
 
 from rest_framework.serializers import (CharField,
                                         ChoiceField,

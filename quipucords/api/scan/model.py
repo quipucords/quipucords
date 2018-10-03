@@ -15,7 +15,7 @@ These models are used in the REST definitions.
 import json
 import logging
 
-import api.messages as messages
+from api import messages
 from api.scantask.model import ScanTask
 from api.source.model import Source
 
@@ -217,11 +217,15 @@ class ScanOptions(models.Model):
 class Scan(models.Model):
     """Configuration for the scan jobs that will run."""
 
+    SCAN_TYPE_CHOICES = (
+        (ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_CONNECT),
+        (ScanTask.SCAN_TYPE_INSPECT, ScanTask.SCAN_TYPE_INSPECT))
+
     name = models.CharField(max_length=64, unique=True)
     sources = models.ManyToManyField(Source)
     scan_type = models.CharField(
         max_length=9,
-        choices=ScanTask.SCAN_TYPE_CHOICES,
+        choices=SCAN_TYPE_CHOICES,
         default=ScanTask.SCAN_TYPE_INSPECT,
     )
     options = models.ForeignKey(

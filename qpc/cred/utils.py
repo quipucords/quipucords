@@ -15,7 +15,7 @@ from __future__ import print_function
 
 from getpass import getpass
 
-import qpc.messages as messages
+from qpc import messages
 from qpc.translation import _
 
 

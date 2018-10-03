@@ -13,9 +13,10 @@
 
 import unittest
 
-from api.models import ServerInformation
-
 from django.test import TestCase
+
+# pylint: disable=wrong-import-order
+from api.models import ServerInformation  # noqa
 
 from fingerprinter.jboss_eap import detect_jboss_eap, version_aware_dedup
 

@@ -13,8 +13,7 @@
 
 from __future__ import print_function
 
-import qpc.messages as messages
-import qpc.scan as scan
+from qpc import messages, scan
 from qpc.clicommand import CliCommand
 from qpc.request import PUT
 from qpc.translation import _

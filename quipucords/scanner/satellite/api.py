@@ -51,7 +51,7 @@ class SatellitePauseException(Exception):
     pass
 
 
-class SatelliteInterface(object):
+class SatelliteInterface():
     """Generic interface for dealing with Satellite."""
 
     def __init__(self, scan_job, scan_task):

@@ -10,6 +10,7 @@
 #
 
 """Serializer for system facts models."""
+
 from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer)
 from api.models import FactCollection

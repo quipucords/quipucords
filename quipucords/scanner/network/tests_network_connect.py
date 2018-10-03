@@ -27,7 +27,6 @@ from api.serializers import CredentialSerializer, SourceSerializer
 
 from django.test import TestCase
 
-
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import (ConnectResultStore,
                                      _connect,
@@ -52,7 +51,7 @@ def mock_handle_ssh(cred):  # pylint: disable=unused-argument
     pass
 
 
-class MockResultStore(object):
+class MockResultStore():
     """A mock ConnectResultStore."""
 
     def __init__(self, hosts):
@@ -153,7 +152,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source2.save()
 
         self.scan_job2, self.scan_task2 = create_scan_job(
-            self.source, 'source2', ScanTask.SCAN_TYPE_CONNECT)
+            self.source, ScanTask.SCAN_TYPE_CONNECT, 'source2')
 
         self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 

@@ -13,8 +13,7 @@
 
 from __future__ import print_function
 
-import qpc.messages as messages
-import qpc.server as server
+from qpc import messages, server
 from qpc.clicommand import CliCommand
 from qpc.request import PUT
 from qpc.translation import _

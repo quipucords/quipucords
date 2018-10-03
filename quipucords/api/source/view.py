@@ -12,7 +12,7 @@
 
 import os
 
-import api.messages as messages
+from api import messages
 from api.common.util import (convert_to_boolean,
                              expand_scanjob_with_times,
                              is_boolean,
@@ -98,11 +98,11 @@ def format_source(json_source):
 class SourceFilter(FilterSet):
     """Filter for sources by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
-    search_credentials_by_name = CharFilter(name='credentials__name',
+    search_credentials_by_name = CharFilter(field_name='credentials__name',
                                             lookup_expr='contains',
                                             distinct=True)
 
@@ -132,7 +132,8 @@ class SourceViewSet(ModelViewSet):
                        'most_recent_connect_scan__start_time')
     ordering = ('name',)
 
-    def list(self, request):  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,arguments-differ
+    def list(self, request):
         """List the sources."""
         # List objects
         result = []
@@ -235,7 +236,7 @@ class SourceViewSet(ModelViewSet):
         return Response(json_source)
 
     @transaction.atomic
-    def destroy(self, request, pk):
+    def destroy(self, request, pk):  # pylint: disable=arguments-differ
         """Delete a cred."""
         try:
             source = Source.objects.get(pk=pk)

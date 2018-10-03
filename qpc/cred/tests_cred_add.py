@@ -17,8 +17,7 @@ from unittest.mock import patch
 from argparse import ArgumentParser, Namespace  # noqa: I100
 from io import StringIO
 
-
-import qpc.messages as messages
+from qpc import messages
 from qpc.cli import CLI
 from qpc.cred import (CREDENTIAL_URI,
                       NETWORK_CRED_TYPE,

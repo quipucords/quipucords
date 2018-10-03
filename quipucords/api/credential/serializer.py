@@ -12,7 +12,7 @@
 
 import os
 
-import api.messages as messages
+from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential

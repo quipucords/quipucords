@@ -14,8 +14,7 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-
-import qpc.messages as messages
+from qpc import messages
 from qpc.cred import CREDENTIAL_URI
 from qpc.cred.clear import CredClearCommand
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout

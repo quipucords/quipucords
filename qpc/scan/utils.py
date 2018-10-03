@@ -13,9 +13,7 @@
 
 from __future__ import print_function
 
-import qpc.messages as messages
-import qpc.scan as scan
-import qpc.source as source
+from qpc import messages, scan, source
 from qpc.request import GET, request
 from qpc.translation import _
 
@@ -128,6 +126,7 @@ def get_enabled_products(enabled_ext_product_search,
             for product in enabled_ext_product_search:
                 enabled_default[product] = True
         return enabled_default
+    # pylint: disable=no-else-return
     if enabled_ext_product_search == []:
         enabled_default = {scan.JBOSS_FUSE: False,
                            scan.JBOSS_EAP: False,

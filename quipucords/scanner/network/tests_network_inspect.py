@@ -29,8 +29,8 @@ from api.models import (Credential,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 import requests_mock
 

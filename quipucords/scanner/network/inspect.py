@@ -185,6 +185,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connected_hosts = \
             self.connect_scan_task.connection_result.systems.filter(
                 status=SystemConnectionResult.SUCCESS).values('name')
+        # pylint: disable=consider-using-set-comprehension
         connected_hosts = set([system.get('name')
                                for system in connected_hosts])
         scanned_hosts = set([system.get(NETWORK_SCAN_IDENTITY_KEY)
@@ -292,8 +293,8 @@ class InspectTaskRunner(ScanTaskRunner):
             if result != TaskQueueManager.RUN_OK:
                 new_error_msg = _construct_error_msg(result)
                 callback.finalize_failed_hosts()
-                if result != TaskQueueManager.RUN_UNREACHABLE_HOSTS and \
-                        result != TaskQueueManager.RUN_FAILED_HOSTS:
+                if result not in [TaskQueueManager.RUN_UNREACHABLE_HOSTS,
+                                  TaskQueueManager.RUN_FAILED_HOSTS]:
                     error_msg += '{}\n'.format(new_error_msg)
 
         if error_msg != '':

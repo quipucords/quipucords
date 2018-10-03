@@ -15,8 +15,7 @@
 import json
 from unittest.mock import patch
 
-
-import api.messages as messages
+from api import messages
 from api.models import (Credential,
                         DisabledOptionalProductsOptions,
                         ExtendedProductSearchOptions,
@@ -34,8 +33,8 @@ from api.scanjob.serializer import ScanJobSerializer
 from api.scanjob.view import expand_scanjob
 
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 
@@ -128,7 +127,7 @@ class ScanJobTest(TestCase):
 
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all().order_by('sequence_number')
-        self.assertEqual(len(tasks), 2)
+        self.assertEqual(len(tasks), 3)
 
         # Validate connect task created and correct
         connect_task = tasks[0]
@@ -207,7 +206,7 @@ class ScanJobTest(TestCase):
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all()
         self.assertEqual(len(tasks), 1)
-        connect_task = scan_job.tasks.first()
+        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         # Start job
@@ -215,17 +214,17 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.RUNNING)
 
         scan_job.pause()
-        connect_task = scan_job.tasks.first()
+        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.PAUSED)
         self.assertEqual(connect_task.status, ScanTask.PAUSED)
 
         scan_job.restart()
-        connect_task = scan_job.tasks.first()
+        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.PENDING)
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         scan_job.cancel()
-        connect_task = scan_job.tasks.first()
+        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.CANCELED)
         self.assertEqual(connect_task.status, ScanTask.CANCELED)
 

@@ -13,7 +13,7 @@
 from api.models import ScanTask
 
 
-class ScanTaskRunner(object):
+class ScanTaskRunner():
     """ScanTaskRunner is a logical breakdown of work."""
 
     # pylint: disable=too-few-public-methods

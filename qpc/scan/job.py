@@ -16,8 +16,7 @@ from __future__ import print_function
 import sys
 import urllib.parse as urlparse
 
-import qpc.messages as messages
-import qpc.scan as scan
+from qpc import messages, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET
 from qpc.scan.utils import get_scan_object_id

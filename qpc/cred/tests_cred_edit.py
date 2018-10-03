@@ -15,7 +15,7 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import qpc.messages as messages
+from qpc import messages
 from qpc.cli import CLI
 from qpc.cred import (CREDENTIAL_URI,
                       NETWORK_CRED_TYPE,
@@ -28,6 +28,7 @@ from qpc.utils import get_server_location, write_server_config
 import requests
 
 import requests_mock
+
 
 TMP_KEY = '/tmp/testkey'
 PARSER = ArgumentParser()

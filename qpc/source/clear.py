@@ -15,8 +15,7 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.source as source
+from qpc import messages, source
 from qpc.clicommand import CliCommand
 from qpc.request import DELETE, GET, request
 from qpc.translation import _

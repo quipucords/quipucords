@@ -10,7 +10,7 @@
 #
 """Module for serializing all model object for database storage."""
 
-import api.messages as messages
+from api import messages
 from api.common.serializer import NotEmptySerializer
 from api.common.util import convert_to_int, is_int
 from api.models import ScanTask, Source
@@ -22,7 +22,7 @@ from rest_framework.serializers import (CharField,
                                         DateTimeField,
                                         IntegerField,
                                         PrimaryKeyRelatedField,
-                                        ValidationError,)
+                                        ValidationError, )
 
 
 class SourceField(PrimaryKeyRelatedField):
@@ -51,10 +51,11 @@ class ScanTaskSerializer(NotEmptySerializer):
     """Serializer for the ScanTask model."""
 
     source = SourceField(queryset=Source.objects.all())
-    scan_type = ChoiceField(required=False, choices=ScanTask.SCAN_TYPE_CHOICES)
+    scan_type = ChoiceField(
+        required=False, choices=ScanTask.SCANTASK_TYPE_CHOICES)
     status = ChoiceField(required=False, read_only=True,
                          choices=ScanTask.STATUS_CHOICES)
-    status_message = CharField(required=False, max_length=256)
+    status_message = CharField(required=False)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)

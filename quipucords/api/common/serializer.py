@@ -13,7 +13,7 @@
 import json
 from collections import OrderedDict
 
-import api.messages as messages
+from api import messages
 
 from rest_framework.serializers import (ChoiceField,
                                         Field,

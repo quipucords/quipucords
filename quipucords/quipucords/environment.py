@@ -111,6 +111,7 @@ def startup():
             database = os.getenv('QPC_DBMS_DATABASE', 'postgres')
             user = os.getenv('QPC_DBMS_USER', 'postgres')
             host = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
+            # pylint: disable=invalid-envvar-default
             port = os.getenv('QPC_DBMS_PORT', 5432)
             logger.info('QPC_DBMS_HOST set to "%s"', host)
             logger.info('QPC_DBMS_PORT set to "%s"', port)

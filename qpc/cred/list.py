@@ -16,7 +16,7 @@ from __future__ import print_function
 import urllib.parse as urlparse
 
 import qpc.cred as credential
-import qpc.messages as messages
+from qpc import messages
 from qpc.clicommand import CliCommand
 from qpc.request import GET
 from qpc.translation import _

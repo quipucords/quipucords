@@ -15,7 +15,7 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import qpc.messages as messages
+from qpc import messages
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
 from qpc.source import SOURCE_URI
 from qpc.source.clear import SourceClearCommand

@@ -15,9 +15,7 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.report as report
-import qpc.scan as scan
+from qpc import messages, report, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET, request
 from qpc.translation import _

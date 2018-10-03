@@ -15,8 +15,7 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.scan as scan
+from qpc import messages, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET, PATCH, request
 from qpc.scan.utils import (build_scan_payload,

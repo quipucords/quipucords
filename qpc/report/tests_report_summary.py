@@ -18,7 +18,7 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import qpc.messages as messages
+from qpc import messages
 from qpc.cli import CLI
 from qpc.report import REPORT_URI
 from qpc.report.summary import ReportSummaryCommand

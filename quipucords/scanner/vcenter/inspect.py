@@ -169,7 +169,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches,too-many-locals
     def parse_vm_props(self, props, host_dict):
         """Parse Virtual Machine properties.
 
