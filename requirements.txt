@@ -1,6 +1,5 @@
 # Include Locked Server Requirements
 -r locked-requirements.txt
---editable .
 
 asn1crypto==0.24.0
 astroid==2.0.4
