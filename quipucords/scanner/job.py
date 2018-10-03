@@ -193,20 +193,21 @@ class ScanJobRunner(Process):
         if task_status == ScanTask.CANCELED:
             runner.scan_task.cancel()
             runner.scan_job.cancel()
-            return ScanTask.CANCELED
         elif task_status == ScanTask.PAUSED:
             runner.scan_task.pause()
             runner.scan_job.pause()
-            return ScanTask.PAUSED
         elif task_status == ScanTask.COMPLETED:
             runner.scan_task.complete(status_message)
-            return ScanTask.COMPLETED
-        error_message = 'ScanTask %d failed.  Scan task must return '\
-            'ScanTask.COMPLETED or ScanTask.FAILED.  '\
-            'ScanTask returned %s' %\
-            (runner.scan_task.id, task_status)
-        runner.scan_task.fail(error_message)
-        return ScanTask.FAILED
+        elif task_status == ScanTask.FAILED:
+            runner.scan_task.fail(status_message)
+        else:
+            error_message = 'ScanTask %d failed.  Scan task must return '\
+                'ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned ' \
+                '"%s" and the following status message: %s' %\
+                (runner.scan_task.sequence_number, task_status, status_message)
+            runner.scan_task.fail(error_message)
+            task_status = ScanTask.FAILED
+        return task_status
 
     def _create_connect_task_runner(self, scan_task):
         """Create connection TaskRunner using source_type."""
