@@ -13,6 +13,7 @@
 import copy
 import json
 import uuid
+from unittest.mock import patch
 
 from api import messages
 from api.models import (Credential,
@@ -652,6 +653,11 @@ class SyncMergeReports(TestCase):
             json_response, expected)
 
 
+def dummy_start():
+    """Create a dummy method for testing."""
+    pass
+
+
 class AsyncMergeReports(TestCase):
     """Tests against the Deployment reports function."""
 
@@ -703,6 +709,8 @@ class AsyncMergeReports(TestCase):
     ##############################################################
     # Test Async Report Merge
     ##############################################################
+
+    @patch('api.report.view.start_scan', side_effect=dummy_start)
     def test_greenpath_create(self):
         """Create report merge job object via API."""
         request_json = {'sources':
