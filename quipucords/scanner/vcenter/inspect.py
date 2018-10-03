@@ -135,8 +135,12 @@ class InspectTaskRunner(ScanTaskRunner):
             elif prop.name == 'parent':
                 parent = parents_dict.get(str(prop.val))
                 while parent.get('type') != 'vim.Datacenter':
-                    parent = parents_dict.get(parent.get('parent'))
-                facts['cluster.datacenter'] = parent.get('name')
+                    if parent is not None:
+                        parent = parents_dict.get(parent.get('parent'))
+                if parent is not None:
+                    facts['cluster.datacenter'] = parent.get('name')
+                else:
+                    facts['cluster.datacenter'] = None
         return facts
 
     @transaction.atomic
@@ -150,13 +154,10 @@ class InspectTaskRunner(ScanTaskRunner):
         facts = {}
         for prop in props:
             if prop.name == 'parent':
-                c_src = cluster_dict.get(str(prop.val))
-                if c_src is not None:
-                    facts['host.cluster'] = c_src.get('cluster.name')
-                    facts['host.datacenter'] = c_src.get('cluster.datacenter')
-                else:
-                    facts['host.cluster'] = None
-                    facts['host.datacenter'] = None
+                cluster_info = cluster_dict.get(str(prop.val), {})
+                facts['host.cluster'] = cluster_info.get('cluster.name')
+                facts['host.datacenter'] = \
+                    cluster_info.get('cluster.datacenter')
             elif prop.name == 'summary.config.name':
                 facts['host.name'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
@@ -201,8 +202,8 @@ class InspectTaskRunner(ScanTaskRunner):
             elif prop.name == 'summary.config.uuid':
                 facts['vm.uuid'] = prop.val
             elif prop.name == 'runtime.host':
-                if host_dict.get(str(prop.val)):
-                    host_facts = host_dict[str(prop.val)]
+                host_facts = host_dict.get(str(prop.val))
+                if host_facts:
                     facts['vm.host.name'] = host_facts.get('host.name')
                     facts['vm.host.cpu_cores'] = \
                         host_facts.get('host.cpu_cores')
