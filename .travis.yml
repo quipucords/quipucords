@@ -25,6 +25,7 @@ env:
 
 # command to install dependencies
 install:
+  - pip install -U pip
   - pip install -r dev-requirements.txt
   - pip install codecov
   - nvm install node
