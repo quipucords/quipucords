@@ -16,11 +16,7 @@ import unittest
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from io import StringIO
 
-import requests
-
-import requests_mock
-
-from qpc import messages  # noqa I100
+from qpc import messages
 from qpc.cli import CLI
 from qpc.cred import CREDENTIAL_URI
 from qpc.request import CONNECTION_ERROR_MSG, SSL_ERROR_MSG
@@ -29,6 +25,10 @@ from qpc.source.add import SourceAddCommand
 from qpc.source.utils import validate_port
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
+
+import requests
+
+import requests_mock
 
 TMP_HOSTFILE = '/tmp/testhostsfile'
 PARSER = ArgumentParser()

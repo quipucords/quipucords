@@ -11,12 +11,12 @@
 
 """Serializer for system facts models."""
 
-from rest_framework.serializers import (CharField,
-                                        ChoiceField)
-
-from api.common.serializer import (CustomJSONField,  # noqa I100
+from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer)
 from api.models import FactCollection
+
+from rest_framework.serializers import (CharField,
+                                        ChoiceField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):

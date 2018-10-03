@@ -14,11 +14,11 @@ import logging
 import ssl
 import xmlrpc.client
 
+from api.vault import decrypt_data_as_unicode
+
 import requests
 
 from rest_framework import status as codes
-
-from api.vault import decrypt_data_as_unicode  # noqa I100
 
 from scanner.satellite.api import (SATELLITE_VERSION_5,
                                    SATELLITE_VERSION_6,

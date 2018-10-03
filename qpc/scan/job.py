@@ -16,14 +16,14 @@ from __future__ import print_function
 import sys
 import urllib.parse as urlparse
 
-from requests import codes
-
-from qpc import messages, scan # noqa I100
+from qpc import messages, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET
 from qpc.scan.utils import get_scan_object_id
 from qpc.translation import _
 from qpc.utils import pretty_print
+
+from requests import codes
 
 
 # pylint: disable=too-few-public-methods

@@ -10,15 +10,7 @@
 #
 """Module for serializing all model object for database storage."""
 
-from django.utils.translation import ugettext as _
-
-from rest_framework.serializers import (CharField,
-                                        DateTimeField,
-                                        IntegerField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
-
-from api import messages  # noqa I100
+from api import messages
 from api.common.serializer import (NotEmptySerializer,
                                    ValidStringChoiceField)
 from api.common.util import convert_to_int, is_int
@@ -28,6 +20,14 @@ from api.models import (Scan,
                         Source)
 from api.scan.serializer import ScanOptionsSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
+
+from django.utils.translation import ugettext as _
+
+from rest_framework.serializers import (CharField,
+                                        DateTimeField,
+                                        IntegerField,
+                                        PrimaryKeyRelatedField,
+                                        ValidationError)
 
 SCAN_KEY = 'scan'
 SOURCES_KEY = 'sources'

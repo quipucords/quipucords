@@ -15,14 +15,14 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from io import StringIO
 
-import requests_mock
-
-from qpc import messages  # noqa I100
+from qpc import messages
 from qpc.cli import CLI
 from qpc.scan import SCAN_URI
 from qpc.scan.start import ScanStartCommand
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
+
+import requests_mock
 
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')

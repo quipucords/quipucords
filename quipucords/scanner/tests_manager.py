@@ -13,9 +13,9 @@
 from multiprocessing import Process
 from unittest.mock import Mock
 
-from django.test import TestCase
+from api.models import ScanTask
 
-from api.models import ScanTask  # noqa I100
+from django.test import TestCase
 
 from scanner.manager import Manager
 

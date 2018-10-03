@@ -16,16 +16,16 @@ from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.parsing.splitter import parse_kv
 
-from django.db import transaction
-
-import pexpect
-
-from api.models import (Credential,  # noqa I100
+from api.models import (Credential,
                         ScanJob,
                         ScanOptions,
                         ScanTask,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
+
+from django.db import transaction
+
+import pexpect
 
 from quipucords import settings
 

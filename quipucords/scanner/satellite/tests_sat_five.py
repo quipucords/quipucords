@@ -15,15 +15,15 @@ from multiprocessing import Value
 from unittest.mock import ANY, patch
 
 
-from django.test import TestCase
-
-from api.models import (Credential,  # noqa I100
+from api.models import (Credential,
                         ScanJob,
                         ScanTask,
                         Source,
                         SystemConnectionResult,
                         SystemInspectionResult,
                         TaskConnectionResult)
+
+from django.test import TestCase
 
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import (SatelliteFive,

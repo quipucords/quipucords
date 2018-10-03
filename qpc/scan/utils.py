@@ -13,11 +13,11 @@
 
 from __future__ import print_function
 
-from requests import codes
-
-from qpc import messages, scan, source  # noqa I100
+from qpc import messages, scan, source
 from qpc.request import GET, request
 from qpc.translation import _
+
+from requests import codes
 
 
 def get_source_ids(parser, source_names):

@@ -16,14 +16,14 @@ import json
 import logging
 from datetime import datetime
 
-from django.db import models, transaction
-from django.utils.translation import ugettext as _
-
-from api import messages  # noqa I100
+from api import messages
 from api.connresult.model import TaskConnectionResult
 from api.fact.model import FactCollection
 from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
+
+from django.db import models, transaction
+from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
