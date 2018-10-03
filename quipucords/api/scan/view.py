@@ -13,15 +13,6 @@
 import logging
 import os
 
-import api.messages as messages
-from api.common.pagination import StandardResultsSetPagination
-from api.common.util import expand_scanjob_with_times, is_int
-from api.filters import ListFilter
-from api.models import (Scan, ScanJob, ScanTask, Source)
-from api.scanjob.serializer import expand_scanjob
-from api.serializers import (ScanJobSerializer, ScanSerializer)
-from api.signal.scanjob_signal import (cancel_scan, start_scan)
-
 from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
@@ -46,6 +37,15 @@ from rest_framework.viewsets import ModelViewSet
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
+
+from api import messages  # noqa I100
+from api.common.pagination import StandardResultsSetPagination
+from api.common.util import expand_scanjob_with_times, is_int
+from api.filters import ListFilter
+from api.models import (Scan, ScanJob, ScanTask, Source)
+from api.scanjob.serializer import expand_scanjob
+from api.serializers import (ScanJobSerializer, ScanSerializer)
+from api.signal.scanjob_signal import (cancel_scan, start_scan)
 
 
 # Get an instance of a logger
@@ -119,18 +119,17 @@ def jobs(request, pk=None):
             job_json = expand_scanjob(job_serializer.data)
             result.append(job_json)
         return Response(result)
-    else:
-        job_data = {}
-        job_data['scan'] = pk
-        job_serializer = ScanJobSerializer(data=job_data)
-        job_serializer.is_valid(raise_exception=True)
-        job_serializer.save()
-        scanjob_obj = ScanJob.objects.get(pk=job_serializer.data['id'])
-        scanjob_obj.log_current_status()
-        start_scan.send(sender=ScanViewSet.__class__, instance=scanjob_obj)
+    job_data = {}
+    job_data['scan'] = pk
+    job_serializer = ScanJobSerializer(data=job_data)
+    job_serializer.is_valid(raise_exception=True)
+    job_serializer.save()
+    scanjob_obj = ScanJob.objects.get(pk=job_serializer.data['id'])
+    scanjob_obj.log_current_status()
+    start_scan.send(sender=ScanViewSet.__class__, instance=scanjob_obj)
 
-        return Response(job_serializer.data,
-                        status=status.HTTP_201_CREATED)
+    return Response(job_serializer.data,
+                    status=status.HTTP_201_CREATED)
 
 
 def get_job_queryset_query_set(scan, query_params):
@@ -170,11 +169,11 @@ def expand_scan(json_scan):
 class ScanFilter(FilterSet):
     """Filter for sources by name."""
 
-    name = ListFilter(name='name')
-    search_by_name = CharFilter(name='name',
+    name = ListFilter(field_name='name')
+    search_by_name = CharFilter(field_name='name',
                                 lookup_expr='contains',
                                 distinct=True)
-    search_sources_by_name = CharFilter(name='sources__name',
+    search_sources_by_name = CharFilter(field_name='sources__name',
                                         lookup_expr='contains',
                                         distinct=True)
 
@@ -217,7 +216,8 @@ class ScanViewSet(ModelViewSet):
         return Response(json_scan, status=status.HTTP_201_CREATED,
                         headers=headers)
 
-    def list(self, request):  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument,no-member,arguments-differ
+    def list(self, request):
         """List the collection of scan."""
         result = []
         queryset = self.filter_queryset(self.get_queryset())

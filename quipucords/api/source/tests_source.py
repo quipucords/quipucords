@@ -14,20 +14,20 @@ import json
 from datetime import datetime
 from unittest.mock import patch
 
-import api.messages as messages
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
+from rest_framework.serializers import ValidationError
+
+from api import messages  # noqa I100
 from api.models import (Credential,
                         Scan,
                         ScanTask,
                         Source)
 from api.serializers import SourceSerializer
 from api.source.view import format_source
-
-from django.core import management
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-
-from rest_framework import status
-from rest_framework.serializers import ValidationError
 
 
 from scanner.test_util import create_scan_job
@@ -186,7 +186,7 @@ class SourceTest(TestCase):
         out = format_source(json_source)
 
         # pylint: disable=line-too-long
-        expected = {'id': 1, 'name': 'source1', 'source_type': 'network', 'port': 22, 'hosts': ['1.2.3.4'], 'connection': {'id': 1, 'start_time': start, 'end_time': end, 'systems_count': 10, 'systems_scanned': 9, 'systems_failed': 1, 'systems_unreachable': 0, 'status_details': {'job_status_message': 'Job is pending.'}, 'status': 'completed', 'source_systems_count': 10, 'source_systems_scanned': 9, 'source_systems_failed': 1, 'source_systems_unreachable': 0}}  # noqa
+        expected = {'id': 1, 'name': 'source1', 'source_type': 'network', 'port': 22, 'hosts': ['1.2.3.4'], 'connection': {'id': 1, 'start_time': start, 'end_time': end, 'systems_count': 10, 'systems_scanned': 9, 'systems_failed': 1, 'systems_unreachable': 0, 'system_fingerprint_count': 0, 'status_details': {'job_status_message': 'Job is pending.'}, 'status': 'completed', 'source_systems_count': 10, 'source_systems_scanned': 9, 'source_systems_failed': 1, 'source_systems_unreachable': 0}} # noqa
         self.assertEqual(out, expected)
 
     #################################################
@@ -255,7 +255,7 @@ class SourceTest(TestCase):
                 'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
-        response = self.create_expect_400(data)
+        self.create_expect_400(data)
 
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""

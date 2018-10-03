@@ -14,23 +14,6 @@ import json
 import logging
 import os
 
-import api.messages as messages
-from api.common.pagination import StandardResultsSetPagination
-from api.common.util import is_int
-from api.models import (Credential,
-                        RawFact,
-                        ScanJob,
-                        ScanTask,
-                        Source)
-from api.scanjob.serializer import expand_scanjob
-from api.serializers import (ScanJobSerializer,
-                             SystemConnectionResultSerializer,
-                             SystemInspectionResultSerializer)
-from api.signal.scanjob_signal import (cancel_scan,
-                                       pause_scan,
-                                       restart_scan)
-
-
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
@@ -47,6 +30,22 @@ from rest_framework.serializers import ValidationError
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
+
+from api import messages  # noqa I100
+from api.common.pagination import StandardResultsSetPagination
+from api.common.util import is_int
+from api.models import (Credential,
+                        RawFact,
+                        ScanJob,
+                        ScanTask,
+                        Source)
+from api.scanjob.serializer import expand_scanjob
+from api.serializers import (ScanJobSerializer,
+                             SystemConnectionResultSerializer,
+                             SystemInspectionResultSerializer)
+from api.signal.scanjob_signal import (cancel_scan,
+                                       pause_scan,
+                                       restart_scan)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -188,6 +187,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
         return (ordering_filter, status_filter, source_id_filter)
 
+    # pylint: disable=too-many-locals
     @detail_route(methods=['get'])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
@@ -225,6 +225,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
+    # pylint: disable=too-many-locals
     @detail_route(methods=['get'])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
@@ -270,6 +271,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             }
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
+        # pylint: disable=no-else-return
         if scan.status == ScanTask.RUNNING:
             # Kill job before changing job state
             pause_scan.send(sender=self.__class__, instance=scan)
@@ -317,6 +319,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             }
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
+        # pylint: disable=no-else-return
         if scan.status == ScanTask.PAUSED:
             # Update job state before starting job
             scan.restart()

@@ -9,7 +9,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Admin module for Django server application."""
-from api.models import (Credential,
+
+from django.contrib import admin
+
+from api.models import (Credential,  # noqa I100
                         FactCollection,
                         JobConnectionResult,
                         JobInspectionResult,
@@ -18,8 +21,6 @@ from api.models import (Credential,
                         ServerInformation,
                         Source,
                         SystemFingerprint)
-
-from django.contrib import admin
 
 admin.site.register(ServerInformation)
 admin.site.register(FactCollection)

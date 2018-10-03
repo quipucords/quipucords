@@ -14,7 +14,9 @@
 import json
 import sys
 
-import qpc.messages as messages
+import requests
+
+from qpc import messages  # noqa I100
 from qpc.translation import _
 from qpc.utils import (get_server_location,
                        get_ssl_verify,
@@ -22,8 +24,6 @@ from qpc.utils import (get_server_location,
                        log,
                        log_request_info,
                        read_client_token)
-
-import requests
 
 # Need to determine how we get this information; config file at install?
 

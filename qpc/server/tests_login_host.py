@@ -16,12 +16,12 @@ from unittest.mock import patch
 from argparse import ArgumentParser, Namespace  # noqa: I100
 from io import StringIO
 
-from qpc.server import LOGIN_URI
+import requests_mock
+
+from qpc.server import LOGIN_URI  # noqa I100
 from qpc.server.login_host import LoginHostCommand
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
-
-import requests_mock
 
 
 TMP_KEY = '/tmp/testkey'

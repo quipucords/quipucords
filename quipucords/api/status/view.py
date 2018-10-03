@@ -13,16 +13,16 @@
 import os
 
 
-from api import API_VERSION
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from api import API_VERSION  # noqa I100
 from api.status.model import ServerInformation
 
 from quipucords.environment import (commit,
                                     modules,
                                     platform_info,
                                     python_version)
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 
 @api_view(['GET'])

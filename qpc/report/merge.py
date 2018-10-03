@@ -16,18 +16,24 @@ from __future__ import print_function
 import json
 import os
 import sys
+from glob import glob
 
-import qpc.messages as messages
-import qpc.report as report
+from requests import codes
+
+from qpc import messages, report  # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import GET, POST, PUT, request
 from qpc.scan import SCAN_JOB_URI
 from qpc.translation import _
 
-from requests import codes
-
-
+# pylint: disable=invalid-name
+try:
+    json_exception_class = json.decoder.JSONDecodeError
+except AttributeError:
+    json_exception_class = ValueError
 # pylint: disable=too-few-public-methods
+
+
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
 
@@ -54,6 +60,8 @@ class ReportMergeCommand(CliCommand):
         group.add_argument('--json-files', dest='json_files', nargs='+',
                            metavar='JSON_FILES', default=[],
                            help=_(messages.REPORT_JSON_FILE_HELP))
+        group.add_argument('--json-directory', dest='json_dir', nargs='+',
+                           help=_(messages.REPORT_JSON_DIR_HELP))
         self.json = None
         self.report_ids = None
 
@@ -66,6 +74,7 @@ class ReportMergeCommand(CliCommand):
         :raises: ValueError if incoming value is not a file that could be found
         """
         input_path = os.path.expanduser(os.path.expandvars(filename))
+        # pylint: disable=no-else-return
         if os.path.isfile(input_path):
             try:
                 with open(input_path, 'r') as in_file:
@@ -114,26 +123,65 @@ class ReportMergeCommand(CliCommand):
                 not_found = True
         return not_found, report_ids, job_not_found, report_not_found
 
-    def _merge_json(self):
-        """Combine the sources for each json file provided.
-
-        :returns Json containing the sources of each file.
-        """
-        report_id = None
+    def _validate_create_json(self, files):
+        print(_(messages.REPORT_VALIDATE_JSON % files))
         all_sources = []
-        if len(self.args.json_files) > 1:
-            for file in self.args.json_files:
+        report_id = None
+        for file in files:
+            error = True
+            with open(file) as lint_f:
+                try:
+                    json_data = json.load(lint_f)
+                except json_exception_class:
+                    print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                    continue
+                sources = json_data.get('sources')
+                if sources:
+                    facts = sources[0].get('facts')
+                    server_id = sources[0].get('server_id')
+                    if facts and server_id:
+                        error = False
+            if not error:
+                print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
                 try:
                     report_id, sources = self.get_id_and_sources(file)
                     all_sources += sources
                 except ValueError:
                     print(_(messages.REPORT_INVALID_JSON_FILE % file))
                     sys.exit(1)
-            self.json = {'id': report_id,
-                         'sources': all_sources}
+            else:
+                print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+        if all_sources == []:
+            print(_(messages.REPORT_JSON_DIR_ALL_FAIL))
+            sys.exit(1)
+        self.json = {'id': report_id,
+                     'sources': all_sources}
+
+    def _merge_json(self):
+        """Combine the sources for each json file provided.
+
+        :returns Json containing the sources of each file.
+        """
+        if len(self.args.json_files) > 1:
+            self._validate_create_json(self.args.json_files)
         else:
             print(_(messages.REPORT_JSON_FILES_HELP))
             sys.exit(1)
+
+    def _merge_json_dir(self):
+        """Combine the sources for each json file in a directory.
+
+        :returns Json containing the sources of each file.
+        """
+        path = self.args.json_dir[0]
+        if os.path.isdir(path) is not True:
+            print(_(messages.REPORT_JSON_DIR_NOT_FOUND % path))
+            sys.exit(1)
+        json_files = glob(os.path.join(path, '*.json'))
+        if json_files == []:
+            print(_(messages.REPORT_JSON_DIR_NO_FILES % path))
+            sys.exit(1)
+        self._validate_create_json(json_files)
 
     def _validate_args(self):
         CliCommand._validate_args(self)
@@ -153,6 +201,8 @@ class ReportMergeCommand(CliCommand):
             report_ids = self.args.report_ids
         elif self.args.json_files:
             self._merge_json()
+        elif self.args.json_dir:
+            self._merge_json_dir()
         self.report_ids = report_ids
 
     def _build_data(self):
@@ -160,7 +210,7 @@ class ReportMergeCommand(CliCommand):
 
         :returns: a dictionary representing the jobs to merge
         """
-        if self.args.json_files:
+        if self.args.json_files or self.args.json_dir:
             self.req_path = report.JSON_FILE_MERGE_URI
             self.req_method = POST
             self.req_payload = self.json
@@ -175,5 +225,11 @@ class ReportMergeCommand(CliCommand):
 
     def _handle_response_error(self):
         json_data = self.response.json()
-        print(json_data['reports'][0])
+        reports = json_data.get('reports')
+        if reports:
+            print(json_data.get('reports')[0])
+            sys.exit(1)
+
+        print('No reports found.  Error json: ')
+        print(json_data)
         sys.exit(1)

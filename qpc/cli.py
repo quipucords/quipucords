@@ -17,12 +17,9 @@ import sys
 from argparse import ArgumentParser
 
 
-import qpc.cred as cred
-import qpc.messages as messages
-import qpc.report as report
-import qpc.scan as scan
-import qpc.server as server
-import qpc.source as source
+from qpc import (cred, messages,
+                 report, scan,
+                 server, source)
 from qpc.cred.commands import (CredAddCommand,
                                CredClearCommand,
                                CredEditCommand,
@@ -61,7 +58,7 @@ from . import __version__
 
 
 # pylint: disable=too-few-public-methods
-class CLI(object):
+class CLI():
     """Defines the CLI class.
 
     Class responsible for displaying usage or matching inputs

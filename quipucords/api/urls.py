@@ -9,7 +9,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Describes the urls and patterns for the API application."""
-from api.views import (CredentialViewSet,
+
+from django.urls import path
+
+from rest_framework.routers import SimpleRouter
+
+from rest_framework_expiring_authtoken import views
+
+from api.views import (CredentialViewSet,  # noqa I100
                        FactViewSet,
                        ScanJobViewSet,
                        ScanViewSet,
@@ -20,13 +27,6 @@ from api.views import (CredentialViewSet,
                        jobs,
                        merge,
                        status)
-
-from django.conf.urls import url
-
-from rest_framework.routers import SimpleRouter
-
-from rest_framework_expiring_authtoken import views
-
 
 ROUTER = SimpleRouter()
 
@@ -51,21 +51,21 @@ ROUTER.register(r'users',
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    url(r'^reports/(?P<pk>[^/.]+)/details/$', details),
-    url(r'^reports/(?P<pk>[^/.]+)/deployments/$', deployments),
-    url(r'^reports/merge/$', merge),
+    path('reports/<int:pk>/details/', details),
+    path('reports/<int:pk>/deployments/', deployments),
+    path('reports/merge/', merge),
 ]
 
 urlpatterns += [
-    url(r'^scans/(?P<pk>[^/.]+)/jobs/$', jobs),
+    path('scans/<int:pk>/jobs/', jobs),
 ]
 
 urlpatterns += [
-    url(r'^token/', views.obtain_expiring_auth_token)
+    path('token/', views.obtain_expiring_auth_token)
 ]
 
 urlpatterns += [
-    url(r'^status/$', status, name='server-status'),
+    path('status/', status, name='server-status'),
 ]
 
 urlpatterns += ROUTER.urls

@@ -13,15 +13,13 @@
 
 import logging
 
-import api.messages as messages
-from api.models import (FactCollection,
-                        ScanTask,
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
+from api.models import (ScanTask,
                         ServerInformation,
                         Source)
 from api.serializers import FactCollectionSerializer
-
-from django.db import transaction
-from django.utils.translation import ugettext as _
 
 
 ERRORS_KEY = 'errors'
@@ -154,41 +152,23 @@ def _validate_source_json(source_json):
     return False, None
 
 
-@transaction.atomic
-def get_or_create_fact_collection(json_fact_collection, scan_job=None):
+def create_fact_collection(json_fact_collection):
     """Create fact collection.
 
     Fact collection consists of a FactCollection record
     :param json_fact_collection: dict representing a fact collection
-    :param scan_job: scanjob to be associated with this fact_collection
     :returns: The newly created FactCollection
     """
-    fact_collection = None
-    if scan_job is not None:
-        # check for existing fact collection
-        report_id = scan_job.report_id
-        fact_collection = FactCollection.objects.filter(
-            id=report_id).first()
+    # Create new fact collection
+    serializer = FactCollectionSerializer(data=json_fact_collection)
+    if serializer.is_valid():
+        fact_collection = serializer.save()
+        logger.debug('Fact collection created: %s', fact_collection)
+        return fact_collection
 
-    if fact_collection is None:
-        # Create new fact collection
-        serializer = FactCollectionSerializer(data=json_fact_collection)
-        if serializer.is_valid():
-            fact_collection = serializer.save()
-            logger.debug('Fact collection created: %s', fact_collection)
-        else:
-            logger.error('Fact collection could not be persisted.')
-            logger.error('Invalid json_fact_collection: %s',
-                         json_fact_collection)
-            logger.error('FactCollection errors: %s', serializer.errors)
+    logger.error('Fact collection could not be persisted.')
+    logger.error('Invalid json_fact_collection: %s',
+                 json_fact_collection)
+    logger.error('FactCollection errors: %s', serializer.errors)
 
-        # Update scan job if there is one
-        if scan_job is not None:
-            scan_job.report_id = fact_collection.id
-            scan_job.save()
-            fact_collection.save()
-            logger.debug('Fact collection %d associated with scanjob %d',
-                         fact_collection.id,
-                         scan_job.id)
-
-    return fact_collection
+    return None

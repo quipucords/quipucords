@@ -12,7 +12,13 @@
 
 import json
 
-from api.models import (Credential,
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
+
+from api.models import (Credential,  # noqa I100
                         Scan,
                         ScanJob,
                         ScanOptions,
@@ -20,12 +26,6 @@ from api.models import (Credential,
                         Source)
 from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
-
-from django.core import management
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-
-from rest_framework import status
 
 from scanner.test_util import create_scan_job
 

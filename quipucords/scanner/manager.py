@@ -16,13 +16,11 @@ import os
 from threading import Thread, Timer
 from time import sleep
 
-
-from api.models import (ScanJob,
-                        ScanTask)
+from api.models import (ScanJob, ScanTask)
 
 from django.db.models import Q
 
-from scanner import ScanJobRunner
+from scanner.job import ScanJobRunner
 
 
 # Get an instance of a logger
@@ -113,6 +111,7 @@ class Manager(Thread):
         self.scan_queue.insert(0, job)
         self.log_info()
 
+    # pylint: disable=inconsistent-return-statements
     def kill(self, job, command):
         """Kill a job or remove it from the running queue.
 
@@ -222,9 +221,20 @@ class Manager(Thread):
                 # Occurs when current jobs ends and at least 1 in queue
                 killed = not self.current_job_runner.is_alive()
                 if killed:
-                    self.current_job_runner.scan_job.log_message(
-                        '%s: scan job has completed.' %
-                        SCAN_MANAGER_LOG_PREFIX)
+                    terminated_job = ScanJob.objects.get(
+                        pk=self.current_job_runner.scan_job.id)
+                    if terminated_job.status in [ScanTask.PENDING,
+                                                 ScanTask.CREATED,
+                                                 ScanTask.RUNNING]:
+                        terminated_job.log_message(
+                            '%s: scan job has unexpectedly failed.' %
+                            SCAN_MANAGER_LOG_PREFIX)
+                        terminated_job.fail(
+                            'Scan manager failed job due to unexpected error.')
+                    else:
+                        terminated_job.log_message(
+                            '%s: scan job has completed.' %
+                            SCAN_MANAGER_LOG_PREFIX)
                     self.current_job_runner = None
                     if queue_len > 0:
                         self.work()

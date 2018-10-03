@@ -15,14 +15,13 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.scan as scan
+from requests import codes
+
+from qpc import messages, scan # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import DELETE, GET, request
 from qpc.translation import _
 from qpc.utils import handle_error_response
-
-from requests import codes
 
 
 # pylint: disable=too-few-public-methods

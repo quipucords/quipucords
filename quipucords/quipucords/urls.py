@@ -24,29 +24,30 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 
 """
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
 urlpatterns = [
-    url(r'^login/$', auth_views.login, name='login'),
-    url(r'^logout/$', auth_views.logout, name='logout'),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
-    url(r'^admin/', admin.site.urls),
-    url(r'^api/v1/', include('api.urls')),
+    path('admin/', admin.site.urls),
+    path('api/v1/', include('api.urls')),
 
-    url(r'^$', RedirectView.as_view(url='/login', permanent=False),
-        name='home'),
+    path('', RedirectView.as_view(url='/login', permanent=False),
+         name='home'),
 
     # ui routing
-    url(r'^(?i)(client/(sources|scans|credentials|)(/|)(index.html|))$',
-        TemplateView.as_view(template_name='client/index.html'),
-        name='client'),
+    re_path(r'^(client/(sources|scans|credentials|)(/|)(index.html|))$',
+            TemplateView.as_view(template_name='client/index.html'),
+            name='client'),
 
     # static files (*.css, *.js, *.jpg etc.)
-    url(r'^(?!/?client/)(?P<path>.*\..*)$',
-        RedirectView.as_view(url='/client/%(path)s', permanent=False),
-        name='client'),
+    re_path(r'^(?!/?client/)(?P<path>.*\..*)$',
+            RedirectView.as_view(url='/client/%(path)s', permanent=False),
+            name='client'),
 ]

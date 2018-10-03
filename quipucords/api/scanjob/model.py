@@ -15,18 +15,21 @@ These models are used in the REST definitions.
 import logging
 from datetime import datetime
 
-import api.messages as messages
+
+from django.db import (models, transaction)
+from django.db.models import Q
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 from api.connresult.model import (JobConnectionResult,
                                   TaskConnectionResult)
+from api.fact.model import FactCollection
+from api.fingerprint.model import SystemFingerprint
 from api.inspectresult.model import (JobInspectionResult,
                                      TaskInspectionResult)
 from api.scan.model import Scan, ScanOptions
 from api.scantask.model import ScanTask
 from api.source.model import Source
-
-from django.db import (OperationalError, models, transaction)
-from django.db.models import Q
-from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -41,11 +44,10 @@ class ScanJob(models.Model):
     JOB_TERMINATE_CANCEL = 2
     JOB_TERMINATE_ACK = 3
 
-    scan = models.ForeignKey(Scan, related_name='jobs', null=True)
-    sources = models.ManyToManyField(Source)
+    # all job types
     scan_type = models.CharField(
-        max_length=9,
-        choices=ScanTask.SCAN_TYPE_CHOICES,
+        max_length=12,
+        choices=ScanTask.SCANTASK_TYPE_CHOICES,
         default=ScanTask.SCAN_TYPE_INSPECT,
     )
     status = models.CharField(
@@ -62,10 +64,20 @@ class ScanJob(models.Model):
     report_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
+
+    # all scan job types
+    scan = models.ForeignKey(Scan, related_name='jobs', null=True,
+                             on_delete=models.SET_NULL)
+    sources = models.ManyToManyField(Source)
     connection_results = models.ForeignKey(
         JobConnectionResult, null=True, on_delete=models.CASCADE)
+
+    # only inspection job
     inspection_results = models.ForeignKey(
         JobInspectionResult, null=True, on_delete=models.CASCADE)
+
+    fact_collection = models.ForeignKey(
+        FactCollection, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         """Convert to string."""
@@ -85,6 +97,7 @@ class ScanJob(models.Model):
                                             self.sources,
                                             self.scan_type,
                                             self.status,
+                                            # pylint: disable=no-member
                                             self.tasks,
                                             self.options,
                                             self.report_id,
@@ -151,14 +164,16 @@ class ScanJob(models.Model):
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
+        # pylint: disable=too-many-locals
         if self.status == ScanTask.CREATED or \
                 self.status == ScanTask.PENDING:
-            return None, None, None, None
+            return None, None, None, None, None
 
         systems_count = 0
         systems_scanned = 0
         systems_failed = 0
         systems_unreachable = 0
+        system_fingerprint_count = 0
 
         connection_systems_count,\
             connection_systems_scanned,\
@@ -181,10 +196,17 @@ class ScanJob(models.Model):
             systems_failed = inspect_systems_failed + connection_systems_failed
             systems_unreachable = \
                 inspect_systems_unreachable + connection_systems_unreachable
+
+        if self.report_id is not None:
+            system_fingerprint_count = \
+                SystemFingerprint.objects.filter(
+                    report_id=self.report_id).count()
+
         return systems_count,\
             systems_scanned, \
             systems_failed, \
-            systems_unreachable
+            systems_unreachable, \
+            system_fingerprint_count
 
     def _calculate_counts(self, scan_type):
         """Calculate scan counts from tasks.
@@ -225,15 +247,18 @@ class ScanJob(models.Model):
         systems_count,\
             systems_scanned,\
             systems_failed,\
-            systems_unreachable = self.calculate_counts()
+            systems_unreachable,\
+            system_fingerprint_count = self.calculate_counts()
 
         message = '%s Stats: systems_count=%d,'\
-            ' systems_scanned=%d, systems_failed=%d, systems_unreachable=%d' %\
+            ' systems_scanned=%d, systems_failed=%d, '\
+            'systems_unreachable=%d, system_fingerprint_count=%d' %\
             (prefix,
              systems_count,
              systems_scanned,
              systems_failed,
-             systems_unreachable)
+             systems_unreachable,
+             system_fingerprint_count)
         self.log_message(message)
 
     def _compute_elapsed_time(self):
@@ -245,32 +270,8 @@ class ScanJob(models.Model):
                             self.start_time).total_seconds()
         return elapsed_time
 
-    def safe_state_change(self, method_name, message=None):
-        """Update state in protected clause."""
-        # django.db.utils.OperationalError: database is locked
-        try:
-            method = getattr(self, method_name)
-            if method_name == '_fail':
-                method(message)
-            else:
-                method()
-        except OperationalError:
-            # try one more time
-            method = getattr(self, method_name)
-            if method_name == '_fail':
-                method(message)
-            else:
-                method()
-
-    def queue(self):
-        """Queue the job to run.
-
-        Change job state from CREATED TO PENDING.
-        """
-        self.safe_state_change('_queue')
-
     @transaction.atomic
-    def _queue(self):
+    def queue(self):
         """Queue the job to run.
 
         Change job state from CREATED TO PENDING.
@@ -304,37 +305,78 @@ class ScanJob(models.Model):
                 self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
+            if self.fact_collection is not None:
+                SystemFingerprint.objects.filter(
+                    report_id=self.fact_collection.id).delete()
 
-        count = 1
+        # Create tasks
+        conn_tasks = self._create_connection_tasks()
+        inspect_tasks = self._create_inspection_tasks(conn_tasks)
+        self._create_fingerprint_task(conn_tasks, inspect_tasks)
+
+        if self.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT and \
+                (conn_tasks or inspect_tasks):
+            # this job runs an actual scan
+            if self.scan:
+                self.scan.most_recent_scanjob = self
+                self.scan.save()
+
+            for source in self.sources.all():
+                source.most_recent_connect_scan = self
+                source.save()
+
+        self.status = target_status
+        self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
+        self.save()
+        self.log_current_status()
+
+    def _create_connection_tasks(self):
+        """Create initial connection tasks.
+
+        :return: list of connection_tasks
+        """
         conn_tasks = []
-        for source in self.sources.all():
-            # Create connect tasks
-            conn_task = ScanTask(job=self,
-                                 source=source,
-                                 scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                                 status=ScanTask.PENDING,
-                                 status_message=_(
-                                     messages.ST_STATUS_MSG_PENDING),
-                                 sequence_number=count)
-            conn_task.save()
-            self.tasks.add(conn_task)
-            conn_tasks.append(conn_task)
+        if self.scan_type in [ScanTask.SCAN_TYPE_CONNECT,
+                              ScanTask.SCAN_TYPE_INSPECT]:
+            count = 1
+            for source in self.sources.all():
+                # Create connect tasks
+                conn_task = ScanTask(job=self,
+                                     source=source,
+                                     scan_type=ScanTask.SCAN_TYPE_CONNECT,
+                                     status=ScanTask.PENDING,
+                                     status_message=_(
+                                         messages.ST_STATUS_MSG_PENDING),
+                                     sequence_number=count)
+                conn_task.save()
+                self.tasks.add(conn_task)  # pylint: disable=no-member
+                conn_tasks.append(conn_task)
 
-            # Create task result
-            conn_task_result = TaskConnectionResult()
-            conn_task_result.save()
+                # Create task result
+                conn_task_result = TaskConnectionResult()
+                conn_task_result.save()
 
-            # Add the task result to job results
-            self.connection_results.task_results.add(conn_task_result)
-            self.connection_results.save()
+                # Add the task result to job results
+                self.connection_results.task_results.add(conn_task_result)  # noqa # pylint: disable=no-member
+                self.connection_results.save()
 
-            # Add the task result to task
-            conn_task.connection_result = conn_task_result
-            conn_task.save()
+                # Add the task result to task
+                conn_task.connection_result = conn_task_result
+                conn_task.save()
 
-            count += 1
+                count += 1
 
-        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+        return conn_tasks
+
+    def _create_inspection_tasks(self, conn_tasks):
+        """Create initial inspection tasks.
+
+        :param conn_tasks: list of connection tasks
+        :return: list of inspection_tasks
+        """
+        inspect_tasks = []
+        if conn_tasks and self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+            count = len(conn_tasks) + 1
             for conn_task in conn_tasks:
                 # Create inspect tasks
                 inspect_task = ScanTask(job=self,
@@ -347,14 +389,16 @@ class ScanJob(models.Model):
                 inspect_task.save()
                 inspect_task.prerequisites.add(conn_task)
                 inspect_task.save()
-                self.tasks.add(inspect_task)
+                self.tasks.add(inspect_task)  # pylint: disable=no-member
+                inspect_tasks.append(conn_task)  # pylint: disable=no-member
 
                 # Create task result
                 inspect_task_result = TaskInspectionResult()
                 inspect_task_result.save()
 
                 # Add the task result to job results
-                self.inspection_results.task_results.add(inspect_task_result)
+                self.inspection_results.task_results.add(
+                    inspect_task_result)
                 self.inspection_results.save()
 
                 # Add the inspect task result to task
@@ -362,29 +406,36 @@ class ScanJob(models.Model):
                 inspect_task.save()
 
                 count += 1
+        return inspect_tasks
 
-        if self.scan:
-            self.scan.most_recent_scanjob = self
-            self.scan.save()
+    def _create_fingerprint_task(self, conn_tasks, inspect_tasks):
+        """Create initial inspection tasks.
 
-        for source in self.sources.all():
-            source.most_recent_connect_scan = self
-            source.save()
-
-        self.status = target_status
-        self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
-        self.save()
-        self.log_current_status()
-
-    def start(self):
-        """Start a job.
-
-        Change job state from PENDING TO RUNNING.
+        :param conn_tasks: list of connection tasks
+        :param inspect_tasks: list of inspection tasks
         """
-        self.safe_state_change('_start')
+        if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT or inspect_tasks:
+            prerequisites = conn_tasks + inspect_tasks
+            count = len(prerequisites) + 1
+            # Create a single fingerprint task with dependencies
+            fingerprint_task = ScanTask(
+                job=self,
+                scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                fact_collection=self.fact_collection,
+                status=ScanTask.PENDING,
+                status_message=_(
+                    messages.ST_STATUS_MSG_PENDING),
+                sequence_number=count)
+            fingerprint_task.save()
+
+            for prerequisite in prerequisites:
+                fingerprint_task.prerequisites.add(prerequisite)
+
+            fingerprint_task.save()
+            self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
     @transaction.atomic
-    def _start(self):
+    def start(self):
         """Start a job.
 
         Change job state from PENDING TO RUNNING.
@@ -401,16 +452,8 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def restart(self):
-        """Restart a job.
-
-        Change job state from PENDING, PAUSED OR RUNNING
-        TO PENDING status.
-        """
-        self.safe_state_change('_restart')
-
     @transaction.atomic
-    def _restart(self):
+    def restart(self):
         """Restart a job.
 
         Change job state from PENDING, PAUSED OR RUNNING
@@ -434,15 +477,8 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def pause(self):
-        """Pause a job.
-
-        Change job state from PENDING/RUNNING TO PAUSED.
-        """
-        self.safe_state_change('_pause')
-
     @transaction.atomic
-    def _pause(self):
+    def pause(self):
         """Pause a job.
 
         Change job state from PENDING/RUNNING TO PAUSED.
@@ -467,16 +503,8 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def cancel(self):
-        """Cancel a job.
-
-        Change job state from CREATED, PENDING, RUNNING, or
-        PAUSED to CANCELED.
-        """
-        self.safe_state_change('_cancel')
-
     @transaction.atomic
-    def _cancel(self):
+    def cancel(self):
         """Cancel a job.
 
         Change job state from CREATED, PENDING, RUNNING, or
@@ -506,15 +534,8 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def complete(self):
-        """Complete a job.
-
-        Change job state from RUNNING TO COMPLETE.
-        """
-        self.safe_state_change('_complete')
-
     @transaction.atomic
-    def _complete(self):
+    def complete(self):
         """Complete a job.
 
         Change job state from RUNNING TO COMPLETE.
@@ -532,16 +553,8 @@ class ScanJob(models.Model):
         self._log_stats('COMPLETION STATS.')
         self.log_current_status()
 
-    def fail(self, message):
-        """Fail a job.
-
-        Change job state from RUNNING TO COMPLETE.
-        :param message: The error message associated with failure
-        """
-        self.safe_state_change('_fail', message)
-
     @transaction.atomic
-    def _fail(self, message):
+    def fail(self, message):
         """Fail a job.
 
         Change job state from RUNNING TO COMPLETE.

@@ -13,12 +13,12 @@
 import json
 from collections import OrderedDict
 
-import api.messages as messages
-
 from rest_framework.serializers import (ChoiceField,
                                         Field,
                                         ModelSerializer,
                                         ValidationError)
+
+from api import messages  # noqa I100
 
 
 class ValidStringChoiceField(ChoiceField):

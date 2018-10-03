@@ -161,10 +161,18 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
 
 REPORT_JSON_FILE_HELP = 'A list of files that contain the json details ' \
                         'reports to merge.'
+REPORT_JSON_DIR_HELP = 'The path to a directory that contain files of json ' \
+                       'details reports to merge'
 REPORT_JSON_FILES_HELP = 'At least two json details report files are ' \
                          'required to merge.'
 REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
                            'details report.'
+REPORT_JSON_DIR_NO_FILES = \
+    'No files with extension .json found in %s.'
+REPORT_VALIDATE_JSON = 'Checking files for valid json details report. %s'
+REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report.'
+REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a details report.'
+REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
@@ -189,6 +197,7 @@ REPORT_OUTPUT_CANNOT_BE_EMPTY = '%s cannot be empty string.'
 REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
+REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
 REPORT_SUCCESSFULLY_MERGED = 'Scan job results successfully merged.  '\
     'Report ID is %s.'

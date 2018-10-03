@@ -12,10 +12,11 @@
 
 import tempfile
 
-from ansible.parsing.vault import VaultLib
-from ansible.parsing.yaml.dumper import AnsibleDumper
 
 from django.conf import settings
+
+from ansible.parsing.vault import VaultLib  # noqa I100
+from ansible.parsing.yaml.dumper import AnsibleDumper
 
 import yaml
 
@@ -73,7 +74,7 @@ def write_to_yaml(data):
 
 
 # pylint: disable=too-few-public-methods
-class Vault(object):
+class Vault():
     """Read and write data using the Ansible vault."""
 
     def __init__(self, password):
@@ -89,6 +90,7 @@ class Vault(object):
         except ImportError:
             self.vault = VaultLib(password)
 
+    # pylint: disable=inconsistent-return-statements
     def dump(self, data, stream=None):
         """Encrypt data and print stdout or write to stream.
 

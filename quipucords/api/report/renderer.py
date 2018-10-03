@@ -14,11 +14,11 @@ import csv
 import logging
 from io import StringIO
 
-from api.common.util import CSVHelper
+from rest_framework import renderers
+
+from api.common.util import CSVHelper  # noqa I100
 from api.models import (FactCollection,
                         Source)
-
-from rest_framework import renderers
 
 
 # Get an instance of a logger
