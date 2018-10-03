@@ -12,12 +12,13 @@
 
 These models are used in the REST definitions
 """
-import api.messages as messages
-from api.credential.model import Credential
-from api.source.model import Source
-
 from django.db import models
 from django.utils.translation import ugettext as _
+
+# pylint: disable=wrong-import-order
+from api import messages  # noqa
+from api.credential.model import Credential
+from api.source.model import Source
 
 
 class SystemConnectionResult(models.Model):

@@ -15,17 +15,15 @@ from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
-import qpc.report as report
-import qpc.scan as scan
+from requests import codes
+
+from qpc import messages, report, scan  # noqa I100
 from qpc.clicommand import CliCommand
 from qpc.request import GET, request
 from qpc.translation import _
 from qpc.utils import (pretty_print,
                        validate_write_file,
                        write_file)
-
-from requests import codes
 
 
 # pylint: disable=too-few-public-methods

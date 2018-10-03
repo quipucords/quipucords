@@ -167,7 +167,7 @@ class ProcessorMeta(abc.ABCMeta):
 
 
 # pylint: disable=too-few-public-methods
-class Processor(object, metaclass=ProcessorMeta):
+class Processor(metaclass=ProcessorMeta):
     """A class to process the output of an Ansible task."""
 
     # Special fields:

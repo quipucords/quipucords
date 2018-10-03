@@ -13,10 +13,10 @@
 
 import logging
 
-import api.messages as messages
-
 import django.dispatch
 from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 
 from scanner.job import ScanJobRunner
 from scanner.manager import SCAN_MANAGER
@@ -59,7 +59,7 @@ def scan_action(sender, instance, action, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    if action == PAUSE or action == CANCEL:
+    if action in [PAUSE, CANCEL]:
         SCAN_MANAGER.kill(instance, action)
 
 

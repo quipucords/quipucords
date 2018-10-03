@@ -13,14 +13,13 @@
 
 import logging
 
-import api.messages as messages
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 from api.models import (ScanTask,
                         ServerInformation,
                         Source)
 from api.serializers import FactCollectionSerializer
-
-from django.db import transaction
-from django.utils.translation import ugettext as _
 
 
 ERRORS_KEY = 'errors'
@@ -153,7 +152,6 @@ def _validate_source_json(source_json):
     return False, None
 
 
-@transaction.atomic
 def create_fact_collection(json_fact_collection):
     """Create fact collection.
 

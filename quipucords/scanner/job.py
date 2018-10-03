@@ -42,6 +42,8 @@ class ScanJobRunner(Process):
 
     def run(self):
         """Trigger thread execution."""
+        # pylint: disable=inconsistent-return-statements
+        # pylint: disable=no-else-return
         # pylint: disable=too-many-locals,too-many-statements
         # pylint: disable=too-many-return-statements,too-many-branches
         # check to see if manager killed job
@@ -145,6 +147,7 @@ class ScanJobRunner(Process):
 
     def _create_task_runner(self, scan_task):
         """Create ScanTaskRunner using scan_type and source_type."""
+        # pylint: disable=no-else-return
         scan_type = scan_task.scan_type
         if scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self._create_connect_task_runner(scan_task)
@@ -156,6 +159,7 @@ class ScanJobRunner(Process):
 
     def _run_task(self, runner):
         """Run a sigle scan task."""
+        # pylint: disable=no-else-return
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return ScanTask.CANCELED

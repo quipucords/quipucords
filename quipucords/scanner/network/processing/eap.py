@@ -71,8 +71,8 @@ class ProcessIdUJboss(process.Processor):
         plain_output = output['stdout'].strip().lower()
         # Yes, id outputs Unicode left and right single quotation
         # marks around the username it doesn't recognize.
-        if plain_output == 'id: jboss: no such user' or \
-           plain_output == 'id: ‘jboss’: no such user':
+        if plain_output in ['id: jboss: no such user',
+                            'id: ‘jboss’: no such user']:
             return False
 
         logger.error('id: unexpected output %s', plain_output)

@@ -10,11 +10,6 @@
 #
 """Module for serializing all model object for database storage."""
 
-import api.messages as messages
-from api.common.serializer import NotEmptySerializer
-from api.common.util import convert_to_int, is_int
-from api.models import ScanTask, Source
-
 from django.utils.translation import ugettext as _
 
 from rest_framework.serializers import (CharField,
@@ -22,7 +17,12 @@ from rest_framework.serializers import (CharField,
                                         DateTimeField,
                                         IntegerField,
                                         PrimaryKeyRelatedField,
-                                        ValidationError,)
+                                        ValidationError, )
+
+from api import messages  # noqa I100
+from api.common.serializer import NotEmptySerializer
+from api.common.util import convert_to_int, is_int
+from api.models import ScanTask, Source
 
 
 class SourceField(PrimaryKeyRelatedField):

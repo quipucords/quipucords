@@ -15,7 +15,12 @@ These models are used in the REST definitions.
 import logging
 from datetime import datetime
 
-import api.messages as messages
+
+from django.db import (models, transaction)
+from django.db.models import Q
+from django.utils.translation import ugettext as _
+
+from api import messages  # noqa I100
 from api.connresult.model import (JobConnectionResult,
                                   TaskConnectionResult)
 from api.fact.model import FactCollection
@@ -25,10 +30,6 @@ from api.inspectresult.model import (JobInspectionResult,
 from api.scan.model import Scan, ScanOptions
 from api.scantask.model import ScanTask
 from api.source.model import Source
-
-from django.db import (models, transaction)
-from django.db.models import Q
-from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -96,6 +97,7 @@ class ScanJob(models.Model):
                                             self.sources,
                                             self.scan_type,
                                             self.status,
+                                            # pylint: disable=no-member
                                             self.tasks,
                                             self.options,
                                             self.report_id,
@@ -162,6 +164,7 @@ class ScanJob(models.Model):
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
+        # pylint: disable=too-many-locals
         if self.status == ScanTask.CREATED or \
                 self.status == ScanTask.PENDING:
             return None, None, None, None, None
@@ -346,7 +349,7 @@ class ScanJob(models.Model):
                                          messages.ST_STATUS_MSG_PENDING),
                                      sequence_number=count)
                 conn_task.save()
-                self.tasks.add(conn_task)
+                self.tasks.add(conn_task)  # pylint: disable=no-member
                 conn_tasks.append(conn_task)
 
                 # Create task result
@@ -354,7 +357,7 @@ class ScanJob(models.Model):
                 conn_task_result.save()
 
                 # Add the task result to job results
-                self.connection_results.task_results.add(conn_task_result)
+                self.connection_results.task_results.add(conn_task_result)  # noqa # pylint: disable=no-member
                 self.connection_results.save()
 
                 # Add the task result to task
@@ -386,8 +389,8 @@ class ScanJob(models.Model):
                 inspect_task.save()
                 inspect_task.prerequisites.add(conn_task)
                 inspect_task.save()
-                self.tasks.add(inspect_task)
-                inspect_tasks.append(conn_task)
+                self.tasks.add(inspect_task)  # pylint: disable=no-member
+                inspect_tasks.append(conn_task)  # pylint: disable=no-member
 
                 # Create task result
                 inspect_task_result = TaskInspectionResult()
@@ -429,7 +432,7 @@ class ScanJob(models.Model):
                 fingerprint_task.prerequisites.add(prerequisite)
 
             fingerprint_task.save()
-            self.tasks.add(fingerprint_task)
+            self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
     @transaction.atomic
     def start(self):

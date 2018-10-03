@@ -16,10 +16,10 @@ import traceback
 
 from ansible.plugins.callback import CallbackBase
 
-from api.models import (RawFact,
-                        SystemInspectionResult)
-
 from django.db import transaction
+
+from api.models import (RawFact,  # noqa I100
+                        SystemInspectionResult)
 
 from quipucords import settings
 
@@ -75,6 +75,7 @@ def normalize_result(result):
     """
     # pylint: disable=protected-access
     if result._result is not None and isinstance(result._result, dict):
+        # pylint: disable=no-else-return
         if ANSIBLE_FACTS in result._result:
             return [(key, value)
                     for key, value in result._result[ANSIBLE_FACTS].items()]

@@ -84,6 +84,7 @@ def details(request, pk=None):
     return Response(json_details)
 
 
+# pylint: disable=inconsistent-return-statements
 @api_view(['GET'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)

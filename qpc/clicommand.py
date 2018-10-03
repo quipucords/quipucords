@@ -20,7 +20,7 @@ from qpc.utils import handle_error_response, log_args
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
-class CliCommand(object):
+class CliCommand():
     """Base class for all sub-commands."""
 
     # pylint: disable=too-many-arguments

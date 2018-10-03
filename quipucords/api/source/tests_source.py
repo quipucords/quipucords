@@ -14,20 +14,20 @@ import json
 from datetime import datetime
 from unittest.mock import patch
 
-import api.messages as messages
-from api.models import (Credential,
-                        Scan,
-                        ScanTask,
-                        Source)
-from api.serializers import SourceSerializer
-from api.source.view import format_source
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.serializers import ValidationError
+
+from api import messages  # noqa I100
+from api.models import (Credential,
+                        Scan,
+                        ScanTask,
+                        Source)
+from api.serializers import SourceSerializer
+from api.source.view import format_source
 
 
 from scanner.test_util import create_scan_job
@@ -255,7 +255,7 @@ class SourceTest(TestCase):
                 'credentials': [self.net_cred_for_upload]}
         response = self.create_expect_201(data)
         self.assertIn('id', response)
-        response = self.create_expect_400(data)
+        self.create_expect_400(data)
 
     def test_create_multiple_hosts(self):
         """A valid create request with two hosts."""

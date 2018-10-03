@@ -13,9 +13,9 @@
 import logging
 from multiprocessing import Pool
 
-from api.models import (ScanJob, SystemInspectionResult)
-
 import requests
+
+from api.models import (ScanJob, SystemInspectionResult)  # noqa I100
 
 from scanner.satellite import utils
 from scanner.satellite.api import (SatelliteCancelException,

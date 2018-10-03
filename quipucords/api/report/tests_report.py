@@ -14,7 +14,13 @@ import copy
 import json
 import uuid
 
-import api.messages as messages
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework import status
+
+from api import messages  # noqa I100
 from api.models import (Credential,
                         FactCollection,
                         ServerInformation,
@@ -22,14 +28,6 @@ from api.models import (Credential,
 from api.report.renderer import (DeploymentCSVRenderer,
                                  DetailsCSVRenderer,
                                  sanitize_row)
-
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-
-# pylint: disable=line-too-long
 
 
 class DetailReportTest(TestCase):
@@ -128,6 +126,7 @@ class DetailReportTest(TestCase):
             request_json)
         test_json = copy.deepcopy(response_json)
         csv_result = renderer.render(test_json)
+        # pylint: disable=line-too-long
         expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n' % self.server_id  # noqa
         self.assertEqual(csv_result, expected)
 
@@ -171,6 +170,7 @@ class DetailReportTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
+        # pylint: disable=line-too-long
         expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % self.server_id  # noqa
         self.assertEqual(csv_result, expected)
 
@@ -420,10 +420,13 @@ class DeploymentReportTest(TestCase):
         report = response.json()
 
         csv_result = renderer.render(report)
-
+        # pylint: disable=line-too-long
         data_rows = [",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+                     # pylint: disable=line-too-long
                      ",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+                     # pylint: disable=line-too-long
                      ",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+                     # pylint: disable=line-too-long
                      "architecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid"]  # noqa
         for row in data_rows:
             result = row in csv_result

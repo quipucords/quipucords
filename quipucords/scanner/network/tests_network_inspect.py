@@ -19,7 +19,12 @@ from types import SimpleNamespace  # noqa: I100
 
 from ansible.errors import AnsibleError
 
-from api.models import (Credential,
+from django.test import TestCase
+from django.urls import reverse
+
+import requests_mock
+
+from api.models import (Credential,  # noqa I100
                         ExtendedProductSearchOptions,
                         ScanJob,
                         ScanOptions,
@@ -28,11 +33,6 @@ from api.models import (Credential,
                         SourceOptions,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
-
-from django.test import TestCase
-from django.urls import reverse
-
-import requests_mock
 
 from scanner import scan_data_log
 from scanner.network import InspectTaskRunner
