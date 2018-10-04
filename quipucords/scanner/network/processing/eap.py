@@ -102,10 +102,12 @@ class ProcessJbossEapCommonFiles(process.Processor):
         return out_list
 
 
-class ProcessJbossEapProcesses(process.Processor):
+class ProcessJbossProcesses(process.Processor):
     """Process the output of a process search."""
 
-    KEY = 'jboss_eap_processes'
+    KEY = 'jboss_processes'
+
+    RETURN_CODE_ANY = True
 
     IGNORE_PROCESSES = ['bash', 'grep', 'oom_reaper']
 
@@ -119,9 +121,13 @@ class ProcessJbossEapProcesses(process.Processor):
         # starts and grabs the process table before the grep is in it,
         # and sometimes not.
         num_matches = 0
+
+        if output.get('rc', 1) != 0:
+            return num_matches
+
         for line in output['stdout_lines']:
             parts = line.split(None, 1)
-            if parts[0] in ProcessJbossEapProcesses.IGNORE_PROCESSES:
+            if parts[0] in ProcessJbossProcesses.IGNORE_PROCESSES:
                 continue
             num_matches += 1
 
