@@ -22,7 +22,10 @@ from api.models import (FactCollection,
                         ScanTask,
                         SystemFingerprint)
 from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
-from api.serializers import FactCollectionSerializer, FingerprintSerializer
+from api.serializers import (FactCollectionSerializer,
+                             FingerprintSerializer,
+                             ScanJobSerializer)
+from api.signal.scanjob_signal import (start_scan)
 
 from django.core.exceptions import FieldError
 from django.db.models import Count
@@ -221,8 +224,8 @@ def build_report(report_id, filters):
 @api_view(['PUT'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-def merge(request):
-    """Merge reports."""
+def sync_merge_reports(request):
+    """Merge reports synchronously."""
     error = {
         'reports': []
     }
@@ -258,6 +261,46 @@ def merge(request):
     serializer = FactCollectionSerializer(fact_collection)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
+
+
+@api_view(['get', 'post'])
+@authentication_classes(auth_classes)
+@permission_classes(perm_classes)
+def async_merge_reports(request, pk=None):
+    """Merge reports asynchronously."""
+    # pylint: disable=invalid-name
+    if request.method == 'GET':
+        merge_job = get_object_or_404(ScanJob.objects.all(), pk=pk)
+        job_serializer = ScanJobSerializer(merge_job)
+        response_data = job_serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    # is POST
+    if pk is not None:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    # Else post
+    has_errors, validation_result = validate_fact_collection_json(
+        request.data)
+    if has_errors:
+        return Response(validation_result,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    # Create FC model and save data
+    fact_collection = create_fact_collection(request.data)
+
+    # Create new job to run
+
+    merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                        fact_collection=fact_collection)
+    merge_job.save()
+    merge_job.log_current_status()
+    job_serializer = ScanJobSerializer(merge_job)
+    response_data = job_serializer.data
+
+    # start fingerprint job
+    start_scan.send(sender=__name__, instance=merge_job)
+
+    return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 def validate_merge_report(data):

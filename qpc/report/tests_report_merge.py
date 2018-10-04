@@ -18,7 +18,7 @@ from argparse import ArgumentParser, Namespace
 from io import StringIO
 
 from qpc import messages
-from qpc.report import JSON_FILE_MERGE_URI, MERGE_URI
+from qpc.report import MERGE_URI
 from qpc.report.merge import ReportMergeCommand
 from qpc.scan import SCAN_JOB_URI
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
@@ -185,7 +185,7 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + JSON_FILE_MERGE_URI
+        put_merge_url = get_server_location() + MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(put_merge_url, status_code=201,
                         json=put_report_data)
@@ -239,7 +239,7 @@ class ReportDetailTests(unittest.TestCase):
         """Testing report merge command with json directory."""
         report_out = StringIO()
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + JSON_FILE_MERGE_URI
+        put_merge_url = get_server_location() + MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(put_merge_url, status_code=201,
                         json=put_report_data)
