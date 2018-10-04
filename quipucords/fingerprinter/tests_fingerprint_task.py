@@ -108,9 +108,10 @@ class EngineTest(TestCase):
             fact['ifconfig_ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if ifconfig_mac_addresses:
-            fact['ifconfig_mac_addresses'] = ifconfig_mac_addresses
+            fact['ifconfig_mac_addresses'] = \
+                list(map(lambda x: x.lower(), ifconfig_mac_addresses))
         else:
-            fact['ifconfig_mac_addresses'] = ['MAC1', 'MAC2']
+            fact['ifconfig_mac_addresses'] = ['mac1', 'mac2']
 
         if dmi_system_uuid:
             fact['dmi_system_uuid'] = dmi_system_uuid
@@ -196,9 +197,10 @@ class EngineTest(TestCase):
             fact['vm.ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if vm_mac_addresses:
-            fact['vm.mac_addresses'] = vm_mac_addresses
+            fact['vm.mac_addresses'] = \
+                list(map(lambda x: x.lower(), vm_mac_addresses))
         else:
-            fact['vm.mac_addresses'] = ['MAC1', 'MAC2']
+            fact['vm.mac_addresses'] = ['mac1', 'mac2']
 
         if vm_name:
             fact['vm.name'] = vm_name
@@ -266,9 +268,10 @@ class EngineTest(TestCase):
             fact['ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if mac_addresses:
-            fact['mac_addresses'] = mac_addresses
+            fact['mac_addresses'] = \
+                list(map(lambda x: x.lower(), mac_addresses))
         else:
-            fact['mac_addresses'] = ['MAC1', 'MAC2']
+            fact['mac_addresses'] = ['mac1', 'mac2']
 
         if registration_time:
             fact['registration_time'] = registration_time
@@ -561,9 +564,9 @@ class EngineTest(TestCase):
 
     def test_merge_mac_address_case_insensitive(self):
         """Test if fingerprints will be merged with mixed mac addr."""
-        n_mac = ['00:50:56:A3:A2:E8']
-        v_mac = ['00:50:56:a3:a2:e8']
-        s_mac = ['00:50:56:A3:a2:E8']
+        n_mac = ['00:50:56:A3:A2:E8', '00:50:56:c3:d2:m8']
+        v_mac = ['00:50:56:a3:a2:e8', '00:50:56:C3:D2:m8']
+        s_mac = ['00:50:56:A3:a2:E8', '00:50:56:C3:D2:M8']
         self.assertNotEqual(v_mac, n_mac)
         self.assertNotEqual(v_mac, s_mac)
         nfingerprints = [
