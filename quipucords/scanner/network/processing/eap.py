@@ -107,6 +107,8 @@ class ProcessJbossProcesses(process.Processor):
 
     KEY = 'jboss_processes'
 
+    RETURN_CODE_ANY = True
+
     IGNORE_PROCESSES = ['bash', 'grep', 'oom_reaper']
 
     @staticmethod
@@ -119,6 +121,10 @@ class ProcessJbossProcesses(process.Processor):
         # starts and grabs the process table before the grep is in it,
         # and sometimes not.
         num_matches = 0
+
+        if output.get('rc', 1) != 0:
+            return num_matches
+
         for line in output['stdout_lines']:
             parts = line.split(None, 1)
             if parts[0] in ProcessJbossProcesses.IGNORE_PROCESSES:

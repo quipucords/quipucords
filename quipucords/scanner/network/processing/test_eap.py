@@ -112,6 +112,13 @@ class TestProcessJbossProcesses(unittest.TestCase):
                 ansible_result('java\nbash')),
             1)
 
+    def test_bad_rc(self):
+        """Test that a bad return code returns 0 processes."""
+        self.assertEqual(
+            eap.ProcessJbossProcesses.process(
+                {'results': [{'rc': 1}]}),
+            0)
+
 
 class TestProcessJbossEapPackages(unittest.TestCase):
     """Test looking for JBoss EAP rpm packages."""
