@@ -13,7 +13,19 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
+RELEASE_TAG='-e RELEASE_TAG=1.0.0'
+POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
+#TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
+#CLI_PACKAGE_VERSION='-e CLI_DEFAULT_VERSION=qpc'
 
+
+
+declare -a args
+args=("$*")
+#TODO: you will need to make sure that the package_version is in args
+#args+=("$RELEASE_TAG" "$POSTGRES_VERSION" "$CLI_PACKAGE_VERSION")
+args+=("$RELEASE_TAG" "$POSTGRES_VERSION")
+set -- ${args[@]}
 
 usage() {
     cat <<EOM

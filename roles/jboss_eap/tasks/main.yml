@@ -138,9 +138,9 @@
     - /etc/init.d/jboss-as-standalone.sh
   when: 'user_has_sudo and jboss_eap'
 
-- name: gather jboss.eap.processes
-  raw: ps -A -o comm -o args e --columns 10000 | grep eap
-  register: jboss_eap_processes
+- name: gather jboss.processes
+  raw: ps -A -o comm -o args e --columns 10000 | grep java | grep jboss | grep -v "/usr/bin/grep"
+  register: jboss_processes
   ignore_errors: yes
   when: 'jboss_eap'
 
