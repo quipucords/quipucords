@@ -257,7 +257,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         logger.debug('Number merged network/satellite before: %d',
                      number_network_satellite_before)
         logger.debug('Number vcenter before: %d', number_vcenter_before)
-        reverse_priority_keys = {'cpu_count'}
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
         number_network_vcenter_merged, all_fingerprints = \
             self._merge_fingerprints_from_source_types(
                 NETWORK_VCENTER_MERGE_KEYS,
