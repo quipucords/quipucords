@@ -15,7 +15,10 @@
 from api.fact.view import FactViewSet
 from api.credential.view import CredentialViewSet
 from api.source.view import SourceViewSet
-from api.report.view import details, deployments, merge
+from api.report.view import (details,
+                             deployments,
+                             async_merge_reports,
+                             sync_merge_reports)
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
 from api.user.view import UserViewSet

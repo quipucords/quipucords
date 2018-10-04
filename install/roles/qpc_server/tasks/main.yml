@@ -46,7 +46,7 @@
 
 - name: Set server timeout
   set_fact:
-    QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
+    QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('30') }}"
   when: QPC_SERVER_TIMEOUT is not defined
 
 - name: Default directory mounting to empty string
