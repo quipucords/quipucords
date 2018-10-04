@@ -134,13 +134,10 @@ class InspectTaskRunner(ScanTaskRunner):
                 facts['cluster.name'] = prop.val
             elif prop.name == 'parent':
                 parent = parents_dict.get(str(prop.val))
-                while parent.get('type') != 'vim.Datacenter':
-                    if parent is not None:
-                        parent = parents_dict.get(parent.get('parent'))
-                if parent is not None:
-                    facts['cluster.datacenter'] = parent.get('name')
-                else:
-                    facts['cluster.datacenter'] = None
+                while parent and parent.get('type') != 'vim.Datacenter':
+                    parent = parents_dict.get(parent.get('parent'))
+                facts['cluster.datacenter'] = \
+                    parent.get('name') if parent else None
         return facts
 
     @transaction.atomic
