@@ -89,26 +89,26 @@ class TestProcessJbossCommonFiles(unittest.TestCase):
             ['dir3'])
 
 
-class TestProcessJbossEapProcesses(unittest.TestCase):
-    """Test looking for JBoss EAP processes."""
+class TestProcessJbossProcesses(unittest.TestCase):
+    """Test looking for JBoss processes."""
 
     def test_no_processes(self):
         """No processes found."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(ansible_result('')),
+            eap.ProcessJbossProcesses.process(ansible_result('')),
             0)
 
     def test_found_processes(self):
         """Found one process."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(
+            eap.ProcessJbossProcesses.process(
                 ansible_result('java\nbash\ngrep')),
             1)
 
     def test_no_grep(self):
         """Grep sometimes doesn't appear in the ps output."""
         self.assertEqual(
-            eap.ProcessJbossEapProcesses.process(
+            eap.ProcessJbossProcesses.process(
                 ansible_result('java\nbash')),
             1)
 

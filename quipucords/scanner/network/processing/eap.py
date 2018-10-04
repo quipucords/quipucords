@@ -102,7 +102,7 @@ class ProcessJbossEapCommonFiles(process.Processor):
         return out_list
 
 
-class ProcessJbossEapProcesses(process.Processor):
+class ProcessJbossProcesses(process.Processor):
     """Process the output of a process search."""
 
     KEY = 'jboss_processes'
@@ -121,7 +121,7 @@ class ProcessJbossEapProcesses(process.Processor):
         num_matches = 0
         for line in output['stdout_lines']:
             parts = line.split(None, 1)
-            if parts[0] in ProcessJbossEapProcesses.IGNORE_PROCESSES:
+            if parts[0] in ProcessJbossProcesses.IGNORE_PROCESSES:
                 continue
             num_matches += 1
 
