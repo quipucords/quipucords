@@ -108,9 +108,10 @@ class EngineTest(TestCase):
             fact['ifconfig_ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if ifconfig_mac_addresses:
-            fact['ifconfig_mac_addresses'] = ifconfig_mac_addresses
+            fact['ifconfig_mac_addresses'] = \
+                list(map(lambda x: x.lower(), ifconfig_mac_addresses))
         else:
-            fact['ifconfig_mac_addresses'] = ['MAC1', 'MAC2']
+            fact['ifconfig_mac_addresses'] = ['mac1', 'mac2']
 
         if dmi_system_uuid:
             fact['dmi_system_uuid'] = dmi_system_uuid
@@ -196,9 +197,10 @@ class EngineTest(TestCase):
             fact['vm.ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if vm_mac_addresses:
-            fact['vm.mac_addresses'] = vm_mac_addresses
+            fact['vm.mac_addresses'] = \
+                list(map(lambda x: x.lower(), vm_mac_addresses))
         else:
-            fact['vm.mac_addresses'] = ['MAC1', 'MAC2']
+            fact['vm.mac_addresses'] = ['mac1', 'mac2']
 
         if vm_name:
             fact['vm.name'] = vm_name
@@ -266,9 +268,10 @@ class EngineTest(TestCase):
             fact['ip_addresses'] = ['1.2.3.4', '2.3.4.5']
 
         if mac_addresses:
-            fact['mac_addresses'] = mac_addresses
+            fact['mac_addresses'] = \
+                list(map(lambda x: x.lower(), mac_addresses))
         else:
-            fact['mac_addresses'] = ['MAC1', 'MAC2']
+            fact['mac_addresses'] = ['mac1', 'mac2']
 
         if registration_time:
             fact['registration_time'] = registration_time
@@ -558,6 +561,39 @@ class EngineTest(TestCase):
             if result_fingerprint.get('vm_uuid') == 'match':
                 self.assertEqual(result_fingerprint.get(
                     'infrastructure_type'), 'virtualized')
+
+    def test_merge_mac_address_case_insensitive(self):
+        """Test if fingerprints will be merged with mixed mac addr."""
+        n_mac = ['00:50:56:A3:A2:E8', '00:50:56:c3:d2:m8']
+        v_mac = ['00:50:56:a3:a2:e8', '00:50:56:C3:D2:m8']
+        s_mac = ['00:50:56:A3:a2:E8', '00:50:56:C3:D2:M8']
+        self.assertNotEqual(v_mac, n_mac)
+        self.assertNotEqual(v_mac, s_mac)
+        nfingerprints = [
+            self._create_network_fingerprint(ifconfig_mac_addresses=n_mac)]
+        vfingerprints = [
+            self._create_vcenter_fingerprint(vm_mac_addresses=v_mac)]
+        sfingerprints = [
+            self._create_satellite_fingerprint(mac_addresses=s_mac)]
+        v_mac_addresses = vfingerprints[0]['mac_addresses']
+        n_mac_addresses = nfingerprints[0]['mac_addresses']
+        s_mac_addresses = sfingerprints[0]['mac_addresses']
+        self.assertEqual(v_mac_addresses, n_mac_addresses)
+        self.assertEqual(v_mac_addresses, s_mac_addresses)
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_SATELLITE_MERGE_KEYS,
+                nfingerprints,
+                sfingerprints)
+        self.assertEqual(len(result_fingerprints), 1)
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
+        _, result_fingerprints = \
+            self.fp_task_runner._merge_fingerprints_from_source_types(
+                NETWORK_VCENTER_MERGE_KEYS,
+                nfingerprints,
+                vfingerprints,
+                reverse_priority_keys=reverse_priority_keys)
+        self.assertEqual(len(result_fingerprints), 1)
 
     def test_merge_net_sate_vcenter_infrastructure_type(self):
         """Test if VCenter infrastructure_type is prefered over the others."""
