@@ -92,9 +92,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.scan_task = scan_task
 
-    def run(self, manager_interrupt):
-        """Scan network range and attempt connections."""
-        # Make sure job is not cancelled or paused
+    def check_for_interrupt(self, manager_interrupt):
+        """Process the fact collection.
+
+        :param manager_interrupt: Signal to indicate job is canceled
+        :return status, message indicating if shutdown should occur.
+            ScanTask.RUNNING indicates process should continue
+        """
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             error_message = 'Scan canceled'
@@ -106,9 +110,36 @@ class FingerprintTaskRunner(ScanTaskRunner):
             error_message = 'Scan paused'
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
+        return 'keep going', ScanTask.RUNNING
+
+    def run(self, manager_interrupt):
+        """Scan network range and attempt connections."""
+        # Make sure job is not cancelled or paused
+        interrupt_message, interrupt_status = self.check_for_interrupt(
+            manager_interrupt)
+        if interrupt_status != ScanTask.RUNNING:
+            return interrupt_message, interrupt_status
+
         fact_collection = self.scan_task.fact_collection
+
+        # remove results from previous interrupted scan
+        existing_fingerprints = SystemFingerprint.objects.filter(
+            report_id=fact_collection.id)
+        if existing_fingerprints:
+            self.scan_task.log_message(
+                'REMOVING PARTIAL RESULTS - deleting %d '
+                'fingerprints from previous scan'
+                % len(existing_fingerprints))
+            existing_fingerprints.delete()
         try:
-            message, status = self._process_fact_collection(fact_collection)
+            message, status = self._process_fact_collection(
+                manager_interrupt, fact_collection)
+
+            interrupt_message, interrupt_status = self.check_for_interrupt(
+                manager_interrupt)
+            if interrupt_status != ScanTask.RUNNING:
+                return interrupt_message, interrupt_status
+
             if status == ScanTask.COMPLETED:
                 fact_collection.status = FactCollection.FC_STATUS_COMPLETE
             else:
@@ -122,43 +153,72 @@ class FingerprintTaskRunner(ScanTaskRunner):
             error_message = 'Fact collection %d failed'\
                 ' to be processed.' % fact_collection.id
 
+            self.scan_task.log_message(
+                '%s' % (error_message), log_level=logging.ERROR)
             self.scan_task.log_message('%s:%s' % (
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
-    def _process_fact_collection(self, fact_collection):
+    def _process_fact_collection(self, manager_interrupt, fact_collection):
         """Process the fact collection.
 
+        :param manager_interrupt: Signal to indicate job is canceled
         :param fact_collection: FactCollection that was saved
         :param scan_task: Task that is running this merge
         :returns: Status message and status
         """
         # pylint: disable=unused-argument
-        logger.info('Fingerprint engine (report id=%d) - start processing',
-                    fact_collection.id)
+        self.scan_task.log_message('START DEDUPLICATION')
 
         # Invoke ENGINE to create fingerprints from facts
         fingerprints_list = self._process_sources(fact_collection)
 
+        self.scan_task.log_message('END DEDUPLICATION')
+
         number_valid = 0
         number_invalid = 0
+        self.scan_task.log_message('START FINGERPRINT PERSISTENCE')
+        status_count = 0
+        total_count = len(fingerprints_list)
         for fingerprint_dict in fingerprints_list:
+            status_count += 1
+            name = fingerprint_dict.get('name', 'unknown')
+            os_release = fingerprint_dict.get('os_release', 'unknown')
+            self.scan_task.log_message(
+                'FINGERPRINT %d of %d SAVED - Fingerprint '
+                '(name=%s, os_release=%s)' %
+                (status_count, total_count, name, os_release))
+
+            if status_count % 100 == 0:
+                interrupt_message, interrupt_status = self.check_for_interrupt(
+                    manager_interrupt)
+                if interrupt_status != ScanTask.RUNNING:
+                    return interrupt_message, interrupt_status
+
             serializer = FingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
                 number_valid += 1
                 serializer.save()
             else:
                 number_invalid += 1
-                logger.error('Invalid fingerprint: %s', fingerprint_dict)
-                logger.error('Fingerprint errors: %s', serializer.errors)
-            logger.debug('Fingerprints (report id=%d): %s',
-                         fact_collection.id, fingerprint_dict)
+                self.scan_task.log_message(
+                    'Invalid fingerprint: %s' %
+                    fingerprint_dict, log_level=logging.ERROR)
+                self.scan_task.log_message(
+                    'Fingerprint errors: %s' %
+                    serializer.errors, log_level=logging.ERROR)
+            self.scan_task.log_message('Fingerprints (report id=%d): %s' %
+                                       (fact_collection.id, fingerprint_dict),
+                                       log_level=logging.DEBUG)
 
-        logger.info('Fingerprint engine (report id=%d) - end processing '
-                    '(valid fingerprints=%d, invalid fingerprints=%d)',
-                    fact_collection.id,
-                    number_valid,
-                    number_invalid)
+        self.scan_task.log_message('RESULTS (report id=%d) -  '
+                                   '(valid fingerprints=%d, '
+                                   'invalid fingerprints=%d)' %
+                                   (fact_collection.id,
+                                    number_valid,
+                                    number_invalid))
+
+        self.scan_task.log_message('END FINGERPRINT PERSISTENCE')
 
         # Mark completed because engine has process raw facts
         fact_collection.status = FactCollection.FC_STATUS_COMPLETE
@@ -171,108 +231,171 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param fact_collection: FactCollection containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
+        # pylint: disable=too-many-statements
         network_fingerprints = []
         vcenter_fingerprints = []
         satellite_fingerprints = []
+
+        total_source_count = len(fact_collection.get_sources())
+        self.scan_task.log_message(
+            '%d sources to process' % total_source_count)
+        source_count = 0
         for source in fact_collection.get_sources():
+            source_count += 1
+            source_type = source.get('source_type')
+            source_name = source.get('source_name')
+            self.scan_task.log_message('PROCESSING Source %d of %d - '
+                                       '(name=%s, type=%s, server=%s)' % (
+                                           source_count,
+                                           total_source_count,
+                                           source_name,
+                                           source_type,
+                                           source.get('server_id')))
             source_fingerprints = self._process_source(fact_collection.id,
                                                        source)
-            if source['source_type'] == Source.NETWORK_SOURCE_TYPE:
+            if source_type == Source.NETWORK_SOURCE_TYPE:
                 network_fingerprints += source_fingerprints
-            elif source['source_type'] == Source.VCENTER_SOURCE_TYPE:
+            elif source_type == Source.VCENTER_SOURCE_TYPE:
                 vcenter_fingerprints += source_fingerprints
-            elif source['source_type'] == Source.SATELLITE_SOURCE_TYPE:
+            elif source_type == Source.SATELLITE_SOURCE_TYPE:
                 satellite_fingerprints += source_fingerprints
 
+            self.scan_task.log_message(
+                'SOURCE FINGERPRINTS - '
+                '%d %s fingerprints' % (
+                    len(source_fingerprints),
+                    source_type))
+
+            self.scan_task.log_message(
+                'TOTAL FINGERPRINT COUNT - '
+                'Fingerprints '
+                '(network=%d, satellite=%d, vcenter=%d, total=%d)' %
+                (
+                    len(network_fingerprints),
+                    len(satellite_fingerprints),
+                    len(vcenter_fingerprints),
+                    len(network_fingerprints) +
+                    len(satellite_fingerprints) +
+                    len(vcenter_fingerprints)))
+
         # Deduplicate network fingerprints
-        logger.debug('Remove duplicate network fingerprints by %s',
-                     NETWORK_IDENTIFICATION_KEYS)
-        logger.debug(
-            'Number network fingerprints before de-duplication: %d',
-            len(network_fingerprints))
+        self.scan_task.log_message(
+            'NETWORK DEDUPLICATION by keys %s' %
+            NETWORK_IDENTIFICATION_KEYS)
+        before_count = len(network_fingerprints)
         network_fingerprints = self._remove_duplicate_fingerprints(
             NETWORK_IDENTIFICATION_KEYS,
             network_fingerprints)
-        logger.debug(
-            'Number network fingerprints after de-duplication: %d\n',
-            len(network_fingerprints))
+        self.scan_task.log_message(
+            'NETWORK DEDUPLICATION RESULT - '
+            '(before=%d, after=%d)' %
+            (before_count, len(network_fingerprints)))
 
         # Deduplicate satellite fingerprints
-        logger.debug('Remove duplicate satellite fingerprints by %s',
-                     SATELLITE_IDENTIFICATION_KEYS)
-        logger.debug(
-            'Number satellite fingerprints before de-duplication: %d',
-            len(satellite_fingerprints))
+        self.scan_task.log_message(
+            'SATELLITE DEDUPLICATION by keys %s' %
+            SATELLITE_IDENTIFICATION_KEYS)
+        before_count = len(satellite_fingerprints)
         satellite_fingerprints = self._remove_duplicate_fingerprints(
             SATELLITE_IDENTIFICATION_KEYS,
             satellite_fingerprints)
-        logger.debug(
-            'Number satellite fingerprints after de-duplication: %d\n',
-            len(satellite_fingerprints))
+        self.scan_task.log_message(
+            'SATELLITE DEDUPLICATION RESULT - '
+            '(before=%d, after=%d)' %
+            (before_count, len(satellite_fingerprints)))
 
         # Deduplicate vcenter fingerprints
-        logger.debug('Remove duplicate vcenter fingerprints by %s',
-                     VCENTER_IDENTIFICATION_KEYS)
-        logger.debug(
-            'Number vcenter fingerprints before de-duplication: %d',
-            len(vcenter_fingerprints))
+        self.scan_task.log_message(
+            'VCENTER DEDUPLICATION by keys %s' %
+            VCENTER_IDENTIFICATION_KEYS)
+        before_count = len(vcenter_fingerprints)
         vcenter_fingerprints = self._remove_duplicate_fingerprints(
             VCENTER_IDENTIFICATION_KEYS,
             vcenter_fingerprints)
-        logger.debug(
-            'Number vcenter fingerprints after de-duplication: %d\n',
-            len(vcenter_fingerprints))
+        self.scan_task.log_message(
+            'VCENTER DEDUPLICATION RESULT - '
+            '(before=%d, after=%d)' %
+            (before_count, len(vcenter_fingerprints)))
+
+        self.scan_task.log_message(
+            'TOTAL FINGERPRINT COUNT - ''Fingerprints '
+            '(network=%d, satellite=%d, vcenter=%d, total=%d)' %
+            (
+                len(network_fingerprints),
+                len(satellite_fingerprints),
+                len(vcenter_fingerprints),
+                len(network_fingerprints) +
+                len(satellite_fingerprints) +
+                len(vcenter_fingerprints)))
 
         # Merge network and satellite fingerprints
-        logger.debug(
-            'Merged network and satellite fingerprints using keypairs.'
-            ' Pairs: [(network_key, satellite_key)]=%s',
+        self.scan_task.log_message(
+            'NETWORK and SATELLITE DEDUPLICATION '
+            'by keys pairs [(network_key, satellite_key)]=%s' %
             NETWORK_SATELLITE_MERGE_KEYS)
         number_network_before = len(network_fingerprints)
         number_satellite_before = len(satellite_fingerprints)
-        logger.debug('Number network before: %d', number_network_before)
-        logger.debug('Number satellite before: %d', number_satellite_before)
-        number_network_satellite_merged, all_fingerprints = \
+        number_vcenter_before = len(vcenter_fingerprints)
+        total_before = number_network_before + \
+            number_satellite_before + number_vcenter_before
+        self.scan_task.log_message(
+            'NETWORK and SATELLITE DEDUPLICATION '
+            'START COUNT - (network=%d, satellite=%d, '
+            'vcenter=%d, total=%d)' % (
+                number_network_before,
+                number_satellite_before,
+                number_vcenter_before,
+                total_before))
+
+        _, all_fingerprints = \
             self._merge_fingerprints_from_source_types(
                 NETWORK_SATELLITE_MERGE_KEYS,
                 network_fingerprints,
                 satellite_fingerprints)
         number_after = len(all_fingerprints)
-        logger.debug('Number fingerprints merged together: %d',
-                     number_network_satellite_merged)
-        logger.debug(
-            'Total number network/satellite after merge: %d',
-            number_after)
-        logger.debug('Total merged count decreased by %d\n',
-                     (number_network_before +
-                      number_satellite_before - number_after))
+        self.scan_task.log_message(
+            'NETWORK and SATELLITE DEDUPLICATION '
+            'END COUNT - (combined_network_satellite=%d,'
+            ' vcenter=%d, total=%d)' % (
+                number_after,
+                number_vcenter_before,
+                number_after + number_vcenter_before))
 
         # Merge network and vcenter fingerprints
-        logger.debug(
-            'Merged network/satellite and vcenter fingerprints using keypairs.'
-            ' Pairs: [(network/satelllite, vcenter)]=%s',
+        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
+        self.scan_task.log_message(
+            'NETWORK-SATELLITE and VCENTER DEDUPLICATION'
+            ' by keys pairs '
+            '[(network_satellite_key, vcenter_key)]=%s' %
             NETWORK_VCENTER_MERGE_KEYS)
+        self.scan_task.log_message(
+            'NETWORK-SATELLITE and VCENTER DEDUPLICATION'
+            ' by reverse priority keys '
+            '(we trust vcenter more than network/satellite): %s' %
+            reverse_priority_keys)
+
         number_network_satellite_before = len(all_fingerprints)
         number_vcenter_before = len(vcenter_fingerprints)
-        logger.debug('Number merged network/satellite before: %d',
-                     number_network_satellite_before)
-        logger.debug('Number vcenter before: %d', number_vcenter_before)
-        reverse_priority_keys = {'cpu_count', 'infrastructure_type'}
-        number_network_vcenter_merged, all_fingerprints = \
+        total_before = number_network_satellite_before + number_vcenter_before
+        self.scan_task.log_message(
+            'NETWORK-SATELLITE and VCENTER DEDUPLICATION '
+            'START COUNT - (combined_network_satellite=%d, '
+            'vcenter=%d, total=%d)' % (
+                number_network_satellite_before,
+                number_vcenter_before,
+                total_before))
+
+        _, all_fingerprints = \
             self._merge_fingerprints_from_source_types(
                 NETWORK_VCENTER_MERGE_KEYS,
                 all_fingerprints,
                 vcenter_fingerprints,
                 reverse_priority_keys=reverse_priority_keys)
         number_after = len(all_fingerprints)
-        logger.debug('Number fingerprints merged together: %d',
-                     number_network_vcenter_merged)
-        logger.debug(
-            'Total number network/satellite/vcenter after merge: %d',
-            number_after)
-        logger.debug('Total merged count decreased by %d\n',
-                     (number_network_satellite_before +
-                      number_vcenter_before - number_after))
+        self.scan_task.log_message(
+            'NETWORK-SATELLITE and VCENTER DEDUPLICATION '
+            'END COUNT - (total=%d)' % (
+                number_after))
 
         self._post_process_merged_fingerprints(all_fingerprints)
         return all_fingerprints
@@ -285,9 +408,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param fingerprints: final list of fingerprints
         associated with facts.
         """
+        self.scan_task.log_message(
+            'POST MERGE PROCESSING BEGIN - computing system creation time')
         for fingerprint in fingerprints:
             fingerprint[SOURCES_KEY] = list(fingerprint[SOURCES_KEY].values())
             self._compute_system_creation_time(fingerprint)
+        self.scan_task.log_message(
+            'POST MERGE PROCESSING END - computing system creation time')
 
     def _compute_system_creation_time(self, fingerprint):
         """Normalize cross source fingerprint values.
@@ -337,9 +464,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
             elif source_type == Source.SATELLITE_SOURCE_TYPE:
                 fingerprint = self._process_satellite_fact(source, fact)
             else:
-                logger.error('Could not process source, '
-                             'unknown source type: %s',
-                             source_type)
+                self.scan_task.log_message.error(
+                    'Could not process source, '
+                    'unknown source type: %s' %
+                    source_type, log_level=logging.ERROR)
 
             if fingerprint is not None:
                 fingerprint['report_id'] = report_id
@@ -539,10 +667,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
             else:
                 key_not_found_list.append(value_dict)
         if number_duplicates:
-            logger.debug(
+            self.scan_task.log_message(
                 '_create_index_for_fingerprints - '
-                'Potential lost fingerprint due to duplicate %s: %d.',
-                id_key, number_duplicates)
+                'Potential lost fingerprint due to duplicate %s: %d.' %
+                (id_key, number_duplicates), log_level=logging.DEBUG)
         return result_by_key, key_not_found_list
 
     # pylint: disable=too-many-branches, too-many-locals
@@ -1053,12 +1181,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 except ValueError as error:
                     date_error = error
 
-            logger.error('Fingerprinter (%s, %s) - '
-                         'Could not parse date for %s. '
-                         'Unsupported date format: \'%s\'. Error: %s',
-                         source['source_type'],
-                         source['source_name'],
-                         raw_fact_key,
-                         raw_date_value,
-                         date_error)
+            self.scan_task.log_message(
+                'Fingerprinter (%s, %s) - '
+                'Could not parse date for %s. '
+                'Unsupported date format: \'%s\'. Error: %s' %
+                (source['source_type'],
+                 source['source_name'],
+                 raw_fact_key,
+                 raw_date_value,
+                 date_error),
+                log_level=logging.ERROR)
         return None

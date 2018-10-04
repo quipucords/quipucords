@@ -211,7 +211,7 @@ class ReportMergeCommand(CliCommand):
         :returns: a dictionary representing the jobs to merge
         """
         if self.args.json_files or self.args.json_dir:
-            self.req_path = report.JSON_FILE_MERGE_URI
+            self.req_path = report.MERGE_URI
             self.req_method = POST
             self.req_payload = self.json
         else:
