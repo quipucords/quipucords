@@ -199,8 +199,8 @@ REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
 REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
-REPORT_SUCCESSFULLY_MERGED = 'Scan job results successfully merged.  '\
-    'Report ID is %s.'
+REPORT_SUCCESSFULLY_MERGED = 'Merge reports job created. '\
+    'Job ID is %s.'
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\

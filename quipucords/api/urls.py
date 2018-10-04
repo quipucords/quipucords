@@ -16,11 +16,12 @@ from api.views import (CredentialViewSet,
                        ScanViewSet,
                        SourceViewSet,
                        UserViewSet,
+                       async_merge_reports,
                        deployments,
                        details,
                        jobs,
-                       merge,
-                       status)
+                       status,
+                       sync_merge_reports)
 
 from django.urls import path
 
@@ -53,10 +54,9 @@ ROUTER.register(r'users',
 urlpatterns = [
     path('reports/<int:pk>/details/', details),
     path('reports/<int:pk>/deployments/', deployments),
-    path('reports/merge/', merge),
-]
-
-urlpatterns += [
+    path('reports/merge/', sync_merge_reports),
+    path('reports/merge/jobs/', async_merge_reports),
+    path('reports/merge/jobs/<int:pk>/', async_merge_reports),
     path('scans/<int:pk>/jobs/', jobs),
 ]
 
