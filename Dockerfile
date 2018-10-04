@@ -11,6 +11,7 @@ RUN virtualenv -p python3 ~/venv
 RUN mkdir -p /app
 
 # Setup dependencies
+COPY locked-requirements.txt /app/locked-requirements.txt
 COPY requirements.txt /app/requirements.txt
 RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==19.7.1
 
