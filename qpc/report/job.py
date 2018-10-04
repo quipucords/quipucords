@@ -9,25 +9,22 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportDetailCommand is used to show detail report information."""
+"""ReportJobCommand is used to show job merge information."""
 
 from __future__ import print_function
 
 import sys
 
-import qpc.messages as messages
 import qpc.report as report
-import qpc.scan as scan
+from qpc import messages
 from qpc.clicommand import CliCommand
-from qpc.request import GET, request
+from qpc.request import GET
 from qpc.translation import _
-from qpc.utils import (pretty_print,
-                       validate_write_file,
-                       write_file)
 
 from requests import codes
 
 
+# pylint: disable=too-few-public-methods
 class ReportJobCommand(CliCommand):
     """Defines the job command.
 
@@ -43,25 +40,19 @@ class ReportJobCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             report.JOB_URI, [codes.ok])
-        id_group = self.parser.add_mutually_exclusive_group(required=True)
-        id_group.add_argument('--id', dest='job_id',
-                              metavar='JOB_ID',
-                              help=_(messages.REPORT_JOB_ID_HELP))
-        self.job_id = None
+        self.parser.add_argument('--id', dest='job_id', metavar='JOB_ID',
+                                 help=_(messages.REPORT_JOB_ID_HELP),
+                                 required=True)
 
-    def _validate_args(self):
-        CliCommand._validate_args(self)
-        try:
-            #TODO: test if id is valid arguement
-            pass
-        except Exception as e:
-            #TODO: error if the --id is not valid
-            pass
+    def _build_req_params(self):
+        self.req_path = report.JOB_URI + str(self.args.job_id) + '/'
 
     def _handle_response_success(self):
-        # TODO: Figure out what needs to be returned from the backend.
-        pass
+        json_data = self.response.json()
+        print(_(messages.JOB_ID_STATUS % (self.args.job_id,
+                                          json_data.get('status_message'),
+                                          json_data.get('report_id'))))
 
     def _handle_response_error(self):
-        # TODO: Figure out what nees to be returned from the backend.
-        pass
+        print(_(messages.JOB_ID_NOT_FOUND % self.args.job_id))
+        sys.exit(1)

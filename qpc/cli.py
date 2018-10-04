@@ -26,9 +26,9 @@ from qpc.cred.commands import (CredAddCommand,
                                CredListCommand,
                                CredShowCommand,)
 from qpc.report.commands import (ReportDetailCommand,
+                                 ReportJobCommand,
                                  ReportMergeCommand,
-                                 ReportSummaryCommand,
-                                 ReportJobCommand)
+                                 ReportSummaryCommand)
 from qpc.scan.commands import (ScanAddCommand,
                                ScanCancelCommand,
                                ScanClearCommand,
