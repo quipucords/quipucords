@@ -33,9 +33,10 @@ quipucords/quipucords/templates/client/
 *.manifest
 
 
-# Installer logs
+# Installer 
 pip-log.txt
 pip-delete-this-directory.txt
+install/packages/*
 
 # Unit test / coverage reports
 htmlcov/
