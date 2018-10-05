@@ -43,11 +43,13 @@ def handle_scan(sender, instance, **kwargs):
     scanner = ScanJobRunner(instance)
     instance.queue()
     if not manager.SCAN_MANAGER.is_alive():
-        logger.error('%s: Process unexpectedly crashed.  See logs.',
-                     (manager.SCAN_MANAGER_LOG_PREFIX))
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
         manager.SCAN_MANAGER = manager.Manager()
-        logger.error('%s: Recovering manager.',
-                     (manager.SCAN_MANAGER_LOG_PREFIX))
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
@@ -104,11 +106,13 @@ def scan_restart(sender, instance, **kwargs):
     scanner = ScanJobRunner(instance)
 
     if not manager.SCAN_MANAGER.is_alive():
-        logger.error('%s: Process unexpectedly crashed.  See logs.',
-                     (manager.SCAN_MANAGER_LOG_PREFIX))
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
         manager.SCAN_MANAGER = manager.Manager()
-        logger.error('%s: Recovering manager.',
-                     (manager.SCAN_MANAGER_LOG_PREFIX))
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
