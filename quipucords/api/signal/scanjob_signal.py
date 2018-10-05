@@ -18,8 +18,8 @@ from api import messages
 import django.dispatch
 from django.utils.translation import ugettext as _
 
+from scanner import manager
 from scanner.job import ScanJobRunner
-from scanner.manager import SCAN_MANAGER
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -42,12 +42,19 @@ def handle_scan(sender, instance, **kwargs):
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('START'))
     scanner = ScanJobRunner(instance)
     instance.queue()
-    if not SCAN_MANAGER.is_alive():
-        SCAN_MANAGER.start()
+    if not manager.SCAN_MANAGER.is_alive():
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
+        manager.SCAN_MANAGER = manager.Manager()
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
+        manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
     else:
-        SCAN_MANAGER.put(scanner)
+        manager.SCAN_MANAGER.put(scanner)
 
 
 def scan_action(sender, instance, action, **kwargs):
@@ -60,7 +67,7 @@ def scan_action(sender, instance, action, **kwargs):
     :returns: None
     """
     if action in [PAUSE, CANCEL]:
-        SCAN_MANAGER.kill(instance, action)
+        manager.SCAN_MANAGER.kill(instance, action)
 
 
 def scan_pause(sender, instance, **kwargs):
@@ -98,12 +105,19 @@ def scan_restart(sender, instance, **kwargs):
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('RESTART'))
     scanner = ScanJobRunner(instance)
 
-    if not SCAN_MANAGER.is_alive():
-        SCAN_MANAGER.start()
+    if not manager.SCAN_MANAGER.is_alive():
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
+        manager.SCAN_MANAGER = manager.Manager()
+        logger.error('%s: %s',
+                     manager.SCAN_MANAGER_LOG_PREFIX,
+                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
+        manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
     else:
-        SCAN_MANAGER.put(scanner)
+        manager.SCAN_MANAGER.put(scanner)
 
 
 # pylint: disable=C0103

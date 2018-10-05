@@ -139,6 +139,8 @@ REPORT_MERGE_NO_RESULTS = 'The specified set of reports '\
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
+SIGNAL_SCAN_MANAGER_CRASH = 'Process unexpectedly crashed.  See logs.'
+SIGNAL_SCAN_MANAGER_RESTART = 'Recovering manager..'
 
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan tasks'
