@@ -110,14 +110,14 @@ class SatelliteUtilsTest(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json(), jsonresult)
 
-    @patch('scanner.satellite.utils._status5',
-           return_value=(200, SATELLITE_VERSION_5, SATELLITE_VERSION_5))
-    def test_status_sat5(self, mock_status5):
+    @patch('scanner.satellite.utils._status6',
+           return_value=(200, SATELLITE_VERSION_6, SATELLITE_VERSION_6))
+    def test_status_sat6(self, mock_status5):
         """Test a patched status request to Satellite 5 server."""
         status_code, api_version, satellite_version = status(self.scan_task)
         self.assertEqual(status_code, 200)
-        self.assertEqual(api_version, SATELLITE_VERSION_5)
-        self.assertEqual(satellite_version, SATELLITE_VERSION_5)
+        self.assertEqual(api_version, SATELLITE_VERSION_6)
+        self.assertEqual(satellite_version, SATELLITE_VERSION_6)
         mock_status5.assert_called_once_with(ANY)
 
     @patch('xmlrpc.client.ServerProxy')
