@@ -5,7 +5,7 @@ exports[`CreateScanDialog Component should render a basic component 1`] = `
   role="dialog"
 >
   <div
-    class="modal-backdrop fade in"
+    class="fade modal-backdrop in"
   />
   <div
     class="fade in modal"

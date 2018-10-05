@@ -324,4 +324,7 @@ const mapStateToProps = function(state) {
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Sources);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Sources);

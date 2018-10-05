@@ -9,7 +9,7 @@ import {
   sourcesTypes
 } from '../constants';
 
-let initialState = {};
+const initialState = {};
 
 const INITAL_VIEW_STATE = {
   currentPage: 1,
@@ -117,9 +117,9 @@ const viewOptionsReducer = function(state = initialState, action) {
           currentPage: 1
         });
         return Object.assign({}, state, updateState);
-      } else {
-        return state;
       }
+
+      return state;
 
     case viewToolbarTypes.CLEAR_FILTERS:
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {

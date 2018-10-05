@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddSourceWizard Component should shallow render a basic component 1`] = `
-<React.Fragment>
+<Fragment>
   <Modal
     animation={true}
     autoFocus={true}
@@ -181,5 +181,5 @@ exports[`AddSourceWizard Component should shallow render a basic component 1`] =
       </ModalFooter>
     </Wizard>
   </Modal>
-</React.Fragment>
+</Fragment>
 `;

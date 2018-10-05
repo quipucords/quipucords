@@ -14,7 +14,9 @@ const AddSourceWizardStepThree = ({ view }) => {
         <p className="blank-slate-pf-secondary-action">{view.errorMessage}</p>
       </div>
     );
-  } else if (!view.fulfilled) {
+  }
+
+  if (!view.fulfilled) {
     return (
       <div className="wizard-pf-process blank-slate-pf">
         <Spinner loading size="lg" className="blank-slate-pf-icon" />
