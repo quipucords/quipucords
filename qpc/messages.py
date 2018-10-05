@@ -222,6 +222,7 @@ SSL_ERROR_MSG = 'A connection error occurred while attempting to '\
 READ_FILE_ERROR = 'Error reading from %s: %s.'
 WRITE_FILE_ERROR = 'Error writing to %s: %s.'
 NOT_A_FILE = 'Input %s was not a file.'
+FILE_NOT_FOUND = 'Input %s was not found.'
 
 VALIDATE_SSHKEY = 'The file path provided, %s, could not be found on the '\
     'system. Provide a valid path for the "--sshkeyfile" argument.'

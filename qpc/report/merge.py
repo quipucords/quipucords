@@ -129,28 +129,32 @@ class ReportMergeCommand(CliCommand):
         report_id = None
         for file in files:
             error = True
-            with open(file) as lint_f:
-                try:
-                    json_data = json.load(lint_f)
-                except json_exception_class:
+            if os.path.isfile(file):
+                with open(file) as lint_f:
+                    try:
+                        json_data = json.load(lint_f)
+                    except json_exception_class:
+                        print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                        continue
+                    sources = json_data.get('sources')
+                    if sources:
+                        facts = sources[0].get('facts')
+                        server_id = sources[0].get('server_id')
+                        if facts and server_id:
+                            error = False
+                if not error:
+                    print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
+                    try:
+                        report_id, sources = self.get_id_and_sources(file)
+                        all_sources += sources
+                    except ValueError:
+                        print(_(messages.REPORT_INVALID_JSON_FILE % file))
+                        sys.exit(1)
+                else:
                     print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
-                    continue
-                sources = json_data.get('sources')
-                if sources:
-                    facts = sources[0].get('facts')
-                    server_id = sources[0].get('server_id')
-                    if facts and server_id:
-                        error = False
-            if not error:
-                print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
-                try:
-                    report_id, sources = self.get_id_and_sources(file)
-                    all_sources += sources
-                except ValueError:
-                    print(_(messages.REPORT_INVALID_JSON_FILE % file))
-                    sys.exit(1)
             else:
-                print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                print(_(messages.FILE_NOT_FOUND % file))
+                sys.exit(1)
         if all_sources == []:
             print(_(messages.REPORT_JSON_DIR_ALL_FAIL))
             sys.exit(1)
