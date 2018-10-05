@@ -184,6 +184,7 @@ class Manager(Thread):
 
     def run(self):
         """Trigger thread execution."""
+        # pylint: disable=too-many-branches
         self.restart_incomplete_scansjobs()
         logger.info('%s: Started run loop.', SCAN_MANAGER_LOG_PREFIX)
         self.start_log_timer()
@@ -221,20 +222,26 @@ class Manager(Thread):
                 # Occurs when current jobs ends and at least 1 in queue
                 killed = not self.current_job_runner.is_alive()
                 if killed:
-                    terminated_job = ScanJob.objects.get(
-                        pk=self.current_job_runner.scan_job.id)
-                    if terminated_job.status in [ScanTask.PENDING,
-                                                 ScanTask.CREATED,
-                                                 ScanTask.RUNNING]:
-                        terminated_job.log_message(
-                            '%s: scan job has unexpectedly failed.' %
-                            SCAN_MANAGER_LOG_PREFIX)
-                        terminated_job.fail(
-                            'Scan manager failed job due to unexpected error.')
+                    terminated_job = ScanJob.objects.filter(
+                        id=self.current_job_runner.scan_job.id).first()
+                    if terminated_job:
+                        if terminated_job.status in [ScanTask.PENDING,
+                                                     ScanTask.CREATED,
+                                                     ScanTask.RUNNING]:
+                            terminated_job.log_message(
+                                '%s: scan job has unexpectedly failed.' %
+                                SCAN_MANAGER_LOG_PREFIX)
+                            terminated_job.fail(
+                                'Scan manager failed job '
+                                'due to unexpected error.')
+                        else:
+                            terminated_job.log_message(
+                                '%s: scan job has completed.' %
+                                SCAN_MANAGER_LOG_PREFIX)
                     else:
-                        terminated_job.log_message(
-                            '%s: scan job has completed.' %
-                            SCAN_MANAGER_LOG_PREFIX)
+                        self.current_job_runner.scan_job.log_message(
+                            'Scan manager detected deletion of scan job '
+                            'model before final updates applied.')
                     self.current_job_runner = None
                     if queue_len > 0:
                         self.work()
