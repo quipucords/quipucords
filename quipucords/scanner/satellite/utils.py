@@ -143,17 +143,17 @@ def status(scan_task):
     :returns: tuple (status_code, api_version or None, satellite_version)
     """
     try:
-        return _status5(scan_task)
+        return _status6(scan_task)
     except SatelliteException as sat_error:
-        message = 'Satellite 5 status check failed with error:' \
+        message = 'Satellite 6 status check failed with error:' \
             ' %s.' % sat_error
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
-        message = 'Satellite 5 status check endpoint not found. '\
-            'Attempting Satellite 6.'
+        message = 'Satellite 6 status check endpoint not found. '\
+            'Attempting Satellite 5.'
         scan_task.log_message(message)
 
-    return _status6(scan_task)
+    return _status5(scan_task)
 
 
 def _status5(scan_task):
