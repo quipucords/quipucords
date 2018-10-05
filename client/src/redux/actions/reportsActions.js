@@ -1,54 +1,47 @@
 import { reportsTypes } from '../constants';
 import reportsService from '../../services/reportsService';
 
-const getReportSummary = (id, query) => dispatch => {
-  return dispatch({
+const getReportSummary = (id, query) => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportSummary(id, query)
   });
-};
 
-const getReportSummaryCsv = (id, query) => dispatch => {
-  return dispatch({
+const getReportSummaryCsv = (id, query) => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportSummaryCsv(id, query)
   });
-};
 
-const getReportDetails = id => dispatch => {
-  return dispatch({
+const getReportDetails = id => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportDetails(id)
   });
-};
 
-const getReportDetailsCsv = id => dispatch => {
-  return dispatch({
+const getReportDetailsCsv = id => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getReportDetailsCsv(id)
   });
-};
 
-const getMergedScanReportSummaryCsv = id => dispatch => {
-  return dispatch({
+const getMergedScanReportSummaryCsv = id => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getMergedScanReportSummaryCsv(id)
   });
-};
 
-const getMergedScanReportDetailsCsv = id => dispatch => {
-  return dispatch({
+const getMergedScanReportDetailsCsv = id => dispatch =>
+  dispatch({
     type: reportsTypes.GET_REPORT,
     payload: reportsService.getMergedScanReportDetailsCsv(id)
   });
-};
 
-const mergeScanReports = data => dispatch => {
-  return dispatch({
+const mergeScanReports = data => dispatch =>
+  dispatch({
     type: reportsTypes.GET_MERGE_REPORT,
     payload: reportsService.mergeScanReports(data)
   });
-};
 
 export {
   getReportSummary,

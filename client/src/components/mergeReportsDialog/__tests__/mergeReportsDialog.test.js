@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import MergeReportsDialog from '../mergeReportsDialog';
 
-describe('ToastNotificationsList Component', function() {
+describe('ToastNotificationsList Component', () => {
   const generateEmptyStore = () => configureMockStore()({ scans: {} });
 
   it('should shallow render a basic component', () => {

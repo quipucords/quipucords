@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import ScanSourceList from '../scanSourceList';
 
-describe('ScanSourceList Component', function() {
+describe('ScanSourceList Component', () => {
   const generateEmptyStore = () => configureMockStore()({});
 
   it('should shallow render a basic component with status', () => {

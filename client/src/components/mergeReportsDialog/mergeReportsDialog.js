@@ -13,30 +13,20 @@ import {
 } from '../../redux/actions/reportsActions';
 
 class MergeReportsDialog extends React.Component {
-  constructor() {
-    super();
-
-    helpers.bindMethods(this, ['mergeScanResults', 'onClose']);
-  }
-
-  onClose() {
+  onClose = () => {
     Store.dispatch({
       type: scansTypes.MERGE_SCAN_DIALOG_HIDE
     });
-  }
+  };
 
   getValidScans() {
     const { scans } = this.props;
-    return _.filter(scans, scan => {
-      return _.get(scan, 'most_recent.status') === 'completed';
-    });
+    return _.filter(scans, scan => _.get(scan, 'most_recent.status') === 'completed');
   }
 
   getInvalidScans() {
     const { scans } = this.props;
-    return _.filter(scans, scan => {
-      return _.get(scan, 'most_recent.status') !== 'completed';
-    });
+    return _.filter(scans, scan => _.get(scan, 'most_recent.status') !== 'completed');
   }
 
   getValidReportId() {
@@ -62,7 +52,7 @@ class MergeReportsDialog extends React.Component {
     this.onClose();
   }
 
-  mergeScanResults() {
+  onMergeScanResults = () => {
     const { mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
     const data = { reports: this.getValidReportId() };
 
@@ -70,19 +60,19 @@ class MergeReportsDialog extends React.Component {
       response => {
         if (details) {
           getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
-            success => this.notifyDownloadStatus(false),
+            () => this.notifyDownloadStatus(false),
             error => this.notifyDownloadStatus(true, error)
           );
         } else {
           getMergedScanReportSummaryCsv(_.get(response, 'value.data.id')).then(
-            success => this.notifyDownloadStatus(false),
+            () => this.notifyDownloadStatus(false),
             error => this.notifyDownloadStatus(true, error)
           );
         }
       },
       error => this.notifyDownloadStatus(true, error)
     );
-  }
+  };
 
   renderValidScans() {
     const validScans = this.getValidScans();
@@ -92,9 +82,9 @@ class MergeReportsDialog extends React.Component {
         <div>
           <span>Scans to be included in the merged report:</span>
           <ul>
-            {validScans.map(scan => {
-              return <li key={scan.id}>{scan.name}</li>;
-            })}
+            {validScans.map(scan => (
+              <li key={scan.id}>{scan.name}</li>
+            ))}
           </ul>
         </div>
       );
@@ -111,9 +101,9 @@ class MergeReportsDialog extends React.Component {
         <div>
           <span>Failed scans that cannot be included in the merged report:</span>
           <ul>
-            {invalidScans.map(scan => {
-              return <li key={scan.id}>{scan.name}</li>;
-            })}
+            {invalidScans.map(scan => (
+              <li key={scan.id}>{scan.name}</li>
+            ))}
           </ul>
         </div>
       );
@@ -138,7 +128,7 @@ class MergeReportsDialog extends React.Component {
         <Button bsStyle="default" className="btn-cancel" onClick={this.onClose}>
           Cancel
         </Button>
-        <Button bsStyle="primary" type="submit" disabled={validCount < 2} onClick={this.mergeScanResults}>
+        <Button bsStyle="primary" type="submit" disabled={validCount < 2} onClick={this.onMergeScanResults}>
           Merge
         </Button>
       </React.Fragment>
@@ -180,7 +170,7 @@ class MergeReportsDialog extends React.Component {
     return (
       <Modal show={show} onHide={this.onClose}>
         <Modal.Header>
-          <button className="close" onClick={this.onClose} aria-hidden="true" aria-label="Close">
+          <button type="button" className="close" onClick={this.onClose} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
           <Modal.Title>{`${details ? 'Detailed' : 'Summary'} Merge Report`}</Modal.Title>
@@ -213,19 +203,19 @@ MergeReportsDialog.propTypes = {
   details: PropTypes.bool.isRequired
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   mergeScans: data => dispatch(mergeScanReports(data)),
   getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id)),
   getMergedScanReportSummaryCsv: id => dispatch(getMergedScanReportSummaryCsv(id))
 });
 
-const mapStateToProps = function(state) {
-  return {
-    ...state.scans.merge_dialog
-  };
-};
+const mapStateToProps = state => ({
+  ...state.scans.merge_dialog
+});
 
-export default connect(
+const ConnectedMergeReportsDialog = connect(
   mapStateToProps,
   mapDispatchToProps
 )(MergeReportsDialog);
+
+export { ConnectedMergeReportsDialog as default, ConnectedMergeReportsDialog, MergeReportsDialog };

@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import ConfirmationModal from '../confirmationModal';
 
-describe('ConfirmationModal Component', function() {
+describe('ConfirmationModal Component', () => {
   const generateEmptyStore = () => configureMockStore()({ confirmationModal: {} });
 
   it('should shallow render a basic component', () => {

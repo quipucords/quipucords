@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Form, Grid } from 'patternfly-react';
 import helpers from '../../common/helpers';
 
-const addSourceWizardField = ({ children, colLabel = 3, colField = 9, id, label, error, errorMessage, ...props }) => {
+const AddSourceWizardField = ({ children, colLabel = 3, colField = 9, id, label, error, errorMessage, ...props }) => {
   const setId = id || helpers.generateId();
 
   return (
@@ -19,7 +19,7 @@ const addSourceWizardField = ({ children, colLabel = 3, colField = 9, id, label,
   );
 };
 
-addSourceWizardField.propTypes = {
+AddSourceWizardField.propTypes = {
   children: PropTypes.node.isRequired,
   colLabel: PropTypes.number,
   colField: PropTypes.number,
@@ -29,6 +29,4 @@ addSourceWizardField.propTypes = {
   errorMessage: PropTypes.string
 };
 
-export { addSourceWizardField };
-
-export default addSourceWizardField;
+export { AddSourceWizardField as default, AddSourceWizardField };

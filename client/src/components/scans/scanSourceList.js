@@ -1,8 +1,8 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Grid, Icon } from 'patternfly-react';
+import _ from 'lodash';
 import { helpers } from '../../common/helpers';
 import { getScanJob } from '../../redux/actions/scansActions';
 
@@ -44,7 +44,7 @@ class ScanSourceList extends React.Component {
   }
 
   sortSources(scan) {
-    let sources = [..._.get(scan, 'sources', [])];
+    const sources = [..._.get(scan, 'sources', [])];
 
     sources.sort((item1, item2) => {
       let cmp = item1.source_type.localeCompare(item2.source_type);
@@ -54,7 +54,7 @@ class ScanSourceList extends React.Component {
       return cmp;
     });
 
-    this.setState({ sources: sources });
+    this.setState({ sources });
   }
 
   getSourceStatus(source) {
@@ -75,7 +75,7 @@ class ScanSourceList extends React.Component {
     return `Inspection Scan: ${_.get(inspectTask, 'status_message', 'checking status...')}`;
   }
 
-  renderSourceIcon(source) {
+  static renderSourceIcon(source) {
     const iconInfo = helpers.sourceTypeIcon(source.source_type);
 
     return <Icon type={iconInfo.type} name={iconInfo.name} />;
@@ -89,7 +89,7 @@ class ScanSourceList extends React.Component {
         {sources.map((item, index) => (
           <Grid.Row key={index}>
             <Grid.Col xs={4} md={3}>
-              {this.renderSourceIcon(item)}
+              {ScanSourceList.renderSourceIcon(item)}
               &nbsp; {item.name}
             </Grid.Col>
             <Grid.Col xs={8} md={9}>
@@ -108,15 +108,15 @@ ScanSourceList.propTypes = {
   getScanJob: PropTypes.func
 };
 
-const mapStateToProps = function(state) {
-  return {};
-};
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  getScanJob: (id, query) => dispatch(getScanJob(id))
+const mapDispatchToProps = dispatch => ({
+  getScanJob: id => dispatch(getScanJob(id))
 });
 
-export default connect(
+const mapStateToProps = () => ({});
+
+const ConnectedScanSourceList = connect(
   mapStateToProps,
   mapDispatchToProps
 )(ScanSourceList);
+
+export { ConnectedScanSourceList as default, ConnectedScanSourceList, ScanSourceList };

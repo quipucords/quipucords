@@ -11,8 +11,6 @@ class CreateScanDialog extends React.Component {
   constructor() {
     super();
 
-    helpers.bindMethods(this, ['updateScanName', 'createScan', 'startChange']);
-
     this.state = {
       scanName: '',
       validScanName: false
@@ -87,11 +85,11 @@ class CreateScanDialog extends React.Component {
     }
   }
 
-  createScan() {
+  onCreateScan = () => {
     const { sources, addScan } = this.props;
     const { scanName } = this.state;
 
-    let data = {
+    const data = {
       name: scanName,
       sources: sources.map(item => item.id)
     };
@@ -100,22 +98,18 @@ class CreateScanDialog extends React.Component {
       response => this.notifyAddStatus(false, response.value),
       error => this.notifyAddStatus(true, error)
     );
-  }
+  };
 
-  startChange(value) {
-    this.setState({ start: value });
-  }
-
-  validateScanName(scanName) {
+  static validateScanName(scanName) {
     return scanName && scanName.length > 0;
   }
 
-  updateScanName(event) {
+  onUpdateScanName = event => {
     this.setState({
       scanName: event.target.value,
-      validScanName: this.validateScanName(event.target.value)
+      validScanName: CreateScanDialog.validateScanName(event.target.value)
     });
-  }
+  };
 
   onScanNameKeyPress(keyEvent) {
     const { scanName, validScanName } = this.state;
@@ -123,22 +117,22 @@ class CreateScanDialog extends React.Component {
     if (keyEvent.key === 'Enter' && scanName && validScanName) {
       keyEvent.stopPropagation();
       keyEvent.preventDefault();
-      this.createScan();
+      this.onCreateScan();
     }
   }
 
-  errorDismissed() {
+  onErrorDismissed = () => {
     Store.dispatch({
       type: scansTypes.RESET_SCAN_ADD_STATUS
     });
-  }
+  };
 
   renderErrorMessage() {
     const { action } = this.props;
 
     if (action && action.error) {
       return (
-        <Alert type="error" onDismiss={this.errorDismissed}>
+        <Alert type="error" onDismiss={this.onErrorDismissed}>
           <strong>Error</strong> {action.errorMessage}
         </Alert>
       );
@@ -158,7 +152,7 @@ class CreateScanDialog extends React.Component {
     return (
       <Modal show={show} onHide={onClose}>
         <Modal.Header>
-          <button className="close" onClick={onClose} aria-hidden="true" aria-label="Close">
+          <button type="button" className="close" onClick={onClose} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </button>
           <Modal.Title>Scan</Modal.Title>
@@ -166,7 +160,7 @@ class CreateScanDialog extends React.Component {
         <Modal.Body />
         <Grid fluid>
           {this.renderErrorMessage()}
-          <Form horizontal onSubmit={this.createScan}>
+          <Form horizontal onSubmit={this.onCreateScan}>
             <Form.FormGroup controlId="scanName">
               <Grid.Col componentClass={Form.ControlLabel} sm={3}>
                 <label htmlFor="scanName" className="control-label">
@@ -180,7 +174,7 @@ class CreateScanDialog extends React.Component {
                   autoFocus
                   value={scanName}
                   placeholder="Enter a name for the scan"
-                  onChange={e => this.updateScanName(e)}
+                  onChange={e => this.onUpdateScanName(e)}
                   onKeyPress={e => this.onScanNameKeyPress(e)}
                 />
               </Grid.Col>
@@ -206,7 +200,7 @@ class CreateScanDialog extends React.Component {
           <Button bsStyle="default" className="btn-cancel" onClick={onClose}>
             Cancel
           </Button>
-          <Button bsStyle="primary" type="submit" onClick={this.createScan} disabled={!validScanName}>
+          <Button bsStyle="primary" type="submit" onClick={this.onCreateScan} disabled={!validScanName}>
             Scan
           </Button>
         </Modal.Footer>
@@ -224,16 +218,16 @@ CreateScanDialog.propTypes = {
   action: PropTypes.object
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   addScan: data => dispatch(addScan(data)),
   startScan: data => dispatch(startScan(data))
 });
 
-const mapStateToProps = function(state) {
-  return Object.assign({}, { action: state.scans.action });
-};
+const mapStateToProps = state => ({ action: state.scans.action });
 
-export default connect(
+const ConnectedCreateScanDialog = connect(
   mapStateToProps,
   mapDispatchToProps
 )(CreateScanDialog);
+
+export { ConnectedCreateScanDialog as default, ConnectedCreateScanDialog, CreateScanDialog };

@@ -1,11 +1,10 @@
 import { factsTypes } from '../constants';
 import factsService from '../../services/factsService';
 
-const addFacts = data => dispatch => {
-  return dispatch({
+const addFacts = data => dispatch =>
+  dispatch({
     type: factsTypes.ADD_FACTS,
     payload: factsService.addFacts(data)
   });
-};
 
-export { addFacts };
+export { addFacts as default, addFacts };

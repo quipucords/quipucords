@@ -1,11 +1,10 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroller';
-
-import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
 import { EmptyState, Grid } from 'patternfly-react';
+import _ from 'lodash';
+import helpers from '../../common/helpers';
 import { getConnectionScanResults, getInspectionScanResults } from '../../redux/actions/scansActions';
 
 class ScanHostList extends React.Component {
@@ -47,7 +46,7 @@ class ScanHostList extends React.Component {
     const { useConnectionResults, useInspectionResults } = this.props;
 
     const newResults = _.get(results, 'value.data.results', []);
-    let allResults = [...scanResults, ...newResults];
+    const allResults = [...scanResults, ...newResults];
 
     if (useConnectionResults && useInspectionResults) {
       allResults.sort((item1, item2) => {
@@ -73,7 +72,7 @@ class ScanHostList extends React.Component {
       page: page === undefined ? this.state.page : page,
       page_size: 100,
       ordering: 'name',
-      status: status
+      status
     };
 
     if (sourceId) {
@@ -111,7 +110,7 @@ class ScanHostList extends React.Component {
       page: page === undefined ? this.state.page : page,
       page_size: 100,
       ordering: 'name',
-      status: status
+      status
     };
 
     if (sourceId) {
@@ -144,7 +143,7 @@ class ScanHostList extends React.Component {
   }
 
   refresh(useProps, page = 1) {
-    let { useConnectionResults, useInspectionResults, status } = useProps;
+    const { useConnectionResults, useInspectionResults, status } = useProps;
 
     this.setState({
       scanResultsPending: true,
@@ -272,16 +271,16 @@ ScanHostList.defaultProps = {
   useInspectionResults: false
 };
 
-const mapStateToProps = function(state) {
-  return {};
-};
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   getConnectionScanResults: (id, query) => dispatch(getConnectionScanResults(id, query)),
   getInspectionScanResults: (id, query) => dispatch(getInspectionScanResults(id, query))
 });
 
-export default connect(
+const mapStateToProps = () => ({});
+
+const ConnectedScanHostList = connect(
   mapStateToProps,
   mapDispatchToProps
 )(ScanHostList);
+
+export { ConnectedScanHostList as default, ConnectedScanHostList, ScanHostList };

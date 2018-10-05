@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import ListStatusItem from '../listStatusItem';
 
-describe('ListStatusItem Component', function() {
+describe('ListStatusItem Component', () => {
   it('should render', () => {
     const props = {
       key: 'credential',

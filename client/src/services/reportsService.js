@@ -14,9 +14,9 @@ class ReportsService {
 
         if (window.navigator && window.navigator.msSaveBlob) {
           window.navigator.msSaveBlob(blob, fileName);
-          resolve({ fileName: fileName, data: data });
+          resolve({ fileName, data });
         } else {
-          let anchorTag = window.document.createElement('a');
+          const anchorTag = window.document.createElement('a');
 
           anchorTag.href = window.URL.createObjectURL(blob);
           anchorTag.style.display = 'none';
@@ -29,7 +29,7 @@ class ReportsService {
           setTimeout(() => {
             window.document.body.removeChild(anchorTag);
             window.URL.revokeObjectURL(blob);
-            resolve({ fileName: fileName, data: data });
+            resolve({ fileName, data });
           }, 250);
         }
       } catch (error) {
@@ -39,7 +39,7 @@ class ReportsService {
   }
 
   static getReportDetails(id, query = {}) {
-    let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DETAILS.replace('{0}', id);
+    const apiPath = process.env.REACT_APP_REPORTS_SERVICE_DETAILS.replace('{0}', id);
 
     return axios({
       url: apiPath,
@@ -49,13 +49,13 @@ class ReportsService {
   }
 
   static getReportDetailsCsv(id) {
-    return this.getReportDetails(id, { format: 'csv' }).then(success => {
-      return this.downloadCSV(success.data, `report_${id}_details_${this.getTimeStampFromResults(success)}.csv`);
-    });
+    return this.getReportDetails(id, { format: 'csv' }).then(success =>
+      this.downloadCSV(success.data, `report_${id}_details_${this.getTimeStampFromResults(success)}.csv`)
+    );
   }
 
   static getReportSummary(id, query = {}) {
-    let apiPath = process.env.REACT_APP_REPORTS_SERVICE_DEPLOYMENTS.replace('{0}', id);
+    const apiPath = process.env.REACT_APP_REPORTS_SERVICE_DEPLOYMENTS.replace('{0}', id);
 
     return axios({
       url: apiPath,
@@ -65,28 +65,28 @@ class ReportsService {
   }
 
   static getReportSummaryCsv(id, query = {}) {
-    return this.getReportSummary(id, Object.assign(query, { format: 'csv' })).then(success => {
-      return this.downloadCSV(success.data, `report_${id}_summary_${this.getTimeStampFromResults(success)}.csv`);
-    });
+    return this.getReportSummary(id, Object.assign(query, { format: 'csv' })).then(success =>
+      this.downloadCSV(success.data, `report_${id}_summary_${this.getTimeStampFromResults(success)}.csv`)
+    );
   }
 
   static getMergedScanReportDetailsCsv(id) {
-    return this.getReportDetails(id, { format: 'csv' }).then(success => {
-      return this.downloadCSV(success.data, `merged_report_details_${this.getTimeStampFromResults(success)}.csv`);
-    });
+    return this.getReportDetails(id, { format: 'csv' }).then(success =>
+      this.downloadCSV(success.data, `merged_report_details_${this.getTimeStampFromResults(success)}.csv`)
+    );
   }
 
   static getMergedScanReportSummaryCsv(id) {
-    return this.getReportSummary(id, { format: 'csv' }).then(success => {
-      return this.downloadCSV(success.data, `merged_report_summary_${this.getTimeStampFromResults(success)}.csv`);
-    });
+    return this.getReportSummary(id, { format: 'csv' }).then(success =>
+      this.downloadCSV(success.data, `merged_report_summary_${this.getTimeStampFromResults(success)}.csv`)
+    );
   }
 
   static mergeScanReports(data = {}) {
     return axios({
       method: 'put',
       url: process.env.REACT_APP_REPORTS_SERVICE_MERGE,
-      data: data,
+      data,
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT

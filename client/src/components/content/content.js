@@ -3,7 +3,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { routes } from '../../routes';
 
 class Content extends React.Component {
-  renderRoutes() {
+  static renderRoutes() {
     let redirectRoot = null;
 
     return {
@@ -19,7 +19,7 @@ class Content extends React.Component {
   }
 
   render() {
-    const { renderRoutes, redirectRoot } = this.renderRoutes();
+    const { renderRoutes, redirectRoot } = Content.renderRoutes();
 
     return (
       <div className="quipucords-content">
@@ -32,4 +32,4 @@ class Content extends React.Component {
   }
 }
 
-export default Content;
+export { Content as default, Content };

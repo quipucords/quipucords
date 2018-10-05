@@ -28,6 +28,4 @@ const reducers = {
 
 const reduxReducers = combineReducers(reducers);
 
-export { reduxReducers, reducers };
-
-export default reduxReducers;
+export { reduxReducers as default, reduxReducers, reducers };

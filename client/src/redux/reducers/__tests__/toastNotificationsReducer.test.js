@@ -1,6 +1,6 @@
 import toastNotificationsReducer from '../toastNotificationsReducer';
 
-describe('toastNotificationsReducer', function() {
+describe('toastNotificationsReducer', () => {
   it('should return the initial state', () => {
     const initialState = {
       toasts: [],

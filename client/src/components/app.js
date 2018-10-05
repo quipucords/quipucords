@@ -59,17 +59,15 @@ class App extends React.Component {
 
     const activeItem = this.menu.find(item => _.startsWith(location.pathname, item.to));
 
-    return this.menu.map(item => {
-      return (
-        <VerticalNav.Item
-          key={item.to}
-          title={item.title}
-          iconClass={item.iconClass}
-          active={item === activeItem || (!activeItem && item.redirect)}
-          onClick={() => this.navigateTo(item.to)}
-        />
-      );
-    });
+    return this.menu.map(item => (
+      <VerticalNav.Item
+        key={item.to}
+        title={item.title}
+        iconClass={item.iconClass}
+        active={item === activeItem || (!activeItem && item.redirect)}
+        onClick={() => this.navigateTo(item.to)}
+      />
+    ));
   }
 
   renderMenuActions() {
@@ -184,20 +182,18 @@ App.propTypes = {
   }).isRequired
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   authorizeUser: () => dispatch(authorizeUser()),
   getUser: () => dispatch(getUser()),
   logoutUser: () => dispatch(logoutUser()),
   getStatus: () => dispatch(getStatus())
 });
 
-const mapStateToProps = function(state) {
-  return {
-    session: state.user.session,
-    user: state.user.user,
-    status: state.status.currentStatus
-  };
-};
+const mapStateToProps = state => ({
+  session: state.user.session,
+  user: state.user.user,
+  status: state.status.currentStatus
+});
 
 export default withRouter(
   connect(

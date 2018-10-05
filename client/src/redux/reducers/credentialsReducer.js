@@ -25,7 +25,7 @@ const initialState = {
   }
 };
 
-const credentialsReducer = function(state = initialState, action) {
+const credentialsReducer = (state = initialState, action) => {
   switch (action.type) {
     // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
@@ -273,6 +273,4 @@ const credentialsReducer = function(state = initialState, action) {
 
 credentialsReducer.initialState = initialState;
 
-export { initialState, credentialsReducer };
-
-export default credentialsReducer;
+export { credentialsReducer as default, initialState, credentialsReducer };

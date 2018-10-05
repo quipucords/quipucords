@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Store from '../../redux/store';
 import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-react';
+import Store from '../../redux/store';
 import { helpers } from '../../common/helpers';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
 import {
@@ -41,8 +41,6 @@ class CreateCredentialDialog extends React.Component {
     this.sshKeyFileValidator = new RegExp(/^\/.*$/);
 
     this.becomeMethods = ['sudo', 'su', 'pbrun', 'pfexec', 'doas', 'dzdo', 'ksu', 'runas'];
-
-    helpers.bindMethods(this, ['cancel', 'save']);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -62,7 +60,7 @@ class CreateCredentialDialog extends React.Component {
         )
       });
 
-      this.cancel();
+      this.onCancel();
       this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
     }
   }
@@ -105,14 +103,14 @@ class CreateCredentialDialog extends React.Component {
     }
   }
 
-  cancel() {
+  onCancel = () => {
     Store.dispatch({
       type: credentialsTypes.UPDATE_CREDENTIAL_HIDE
     });
-  }
+  };
 
-  save() {
-    let credential = {
+  onSave = () => {
+    const credential = {
       username: this.state.username,
       name: this.state.credentialName
     };
@@ -147,7 +145,7 @@ class CreateCredentialDialog extends React.Component {
         this.props.getWizardCredentials();
       });
     }
-  }
+  };
 
   setAuthType(authType) {
     this.setState({ authorizationType: authType });
@@ -165,7 +163,7 @@ class CreateCredentialDialog extends React.Component {
     );
   }
 
-  validateCredentialName(credentialName) {
+  static validateCredentialName(credentialName) {
     if (!credentialName) {
       return 'You must enter a credential name';
     }
@@ -180,11 +178,11 @@ class CreateCredentialDialog extends React.Component {
   updateCredentialName(event) {
     this.setState({
       credentialName: event.target.value,
-      credentialNameError: this.validateCredentialName(event.target.value)
+      credentialNameError: CreateCredentialDialog.validateCredentialName(event.target.value)
     });
   }
 
-  validateUsername(username) {
+  static validateUsername(username) {
     if (!username || !username.length) {
       return 'You must enter a user name';
     }
@@ -195,11 +193,11 @@ class CreateCredentialDialog extends React.Component {
   updateUsername(event) {
     this.setState({
       username: event.target.value,
-      usernameError: this.validateUsername(event.target.value)
+      usernameError: CreateCredentialDialog.validateUsername(event.target.value)
     });
   }
 
-  validatePassword(password) {
+  static validatePassword(password) {
     if (!password || !password.length) {
       return 'You must enter a password';
     }
@@ -210,7 +208,7 @@ class CreateCredentialDialog extends React.Component {
   updatePassword(event) {
     this.setState({
       password: event.target.value,
-      passwordError: this.validatePassword(event.target.value)
+      passwordError: CreateCredentialDialog.validatePassword(event.target.value)
     });
   }
 
@@ -253,7 +251,7 @@ class CreateCredentialDialog extends React.Component {
     });
   }
 
-  renderFormLabel(label) {
+  static renderFormLabel(label) {
     return (
       <Grid.Col componentClass={Form.ControlLabel} sm={5}>
         {label}
@@ -276,7 +274,7 @@ class CreateCredentialDialog extends React.Component {
       case 'usernamePassword':
         return (
           <Form.FormGroup validationState={passwordError ? 'error' : null}>
-            {this.renderFormLabel('Password')}
+            {CreateCredentialDialog.renderFormLabel('Password')}
             <Grid.Col sm={7}>
               <Form.FormControl
                 type="password"
@@ -296,7 +294,7 @@ class CreateCredentialDialog extends React.Component {
         return (
           <React.Fragment>
             <Form.FormGroup validationState={sskKeyFileError ? 'error' : null}>
-              {this.renderFormLabel('SSH Key File')}
+              {CreateCredentialDialog.renderFormLabel('SSH Key File')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
@@ -308,7 +306,7 @@ class CreateCredentialDialog extends React.Component {
               </Grid.Col>
             </Form.FormGroup>
             <Form.FormGroup>
-              {this.renderFormLabel('Passphrase')}
+              {CreateCredentialDialog.renderFormLabel('Passphrase')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="password"
@@ -335,7 +333,7 @@ class CreateCredentialDialog extends React.Component {
     return (
       <React.Fragment>
         <Form.FormGroup>
-          {this.renderFormLabel('Become Method')}
+          {CreateCredentialDialog.renderFormLabel('Become Method')}
           <Grid.Col sm={7}>
             <div className="quipucords-dropdownselect">
               <DropdownSelect
@@ -359,7 +357,7 @@ class CreateCredentialDialog extends React.Component {
           </Grid.Col>
         </Form.FormGroup>
         <Form.FormGroup validationState={becomeUserError ? 'error' : null}>
-          {this.renderFormLabel('Become User')}
+          {CreateCredentialDialog.renderFormLabel('Become User')}
           <Grid.Col sm={7}>
             <Form.FormControl
               type="text"
@@ -370,7 +368,7 @@ class CreateCredentialDialog extends React.Component {
           </Grid.Col>
         </Form.FormGroup>
         <Form.FormGroup>
-          {this.renderFormLabel('Become Password')}
+          {CreateCredentialDialog.renderFormLabel('Become Password')}
           <Grid.Col sm={7}>
             <Form.FormControl
               type="password"
@@ -384,18 +382,18 @@ class CreateCredentialDialog extends React.Component {
     );
   }
 
-  errorDismissed() {
+  onErrorDismissed = () => {
     Store.dispatch({
       type: credentialsTypes.RESET_CREDENTIAL_UPDATE_STATUS
     });
-  }
+  };
 
   renderErrorMessage() {
     const { error, errorMessage } = this.props;
 
     if (error) {
       return (
-        <Alert type="error" onDismiss={this.errorDismissed}>
+        <Alert type="error" onDismiss={this.onErrorDismissed}>
           <strong>Error</strong> {errorMessage}
         </Alert>
       );
@@ -417,9 +415,9 @@ class CreateCredentialDialog extends React.Component {
     } = this.state;
 
     return (
-      <Modal show={show} onHide={this.cancel}>
+      <Modal show={show} onHide={this.onCancel}>
         <Modal.Header>
-          <Button className="close" onClick={this.cancel} aria-hidden="true" aria-label="Close">
+          <Button className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
             <Icon type="pf" name="close" />
           </Button>
           <Modal.Title>{edit ? `Edit Credential - ${credentialName}` : 'Add Credential'}</Modal.Title>
@@ -429,7 +427,7 @@ class CreateCredentialDialog extends React.Component {
           {this.renderErrorMessage()}
           <Form horizontal>
             <Form.FormGroup>
-              {this.renderFormLabel('Source Type')}
+              {CreateCredentialDialog.renderFormLabel('Source Type')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   className="quipucords-form-control"
@@ -440,7 +438,7 @@ class CreateCredentialDialog extends React.Component {
               </Grid.Col>
             </Form.FormGroup>
             <Form.FormGroup validationState={credentialNameError ? 'error' : null}>
-              {this.renderFormLabel('Credential Name')}
+              {CreateCredentialDialog.renderFormLabel('Credential Name')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
@@ -455,7 +453,7 @@ class CreateCredentialDialog extends React.Component {
             </Form.FormGroup>
             {!sshKeyDisabled && (
               <Form.FormGroup>
-                {this.renderFormLabel('Authentication Type')}
+                {CreateCredentialDialog.renderFormLabel('Authentication Type')}
                 <Grid.Col sm={7}>
                   <div className="quipucords-dropdownselect">
                     <DropdownSelect
@@ -488,7 +486,7 @@ class CreateCredentialDialog extends React.Component {
               </Form.FormGroup>
             )}
             <Form.FormGroup validationState={usernameError ? 'error' : null}>
-              {this.renderFormLabel('Username')}
+              {CreateCredentialDialog.renderFormLabel('Username')}
               <Grid.Col sm={7}>
                 <Form.FormControl
                   type="text"
@@ -504,10 +502,10 @@ class CreateCredentialDialog extends React.Component {
           </Form>
         </Grid>
         <Modal.Footer>
-          <Button bsStyle="default" className="btn-cancel" autoFocus={edit} onClick={this.cancel}>
+          <Button bsStyle="default" className="btn-cancel" autoFocus={edit} onClick={this.onCancel}>
             Cancel
           </Button>
-          <Button bsStyle="primary" onClick={this.save} disabled={!this.validateForm()}>
+          <Button bsStyle="primary" onClick={this.onSave} disabled={!this.validateForm()}>
             Save
           </Button>
         </Modal.Footer>
@@ -531,20 +529,21 @@ CreateCredentialDialog.propTypes = {
   viewOptions: PropTypes.object
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   getCredentials: queryObj => dispatch(getCredentials(queryObj)),
   getWizardCredentials: () => dispatch(getWizardCredentials()),
   addCredential: data => dispatch(addCredential(data)),
   updateCredential: (id, data) => dispatch(updateCredential(id, data))
 });
 
-const mapStateToProps = function(state) {
-  return Object.assign({}, state.credentials.update, {
+const mapStateToProps = state =>
+  Object.assign({}, state.credentials.update, {
     viewOptions: state.viewOptions[viewTypes.CREDENTIALS_VIEW]
   });
-};
 
-export default connect(
+const ConnectedCreateCredentialDialog = connect(
   mapStateToProps,
   mapDispatchToProps
 )(CreateCredentialDialog);
+
+export { ConnectedCreateCredentialDialog as default, ConnectedCreateCredentialDialog, CreateCredentialDialog };

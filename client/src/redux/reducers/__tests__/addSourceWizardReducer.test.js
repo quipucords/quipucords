@@ -17,7 +17,7 @@ const initialState = {
   }
 };
 
-describe('AddSourceWizardReducer', function() {
+describe('AddSourceWizardReducer', () => {
   it('should return the initial state', () => {
     expect(addSourceWizardReducer(undefined, {})).toEqual(initialState);
   });
@@ -65,7 +65,7 @@ describe('AddSourceWizardReducer', function() {
   });
 
   it('should handle ADD_SOURCE_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE),
       error: true,
       payload: {
@@ -78,14 +78,14 @@ describe('AddSourceWizardReducer', function() {
       }
     };
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
+    const resultState = addSourceWizardReducer(undefined, dispatched);
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('ADD ERROR');
   });
 
   it('should handle UPDATE_SOURCE_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(sourcesTypes.UPDATE_SOURCE),
       error: true,
       payload: {
@@ -98,14 +98,14 @@ describe('AddSourceWizardReducer', function() {
       }
     };
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
+    const resultState = addSourceWizardReducer(undefined, dispatched);
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('UPDATE ERROR');
   });
 
   it('should handle UPDATE_SOURCE_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(sourcesTypes.UPDATE_SOURCE),
       payload: {
         data: {
@@ -140,13 +140,13 @@ describe('AddSourceWizardReducer', function() {
       }
     };
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
+    const resultState = addSourceWizardReducer(undefined, dispatched);
 
     expect(Object.keys(resultState.view.source).length).toBeGreaterThan(0);
   });
 
   it('should handle ADD_SOURCE_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(sourcesTypes.ADD_SOURCE),
       payload: {
         data: {
@@ -181,7 +181,7 @@ describe('AddSourceWizardReducer', function() {
       }
     };
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
+    const resultState = addSourceWizardReducer(undefined, dispatched);
 
     expect(Object.keys(resultState.view.source).length).toBeGreaterThan(0);
   });

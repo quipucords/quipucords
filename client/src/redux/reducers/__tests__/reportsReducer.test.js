@@ -19,13 +19,13 @@ const initialState = {
   }
 };
 
-describe('ReportsReducer', function() {
+describe('ReportsReducer', () => {
   it('should return the initial state', () => {
     expect(reportsReducer(undefined, {})).toEqual(initialState);
   });
 
   it('should handle GET_REPORT_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(reportsTypes.GET_REPORT),
       error: true,
       payload: {
@@ -38,7 +38,7 @@ describe('ReportsReducer', function() {
       }
     };
 
-    let resultState = reportsReducer(undefined, dispatched);
+    const resultState = reportsReducer(undefined, dispatched);
     expect(resultState.report.error).toBeTruthy();
     expect(resultState.report.errorMessage).toEqual('GET ERROR');
     expect(resultState.report.pending).toBeFalsy();
@@ -49,11 +49,11 @@ describe('ReportsReducer', function() {
   });
 
   it('should handle GET_REPORT_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(reportsTypes.GET_REPORT)
     };
 
-    let resultState = reportsReducer(undefined, dispatched);
+    const resultState = reportsReducer(undefined, dispatched);
 
     expect(resultState.report.error).toBeFalsy();
     expect(resultState.report.errorMessage).toEqual('');
@@ -63,7 +63,7 @@ describe('ReportsReducer', function() {
   });
 
   it('should handle GET_REPORT_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(reportsTypes.GET_REPORT),
       payload: {
         data: [
@@ -87,7 +87,7 @@ describe('ReportsReducer', function() {
       }
     };
 
-    let resultState = reportsReducer(undefined, dispatched);
+    const resultState = reportsReducer(undefined, dispatched);
 
     expect(resultState.report.error).toBeFalsy();
     expect(resultState.report.errorMessage).toEqual('');

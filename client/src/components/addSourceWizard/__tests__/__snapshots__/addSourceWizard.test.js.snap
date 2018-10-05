@@ -42,6 +42,7 @@ exports[`AddSourceWizard Component should shallow render a basic component 1`] =
           aria-label="Close"
           className="close"
           onClick={[Function]}
+          type="button"
         >
           <Icon
             name="close"

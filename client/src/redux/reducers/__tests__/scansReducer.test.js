@@ -71,13 +71,13 @@ const initialState = {
   }
 };
 
-describe('scansReducer', function() {
+describe('scansReducer', () => {
   it('should return the initial state', () => {
     expect(scansReducer(undefined, {})).toEqual(initialState);
   });
 
   it('should handle GET_SCANS_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.GET_SCANS),
       error: true,
       payload: {
@@ -90,7 +90,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('GET ERROR');
@@ -104,11 +104,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCANS_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.GET_SCANS)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.view.pending).toBeTruthy();
 
@@ -121,7 +121,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCANS_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.GET_SCANS),
       payload: {
         data: {
@@ -147,7 +147,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.view.fulfilled).toBeTruthy();
     expect(resultState.view.scans).toHaveLength(4);
@@ -161,7 +161,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN),
       error: true,
       payload: {
@@ -174,7 +174,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.detail.error).toBeTruthy();
     expect(resultState.detail.errorMessage).toEqual('GET ERROR');
@@ -188,11 +188,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.GET_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.detail.pending).toBeTruthy();
 
@@ -205,7 +205,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN),
       payload: {
         data: {
@@ -217,7 +217,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.detail.fulfilled).toBeTruthy();
     expect(resultState.detail.scan.id).toEqual(1);
@@ -231,7 +231,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_JOBS_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN_JOBS),
       error: true,
       payload: {
@@ -244,7 +244,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.jobs.error).toBeTruthy();
     expect(resultState.jobs.errorMessage).toEqual('GET JOBS ERROR');
@@ -258,11 +258,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_JOBS_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.GET_SCAN_JOBS)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.jobs.pending).toBeTruthy();
 
@@ -275,7 +275,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_JOBS_FULFILLED', () => {
-    let mockResults = [
+    const mockResults = [
       {
         scan_type: 'inspect',
         options: {
@@ -316,7 +316,7 @@ describe('scansReducer', function() {
       }
     ];
 
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_JOBS),
       payload: {
         data: {
@@ -325,7 +325,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.jobs.fulfilled).toBeTruthy();
     expect(resultState.jobs.jobs).toEqual(mockResults);
@@ -339,7 +339,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_CONNECTION_RESULTS_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS),
       error: true,
       payload: {
@@ -352,7 +352,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.connectionResults.error).toBeTruthy();
     expect(resultState.connectionResults.errorMessage).toEqual('GET CONNECTION RESULTS ERROR');
@@ -366,11 +366,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_CONNECTION_RESULTS_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.connectionResults.pending).toBeTruthy();
 
@@ -383,7 +383,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_CONNECTION_RESULTS_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_CONNECTION_RESULTS),
       payload: {
         data: {
@@ -429,7 +429,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.connectionResults.fulfilled).toBeTruthy();
     expect(resultState.connectionResults.results).toHaveLength(4);
@@ -443,7 +443,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_INSPECTION_RESULTS_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS),
       error: true,
       payload: {
@@ -456,7 +456,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.inspectionResults.error).toBeTruthy();
     expect(resultState.inspectionResults.errorMessage).toEqual('GET INSPECTION RESULTS ERROR');
@@ -470,11 +470,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_INSPECTION_RESULTS_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.inspectionResults.pending).toBeTruthy();
 
@@ -487,7 +487,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle GET_SCAN_INSPECTION_RESULTS_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.GET_SCAN_INSPECTION_RESULTS),
       payload: {
         data: {
@@ -533,7 +533,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.inspectionResults.fulfilled).toBeTruthy();
     expect(resultState.inspectionResults.results).toHaveLength(4);
@@ -547,7 +547,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle ADD_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.ADD_SCAN),
       error: true,
       payload: {
@@ -560,7 +560,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('ADD ERROR');
@@ -579,11 +579,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle ADD_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.ADD_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeTruthy();
@@ -601,12 +601,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle ADD_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.ADD_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeTruthy();
@@ -624,7 +624,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle START_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.START_SCAN),
       error: true,
       payload: {
@@ -637,7 +637,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('START ERROR');
@@ -656,11 +656,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle START_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.START_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -678,12 +678,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle START_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.START_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -701,7 +701,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle CANCEL_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.CANCEL_SCAN),
       error: true,
       payload: {
@@ -714,7 +714,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('CANCEL ERROR');
@@ -733,11 +733,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle CANCEL_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.CANCEL_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -755,12 +755,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle CANCEL_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.CANCEL_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -778,7 +778,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle PAUSE_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.PAUSE_SCAN),
       error: true,
       payload: {
@@ -791,7 +791,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('PAUSE ERROR');
@@ -810,11 +810,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle PAUSE_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.PAUSE_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -831,12 +831,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle PAUSE_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.PAUSE_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -854,7 +854,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle RESTART_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.RESTART_SCAN),
       error: true,
       payload: {
@@ -867,7 +867,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.error).toBeTruthy();
     expect(resultState.action.errorMessage).toEqual('RESTART ERROR');
@@ -886,11 +886,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle RESTART_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.RESTART_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.pending).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -908,12 +908,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle RESTART_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.RESTART_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.action.fulfilled).toBeTruthy();
     expect(resultState.action.add).toBeFalsy();
@@ -931,7 +931,7 @@ describe('scansReducer', function() {
   });
 
   it('should handle DELETE_SCAN_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(scansTypes.DELETE_SCAN),
       error: true,
       payload: {
@@ -944,7 +944,7 @@ describe('scansReducer', function() {
       }
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.update.delete).toBeTruthy();
     expect(resultState.update.error).toBeTruthy();
@@ -961,11 +961,11 @@ describe('scansReducer', function() {
   });
 
   it('should handle DELETE_SCAN_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(scansTypes.DELETE_SCAN)
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.update.delete).toBeTruthy();
     expect(resultState.update.error).toBeFalsy();
@@ -982,12 +982,12 @@ describe('scansReducer', function() {
   });
 
   it('should handle DELETE_SCAN_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(scansTypes.DELETE_SCAN),
       payload: {}
     };
 
-    let resultState = scansReducer(undefined, dispatched);
+    const resultState = scansReducer(undefined, dispatched);
 
     expect(resultState.update.delete).toBeTruthy();
     expect(resultState.update.error).toBeFalsy();

@@ -1,7 +1,7 @@
 import { confirmationModalTypes } from '../../constants/index';
 import confirmationModalReducer from '../confirmationModalReducer';
 
-describe('ConfirmationModalReducer', function() {
+describe('ConfirmationModalReducer', () => {
   it('should return the initial state', () => {
     const initialState = {
       show: false,

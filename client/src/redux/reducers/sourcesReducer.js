@@ -21,7 +21,7 @@ const initialState = {
   }
 };
 
-const sourcesReducer = function(state = initialState, action) {
+const sourcesReducer = (state = initialState, action) => {
   switch (action.type) {
     // Error/Rejected
     case helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCE):
@@ -101,7 +101,7 @@ const sourcesReducer = function(state = initialState, action) {
       return helpers.setStateProp(
         'view',
         {
-          sources: sources,
+          sources,
           fulfilled: true
         },
         {
@@ -117,6 +117,4 @@ const sourcesReducer = function(state = initialState, action) {
 
 sourcesReducer.initialState = initialState;
 
-export { initialState, sourcesReducer };
-
-export default sourcesReducer;
+export { sourcesReducer as default, initialState, sourcesReducer };

@@ -1,9 +1,9 @@
-import _ from 'lodash';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import cx from 'classnames';
-import PropTypes from 'prop-types';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
+import _ from 'lodash';
 import { helpers } from '../../common/helpers';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
@@ -19,22 +19,13 @@ class CredentialListItem extends React.Component {
   expandType() {
     const { item, expandedCredentials } = this.props;
 
-    return _.get(
-      _.find(expandedCredentials, nextExpanded => {
-        return nextExpanded.id === item.id;
-      }),
-      'expandType'
-    );
+    return _.get(_.find(expandedCredentials, nextExpanded => nextExpanded.id === item.id), 'expandType');
   }
 
   isSelected() {
     const { item, selectedCredentials } = this.props;
 
-    return (
-      _.find(selectedCredentials, nextSelected => {
-        return nextSelected.id === item.id;
-      }) !== undefined
-    );
+    return _.find(selectedCredentials, nextSelected => nextSelected.id === item.id) !== undefined;
   }
 
   itemSelectChange() {
@@ -43,7 +34,7 @@ class CredentialListItem extends React.Component {
     Store.dispatch({
       type: this.isSelected() ? viewTypes.DESELECT_ITEM : viewTypes.SELECT_ITEM,
       viewType: viewTypes.CREDENTIALS_VIEW,
-      item: item
+      item
     });
   }
 
@@ -54,14 +45,14 @@ class CredentialListItem extends React.Component {
       Store.dispatch({
         type: viewTypes.EXPAND_ITEM,
         viewType: viewTypes.CREDENTIALS_VIEW,
-        item: item
+        item
       });
     } else {
       Store.dispatch({
         type: viewTypes.EXPAND_ITEM,
         viewType: viewTypes.CREDENTIALS_VIEW,
-        item: item,
-        expandType: expandType
+        item,
+        expandType
       });
     }
   }
@@ -71,7 +62,7 @@ class CredentialListItem extends React.Component {
     Store.dispatch({
       type: viewTypes.EXPAND_ITEM,
       viewType: viewTypes.CREDENTIALS_VIEW,
-      item: item
+      item
     });
   }
 
@@ -107,7 +98,7 @@ class CredentialListItem extends React.Component {
   renderStatusItems() {
     const { item } = this.props;
 
-    let sourceCount = item.sources ? item.sources.length : 0;
+    const sourceCount = item.sources ? item.sources.length : 0;
 
     return [
       <ListView.InfoItem
@@ -133,27 +124,22 @@ class CredentialListItem extends React.Component {
 
     switch (this.expandType(item, expandedCredentials)) {
       case 'sources':
-        item.sources &&
-          item.sources.sort((item1, item2) => {
-            return item1.name.localeCompare(item2.name);
-          });
+        (item.sources || []).sort((item1, item2) => item1.name.localeCompare(item2.name));
         return (
           <Grid fluid>
             {item.sources &&
-              item.sources.map((source, index) => {
-                return (
-                  <Grid.Row key={index}>
-                    <Grid.Col xs={12} sm={4}>
-                      <span>
-                        <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(source.source_type)}>
-                          <Icon type={typeIcon.type} name={typeIcon.name} />
-                        </SimpleTooltip>
-                        &nbsp; {source.name}
-                      </span>
-                    </Grid.Col>
-                  </Grid.Row>
-                );
-              })}
+              item.sources.map((source, index) => (
+                <Grid.Row key={index}>
+                  <Grid.Col xs={12} sm={4}>
+                    <span>
+                      <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(source.source_type)}>
+                        <Icon type={typeIcon.type} name={typeIcon.name} />
+                      </SimpleTooltip>
+                      &nbsp; {source.name}
+                    </span>
+                  </Grid.Col>
+                </Grid.Row>
+              ))}
           </Grid>
         );
       default:
@@ -214,11 +200,11 @@ CredentialListItem.propTypes = {
   expandedCredentials: PropTypes.array
 };
 
-const mapStateToProps = function(state) {
-  return Object.assign({
-    selectedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].selectedItems,
-    expandedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].expandedItems
-  });
-};
+const mapStateToProps = state => ({
+  selectedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].selectedItems,
+  expandedCredentials: state.viewOptions[viewTypes.CREDENTIALS_VIEW].expandedItems
+});
 
-export default connect(mapStateToProps)(CredentialListItem);
+const ConnectedCredentialListItem = connect(mapStateToProps)(CredentialListItem);
+
+export { ConnectedCredentialListItem as default, ConnectedCredentialListItem, CredentialListItem };
