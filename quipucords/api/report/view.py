@@ -271,6 +271,8 @@ def async_merge_reports(request, pk=None):
     # pylint: disable=invalid-name
     if request.method == 'GET':
         merge_job = get_object_or_404(ScanJob.objects.all(), pk=pk)
+        if merge_job.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         job_serializer = ScanJobSerializer(merge_job)
         response_data = job_serializer.data
         return Response(response_data, status=status.HTTP_200_OK)
