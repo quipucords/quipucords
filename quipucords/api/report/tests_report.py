@@ -741,7 +741,7 @@ class AsyncMergeReports(TestCase):
                          status.HTTP_200_OK)
 
     def test_404_if_not_fingerprint_job(self):
-        """Test report job verification returns 404 for connect."""
+        """Test report job status only returns merge jobs."""
         source = Source(
             name='source1',
             hosts=json.dumps(['1.2.3.4']),
