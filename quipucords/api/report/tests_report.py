@@ -18,6 +18,7 @@ from unittest.mock import patch
 from api import messages
 from api.models import (Credential,
                         FactCollection,
+                        ScanTask,
                         ServerInformation,
                         Source)
 from api.report.renderer import (DeploymentCSVRenderer,
@@ -29,6 +30,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
+
+from scanner.test_util import create_scan_job
 
 
 class DetailReportTest(TestCase):
@@ -733,6 +736,29 @@ class AsyncMergeReports(TestCase):
         self.assertEqual(response_json, expected)
 
         url = '/api/v1/reports/merge/jobs/{}/'.format(job_id)
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code,
+                         status.HTTP_200_OK)
+
+    def test_404_if_not_fingerprint_job(self):
+        """Test report job status only returns merge jobs."""
+        source = Source(
+            name='source1',
+            hosts=json.dumps(['1.2.3.4']),
+            source_type='network',
+            port=22)
+        source.save()
+        scan_job, _ = create_scan_job(
+            source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+
+        url = '/api/v1/reports/merge/jobs/{}/'.format(scan_job.id)
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+        scan_job.scan_type = ScanTask.SCAN_TYPE_FINGERPRINT
+        scan_job.save()
+        url = '/api/v1/reports/merge/jobs/{}/'.format(scan_job.id)
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code,
                          status.HTTP_200_OK)
