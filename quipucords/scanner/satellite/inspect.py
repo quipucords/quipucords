@@ -42,7 +42,7 @@ class InspectTaskRunner(ScanTaskRunner):
         self.source = scan_task.source
         self.connect_scan_task = None
 
-    # pylint: disable=too-many-return-statements
+    # pylint: disable=too-many-return-statements,too-many-branches
     def run(self, manager_interrupt):
         """Scan satellite manager and obtain host facts."""
         # Make sure job is not cancelled or paused
@@ -67,6 +67,12 @@ class InspectTaskRunner(ScanTaskRunner):
         try:
             status_code, api_version, satellite_version = \
                 utils.status(self.scan_task)
+            if status_code is None:
+                error_message = 'Unknown satellite version is not ' \
+                                'supported. '
+                error_message += 'Inspect scan failed for source %s.' % \
+                                 (self.source.name)
+                return error_message, ScanTask.FAILED
             if status_code == 200:
                 api = create(satellite_version, api_version,
                              self.scan_job, self.scan_task)

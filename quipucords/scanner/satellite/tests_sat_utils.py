@@ -113,7 +113,7 @@ class SatelliteUtilsTest(TestCase):
     @patch('scanner.satellite.utils._status6',
            return_value=(200, SATELLITE_VERSION_6, SATELLITE_VERSION_6))
     def test_status_sat6(self, mock_status5):
-        """Test a patched status request to Satellite 5 server."""
+        """Test a patched status request to Satellite 6 server."""
         status_code, api_version, satellite_version = status(self.scan_task)
         self.assertEqual(status_code, 200)
         self.assertEqual(api_version, SATELLITE_VERSION_6)
