@@ -1,5 +1,6 @@
-# Include Production Server Requirements
+# Include Production Server Requirements & locked Dev Requirements
 -r requirements.txt
+-r dev-locked-requirements.txt
 --editable .
 
 #Coverage
