@@ -26,8 +26,8 @@ from qpc.cred.commands import (CredAddCommand,
                                CredListCommand,
                                CredShowCommand,)
 from qpc.report.commands import (ReportDetailCommand,
-                                 ReportJobCommand,
                                  ReportMergeCommand,
+                                 ReportMergeStatusCommand,
                                  ReportSummaryCommand)
 from qpc.scan.commands import (ScanAddCommand,
                                ScanCancelCommand,
@@ -103,7 +103,7 @@ class CLI():
                              [ReportSummaryCommand,
                               ReportDetailCommand,
                               ReportMergeCommand,
-                              ReportJobCommand])
+                              ReportMergeStatusCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

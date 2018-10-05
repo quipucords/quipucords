@@ -56,6 +56,8 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
+* Fri Oct 5 2018 Cody Myers <cmyers@redhat.com> 0.0.45-1
+- Add async merge job creation and job status
 * Fri Sep 7 2018 Cecilia Carter <cecarter@redhat.com> 0.0.44-1
 - Add JBoss Web Server detection to QPC
 * Wed Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1

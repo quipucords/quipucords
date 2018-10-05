@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportJobCommand is used to show job merge information."""
+"""ReportMergeStatusCommand is used to show job merge information."""
 
 from __future__ import print_function
 
@@ -25,7 +25,7 @@ from requests import codes
 
 
 # pylint: disable=too-few-public-methods
-class ReportJobCommand(CliCommand):
+class ReportMergeStatusCommand(CliCommand):
     """Defines the job command.
 
     This command is for checking the job status of a merge command.
@@ -50,8 +50,9 @@ class ReportJobCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         print(_(messages.JOB_ID_STATUS % (self.args.job_id,
-                                          json_data.get('status_message'),
-                                          json_data.get('report_id'))))
+                                          json_data.get('status_message'))))
+        if json_data.get('report_id'):
+            print(_(messages.DISPLAY_REPORT_ID % json_data.get('report_id')))
 
     def _handle_response_error(self):
         print(_(messages.JOB_ID_NOT_FOUND % self.args.job_id))

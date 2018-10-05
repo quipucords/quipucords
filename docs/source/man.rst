@@ -559,6 +559,16 @@ The ``qpc report merge`` command combines results from two or more scan job iden
 
   A Path to a directory with JSON details report files that will be merged. Mutually exclusive with the ``--job-ids`` and the ``--report-ids`` option.
 
+Report Merge Status
+~~~~~~~~~~~~~~~~~~~
+The ``qpc report job`` command can be used to check the status of a large merge of JSON details report files. The ``qpc report merge --json-directory`` can be used to generate a job id.
+
+**qpc report job (--id** *job_identifiers* **)**
+
+``--id=job_identifiers``
+
+  Contains the job identifier that will be used to checked for status of a merge.
+
 Options for All Commands
 ------------------------
 
