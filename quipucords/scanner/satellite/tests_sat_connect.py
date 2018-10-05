@@ -81,6 +81,18 @@ class ConnectTaskRunnerTest(TestCase):
         """Cleanup test case setup."""
         pass
 
+    def test_run_unknown_sat(self):
+        """Test the running connect task for unknown sat version."""
+        task = ConnectTaskRunner(self.scan_job, self.scan_task)
+
+        with patch('scanner.satellite.connect.utils.status',
+                   return_value=(None,
+                                 None,
+                                 None)) as mock_sat_status:
+            status = task.run(Value('i', ScanJob.JOB_RUN))
+            mock_sat_status.assert_called_once_with(ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
+
     def test_run_sat5_bad_status(self):
         """Test the running connect task for Satellite 5."""
         task = ConnectTaskRunner(self.scan_job, self.scan_task)

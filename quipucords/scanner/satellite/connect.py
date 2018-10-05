@@ -58,6 +58,12 @@ class ConnectTaskRunner(ScanTaskRunner):
         try:
             status_code, api_version, satellite_version = \
                 utils.status(self.scan_task)
+            if status_code is None:
+                error_message = 'Unknown satellite version is not ' \
+                                'supported. '
+                error_message += 'Connect scan failed for source %s.' % \
+                                 (self.source.name)
+                return error_message, ScanTask.FAILED
             if status_code == 200:
                 api = create(satellite_version, api_version,
                              self.scan_job, self.scan_task)
