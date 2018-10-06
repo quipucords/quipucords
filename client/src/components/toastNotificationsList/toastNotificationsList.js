@@ -52,9 +52,9 @@ class ToastNotificationsList extends React.Component {
                   </span>
                 </TimedToastNotification>
               );
-            } else {
-              return null;
             }
+
+            return null;
           })}
       </ToastNotificationList>
     );

@@ -225,4 +225,7 @@ const mapStateToProps = function(state) {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(MergeReportsDialog);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MergeReportsDialog);

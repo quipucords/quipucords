@@ -25,14 +25,14 @@ const ListStatusItem = ({
           <strong>{count}</strong>
         </React.Fragment>
       );
-    } else {
-      return (
-        <span>
-          <strong>{count}</strong>
-          {` ${text}`}
-        </span>
-      );
     }
+
+    return (
+      <span>
+        <strong>{count}</strong>
+        {` ${text}`}
+      </span>
+    );
   };
 
   if (count > 0) {

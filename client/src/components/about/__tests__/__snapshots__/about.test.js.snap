@@ -5,7 +5,7 @@ exports[`About Component should render a basic display 1`] = `
   role="dialog"
 >
   <div
-    class="modal-backdrop fade in"
+    class="fade modal-backdrop in"
   />
   <div
     class="fade in modal"

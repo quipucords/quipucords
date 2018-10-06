@@ -112,7 +112,7 @@ class CredentialListItem extends React.Component {
     return [
       <ListView.InfoItem
         key="sources"
-        className={'list-view-info-item-icon-count ' + (sourceCount === 0 ? 'invisible' : '')}
+        className={cx('list-view-info-item-icon-count', { invisible: sourceCount === 0 })}
       >
         <ListView.Expand
           expanded={this.expandType() === 'sources'}
