@@ -281,4 +281,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   getInspectionScanResults: (id, query) => dispatch(getInspectionScanResults(id, query))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ScanHostList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ScanHostList);

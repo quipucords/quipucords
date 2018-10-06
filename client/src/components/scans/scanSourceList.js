@@ -116,4 +116,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   getScanJob: (id, query) => dispatch(getScanJob(id))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ScanSourceList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ScanSourceList);
