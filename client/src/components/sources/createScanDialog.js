@@ -233,4 +233,7 @@ const mapStateToProps = function(state) {
   return Object.assign({}, { action: state.scans.action });
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateScanDialog);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CreateScanDialog);

@@ -2,7 +2,7 @@
 
 exports[`ViewPaginationRow Component should render 1`] = `
 <form
-  class="content-view-pf-pagination list-view-pagination-top list-view-pf-pagination clearfix "
+  class="content-view-pf-pagination list-view-pagination-top list-view-pf-pagination clearfix"
 >
   <div
     class="form-group"
