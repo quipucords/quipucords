@@ -23,7 +23,8 @@ class TestProcessEnableYumRepolist(unittest.TestCase):
     def test_success_case(self):
         """Found yum_enabled_repolist."""
         input_data = \
-            'junk that should not be in a repo. ' \
+            'You no longer have access to the repositories that ' \
+            'provide these products. ' \
             'repo id' \
             'repo name \n' \
             '!jb-eap-7-for-rhel-7-server-rpms/7Server/x86_64 ' \
