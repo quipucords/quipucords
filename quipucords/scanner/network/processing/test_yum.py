@@ -22,7 +22,12 @@ class TestProcessEnableYumRepolist(unittest.TestCase):
 
     def test_success_case(self):
         """Found yum_enabled_repolist."""
-        input_data = '!jb-eap-7-for-rhel-7-server-rpms/7Server/x86_64 ' \
+        input_data = \
+            'You no longer have access to the repositories that ' \
+            'provide these products. ' \
+            'repo id' \
+            'repo name \n' \
+            '!jb-eap-7-for-rhel-7-server-rpms/7Server/x86_64 ' \
             'JBoss Enterprise Applicat    886\n' \
             '!rhel-7-server-rpms/7Server/x86_64              ' \
             'Red Hat Enterprise Linux  17,664\n' \
@@ -35,24 +40,24 @@ class TestProcessEnableYumRepolist(unittest.TestCase):
 
         expected = [
             {
+                'name': 'JBoss Enterprise Applicat',
                 'repo': '!jb-eap-7-for-rhel-7-server-rpms/7Server/x86_64',
-                'name': 'JBoss Enterprise Applicat'
             },
             {
-                'repo': '!rhel-7-server-rpms/7Server/x86_64',
-                'name': 'Red Hat Enterprise Linux'
+                'name': 'Red Hat Enterprise Linux',
+                'repo': '!rhel-7-server-rpms/7Server/x86_64'
             },
             {
+                'name': 'RHEL 7 - x86_64',
                 'repo': '!rhel7-cdn-internal/7Server/x86_64',
-                'name': 'RHEL 7 - x86_64'
             },
             {
+                'name': 'RHEL 7 - x86_64',
                 'repo': '!rhel7-cdn-internal-extras/7Server/x86_64',
-                'name': 'RHEL 7 - x86_64'
             },
             {
-                'repo': '!rhel7-cdn-internal-optional/7Server/x86_64',
-                'name': 'RHEL 7 - x86_64'
+                'name': 'RHEL 7 - x86_64',
+                'repo': '!rhel7-cdn-internal-optional/7Server/x86_64'
             }]
 
         self.assertEqual(
