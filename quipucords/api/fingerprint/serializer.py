@@ -90,7 +90,7 @@ class FingerprintSerializer(ModelSerializer):
     # VCenter scan facts
     vm_state = CharField(required=False, max_length=24)
     vm_uuid = CharField(required=False, max_length=36)
-    vm_dns_name = CharField(required=False, max_length=128)
+    vm_dns_name = CharField(required=False, max_length=256)
 
     vm_host = CharField(required=False, max_length=128)
     vm_host_socket_count = IntegerField(required=False, min_value=0)

@@ -67,7 +67,7 @@ class SystemFingerprint(models.Model):
     # VCenter scan facts
     vm_state = models.CharField(max_length=24, unique=False, null=True)
     vm_uuid = models.CharField(max_length=36, unique=False, null=True)
-    vm_dns_name = models.CharField(max_length=128, unique=False, null=True)
+    vm_dns_name = models.CharField(max_length=256, unique=False, null=True)
     vm_host = models.CharField(max_length=128, unique=False, null=True)
     vm_host_socket_count = models.PositiveIntegerField(unique=False, null=True)
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
