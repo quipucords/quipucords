@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -140,7 +140,7 @@ REPORT_MERGE_NO_RESULTS = 'The specified set of reports '\
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
 SIGNAL_SCAN_MANAGER_CRASH = 'Process unexpectedly crashed.  See logs.'
-SIGNAL_SCAN_MANAGER_RESTART = 'Recovering manager..'
+SIGNAL_SCAN_MANAGER_RESTART = 'Recovering manager.'
 
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = 'Scan tasks'

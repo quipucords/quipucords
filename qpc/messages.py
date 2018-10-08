@@ -199,7 +199,7 @@ REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
 REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
-REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
+REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully.'
 REPORT_SUCCESSFULLY_MERGED = 'Merge reports job created. '\
     'Job ID is %s.'
 
@@ -249,6 +249,10 @@ SERVER_CONFIG_SUCCESS = 'Server connectivity was successfully configured. '\
     'The server will be contacted via "%s" at host "%s" with port "%s".'
 SERVER_INTERNAL_ERROR = 'An internal server error occurred. For more '\
     'information, see the server log file.'
+SERVER_STATUS_FAILURE = 'Unexpected failure occurred when accessing the '\
+    'status endpoint.'
+STATUS_PATH_HELP = 'Output file location.'
+STATUS_SUCCESSFULLY_WRITTEN = 'Server status written successfully.'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
 LOGIN_USERNAME_PROMPT = 'User name: '
