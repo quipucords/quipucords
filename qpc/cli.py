@@ -40,7 +40,8 @@ from qpc.scan.commands import (ScanAddCommand,
                                ScanStartCommand)
 from qpc.server.commands import (ConfigureHostCommand,
                                  LoginHostCommand,
-                                 LogoutHostCommand)
+                                 LogoutHostCommand,
+                                 ServerStatusCommand)
 from qpc.source.commands import (SourceAddCommand,
                                  SourceClearCommand,
                                  SourceEditCommand,
@@ -82,7 +83,7 @@ class CLI():
         self.subcommands = {}
         self._add_subcommand(server.SUBCOMMAND,
                              [ConfigureHostCommand, LoginHostCommand,
-                              LogoutHostCommand])
+                              LogoutHostCommand, ServerStatusCommand])
         self._add_subcommand(cred.SUBCOMMAND,
                              [CredAddCommand, CredListCommand,
                               CredEditCommand, CredShowCommand,

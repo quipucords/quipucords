@@ -244,6 +244,10 @@ SERVER_CONFIG_SUCCESS = 'Server connectivity was successfully configured. '\
     'The server will be contacted via "%s" at host "%s" with port "%s".'
 SERVER_INTERNAL_ERROR = 'An internal server error occurred. For more '\
     'information, see the server log file.'
+SERVER_STATUS_FAILURE = 'Unexpected failure occurred when accessing the '\
+    'status endpoint.'
+STATUS_PATH_HELP = 'Output file location.'
+STATUS_SUCCESSFULLY_WRITTEN = 'Server status written successfully..'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
 LOGIN_USERNAME_PROMPT = 'User name: '

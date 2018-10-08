@@ -105,6 +105,18 @@ To log out of the server, use the ``logout`` subcommand. This command removes th
 **qpc server logout**
 
 
+Viewing the server status
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To view or save the status information of the server, use the ``status`` subcommand. This command returns the information from the status endpoint.
+
+**qpc server status [--output-file** *path* **]**
+
+``--output-file=path``
+
+  Optional. Path to a file location where the status information is saved.
+
+
 Credentials
 -----------
 

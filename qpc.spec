@@ -56,6 +56,8 @@ install -D -p -m 644 build/qpc.1 $RPM_BUILD_ROOT%{_mandir}/man1/qpc.1
 %{_mandir}/man1/qpc.1.gz
 
 %changelog
+* Mon Oct 8 2018 Ashley Aiken <aaiken@redhat.com> 0.0.44-1
+- Add server status command to QPC
 * Fri Sep 7 2018 Cecilia Carter <cecarter@redhat.com> 0.0.44-1
 - Add JBoss Web Server detection to QPC
 * Wed Jul 18 2018 Cecilia Carter <cecarter@redhat.com> 0.0.43-1
