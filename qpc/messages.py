@@ -176,6 +176,7 @@ REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
+REPORT_JOB_ID_HELP = 'Merge report job identifier'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_REPORT_IDS_HELP = 'Report identifiers.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
@@ -233,7 +234,11 @@ SSH_PASSPHRASE = 'Provide a passphrase for the SSH keyfile.'
 BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
     'running a network scan.'
 
-
+JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
+JOB_ID_STATUS = 'Job id: %s status is %s'
+DISPLAY_REPORT_ID = \
+    'Created merge report with id: "%s". To view, run qpc report' \
+    ' summary --report "%s" --csv'
 SERVER_CONFIG_REQUIRED = 'Configure server using command below:'
 SERVER_LOGIN_REQUIRED = 'Log in using the command below:'
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
