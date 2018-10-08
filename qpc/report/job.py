@@ -50,7 +50,7 @@ class ReportMergeStatusCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         print(_(messages.JOB_ID_STATUS % (self.args.job_id,
-                                          json_data.get('status_message'))))
+                                          json_data.get('status').lower())))
         if json_data.get('report_id'):
             print(_(messages.DISPLAY_REPORT_ID % json_data.get('report_id')))
 
