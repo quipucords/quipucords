@@ -15,7 +15,7 @@ SUBCOMMAND = 'report'
 SUMMARY = 'summary'
 DETAIL = 'detail'
 MERGE = 'merge'
-JOB = 'job'
+JOB = 'merge-status'
 
 JOB_URI = '/api/v1/reports/merge/jobs/'
 REPORT_URI = '/api/v1/reports/'
