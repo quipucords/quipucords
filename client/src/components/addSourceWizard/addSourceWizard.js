@@ -180,16 +180,19 @@ class AddSourceWizard extends React.Component {
                 disabled={activeStepIndex === 0 || activeStepIndex === wizardSteps.length - 1}
                 onClick={this.onBack}
               >
-                <Icon type="fa" name="angle-left" />Back
+                <Icon type="fa" name="angle-left" />
+                Back
               </Button>
               {activeStepIndex < wizardSteps.length - 2 && (
                 <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
-                  Next<Icon type="fa" name="angle-right" />
+                  Next
+                  <Icon type="fa" name="angle-right" />
                 </Button>
               )}
               {activeStepIndex === wizardSteps.length - 2 && (
                 <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onSubmit}>
-                  Save<Icon type="fa" name="angle-right" />
+                  Save
+                  <Icon type="fa" name="angle-right" />
                 </Button>
               )}
               {activeStepIndex === wizardSteps.length - 1 && (
@@ -226,4 +229,7 @@ const mapStateToProps = function(state) {
   return { ...state.addSourceWizard.view };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddSourceWizard);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AddSourceWizard);

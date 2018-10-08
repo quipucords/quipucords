@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+// ToDo: update and remove all bindMethods calls in favor of public class fields syntax
 const bindMethods = (context, methods) => {
   methods.forEach(method => {
     context[method] = context[method].bind(context);

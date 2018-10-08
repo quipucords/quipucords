@@ -42,6 +42,7 @@ TMP_BADDETAILS4 = ('/tmp/testbaddetailsreport_bad_json.json',
                    '{"id":3,"sources"[this is bad]')
 TMP_GOODDETAILS = ('/tmp/testgooddetailsreport.json',
                    '{"id": 4,"sources":[{"facts": ["A"],"server_id": "8"}]}')
+NONEXIST_FILE = ('/tmp/does/not/exist/bad.json')
 JSON_FILES_LIST = [TMP_DETAILSFILE1, TMP_DETAILSFILE2, TMP_NOTJSONFILE,
                    TMP_BADDETAILS1, TMP_BADDETAILS2, TMP_BADDETAILS3,
                    TMP_GOODDETAILS]
@@ -197,6 +198,21 @@ class ReportDetailTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                              report_out.getvalue().strip())
+
+    def test_detail_merge_json_files_not_exist(self):
+        """Testing report merge file not found error with json files."""
+        report_out = StringIO()
+        nac = ReportMergeCommand(SUBPARSER)
+        args = Namespace(scan_job_ids=None,
+                         json_files=[TMP_DETAILSFILE1[0],
+                                     NONEXIST_FILE[0]],
+                         report_ids=None,
+                         json_dir=None)
+        with self.assertRaises(SystemExit):
+            with redirect_stdout(report_out):
+                nac.main(args)
+                self.assertIn(messages.FILE_NOT_FOUND % NONEXIST_FILE[0],
                               report_out.getvalue().strip())
 
     def test_detail_merge_error_json_files(self):

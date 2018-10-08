@@ -101,8 +101,20 @@ class InspectTaskRunnerTest(TestCase):
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
+    def test_run_unknown_sat(self):
+        """Test running the inspect scan for unknown sat."""
+        scan_job, inspect_task = self.create_scan_job()
+        task = InspectTaskRunner(scan_job, inspect_task)
+        with patch('scanner.satellite.connect.utils.status',
+                   return_value=(None,
+                                 None,
+                                 None)) as mock_sat_status:
+            status = task.run(Value('i', ScanJob.JOB_RUN))
+            mock_sat_status.assert_called_once_with(ANY)
+            self.assertEqual(status[1], ScanTask.FAILED)
+
     def test_run_sat5_bad_status(self):
-        """Test the running connect task for Satellite 5."""
+        """Test the running inspect task for Satellite 5."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
         with patch('scanner.satellite.connect.utils.status',
@@ -114,7 +126,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_status(self):
-        """Test the running connect task for Sat 6 with bad status."""
+        """Test the running inspect task for Sat 6 with bad status."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -127,7 +139,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_sat6_bad_api_version(self):
-        """Test the running connect task for Sat6 with bad api version."""
+        """Test the running inspect task for Sat6 with bad api version."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -140,7 +152,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_conn_err(self):
-        """Test the running connect task with connection error."""
+        """Test the running inspect task with connection error."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -151,7 +163,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_auth_err(self):
-        """Test the running connect task with satellite auth error."""
+        """Test the running inspect task with satellite auth error."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -162,7 +174,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_sat_err(self):
-        """Test the running connect task with satellite error."""
+        """Test the running inspect task with satellite error."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -173,7 +185,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_timeout(self):
-        """Test the running connect task with timeout error."""
+        """Test the running inspect task with timeout error."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -184,7 +196,7 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_excep(self):
-        """Test the running connect task with general exception."""
+        """Test the running inspect task with general exception."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -196,7 +208,7 @@ class InspectTaskRunnerTest(TestCase):
                 self.assertEqual(status[1], ScanTask.FAILED)
 
     def test_run_with_sat(self):
-        """Test the running connect task with satellite."""
+        """Test the running inspect task with satellite."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -211,7 +223,7 @@ class InspectTaskRunnerTest(TestCase):
                 self.assertEqual(status[1], ScanTask.COMPLETED)
 
     def test_run_with_sat_cancel(self):
-        """Test the running connect task with satellite cancelled."""
+        """Test the running inspect task with satellite cancelled."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
@@ -219,7 +231,7 @@ class InspectTaskRunnerTest(TestCase):
         self.assertEqual(status[1], ScanTask.CANCELED)
 
     def test_run_with_sat_pause(self):
-        """Test the running connect task with satellite paused."""
+        """Test the running inspect task with satellite paused."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 

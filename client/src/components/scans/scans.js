@@ -498,4 +498,7 @@ const mapStateToProps = function(state) {
   });
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Scans);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Scans);
