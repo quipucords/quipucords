@@ -55,7 +55,7 @@ class ScanJob(models.Model):
         choices=ScanTask.STATUS_CHOICES,
         default=ScanTask.CREATED,
     )
-    status_message = models.CharField(
+    status_message = models.TextField(
         max_length=256,
         null=True,
         default=_(messages.SJ_STATUS_MSG_CREATED))
