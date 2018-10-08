@@ -237,7 +237,8 @@ BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
 JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
 JOB_ID_STATUS = 'Job id: %s status is %s'
 DISPLAY_REPORT_ID = \
-    'To view the report run: qpc report summary --report "%s" --csv.'
+    'Created merge report with id: "%s". To view, run qpc report' \
+    ' summary --report "%s" --csv'
 SERVER_CONFIG_REQUIRED = 'Configure server using command below:'
 SERVER_LOGIN_REQUIRED = 'Log in using the command below:'
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
