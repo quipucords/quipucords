@@ -1,2 +1,2 @@
 # flake8 locks the following dependencies
-pyflakes==2.0.0
+pyflakes==1.6.0
