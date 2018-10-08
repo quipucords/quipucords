@@ -176,6 +176,7 @@ REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
 REPORT_SCAN_JOB_ID_HELP = 'Scan job identifier.'
+REPORT_JOB_ID_HELP = 'Merge report job identifier'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_REPORT_IDS_HELP = 'Report identifiers.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
@@ -198,7 +199,7 @@ REPORT_OUTPUT_IS_A_DIRECTORY = '%s %s was a directory.'
 REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
 REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
-REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully..'
+REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully.'
 REPORT_SUCCESSFULLY_MERGED = 'Merge reports job created. '\
     'Job ID is %s.'
 
@@ -233,7 +234,11 @@ SSH_PASSPHRASE = 'Provide a passphrase for the SSH keyfile.'
 BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
     'running a network scan.'
 
-
+JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
+JOB_ID_STATUS = 'Job id: %s status is %s'
+DISPLAY_REPORT_ID = \
+    'Created merge report with id: "%s". To view, run qpc report' \
+    ' summary --report "%s" --csv'
 SERVER_CONFIG_REQUIRED = 'Configure server using command below:'
 SERVER_LOGIN_REQUIRED = 'Log in using the command below:'
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'
@@ -244,6 +249,10 @@ SERVER_CONFIG_SUCCESS = 'Server connectivity was successfully configured. '\
     'The server will be contacted via "%s" at host "%s" with port "%s".'
 SERVER_INTERNAL_ERROR = 'An internal server error occurred. For more '\
     'information, see the server log file.'
+SERVER_STATUS_FAILURE = 'Unexpected failure occurred when accessing the '\
+    'status endpoint.'
+STATUS_PATH_HELP = 'Output file location.'
+STATUS_SUCCESSFULLY_WRITTEN = 'Server status written successfully.'
 
 LOGIN_USER_HELP = 'The user name to log in to the server.'
 LOGIN_USERNAME_PROMPT = 'User name: '

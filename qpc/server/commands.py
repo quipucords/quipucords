@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2018 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -15,3 +15,4 @@
 from qpc.server.configure_host import ConfigureHostCommand
 from qpc.server.login_host import LoginHostCommand
 from qpc.server.logout_host import LogoutHostCommand
+from qpc.server.status import ServerStatusCommand

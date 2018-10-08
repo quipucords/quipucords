@@ -27,6 +27,7 @@ from qpc.cred.commands import (CredAddCommand,
                                CredShowCommand,)
 from qpc.report.commands import (ReportDetailCommand,
                                  ReportMergeCommand,
+                                 ReportMergeStatusCommand,
                                  ReportSummaryCommand)
 from qpc.scan.commands import (ScanAddCommand,
                                ScanCancelCommand,
@@ -40,7 +41,8 @@ from qpc.scan.commands import (ScanAddCommand,
                                ScanStartCommand)
 from qpc.server.commands import (ConfigureHostCommand,
                                  LoginHostCommand,
-                                 LogoutHostCommand)
+                                 LogoutHostCommand,
+                                 ServerStatusCommand)
 from qpc.source.commands import (SourceAddCommand,
                                  SourceClearCommand,
                                  SourceEditCommand,
@@ -82,7 +84,7 @@ class CLI():
         self.subcommands = {}
         self._add_subcommand(server.SUBCOMMAND,
                              [ConfigureHostCommand, LoginHostCommand,
-                              LogoutHostCommand])
+                              LogoutHostCommand, ServerStatusCommand])
         self._add_subcommand(cred.SUBCOMMAND,
                              [CredAddCommand, CredListCommand,
                               CredEditCommand, CredShowCommand,
@@ -101,7 +103,8 @@ class CLI():
         self._add_subcommand(report.SUBCOMMAND,
                              [ReportSummaryCommand,
                               ReportDetailCommand,
-                              ReportMergeCommand])
+                              ReportMergeCommand,
+                              ReportMergeStatusCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 
