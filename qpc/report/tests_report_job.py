@@ -68,7 +68,7 @@ class ReportMergeStatusTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertIn(messages.JOB_ID_STATUS % ('1',
-                                                        'Job is complete.'),
+                                                        'complete'),
                                                         \
                               report_out.getvalue().strip())
 
