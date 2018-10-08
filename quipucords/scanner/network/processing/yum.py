@@ -32,10 +32,13 @@ class ProcessEnableYumRepolist(process.Processor):
         repos = []
         out_lines = output['stdout_lines']
         for line in out_lines:
+            if 'repo id' in line:
+                out_lines = out_lines[out_lines.index(line) + 1:]
+        for line in out_lines:
             repo, _, remainder = line.partition(' ')
             repo_name, _, _ = remainder.rpartition(' ')
             repo = repo.strip()
             repo_name = repo_name.strip()
             if repo != '' and repo_name != '':
-                repos.append({'repo': repo, 'name': repo_name})
+                repos.append({'name': repo_name, 'repo': repo})
         return repos
