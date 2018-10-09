@@ -40,7 +40,7 @@ class ReportMergeStatusCommand(CliCommand):
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
                             report.JOB_URI, [codes.ok])
-        self.parser.add_argument('--id', dest='job_id', metavar='JOB_ID',
+        self.parser.add_argument('--job', dest='job_id', metavar='JOB_ID',
                                  help=_(messages.REPORT_JOB_ID_HELP),
                                  required=True)
 
