@@ -2,10 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Filter, Sort, Toolbar } from 'patternfly-react';
 import _ from 'lodash';
-
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
-
 import { viewToolbarTypes } from '../../redux/constants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import RefreshTimeButton from '../refreshTimeButton/refreshTimeButton';
@@ -56,10 +54,10 @@ class ViewToolbar extends React.Component {
       filterText += value;
     }
 
-    const filter = { field: field, value: value, label: filterText };
+    const filter = { field, value, label: filterText };
     Store.dispatch({
       type: viewToolbarTypes.ADD_FILTER,
-      viewType: viewType,
+      viewType,
       filter
     });
   }
@@ -68,7 +66,7 @@ class ViewToolbar extends React.Component {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_TYPE,
-      viewType: viewType,
+      viewType,
       filterType
     });
   }
@@ -79,7 +77,7 @@ class ViewToolbar extends React.Component {
 
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
-      viewType: viewType,
+      viewType,
       filterValue
     });
 
@@ -94,7 +92,7 @@ class ViewToolbar extends React.Component {
 
     Store.dispatch({
       type: viewToolbarTypes.SET_FILTER_VALUE,
-      viewType: viewType,
+      viewType,
       filterValue
     });
   }
@@ -113,7 +111,7 @@ class ViewToolbar extends React.Component {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.REMOVE_FILTER,
-      viewType: viewType,
+      viewType,
       filter
     });
   }
@@ -122,7 +120,7 @@ class ViewToolbar extends React.Component {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.CLEAR_FILTERS,
-      viewType: viewType
+      viewType
     });
   }
 
@@ -130,7 +128,7 @@ class ViewToolbar extends React.Component {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.SET_SORT_TYPE,
-      viewType: viewType,
+      viewType,
       sortType
     });
   }
@@ -139,7 +137,7 @@ class ViewToolbar extends React.Component {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewToolbarTypes.TOGGLE_SORT_ASCENDING,
-      viewType: viewType
+      viewType
     });
   }
 
@@ -246,13 +244,11 @@ class ViewToolbar extends React.Component {
       return [
         <Filter.ActiveLabel key="label">Active Filters:</Filter.ActiveLabel>,
         <Filter.List key="list">
-          {activeFilters.map((item, index) => {
-            return (
-              <Filter.Item key={index} onRemove={this.removeFilter} filterData={item}>
-                {item.label}
-              </Filter.Item>
-            );
-          })}
+          {activeFilters.map((item, index) => (
+            <Filter.Item key={index} onRemove={this.removeFilter} filterData={item}>
+              {item.label}
+            </Filter.Item>
+          ))}
         </Filter.List>,
         <Button bsStyle="link" key="clear" onClick={this.clearFilters}>
           Clear All Filters
@@ -300,9 +296,8 @@ ViewToolbar.propTypes = {
 };
 
 ViewToolbar.defaultProps = {
-  filteredCount: -1,
   itemsType: '',
   itemsTypePlural: ''
 };
 
-export default ViewToolbar;
+export { ViewToolbar as default, ViewToolbar };

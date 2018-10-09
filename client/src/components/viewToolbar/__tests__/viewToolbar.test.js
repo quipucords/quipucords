@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 import ViewToolbar from '../viewToolbar';
 import { viewTypes } from '../../../redux/constants';
 
-describe('ViewPaginationRow Component', function() {
+describe('ViewPaginationRow Component', () => {
   it('should render', () => {
     const props = {
       viewType: viewTypes.SCANS_VIEW,

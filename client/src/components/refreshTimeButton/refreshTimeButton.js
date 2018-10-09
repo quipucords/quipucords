@@ -70,4 +70,4 @@ RefreshTimeButton.propTypes = {
   onRefresh: PropTypes.func.isRequired
 };
 
-export default RefreshTimeButton;
+export { RefreshTimeButton as default, RefreshTimeButton };

@@ -1,10 +1,10 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
-import SourceListItem from '../sourceListItem';
 import { mount } from 'enzyme';
-import { viewTypes } from '../../../redux/constants/';
+import SourceListItem from '../sourceListItem';
+import { viewTypes } from '../../../redux/constants';
 
-describe('SourceListItem Component', function() {
+describe('SourceListItem Component', () => {
   const generateEmptyStore = () => configureMockStore()({ sources: {}, viewOptions: { [viewTypes.SOURCES_VIEW]: {} } });
 
   it('should render a basic component', () => {

@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import CreateCredentialDialog from '../createCredentialDialog';
 
-describe('CreateCredentialDialog Component', function() {
+describe('CreateCredentialDialog Component', () => {
   const generateEmptyStore = () => configureMockStore()({ credentials: {}, viewOptions: {} });
 
   it('should shallow render a basic component', () => {

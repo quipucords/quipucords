@@ -8,7 +8,7 @@ class CredentialsService {
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      data: data
+      data
     });
   }
 
@@ -45,7 +45,7 @@ class CredentialsService {
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      data: data
+      data
     });
   }
 }

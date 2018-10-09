@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import MastheadOptions from '../mastheadOptions';
 
-describe('MastheadOptions Component', function() {
+describe('MastheadOptions Component', () => {
   it('should render', () => {
     const props = {
       user: { currentUser: { username: 'Admin' } }

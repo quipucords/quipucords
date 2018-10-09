@@ -1,11 +1,10 @@
-import expect from 'expect';
 import moxios from 'moxios';
 import promiseMiddleware from 'redux-promise-middleware';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { actions } from '../';
+import { actions } from '..';
 import { reducers } from '../../reducers';
 
-describe('ScansActions', function() {
+describe('ScansActions', () => {
   const middleware = [promiseMiddleware()];
   const generateStore = () => createStore(combineReducers({ scans: reducers.scans }), applyMiddleware(...middleware));
 
@@ -53,7 +52,7 @@ describe('ScansActions', function() {
 
     const dispatcher = actions.scans.getScans();
     dispatcher(store.dispatch).then(() => {
-      const view = store.getState().scans.view;
+      const { view } = store.getState().scans;
 
       expect(view.scans).toEqual(getScansMock.results);
       expect(view.fulfilled).toBeTruthy();

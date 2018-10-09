@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import AddSourceWizard from '../addSourceWizard';
 
-describe('AddSourceWizard Component', function() {
+describe('AddSourceWizard Component', () => {
   const generateEmptyStore = () => configureMockStore()({ addSourceWizard: {} });
 
   it('should shallow render a basic component', () => {

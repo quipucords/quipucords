@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import ScanJobsList from '../scanJobsList';
 
-describe('ScanJobsList Component', function() {
+describe('ScanJobsList Component', () => {
   const generateEmptyStore = () => configureMockStore()({});
 
   it('should shallow render a basic component with an empty state status', () => {

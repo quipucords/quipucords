@@ -12,7 +12,7 @@ import * as viewTypes from '../viewConstants';
 import * as viewPaginationTypes from '../viewPaginationConstants';
 import * as viewToolbarTypes from '../viewToolbarConstants';
 
-describe('reduxTypes', function() {
+describe('reduxTypes', () => {
   it('should export the same number of name-spaced types as imported', () => {
     expect(Object.keys(reduxTypes)).toHaveLength(12);
   });

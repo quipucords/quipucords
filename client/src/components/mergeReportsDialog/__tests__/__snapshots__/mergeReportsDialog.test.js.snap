@@ -36,6 +36,7 @@ exports[`ToastNotificationsList Component should shallow render a basic componen
       aria-label="Close"
       className="close"
       onClick={[Function]}
+      type="button"
     >
       <Icon
         name="close"

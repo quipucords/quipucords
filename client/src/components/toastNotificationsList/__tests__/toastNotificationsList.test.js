@@ -3,7 +3,7 @@ import configureMockStore from 'redux-mock-store';
 import { shallow } from 'enzyme';
 import ToastNotificationsList from '../toastNotificationsList';
 
-describe('ToastNotificationsList Component', function() {
+describe('ToastNotificationsList Component', () => {
   const generateEmptyStore = () => configureMockStore()({ toastNotifications: {} });
 
   it('should shallow render a basic component', () => {

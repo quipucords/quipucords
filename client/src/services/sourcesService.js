@@ -8,7 +8,7 @@ class SourcesService {
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      data: data,
+      data,
       params: query
     });
   }
@@ -46,7 +46,7 @@ class SourcesService {
       xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
       xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
       timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      data: data
+      data
     });
   }
 }

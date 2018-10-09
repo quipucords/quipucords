@@ -11,7 +11,7 @@ class UserService {
 
     const token = cookies.get(process.env.REACT_APP_AUTH_TOKEN);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if (token) {
         return resolve({
           authToken: token

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button, Icon, Wizard } from 'patternfly-react';
-import helpers from '../../common/helpers';
 import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
@@ -19,8 +18,6 @@ class AddSourceWizard extends React.Component {
     };
 
     this.state = { ...this.initialState };
-
-    helpers.bindMethods(this, ['onCancel', 'onStep', 'onNext', 'onBack', 'onSubmit']);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -42,7 +39,7 @@ class AddSourceWizard extends React.Component {
     }
   }
 
-  onCancel() {
+  onCancel = () => {
     const { fulfilled, error } = this.props;
 
     const closeWizard = () => {
@@ -67,13 +64,13 @@ class AddSourceWizard extends React.Component {
         onConfirm: closeWizard
       });
     }
-  }
+  };
 
-  onStep(stepIndex) {
+  onStep = () => {
     // ToDo: wizard step map/breadcrumb/trail click, or leave disabled
-  }
+  };
 
-  onNext() {
+  onNext = () => {
     const { activeStepIndex } = this.state;
     const { edit } = this.props;
     const numberSteps = edit ? editSourceWizardSteps.length : addSourceWizardSteps.length;
@@ -81,17 +78,17 @@ class AddSourceWizard extends React.Component {
     if (activeStepIndex < numberSteps - 1) {
       this.setState({ activeStepIndex: activeStepIndex + 1 });
     }
-  }
+  };
 
-  onBack() {
-    let { activeStepIndex } = this.state;
+  onBack = () => {
+    const { activeStepIndex } = this.state;
 
     if (activeStepIndex >= 1) {
       this.setState({ activeStepIndex: activeStepIndex - 1 });
     }
-  }
+  };
 
-  onSubmit(event) {
+  onSubmit = () => {
     const { addSource, updateSource, source, edit } = this.props;
     const { stepOneValid, stepTwoValid } = this.state;
 
@@ -114,7 +111,7 @@ class AddSourceWizard extends React.Component {
         });
       }
     }
-  }
+  };
 
   renderWizardSteps() {
     const { activeStepIndex } = this.state;
@@ -122,19 +119,17 @@ class AddSourceWizard extends React.Component {
     const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
     const activeStep = wizardSteps[activeStepIndex];
 
-    return wizardSteps.map((step, stepIndex) => {
-      return (
-        <Wizard.Step
-          key={stepIndex}
-          stepIndex={stepIndex}
-          step={step.step}
-          label={step.label}
-          title={step.title}
-          activeStep={activeStep && activeStep.step}
-          onClick={e => this.onStep(activeStep && activeStep.step)}
-        />
-      );
-    });
+    return wizardSteps.map((step, stepIndex) => (
+      <Wizard.Step
+        key={stepIndex}
+        stepIndex={stepIndex}
+        step={step.step}
+        label={step.label}
+        title={step.title}
+        activeStep={activeStep && activeStep.step}
+        onClick={() => this.onStep(activeStep && activeStep.step)}
+      />
+    ));
   }
 
   render() {
@@ -147,7 +142,7 @@ class AddSourceWizard extends React.Component {
         <Modal show={show} onHide={this.onCancel} dialogClassName="modal-dialog modal-lg wizard-pf quipucords-wizard">
           <Wizard>
             <Modal.Header>
-              <button className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
+              <button type="button" className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
                 <Icon type="pf" name="close" />
               </button>
               <Modal.Title>{edit ? 'Edit' : 'Add'} Source</Modal.Title>
@@ -156,13 +151,11 @@ class AddSourceWizard extends React.Component {
               <Wizard.Steps steps={this.renderWizardSteps()} />
               <Wizard.Row>
                 <Wizard.Main>
-                  {wizardSteps.map((step, stepIndex) => {
-                    return (
-                      <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
-                        {wizardSteps[stepIndex].page}
-                      </Wizard.Contents>
-                    );
-                  })}
+                  {wizardSteps.map((step, stepIndex) => (
+                    <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
+                      {wizardSteps[stepIndex].page}
+                    </Wizard.Contents>
+                  ))}
                 </Wizard.Main>
               </Wizard.Row>
             </Modal.Body>
@@ -220,16 +213,16 @@ AddSourceWizard.propTypes = {
   error: PropTypes.bool
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   addSource: (data, query) => dispatch(addSource(data, query)),
   updateSource: (id, data) => dispatch(updateSource(id, data))
 });
 
-const mapStateToProps = function(state) {
-  return { ...state.addSourceWizard.view };
-};
+const mapStateToProps = state => ({ ...state.addSourceWizard.view });
 
-export default connect(
+const ConnectedAddSourceWizard = connect(
   mapStateToProps,
   mapDispatchToProps
 )(AddSourceWizard);
+
+export { ConnectedAddSourceWizard as default, ConnectedAddSourceWizard, AddSourceWizard };

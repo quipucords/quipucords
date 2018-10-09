@@ -1,9 +1,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import DropdownSelect from '../dropdownSelect';
 import { MenuItem } from 'patternfly-react';
+import DropdownSelect from '../dropdownSelect';
 
-describe('DropdownSelect Component', function() {
+describe('DropdownSelect Component', () => {
   it('should render', () => {
     const props = {
       id: 'testing',

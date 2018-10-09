@@ -13,7 +13,7 @@ const initialState = {
   }
 };
 
-const factsReducer = function(state = initialState, action) {
+const factsReducer = (state = initialState, action) => {
   switch (action.type) {
     // Error/Rejected
     case helpers.REJECTED_ACTION(factsTypes.ADD_FACTS):
@@ -63,6 +63,4 @@ const factsReducer = function(state = initialState, action) {
 
 factsReducer.initialState = initialState;
 
-export { initialState, factsReducer };
-
-export default factsReducer;
+export { factsReducer as default, initialState, factsReducer };

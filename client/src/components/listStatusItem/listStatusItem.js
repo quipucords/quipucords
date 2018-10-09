@@ -73,4 +73,4 @@ ListStatusItem.propTypes = {
   iconInfo: PropTypes.object
 };
 
-export default ListStatusItem;
+export { ListStatusItem as default, ListStatusItem };

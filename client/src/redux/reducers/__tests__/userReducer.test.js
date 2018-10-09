@@ -21,13 +21,13 @@ const initialState = {
   }
 };
 
-describe('userReducer', function() {
+describe('userReducer', () => {
   it('should return the initial state', () => {
     expect(userReducer(undefined, {})).toEqual(initialState);
   });
 
   it('should handle USER_INFO_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(userTypes.USER_INFO),
       error: true,
       payload: {
@@ -40,7 +40,7 @@ describe('userReducer', function() {
       }
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
     expect(resultState.user.error).toBeTruthy();
     expect(resultState.user.errorMessage).toEqual('USER INFO ERROR');
 
@@ -48,18 +48,18 @@ describe('userReducer', function() {
   });
 
   it('should handle USER_INFO_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(userTypes.USER_INFO)
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
 
     expect(resultState.user.pending).toBeTruthy();
     expect(resultState.session).toEqual(initialState.session);
   });
 
   it('should handle USER_INFO_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(userTypes.USER_INFO),
       payload: {
         data: {
@@ -69,7 +69,7 @@ describe('userReducer', function() {
       }
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
 
     expect(resultState.user.fulfilled).toBeTruthy();
     expect(resultState.user.currentUser.userName).toEqual('admin');
@@ -78,7 +78,7 @@ describe('userReducer', function() {
   });
 
   it('should handle USER_AUTH_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(userTypes.USER_AUTH),
       error: true,
       payload: {
@@ -91,7 +91,7 @@ describe('userReducer', function() {
       }
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
     expect(resultState.session.error).toBeTruthy();
     expect(resultState.session.errorMessage).toEqual('USER AUTH ERROR');
 
@@ -99,25 +99,25 @@ describe('userReducer', function() {
   });
 
   it('should handle USER_AUTH_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(userTypes.USER_AUTH)
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
 
     expect(resultState.session.pending).toBeTruthy();
     expect(resultState.user).toEqual(initialState.user);
   });
 
   it('should handle USER_AUTH_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(userTypes.USER_AUTH),
       payload: {
         authToken: 'spoof'
       }
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
 
     expect(resultState.session.fulfilled).toBeTruthy();
     expect(resultState.session.loggedIn).toBeTruthy();
@@ -129,7 +129,7 @@ describe('userReducer', function() {
   });
 
   it('should handle USER_LOGOUT_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(userTypes.USER_LOGOUT),
       error: true,
       payload: {
@@ -142,7 +142,7 @@ describe('userReducer', function() {
       }
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
     expect(resultState.session.error).toBeTruthy();
     expect(resultState.session.errorMessage).toEqual('USER LOGOUT ERROR');
 
@@ -150,11 +150,11 @@ describe('userReducer', function() {
   });
 
   it('should handle USER_LOGOUT_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(userTypes.USER_LOGOUT)
     };
 
-    let resultState = userReducer(undefined, dispatched);
+    const resultState = userReducer(undefined, dispatched);
 
     expect(resultState.session.pending).toBeTruthy();
     expect(resultState.user).toEqual(initialState.user);

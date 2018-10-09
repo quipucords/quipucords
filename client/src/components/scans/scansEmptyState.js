@@ -31,4 +31,4 @@ ScansEmptyState.propTypes = {
   sourcesExist: PropTypes.bool
 };
 
-export default ScansEmptyState;
+export { ScansEmptyState as default, ScansEmptyState };

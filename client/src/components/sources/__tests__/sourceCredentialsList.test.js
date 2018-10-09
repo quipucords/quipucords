@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import SourceCredentialsList from '../sourceCredentialsList';
 
-describe('SourceCredentialsList Component', function() {
+describe('SourceCredentialsList Component', () => {
   it('should render a sorted list', () => {
     const props = {
       source: {

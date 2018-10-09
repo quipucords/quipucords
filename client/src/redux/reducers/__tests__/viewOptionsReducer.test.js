@@ -1,6 +1,6 @@
 import viewOptionsReducer from '../viewOptionsReducer';
 
-describe('viewOptionsReducer', function() {
+describe('viewOptionsReducer', () => {
   it('should return the initial state', () => {
     const initialState = {
       SOURCES_VIEW: {

@@ -25,7 +25,7 @@ const initialState = {
   }
 };
 
-describe('CredentialsReducer', function() {
+describe('CredentialsReducer', () => {
   it('should return the initial state', () => {
     expect(credentialsReducer(undefined, {})).toEqual(initialState);
   });
@@ -77,7 +77,7 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle ADD_CREDENTIAL_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(credentialsTypes.ADD_CREDENTIAL),
       error: true,
       payload: {
@@ -90,7 +90,7 @@ describe('CredentialsReducer', function() {
       }
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.update.error).toBeTruthy();
     expect(resultState.update.errorMessage).toEqual('ADD ERROR');
@@ -101,7 +101,7 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle DELETE_CREDENTIAL_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(credentialsTypes.DELETE_CREDENTIAL),
       error: true,
       payload: {
@@ -114,7 +114,7 @@ describe('CredentialsReducer', function() {
       }
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.update.error).toBeTruthy();
     expect(resultState.update.errorMessage).toEqual('DELETE ERROR');
@@ -125,7 +125,7 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle UPDATE_CREDENTIAL_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(credentialsTypes.UPDATE_CREDENTIAL),
       error: true,
       payload: {
@@ -138,7 +138,7 @@ describe('CredentialsReducer', function() {
       }
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.update.error).toBeTruthy();
     expect(resultState.update.errorMessage).toEqual('UPDATE ERROR');
@@ -149,7 +149,7 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle GET_CREDENTIALS_REJECTED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.REJECTED_ACTION(credentialsTypes.GET_CREDENTIALS),
       error: true,
       payload: {
@@ -162,7 +162,7 @@ describe('CredentialsReducer', function() {
       }
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.view.error).toBeTruthy();
     expect(resultState.view.errorMessage).toEqual('GET ERROR');
@@ -171,11 +171,11 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle GET_CREDENTIALS_PENDING', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.PENDING_ACTION(credentialsTypes.GET_CREDENTIALS)
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.view.pending).toBeTruthy();
 
@@ -183,7 +183,7 @@ describe('CredentialsReducer', function() {
   });
 
   it('should handle GET_CREDENTIALS_FULFILLED', () => {
-    let dispatched = {
+    const dispatched = {
       type: helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS),
       payload: {
         data: {
@@ -209,7 +209,7 @@ describe('CredentialsReducer', function() {
       }
     };
 
-    let resultState = credentialsReducer(undefined, dispatched);
+    const resultState = credentialsReducer(undefined, dispatched);
 
     expect(resultState.view.fulfilled).toBeTruthy();
     expect(resultState.view.credentials).toHaveLength(4);
