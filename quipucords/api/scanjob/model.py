@@ -352,12 +352,9 @@ class ScanJob(models.Model):
                 conn_tasks.append(conn_task)
 
                 # Create task result
-                conn_task_result = TaskConnectionResult()
+                conn_task_result = TaskConnectionResult(
+                    job_connection_result=self.connection_results)
                 conn_task_result.save()
-
-                # Add the task result to job results
-                self.connection_results.task_results.add(conn_task_result)  # noqa # pylint: disable=no-member
-                self.connection_results.save()
 
                 # Add the task result to task
                 conn_task.connection_result = conn_task_result
@@ -392,13 +389,9 @@ class ScanJob(models.Model):
                 inspect_tasks.append(conn_task)  # pylint: disable=no-member
 
                 # Create task result
-                inspect_task_result = TaskInspectionResult()
+                inspect_task_result = TaskInspectionResult(
+                    job_inspection_result=self.inspection_results)
                 inspect_task_result.save()
-
-                # Add the task result to job results
-                self.inspection_results.task_results.add(
-                    inspect_task_result)
-                self.inspection_results.save()
 
                 # Add the inspect task result to task
                 inspect_task.inspection_result = inspect_task_result

@@ -14,6 +14,7 @@ from multiprocessing import Value
 from unittest.mock import ANY, patch
 
 from api.models import (Credential,
+                        JobConnectionResult,
                         ScanJob,
                         ScanOptions,
                         ScanTask,
@@ -72,17 +73,20 @@ class SatelliteSixV1Test(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         self.api = SatelliteSixV1(self.scan_job, self.scan_task)
-        connection_results = TaskConnectionResult()
+        job_conn_result = JobConnectionResult()
+        job_conn_result.save()
+        connection_results = TaskConnectionResult(
+            job_connection_result=job_conn_result)
         connection_results.save()
         self.api.connect_scan_task.connection_result = connection_results
         self.api.connect_scan_task.connection_result.save()
 
+        conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
+            status=SystemInspectionResult.SUCCESS,
+            task_connection_result=conn_result)
         sys_result.save()
-        self.api.connect_scan_task.connection_result.systems.add(sys_result)
-        self.api.connect_scan_task.connection_result.save()
         self.api.connect_scan_task.save()
 
     def tearDown(self):
@@ -473,17 +477,20 @@ class SatelliteSixV2Test(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
         self.scan_task.update_stats('TEST_SAT.', sys_scanned=0)
         self.api = SatelliteSixV2(self.scan_job, self.scan_task)
-        connection_results = TaskConnectionResult()
+        job_conn_result = JobConnectionResult()
+        job_conn_result.save()
+        connection_results = TaskConnectionResult(
+            job_connection_result=job_conn_result)
         connection_results.save()
         self.api.connect_scan_task.connection_result = connection_results
         self.api.connect_scan_task.connection_result.save()
 
+        conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
+            status=SystemInspectionResult.SUCCESS,
+            task_connection_result=conn_result)
         sys_result.save()
-        self.api.connect_scan_task.connection_result.systems.add(sys_result)
-        self.api.connect_scan_task.connection_result.save()
         self.api.connect_scan_task.save()
 
     def tearDown(self):
@@ -897,17 +904,19 @@ class SatelliteSixV2Test(TestCase):
             scan_options=scan_options)
         scan_task.update_stats('TEST_SAT.', sys_scanned=0)
         api = SatelliteSixV2(scan_job, scan_task)
-        connection_results = TaskConnectionResult()
+        job_conn_result = JobConnectionResult()
+        job_conn_result.save()
+        connection_results = TaskConnectionResult(
+            job_connection_result=job_conn_result)
         connection_results.save()
         api.connect_scan_task.connection_result = connection_results
         api.connect_scan_task.connection_result.save()
 
         sys_result = SystemConnectionResult(
             name='sys1_1',
-            status=SystemInspectionResult.SUCCESS)
+            status=SystemInspectionResult.SUCCESS,
+            task_connection_result=api.connect_scan_task.connection_result)
         sys_result.save()
-        api.connect_scan_task.connection_result.systems.add(sys_result)
-        api.connect_scan_task.connection_result.save()
         api.connect_scan_task.save()
         hosts_url = 'https://{sat_host}:{port}/api/v2/hosts'
         with requests_mock.Mocker() as mocker:

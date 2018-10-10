@@ -173,16 +173,16 @@ class NetworkInspectScannerTest(TestCase):
         self.connect_scan_task.update_stats(
             'TEST NETWORK CONNECT.', sys_failed=0)
 
+        conn_result = self.connect_scan_task.connection_result
         success_sys = SystemConnectionResult(
             name='1.2.3.4', credential=self.cred,
-            status=SystemConnectionResult.SUCCESS)
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
         success_sys.save()
         failed_sys = SystemConnectionResult(
-            name='1.1.1.2', status=SystemConnectionResult.FAILED)
+            name='1.1.1.2', status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
         failed_sys.save()
-        conn_result = self.connect_scan_task.connection_result
-        conn_result.systems.add(success_sys)
-        conn_result.systems.add(failed_sys)
         conn_result.save()
 
         self.connect_scan_task.update_stats(

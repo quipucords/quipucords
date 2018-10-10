@@ -87,11 +87,9 @@ class ConnectResultStore():
             name=name,
             source=source,
             credential=credential,
-            status=status)
+            status=status,
+            task_connection_result=self.scan_task.connection_result)
         sys_result.save()
-
-        self.scan_task.connection_result.systems.add(sys_result)
-        self.scan_task.connection_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
             message = '%s with %s' % (name, credential.name)

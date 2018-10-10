@@ -19,21 +19,39 @@ from api import messages  # noqa
 from api.source.model import Source
 
 
-class RawFact(models.Model):
-    """A model of a raw fact."""
-
-    name = models.CharField(max_length=1024)
-    value = models.TextField()
+class JobInspectionResult(models.Model):
+    """The results of a connection scan."""
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, value:%s }' % \
-            (self.id, self.name, self.value)
+        # pylint: disable=no-member
+        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_RAW_FACT_MSG)
+        verbose_name_plural = _(messages.PLURAL_JOB_INSPECT_RESULTS_MSG)
+
+
+class TaskInspectionResult(models.Model):
+    """The captured connection results from a scan."""
+
+    job_inspection_result = models.ForeignKey(JobInspectionResult,
+                                              on_delete=models.CASCADE,
+                                              related_name='task_results')
+
+    def __str__(self):
+        """Convert to string."""
+        # pylint: disable=no-member
+        return '{ ' + 'id:{}, '\
+            'systems:{}, '\
+            .format(self.id,
+                    self.systems) + ' }'
+
+    class Meta:
+        """Metadata for model."""
+
+        verbose_name_plural = _(messages.PLURAL_TASK_INSPECT_RESULTS_MSG)
 
 
 class SystemInspectionResult(models.Model):
@@ -47,13 +65,16 @@ class SystemInspectionResult(models.Model):
 
     name = models.CharField(max_length=1024)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
-    facts = models.ManyToManyField(RawFact)
     source = models.ForeignKey(Source,
                                on_delete=models.SET_NULL,
                                null=True)
+    task_inspection_result = models.ForeignKey(TaskInspectionResult,
+                                               on_delete=models.CASCADE,
+                                               related_name='systems')
 
     def __str__(self):
         """Convert to string."""
+        # pylint: disable=no-member
         return '{ id:%s, name:%s, status:%s, facts:%s, source:%s }' % \
             (self.id, self.name, self.status, self.facts, self.source)
 
@@ -63,34 +84,22 @@ class SystemInspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_SYS_INSPECT_RESULTS_MSG)
 
 
-class TaskInspectionResult(models.Model):
-    """The captured connection results from a scan."""
+class RawFact(models.Model):
+    """A model of a raw fact."""
 
-    systems = models.ManyToManyField(SystemInspectionResult)
+    name = models.CharField(max_length=1024)
+    value = models.TextField()
+    system_inspection_result = models.ForeignKey(SystemInspectionResult,
+                                                 on_delete=models.CASCADE,
+                                                 related_name='facts')
 
     def __str__(self):
         """Convert to string."""
-        return '{ ' + 'id:{}, '\
-            'systems:{}, '\
-            .format(self.id,
-                    self.systems) + ' }'
+        # pylint: disable=no-member
+        return '{ id:%s, name:%s, value:%s }' % \
+            (self.id, self.name, self.value)
 
     class Meta:
         """Metadata for model."""
 
-        verbose_name_plural = _(messages.PLURAL_TASK_INSPECT_RESULTS_MSG)
-
-
-class JobInspectionResult(models.Model):
-    """The results of a connection scan."""
-
-    task_results = models.ManyToManyField(TaskInspectionResult)
-
-    def __str__(self):
-        """Convert to string."""
-        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
-
-    class Meta:
-        """Metadata for model."""
-
-        verbose_name_plural = _(messages.PLURAL_JOB_INSPECT_RESULTS_MSG)
+        verbose_name_plural = _(messages.PLURAL_RAW_FACT_MSG)
