@@ -245,7 +245,7 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
 
 Developing with Insights Client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Information on installing and developing with the insights client can be found in `Insights Upload Configuration <docs/source/insights_upload_configuration.rst>`
+Information on installing and developing with the insights client can be found in `Insights Upload Configuration <docs/source/insights_upload_configuration.rst>`_.
 
 Testing
 ^^^^^^^

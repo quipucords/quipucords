@@ -1,12 +1,10 @@
 Installing the Insights Client
 ------------------------------
-To work with the Insights Client, begin by cloning the repository::
+The Insights Client requires the insights-core which is why we coupled these repositories together inside of an insights directory. To work with the Insights Client, begin by cloning the repository::
 
     mkdir insights && cd insights
     git clone git@github.com:RedHatInsights/insights-core.git
     git clone git@github.com:RedHatInsights/insights-client.git
-
-The Insights Client requires the insights-core which is why we coupled these repositories together inside of an insights directory.
 
 Setting Up a Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
