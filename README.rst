@@ -242,6 +242,22 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
     qpc server config --host 127.0.0.1 --port 8000
     qpc server login
 
+
+Developing with Insights Client
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Information on installing and developing with the insights client can be found in `Insights Upload Configuration <docs/source/insights_upload_configuration.rst>`
+
+Testing
+^^^^^^^
+
+Unit Testing
+""""""""""""
+
+To run the unit tests with the interpreter available as ``python``, use the following command::
+
+    make test
+
+
 Issues
 ------
 To report bugs for quipucords `open issues <https://github.com/quipucords/quipucords/issues>`_ against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
