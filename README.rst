@@ -161,6 +161,19 @@ To lint changes that are made to the source code, run the following command::
 
     make lint
 
+Testing
+^^^^^^^
+
+Unit Testing
+""""""""""""
+
+To run the unit tests with the interpreter available as ``python``, use the following command::
+
+    make test
+
+Advanced Topics
+---------------
+
 Container Image
 ^^^^^^^^^^^^^^^
 The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
@@ -233,18 +246,6 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
 
     qpc server config --host 127.0.0.1 --port 8000
     qpc server login
-
-
-Testing
-^^^^^^^
-
-Unit Testing
-""""""""""""
-
-To run the unit tests with the interpreter available as ``python``, use the following command::
-
-    make test
-
 
 Issues
 ------
