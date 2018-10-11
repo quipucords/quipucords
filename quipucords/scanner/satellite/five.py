@@ -326,6 +326,8 @@ class SatelliteFive(SatelliteInterface):
         virt_hosts = []
         virtual_hosts = {}
         virtual_guests = {}
+        self.inspect_scan_task.log_message(
+            'Obtaining satellite 5 virtual hosts')
         client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
@@ -347,6 +349,11 @@ class SatelliteFive(SatelliteInterface):
         for virt_host in virt_hosts:
             virt_host_id = virt_host.get(ID)
             virtual_host = virtual_hosts.get(virt_host_id)
+            self.inspect_scan_task.log_message(
+                'Obtaining virtual guests for virtual host (name=%s, '
+                'id=%s)' %
+                (virtual_host.get('name', 'unknown'),
+                 virtual_host.get('id', 'unknown')))
             guests, guest_count = self.virtual_guests(virt_host_id)
             virtual_guests.update(guests)
             virtual_host[NUM_VIRTUAL_GUESTS] = guest_count
@@ -359,6 +366,8 @@ class SatelliteFive(SatelliteInterface):
         :returns: list of phyiscal host ids
         """
         physical_hosts = []
+        self.inspect_scan_task.log_message(
+            'Obtaining satellite 5 physical hosts')
         client, user, password = utils.get_sat5_client(self.connect_scan_task)
         try:
             key = client.auth.login(user, password)
