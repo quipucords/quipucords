@@ -21,7 +21,7 @@ from api.models import (FactCollection,
                         ScanJob,
                         ScanTask,
                         SystemFingerprint)
-from api.report.renderer import DeploymentCSVRenderer, DetailsCSVRenderer
+from api.report.cvs_renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 from api.serializers import (FactCollectionSerializer,
                              FingerprintSerializer,
                              ScanJobSerializer)
