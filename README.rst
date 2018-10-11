@@ -30,6 +30,7 @@ This *README* file contains information about the installation and development o
 - `Installation`_
 - `Command Syntax and Usage`_
 - `Development`_
+- `Advanced Topics`_
 - `Issues`_
 - `Changes`_
 - `Authors`_
@@ -75,50 +76,6 @@ qpc is available for `download <https://copr.fedorainfracloud.org/coprs/g/quipuc
 
     yum -y install qpc
 
-Container Image
-^^^^^^^^^^^^^^^
-The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
-You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.
-
-1. Clone the repository::
-
-    git clone git@github.com:quipucords/quipucords.git
-
-2. *Optional* - Build UI.::
-
-    make build-ui
-
-  **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
-
-3. Build the Docker image::
-
-    docker -D build . -t quipucords:1.0.0
-
-  **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
-
-4. There are 3 different options for running the QPC server.
-    A. Run the Docker image with Postgres container::
-
-        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
-
-    B. Run the Docker image with external Postgres container::
-
-        ifconfig (get your computer's external IP if Postgres is local)
-        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
-
-    C. Run the Docker image with SQLite::
-
-        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
-
-5. Configure the CLI by using the following commands::
-
-    qpc server config --host 127.0.0.1
-    qpc server login
-
-6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
-
-
 Command Syntax and Usage
 ------------------------
 The complete list of options for each qpc command and subcommand are listed in the qpc man page. The man page information also contains usage examples and some best practice recommendations.
@@ -131,29 +88,25 @@ To work with the quipucords code, begin by cloning the repository::
 
     git clone git@github.com:quipucords/quipucords.git
 
-quipucords currently supports Python 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_. Based on the configuration of your system, you might be using either `pip` or `pip3` to install modules. The following instructions show the steps for a system with `pip`.
+quipucords currently supports Python 3.4, 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_.
 
 
 Setting Up a Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-You might want to isolate your development work by using a virtual environment. Run the following command to set up a virtual environment::
+Developing inside a virtual environment is recommended. Add desired environment variables to the `.env` file before creating your virtual environment.  You can copy ``.env.example`` to get started.
 
-    virtualenv -p python3 venv
-    source venv/bin/activate
+On Mac run the following command to set up a virtual environment::
 
-
-Installing Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^
-Run the following commands from within the local clone root directory to install dependencies that are needed for development and testing purposes:
-
-1. Collect some packages available through either `yum` (for RHEL) or `dnf` (for Fedora)::
-
-    sudo yum install python-tools
-
-2. Install the rest of the packages locally in your virtual environment::
-
+    brew install pipenv
+    pipenv shell
     pip install -r dev-requirements.txt
 
+On Linux run the following command to set up a virtual environment::
+
+    sudo yum install python-tools (or dnf for Fedora)
+    pip3 install pipenv
+    pipenv shell
+    pip install -r dev-requirements.txt
 
 Database Options
 ^^^^^^^^^^^^^^^^
@@ -203,6 +156,62 @@ To lint changes that are made to the source code, run the following command::
 
     make lint
 
+Testing
+^^^^^^^
+
+Unit Testing
+""""""""""""
+
+To run the unit tests, use the following command::
+
+    make test
+
+Advanced Topics
+---------------
+
+Container Image
+^^^^^^^^^^^^^^^
+The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
+You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.
+
+1. Clone the repository::
+
+    git clone git@github.com:quipucords/quipucords.git
+
+2. *Optional* - Build UI.::
+
+    make build-ui
+
+  **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
+
+3. Build the Docker image::
+
+    docker -D build . -t quipucords:1.0.0
+
+  **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
+
+4. There are 3 different options for running the QPC server.
+    A. Run the Docker image with Postgres container::
+
+        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
+        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
+
+    B. Run the Docker image with external Postgres container::
+
+        ifconfig (get your computer's external IP if Postgres is local)
+        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
+
+    C. Run the Docker image with SQLite::
+
+        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
+
+5. Configure the CLI by using the following commands::
+
+    qpc server config --host 127.0.0.1
+    qpc server login
+
+6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
+
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 You can run the server locally inside of gunicorn.  This can be a useful way to debug.
@@ -233,18 +242,6 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
     qpc server config --host 127.0.0.1 --port 8000
     qpc server login
 
-
-Testing
-^^^^^^^
-
-Unit Testing
-""""""""""""
-
-To run the unit tests with the interpreter available as ``python``, use the following command::
-
-    make test
-
-
 Issues
 ------
 To report bugs for quipucords `open issues <https://github.com/quipucords/quipucords/issues>`_ against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
@@ -269,4 +266,4 @@ Copyright and License
 ---------------------
 Copyright 2017-2018, Red Hat, Inc.
 
-quipucords is released under the `GNU Public License version 3 <LICENSE>`_.
+quipucords is released under the `GNU Public License version 3 <LICENSE>`_
