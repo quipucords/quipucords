@@ -30,6 +30,7 @@ This *README* file contains information about the installation and development o
 - `Installation`_
 - `Command Syntax and Usage`_
 - `Development`_
+- `Advanced Topics`_
 - `Issues`_
 - `Changes`_
 - `Authors`_
@@ -87,31 +88,25 @@ To work with the quipucords code, begin by cloning the repository::
 
     git clone git@github.com:quipucords/quipucords.git
 
-quipucords currently supports Python 3.4, 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_. Based on the configuration of your system, you might be using either `pip` or `pip3` to install modules. The following instructions show the steps for a system with `pip`.
+quipucords currently supports Python 3.4, 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_.
 
 
 Setting Up a Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Add desired environment variables to the `.env` file.  You can copy ``.env.example`` to get started.
+Developing inside a virtual environment is recommended. Add desired environment variables to the `.env` file before creating your virtual environment.  You can copy ``.env.example`` to get started.
 
-Developing inside a virtual environment is recommended. Run the following command to set up a virtual environment::
+On Mac run the following command to set up a virtual environment::
 
-    pip3/brew install pipenv
+    brew install pipenv
     pipenv shell
-
-
-Installing Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^
-Run the following commands from within the local clone root directory to install dependencies that are needed for development and testing purposes:
-
-1. Collect some packages available through either `yum` (for RHEL) or `dnf` (for Fedora)::
-
-    sudo yum install python-tools
-
-2. Install the rest of the packages locally in your virtual environment::
-
     pip install -r dev-requirements.txt
 
+On Linux run the following command to set up a virtual environment::
+
+    sudo yum install python-tools (or dnf for Fedora)
+    pip3 install pipenv
+    pipenv shell
+    pip install -r dev-requirements.txt
 
 Database Options
 ^^^^^^^^^^^^^^^^
@@ -167,7 +162,7 @@ Testing
 Unit Testing
 """"""""""""
 
-To run the unit tests with the interpreter available as ``python``, use the following command::
+To run the unit tests, use the following command::
 
     make test
 
