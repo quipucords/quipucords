@@ -93,6 +93,11 @@ class ScanTask(models.Model):
     fact_collection = models.ForeignKey(
         FactCollection, null=True, on_delete=models.CASCADE)
 
+    def __init__(self, *args, **kwargs):
+        """Constructore for ScanTask."""
+        super().__init__(*args, **kwargs)
+        self.scan_job_task_count = None
+
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
@@ -194,6 +199,8 @@ class ScanTask(models.Model):
                     static_options=None):
         """Log a message for this task."""
         # pylint: disable=no-member
+        if self.scan_job_task_count is None:
+            self.scan_job_task_count = self.job.tasks.all().count()
         if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             self._log_fingerprint_message(message, log_level)
         else:
@@ -205,18 +212,20 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         # pylint: disable=no-member
         if static_options is not None:
-            actual_message = 'Job %d, Task %d (%s, %s, %s) - ' % \
+            actual_message = 'Job %d, Task %d of %d (%s, %s, %s) - ' % \
                 (static_options['job_id'],
                  static_options['task_sequence_number'],
+                 self.scan_job_task_count,
                  static_options['scan_type'],
                  static_options['source_type'],
                  static_options['source_name'])
         else:
             elapsed_time = self._compute_elapsed_time()
-            actual_message = 'Job %d, Task %d '\
+            actual_message = 'Job %d, Task %d of %d '\
                 '(%s, %s, %s, elapsed_time: %ds) - ' % \
                 (self.job.id,
                  self.sequence_number,
+                 self.scan_job_task_count,
                  self.scan_type,
                  self.source.source_type,
                  self.source.name,
@@ -232,10 +241,11 @@ class ScanTask(models.Model):
         fact_collection_id = None
         if self.fact_collection:
             fact_collection_id = self.fact_collection.id
-        actual_message = 'Job %d, Task %d '\
+        actual_message = 'Job %d, Task %d of %d '\
             '(%s, fact_collection=%s, elapsed_time: %ds) - ' % \
             (self.job.id,
              self.sequence_number,
+             self.scan_job_task_count,
              self.scan_type,
              fact_collection_id,
              elapsed_time)
@@ -382,6 +392,8 @@ class ScanTask(models.Model):
         self.status = ScanTask.RUNNING
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
+        # pylint: disable=no-member
+        self.scan_job_task_count = self.job.tasks.all().count()
         self.log_current_status()
 
     # All task types

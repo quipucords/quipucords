@@ -112,6 +112,7 @@ ENV/
 
 # sqlite
 db.sqlite3
+db.sqlite3-journal
 
 # From ide
 .idea/
