@@ -1,6 +1,6 @@
 Installing the Insights Client
 ------------------------------
-The Insights Client requires the insights-core which is why we coupled these repositories together inside of an insights directory. To work with the Insights Client, begin by cloning the repository::
+To work with the Insights Client, we must also install the Insights Core. To begin, create the insights directory and clone the following repositories::
 
     mkdir insights && cd insights
     git clone git@github.com:RedHatInsights/insights-core.git
@@ -16,19 +16,19 @@ Accessing the Insights Development Branches
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For QPC to access the Insights Client locally we need to checkout branches that are still in development.
 
-    cd insights-core
-    git fetch origin platform-upload && git checkout platform-upload
-    cd ../insights-client
-    git fetch origin os-x-test && git checkout os-x-test
+    `cd insights-core`
+    `git fetch origin platform-upload && git checkout platform-upload`
+    `cd ../insights-client`
+    `git fetch origin os-x-test && git checkout os-x-test`
 
 Edit the Insights Client Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 You will need modify the Insights Client Configuration in order to be authorized to upload.
 
-    vim etc/insights-client.conf
-    auto_config=False
-    username=<your_username>
-    password=<your_password>
+    `vim etc/insights-client.conf`
+    `auto_config=False`
+    `username=<your_username>`
+    `password=<your_password>`
 
 **Note:** The username and password is based off your login for https://accesss.redhat.com/
 
