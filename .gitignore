@@ -33,7 +33,7 @@ quipucords/quipucords/templates/client/
 *.manifest
 
 
-# Installer 
+# Installer
 pip-log.txt
 pip-delete-this-directory.txt
 install/packages/*
@@ -76,9 +76,6 @@ target/
 
 # pyenv
 .python-version
-
-# pipenv
-Pipfile
 
 # celery beat schedule file
 celerybeat-schedule

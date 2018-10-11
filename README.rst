@@ -131,15 +131,17 @@ To work with the quipucords code, begin by cloning the repository::
 
     git clone git@github.com:quipucords/quipucords.git
 
-quipucords currently supports Python 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_. Based on the configuration of your system, you might be using either `pip` or `pip3` to install modules. The following instructions show the steps for a system with `pip`.
+quipucords currently supports Python 3.4, 3.5 and 3.6. If you do not have Python on your system, follow these `instructions <https://www.python.org/downloads/>`_. Based on the configuration of your system, you might be using either `pip` or `pip3` to install modules. The following instructions show the steps for a system with `pip`.
 
 
 Setting Up a Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Add desired environment variables to the `.env` file.  You can copy ``.env.example`` to get started.
+
 You might want to isolate your development work by using a virtual environment. Run the following command to set up a virtual environment::
 
-    virtualenv -p python3 venv
-    source venv/bin/activate
+    brew install pipenv
+    pipenv shell
 
 
 Installing Dependencies
@@ -269,4 +271,4 @@ Copyright and License
 ---------------------
 Copyright 2017-2018, Red Hat, Inc.
 
-quipucords is released under the `GNU Public License version 3 <LICENSE>`_.
+quipucords is released under the `GNU Public License version 3 <LICENSE>`_
