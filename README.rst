@@ -75,50 +75,6 @@ qpc is available for `download <https://copr.fedorainfracloud.org/coprs/g/quipuc
 
     yum -y install qpc
 
-Container Image
-^^^^^^^^^^^^^^^
-The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
-You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.
-
-1. Clone the repository::
-
-    git clone git@github.com:quipucords/quipucords.git
-
-2. *Optional* - Build UI.::
-
-    make build-ui
-
-  **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
-
-3. Build the Docker image::
-
-    docker -D build . -t quipucords:1.0.0
-
-  **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
-
-4. There are 3 different options for running the QPC server.
-    A. Run the Docker image with Postgres container::
-
-        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
-
-    B. Run the Docker image with external Postgres container::
-
-        ifconfig (get your computer's external IP if Postgres is local)
-        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
-
-    C. Run the Docker image with SQLite::
-
-        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
-
-5. Configure the CLI by using the following commands::
-
-    qpc server config --host 127.0.0.1
-    qpc server login
-
-6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
-
-
 Command Syntax and Usage
 ------------------------
 The complete list of options for each qpc command and subcommand are listed in the qpc man page. The man page information also contains usage examples and some best practice recommendations.
@@ -138,9 +94,9 @@ Setting Up a Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Add desired environment variables to the `.env` file.  You can copy ``.env.example`` to get started.
 
-You might want to isolate your development work by using a virtual environment. Run the following command to set up a virtual environment::
+Developing inside a virtual environment is recommended. Run the following command to set up a virtual environment::
 
-    brew install pipenv
+    pip3/brew install pipenv
     pipenv shell
 
 
@@ -204,6 +160,49 @@ Linting
 To lint changes that are made to the source code, run the following command::
 
     make lint
+
+Container Image
+^^^^^^^^^^^^^^^
+The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
+You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.
+
+1. Clone the repository::
+
+    git clone git@github.com:quipucords/quipucords.git
+
+2. *Optional* - Build UI.::
+
+    make build-ui
+
+  **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.
+
+3. Build the Docker image::
+
+    docker -D build . -t quipucords:1.0.0
+
+  **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
+
+4. There are 3 different options for running the QPC server.
+    A. Run the Docker image with Postgres container::
+
+        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
+        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
+
+    B. Run the Docker image with external Postgres container::
+
+        ifconfig (get your computer's external IP if Postgres is local)
+        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
+
+    C. Run the Docker image with SQLite::
+
+        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
+
+5. Configure the CLI by using the following commands::
+
+    qpc server config --host 127.0.0.1
+    qpc server login
+
+6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
 
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
