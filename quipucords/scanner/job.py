@@ -122,7 +122,6 @@ class ScanJobRunner(Process):
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
                 failed_tasks.append(runner.scan_task)
-                # Task did not complete successfully
                 fingerprint_task_runner.scan_task.log_message(
                     'Task %s failed.' % (
                         fingerprint_task_runner.scan_task.sequence_number),
