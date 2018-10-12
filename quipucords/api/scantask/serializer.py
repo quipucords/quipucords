@@ -50,6 +50,7 @@ class SourceField(PrimaryKeyRelatedField):
 class ScanTaskSerializer(NotEmptySerializer):
     """Serializer for the ScanTask model."""
 
+    sequence_number = IntegerField(required=False, min_value=0, read_only=True)
     source = SourceField(queryset=Source.objects.all())
     scan_type = ChoiceField(
         required=False, choices=ScanTask.SCANTASK_TYPE_CHOICES)
@@ -68,10 +69,17 @@ class ScanTaskSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanTask
-        fields = ['source', 'scan_type', 'status', 'status_message',
-                  'systems_count', 'systems_scanned',
-                  'systems_failed', 'systems_unreachable',
-                  'start_time', 'end_time']
+        fields = ['sequence_number',
+                  'source',
+                  'scan_type',
+                  'status',
+                  'status_message',
+                  'systems_count',
+                  'systems_scanned',
+                  'systems_failed',
+                  'systems_unreachable',
+                  'start_time',
+                  'end_time']
 
     @staticmethod
     def validate_source(source):

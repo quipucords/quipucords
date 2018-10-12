@@ -103,14 +103,6 @@ class ScanJobRunner(Process):
                 # something went wrong or cancel/pause
                 return task_status
 
-        if bool(failed_tasks):
-            failed_task_ids = ', '.join([str(task.sequence_number)
-                                         for task in failed_tasks])
-            error_message = 'The following tasks failed: %s' % failed_task_ids
-            fingerprint_task_runner.scan_task.fail(error_message)
-            self.scan_job.fail(error_message)
-            return ScanTask.FAILED
-
         if self.scan_job.scan_type in [ScanTask.SCAN_TYPE_INSPECT,
                                        ScanTask.SCAN_TYPE_FINGERPRINT]:
             fact_collection = fingerprint_task_runner.scan_task.fact_collection
@@ -127,21 +119,27 @@ class ScanJobRunner(Process):
             fingerprint_task_runner.scan_task.fact_collection = fact_collection
             fingerprint_task_runner.scan_task.save()
             task_status = self._run_task(fingerprint_task_runner)
-            if task_status == ScanTask.FAILED:
+            if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
-                self.scan_job.fail(
+                failed_tasks.append(runner.scan_task)
+                fingerprint_task_runner.scan_task.log_message(
                     'Task %s failed.' % (
-                        fingerprint_task_runner.scan_task.sequence_number))
-                return ScanTask.FAILED
-            elif task_status != ScanTask.COMPLETED:
-                # something went wrong or cancel/pause
-                return task_status
+                        fingerprint_task_runner.scan_task.sequence_number),
+                    log_level=logging.ERROR)
+            else:
+                # Record results for successful tasks
+                self.scan_job.report_id = fact_collection.id
+                self.scan_job.save()
+                self.scan_job.log_message('Report %d created.' %
+                                          self.scan_job.report_id)
 
-            # All tasks completed successfully and sent to endpoint
-            self.scan_job.report_id = fact_collection.id
-            self.scan_job.save()
-            self.scan_job.log_message('Report %d created.' %
-                                      self.scan_job.report_id)
+        if failed_tasks:
+            failed_task_ids = ', '.join([str(task.sequence_number)
+                                         for task in failed_tasks])
+            error_message = 'The following tasks failed: %s' % failed_task_ids
+            self.scan_job.fail(error_message)
+            return ScanTask.FAILED
+
         self.scan_job.complete()
         return ScanTask.COMPLETED
 
@@ -247,7 +245,8 @@ class ScanJobRunner(Process):
         """
         inspect_tasks = self.scan_job.tasks.filter(
             scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
-        sources = build_sources_from_tasks(inspect_tasks.all())
+        sources = build_sources_from_tasks(
+            inspect_tasks.filter(status=ScanTask.COMPLETED))
         if bool(sources):
             fact_collection_json = {'sources': sources}
             has_errors, validation_result = validate_fact_collection_json(
