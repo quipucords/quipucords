@@ -196,7 +196,7 @@ node('f28-os') {
 
         archiveArtifacts 'test-api-logs.tar.gz'
 
-        junit '*junit.xml'
+        junit 'api-junit.xml'
     }
 
     stage('Test CLI') {
@@ -218,7 +218,7 @@ node('f28-os') {
 
         archiveArtifacts 'test-cli-logs.tar.gz'
 
-        junit '*junit.xml'
+        junit 'cli-junit.xml'
     }
 
     stage('Test UI Chrome') {
@@ -243,7 +243,7 @@ node('f28-os') {
 
         archiveArtifacts 'test-ui-chrome-logs.tar.gz'
 
-        junit '*junit.xml'
+        junit 'ui-chrome-junit.xml'
     }
 
     stage('Test UI Firefox') {
@@ -268,6 +268,6 @@ node('f28-os') {
 
         archiveArtifacts 'test-ui-firefox-logs.tar.gz'
 
-        junit '*junit.xml'
+        junit 'ui-firefox-junit.xml'
     }
 }
