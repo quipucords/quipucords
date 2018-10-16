@@ -16,33 +16,23 @@ import json
 from django.db import models
 
 
-class FactCollection(models.Model):
+class DetailsReport(models.Model):
     """A reported set of facts."""
 
-    FC_STATUS_PENDING = 'pending'
-    FC_STATUS_FAILED = 'failed'
-    FC_STATUS_COMPLETE = 'complete'
-    FC_STATUS_CHOICES = ((FC_STATUS_PENDING,
-                          FC_STATUS_PENDING),
-                         (FC_STATUS_FAILED,
-                          FC_STATUS_FAILED),
-                         (FC_STATUS_COMPLETE,
-                          FC_STATUS_COMPLETE))
-
-    status = models.CharField(
-        max_length=16,
-        choices=FC_STATUS_CHOICES,
-        default=FC_STATUS_PENDING
-    )
     sources = models.TextField(null=False)
-    csv_content = models.TextField(null=True)
+    report_id = models.IntegerField(null=True)
+    deployment_report = models.OneToOneField(
+        'DeploymentsReport',
+        models.CASCADE,
+        related_name='details_report',
+        null=True)
+    cached_csv = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""
         return '{' +\
-            'id:{}, status:{}, sources:{}'.format(self.id,
-                                                  self.status,
-                                                  self.sources) + '}'
+            'id:{}, sources:{}'.format(self.id,
+                                       self.sources) + '}'
 
     def get_sources(self):
         """Access facts as python dict instead of str.

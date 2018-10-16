@@ -62,9 +62,9 @@ def build_sources_from_tasks(tasks):
 
 
 def validate_fact_collection_json(fact_collection_json):
-    """Validate fact_collection field.
+    """Validate details_report field.
 
-    :param fact_collection_json: dict representing a fact collection
+    :param fact_collection_json: dict representing a details report
     :returns: bool indicating if there are errors and dict with result.
     """
     if not fact_collection_json.get(SOURCES_KEY):
@@ -153,22 +153,22 @@ def _validate_source_json(source_json):
 
 
 def create_fact_collection(json_fact_collection):
-    """Create fact collection.
+    """Create details report.
 
-    Fact collection consists of a FactCollection record
-    :param json_fact_collection: dict representing a fact collection
-    :returns: The newly created FactCollection
+    Fact collection consists of a DetailsReport record
+    :param json_fact_collection: dict representing a details report
+    :returns: The newly created DetailsReport
     """
-    # Create new fact collection
+    # Create new details report
     serializer = FactCollectionSerializer(data=json_fact_collection)
     if serializer.is_valid():
-        fact_collection = serializer.save()
-        logger.debug('Fact collection created: %s', fact_collection)
-        return fact_collection
+        details_report = serializer.save()
+        logger.debug('Fact collection created: %s', details_report)
+        return details_report
 
     logger.error('Fact collection could not be persisted.')
     logger.error('Invalid json_fact_collection: %s',
                  json_fact_collection)
-    logger.error('FactCollection errors: %s', serializer.errors)
+    logger.error('DetailsReport errors: %s', serializer.errors)
 
     return None

@@ -246,7 +246,8 @@ class ReportDetailTests(unittest.TestCase):
         nac = ReportMergeCommand(SUBPARSER)
         args = Namespace(scan_job_ids=[1],
                          json_files=None,
-                         report_ids=None)
+                         report_ids=None,
+                         json_dir=None)
         with self.assertRaises(SystemExit):
             with redirect_stdout(report_out):
                 nac.main(args)

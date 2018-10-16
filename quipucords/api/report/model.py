@@ -10,13 +10,44 @@
 #
 
 """Models system fingerprints."""
-from api.fact.model import FactCollection
 
 from django.db import models
 
 
+class DeploymentsReport(models.Model):
+    """Represents deployment report."""
+
+    STATUS_PENDING = 'pending'
+    STATUS_FAILED = 'failed'
+    STATUS_COMPLETE = 'complete'
+    STATUS_CHOICES = ((STATUS_PENDING, STATUS_PENDING),
+                      (STATUS_FAILED, STATUS_FAILED),
+                      (STATUS_COMPLETE, STATUS_COMPLETE))
+
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
+    )
+    report_id = models.IntegerField(null=True)
+    cached_json = models.TextField(null=True)
+    cached_csv = models.TextField(null=True)
+
+    def __str__(self):
+        """Convert to string."""
+        return '{' +\
+            'id:{}, report_id: {}, status:{}'.format(
+                self.id,
+                self.report_id,
+                self.status) + '}'
+
+
 class SystemFingerprint(models.Model):
     """Represents system fingerprint."""
+
+    # Important: If you add a DATE field, add it to list
+    DATE_FIELDS = ['system_last_checkin_date',
+                   'system_creation_date']
 
     BARE_METAL = 'bare_metal'
     SOURCE_TYPE = (
@@ -32,7 +63,8 @@ class SystemFingerprint(models.Model):
     )
 
     # Scan information
-    report_id = models.ForeignKey(FactCollection, models.CASCADE)
+    deployment_report = models.ForeignKey(
+        DeploymentsReport, models.CASCADE, related_name='system_fingerprints')
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)
@@ -86,7 +118,7 @@ class SystemFingerprint(models.Model):
     def __str__(self):
         """Convert to string."""
         return '{' + 'id:{}, '\
-            'report:{}, ' \
+            'deployment_report:{}, ' \
             'name:{}, '\
             'os_name:{}, '\
             'os_version:{}, '\
@@ -114,7 +146,7 @@ class SystemFingerprint(models.Model):
             'architecture:{}, '\
             'sources:{}, '\
             'metadata:{} '.format(self.id,
-                                  self.report_id.id,
+                                  self.deployment_report.id,
                                   self.name,
                                   self.os_name,
                                   self.os_version,
