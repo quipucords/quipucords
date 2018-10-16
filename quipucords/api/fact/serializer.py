@@ -13,14 +13,14 @@
 
 from api.common.serializer import (CustomJSONField,
                                    NotEmptySerializer)
-from api.models import FactCollection
+from api.models import DetailsReport
 
 from rest_framework.serializers import (CharField,
                                         IntegerField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):
-    """Serializer for the FactCollection model."""
+    """Serializer for the DetailsReport model."""
 
     sources = CustomJSONField(required=True)
     report_id = IntegerField(read_only=True)
@@ -29,5 +29,5 @@ class FactCollectionSerializer(NotEmptySerializer):
     class Meta:
         """Meta class for FactCollectionSerializer."""
 
-        model = FactCollection
+        model = DetailsReport
         exclude = ('id', 'deployment_report')

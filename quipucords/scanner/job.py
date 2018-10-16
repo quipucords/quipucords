@@ -105,22 +105,22 @@ class ScanJobRunner(Process):
 
         if self.scan_job.scan_type in [ScanTask.SCAN_TYPE_INSPECT,
                                        ScanTask.SCAN_TYPE_FINGERPRINT]:
-            fact_collection = fingerprint_task_runner.scan_task.fact_collection
+            details_report = fingerprint_task_runner.scan_task.details_report
 
-            if not fact_collection:
+            if not details_report:
                 # Create the fact collection
-                fact_collection = self._create_fact_collection()
+                details_report = self._create_fact_collection()
 
-            if not fact_collection:
+            if not details_report:
                 self.scan_job.fail('No facts gathered from scan.')
                 return ScanTask.FAILED
 
             # Associate fact collection with scan job
-            self.scan_job.fact_collection = fact_collection
+            self.scan_job.details_report = details_report
             self.scan_job.save()
 
             # Associate fact collection with fingerprint task
-            fingerprint_task_runner.scan_task.fact_collection = fact_collection
+            fingerprint_task_runner.scan_task.details_report = details_report
             fingerprint_task_runner.scan_task.save()
             task_status = self._run_task(fingerprint_task_runner)
             if task_status != ScanTask.COMPLETED:
@@ -132,7 +132,7 @@ class ScanJobRunner(Process):
                     log_level=logging.ERROR)
             else:
                 # Record results for successful tasks
-                self.scan_job.report_id = fact_collection.deployment_report.id
+                self.scan_job.report_id = details_report.deployment_report.id
                 self.scan_job.save()
                 self.scan_job.log_message('Report %d created.' %
                                           self.scan_job.report_id)
@@ -264,9 +264,9 @@ class ScanJobRunner(Process):
                 return ScanTask.FAILED
 
             # Create FC model and save data to JSON file
-            fact_collection = create_fact_collection(
+            details_report = create_fact_collection(
                 fact_collection_json)
-            return fact_collection
+            return details_report
 
         return None
 

@@ -944,7 +944,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/DeploymentReport"
+              $ref: "#/definitions/DeploymentsReport"
         401:
           description: "Not authorized"
         404:
@@ -989,7 +989,7 @@ paths:
         description: "Reports json to combine"
         required: true
         schema:
-          $ref: "#/definitions/FactCollectionIn"
+          $ref: "#/definitions/DetailsReportIn"
       responses:
         201:
           description: "Job to track results of merge report operation."
@@ -1207,7 +1207,7 @@ definitions:
         type: "string"
         description: "Deletion error message"
         example: "Failed to delete"
-  DeploymentReport:
+  DeploymentsReport:
     properties:
         report_id:
           type: "integer"
@@ -1241,9 +1241,9 @@ definitions:
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/FactCollectionSource"
+            $ref: "#/definitions/DetailsReportSource"
           minItems: 1
-  FactCollectionIn:
+  DetailsReportIn:
     type: "object"
     required:
       - sources
@@ -1251,9 +1251,9 @@ definitions:
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/FactCollectionSource"
+            $ref: "#/definitions/DetailsReportSource"
           minItems: 1
-  FactCollectionSource:
+  DetailsReportSource:
     type: "object"
     required:
       - server_id

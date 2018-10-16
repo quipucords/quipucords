@@ -15,7 +15,7 @@ import logging
 from io import StringIO
 
 from api.common.util import CSVHelper
-from api.models import (DeploymentReport, FactCollection,
+from api.models import (DeploymentsReport, DetailsReport,
                         Source)
 
 from rest_framework import renderers
@@ -53,13 +53,13 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
         if report_id is None:
             return None
 
-        fact_collection = FactCollection.objects.filter(
+        details_report = DetailsReport.objects.filter(
             report_id=report_id).first()
-        if fact_collection is None:
+        if details_report is None:
             return None
 
         # Check for a cached copy of csv
-        cached_csv = fact_collection.cached_csv
+        cached_csv = details_report.cached_csv
         if cached_csv:
             logger.info('Using cached csv results for details report %d',
                         report_id)
@@ -115,8 +115,8 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
         logger.info('Caching csv results for details report %d',
                     report_id)
         cached_csv = details_report_csv_buffer.getvalue()
-        fact_collection.cached_csv = cached_csv
-        fact_collection.save()
+        details_report.cached_csv = cached_csv
+        details_report.save()
 
         return cached_csv
 
@@ -148,7 +148,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
         if report_id is None:
             return None
 
-        deployment_report = DeploymentReport.objects.filter(
+        deployment_report = DeploymentsReport.objects.filter(
             report_id=report_id).first()
         if deployment_report is None:
             return None

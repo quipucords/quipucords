@@ -18,7 +18,7 @@ from datetime import datetime
 from api import messages
 from api.connresult.model import (JobConnectionResult,
                                   TaskConnectionResult)
-from api.fact.model import FactCollection
+from api.fact.model import DetailsReport
 from api.inspectresult.model import (JobInspectionResult,
                                      TaskInspectionResult)
 from api.scan.model import Scan, ScanOptions
@@ -74,8 +74,8 @@ class ScanJob(models.Model):
     inspection_results = models.ForeignKey(
         JobInspectionResult, null=True, on_delete=models.CASCADE)
 
-    fact_collection = models.ForeignKey(
-        FactCollection, null=True, on_delete=models.CASCADE)
+    details_report = models.ForeignKey(
+        DetailsReport, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         """Convert to string."""
@@ -196,12 +196,12 @@ class ScanJob(models.Model):
                 inspect_systems_unreachable + connection_systems_unreachable
         self.refresh_from_db()
         if self.report_id and \
-                self.fact_collection:
-            self.fact_collection.refresh_from_db()
-            if self.fact_collection.deployment_report:
+                self.details_report:
+            self.details_report.refresh_from_db()
+            if self.details_report.deployment_report:
                 # pylint: disable=no-member
                 system_fingerprint_count = \
-                    self.fact_collection.deployment_report.\
+                    self.details_report.deployment_report.\
                     system_fingerprints.count()
 
         return systems_count,\
@@ -307,9 +307,9 @@ class ScanJob(models.Model):
                 self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
-            if self.fact_collection and \
-                    self.fact_collection.deployment_report:
-                self.fact_collection.deployment_report.\
+            if self.details_report and \
+                    self.details_report.deployment_report:
+                self.details_report.deployment_report.\
                     system_fingerprints.delete()
 
         # Create tasks
@@ -424,7 +424,7 @@ class ScanJob(models.Model):
             fingerprint_task = ScanTask(
                 job=self,
                 scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                fact_collection=self.fact_collection,
+                details_report=self.details_report,
                 status=ScanTask.PENDING,
                 status_message=_(
                     messages.ST_STATUS_MSG_PENDING),

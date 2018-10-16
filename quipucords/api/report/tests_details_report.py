@@ -14,7 +14,7 @@ import copy
 import json
 
 from api.models import (Credential,
-                        FactCollection,
+                        DetailsReport,
                         ServerInformation,
                         Source)
 from api.report.cvs_renderer import (DetailsCSVRenderer)
@@ -134,10 +134,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(
+        details_report = DetailsReport.objects.get(
             report_id=response_json['report_id'])
-        fact_collection.cached_csv = None
-        fact_collection.save()
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -147,10 +147,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(
+        details_report = DetailsReport.objects.get(
             id=response_json['report_id'])
-        fact_collection.cached_csv = None
-        fact_collection.save()
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -160,10 +160,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(
+        details_report = DetailsReport.objects.get(
             report_id=response_json['report_id'])
-        fact_collection.cached_csv = None
-        fact_collection.save()
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove facts
         test_json = copy.deepcopy(response_json)

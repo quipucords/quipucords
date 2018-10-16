@@ -77,7 +77,7 @@ class DeploymentReportTest(TestCase):
     def generate_fingerprints(self,
                               os_name='RHEL',
                               os_versions=None):
-        """Create a FactCollection for test."""
+        """Create a DetailsReport for test."""
         facts = []
         fc_json = {'sources': [{'server_id': self.server_id,
                                 'source_name': self.net_source.name,
@@ -113,8 +113,8 @@ class DeploymentReportTest(TestCase):
                 'virt_what_type': 'vt'
             }
             facts.append(fact_json)
-        fact_collection = self.create_fact_collection_expect_201(fc_json)
-        return fact_collection
+        details_report = self.create_fact_collection_expect_201(fc_json)
+        return details_report
 
     def test_get_fact_collection_group_report_count(self):
         """Get a specific group count report."""
@@ -181,7 +181,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_bad_deployment_report(self):
-        """Test case where FactCollection exists but no fingerprint."""
+        """Test case where DetailsReport exists but no fingerprint."""
         url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver

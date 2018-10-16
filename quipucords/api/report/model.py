@@ -14,7 +14,7 @@
 from django.db import models
 
 
-class DeploymentReport(models.Model):
+class DeploymentsReport(models.Model):
     """Represents deployment report."""
 
     STATUS_PENDING = 'pending'
@@ -64,7 +64,7 @@ class SystemFingerprint(models.Model):
 
     # Scan information
     deployment_report = models.ForeignKey(
-        DeploymentReport, models.CASCADE, related_name='system_fingerprints')
+        DeploymentsReport, models.CASCADE, related_name='system_fingerprints')
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)

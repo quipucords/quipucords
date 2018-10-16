@@ -13,9 +13,9 @@
 
 from api.common.serializer import CustomJSONField, NotEmptySerializer
 from api.models import (
-    DeploymentReport,
+    DeploymentsReport,
+    DetailsReport,
     Entitlement,
-    FactCollection,
     Product,
     SystemFingerprint)
 
@@ -144,18 +144,18 @@ class DeploymentReportSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
 
     # Scan information
-    fact_collection = PrimaryKeyRelatedField(
-        queryset=FactCollection.objects.all())
+    details_report = PrimaryKeyRelatedField(
+        queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
     cached_json = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
 
     status = ChoiceField(
-        read_only=True, choices=DeploymentReport.STATUS_CHOICES)
+        read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
     system_fingerprints = FingerprintField(many=True, read_only=True)
 
     class Meta:
         """Meta class for DeploymentReportSerializer."""
 
-        model = DeploymentReport
+        model = DeploymentsReport
         fields = '__all__'

@@ -14,7 +14,7 @@ import logging
 import uuid
 from datetime import datetime
 
-from api.models import (DeploymentReport,
+from api.models import (DeploymentsReport,
                         Product,
                         ScanJob,
                         ScanTask,
@@ -123,12 +123,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if interrupt_status != ScanTask.RUNNING:
             return interrupt_message, interrupt_status
 
-        fact_collection = self.scan_task.fact_collection
+        details_report = self.scan_task.details_report
 
         # remove results from previous interrupted scan
-        deployment_report = fact_collection.deployment_report
+        deployment_report = details_report.deployment_report
         if not deployment_report:
-            deployment_report = DeploymentReport()
+            deployment_report = DeploymentsReport()
             deployment_report.save()
 
             # Set the report ids.  Right now they are deployemnt report id
@@ -138,9 +138,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
             # Set the report ids.  Right now they are deployemnt report id
             # but they do not have to
-            fact_collection.deployment_report = deployment_report
-            fact_collection.report_id = deployment_report.id
-            fact_collection.save()
+            details_report.deployment_report = deployment_report
+            details_report.report_id = deployment_report.id
+            details_report.save()
         else:
             # remove partial results
             self.scan_task.log_message(
@@ -152,7 +152,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         try:
             message, status = self._process_fact_collection(
-                manager_interrupt, fact_collection)
+                manager_interrupt, details_report)
 
             interrupt_message, interrupt_status = self.check_for_interrupt(
                 manager_interrupt)
@@ -160,17 +160,17 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 return interrupt_message, interrupt_status
 
             if status == ScanTask.COMPLETED:
-                deployment_report.status = DeploymentReport.STATUS_COMPLETE
+                deployment_report.status = DeploymentsReport.STATUS_COMPLETE
             else:
-                deployment_report.status = DeploymentReport.STATUS_FAILED
+                deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
             return message, status
         except Exception as error:
             # Transition from persisted to failed after engine failed
-            deployment_report.status = DeploymentReport.STATUS_FAILED
+            deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
             error_message = 'Fact collection %d failed'\
-                ' to be processed.' % fact_collection.id
+                ' to be processed.' % details_report.id
 
             self.scan_task.log_message(
                 '%s' % (error_message), log_level=logging.ERROR)
@@ -178,11 +178,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
-    def _process_fact_collection(self, manager_interrupt, fact_collection):
+    def _process_fact_collection(self, manager_interrupt, details_report):
         """Process the fact collection.
 
         :param manager_interrupt: Signal to indicate job is canceled
-        :param fact_collection: FactCollection that was saved
+        :param details_report: DetailsReport that was saved
         :param scan_task: Task that is running this merge
         :returns: Status message and status
         """
@@ -190,7 +190,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message('START DEDUPLICATION')
 
         # Invoke ENGINE to create fingerprints from facts
-        fingerprints_list = self._process_sources(fact_collection)
+        fingerprints_list = self._process_sources(details_report)
 
         self.scan_task.log_message('END DEDUPLICATION')
 
@@ -199,7 +199,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message('START FINGERPRINT PERSISTENCE')
         status_count = 0
         total_count = len(fingerprints_list)
-        deployment_report = fact_collection.deployment_report
+        deployment_report = details_report.deployment_report
         # deployment_report_json = []
         date_field = DateField()
         final_fingerprint_list = []
@@ -238,20 +238,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     'Fingerprint errors: %s' %
                     serializer.errors, log_level=logging.ERROR)
             self.scan_task.log_message('Fingerprints (report id=%d): %s' %
-                                       (fact_collection.id, fingerprint_dict),
+                                       (details_report.id, fingerprint_dict),
                                        log_level=logging.DEBUG)
 
         # Mark completed because engine has process raw facts
         status = ScanTask.COMPLETED
         status_message = 'success'
         if final_fingerprint_list:
-            deployment_report.status = DeploymentReport.STATUS_COMPLETE
+            deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
             status_message = 'FAILED to create report id=%d - '\
                 'produced no valid fingerprints ' % (
                     deployment_report.report_id)
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
-            deployment_report.status = DeploymentReport.STATUS_FAILED
+            deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
         deployment_report.cached_json = json.dumps(final_fingerprint_list)
         deployment_report.save()
@@ -267,10 +267,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         return status_message, status
 
-    def _process_sources(self, fact_collection):
+    def _process_sources(self, details_report):
         """Process facts and convert to fingerprints.
 
-        :param fact_collection: FactCollection containing raw facts
+        :param details_report: DetailsReport containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
         # pylint: disable=too-many-statements
@@ -278,11 +278,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
         vcenter_fingerprints = []
         satellite_fingerprints = []
 
-        total_source_count = len(fact_collection.get_sources())
+        total_source_count = len(details_report.get_sources())
         self.scan_task.log_message(
             '%d sources to process' % total_source_count)
         source_count = 0
-        for source in fact_collection.get_sources():
+        for source in details_report.get_sources():
             source_count += 1
             source_type = source.get('source_type')
             source_name = source.get('source_name')

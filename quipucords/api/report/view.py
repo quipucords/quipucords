@@ -18,8 +18,8 @@ import api.messages as messages
 from api.common.util import is_int
 from api.fact.util import (create_fact_collection,
                            validate_fact_collection_json)
-from api.models import (DeploymentReport,
-                        FactCollection,
+from api.models import (DeploymentsReport,
+                        DetailsReport,
                         ScanJob,
                         ScanTask)
 from api.report.cvs_renderer import DeploymentCSVRenderer, DetailsCSVRenderer
@@ -77,7 +77,7 @@ def details(request, pk=None):
                 'report_id': [_(messages.COMMON_ID_INV)]
             }
             raise ValidationError(error)
-    detail_data = get_object_or_404(FactCollection.objects.all(), report_id=pk)
+    detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = FactCollectionSerializer(detail_data)
     json_details = serializer.data
     http_accept = request.META.get('HTTP_ACCEPT')
@@ -102,11 +102,11 @@ def deployments(request, pk=None):
 
     validate_filters(request.query_params)
     filters = filter_keys(request.query_params)
-    report = get_object_or_404(DeploymentReport.objects.all(), report_id=pk)
-    if report.status != DeploymentReport.STATUS_COMPLETE:
+    report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
+    if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response({'detail':
                          'Deployment report %s could not be created.'
-                         '  See server logs.' % report.fact_collection.id},
+                         '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
 
     # pylint: disable=no-else-return
@@ -157,7 +157,7 @@ def filter_keys(filters):
 def build_report(report, fingerprint_dicts):
     """Create starter object for report json.
 
-    :param report: the DeploymentReport
+    :param report: the DeploymentsReport
     :param fingerprint_dicts: the fingerprints for the report
     :returns: json report start object
     """
@@ -170,7 +170,7 @@ def build_report(report, fingerprint_dicts):
 def build_cached_json_report(report):
     """Create a count report based on the fingerprints and the group.
 
-    :param report: the DeploymentReport used to group count
+    :param report: the DeploymentsReport used to group count
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
@@ -180,7 +180,7 @@ def build_cached_json_report(report):
 def build_grouped_report(report, group):
     """Create a count report based on the fingerprints and the group.
 
-    :param report: the DeploymentReport used to group count
+    :param report: the DeploymentsReport used to group count
     :param group: the field to group and count on
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
@@ -215,7 +215,7 @@ def build_grouped_report(report, group):
 def build_filtered_report(report, filters):
     """Create a count report based on the fingerprints and the group.
 
-    :param report: The DeploymentReport used for filtered report
+    :param report: The DeploymentsReport used for filtered report
     :param filters: The values to display in report
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
@@ -257,9 +257,9 @@ def sync_merge_reports(request):
         raise ValidationError(error)
 
     # Create FC model and save data
-    fact_collection = create_fact_collection(fact_collection_json)
+    details_report = create_fact_collection(fact_collection_json)
     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                       fact_collection=fact_collection)
+                       details_report=details_report)
     scan_job.save()
     scan_job.queue()
     runner = ScanJobRunner(scan_job)
@@ -269,10 +269,10 @@ def sync_merge_reports(request):
         raise Exception(scan_job.status_message)
 
     scan_job = ScanJob.objects.get(pk=scan_job.id)
-    fact_collection = FactCollection.objects.get(pk=fact_collection.id)
+    details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
-    serializer = FactCollectionSerializer(fact_collection)
+    serializer = FactCollectionSerializer(details_report)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
 
@@ -302,12 +302,12 @@ def async_merge_reports(request, pk=None):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Create FC model and save data
-    fact_collection = create_fact_collection(request.data)
+    details_report = create_fact_collection(request.data)
 
     # Create new job to run
 
     merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                        fact_collection=fact_collection)
+                        details_report=details_report)
     merge_job.save()
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
@@ -351,7 +351,7 @@ def validate_merge_report(data):
         error.get('reports').append(_(messages.REPORT_MERGE_NOT_UNIQUE))
         raise ValidationError(error)
 
-    reports = FactCollection.objects.filter(pk__in=report_ids).order_by('-id')
+    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by('-id')
     actual_report_ids = [report.id for report in reports]
     missing_reports = set(report_ids) - set(actual_report_ids)
     if bool(missing_reports):

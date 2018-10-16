@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the fingerprint model."""
-from api.models import DeploymentReport
+from api.models import DeploymentsReport
 from api.serializers import SystemFingerprintSerializer
 
 from django.test import TestCase
@@ -20,7 +20,7 @@ class FingerprintModelTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.deployment_report = DeploymentReport()
+        self.deployment_report = DeploymentsReport()
         self.deployment_report.save()
 
     ################################################################

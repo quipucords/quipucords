@@ -18,7 +18,7 @@ from datetime import datetime
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.fact.model import FactCollection
+from api.fact.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
 
@@ -90,8 +90,8 @@ class ScanTask(models.Model):
         TaskInspectionResult, null=True, on_delete=models.CASCADE)
 
     # Fingerprint task field
-    fact_collection = models.ForeignKey(
-        FactCollection, null=True, on_delete=models.CASCADE)
+    details_report = models.ForeignKey(
+        DetailsReport, null=True, on_delete=models.CASCADE)
 
     def __init__(self, *args, **kwargs):
         """Constructore for ScanTask."""
@@ -115,21 +115,21 @@ class ScanTask(models.Model):
             'end_time: {}, '\
             'connection_result: {}, '\
             'inspection_result: {}, '\
-            'fact_collection: {}'.format(self.id,
-                                         self.job.id,
-                                         self.scan_type,
-                                         self.status,
-                                         self.source,
-                                         self.sequence_number,
-                                         self.systems_count,
-                                         self.systems_scanned,
-                                         self.systems_failed,
-                                         self.systems_unreachable,
-                                         self.start_time,
-                                         self.end_time,
-                                         self.connection_result,
-                                         self.inspection_result,
-                                         self.fact_collection) + '}'
+            'details_report: {}'.format(self.id,
+                                        self.job.id,
+                                        self.scan_type,
+                                        self.status,
+                                        self.source,
+                                        self.sequence_number,
+                                        self.systems_count,
+                                        self.systems_scanned,
+                                        self.systems_failed,
+                                        self.systems_unreachable,
+                                        self.start_time,
+                                        self.end_time,
+                                        self.connection_result,
+                                        self.inspection_result,
+                                        self.details_report) + '}'
 
     class Meta:
         """Metadata for model."""
@@ -187,12 +187,12 @@ class ScanTask(models.Model):
     def _log_fingerprint_stats(self, prefix):
         """Log stats for fingerprinter."""
         system_fingerprint_count = 0
-        if self.fact_collection:
-            self.fact_collection.refresh_from_db()
-            if self.fact_collection.deployment_report:
+        if self.details_report:
+            self.details_report.refresh_from_db()
+            if self.details_report.deployment_report:
                 # pylint: disable=no-member
                 system_fingerprint_count = \
-                    self.fact_collection.deployment_report.\
+                    self.details_report.deployment_report.\
                     system_fingerprints.count()
         message = '%s Stats: system_fingerprint_count=%d,' %\
             (prefix,
@@ -244,10 +244,10 @@ class ScanTask(models.Model):
         elapsed_time = self._compute_elapsed_time()
         # pylint: disable=no-member
         fact_collection_id = None
-        if self.fact_collection:
-            fact_collection_id = self.fact_collection.id
+        if self.details_report:
+            fact_collection_id = self.details_report.id
         actual_message = 'Job %d, Task %d of %d '\
-            '(%s, fact_collection=%s, elapsed_time: %ds) - ' % \
+            '(%s, details_report=%s, elapsed_time: %ds) - ' % \
             (self.job.id,
              self.sequence_number,
              self.scan_job_task_count,
@@ -526,12 +526,12 @@ class ScanTask(models.Model):
         using a ScanTask object so others can retrieve them if needed.
 
         :returns: Scan result object for task (either TaskConnectionResult,
-            TaskInspectionResult, or FactCollection)
+            TaskInspectionResult, or DetailsReport)
         """
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             return self.inspection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-            return self.fact_collection
+            return self.details_report
         return None

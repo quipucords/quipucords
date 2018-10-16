@@ -16,15 +16,15 @@ import json
 from django.db import models
 
 
-class FactCollection(models.Model):
+class DetailsReport(models.Model):
     """A reported set of facts."""
 
     sources = models.TextField(null=False)
     report_id = models.IntegerField(null=True)
     deployment_report = models.OneToOneField(
-        'DeploymentReport',
+        'DeploymentsReport',
         models.CASCADE,
-        related_name='fact_collection',
+        related_name='details_report',
         null=True)
     cached_csv = models.TextField(null=True)
 
