@@ -140,4 +140,4 @@ class ConnectTaskRunner(ScanTaskRunner):
         content = vcenter.RetrieveContent()
         vm_names = get_vm_names(content)
 
-        return set(vm_names)
+        return vm_names
