@@ -13,7 +13,7 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from api.fact.model import FactCollection
-from api.fingerprint.model import (SystemFingerprint, Product, Entitlement)
+from api.report.model import (DeploymentReport, SystemFingerprint, Product, Entitlement)
 from api.credential.model import Credential
 from api.source.model import Source, SourceOptions
 from api.scan.model import (Scan,

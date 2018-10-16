@@ -421,7 +421,6 @@ class EngineTest(TestCase):
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': n_fact_collection['facts']}
         nfingerprints = self.fp_task_runner._process_source(
-            n_fact_collection['id'],
             source)
         nfingerprint = nfingerprints[0]
         self._validate_network_result(nfingerprint, nfact)
@@ -437,7 +436,6 @@ class EngineTest(TestCase):
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
         vfingerprints = self.fp_task_runner._process_source(
-            v_fact_collection['id'],
             source)
         vfingerprint = vfingerprints[0]
         self._validate_vcenter_result(vfingerprint, vfact)
@@ -452,7 +450,6 @@ class EngineTest(TestCase):
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': s_fact_collection['facts']}
         sfingerprints = self.fp_task_runner._process_source(
-            s_fact_collection['id'],
             source)
         sfingerprint = sfingerprints[0]
         self._validate_satellite_result(sfingerprint, vfact)
@@ -470,7 +467,6 @@ class EngineTest(TestCase):
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_network_result(fingerprint, fact)
@@ -484,7 +480,6 @@ class EngineTest(TestCase):
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_vcenter_result(fingerprint, fact)
@@ -498,7 +493,6 @@ class EngineTest(TestCase):
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': fact_collection['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_satellite_result(fingerprint, fact)

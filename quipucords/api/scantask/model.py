@@ -186,12 +186,17 @@ class ScanTask(models.Model):
 
     def _log_fingerprint_stats(self, prefix):
         """Log stats for fingerprinter."""
-        fingerprint_count = self.systems_count
-        if fingerprint_count is None:
-            fingerprint_count = 0
+        system_fingerprint_count = 0
+        if self.fact_collection:
+            self.fact_collection.refresh_from_db()
+            if self.fact_collection.deployment_report:
+                # pylint: disable=no-member
+                system_fingerprint_count = \
+                    self.fact_collection.deployment_report.\
+                    system_fingerprints.count()
         message = '%s Stats: system_fingerprint_count=%d,' %\
             (prefix,
-             fingerprint_count)
+             system_fingerprint_count)
         self.log_message(message)
 
     # All task types

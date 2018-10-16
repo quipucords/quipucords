@@ -9,23 +9,26 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for network connection discovery."""
+import json
 import logging
 import uuid
 from datetime import datetime
 
-from api.models import (FactCollection,
+from api.models import (DeploymentReport,
                         Product,
                         ScanJob,
                         ScanTask,
                         Source,
                         SystemFingerprint)
-from api.serializers import (FingerprintSerializer)
+from api.serializers import (SystemFingerprintSerializer)
 
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
+
+from rest_framework.serializers import DateField
 
 from scanner.task import ScanTaskRunner
 
@@ -123,14 +126,30 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fact_collection = self.scan_task.fact_collection
 
         # remove results from previous interrupted scan
-        existing_fingerprints = SystemFingerprint.objects.filter(
-            report_id=fact_collection.id)
-        if existing_fingerprints:
+        deployment_report = fact_collection.deployment_report
+        if not deployment_report:
+            deployment_report = DeploymentReport()
+            deployment_report.save()
+
+            # Set the report ids.  Right now they are deployemnt report id
+            # but they do not have to
+            deployment_report.report_id = deployment_report.id
+            deployment_report.save()
+
+            # Set the report ids.  Right now they are deployemnt report id
+            # but they do not have to
+            fact_collection.deployment_report = deployment_report
+            fact_collection.report_id = deployment_report.id
+            fact_collection.save()
+        else:
+            # remove partial results
             self.scan_task.log_message(
                 'REMOVING PARTIAL RESULTS - deleting %d '
                 'fingerprints from previous scan'
-                % len(existing_fingerprints))
-            existing_fingerprints.delete()
+                % len(deployment_report.system_fingerprints().all()))
+            deployment_report.system_fingerprints().all().delete()
+            deployment_report.save()
+
         try:
             message, status = self._process_fact_collection(
                 manager_interrupt, fact_collection)
@@ -141,15 +160,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 return interrupt_message, interrupt_status
 
             if status == ScanTask.COMPLETED:
-                fact_collection.status = FactCollection.FC_STATUS_COMPLETE
+                deployment_report.status = DeploymentReport.STATUS_COMPLETE
             else:
-                fact_collection.status = FactCollection.FC_STATUS_FAILED
-            fact_collection.save()
+                deployment_report.status = DeploymentReport.STATUS_FAILED
+            deployment_report.save()
             return message, status
         except Exception as error:
             # Transition from persisted to failed after engine failed
-            fact_collection.status = FactCollection.FC_STATUS_FAILED
-            fact_collection.save()
+            deployment_report.status = DeploymentReport.STATUS_FAILED
+            deployment_report.save()
             error_message = 'Fact collection %d failed'\
                 ' to be processed.' % fact_collection.id
 
@@ -180,6 +199,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message('START FINGERPRINT PERSISTENCE')
         status_count = 0
         total_count = len(fingerprints_list)
+        deployment_report = fact_collection.deployment_report
+        # deployment_report_json = []
+        date_field = DateField()
+        final_fingerprint_list = []
         for fingerprint_dict in fingerprints_list:
             status_count += 1
             name = fingerprint_dict.get('name', 'unknown')
@@ -194,11 +217,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     manager_interrupt)
                 if interrupt_status != ScanTask.RUNNING:
                     return interrupt_message, interrupt_status
-
-            serializer = FingerprintSerializer(data=fingerprint_dict)
+            fingerprint_dict['deployment_report'] = deployment_report.id
+            serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
                 number_valid += 1
                 serializer.save()
+                fingerprint_dict.pop('deployment_report')
+                # Serialize the date
+                for field in SystemFingerprint.DATE_FIELDS:
+                    if fingerprint_dict.get(field, None):
+                        fingerprint_dict[field] = date_field.to_representation(
+                            fingerprint_dict.get(field))
+                final_fingerprint_list.append(fingerprint_dict)
             else:
                 number_invalid += 1
                 self.scan_task.log_message(
@@ -211,19 +241,31 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                        (fact_collection.id, fingerprint_dict),
                                        log_level=logging.DEBUG)
 
+        # Mark completed because engine has process raw facts
+        status = ScanTask.COMPLETED
+        status_message = 'success'
+        if final_fingerprint_list:
+            deployment_report.status = DeploymentReport.STATUS_COMPLETE
+        else:
+            status_message = 'FAILED to create report id=%d - '\
+                'produced no valid fingerprints ' % (
+                    deployment_report.report_id)
+            self.scan_task.log_message(status_message, log_level=logging.ERROR)
+            deployment_report.status = DeploymentReport.STATUS_FAILED
+            status = ScanTask.FAILED
+        deployment_report.cached_json = json.dumps(final_fingerprint_list)
+        deployment_report.save()
+
         self.scan_task.log_message('RESULTS (report id=%d) -  '
                                    '(valid fingerprints=%d, '
                                    'invalid fingerprints=%d)' %
-                                   (fact_collection.id,
+                                   (deployment_report.report_id,
                                     number_valid,
                                     number_invalid))
 
         self.scan_task.log_message('END FINGERPRINT PERSISTENCE')
 
-        # Mark completed because engine has process raw facts
-        fact_collection.status = FactCollection.FC_STATUS_COMPLETE
-        fact_collection.save()
-        return 'success', ScanTask.COMPLETED
+        return status_message, status
 
     def _process_sources(self, fact_collection):
         """Process facts and convert to fingerprints.
@@ -251,8 +293,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                            source_name,
                                            source_type,
                                            source.get('server_id')))
-            source_fingerprints = self._process_source(fact_collection.id,
-                                                       source)
+            source_fingerprints = self._process_source(source)
             if source_type == Source.NETWORK_SOURCE_TYPE:
                 network_fingerprints += source_fingerprints
             elif source_type == Source.VCENTER_SOURCE_TYPE:
@@ -443,11 +484,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fingerprint[META_DATA_KEY]['system_creation_date'] = \
                 system_creation_date_metadata
 
-    def _process_source(self, report_id, source):
+    def _process_source(self, source):
         """Process facts and convert to fingerprints.
 
-        :param report_id: id of report
-        associated with facts
         :param source: The JSON source information
         :returns: fingerprints produced from facts
         """
@@ -470,7 +509,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     source_type, log_level=logging.ERROR)
 
             if fingerprint is not None:
-                fingerprint['report_id'] = report_id
                 fingerprint[SOURCES_KEY] = \
                     {'%s+%s' % (server_id, source_name): {
                         'server_id': server_id,

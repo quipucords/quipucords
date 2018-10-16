@@ -115,6 +115,10 @@ class ScanJobRunner(Process):
                 self.scan_job.fail('No facts gathered from scan.')
                 return ScanTask.FAILED
 
+            # Associate fact collection with scan job
+            self.scan_job.fact_collection = fact_collection
+            self.scan_job.save()
+
             # Associate fact collection with fingerprint task
             fingerprint_task_runner.scan_task.fact_collection = fact_collection
             fingerprint_task_runner.scan_task.save()
@@ -128,7 +132,7 @@ class ScanJobRunner(Process):
                     log_level=logging.ERROR)
             else:
                 # Record results for successful tasks
-                self.scan_job.report_id = fact_collection.id
+                self.scan_job.report_id = fact_collection.deployment_report.id
                 self.scan_job.save()
                 self.scan_job.log_message('Report %d created.' %
                                           self.scan_job.report_id)
@@ -176,10 +180,11 @@ class ScanJobRunner(Process):
             context_message += 'See context below.\n'
             context_message += 'SCAN JOB: %s\n' % self.scan_job
             context_message += 'TASK: %s\n' % failed_task
-            context_message += 'SOURCE: %s\n' % failed_task.source
-            creds = [str(cred)
-                     for cred in failed_task.source.credentials.all()]
-            context_message += 'CREDENTIALS: [%s]' % creds
+            if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
+                context_message += 'SOURCE: %s\n' % failed_task.source
+                creds = [str(cred)
+                         for cred in failed_task.source.credentials.all()]
+                context_message += 'CREDENTIALS: [%s]' % creds
             failed_task.log_message(
                 context_message, log_level=logging.ERROR)
 

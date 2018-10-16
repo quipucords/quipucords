@@ -16,19 +16,18 @@ from api.common.serializer import (CustomJSONField,
 from api.models import FactCollection
 
 from rest_framework.serializers import (CharField,
-                                        ChoiceField)
+                                        IntegerField)
 
 
 class FactCollectionSerializer(NotEmptySerializer):
     """Serializer for the FactCollection model."""
 
     sources = CustomJSONField(required=True)
-    csv_content = CharField(required=False, read_only=True)
-    status = ChoiceField(
-        read_only=True, choices=FactCollection.FC_STATUS_CHOICES)
+    report_id = IntegerField(read_only=True)
+    cached_csv = CharField(required=False, read_only=True)
 
     class Meta:
         """Meta class for FactCollectionSerializer."""
 
         model = FactCollection
-        fields = '__all__'
+        exclude = ('id', 'deployment_report')

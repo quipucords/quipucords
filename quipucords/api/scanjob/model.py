@@ -19,7 +19,6 @@ from api import messages
 from api.connresult.model import (JobConnectionResult,
                                   TaskConnectionResult)
 from api.fact.model import FactCollection
-from api.fingerprint.model import SystemFingerprint
 from api.inspectresult.model import (JobInspectionResult,
                                      TaskInspectionResult)
 from api.scan.model import Scan, ScanOptions
@@ -195,11 +194,15 @@ class ScanJob(models.Model):
             systems_failed = inspect_systems_failed + connection_systems_failed
             systems_unreachable = \
                 inspect_systems_unreachable + connection_systems_unreachable
-
-        if self.report_id is not None:
-            system_fingerprint_count = \
-                SystemFingerprint.objects.filter(
-                    report_id=self.report_id).count()
+        self.refresh_from_db()
+        if self.report_id and \
+                self.fact_collection:
+            self.fact_collection.refresh_from_db()
+            if self.fact_collection.deployment_report:
+                # pylint: disable=no-member
+                system_fingerprint_count = \
+                    self.fact_collection.deployment_report.\
+                    system_fingerprints.count()
 
         return systems_count,\
             systems_scanned, \
@@ -304,9 +307,10 @@ class ScanJob(models.Model):
                 self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
-            if self.fact_collection is not None:
-                SystemFingerprint.objects.filter(
-                    report_id=self.fact_collection.id).delete()
+            if self.fact_collection and \
+                    self.fact_collection.deployment_report:
+                self.fact_collection.deployment_report.\
+                    system_fingerprints.delete()
 
         # Create tasks
         conn_tasks = self._create_connection_tasks()

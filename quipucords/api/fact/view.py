@@ -70,7 +70,12 @@ class FactViewSet(mixins.CreateModelMixin,
         runner.run()
 
         if scan_job.status != ScanTask.COMPLETED:
-            raise Exception(scan_job.status_message)
+            # pylint: disable=no-member
+            error_json = {
+                'error': scan_job.tasks.first().status_message
+            }
+            return Response(error_json,
+                            status=status.HTTP_400_BAD_REQUEST)
 
         scan_job = ScanJob.objects.get(pk=scan_job.id)
         fact_collection = FactCollection.objects.get(pk=fact_collection.id)

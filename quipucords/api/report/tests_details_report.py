@@ -92,9 +92,9 @@ class DetailReportTest(TestCase):
 
         response_json = self.create_expect_201(
             request_json)
-        identifier = response_json['id']
+        identifier = response_json['report_id']
         response_json = self.retrieve_expect_200(identifier)
-        self.assertEqual(response_json['id'], identifier)
+        self.assertEqual(response_json['report_id'], identifier)
 
     ##############################################################
     # Test CSV Renderer
@@ -134,8 +134,9 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
+        fact_collection = FactCollection.objects.get(
+            report_id=response_json['report_id'])
+        fact_collection.cached_csv = None
         fact_collection.save()
 
         # Remove sources
@@ -146,8 +147,9 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
+        fact_collection = FactCollection.objects.get(
+            id=response_json['report_id'])
+        fact_collection.cached_csv = None
         fact_collection.save()
 
         # Remove sources
@@ -158,8 +160,9 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
+        fact_collection = FactCollection.objects.get(
+            report_id=response_json['report_id'])
+        fact_collection.cached_csv = None
         fact_collection.save()
 
         # Remove facts
