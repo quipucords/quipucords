@@ -111,8 +111,8 @@ class ReportDetailTests(unittest.TestCase):
                              json_dir=None)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_MERGED % '1')
+                self.assertIn(messages.DISPLAY_REPORT_ID % ('1', '1'),
+                              report_out.getvalue().strip())
 
     def test_detail_merge_error_job_ids(self):
         """Testing report merge error with scan job ids."""
@@ -160,7 +160,7 @@ class ReportDetailTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_MERGED % '1')
+                                 messages.DISPLAY_REPORT_ID % ('1', '1'))
 
     def test_detail_merge_error_report_ids(self):
         """Testing report merge error with report ids."""
@@ -197,7 +197,7 @@ class ReportDetailTests(unittest.TestCase):
                              report_ids=None)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                self.assertIn(messages.DISPLAY_REPORT_ID % ('1', '1'),
                               report_out.getvalue().strip())
 
     def test_detail_merge_json_files_not_exist(self):
@@ -246,7 +246,8 @@ class ReportDetailTests(unittest.TestCase):
         nac = ReportMergeCommand(SUBPARSER)
         args = Namespace(scan_job_ids=[1],
                          json_files=None,
-                         report_ids=None)
+                         report_ids=None,
+                         json_dir=None)
         with self.assertRaises(SystemExit):
             with redirect_stdout(report_out):
                 nac.main(args)
@@ -266,7 +267,7 @@ class ReportDetailTests(unittest.TestCase):
                              json_dir=['/tmp/'])
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                self.assertIn(messages.DISPLAY_REPORT_ID % ('1', '1'),
                               report_out.getvalue().strip())
 
     def test_detail_merge_json_directory_error_dir_not_found(self):

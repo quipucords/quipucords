@@ -225,7 +225,9 @@ class ReportMergeCommand(CliCommand):
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        print(_(messages.REPORT_SUCCESSFULLY_MERGED % json_data['id']))
+        if json_data.get('id'):
+            print(_(messages.DISPLAY_REPORT_ID % (json_data.get('id'),
+                                                  json_data.get('id'))))
 
     def _handle_response_error(self):
         json_data = self.response.json()
