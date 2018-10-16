@@ -1212,7 +1212,7 @@ definitions:
         report_id:
           type: "integer"
           format: "int64"
-          description: "The id associated with report"
+          description: "The deployment report identifier"
           example: 1
         status:
           type: "string"
