@@ -61,16 +61,16 @@ def build_sources_from_tasks(tasks):
     return sources
 
 
-def validate_fact_collection_json(fact_collection_json):
+def validate_details_report_json(details_report_json):
     """Validate details_report field.
 
-    :param fact_collection_json: dict representing a details report
+    :param details_report_json: dict representing a details report
     :returns: bool indicating if there are errors and dict with result.
     """
-    if not fact_collection_json.get(SOURCES_KEY):
+    if not details_report_json.get(SOURCES_KEY):
         return True, {SOURCES_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
 
-    return _validate_sources_json(fact_collection_json.get(SOURCES_KEY))
+    return _validate_sources_json(details_report_json.get(SOURCES_KEY))
 
 
 def _validate_sources_json(sources_json):
@@ -152,23 +152,23 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_fact_collection(json_fact_collection):
+def create_details_report(json_details_report):
     """Create details report.
 
     Fact collection consists of a DetailsReport record
-    :param json_fact_collection: dict representing a details report
+    :param json_details_report: dict representing a details report
     :returns: The newly created DetailsReport
     """
     # Create new details report
-    serializer = FactCollectionSerializer(data=json_fact_collection)
+    serializer = FactCollectionSerializer(data=json_details_report)
     if serializer.is_valid():
         details_report = serializer.save()
         logger.debug('Fact collection created: %s', details_report)
         return details_report
 
     logger.error('Fact collection could not be persisted.')
-    logger.error('Invalid json_fact_collection: %s',
-                 json_fact_collection)
+    logger.error('Invalid json_details_report: %s',
+                 json_details_report)
     logger.error('DetailsReport errors: %s', serializer.errors)
 
     return None

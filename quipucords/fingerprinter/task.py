@@ -149,7 +149,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.save()
 
         try:
-            message, status = self._process_fact_collection(
+            message, status = self._process_details_report(
                 manager_interrupt, details_report)
 
             interrupt_message, interrupt_status = self.check_for_interrupt(
@@ -176,7 +176,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
-    def _process_fact_collection(self, manager_interrupt, details_report):
+    def _process_details_report(self, manager_interrupt, details_report):
         """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled

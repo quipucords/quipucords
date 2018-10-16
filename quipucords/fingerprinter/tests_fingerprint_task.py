@@ -414,12 +414,12 @@ class EngineTest(TestCase):
 
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""
-        n_fact_collection = self._create_network_fc_json(*args, **kwargs)
-        nfact = n_fact_collection['facts'][0]
+        n_details_report = self._create_network_fc_json(*args, **kwargs)
+        nfact = n_details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
-                  'facts': n_fact_collection['facts']}
+                  'facts': n_details_report['facts']}
         nfingerprints = self.fp_task_runner._process_source(
             source)
         nfingerprint = nfingerprints[0]
@@ -429,12 +429,12 @@ class EngineTest(TestCase):
 
     def _create_vcenter_fingerprint(self, *args, **kwargs):
         """Create test network/vcenter fingerprints."""
-        v_fact_collection = self._create_vcenter_fc_json(*args, **kwargs)
-        vfact = v_fact_collection['facts'][0]
+        v_details_report = self._create_vcenter_fc_json(*args, **kwargs)
+        vfact = v_details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source2',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
-                  'facts': v_fact_collection['facts']}
+                  'facts': v_details_report['facts']}
         vfingerprints = self.fp_task_runner._process_source(
             source)
         vfingerprint = vfingerprints[0]
@@ -443,12 +443,12 @@ class EngineTest(TestCase):
 
     def _create_satellite_fingerprint(self, *args, **kwargs):
         """Create test network/vcenter fingerprints."""
-        s_fact_collection = self._create_satellite_fc_json(*args, **kwargs)
-        vfact = s_fact_collection['facts'][0]
+        s_details_report = self._create_satellite_fc_json(*args, **kwargs)
+        vfact = s_details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source3',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
-                  'facts': s_fact_collection['facts']}
+                  'facts': s_details_report['facts']}
         sfingerprints = self.fp_task_runner._process_source(
             source)
         sfingerprint = sfingerprints[0]

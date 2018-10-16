@@ -44,12 +44,12 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
     format = 'csv'
 
     def render(self,
-               fact_collection_dict,
+               details_report_dict,
                media_type=None,
                renderer_context=None):
         """Render detailed report as CSV."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        report_id = fact_collection_dict.get('report_id')
+        report_id = details_report_dict.get('report_id')
         if report_id is None:
             return None
 
@@ -71,7 +71,7 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
         details_report_csv_buffer = StringIO()
         csv_writer = csv.writer(details_report_csv_buffer, delimiter=',')
 
-        sources = fact_collection_dict.get('sources')
+        sources = details_report_dict.get('sources')
 
         csv_writer.writerow(['Report', 'Number Sources'])
         if sources is None:

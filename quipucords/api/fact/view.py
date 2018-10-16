@@ -14,8 +14,8 @@
 import logging
 import os
 
-from api.fact.util import (create_fact_collection,
-                           validate_fact_collection_json)
+from api.fact.util import (create_details_report,
+                           validate_details_report_json)
 from api.models import (DetailsReport,
                         ScanJob,
                         ScanTask)
@@ -54,14 +54,14 @@ class FactViewSet(mixins.CreateModelMixin,
         """Create a details report."""
         # pylint: disable=unused-argument
         # Validate incoming request body
-        has_errors, validation_result = validate_fact_collection_json(
+        has_errors, validation_result = validate_details_report_json(
             request.data)
         if has_errors:
             return Response(validation_result,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Create FC model and save data
-        details_report = create_fact_collection(request.data)
+        details_report = create_details_report(request.data)
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                            details_report=details_report)
         scan_job.save()
