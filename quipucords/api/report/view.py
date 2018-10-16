@@ -277,7 +277,7 @@ def sync_merge_reports(request):
     return Response(result, status=status.HTTP_201_CREATED)
 
 
-@api_view(['get', 'post'])
+@api_view(['get', 'put', 'post'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def async_merge_reports(request, pk=None):
@@ -289,6 +289,15 @@ def async_merge_reports(request, pk=None):
     # is POST
     if pk is not None:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    if request.method == 'PUT':
+        reports = validate_merge_report(request.data)
+        sources = []
+        for report in reports:
+            sources = sources + report.get_sources()
+
+        details_report_json = {'sources': sources}
+        return _create_async_merge_report_job(details_report_json)
 
     # Post is last case
     return _create_async_merge_report_job(request.data)

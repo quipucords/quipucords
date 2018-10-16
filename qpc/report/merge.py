@@ -49,7 +49,7 @@ class ReportMergeCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PUT,
-                            report.SYNC_MERGE_URI, [codes.created])
+                            report.ASYNC_MERGE_URI, [codes.created])
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--job-ids', dest='scan_job_ids', nargs='+',
                            metavar='SCAN_JOB_IDS', default=[],
@@ -66,7 +66,7 @@ class ReportMergeCommand(CliCommand):
         self.report_ids = None
 
     @staticmethod
-    def get_id_and_sources(filename):
+    def sources(filename):
         """Return the sources and id from a valid json details report file.
 
         :param filename: the filename to read
@@ -79,16 +79,12 @@ class ReportMergeCommand(CliCommand):
             try:
                 with open(input_path, 'r') as in_file:
                     result = in_file.read()
-                    report_id = json.loads(result).get('id')
                     sources = json.loads(result).get('sources')
-                    if not report_id or not sources:
-                        print(_(messages.REPORT_INVALID_JSON_FILE % filename))
-                        sys.exit(1)
             except EnvironmentError as err:
                 err_msg = (messages.READ_FILE_ERROR % (input_path, err))
                 print(err_msg)
                 sys.exit(1)
-            return report_id, sources
+            return sources
         else:
             raise ValueError(_(messages.NOT_A_FILE % input_path))
 
@@ -145,7 +141,7 @@ class ReportMergeCommand(CliCommand):
                 if not error:
                     print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
                     try:
-                        report_id, sources = self.get_id_and_sources(file)
+                        sources = self.sources(file)
                         all_sources += sources
                     except ValueError:
                         print(_(messages.REPORT_INVALID_JSON_FILE % file))
@@ -215,10 +211,10 @@ class ReportMergeCommand(CliCommand):
         :returns: a dictionary representing the jobs to merge
         """
         if self.args.json_files or self.args.json_dir:
-            self.req_path = report.ASYNC_MERGE_URI
             self.req_method = POST
             self.req_payload = self.json
         else:
+            self.req_method = PUT
             self.req_payload = {
                 'reports': self.report_ids,
             }
@@ -226,8 +222,9 @@ class ReportMergeCommand(CliCommand):
     def _handle_response_success(self):
         json_data = self.response.json()
         if json_data.get('id'):
-            print(_(messages.DISPLAY_REPORT_ID % (json_data.get('id'),
-                                                  json_data.get('id'))))
+            print(_(messages.REPORT_SUCCESSFULLY_MERGED % (
+                json_data.get('id'),
+                json_data.get('id'))))
 
     def _handle_response_error(self):
         json_data = self.response.json()
