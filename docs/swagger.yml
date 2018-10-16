@@ -916,7 +916,7 @@ paths:
         200:
           description: "Detailed report successfully retrieved"
           schema:
-            $ref: "#/definitions/DetailsReport"
+            $ref: "#/definitions/DetailsReportOut"
         401:
           description: "Not authorized"
         404:
@@ -969,7 +969,7 @@ paths:
         201:
           description: "Report results merged and details report created"
           schema:
-            $ref: "#/definitions/DetailsReport"
+            $ref: "#/definitions/DetailsReportOut"
         400:
           description: "Reports not merged due to invalid request"
         401:
@@ -1220,14 +1220,24 @@ definitions:
             - pending
             - complete
             - failed
-          description: "The status of creating report"
+          description: "The status of creating the report"
           example: complete
         system_fingerprints:
           type: "array"
           items:
             $ref: "#/definitions/SystemFingerprint"
           description: "The report for the systems that were scanned"
-  DetailsReport:
+  DetailsReportIn:
+    type: "object"
+    required:
+      - sources
+    properties:
+        sources:
+          type: "array"
+          items:
+            $ref: "#/definitions/DetailsReportSource"
+          minItems: 1
+  DetailsReportOut:
     type: "object"
     required:
       - report_id
@@ -1238,16 +1248,6 @@ definitions:
           format: "int64"
           description: "The details report identifier"
           example: 15
-        sources:
-          type: "array"
-          items:
-            $ref: "#/definitions/DetailsReportSource"
-          minItems: 1
-  DetailsReportIn:
-    type: "object"
-    required:
-      - sources
-    properties:
         sources:
           type: "array"
           items:
