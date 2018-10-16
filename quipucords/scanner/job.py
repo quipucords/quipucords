@@ -108,18 +108,18 @@ class ScanJobRunner(Process):
             details_report = fingerprint_task_runner.scan_task.details_report
 
             if not details_report:
-                # Create the fact collection
+                # Create the details report
                 details_report = self._create_fact_collection()
 
             if not details_report:
                 self.scan_job.fail('No facts gathered from scan.')
                 return ScanTask.FAILED
 
-            # Associate fact collection with scan job
+            # Associate details report with scan job
             self.scan_job.details_report = details_report
             self.scan_job.save()
 
-            # Associate fact collection with fingerprint task
+            # Associate details report with fingerprint task
             fingerprint_task_runner.scan_task.details_report = details_report
             fingerprint_task_runner.scan_task.save()
             task_status = self._run_task(fingerprint_task_runner)
@@ -258,7 +258,7 @@ class ScanJobRunner(Process):
                 fact_collection_json)
 
             if has_errors:
-                message = 'Scan producted invalid fact collection JSON: %s' % \
+                message = 'Scan producted invalid details report JSON: %s' % \
                     validation_result
                 self.scan_job.fail(message)
                 return ScanTask.FAILED

@@ -51,7 +51,7 @@ class FactViewSet(mixins.CreateModelMixin,
     serializer_class = FactCollectionSerializer
 
     def create(self, request, *args, **kwargs):
-        """Create a fact collection."""
+        """Create a details report."""
         # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_fact_collection_json(

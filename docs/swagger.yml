@@ -967,7 +967,7 @@ paths:
           $ref: "#/definitions/ReportMergeSync"
       responses:
         201:
-          description: "Report results merged and fact collection created"
+          description: "Report results merged and details report created"
           schema:
             $ref: "#/definitions/DetailsReport"
         400:
@@ -1212,7 +1212,7 @@ definitions:
         report_id:
           type: "integer"
           format: "int64"
-          description: "The id associate with report"
+          description: "The id associated with report"
           example: 1
         status:
           type: "string"
@@ -1236,7 +1236,7 @@ definitions:
         report_id:
           type: "integer"
           format: "int64"
-          description: "The fact collection identifier"
+          description: "The details report identifier"
           example: 15
         sources:
           type: "array"
@@ -1627,7 +1627,7 @@ definitions:
           report_id:
             type: "integer"
             format: "int64"
-            description: "The fact collection identifier"
+            description: "The details report identifier"
             example: 2
   ScanJobPagination:
     allOf:

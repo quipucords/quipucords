@@ -64,7 +64,7 @@ def build_sources_from_tasks(tasks):
 def validate_fact_collection_json(fact_collection_json):
     """Validate details_report field.
 
-    :param fact_collection_json: dict representing a fact collection
+    :param fact_collection_json: dict representing a details report
     :returns: bool indicating if there are errors and dict with result.
     """
     if not fact_collection_json.get(SOURCES_KEY):
@@ -153,13 +153,13 @@ def _validate_source_json(source_json):
 
 
 def create_fact_collection(json_fact_collection):
-    """Create fact collection.
+    """Create details report.
 
     Fact collection consists of a DetailsReport record
-    :param json_fact_collection: dict representing a fact collection
+    :param json_fact_collection: dict representing a details report
     :returns: The newly created DetailsReport
     """
-    # Create new fact collection
+    # Create new details report
     serializer = FactCollectionSerializer(data=json_fact_collection)
     if serializer.is_valid():
         details_report = serializer.save()

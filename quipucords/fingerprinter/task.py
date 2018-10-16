@@ -96,7 +96,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task = scan_task
 
     def check_for_interrupt(self, manager_interrupt):
-        """Process the fact collection.
+        """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
         :return status, message indicating if shutdown should occur.
@@ -131,13 +131,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report = DeploymentsReport()
             deployment_report.save()
 
-            # Set the report ids.  Right now they are deployemnt report id
+            # Set the report ids.  Right now they are deployment report id
             # but they do not have to
             deployment_report.report_id = deployment_report.id
             deployment_report.save()
 
-            # Set the report ids.  Right now they are deployemnt report id
-            # but they do not have to
             details_report.deployment_report = deployment_report
             details_report.report_id = deployment_report.id
             details_report.save()
@@ -179,7 +177,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             raise error
 
     def _process_fact_collection(self, manager_interrupt, details_report):
-        """Process the fact collection.
+        """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
         :param details_report: DetailsReport that was saved
@@ -200,7 +198,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         status_count = 0
         total_count = len(fingerprints_list)
         deployment_report = details_report.deployment_report
-        # deployment_report_json = []
         date_field = DateField()
         final_fingerprint_list = []
         for fingerprint_dict in fingerprints_list:
