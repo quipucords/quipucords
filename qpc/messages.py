@@ -274,3 +274,16 @@ LOGIN_SUCCESS = 'Login successful.'
 LOGOUT_SUCCESS = 'Logged out.'
 
 NEXT_RESULTS = 'Press enter to see the next set of results.'
+# BAD_INSIGHTS_INSTALL = 'Error: Insights is either not installed '\
+#     'or configured correctly.\nCommand: %s \nResult: %s'
+CHECKING_INSIGHTS = 'Checking if insights is installed and configured with ' \
+    'command "%s"'
+BAD_INSIGHTS_CHECK = 'Check failed. Information from insights: \n %s'
+GOOD_INSIGHTS_CHECK = 'Success. Insights is installed and configured.'
+UPLOADING_REPORT_INSIGHTS = \
+    'Uploading the QPC report to Insights with command "%s"'
+GOOD_INSIGHTS_UPLOAD = 'Report Successfully uploaded.'\
+    ' Information from insights:\n %s'
+BAD_INSIGHTS_UPLOAD = 'Report Upload Failed.'\
+    ' Information from insights:\n %s'
+INSIGHTS_REPORT_NOT_FOUND = 'No report could be found for report id: %s'
