@@ -11,7 +11,7 @@
 """Admin module for Django server application."""
 
 from api.models import (Credential,
-                        FactCollection,
+                        DetailsReport,
                         JobConnectionResult,
                         JobInspectionResult,
                         Scan,
@@ -23,7 +23,7 @@ from api.models import (Credential,
 from django.contrib import admin
 
 admin.site.register(ServerInformation)
-admin.site.register(FactCollection)
+admin.site.register(DetailsReport)
 admin.site.register(Credential)
 admin.site.register(Source)
 admin.site.register(SystemFingerprint)

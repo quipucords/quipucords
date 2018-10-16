@@ -33,8 +33,6 @@ tags:
   description: "API related to the Scan Job model"
 - name: "Report"
   description: "API related to the Report model"
-- name: "Fact"
-  description: "API related to the Fact model"
 - name: "User"
   description: "API related to the User model"
 - name: "Status"
@@ -918,7 +916,7 @@ paths:
         200:
           description: "Detailed report successfully retrieved"
           schema:
-            $ref: "#/definitions/FactCollectionOut"
+            $ref: "#/definitions/DetailsReportOut"
         401:
           description: "Not authorized"
         404:
@@ -946,7 +944,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/SystemReportOut"
+              $ref: "#/definitions/DeploymentsReport"
         401:
           description: "Not authorized"
         404:
@@ -969,9 +967,9 @@ paths:
           $ref: "#/definitions/ReportMergeSync"
       responses:
         201:
-          description: "Report results merged and fact collection created"
+          description: "Report results merged and details report created"
           schema:
-            $ref: "#/definitions/FactCollectionOut"
+            $ref: "#/definitions/DetailsReportOut"
         400:
           description: "Reports not merged due to invalid request"
         401:
@@ -991,7 +989,7 @@ paths:
         description: "Reports json to combine"
         required: true
         schema:
-          $ref: "#/definitions/FactCollectionIn"
+          $ref: "#/definitions/DetailsReportIn"
       responses:
         201:
           description: "Job to track results of merge report operation."
@@ -1209,7 +1207,27 @@ definitions:
         type: "string"
         description: "Deletion error message"
         example: "Failed to delete"
-  FactCollectionIn:
+  DeploymentsReport:
+    properties:
+        report_id:
+          type: "integer"
+          format: "int64"
+          description: "The deployment report identifier"
+          example: 1
+        status:
+          type: "string"
+          enum:
+            - pending
+            - complete
+            - failed
+          description: "The status of creating the report"
+          example: complete
+        system_fingerprints:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemFingerprint"
+          description: "The report for the systems that were scanned"
+  DetailsReportIn:
     type: "object"
     required:
       - sources
@@ -1217,25 +1235,25 @@ definitions:
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/FactCollectionSource"
+            $ref: "#/definitions/DetailsReportSource"
           minItems: 1
-  FactCollectionOut:
+  DetailsReportOut:
     type: "object"
     required:
-      - id
+      - report_id
       - sources
     properties:
-        id:
+        report_id:
           type: "integer"
           format: "int64"
-          description: "The fact collection identifier"
+          description: "The details report identifier"
           example: 15
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/FactCollectionSource"
+            $ref: "#/definitions/DetailsReportSource"
           minItems: 1
-  FactCollectionSource:
+  DetailsReportSource:
     type: "object"
     required:
       - server_id
@@ -1609,7 +1627,7 @@ definitions:
           report_id:
             type: "integer"
             format: "int64"
-            description: "The fact collection identifier"
+            description: "The details report identifier"
             example: 2
   ScanJobPagination:
     allOf:
@@ -2064,56 +2082,7 @@ definitions:
           type: "string"
           description: "The original fact name where this fact originated"
           example: "jboss_eap_packages"
-  SystemInspectResultOut:
-    type: "object"
-    required:
-      - name
-      - status
-      - source
-      - facts
-    properties:
-      name:
-        type: "string"
-        description: "The name of the system (ip, hostname, etc.)"
-        example: "192.168.0.1"
-      status:
-        type: "string"
-        description: "The status of the system inspection"
-        enum:
-          - success
-          - unreachable
-          - failed
-      source:
-        $ref: "#/definitions/SourceMin"
-      facts:
-        type: "array"
-        items:
-          $ref: "#/definitions/RawFactsOut"
-        description: "The raw facts collected from the system"
-  SystemProducts:
-    type: "object"
-    properties:
-        name:
-          type: "string"
-          description: "The product name"
-          example: "JBoss EAP"
-        presence:
-          type: "string"
-          enum:
-            - present
-            - absent
-            - unknown
-        version:
-          type: "array"
-          items:
-            type: string
-            description: "The product version"
-            example: "EAP-7.0"
-        metadata:
-          type: "array"
-          items:
-            $ref: "#/definitions/SystemFactMetadata"
-  SystemReportSource:
+  SystemFingerprintSource:
     type: "object"
     properties:
         server_id:
@@ -2128,7 +2097,7 @@ definitions:
           type: "string"
           description: "The type of source where this fact originated"
           example: "network"
-  SystemReport:
+  SystemFingerprint:
     type: "object"
     properties:
         id:
@@ -2271,24 +2240,61 @@ definitions:
         sources:
           type: "array"
           items:
-            $ref: "#/definitions/SystemReportSource"
+            $ref: "#/definitions/SystemFingerprintSource"
         system_last_checkin_date:
             type: "string"
             format: "date"
             description: "Last time the system was seen.  For VCenter sources, this is the last time the system was powered on.  For Satellite sources, this is the last time the system satellite agent reportd.  For network sources, this is the last time the system was scanned."
             example: "183.pem"
-  SystemReportOut:
+  SystemInspectResultOut:
+    type: "object"
+    required:
+      - name
+      - status
+      - source
+      - facts
     properties:
-        report_id:
-          type: "integer"
-          format: "int64"
-          description: "The fact collection id associate with report"
-          example: 1
-        report:
+      name:
+        type: "string"
+        description: "The name of the system (ip, hostname, etc.)"
+        example: "192.168.0.1"
+      status:
+        type: "string"
+        description: "The status of the system inspection"
+        enum:
+          - success
+          - unreachable
+          - failed
+      source:
+        $ref: "#/definitions/SourceMin"
+      facts:
+        type: "array"
+        items:
+          $ref: "#/definitions/RawFactsOut"
+        description: "The raw facts collected from the system"
+  SystemProducts:
+    type: "object"
+    properties:
+        name:
+          type: "string"
+          description: "The product name"
+          example: "JBoss EAP"
+        presence:
+          type: "string"
+          enum:
+            - present
+            - absent
+            - unknown
+        version:
           type: "array"
           items:
-            $ref: "#/definitions/SystemReport"
-          description: "The report for the systems that were scanned"
+            type: string
+            description: "The product version"
+            example: "EAP-7.0"
+        metadata:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemFactMetadata"
   User:
     type: "object"
     required:

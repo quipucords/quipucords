@@ -15,7 +15,7 @@ import logging
 from io import StringIO
 
 from api.common.util import CSVHelper
-from api.models import (FactCollection,
+from api.models import (DeploymentsReport, DetailsReport,
                         Source)
 
 from rest_framework import renderers
@@ -49,35 +49,34 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
                renderer_context=None):
         """Render detailed report as CSV."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
-
-        report_id = fact_collection_dict.get('id')
+        report_id = fact_collection_dict.get('report_id')
         if report_id is None:
             return None
 
-        fact_collection = FactCollection.objects.filter(
-            id=report_id).first()
-        if fact_collection is None:
+        details_report = DetailsReport.objects.filter(
+            report_id=report_id).first()
+        if details_report is None:
             return None
 
         # Check for a cached copy of csv
-        csv_content = fact_collection.csv_content
-        if csv_content:
-            logger.debug('Using cached csv results for fact collection %d',
-                         report_id)
-            return csv_content
-        logger.debug('No cached csv results for fact collection %d',
-                     report_id)
+        cached_csv = details_report.cached_csv
+        if cached_csv:
+            logger.info('Using cached csv results for details report %d',
+                        report_id)
+            return cached_csv
+        logger.info('No cached csv results for details report %d',
+                    report_id)
 
         csv_helper = CSVHelper()
-        fact_collection_dict_buffer = StringIO()
-        csv_writer = csv.writer(fact_collection_dict_buffer, delimiter=',')
+        details_report_csv_buffer = StringIO()
+        csv_writer = csv.writer(details_report_csv_buffer, delimiter=',')
 
         sources = fact_collection_dict.get('sources')
 
         csv_writer.writerow(['Report', 'Number Sources'])
         if sources is None:
             csv_writer.writerow([report_id, 0])
-            return fact_collection_dict_buffer.getvalue()
+            return details_report_csv_buffer.getvalue()
 
         csv_writer.writerow([report_id, len(sources)])
         csv_writer.writerow([])
@@ -113,12 +112,13 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
             csv_writer.writerow([])
             csv_writer.writerow([])
 
-        logger.debug('Caching csv results for fact collection %d',
-                     report_id)
-        csv_content = fact_collection_dict_buffer.getvalue()
-        fact_collection.csv_content = csv_content
-        fact_collection.save()
-        return csv_content
+        logger.info('Caching csv results for details report %d',
+                    report_id)
+        cached_csv = details_report_csv_buffer.getvalue()
+        details_report.cached_csv = cached_csv
+        details_report.save()
+
+        return cached_csv
 
 
 class DeploymentCSVRenderer(renderers.BaseRenderer):
@@ -139,16 +139,34 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                renderer_context=None):
         """Render deployment report as CSV."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
+        # pylint: disable=too-many-branches
 
         if not bool(report_dict):
             return None
 
-        csv_helper = CSVHelper()
-        report_buffer = StringIO()
-        csv_writer = csv.writer(report_buffer, delimiter=',')
-
         report_id = report_dict.get('report_id')
-        systems_list = report_dict.get('report')
+        if report_id is None:
+            return None
+
+        deployment_report = DeploymentsReport.objects.filter(
+            report_id=report_id).first()
+        if deployment_report is None:
+            return None
+
+        # Check for a cached copy of csv
+        cached_csv = deployment_report.cached_csv
+        if cached_csv:
+            logger.info('Using cached csv results for deployment report %d',
+                        report_id)
+            return cached_csv
+        logger.info('No cached csv results for deployment report %d',
+                    report_id)
+
+        csv_helper = CSVHelper()
+        deployment_report_buffer = StringIO()
+        csv_writer = csv.writer(deployment_report_buffer, delimiter=',')
+
+        systems_list = report_dict.get('system_fingerprints')
 
         csv_writer.writerow(['Report'])
         csv_writer.writerow([report_id])
@@ -189,9 +207,12 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
             csv_writer.writerow(sanitize_row(row))
 
         csv_writer.writerow([])
+        logger.info('Caching csv results for deployment report %d', report_id)
+        cached_csv = deployment_report_buffer.getvalue()
+        deployment_report.cached_csv = cached_csv
+        deployment_report.save()
 
-        csv_content = report_buffer.getvalue()
-        return csv_content
+        return cached_csv
 
     @staticmethod
     def _compute_source_info(sources):

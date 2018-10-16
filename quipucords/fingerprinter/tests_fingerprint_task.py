@@ -86,7 +86,7 @@ class EngineTest(TestCase):
             redhat_certs='fake certs',
             redhat_package_count=100,
             architecture='x86_64'):
-        """Create an in memory FactCollection for tests."""
+        """Create an in memory DetailsReport for tests."""
         # pylint: disable=too-many-statements
         fact = {}
         if source_name:
@@ -158,8 +158,8 @@ class EngineTest(TestCase):
         if architecture:
             fact['uname_processor'] = architecture
 
-        fact_collection = {'id': report_id, 'facts': [fact]}
-        return fact_collection
+        details_report = {'id': report_id, 'facts': [fact]}
+        return details_report
 
     def _create_vcenter_fc_json(
             self,
@@ -180,7 +180,7 @@ class EngineTest(TestCase):
             vm_cluster='23sd',
             architecture='x86_64',
             is_redhat=True):
-        """Create an in memory FactCollection for tests."""
+        """Create an in memory DetailsReport for tests."""
         fact = {}
         if source_name:
             fact['source_name'] = source_name
@@ -223,8 +223,8 @@ class EngineTest(TestCase):
         if 'red hat enterprise linux' in vm_os.lower() or \
                 'rhel' in vm_os.lower():
             fact['is_redhat'] = is_redhat
-        fact_collection = {'id': report_id, 'facts': [fact]}
-        return fact_collection
+        details_report = {'id': report_id, 'facts': [fact]}
+        return details_report
 
     def _create_satellite_fc_json(
             self,
@@ -247,7 +247,7 @@ class EngineTest(TestCase):
             entitlements=SAT_ENTITLEMENTS,
             architecture='x86_64',
             is_redhat=True):
-        """Create an in memory FactCollection for tests."""
+        """Create an in memory DetailsReport for tests."""
         fact = {}
         if source_name:
             fact['source_name'] = source_name
@@ -296,8 +296,8 @@ class EngineTest(TestCase):
                 'rhel' in os_name.lower():
             fact['is_redhat'] = is_redhat
 
-        fact_collection = {'id': report_id, 'facts': [fact]}
-        return fact_collection
+        details_report = {'id': report_id, 'facts': [fact]}
+        return details_report
 
     def _validate_network_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -421,7 +421,6 @@ class EngineTest(TestCase):
                   'source_type': Source.NETWORK_SOURCE_TYPE,
                   'facts': n_fact_collection['facts']}
         nfingerprints = self.fp_task_runner._process_source(
-            n_fact_collection['id'],
             source)
         nfingerprint = nfingerprints[0]
         self._validate_network_result(nfingerprint, nfact)
@@ -437,7 +436,6 @@ class EngineTest(TestCase):
                   'source_type': Source.VCENTER_SOURCE_TYPE,
                   'facts': v_fact_collection['facts']}
         vfingerprints = self.fp_task_runner._process_source(
-            v_fact_collection['id'],
             source)
         vfingerprint = vfingerprints[0]
         self._validate_vcenter_result(vfingerprint, vfact)
@@ -452,7 +450,6 @@ class EngineTest(TestCase):
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
                   'facts': s_fact_collection['facts']}
         sfingerprints = self.fp_task_runner._process_source(
-            s_fact_collection['id'],
             source)
         sfingerprint = sfingerprints[0]
         self._validate_satellite_result(sfingerprint, vfact)
@@ -463,42 +460,39 @@ class EngineTest(TestCase):
     ################################################################
     def test_process_network_source(self):
         """Test process network source."""
-        fact_collection = self._create_network_fc_json()
-        fact = fact_collection['facts'][0]
+        details_report = self._create_network_fc_json()
+        fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
                   'source_type': Source.NETWORK_SOURCE_TYPE,
-                  'facts': fact_collection['facts']}
+                  'facts': details_report['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_network_result(fingerprint, fact)
 
     def test_process_vcenter_source(self):
         """Test process vcenter source."""
-        fact_collection = self._create_vcenter_fc_json()
-        fact = fact_collection['facts'][0]
+        details_report = self._create_vcenter_fc_json()
+        fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
                   'source_type': Source.VCENTER_SOURCE_TYPE,
-                  'facts': fact_collection['facts']}
+                  'facts': details_report['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_vcenter_result(fingerprint, fact)
 
     def test_process_satellite_source(self):
         """Test process satellite source."""
-        fact_collection = self._create_satellite_fc_json()
-        fact = fact_collection['facts'][0]
+        details_report = self._create_satellite_fc_json()
+        fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
                   'source_type': Source.SATELLITE_SOURCE_TYPE,
-                  'facts': fact_collection['facts']}
+                  'facts': details_report['facts']}
         fingerprints = self.fp_task_runner._process_source(
-            fact_collection['id'],
             source)
         fingerprint = fingerprints[0]
         self._validate_satellite_result(fingerprint, fact)

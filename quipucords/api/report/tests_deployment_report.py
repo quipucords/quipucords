@@ -65,10 +65,19 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
+    def create_fact_collection_expect_400(self, data):
+        """Create a source, return the response as a dict."""
+        response = self.create_fact_collection(data)
+        if response.status_code != status.HTTP_400_BAD_REQUEST:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        return response.json()
+
     def generate_fingerprints(self,
                               os_name='RHEL',
                               os_versions=None):
-        """Create a FactCollection for test."""
+        """Create a DetailsReport for test."""
         facts = []
         fc_json = {'sources': [{'server_id': self.server_id,
                                 'source_name': self.net_source.name,
@@ -104,8 +113,8 @@ class DeploymentReportTest(TestCase):
                 'virt_what_type': 'vt'
             }
             facts.append(fact_json)
-        fact_collection = self.create_fact_collection_expect_201(fc_json)
-        return fact_collection
+        details_report = self.create_fact_collection_expect_201(fc_json)
+        return details_report
 
     def test_get_fact_collection_group_report_count(self):
         """Get a specific group count report."""
@@ -121,8 +130,8 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(report['report'][0]['count'], 2)
-        self.assertEqual(report['report'][1]['count'], 1)
+        self.assertEqual(report['system_fingerprints'][0]['count'], 2)
+        self.assertEqual(report['system_fingerprints'][1]['count'], 1)
 
     def test_get_fact_collection_group_report(self):
         """Get a specific group count report."""
@@ -137,7 +146,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['report'][0].keys()), 32)
+        self.assertEqual(len(report['system_fingerprints'][0].keys()), 14)
 
     def test_get_fact_collection_filter_report(self):
         """Get a specific group count report with filter."""
@@ -156,7 +165,7 @@ class DeploymentReportTest(TestCase):
         self.assertIsInstance(report, dict)
         expected = [{'os_name': 'RHEL', 'os_release': 'RHEL 7.4'},
                     {'os_name': 'RHEL', 'os_release': 'RHEL 7.5'}]
-        diff = [x for x in expected if x not in report['report']]
+        diff = [x for x in expected if x not in report['system_fingerprints']]
         self.assertEqual(diff, [])
 
     def test_get_fact_collection_404(self):
@@ -172,7 +181,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_bad_deployment_report(self):
-        """Test case where FactCollection exists but no fingerprint."""
+        """Test case where DetailsReport exists but no fingerprint."""
         url = '/api/v1/reports/1/deployments/'
 
         # Create a system fingerprint via collection receiver
@@ -186,7 +195,7 @@ class DeploymentReportTest(TestCase):
             'cpu_core_count': 'cat',
         }
         facts.append(fact_json)
-        self.create_fact_collection_expect_201(fc_json)
+        self.create_fact_collection_expect_400(fc_json)
 
         # Query API
         response = self.client.get(url)
@@ -272,13 +281,13 @@ class DeploymentReportTest(TestCase):
 
         csv_result = renderer.render(report)
         # pylint: disable=line-too-long
-        data_rows = [",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+        data_rows = ["2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.4,7.4,[test_source],2017-07-18,vmware",  # noqa
                      # pylint: disable=line-too-long
-                     ",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+                     "2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.4,7.4,[test_source],2017-07-18,vmware",  # noqa
                      # pylint: disable=line-too-long
-                     ",,2.0,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,vmware,,,,,,,",  # noqa
+                     "2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.5,7.5,[test_source],2017-07-18,vmware",  # noqa
                      # pylint: disable=line-too-long
-                     "architecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid"]  # noqa
+                     "cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,jboss brms,jboss eap,jboss fuse,jboss web server,name,os_name,os_release,os_version,sources,system_creation_date,virtualized_type"]  # noqa
         for row in data_rows:
             result = row in csv_result
             self.assertEqual(result, True)
