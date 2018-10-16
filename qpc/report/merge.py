@@ -49,7 +49,7 @@ class ReportMergeCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PUT,
-                            report.MERGE_URI, [codes.created])
+                            report.SYNC_MERGE_URI, [codes.created])
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--job-ids', dest='scan_job_ids', nargs='+',
                            metavar='SCAN_JOB_IDS', default=[],
@@ -215,7 +215,7 @@ class ReportMergeCommand(CliCommand):
         :returns: a dictionary representing the jobs to merge
         """
         if self.args.json_files or self.args.json_dir:
-            self.req_path = report.MERGE_URI
+            self.req_path = report.ASYNC_MERGE_URI
             self.req_method = POST
             self.req_payload = self.json
         else:

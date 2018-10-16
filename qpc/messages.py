@@ -234,8 +234,8 @@ SSH_PASSPHRASE = 'Provide a passphrase for the SSH keyfile.'
 BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
     'running a network scan.'
 
-JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
-JOB_ID_STATUS = 'Job id: %s status is %s'
+MERGE_JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
+MERGE_JOB_ID_STATUS = 'Job id: %s status is %s'
 DISPLAY_REPORT_ID = \
     'Created merge report with id: "%s". To view, run qpc report' \
     ' summary --report "%s" --csv'
