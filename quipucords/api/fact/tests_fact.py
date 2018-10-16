@@ -14,7 +14,7 @@ import json
 
 from api import messages
 from api.models import (Credential,
-                        FactCollection,
+                        DetailsReport,
                         ServerInformation,
                         Source)
 
@@ -25,7 +25,7 @@ from rest_framework import status
 
 
 class FactCollectionTest(TestCase):
-    """Tests against the FactCollection model and view set."""
+    """Tests against the DetailsReport model and view set."""
 
     # pylint: disable=no-self-use,too-many-arguments,invalid-name
     # pylint: disable=too-many-locals,too-many-branches
@@ -101,7 +101,7 @@ class FactCollectionTest(TestCase):
         self.assertEqual(
             response_json['sources'],
             request_json['sources'])
-        self.assertEqual(FactCollection.objects.count(), 1)
+        self.assertEqual(DetailsReport.objects.count(), 1)
 
     def test_missing_sources(self):
         """Test missing sources attribute."""

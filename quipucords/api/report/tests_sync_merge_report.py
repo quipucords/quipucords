@@ -176,7 +176,7 @@ class SyncMergeReports(TestCase):
         self.assertEqual(
             response_json['sources'],
             sources1)
-        report1_id = response_json['id']
+        report1_id = response_json['report_id']
 
         request_json = {'sources': sources2}
         response = self.client.post(url,
@@ -188,7 +188,7 @@ class SyncMergeReports(TestCase):
         self.assertEqual(
             response_json['sources'],
             sources2)
-        report2_id = response_json['id']
+        report2_id = response_json['report_id']
 
         url = '/api/v1/reports/merge/'
         data = {'reports': [report1_id, report2_id]}
@@ -199,7 +199,7 @@ class SyncMergeReports(TestCase):
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
-        expected = {'id': 3,
+        expected = {'report_id': 3,
                     'sources': [
                         {'server_id': 'abc',
                          'source_name': 'another_name',
@@ -208,8 +208,7 @@ class SyncMergeReports(TestCase):
                         {'server_id': self.server_id,
                          'source_name': 'test_source',
                          'source_type': 'network',
-                         'facts': [{'key1': 'value1'}]}],
-                    'status': 'complete'}
+                         'facts': [{'key1': 'value1'}]}]}
 
         self.assertEqual(
             json_response, expected)

@@ -16,7 +16,7 @@ import os
 
 from api.fact.util import (create_fact_collection,
                            validate_fact_collection_json)
-from api.models import (FactCollection,
+from api.models import (DetailsReport,
                         ScanJob,
                         ScanTask)
 from api.serializers import FactCollectionSerializer
@@ -47,11 +47,11 @@ class FactViewSet(mixins.CreateModelMixin,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
-    queryset = FactCollection.objects.all()
+    queryset = DetailsReport.objects.all()
     serializer_class = FactCollectionSerializer
 
     def create(self, request, *args, **kwargs):
-        """Create a fact collection."""
+        """Create a details report."""
         # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_fact_collection_json(
@@ -61,21 +61,26 @@ class FactViewSet(mixins.CreateModelMixin,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Create FC model and save data
-        fact_collection = create_fact_collection(request.data)
+        details_report = create_fact_collection(request.data)
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                           fact_collection=fact_collection)
+                           details_report=details_report)
         scan_job.save()
         scan_job.queue()
         runner = ScanJobRunner(scan_job)
         runner.run()
 
         if scan_job.status != ScanTask.COMPLETED:
-            raise Exception(scan_job.status_message)
+            # pylint: disable=no-member
+            error_json = {
+                'error': scan_job.tasks.first().status_message
+            }
+            return Response(error_json,
+                            status=status.HTTP_400_BAD_REQUEST)
 
         scan_job = ScanJob.objects.get(pk=scan_job.id)
-        fact_collection = FactCollection.objects.get(pk=fact_collection.id)
+        details_report = DetailsReport.objects.get(pk=details_report.id)
 
         # Prepare REST response body
-        serializer = self.get_serializer(fact_collection)
+        serializer = self.get_serializer(details_report)
         result = serializer.data
         return Response(result, status=status.HTTP_201_CREATED)

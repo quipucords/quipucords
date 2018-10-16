@@ -10,6 +10,7 @@
 #
 
 """View for system reports."""
+import json
 import logging
 import os
 
@@ -17,13 +18,12 @@ import api.messages as messages
 from api.common.util import is_int
 from api.fact.util import (create_fact_collection,
                            validate_fact_collection_json)
-from api.models import (FactCollection,
+from api.models import (DeploymentsReport,
+                        DetailsReport,
                         ScanJob,
-                        ScanTask,
-                        SystemFingerprint)
+                        ScanTask)
 from api.report.cvs_renderer import DeploymentCSVRenderer, DetailsCSVRenderer
 from api.serializers import (FactCollectionSerializer,
-                             FingerprintSerializer,
                              ScanJobSerializer)
 from api.signal.scanjob_signal import (start_scan)
 
@@ -77,13 +77,12 @@ def details(request, pk=None):
                 'report_id': [_(messages.COMMON_ID_INV)]
             }
             raise ValidationError(error)
-    detail_data = get_object_or_404(FactCollection.objects.all(), pk=pk)
+    detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = FactCollectionSerializer(detail_data)
     json_details = serializer.data
     http_accept = request.META.get('HTTP_ACCEPT')
     if http_accept and 'text/csv' not in http_accept:
-        json_details.pop('csv_content', None)
-        json_details.pop('status', None)
+        json_details.pop('cached_csv', None)
     return Response(json_details)
 
 
@@ -95,25 +94,32 @@ def details(request, pk=None):
                    DeploymentCSVRenderer))
 def deployments(request, pk=None):
     """Lookup and return a deployment system report."""
+    if not is_int(pk):
+        error = {
+            'report_id': [_(messages.COMMON_ID_INV)]
+        }
+        raise ValidationError(error)
+
     validate_filters(request.query_params)
-
-    if pk is not None:
-        if not is_int(pk):
-            error = {
-                'report_id': [_(messages.COMMON_ID_INV)]
-            }
-            raise ValidationError(error)
-
-        report = build_report(pk, request.query_params)
-        if report is not None:
-            return Response(report)
-
-        report_fact_collection = get_object_or_404(
-            FactCollection.objects.all(), pk=pk)
+    filters = filter_keys(request.query_params)
+    report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
+    if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response({'detail':
                          'Deployment report %s could not be created.'
-                         '  See server logs.' % report_fact_collection.id},
+                         '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
+
+    # pylint: disable=no-else-return
+    if request.query_params.get('group_count', None):
+        report_dict = build_grouped_report(
+            report, request.query_params.get('group_count'))
+        return Response(report_dict)
+    elif filters:
+        report_dict = build_filtered_report(report, filters)
+        return Response(report_dict)
+    else:
+        report_dict = build_cached_json_report(report)
+        return Response(report_dict)
 
 
 def validate_filters(filters):
@@ -132,42 +138,6 @@ def validate_filters(filters):
         raise ValidationError(error)
 
 
-def build_grouped_report(report_id, fingerprints, group):
-    """Create a count report based on the fingerprints and the group.
-
-    :param report_id: the identifer for the report
-    :param fingerprints: The system fingerprints used in the group count
-    :param group: the field to group and count on
-    :returns: json report data
-    :raises: Raises validation error group_count on non-existent field.
-    """
-    try:
-        # Group by field and count
-        counts_by_group = fingerprints.values(
-            group).annotate(total=Count(group))
-    except FieldError:
-        msg = _(messages.REPORT_GROUP_COUNT_FIELD % (group))
-        error = {
-            'query_params': [msg]
-        }
-        raise ValidationError(error)
-
-    if len(counts_by_group) is 0:
-        return None
-
-    # Build response dictionary
-    report = {'report_id': report_id,
-              'report': []}
-    for group_count in counts_by_group:
-        report['report'].append(
-            {
-                group: group_count[group],
-                'count': group_count['total']
-            }
-        )
-    return report
-
-
 def filter_keys(filters):
     """Get the values to supply based on the filters.
 
@@ -184,41 +154,85 @@ def filter_keys(filters):
     return set(filter_list)
 
 
-def build_report(report_id, filters):
-    """Lookup system report by report_id.
+def build_report(report, fingerprint_dicts):
+    """Create starter object for report json.
 
-    :param report_id: the identifer for the report
-    :param fiters: filters for the report
-    :returns: json report data
+    :param report: the DeploymentsReport
+    :param fingerprint_dicts: the fingerprints for the report
+    :returns: json report start object
     """
-    # We want aggregate counts on the fingerprints
-    # Find all fingerprints with this report_id
-    fingerprints = SystemFingerprint.objects.filter(
-        report_id__id=report_id)
+    report_dict = {'report_id': report.id,
+                   'status': report.status,
+                   'system_fingerprints': fingerprint_dicts}
+    return report_dict
 
-    if len(fingerprints) is 0:
+
+def build_cached_json_report(report):
+    """Create a count report based on the fingerprints and the group.
+
+    :param report: the DeploymentsReport used to group count
+    :returns: json report data
+    :raises: Raises validation error group_count on non-existent field.
+    """
+    return build_report(report, json.loads(report.cached_json))
+
+
+def build_grouped_report(report, group):
+    """Create a count report based on the fingerprints and the group.
+
+    :param report: the DeploymentsReport used to group count
+    :param group: the field to group and count on
+    :returns: json report data
+    :raises: Raises validation error group_count on non-existent field.
+    """
+    try:
+
+        # Group by field and count
+        counts_by_group = report.system_fingerprints.all().values(
+            group).annotate(total=Count(group))
+    except FieldError:
+        msg = _(messages.REPORT_GROUP_COUNT_FIELD % (group))
+        error = {
+            'query_params': [msg]
+        }
+        raise ValidationError(error)
+
+    if len(counts_by_group) is 0:
         return None
 
-    group = filters.get('group_count', None)
-    if group is not None:
-        return build_grouped_report(report_id,
-                                    fingerprints,
-                                    group)
     # Build response dictionary
-    report = {'report_id': report_id,
-              'report': []}
-    filterkeys = filter_keys(filters)
-    for fingerprint in fingerprints:
-        serializer = FingerprintSerializer(fingerprint)
-        if filterkeys == set():
-            report['report'].append(serializer.data)
-        else:
-            filtered_data = {}
-            for key in filterkeys:
-                visible_data = serializer.data.get(key, None)
-                filtered_data[key] = visible_data
-            report['report'].append(filtered_data)
-    return report
+    fingerprints = []
+    for group_count in counts_by_group:
+        fingerprints.append(
+            {
+                group: group_count[group],
+                'count': group_count['total']
+            }
+        )
+    return build_report(report, fingerprints)
+
+
+def build_filtered_report(report, filters):
+    """Create a count report based on the fingerprints and the group.
+
+    :param report: The DeploymentsReport used for filtered report
+    :param filters: The values to display in report
+    :returns: json report data
+    :raises: Raises validation error group_count on non-existent field.
+    """
+    try:
+        # Group by field and count
+        fingerprints = report.system_fingerprints.all().values(*filters)
+    except FieldError:
+        filter_string = '[%s]' % (', '.join(filters))
+        msg = _(messages.REPORT_INVALID_FILTER_QUERY_PARAM % (filter_string))
+        error = {
+            'query_params': [msg]
+        }
+        raise ValidationError(error)
+
+    # Build response dictionary
+    return build_report(report, fingerprints)
 
 
 @api_view(['PUT'])
@@ -243,9 +257,9 @@ def sync_merge_reports(request):
         raise ValidationError(error)
 
     # Create FC model and save data
-    fact_collection = create_fact_collection(fact_collection_json)
+    details_report = create_fact_collection(fact_collection_json)
     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                       fact_collection=fact_collection)
+                       details_report=details_report)
     scan_job.save()
     scan_job.queue()
     runner = ScanJobRunner(scan_job)
@@ -255,10 +269,10 @@ def sync_merge_reports(request):
         raise Exception(scan_job.status_message)
 
     scan_job = ScanJob.objects.get(pk=scan_job.id)
-    fact_collection = FactCollection.objects.get(pk=fact_collection.id)
+    details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
-    serializer = FactCollectionSerializer(fact_collection)
+    serializer = FactCollectionSerializer(details_report)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
 
@@ -288,12 +302,12 @@ def async_merge_reports(request, pk=None):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Create FC model and save data
-    fact_collection = create_fact_collection(request.data)
+    details_report = create_fact_collection(request.data)
 
     # Create new job to run
 
     merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                        fact_collection=fact_collection)
+                        details_report=details_report)
     merge_job.save()
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
@@ -337,7 +351,7 @@ def validate_merge_report(data):
         error.get('reports').append(_(messages.REPORT_MERGE_NOT_UNIQUE))
         raise ValidationError(error)
 
-    reports = FactCollection.objects.filter(pk__in=report_ids).order_by('-id')
+    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by('-id')
     actual_report_ids = [report.id for report in reports]
     missing_reports = set(report_ids) - set(actual_report_ids)
     if bool(missing_reports):
