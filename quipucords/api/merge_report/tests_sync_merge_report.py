@@ -49,7 +49,7 @@ class SyncMergeReports(TestCase):
 
     def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -157,7 +157,7 @@ class SyncMergeReports(TestCase):
 
     def test_sync_merge_jobs_success(self):
         """Test sync merge jobs success."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         sources1 = [{'server_id': self.server_id,
                      'source_name': self.net_source.name,
                      'source_type': self.net_source.source_type,
