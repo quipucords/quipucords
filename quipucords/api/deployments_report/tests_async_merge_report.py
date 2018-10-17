@@ -21,6 +21,7 @@ from api.models import (Credential,
 
 from django.core import management
 from django.test import TestCase
+from django.urls import reverse
 
 from rest_framework import status
 
@@ -35,7 +36,7 @@ def dummy_start():
 class AsyncMergeReports(TestCase):
     """Tests against the Deployment reports function."""
 
-    # pylint: disable= no-self-use, invalid-name
+    # pylint: disable= no-self-use, invalid-name,too-many-public-methods
     def setUp(self):
         """Create test case setup."""
         management.call_command('flush', '--no-input')
@@ -55,25 +56,25 @@ class AsyncMergeReports(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
 
-    def create_report_merge_job(self, data):
+    def merge_details_from_source(self, data):
         """Call the create endpoint."""
         url = '/api/v1/reports/merge/jobs/'
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_report_merge_job_expect_201(self, data):
+    def merge_details_from_source_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_report_merge_job(data)
+        response = self.merge_details_from_source(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def create_report_merge_job_expect_400(self, data):
+    def merge_details_from_source_expect_400(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_report_merge_job(data)
+        response = self.merge_details_from_source(data)
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print('Failure cause: ')
             print(response.json())
@@ -94,7 +95,7 @@ class AsyncMergeReports(TestCase):
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
 
-        response_json = self.create_report_merge_job_expect_201(
+        response_json = self.merge_details_from_source_expect_201(
             request_json)
 
         expected = {
@@ -144,7 +145,7 @@ class AsyncMergeReports(TestCase):
     def test_missing_sources(self):
         """Test missing sources attribute."""
         request_json = {}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(
             response_json['sources'],
@@ -153,7 +154,7 @@ class AsyncMergeReports(TestCase):
     def test_empty_sources(self):
         """Test empty sources attribute."""
         request_json = {'sources': []}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(
             response_json['sources'],
@@ -162,7 +163,7 @@ class AsyncMergeReports(TestCase):
     def test_source_missing_name(self):
         """Test source is missing source_name."""
         request_json = {'sources': [{'foo': 'abc'}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -173,7 +174,7 @@ class AsyncMergeReports(TestCase):
     def test_source_empty_name(self):
         """Test source has empty source_name."""
         request_json = {'sources': [{'source_name': ''}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -187,7 +188,7 @@ class AsyncMergeReports(TestCase):
                                      'source_name': 100,
                                      'source_type':
                                      self.net_source.source_type}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -199,7 +200,7 @@ class AsyncMergeReports(TestCase):
         """Test source_type is missing."""
         request_json = {'sources': [
             {'source_name': self.net_source.name}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -212,7 +213,7 @@ class AsyncMergeReports(TestCase):
         request_json = {'sources':
                         [{'source_id': self.net_source.id,
                           'source_type': ''}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -226,7 +227,7 @@ class AsyncMergeReports(TestCase):
                         [{'server_id': self.server_id,
                           'source_name': self.net_source.name,
                           'source_type': 'abc'}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -243,7 +244,7 @@ class AsyncMergeReports(TestCase):
         request_json = {'sources':
                         [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
@@ -257,10 +258,142 @@ class AsyncMergeReports(TestCase):
                         [{'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': []}]}
-        response_json = self.create_report_merge_job_expect_400(
+        response_json = self.merge_details_from_source_expect_400(
             request_json)
         self.assertEqual(len(response_json['valid_sources']), 0)
         self.assertEqual(len(response_json['invalid_sources']), 1)
         self.assertEqual(
             response_json['invalid_sources'][0]['errors']['facts'],
             messages.FC_REQUIRED_ATTRIBUTE)
+
+    ##############################################################
+    # Test PUT Async Report Merge
+    ##############################################################
+    def merge_details_by_ids(self, data):
+        """Call the create endpoint."""
+        url = '/api/v1/reports/merge/jobs/'
+        return self.client.put(url,
+                               json.dumps(data),
+                               'application/json')
+
+    def merge_details_by_ids_expect_201(self, data):
+        """Create a source, return the response as a dict."""
+        response = self.merge_details_by_ids(data)
+        if response.status_code != status.HTTP_201_CREATED:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response.json()
+
+    def merge_details_by_ids_expect_400(self, data):
+        """Create a source, return the response as a dict."""
+        response = self.merge_details_by_ids(data)
+        if response.status_code != status.HTTP_400_BAD_REQUEST:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        return response.json()
+
+    def test_sync_merge_empty_body(self):
+        """Test report merge by id with empty body."""
+        # pylint: disable=no-member
+        data = None
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_REQUIRED]})
+
+    def test_by_id_merge_empty_dict(self):
+        """Test report merge by id with empty dict."""
+        # pylint: disable=no-member
+        data = {}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_REQUIRED]})
+
+    def test_by_id_merge_jobs_not_list(self):
+        """Test report merge by id with not list."""
+        # pylint: disable=no-member
+        data = {'reports': 5}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_LIST]})
+
+    def test_by_id_merge_jobs_list_too_short(self):
+        """Test report merge by id with list too short."""
+        # pylint: disable=no-member
+        data = {'reports': [5]}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_TOO_SHORT]})
+
+    def test_by_id_merge_jobs_list_contains_string(self):
+        """Test report merge by id with containing str."""
+        # pylint: disable=no-member
+        data = {'reports': [5, 'hello']}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_INT]})
+
+    def test_by_id_merge_jobs_list_contains_duplicates(self):
+        """Test report merge by id with containing duplicates."""
+        # pylint: disable=no-member
+        data = {'reports': [5, 5]}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports': [messages.REPORT_MERGE_NOT_UNIQUE]})
+
+    def test_by_id_merge_jobs_list_contains_invalid_job_ids(self):
+        """Test report merge by id with containing duplicates."""
+        # pylint: disable=no-member
+        data = {'reports': [5, 6]}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(
+            json_response, {'reports':
+                            [messages.REPORT_MERGE_NOT_FOUND % '5, 6']})
+
+    @patch('api.deployments_report.view.start_scan', side_effect=dummy_start)
+    def test_by_id_merge_jobs_success(self, mock_dummy_start):
+        """Test report merge by id jobs success."""
+        # pylint: disable=unused-argument
+        url = reverse('facts-list')
+        sources1 = [{'server_id': self.server_id,
+                     'source_name': self.net_source.name,
+                     'source_type': self.net_source.source_type,
+                     'facts': [{'key1': 'value1'}]}]
+        sources2 = [{'server_id': 'abc',
+                     'source_name': 'another_name',
+                     'source_type': 'network',
+                     'facts': [{'key2': 'value2'}]}]
+        request_json = {'sources': sources1}
+        response = self.client.post(url,
+                                    json.dumps(request_json),
+                                    'application/json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
+        response_json = response.json()
+        self.assertEqual(
+            response_json['sources'],
+            sources1)
+        report1_id = response_json['report_id']
+
+        request_json = {'sources': sources2}
+        response = self.client.post(url,
+                                    json.dumps(request_json),
+                                    'application/json')
+        if response.status_code != status.HTTP_201_CREATED:
+            print(response.json())
+        response_json = response.json()
+        self.assertEqual(
+            response_json['sources'],
+            sources2)
+        report2_id = response_json['report_id']
+
+        data = {'reports': [report1_id, report2_id]}
+        json_response = self.merge_details_by_ids_expect_201(data)
+        expected = {'id': 3,
+                    'scan_type': 'fingerprint',
+                    'status': 'created',
+                    'status_message': 'Job is created.'}
+
+        self.assertEqual(
+            json_response, expected)
