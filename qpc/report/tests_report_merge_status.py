@@ -67,10 +67,12 @@ class ReportMergeStatusTests(unittest.TestCase):
             args = Namespace(job_id='1')
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(messages.MERGE_JOB_ID_STATUS % ('1',
-                                                                 'completed'),
-                                                        \
-                                 report_out.getvalue().strip())
+                result1 = messages.MERGE_JOB_ID_STATUS % (
+                    '1', 'completed')
+                result2 = messages.DISPLAY_REPORT_ID % (
+                    '10', '10')
+                result = '%s\n%s' % (result1, result2)
+                self.assertEqual(result, report_out.getvalue().strip())
 
     def test_job_id_not_exist(self):
         """Test the job command with an invalid ID."""
