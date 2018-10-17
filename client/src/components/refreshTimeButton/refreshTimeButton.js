@@ -2,13 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Icon } from 'patternfly-react';
 import * as moment from 'moment';
-import helpers from '../../common/helpers';
 
 class RefreshTimeButton extends React.Component {
   constructor(props) {
     super(props);
-
-    helpers.bindMethods(this, ['doUpdate']);
 
     this.pollingInterval = null;
     this.mounted = false;
@@ -18,24 +15,24 @@ class RefreshTimeButton extends React.Component {
     this.mounted = true;
   }
 
-  componentWillUnmount() {
-    this.stopPolling();
-    this.mounted = false;
-  }
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.lastRefresh && !this.lastRefresh) {
       this.startPolling();
     }
   }
 
-  doUpdate() {
-    this.forceUpdate();
+  componentWillUnmount() {
+    this.stopPolling();
+    this.mounted = false;
   }
+
+  onDoUpdate = () => {
+    this.forceUpdate();
+  };
 
   startPolling() {
     if (!this.pollingInterval && this.mounted) {
-      this.pollingInterval = setInterval(this.doUpdate, 3000);
+      this.pollingInterval = setInterval(this.onDoUpdate, 3000);
     }
   }
 
@@ -68,6 +65,10 @@ class RefreshTimeButton extends React.Component {
 RefreshTimeButton.propTypes = {
   lastRefresh: PropTypes.number,
   onRefresh: PropTypes.func.isRequired
+};
+
+RefreshTimeButton.defaultProps = {
+  lastRefresh: 0
 };
 
 export { RefreshTimeButton as default, RefreshTimeButton };

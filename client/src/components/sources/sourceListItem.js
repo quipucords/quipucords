@@ -14,21 +14,16 @@ import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
 class SourceListItem extends React.Component {
-  componentWillReceiveProps(nextProps) {
-    // Check for changes resulting in a fetch
-    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
-      this.closeExpandIfNoData(this.expandType());
-    }
-  }
-
-  expandType() {
-    const { item, expandedSources } = this.props;
-
-    return _.get(_.find(expandedSources, nextExpanded => nextExpanded.id === item.id), 'expandType');
-  }
-
   static isSelected(item, selectedSources) {
     return _.find(selectedSources, nextSelected => nextSelected.id === item.id) !== undefined;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { lastRefresh } = this.props;
+    // Check for changes resulting in a fetch
+    if (!_.isEqual(nextProps.lastRefresh, lastRefresh)) {
+      this.closeExpandIfNoData(this.expandType());
+    }
   }
 
   onItemSelectChange = () => {
@@ -40,19 +35,6 @@ class SourceListItem extends React.Component {
       item
     });
   };
-
-  closeExpandIfNoData(expandType) {
-    const { item } = this.props;
-
-    if (expandType === 'okHosts' || expandType === 'failedHosts') {
-      const okHostCount = _.get(item, 'connection.source_systems_scanned', 0);
-      const failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
-
-      if ((expandType === 'okHosts' && okHostCount === 0) || (expandType === 'failedHosts' && failedHostCount === 0)) {
-        this.onCloseExpand();
-      }
-    }
-  }
 
   onToggleExpand = expandType => {
     const { item } = this.props;
@@ -81,6 +63,25 @@ class SourceListItem extends React.Component {
       item
     });
   };
+
+  expandType() {
+    const { item, expandedSources } = this.props;
+
+    return _.get(_.find(expandedSources, nextExpanded => nextExpanded.id === item.id), 'expandType');
+  }
+
+  closeExpandIfNoData(expandType) {
+    const { item } = this.props;
+
+    if (expandType === 'okHosts' || expandType === 'failedHosts') {
+      const okHostCount = _.get(item, 'connection.source_systems_scanned', 0);
+      const failedHostCount = _.get(item, 'connection.source_systems_failed', 0);
+
+      if ((expandType === 'okHosts' && okHostCount === 0) || (expandType === 'failedHosts' && failedHostCount === 0)) {
+        this.onCloseExpand();
+      }
+    }
+  }
 
   renderSourceType() {
     const { item } = this.props;
@@ -257,9 +258,8 @@ class SourceListItem extends React.Component {
         {item.hosts &&
           item.hosts.length > 1 && (
             <ul className="quipucords-popover-list">
-              hello
-              {item.hosts.map((host, index) => (
-                <li key={index}>{host}</li>
+              {item.hosts.map(host => (
+                <li>{host}</li>
               ))}
             </ul>
           )}
@@ -385,6 +385,15 @@ SourceListItem.propTypes = {
   onScan: PropTypes.func,
   selectedSources: PropTypes.array,
   expandedSources: PropTypes.array
+};
+
+SourceListItem.defaultProps = {
+  lastRefresh: 0,
+  onEdit: helpers.noop,
+  onDelete: helpers.noop,
+  onScan: helpers.noop,
+  selectedSources: [],
+  expandedSources: []
 };
 
 const mapStateToProps = state =>

@@ -6,13 +6,11 @@ import { Dropdown, EmptyState, Grid, Icon, MenuItem, Pager } from 'patternfly-re
 import _ from 'lodash';
 import * as moment from 'moment/moment';
 import helpers from '../../common/helpers';
-import { getScanJobs } from '../../redux/actions/scansActions';
+import { reduxActions } from '../../redux/actions';
 
 class ScanJobsList extends React.Component {
   constructor() {
     super();
-
-    helpers.bindMethods(this, ['onNextPage', 'onPreviousPage']);
 
     this.state = {
       scanJobs: [],
@@ -29,24 +27,30 @@ class ScanJobsList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const { lastRefresh } = this.props;
     // Check for changes resulting in a fetch
-    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
+    if (!_.isEqual(nextProps.lastRefresh, lastRefresh)) {
       this.refresh();
     }
   }
 
-  onNextPage() {
-    this.setState({ page: this.state.page + 1 });
-    this.refresh(this.state.page + 1);
-  }
+  onNextPage = () => {
+    const { page } = this.state;
 
-  onPreviousPage() {
-    this.setState({ page: this.state.page - 1 });
-    this.refresh(this.state.page - 1);
-  }
+    this.setState({ page: page + 1 });
+    this.refresh(page + 1);
+  };
 
-  refresh(page) {
+  onPreviousPage = () => {
+    const { page } = this.state;
+
+    this.setState({ page: page - 1 });
+    this.refresh(page - 1);
+  };
+
+  refresh(passedPage) {
     const { scan, getScanJobs } = this.props;
+    const { page } = this.state;
 
     this.setState({
       scanJobsPending: true,
@@ -55,7 +59,7 @@ class ScanJobsList extends React.Component {
     });
 
     const queryObject = {
-      page: page === undefined ? this.state.page : page,
+      page: passedPage === undefined ? page : passedPage,
       page_size: 100,
       ordering: 'name'
     };
@@ -190,8 +194,16 @@ ScanJobsList.propTypes = {
   getScanJobs: PropTypes.func
 };
 
+ScanJobsList.defaultProps = {
+  scan: {},
+  lastRefresh: 0,
+  onSummaryDownload: helpers.noop,
+  onDetailedDownload: helpers.noop,
+  getScanJobs: helpers.noop
+};
+
 const mapDispatchToProps = dispatch => ({
-  getScanJobs: (id, query) => dispatch(getScanJobs(id, query))
+  getScanJobs: (id, query) => dispatch(reduxActions.scans.getScanJobs(id, query))
 });
 
 const mapStateToProps = () => ({});

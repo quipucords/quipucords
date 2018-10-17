@@ -101,6 +101,7 @@ exports[`ConfirmationModal Component should shallow render a basic component 1`]
       bsClass="btn"
       bsStyle="primary"
       disabled={false}
+      onClick={[Function]}
     >
       Confirm
     </Button>

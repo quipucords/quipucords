@@ -7,12 +7,12 @@ class Content extends React.Component {
     let redirectRoot = null;
 
     return {
-      renderRoutes: routes().map((item, index) => {
+      renderRoutes: routes().map(item => {
         if (item.redirect === true) {
           redirectRoot = <Redirect from="/" to={item.to} />;
         }
 
-        return <Route key={index} path={item.to} component={item.component} />;
+        return <Route key={item.to} path={item.to} component={item.component} />;
       }),
       redirectRoot
     };
