@@ -112,7 +112,7 @@ class ReportDetailTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(messages.REPORT_SUCCESSFULLY_MERGED % ('1', '1'),
-                              report_out.getvalue().strip())
+                                 report_out.getvalue().strip())
 
     def test_detail_merge_error_job_ids(self):
         """Testing report merge error with scan job ids."""
