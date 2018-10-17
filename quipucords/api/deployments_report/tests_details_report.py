@@ -17,7 +17,7 @@ from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DetailsCSVRenderer)
+from api.deployments_report.cvs_renderer import (DetailsCSVRenderer)
 
 from django.core import management
 from django.test import TestCase

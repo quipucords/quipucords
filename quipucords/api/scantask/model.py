@@ -18,7 +18,7 @@ from datetime import datetime
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.fact.model import DetailsReport
+from api.details_report.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
 

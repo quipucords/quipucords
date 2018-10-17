@@ -12,9 +12,9 @@
 import logging
 from multiprocessing import Process, Value
 
-from api.fact.util import (build_sources_from_tasks,
-                           create_details_report,
-                           validate_details_report_json)
+from api.details_report.util import (build_sources_from_tasks,
+                                     create_details_report,
+                                     validate_details_report_json)
 from api.models import (ScanJob,
                         ScanTask,
                         Source)

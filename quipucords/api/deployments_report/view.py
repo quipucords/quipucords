@@ -16,14 +16,15 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.fact.util import (create_details_report,
-                           validate_details_report_json)
+from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+                                                 DetailsCSVRenderer)
+from api.details_report.util import (create_details_report,
+                                     validate_details_report_json)
 from api.models import (DeploymentsReport,
                         DetailsReport,
                         ScanJob,
                         ScanTask)
-from api.report.cvs_renderer import DeploymentCSVRenderer, DetailsCSVRenderer
-from api.serializers import (FactCollectionSerializer,
+from api.serializers import (DetailsReportSerializer,
                              ScanJobSerializer)
 from api.signal.scanjob_signal import (start_scan)
 
@@ -78,7 +79,7 @@ def details(request, pk=None):
             }
             raise ValidationError(error)
     detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
-    serializer = FactCollectionSerializer(detail_data)
+    serializer = DetailsReportSerializer(detail_data)
     json_details = serializer.data
     http_accept = request.META.get('HTTP_ACCEPT')
     if http_accept and 'text/csv' not in http_accept:
@@ -272,7 +273,7 @@ def sync_merge_reports(request):
     details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
-    serializer = FactCollectionSerializer(details_report)
+    serializer = DetailsReportSerializer(details_report)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
 

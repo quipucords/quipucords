@@ -17,7 +17,7 @@ from api import messages
 from api.models import (ScanTask,
                         ServerInformation,
                         Source)
-from api.serializers import FactCollectionSerializer
+from api.serializers import DetailsReportSerializer
 
 from django.utils.translation import ugettext as _
 
@@ -160,7 +160,7 @@ def create_details_report(json_details_report):
     :returns: The newly created DetailsReport
     """
     # Create new details report
-    serializer = FactCollectionSerializer(data=json_details_report)
+    serializer = DetailsReportSerializer(data=json_details_report)
     if serializer.is_valid():
         details_report = serializer.save()
         logger.debug('Fact collection created: %s', details_report)

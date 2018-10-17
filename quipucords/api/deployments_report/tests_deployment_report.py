@@ -13,11 +13,11 @@
 import json
 import uuid
 
+from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+                                                 sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DeploymentCSVRenderer,
-                                     sanitize_row)
 
 from django.core import management
 from django.test import TestCase
