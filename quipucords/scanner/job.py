@@ -125,7 +125,7 @@ class ScanJobRunner(Process):
             task_status = self._run_task(fingerprint_task_runner)
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
-                failed_tasks.append(runner.scan_task)
+                failed_tasks.append(fingerprint_task_runner.scan_task)
                 fingerprint_task_runner.scan_task.log_message(
                     'Task %s failed.' % (
                         fingerprint_task_runner.scan_task.sequence_number),
@@ -185,8 +185,7 @@ class ScanJobRunner(Process):
                 creds = [str(cred)
                          for cred in failed_task.source.credentials.all()]
                 context_message += 'CREDENTIALS: [%s]' % creds
-            failed_task.log_message(
-                context_message, log_level=logging.ERROR)
+            failed_task.fail(context_message)
 
             message = 'FATAL ERROR. %s' % str(error)
             self.scan_job.fail(message)
