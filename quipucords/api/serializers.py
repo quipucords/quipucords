@@ -13,7 +13,8 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from api.details_report.serializer import DetailsReportSerializer
-from api.deployments_report.serializer import DeploymentReportSerializer, SystemFingerprintSerializer
+from api.deployments_report.serializer import (DeploymentReportSerializer,
+                                               SystemFingerprintSerializer)
 from api.credential.serializer import CredentialSerializer
 from api.source.serializer import (CredentialsField,
                                    SourceSerializer)
