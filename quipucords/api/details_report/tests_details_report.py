@@ -13,7 +13,7 @@
 import copy
 import json
 
-from api.deployments_report.cvs_renderer import (DetailsCSVRenderer)
+from api.details_report.cvs_renderer import (DetailsCSVRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
@@ -54,7 +54,7 @@ class DetailReportTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
