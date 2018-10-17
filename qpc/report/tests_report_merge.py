@@ -18,7 +18,7 @@ from argparse import ArgumentParser, Namespace
 from io import StringIO
 
 from qpc import messages
-from qpc.report import MERGE_URI
+from qpc.report import ASYNC_MERGE_URI
 from qpc.report.merge import ReportMergeCommand
 from qpc.scan import SCAN_JOB_URI
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
@@ -90,7 +90,7 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         scanjob1_data = {'report_id': 1}
         scanjob2_data = {'report_id': 2}
         get_scanjob1_url = \
@@ -111,8 +111,8 @@ class ReportDetailTests(unittest.TestCase):
                              json_dir=None)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_MERGED % '1')
+                self.assertEqual(messages.REPORT_SUCCESSFULLY_MERGED %
+                                 ('1', '1'), report_out.getvalue().strip())
 
     def test_detail_merge_error_job_ids(self):
         """Testing report merge error with scan job ids."""
@@ -126,7 +126,7 @@ class ReportDetailTests(unittest.TestCase):
             get_server_location() + SCAN_JOB_URI + '1/'
         get_scanjob2_url = \
             get_server_location() + SCAN_JOB_URI + '2/'
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob1_url, status_code=200,
                        json=scanjob1_data)
@@ -148,7 +148,7 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.put(put_merge_url, status_code=201,
                        json=put_report_data)
@@ -160,7 +160,8 @@ class ReportDetailTests(unittest.TestCase):
             with redirect_stdout(report_out):
                 nac.main(args)
                 self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_MERGED % '1')
+                                 messages.REPORT_SUCCESSFULLY_MERGED % (
+                                     '1', '1'))
 
     def test_detail_merge_error_report_ids(self):
         """Testing report merge error with report ids."""
@@ -168,7 +169,7 @@ class ReportDetailTests(unittest.TestCase):
 
         error_message = 'fake_message'
         put_report_data = {'reports': [error_message]}
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.put(put_merge_url, status_code=400,
                        json=put_report_data)
@@ -186,7 +187,7 @@ class ReportDetailTests(unittest.TestCase):
         report_out = StringIO()
 
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(put_merge_url, status_code=201,
                         json=put_report_data)
@@ -197,7 +198,7 @@ class ReportDetailTests(unittest.TestCase):
                              report_ids=None)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % ('1', '1'),
                               report_out.getvalue().strip())
 
     def test_detail_merge_json_files_not_exist(self):
@@ -256,7 +257,7 @@ class ReportDetailTests(unittest.TestCase):
         """Testing report merge command with json directory."""
         report_out = StringIO()
         put_report_data = {'id': 1}
-        put_merge_url = get_server_location() + MERGE_URI
+        put_merge_url = get_server_location() + ASYNC_MERGE_URI
         with requests_mock.Mocker() as mocker:
             mocker.post(put_merge_url, status_code=201,
                         json=put_report_data)
@@ -267,7 +268,7 @@ class ReportDetailTests(unittest.TestCase):
                              json_dir=['/tmp/'])
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % 1,
+                self.assertIn(messages.REPORT_SUCCESSFULLY_MERGED % ('1', '1'),
                               report_out.getvalue().strip())
 
     def test_detail_merge_json_directory_error_dir_not_found(self):

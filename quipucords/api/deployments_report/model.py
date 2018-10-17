@@ -19,7 +19,7 @@ class DeploymentsReport(models.Model):
 
     STATUS_PENDING = 'pending'
     STATUS_FAILED = 'failed'
-    STATUS_COMPLETE = 'complete'
+    STATUS_COMPLETE = 'completed'
     STATUS_CHOICES = ((STATUS_PENDING, STATUS_PENDING),
                       (STATUS_FAILED, STATUS_FAILED),
                       (STATUS_COMPLETE, STATUS_COMPLETE))

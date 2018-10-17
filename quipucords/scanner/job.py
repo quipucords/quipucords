@@ -12,9 +12,9 @@
 import logging
 from multiprocessing import Process, Value
 
-from api.fact.util import (build_sources_from_tasks,
-                           create_fact_collection,
-                           validate_fact_collection_json)
+from api.details_report.util import (build_sources_from_tasks,
+                                     create_details_report,
+                                     validate_details_report_json)
 from api.models import (ScanJob,
                         ScanTask,
                         Source)
@@ -109,7 +109,7 @@ class ScanJobRunner(Process):
 
             if not details_report:
                 # Create the details report
-                details_report = self._create_fact_collection()
+                details_report = self._create_details_report()
 
             if not details_report:
                 self.scan_job.fail('No facts gathered from scan.')
@@ -241,7 +241,7 @@ class ScanJobRunner(Process):
                 self.scan_job, scan_task)
         return runner
 
-    def _create_fact_collection(self):
+    def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
 
         :param facts: The array of fact dictionaries
@@ -252,9 +252,9 @@ class ScanJobRunner(Process):
         sources = build_sources_from_tasks(
             inspect_tasks.filter(status=ScanTask.COMPLETED))
         if bool(sources):
-            fact_collection_json = {'sources': sources}
-            has_errors, validation_result = validate_fact_collection_json(
-                fact_collection_json)
+            details_report_json = {'sources': sources}
+            has_errors, validation_result = validate_details_report_json(
+                details_report_json)
 
             if has_errors:
                 message = 'Scan producted invalid details report JSON: %s' % \
@@ -263,8 +263,8 @@ class ScanJobRunner(Process):
                 return ScanTask.FAILED
 
             # Create FC model and save data to JSON file
-            details_report = create_fact_collection(
-                fact_collection_json)
+            details_report = create_details_report(
+                details_report_json)
             return details_report
 
         return None

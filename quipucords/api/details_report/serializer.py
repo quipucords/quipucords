@@ -19,7 +19,7 @@ from rest_framework.serializers import (CharField,
                                         IntegerField)
 
 
-class FactCollectionSerializer(NotEmptySerializer):
+class DetailsReportSerializer(NotEmptySerializer):
     """Serializer for the DetailsReport model."""
 
     sources = CustomJSONField(required=True)
@@ -27,7 +27,7 @@ class FactCollectionSerializer(NotEmptySerializer):
     cached_csv = CharField(required=False, read_only=True)
 
     class Meta:
-        """Meta class for FactCollectionSerializer."""
+        """Meta class for DetailsReportSerializer."""
 
         model = DetailsReport
         exclude = ('id', 'deployment_report')

@@ -47,16 +47,16 @@ class SyncMergeReports(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
 
-    def create_fact_collection(self, data):
+    def create_details_report(self, data):
         """Call the create endpoint."""
         url = reverse('facts-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_fact_collection_expect_201(self, data):
+    def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())

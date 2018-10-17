@@ -13,11 +13,11 @@
 import json
 import uuid
 
+from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+                                                 sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DeploymentCSVRenderer,
-                                     sanitize_row)
 
 from django.core import management
 from django.test import TestCase
@@ -49,25 +49,25 @@ class DeploymentReportTest(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
 
-    def create_fact_collection(self, data):
+    def create_details_report(self, data):
         """Call the create endpoint."""
         url = reverse('facts-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_fact_collection_expect_201(self, data):
+    def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def create_fact_collection_expect_400(self, data):
+    def create_details_report_expect_400(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print('Failure cause: ')
             print(response.json())
@@ -113,10 +113,10 @@ class DeploymentReportTest(TestCase):
                 'virt_what_type': 'vt'
             }
             facts.append(fact_json)
-        details_report = self.create_fact_collection_expect_201(fc_json)
+        details_report = self.create_details_report_expect_201(fc_json)
         return details_report
 
-    def test_get_fact_collection_group_report_count(self):
+    def test_get_details_report_group_report_count(self):
         """Get a specific group count report."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -133,7 +133,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(report['system_fingerprints'][0]['count'], 2)
         self.assertEqual(report['system_fingerprints'][1]['count'], 1)
 
-    def test_get_fact_collection_group_report(self):
+    def test_get_details_report_group_report(self):
         """Get a specific group count report."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -148,7 +148,7 @@ class DeploymentReportTest(TestCase):
         self.assertIsInstance(report, dict)
         self.assertEqual(len(report['system_fingerprints'][0].keys()), 14)
 
-    def test_get_fact_collection_filter_report(self):
+    def test_get_details_report_filter_report(self):
         """Get a specific group count report with filter."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -168,7 +168,7 @@ class DeploymentReportTest(TestCase):
         diff = [x for x in expected if x not in report['system_fingerprints']]
         self.assertEqual(diff, [])
 
-    def test_get_fact_collection_404(self):
+    def test_get_details_report_404(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/2/deployments/'
 
@@ -195,14 +195,14 @@ class DeploymentReportTest(TestCase):
             'cpu_core_count': 'cat',
         }
         facts.append(fact_json)
-        self.create_fact_collection_expect_400(fc_json)
+        self.create_details_report_expect_400(fc_json)
 
         # Query API
         response = self.client.get(url)
         self.assertEqual(response.status_code,
                          status.HTTP_424_FAILED_DEPENDENCY)
 
-    def test_get_fact_collection_bad_id(self):
+    def test_get_details_report_bad_id(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/string/deployments/'
 

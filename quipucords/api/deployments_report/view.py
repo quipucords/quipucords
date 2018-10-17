@@ -16,14 +16,15 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.fact.util import (create_fact_collection,
-                           validate_fact_collection_json)
+from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+                                                 DetailsCSVRenderer)
+from api.details_report.util import (create_details_report,
+                                     validate_details_report_json)
 from api.models import (DeploymentsReport,
                         DetailsReport,
                         ScanJob,
                         ScanTask)
-from api.report.cvs_renderer import DeploymentCSVRenderer, DetailsCSVRenderer
-from api.serializers import (FactCollectionSerializer,
+from api.serializers import (DetailsReportSerializer,
                              ScanJobSerializer)
 from api.signal.scanjob_signal import (start_scan)
 
@@ -78,7 +79,7 @@ def details(request, pk=None):
             }
             raise ValidationError(error)
     detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
-    serializer = FactCollectionSerializer(detail_data)
+    serializer = DetailsReportSerializer(detail_data)
     json_details = serializer.data
     http_accept = request.META.get('HTTP_ACCEPT')
     if http_accept and 'text/csv' not in http_accept:
@@ -248,16 +249,16 @@ def sync_merge_reports(request):
     for report in reports:
         sources = sources + report.get_sources()
 
-    fact_collection_json = {'sources': sources}
-    has_errors, validation_result = validate_fact_collection_json(
-        fact_collection_json)
+    details_report_json = {'sources': sources}
+    has_errors, validation_result = validate_details_report_json(
+        details_report_json)
     if has_errors:
         message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
         error.get('reports').append(message)
         raise ValidationError(error)
 
     # Create FC model and save data
-    details_report = create_fact_collection(fact_collection_json)
+    details_report = create_details_report(details_report_json)
     scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                        details_report=details_report)
     scan_job.save()
@@ -272,37 +273,65 @@ def sync_merge_reports(request):
     details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
-    serializer = FactCollectionSerializer(details_report)
+    serializer = DetailsReportSerializer(details_report)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
 
 
-@api_view(['get', 'post'])
+@api_view(['get', 'put', 'post'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def async_merge_reports(request, pk=None):
     """Merge reports asynchronously."""
     # pylint: disable=invalid-name
     if request.method == 'GET':
-        merge_job = get_object_or_404(ScanJob.objects.all(), pk=pk)
-        if merge_job.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        job_serializer = ScanJobSerializer(merge_job)
-        response_data = job_serializer.data
-        return Response(response_data, status=status.HTTP_200_OK)
+        return _get_async_merge_report_status(pk)
 
     # is POST
     if pk is not None:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    # Else post
-    has_errors, validation_result = validate_fact_collection_json(
-        request.data)
+
+    if request.method == 'PUT':
+        reports = validate_merge_report(request.data)
+        sources = []
+        for report in reports:
+            sources = sources + report.get_sources()
+
+        details_report_json = {'sources': sources}
+        return _create_async_merge_report_job(details_report_json)
+
+    # Post is last case
+    return _create_async_merge_report_job(request.data)
+
+
+def _get_async_merge_report_status(merge_job_id):
+    """Retrieve merge report job status.
+
+    :param merge_job_id: ScanJob id for this merge.
+    :returns: Response for http request
+    """
+    merge_job = get_object_or_404(ScanJob.objects.all(), pk=merge_job_id)
+    if merge_job.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    job_serializer = ScanJobSerializer(merge_job)
+    response_data = job_serializer.data
+    return Response(response_data, status=status.HTTP_200_OK)
+
+
+def _create_async_merge_report_job(details_report_data):
+    """Retrieve merge report job status.
+
+    :param details_report_data: Details report data to fingerprint
+    :returns: Response for http request
+    """
+    has_errors, validation_result = validate_details_report_json(
+        details_report_data)
     if has_errors:
         return Response(validation_result,
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Create FC model and save data
-    details_report = create_fact_collection(request.data)
+    details_report = create_details_report(details_report_data)
 
     # Create new job to run
 

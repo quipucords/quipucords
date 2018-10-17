@@ -18,7 +18,7 @@ from datetime import datetime
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.fact.model import DetailsReport
+from api.details_report.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
 
@@ -243,16 +243,16 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         elapsed_time = self._compute_elapsed_time()
         # pylint: disable=no-member
-        fact_collection_id = None
+        details_report_id = None
         if self.details_report:
-            fact_collection_id = self.details_report.id
+            details_report_id = self.details_report.id
         actual_message = 'Job %d, Task %d of %d '\
             '(%s, details_report=%s, elapsed_time: %ds) - ' % \
             (self.job.id,
              self.sequence_number,
              self.scan_job_task_count,
              self.scan_type,
-             fact_collection_id,
+             details_report_id,
              elapsed_time)
         actual_message += message.strip()
         logger.log(log_level, actual_message)

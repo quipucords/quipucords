@@ -310,11 +310,11 @@ LOGGING = {
             'handlers': LOGGING_HANDLERS,
             'level': DJANGO_LOGGING_LEVEL,
         },
-        'api.fact': {
+        'api.details_report': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.report': {
+        'api.deployments_report': {
             'handlers': LOGGING_HANDLERS,
             'level': QUIPUCORDS_LOGGING_LEVEL,
         },

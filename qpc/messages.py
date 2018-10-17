@@ -200,8 +200,8 @@ REPORT_DIRECTORY_DOES_NOT_EXIST = \
     'The directory %s does not exist.  Cannot write here.'
 REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully.'
-REPORT_SUCCESSFULLY_MERGED = 'Merge reports job created. '\
-    'Job ID is %s.'
+REPORT_SUCCESSFULLY_MERGED = 'Report merge job %s created. '\
+    'To check merge status, run "qpc report merge-status --job %s"'
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\
@@ -234,11 +234,11 @@ SSH_PASSPHRASE = 'Provide a passphrase for the SSH keyfile.'
 BECOME_PASSWORD = 'Provide a privilege escalation password to be used when '\
     'running a network scan.'
 
-JOB_ID_NOT_FOUND = 'Merge report job "%s" not found.'
-JOB_ID_STATUS = 'Job id: %s status is %s'
+MERGE_JOB_ID_NOT_FOUND = 'Report merge job %s not found.'
+MERGE_JOB_ID_STATUS = 'Report merge job %s is %s.'
 DISPLAY_REPORT_ID = \
-    'Created merge report with id: "%s". To view, run qpc report' \
-    ' summary --report "%s" --csv'
+    'Created merge report with id: "%s". To download report, run "qpc report' \
+    ' summary --report %s --csv --output-file temp.csv"'
 SERVER_CONFIG_REQUIRED = 'Configure server using command below:'
 SERVER_LOGIN_REQUIRED = 'Log in using the command below:'
 SERVER_CONFIG_HOST_HELP = 'Host or IP address for the server.'

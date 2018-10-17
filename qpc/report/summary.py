@@ -108,7 +108,6 @@ class ReportSummaryCommand(CliCommand):
             file_content = pretty_print(file_content)
         else:
             file_content = self.response.text
-            print()
 
         try:
             write_file(self.args.path, file_content)
