@@ -13,7 +13,7 @@
 import json
 import uuid
 
-from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
                                                  sanitize_row)
 from api.models import (Credential,
                         ServerInformation,

@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.details_report.cvs_renderer import (DetailsCSVRenderer)
+from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.details_report.util import (create_details_report,
                                      validate_details_report_json)
 from api.models import (DetailsReport,

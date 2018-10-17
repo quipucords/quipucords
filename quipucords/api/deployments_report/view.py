@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.util import is_int
-from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer)
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.models import (DeploymentsReport)
 
 from django.core.exceptions import FieldError

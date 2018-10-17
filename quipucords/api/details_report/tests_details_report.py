@@ -13,7 +13,7 @@
 import copy
 import json
 
-from api.details_report.cvs_renderer import (DetailsCSVRenderer)
+from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
