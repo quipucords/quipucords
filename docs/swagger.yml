@@ -1242,10 +1242,10 @@ definitions:
           type: "string"
           enum:
             - pending
-            - complete
+            - completed
             - failed
           description: "The status of creating the report"
-          example: complete
+          example: completed
         system_fingerprints:
           type: "array"
           items:
