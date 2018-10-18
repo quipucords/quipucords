@@ -11,11 +11,22 @@
 
 """Models system fingerprints."""
 
+from api.common.common_report import (REPORT_TYPE_CHOICES,
+                                      REPORT_TYPE_DEPLOYMENT)
+
 from django.db import models
 
 
 class DeploymentsReport(models.Model):
     """Represents deployment report."""
+
+    report_type = models.CharField(
+        max_length=10,
+        choices=REPORT_TYPE_CHOICES,
+        default=REPORT_TYPE_DEPLOYMENT
+    )
+    report_version = models.CharField(max_length=32,
+                                      null=False)
 
     STATUS_PENDING = 'pending'
     STATUS_FAILED = 'failed'

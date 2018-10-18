@@ -13,6 +13,7 @@
 import json
 
 from api import messages
+from api.common.common_report import create_report_version
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -200,6 +201,8 @@ class SyncMergeReports(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
         expected = {'report_id': 3,
+                    'report_type': 'details',
+                    'report_version': create_report_version(),
                     'sources': [
                         {'server_id': 'abc',
                          'source_name': 'another_name',

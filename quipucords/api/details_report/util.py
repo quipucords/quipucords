@@ -152,10 +152,11 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_details_report(json_details_report):
+def create_details_report(report_version, json_details_report):
     """Create details report.
 
     Fact collection consists of a DetailsReport record
+    :param report_version: major.minor.patch version of report.
     :param json_details_report: dict representing a details report
     :returns: The newly created DetailsReport
     """
@@ -163,6 +164,8 @@ def create_details_report(json_details_report):
     serializer = DetailsReportSerializer(data=json_details_report)
     if serializer.is_valid():
         details_report = serializer.save()
+        details_report.report_version = report_version
+        details_report.save()
         logger.debug('Fact collection created: %s', details_report)
         return details_report
 

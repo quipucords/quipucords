@@ -14,6 +14,7 @@ import logging
 import os
 
 import api.messages as messages
+from api.common.common_report import create_report_version
 from api.common.util import is_int
 from api.details_report.util import (create_details_report,
                                      validate_details_report_json)
@@ -60,6 +61,7 @@ else:
 @permission_classes(perm_classes)
 def sync_merge_reports(request):
     """Merge reports synchronously."""
+    # pylint: disable=too-many-locals
     error = {
         'reports': []
     }
@@ -77,18 +79,27 @@ def sync_merge_reports(request):
         raise ValidationError(error)
 
     # Create FC model and save data
-    details_report = create_details_report(details_report_json)
-    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                       details_report=details_report)
-    scan_job.save()
-    scan_job.queue()
-    runner = ScanJobRunner(scan_job)
+    report_version = details_report_json.get('report_version', None)
+    warn_deprecated = False
+    if not report_version:
+        warn_deprecated = True
+        report_version = create_report_version()
+    details_report = create_details_report(report_version, details_report_json)
+    merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                        details_report=details_report)
+    merge_job.save()
+    if warn_deprecated:
+        merge_job.log_message(
+            _(messages.FC_MISSING_REPORT_VERSION),
+            log_level=logging.WARNING)
+    merge_job.queue()
+    runner = ScanJobRunner(merge_job)
     runner.run()
 
-    if scan_job.status != ScanTask.COMPLETED:
-        raise Exception(scan_job.status_message)
+    if merge_job.status != ScanTask.COMPLETED:
+        raise Exception(merge_job.status_message)
 
-    scan_job = ScanJob.objects.get(pk=scan_job.id)
+    merge_job.refresh_from_db()
     details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
@@ -150,13 +161,23 @@ def _create_async_merge_report_job(details_report_data):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Create FC model and save data
-    details_report = create_details_report(details_report_data)
+    report_version = details_report_data.get('report_version', None)
+    warn_deprecated = False
+
+    if not report_version:
+        warn_deprecated = True
+        report_version = create_report_version()
+    details_report = create_details_report(report_version, details_report_data)
 
     # Create new job to run
 
     merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                         details_report=details_report)
     merge_job.save()
+    if warn_deprecated:
+        merge_job.log_message(
+            _(messages.FC_MISSING_REPORT_VERSION),
+            log_level=logging.WARNING)
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
     response_data = job_serializer.data

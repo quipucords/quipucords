@@ -83,14 +83,18 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
 
         systems_list = report_dict.get('system_fingerprints')
 
-        csv_writer.writerow(['Report'])
-        csv_writer.writerow([report_id])
+        csv_writer.writerow(['Report ID',
+                             'Report Type',
+                             'Report Version'])
+        csv_writer.writerow([report_id,
+                             deployment_report.report_type,
+                             deployment_report.report_version])
         csv_writer.writerow([])
         csv_writer.writerow([])
 
         if not systems_list:
             return None
-        csv_writer.writerow(['Report:'])
+        csv_writer.writerow(['System Fingerprints:'])
         headers = csv_helper.generate_headers(
             systems_list,
             exclude={'id', 'report_id', 'metadata'})

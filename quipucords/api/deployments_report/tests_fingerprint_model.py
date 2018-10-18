@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the fingerprint model."""
+from api.common.common_report import create_report_version
 from api.models import DeploymentsReport
 from api.serializers import SystemFingerprintSerializer
 
@@ -20,7 +21,8 @@ class FingerprintModelTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.deployment_report = DeploymentsReport()
+        self.deployment_report = DeploymentsReport(
+            report_version=create_report_version())
         self.deployment_report.save()
 
     ################################################################

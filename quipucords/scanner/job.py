@@ -12,6 +12,7 @@
 import logging
 from multiprocessing import Process, Value
 
+from api.common.common_report import create_report_version
 from api.details_report.util import (build_sources_from_tasks,
                                      create_details_report,
                                      validate_details_report_json)
@@ -263,8 +264,8 @@ class ScanJobRunner(Process):
                 return ScanTask.FAILED
 
             # Create FC model and save data to JSON file
-            details_report = create_details_report(
-                details_report_json)
+            details_report = create_details_report(create_report_version(),
+                                                   details_report_json)
             return details_report
 
         return None

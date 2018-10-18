@@ -14,6 +14,7 @@ import logging
 import uuid
 from datetime import datetime
 
+from api.common.common_report import create_report_version
 from api.models import (DeploymentsReport,
                         Product,
                         ScanJob,
@@ -128,7 +129,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # remove results from previous interrupted scan
         deployment_report = details_report.deployment_report
         if not deployment_report:
-            deployment_report = DeploymentsReport()
+            deployment_report = DeploymentsReport(
+                report_version=create_report_version())
             deployment_report.save()
 
             # Set the report ids.  Right now they are deployment report id
