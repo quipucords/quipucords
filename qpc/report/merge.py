@@ -126,7 +126,7 @@ class ReportMergeCommand(CliCommand):
                     file_report_type = details_report.get('report_type', None)
                     if file_report_type and file_report_type != 'details':
                         print(_(messages.REPORT_INVALID_REPORT_TYPE %
-                                file_report_type))
+                                (file, file_report_type)))
                         continue
 
                     # validate sources
