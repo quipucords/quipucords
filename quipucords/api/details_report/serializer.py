@@ -22,6 +22,9 @@ from rest_framework.serializers import (CharField,
 class DetailsReportSerializer(NotEmptySerializer):
     """Serializer for the DetailsReport model."""
 
+    report_type = CharField(read_only=True)
+    report_version = CharField(max_length=32, read_only=True)
+
     sources = CustomJSONField(required=True)
     report_id = IntegerField(read_only=True)
     cached_csv = CharField(required=False, read_only=True)

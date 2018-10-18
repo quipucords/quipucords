@@ -130,6 +130,8 @@ def build_report(report, fingerprint_dicts):
     """
     report_dict = {'report_id': report.id,
                    'status': report.status,
+                   'report_type': report.report_type,
+                   'report_version': report.report_version,
                    'system_fingerprints': fingerprint_dicts}
     return report_dict
 

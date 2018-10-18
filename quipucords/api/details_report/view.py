@@ -15,6 +15,7 @@ import logging
 import os
 
 import api.messages as messages
+from api.common.common_report import create_report_version
 from api.common.util import is_int
 from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.details_report.util import (create_details_report,
@@ -82,7 +83,10 @@ def details(request, pk=None):
 
 class DetailsReportsViewSet(mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
-    """ModelViewSet to publish system facts."""
+    """ModelViewSet to publish system facts.
+
+    This is internal API for a sync way to create a report.
+    """
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
@@ -98,16 +102,28 @@ class DetailsReportsViewSet(mixins.CreateModelMixin,
         # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_details_report_json(
-            request.data)
+            request.data, True)
         if has_errors:
             return Response(validation_result,
                             status=status.HTTP_400_BAD_REQUEST)
 
+        report_version = request.data.get('report_version', None)
+        warn_deprecated = False
+        if not report_version:
+            warn_deprecated = True
+            report_version = create_report_version()
+
         # Create FC model and save data
-        details_report = create_details_report(request.data)
+        details_report = create_details_report(
+            create_report_version(), request.data)
         scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                            details_report=details_report)
         scan_job.save()
+        if warn_deprecated:
+            scan_job.log_message(
+                _(messages.FC_MISSING_REPORT_VERSION),
+                log_level=logging.WARNING)
+
         scan_job.queue()
         runner = ScanJobRunner(scan_job)
         runner.run()

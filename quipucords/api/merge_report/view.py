@@ -60,35 +60,35 @@ else:
 @permission_classes(perm_classes)
 def sync_merge_reports(request):
     """Merge reports synchronously."""
+    # pylint: disable=too-many-locals
     error = {
         'reports': []
     }
-    reports = validate_merge_report(request.data)
-    sources = []
-    for report in reports:
-        sources = sources + report.get_sources()
 
-    details_report_json = {'sources': sources}
+    details_report_json = _convert_ids_to_json(request.data)
+
     has_errors, validation_result = validate_details_report_json(
-        details_report_json)
+        details_report_json, True)
     if has_errors:
         message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
         error.get('reports').append(message)
         raise ValidationError(error)
 
     # Create FC model and save data
-    details_report = create_details_report(details_report_json)
-    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                       details_report=details_report)
-    scan_job.save()
-    scan_job.queue()
-    runner = ScanJobRunner(scan_job)
+    details_report_json = _reconcile_source_versions(details_report_json)
+    report_version = details_report_json.get('report_version', None)
+    details_report = create_details_report(report_version, details_report_json)
+    merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                        details_report=details_report)
+    merge_job.save()
+    merge_job.queue()
+    runner = ScanJobRunner(merge_job)
     runner.run()
 
-    if scan_job.status != ScanTask.COMPLETED:
-        raise Exception(scan_job.status_message)
+    if merge_job.status != ScanTask.COMPLETED:
+        raise Exception(merge_job.status_message)
 
-    scan_job = ScanJob.objects.get(pk=scan_job.id)
+    merge_job.refresh_from_db()
     details_report = DetailsReport.objects.get(pk=details_report.id)
 
     # Prepare REST response body
@@ -111,16 +111,36 @@ def async_merge_reports(request, pk=None):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     if request.method == 'PUT':
-        reports = validate_merge_report(request.data)
-        sources = []
-        for report in reports:
-            sources = sources + report.get_sources()
-
-        details_report_json = {'sources': sources}
+        details_report_json = _convert_ids_to_json(request.data)
         return _create_async_merge_report_job(details_report_json)
 
     # Post is last case
     return _create_async_merge_report_job(request.data)
+
+
+def _convert_ids_to_json(report_request_json):
+    """Retrieve merge report job status.
+
+    :param report_request_json: dict with report list of DetailsReport ids
+    :returns: DetailsReport as dict
+    """
+    reports = _validate_merge_report(report_request_json)
+    sources = []
+    report_version = None
+    report_type = None
+
+    for report in reports:
+        sources = sources + report.get_sources()
+        if not report_version and \
+                report.report_version and \
+                report.report_type:
+            report_version = report.report_version
+            report_type = report.report_type
+    details_report_json = {'sources': sources}
+    if report_version:
+        details_report_json['report_version'] = report_version
+        details_report_json['report_type'] = report_type
+    return details_report_json
 
 
 def _get_async_merge_report_status(merge_job_id):
@@ -144,13 +164,16 @@ def _create_async_merge_report_job(details_report_data):
     :returns: Response for http request
     """
     has_errors, validation_result = validate_details_report_json(
-        details_report_data)
+        details_report_data, True)
     if has_errors:
         return Response(validation_result,
                         status=status.HTTP_400_BAD_REQUEST)
 
+    details_report_data = _reconcile_source_versions(details_report_data)
+
     # Create FC model and save data
-    details_report = create_details_report(details_report_data)
+    report_version = details_report_data.get('report_version', None)
+    details_report = create_details_report(report_version, details_report_data)
 
     # Create new job to run
 
@@ -167,8 +190,29 @@ def _create_async_merge_report_job(details_report_data):
     return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-def validate_merge_report(data):
-    """Validate merge reports."""
+def _reconcile_source_versions(details_report_data):
+    """Reconcile various source versions.
+
+    Currently, we only have one version
+        but this could change.  This function should handle it.
+        This function assume validation was done previously.
+    :param details_report_data: details report with versions
+        in each source.  Required due to merging reports.
+    :returns Transformed details report as dict.  Any transformation
+        will be done.  All sources will be the same version.  Report
+        also will have a version.
+    """
+    source_version = details_report_data['sources'][0]['report_version']
+    details_report_data['report_version'] = source_version
+    return details_report_data
+
+
+def _validate_merge_report(data):
+    """Validate merge reports.
+
+    :param data: dict with list of report ids
+    :returns QuerySet DetailsReport
+    """
     # pylint: disable=no-self-use
     error = {
         'reports': []

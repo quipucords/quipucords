@@ -13,12 +13,22 @@
 
 import json
 
+from api.common.common_report import (REPORT_TYPE_CHOICES,
+                                      REPORT_TYPE_DETAILS)
+
 from django.db import models
 
 
 class DetailsReport(models.Model):
     """A reported set of facts."""
 
+    report_type = models.CharField(
+        max_length=11,
+        choices=REPORT_TYPE_CHOICES,
+        default=REPORT_TYPE_DETAILS
+    )
+    report_version = models.CharField(max_length=32,
+                                      null=False)
     sources = models.TextField(null=False)
     report_id = models.IntegerField(null=True)
     deployment_report = models.OneToOneField(

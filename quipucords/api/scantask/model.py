@@ -283,6 +283,7 @@ class ScanTask(models.Model):
         :param sys_unreachable: Systems unreachable during scan.
         """
         # pylint: disable=too-many-arguments
+        self.refresh_from_db()
         stats_changed = False
         if sys_count is not None and sys_count != self.systems_count:
             self.systems_count = sys_count
@@ -321,6 +322,7 @@ class ScanTask(models.Model):
         :param increment_sys_unreachable: True if should be incremented.
         """
         # pylint: disable=too-many-arguments
+        self.refresh_from_db()
         sys_count = None
         sys_failed = None
         sys_unreachable = None
@@ -390,7 +392,6 @@ class ScanTask(models.Model):
             systems_unreachable
 
     # All task types
-    @transaction.atomic
     def start(self):
         """Start a task."""
         self.start_time = datetime.utcnow()
@@ -402,7 +403,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def restart(self):
         """Start a task."""
         self.status = ScanTask.PENDING
@@ -411,7 +411,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def pause(self):
         """Pause a task."""
         self.status = ScanTask.PAUSED
@@ -420,7 +419,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def cancel(self):
         """Cancel a task."""
         self.end_time = datetime.utcnow()
@@ -433,6 +431,7 @@ class ScanTask(models.Model):
     @transaction.atomic
     def complete(self, message=None):
         """Complete a task."""
+        self.refresh_from_db()
         self.end_time = datetime.utcnow()
         self.status = ScanTask.COMPLETED
         if message:
@@ -453,7 +452,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def fail(self, message):
         """Fail a task.
 
