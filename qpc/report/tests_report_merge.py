@@ -40,12 +40,14 @@ TMP_BADDETAILS3 = ('/tmp/testbaddetailsreport_server_id.json',
                    '{"id": 4,"sources":[{"facts": ["A"],"bserver_id": "8"}]}')
 TMP_BADDETAILS4 = ('/tmp/testbaddetailsreport_bad_json.json',
                    '{"id":3,"sources"[this is bad]')
+TMP_BADDETAILS5 = ('/tmp/testbaddetailsinvalidreporttype.json',
+                   '{"report_type": "durham","sources":[{"facts": ["A"],"server_id": "8"}]}')  # noqa
 TMP_GOODDETAILS = ('/tmp/testgooddetailsreport.json',
                    '{"id": 4,"sources":[{"facts": ["A"],"server_id": "8"}]}')
 NONEXIST_FILE = ('/tmp/does/not/exist/bad.json')
 JSON_FILES_LIST = [TMP_DETAILSFILE1, TMP_DETAILSFILE2, TMP_NOTJSONFILE,
                    TMP_BADDETAILS1, TMP_BADDETAILS2, TMP_BADDETAILS3,
-                   TMP_GOODDETAILS]
+                   TMP_GOODDETAILS, TMP_BADDETAILS5]
 PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
@@ -292,6 +294,18 @@ class ReportDetailTests(unittest.TestCase):
                          json_files=None,
                          report_ids=None,
                          json_dir=TMP_BADDETAILS1[0])
+        with self.assertRaises(SystemExit):
+            with redirect_stdout(report_out):
+                nac.main(args)
+
+    def test_detail_merge_json_invalid_report_type_passed(self):
+        """Testing report merge command bad report_type."""
+        report_out = StringIO()
+        nac = ReportMergeCommand(SUBPARSER)
+        args = Namespace(scan_job_ids=None,
+                         json_files=None,
+                         report_ids=None,
+                         json_dir=TMP_BADDETAILS5[0])
         with self.assertRaises(SystemExit):
             with redirect_stdout(report_out):
                 nac.main(args)
