@@ -23,7 +23,7 @@ class DetailsReport(models.Model):
     """A reported set of facts."""
 
     report_type = models.CharField(
-        max_length=10,
+        max_length=11,
         choices=REPORT_TYPE_CHOICES,
         default=REPORT_TYPE_DETAILS
     )
