@@ -163,6 +163,7 @@ class ScanJob(models.Model):
         systems_failed, systems_unreachable
         """
         # pylint: disable=too-many-locals
+        self.refresh_from_db()
         if self.status == ScanTask.CREATED or \
                 self.status == ScanTask.PENDING:
             return None, None, None, None, None
@@ -437,7 +438,6 @@ class ScanJob(models.Model):
             fingerprint_task.save()
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
-    @transaction.atomic
     def start(self):
         """Start a job.
 
@@ -455,7 +455,6 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def restart(self):
         """Restart a job.
 
@@ -537,7 +536,6 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    @transaction.atomic
     def complete(self):
         """Complete a job.
 
@@ -556,7 +554,6 @@ class ScanJob(models.Model):
         self._log_stats('COMPLETION STATS.')
         self.log_current_status()
 
-    @transaction.atomic
     def fail(self, message):
         """Fail a job.
 
