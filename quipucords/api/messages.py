@@ -17,7 +17,7 @@ FC_REQUIRED_ATTRIBUTE = 'Required. May not be null or empty.'
 FC_SOURCE_NAME_NOT_STR = 'Source name must be type string.'
 FC_MUST_BE_ONE_OF = 'Must be one of the following: %s'
 FC_MISSING_REPORT_VERSION = 'Missing report_version.  '\
-    'Future releases will not tolerate missing or invalid report_version.'
+    'Future releases will not tolerate a missing or invalid report_version.'
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = 'Credentials'
