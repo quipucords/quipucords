@@ -177,12 +177,8 @@ REPORT_JSON_DIR_NO_FILES = \
 REPORT_VALIDATE_JSON = 'Checking files for valid json details report. %s'
 REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report. '\
     'Excluding from merge.'
-REPORT_JSON_MISSING_SOURCES = 'Failed: %s is not a details report.'\
-    ' Missing sources. Excluding from merge.'
-REPORT_JSON_MISSING_FACTS = 'Failed: %s is not a details report. ' \
-    'One or more sources missing facts attribute. Excluding from merge.'
-REPORT_JSON_MISSING_SERVER_ID = 'Failed: %s is not a details report. ' \
-    'One or more sources missing server_id attribute. Excluding from merge.'
+REPORT_JSON_MISSING_ATTR = 'Failed: %s is not a details report.'\
+    ' Missing %s. Excluding from merge.'
 REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a valid details report.'
 REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \

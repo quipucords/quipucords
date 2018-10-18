@@ -148,14 +148,14 @@ class ReportMergeCommand(CliCommand):
                             facts = source.get(FACTS_KEY)
                             server_id = source.get(SERVER_ID_KEY)
                             if not facts:
-                                print(_(messages.REPORT_JSON_MISSING_FACTS %
-                                        file))
+                                print(_(messages.REPORT_JSON_MISSING_ATTR %
+                                        (file, FACTS_KEY)))
                                 has_error = True
                                 break
                             if not server_id:
                                 print(
-                                    _(messages.REPORT_JSON_MISSING_SERVER_ID %
-                                      file))
+                                    _(messages.REPORT_JSON_MISSING_ATTR %
+                                      (file, SERVER_ID_KEY)))
                                 has_error = True
                                 break
                             # Add version/type to all sources since merge
@@ -168,7 +168,8 @@ class ReportMergeCommand(CliCommand):
                             print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS %
                                     file))
                     else:
-                        print(_(messages.REPORT_JSON_MISSING_SOURCES % file))
+                        print(_(messages.REPORT_JSON_MISSING_ATTR %
+                                (file, SOURCES_KEY)))
                         continue
             else:
                 print(_(messages.FILE_NOT_FOUND % file))
