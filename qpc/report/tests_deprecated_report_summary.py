@@ -21,7 +21,7 @@ from io import StringIO
 from qpc import messages
 from qpc.cli import CLI
 from qpc.report import REPORT_URI
-from qpc.report.detail import ReportDetailCommand
+from qpc.report.deprecated_summary import DeprecatedReportSummaryCommand
 from qpc.scan import SCAN_JOB_URI
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
@@ -32,7 +32,7 @@ PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
-class ReportDetailTests(unittest.TestCase):
+class ReportSummaryTests(unittest.TestCase):
     """Class for testing the scan show commands for qpc."""
 
     # pylint: disable=invalid-name
@@ -59,22 +59,22 @@ class ReportDetailTests(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-    def test_detail_report_as_json(self):
-        """Testing retreiving detail report as json."""
+    def test_summary_report_as_json(self):
+        """Testing retreiving summary report as json."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
             SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            REPORT_URI + '1/details/'
+            REPORT_URI + '1/deployments/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = DeprecatedReportSummaryCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=True,
@@ -82,24 +82,25 @@ class ReportDetailTests(unittest.TestCase):
                              path=self.test_json_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
+                output = report_out.getvalue().strip()
+                self.assertIn(messages.REPORT_SUMMARY_DEPRECATED, output)
+                self.assertIn(messages.REPORT_SUCCESSFULLY_WRITTEN, output)
                 with open(self.test_json_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)
                 self.assertDictEqual(get_report_json_data, file_content_dict)
 
-    def test_detail_report_as_json_report_id(self):
-        """Testing retreiving detail report as json with report id."""
+    def test_summary_report_as_json_report_id(self):
+        """Testing retreiving summary report as json with report id."""
         report_out = StringIO()
 
         get_report_url = get_server_location() + \
-            REPORT_URI + '1/details/'
+            REPORT_URI + '1/deployments/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
         with requests_mock.Mocker() as mocker:
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = DeprecatedReportSummaryCommand(SUBPARSER)
             args = Namespace(scan_job_id=None,
                              report_id='1',
                              output_json=True,
@@ -107,21 +108,22 @@ class ReportDetailTests(unittest.TestCase):
                              path=self.test_json_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
+                output = report_out.getvalue().strip()
+                self.assertIn(messages.REPORT_SUMMARY_DEPRECATED, output)
+                self.assertIn(messages.REPORT_SUCCESSFULLY_WRITTEN, output)
                 with open(self.test_json_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)
                 self.assertDictEqual(get_report_json_data, file_content_dict)
 
-    def test_detail_report_as_csv(self):
-        """Testing retreiving detail report as csv."""
+    def test_summary_report_as_csv(self):
+        """Testing retreiving summary report as csv."""
         report_out = StringIO()
         get_scanjob_url = get_server_location() + \
             SCAN_JOB_URI + '1'
         get_scanjob_json_data = {'id': 1, 'report_id': 1}
         get_report_url = get_server_location() + \
-            REPORT_URI + '1/details/'
+            REPORT_URI + '1/deployments/'
         get_report_csv_data = 'Report\n'
         get_report_csv_data += '1\n\n\n'
         get_report_csv_data += 'key\n'
@@ -133,7 +135,7 @@ class ReportDetailTests(unittest.TestCase):
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_csv_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = DeprecatedReportSummaryCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=False,
@@ -141,8 +143,9 @@ class ReportDetailTests(unittest.TestCase):
                              path=self.test_csv_filename)
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertEqual(report_out.getvalue().strip(),
-                                 messages.REPORT_SUCCESSFULLY_WRITTEN)
+                output = report_out.getvalue().strip()
+                self.assertIn(messages.REPORT_SUMMARY_DEPRECATED, output)
+                self.assertIn(messages.REPORT_SUCCESSFULLY_WRITTEN, output)
                 with open(self.test_csv_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)
@@ -150,28 +153,28 @@ class ReportDetailTests(unittest.TestCase):
                 self.assertDictEqual(get_report_csv_data, file_content_dict)
 
     # Test validation
-    def test_detail_report_output_directory(self):
+    def test_summary_report_output_directory(self):
         """Testing fail because output directory."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'report', 'detail',
+            sys.argv = ['/bin/qpc', 'report', 'summary',
                         '--json', '--output-file', '/']
             CLI().main()
 
-    def test_detail_report_output_directory_not_exist(self):
+    def test_summary_report_output_directory_not_exist(self):
         """Testing fail because output directory does not exist."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'report', 'detail',
+            sys.argv = ['/bin/qpc', 'report', 'summary',
                         '--json', '--output-file', '/foo/bar/']
             CLI().main()
 
-    def test_detail_report_output_file_empty(self):
+    def test_summary_report_output_file_empty(self):
         """Testing fail because output file empty."""
         with self.assertRaises(SystemExit):
-            sys.argv = ['/bin/qpc', 'report', 'detail',
+            sys.argv = ['/bin/qpc', 'report', 'summary',
                         '--json', '--output-file', '']
             CLI().main()
 
-    def test_detail_report_scan_job_not_exist(self):
+    def test_summary_report_scan_job_not_exist(self):
         """Summary report with nonexistent scanjob."""
         report_out = StringIO()
 
@@ -181,10 +184,10 @@ class ReportDetailTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = DeprecatedReportSummaryCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
-                             report_id=None,
                              output_json=True,
+                             report_id=None,
                              output_csv=False,
                              path=self.test_json_filename)
             with self.assertRaises(SystemExit):
@@ -193,7 +196,7 @@ class ReportDetailTests(unittest.TestCase):
                     self.assertEqual(report_out.getvalue(),
                                      messages.REPORT_SJ_DOES_NOT_EXIST)
 
-    def test_detail_report_invalid_scan_job(self):
+    def test_summary_report_invalid_scan_job(self):
         """Summary report with scanjob but no report_id."""
         report_out = StringIO()
 
@@ -203,7 +206,7 @@ class ReportDetailTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = DeprecatedReportSummaryCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=True,
@@ -212,5 +215,6 @@ class ReportDetailTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 with redirect_stdout(report_out):
                     nac.main(args)
-                    self.assertEqual(report_out.getvalue(),
-                                     messages.REPORT_NO_DETAIL_REPORT_FOR_SJ)
+                    self.assertEqual(
+                        report_out.getvalue(),
+                        messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ)

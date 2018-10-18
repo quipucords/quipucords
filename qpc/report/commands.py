@@ -12,7 +12,9 @@
 """Commands for import organization."""
 # flake8: noqa
 # pylint: disable=unused-import
-from qpc.report.summary import ReportSummaryCommand
-from qpc.report.detail import ReportDetailCommand
+from qpc.report.deployments import ReportDeploymentsCommand
+from qpc.report.deprecated_detail import DeprecatedReportDetailCommand
+from qpc.report.details import ReportDetailsCommand
 from qpc.report.merge import ReportMergeCommand
 from qpc.report.merge_status import ReportMergeStatusCommand
+from qpc.report.deprecated_summary import DeprecatedReportSummaryCommand

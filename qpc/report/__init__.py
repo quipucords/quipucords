@@ -12,8 +12,15 @@
 """Constants for the Report commands."""
 
 SUBCOMMAND = 'report'
+
+
+DEPLOYMENTS = 'deployments'
+DETAILS = 'details'
+
+# deprecated
 SUMMARY = 'summary'
 DETAIL = 'detail'
+
 MERGE = 'merge'
 MERGE_STATUS = 'merge-status'
 

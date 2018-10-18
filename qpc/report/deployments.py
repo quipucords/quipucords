@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportSummaryCommand is used to show summary report information."""
+"""ReportDeploymentsCommand is used to show summary report information."""
 
 from __future__ import print_function
 
@@ -27,14 +27,14 @@ from requests import codes
 
 
 # pylint: disable=too-few-public-methods
-class ReportSummaryCommand(CliCommand):
+class ReportDeploymentsCommand(CliCommand):
     """Defines the report summary command.
 
     This command is for showing the summary report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.SUMMARY
+    ACTION = report.DEPLOYMENTS
 
     def __init__(self, subparsers):
         """Create command."""
@@ -88,7 +88,7 @@ class ReportSummaryCommand(CliCommand):
                         self.req_path, self.report_id,
                         report.DEPLOYMENTS_PATH_SUFFIX)
                 else:
-                    print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+                    print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ %
                             self.args.scan_job_id))
                     sys.exit(1)
             else:
@@ -118,9 +118,9 @@ class ReportSummaryCommand(CliCommand):
 
     def _handle_response_error(self):
         if self.args.report_id is None:
-            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+            print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ %
                     self.args.scan_job_id))
         else:
-            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID %
+            print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_REPORT_ID %
                     self.args.report_id))
         sys.exit(1)

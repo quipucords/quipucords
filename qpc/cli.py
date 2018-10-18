@@ -25,10 +25,12 @@ from qpc.cred.commands import (CredAddCommand,
                                CredEditCommand,
                                CredListCommand,
                                CredShowCommand,)
-from qpc.report.commands import (ReportDetailCommand,
+from qpc.report.commands import (DeprecatedReportDetailCommand,
+                                 DeprecatedReportSummaryCommand,
+                                 ReportDeploymentsCommand,
+                                 ReportDetailsCommand,
                                  ReportMergeCommand,
-                                 ReportMergeStatusCommand,
-                                 ReportSummaryCommand)
+                                 ReportMergeStatusCommand)
 from qpc.scan.commands import (ScanAddCommand,
                                ScanCancelCommand,
                                ScanClearCommand,
@@ -101,10 +103,12 @@ class CLI():
                               ScanRestartCommand, ScanEditCommand,
                               ScanClearCommand, ScanJobCommand])
         self._add_subcommand(report.SUBCOMMAND,
-                             [ReportSummaryCommand,
-                              ReportDetailCommand,
+                             [ReportDeploymentsCommand,
+                              ReportDetailsCommand,
                               ReportMergeCommand,
-                              ReportMergeStatusCommand])
+                              ReportMergeStatusCommand,
+                              DeprecatedReportSummaryCommand,
+                              DeprecatedReportDetailCommand])
         ensure_data_dir_exists()
         ensure_config_dir_exists()
 

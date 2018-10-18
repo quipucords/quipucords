@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportDetailCommand is used to show detail report information."""
+"""ReportDetailsCommand is used to show detail report information."""
 
 from __future__ import print_function
 
@@ -27,14 +27,14 @@ from requests import codes
 
 
 # pylint: disable=too-few-public-methods
-class ReportDetailCommand(CliCommand):
+class ReportDetailsCommand(CliCommand):
     """Defines the report details command.
 
     This command is for showing the details report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.DETAIL
+    ACTION = report.DETAILS
 
     def __init__(self, subparsers):
         """Create command."""
