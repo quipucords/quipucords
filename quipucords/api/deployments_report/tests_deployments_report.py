@@ -13,6 +13,7 @@
 import json
 import uuid
 
+from api.common.common_report import create_report_version
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
                                                  sanitize_row)
 from api.models import (Credential,
@@ -48,6 +49,7 @@ class DeploymentReportTest(TestCase):
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.report_version = create_report_version()
 
     def create_details_report(self, data):
         """Call the create endpoint."""
@@ -317,5 +319,5 @@ class DeploymentReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
+        expected = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)
