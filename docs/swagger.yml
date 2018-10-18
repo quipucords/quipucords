@@ -1238,6 +1238,14 @@ definitions:
           format: "int64"
           description: "The deployment report identifier"
           example: 1
+        report_type:
+          type: "string"
+          description: "The report type"
+          example: "deployments"
+        report_version:
+          type: "string"
+          description: "The report version"
+          example: "1.0.0.afdsgev"
         status:
           type: "string"
           enum:
@@ -1272,6 +1280,14 @@ definitions:
           format: "int64"
           description: "The details report identifier"
           example: 15
+        report_type:
+          type: "string"
+          description: "The report type"
+          example: "details"
+        report_version:
+          type: "string"
+          description: "The report version"
+          example: "1.0.0.afdsgev"
         sources:
           type: "array"
           items:
@@ -1289,6 +1305,10 @@ definitions:
         type: "string"
         description: "Globally unique server identifier"
         example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
+      report_version:
+        type: "string"
+        description: "The report version"
+        example: "1.0.0.afdsgev"
       source_name:
         type: "string"
         description: "The source name associated with these facts"
