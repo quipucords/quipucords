@@ -41,7 +41,7 @@ TMP_BADDETAILS3 = ('/tmp/testbaddetailsreport_server_id.json',
 TMP_BADDETAILS4 = ('/tmp/testbaddetailsreport_bad_json.json',
                    '{"id":3,"sources"[this is bad]')
 TMP_BADDETAILS5 = ('/tmp/testbaddetailsinvalidreporttype.json',
-                   '{"report_type": "durham","sources":[{"facts": ["A"],"server_id": "8"}]}')  # noqa
+                   '{"report_type": "durham"}')
 TMP_GOODDETAILS = ('/tmp/testgooddetailsreport.json',
                    '{"id": 4,"sources":[{"facts": ["A"],"server_id": "8"}]}')
 NONEXIST_FILE = ('/tmp/does/not/exist/bad.json')
