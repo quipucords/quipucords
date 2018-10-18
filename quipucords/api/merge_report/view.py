@@ -65,12 +65,9 @@ def sync_merge_reports(request):
     error = {
         'reports': []
     }
-    reports = validate_merge_report(request.data)
-    sources = []
-    for report in reports:
-        sources = sources + report.get_sources()
 
-    details_report_json = {'sources': sources}
+    details_report_json = _convert_ids_to_json(request.data)
+
     has_errors, validation_result = validate_details_report_json(
         details_report_json)
     if has_errors:
@@ -122,16 +119,36 @@ def async_merge_reports(request, pk=None):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     if request.method == 'PUT':
-        reports = validate_merge_report(request.data)
-        sources = []
-        for report in reports:
-            sources = sources + report.get_sources()
-
-        details_report_json = {'sources': sources}
+        details_report_json = _convert_ids_to_json(request.data)
         return _create_async_merge_report_job(details_report_json)
 
     # Post is last case
     return _create_async_merge_report_job(request.data)
+
+
+def _convert_ids_to_json(report_request_json):
+    """Retrieve merge report job status.
+
+    :param report_request_json: dict with report list of DetailsReport ids
+    :returns: DetailsReport as dict
+    """
+    reports = _validate_merge_report(report_request_json)
+    sources = []
+    report_version = None
+    report_type = None
+
+    for report in reports:
+        sources = sources + report.get_sources()
+        if not report_version and \
+                report.report_version and \
+                report.report_type:
+            report_version = report.report_version
+            report_type = report.report_type
+    details_report_json = {'sources': sources}
+    if report_version:
+        details_report_json['report_version'] = report_version
+        details_report_json['report_type'] = report_type
+    return details_report_json
 
 
 def _get_async_merge_report_status(merge_job_id):
@@ -188,8 +205,12 @@ def _create_async_merge_report_job(details_report_data):
     return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-def validate_merge_report(data):
-    """Validate merge reports."""
+def _validate_merge_report(data):
+    """Validate merge reports.
+
+    :param data: dict with list of report ids
+    :returns QuerySet DetailsReport
+    """
     # pylint: disable=no-self-use
     error = {
         'reports': []
