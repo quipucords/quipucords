@@ -34,6 +34,15 @@ except AttributeError:
 # pylint: disable=too-few-public-methods
 
 
+SOURCES_KEY = 'sources'
+FACTS_KEY = 'facts'
+SERVER_ID_KEY = 'server_id'
+REPORT_VERSION_KEY = 'report_version'
+REPORT_TYPE_KEY = 'report_type'
+DEFAULT_REPORT_VERSION = '1.0.0.legacy'
+DETAILS_REPORT_TYPE = 'details'
+
+
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
 
@@ -105,9 +114,6 @@ class ReportMergeCommand(CliCommand):
         # pylint: disable=too-many-locals
         print(_(messages.REPORT_VALIDATE_JSON % files))
         all_sources = []
-        report_version = None
-        report_type = None
-        report_id = None
         for file in files:
             if os.path.isfile(file):
                 details_report = None
@@ -118,24 +124,29 @@ class ReportMergeCommand(CliCommand):
                         print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
                         continue
 
-                    # validate report type
+                    # validate version type
                     file_report_version = details_report.get(
-                        'report_version', None)
+                        REPORT_VERSION_KEY, None)
                     if not file_report_version:
+                        # warn about old format but continue
                         print(_(messages.REPORT_MISSING_REPORT_VERSION % file))
-                    file_report_type = details_report.get('report_type', None)
-                    if file_report_type and file_report_type != 'details':
+                        file_report_version = DEFAULT_REPORT_VERSION
+
+                    file_report_type = details_report.get(
+                        REPORT_TYPE_KEY, DETAILS_REPORT_TYPE)
+                    if file_report_type != DETAILS_REPORT_TYPE:
+                        # terminate if different from details type
                         print(_(messages.REPORT_INVALID_REPORT_TYPE %
                                 (file, file_report_type)))
                         continue
 
                     # validate sources
-                    sources = details_report.get('sources', None)
+                    sources = details_report.get(SOURCES_KEY, None)
                     if sources:
                         has_error = False
                         for source in sources:
-                            facts = source.get('facts')
-                            server_id = source.get('server_id')
+                            facts = source.get(FACTS_KEY)
+                            server_id = source.get(SERVER_ID_KEY)
                             if not facts:
                                 print(_(messages.REPORT_JSON_MISSING_FACTS %
                                         file))
@@ -147,13 +158,11 @@ class ReportMergeCommand(CliCommand):
                                       file))
                                 has_error = True
                                 break
-                        if not has_error:
-                            if not report_version and \
-                                    file_report_version and \
-                                    file_report_type:
-                                report_version = file_report_version
-                                report_type = file_report_type
+                            # Add version/type to all sources since merge
+                            source[REPORT_TYPE_KEY] = file_report_type
+                            source[REPORT_VERSION_KEY] = file_report_version
 
+                        if not has_error:
                             # Source is valid so add it
                             all_sources += sources
                             print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS %
@@ -167,11 +176,8 @@ class ReportMergeCommand(CliCommand):
         if all_sources == []:
             print(_(messages.REPORT_JSON_DIR_ALL_FAIL))
             sys.exit(1)
-        self.json = {'id': report_id,
-                     'sources': all_sources}
-        if report_version:
-            self.json['report_version'] = report_version
-            self.json['report_type'] = report_type
+        self.json = {SOURCES_KEY: all_sources,
+                     REPORT_TYPE_KEY: DETAILS_REPORT_TYPE}
 
     def _merge_json(self):
         """Combine the sources for each json file provided.

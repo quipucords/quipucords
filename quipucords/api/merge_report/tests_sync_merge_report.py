@@ -160,14 +160,17 @@ class SyncMergeReports(TestCase):
         """Test sync merge jobs success."""
         url = reverse('reports-list')
         sources1 = [{'server_id': self.server_id,
+                     'report_version': create_report_version(),
                      'source_name': self.net_source.name,
                      'source_type': self.net_source.source_type,
                      'facts': [{'key1': 'value1'}]}]
         sources2 = [{'server_id': 'abc',
+                     'report_version': create_report_version(),
                      'source_name': 'another_name',
                      'source_type': 'network',
                      'facts': [{'key2': 'value2'}]}]
-        request_json = {'sources': sources1}
+        request_json = {'report_type': 'details',
+                        'sources': sources1}
         response = self.client.post(url,
                                     json.dumps(request_json),
                                     'application/json')
@@ -179,7 +182,8 @@ class SyncMergeReports(TestCase):
             sources1)
         report1_id = response_json['report_id']
 
-        request_json = {'sources': sources2}
+        request_json = {'report_type': 'details',
+                        'sources': sources2}
         response = self.client.post(url,
                                     json.dumps(request_json),
                                     'application/json')
@@ -205,10 +209,12 @@ class SyncMergeReports(TestCase):
                     'report_version': create_report_version(),
                     'sources': [
                         {'server_id': 'abc',
+                         'report_version': create_report_version(),
                          'source_name': 'another_name',
                          'source_type': 'network',
                          'facts': [{'key2': 'value2'}]},
                         {'server_id': self.server_id,
+                         'report_version': create_report_version(),
                          'source_name': 'test_source',
                          'source_type': 'network',
                          'facts': [{'key1': 'value1'}]}]}

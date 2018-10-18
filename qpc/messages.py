@@ -167,7 +167,8 @@ REPORT_JSON_FILES_HELP = 'At least two json details report files are ' \
                          'required to merge.'
 REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
                            'details report.'
-REPORT_MISSING_REPORT_VERSION = 'The file %s is missing report_version.  '\
+REPORT_MISSING_REPORT_VERSION = 'WARNING: '\
+    'The file %s is missing report_version.  '\
     'Future releases will not tolerate a missing or invalid report_version.'
 REPORT_INVALID_REPORT_TYPE = 'The file %s contains invalid report type %s.  '\
     'Only details reports can be merged. Excluding from merge.'

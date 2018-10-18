@@ -86,8 +86,10 @@ class DetailReportTest(TestCase):
     ##############################################################
     def test_details(self):
         """Get details for a report via API."""
-        request_json = {'sources':
+        request_json = {'report_type': 'details',
+                        'sources':
                         [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
@@ -114,8 +116,10 @@ class DetailReportTest(TestCase):
         value = renderer.render(test_json)
         self.assertIsNone(value)
 
-        request_json = {'sources':
+        request_json = {'report_type': 'details',
+                        'sources':
                         [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}

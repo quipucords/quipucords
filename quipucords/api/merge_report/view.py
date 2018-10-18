@@ -14,7 +14,6 @@ import logging
 import os
 
 import api.messages as messages
-from api.common.common_report import create_report_version
 from api.common.util import is_int
 from api.details_report.util import (create_details_report,
                                      validate_details_report_json)
@@ -69,26 +68,19 @@ def sync_merge_reports(request):
     details_report_json = _convert_ids_to_json(request.data)
 
     has_errors, validation_result = validate_details_report_json(
-        details_report_json)
+        details_report_json, True)
     if has_errors:
         message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
         error.get('reports').append(message)
         raise ValidationError(error)
 
     # Create FC model and save data
+    details_report_json = _reconcile_source_versions(details_report_json)
     report_version = details_report_json.get('report_version', None)
-    warn_deprecated = False
-    if not report_version:
-        warn_deprecated = True
-        report_version = create_report_version()
     details_report = create_details_report(report_version, details_report_json)
     merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                         details_report=details_report)
     merge_job.save()
-    if warn_deprecated:
-        merge_job.log_message(
-            _(messages.FC_MISSING_REPORT_VERSION),
-            log_level=logging.WARNING)
     merge_job.queue()
     runner = ScanJobRunner(merge_job)
     runner.run()
@@ -172,18 +164,15 @@ def _create_async_merge_report_job(details_report_data):
     :returns: Response for http request
     """
     has_errors, validation_result = validate_details_report_json(
-        details_report_data)
+        details_report_data, True)
     if has_errors:
         return Response(validation_result,
                         status=status.HTTP_400_BAD_REQUEST)
 
+    details_report_data = _reconcile_source_versions(details_report_data)
+
     # Create FC model and save data
     report_version = details_report_data.get('report_version', None)
-    warn_deprecated = False
-
-    if not report_version:
-        warn_deprecated = True
-        report_version = create_report_version()
     details_report = create_details_report(report_version, details_report_data)
 
     # Create new job to run
@@ -191,10 +180,6 @@ def _create_async_merge_report_job(details_report_data):
     merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                         details_report=details_report)
     merge_job.save()
-    if warn_deprecated:
-        merge_job.log_message(
-            _(messages.FC_MISSING_REPORT_VERSION),
-            log_level=logging.WARNING)
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
     response_data = job_serializer.data
@@ -203,6 +188,23 @@ def _create_async_merge_report_job(details_report_data):
     start_scan.send(sender=__name__, instance=merge_job)
 
     return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+def _reconcile_source_versions(details_report_data):
+    """Reconcile various source versions.
+
+    Currently, we only have one version
+        but this could change.  This function should handle it.
+        This function assume validation was done previously.
+    :param details_report_data: details report with versions
+        in each source.  Required due to merging reports.
+    :returns Transformed details report as dict.  Any transformation
+        will be done.  All sources will be the same version.  Report
+        also will have a version.
+    """
+    source_version = details_report_data['sources'][0]['report_version']
+    details_report_data['report_version'] = source_version
+    return details_report_data
 
 
 def _validate_merge_report(data):

@@ -81,7 +81,9 @@ class DeploymentReportTest(TestCase):
                               os_versions=None):
         """Create a DetailsReport for test."""
         facts = []
-        fc_json = {'sources': [{'server_id': self.server_id,
+        fc_json = {'report_type': 'details',
+                   'sources': [{'server_id': self.server_id,
+                                'report_version': create_report_version(),
                                 'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
@@ -188,7 +190,9 @@ class DeploymentReportTest(TestCase):
 
         # Create a system fingerprint via collection receiver
         facts = []
-        fc_json = {'sources': [{'server_id': self.server_id,
+        fc_json = {'report_type': 'details',
+                   'sources': [{'server_id': self.server_id,
+                                'report_version': create_report_version(),
                                 'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}

@@ -102,7 +102,7 @@ class DetailsReportsViewSet(mixins.CreateModelMixin,
         # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_details_report_json(
-            request.data)
+            request.data, True)
         if has_errors:
             return Response(validation_result,
                             status=status.HTTP_400_BAD_REQUEST)

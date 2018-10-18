@@ -253,9 +253,11 @@ class ScanJobRunner(Process):
         sources = build_sources_from_tasks(
             inspect_tasks.filter(status=ScanTask.COMPLETED))
         if bool(sources):
-            details_report_json = {'sources': sources}
+            details_report_json = {'sources': sources,
+                                   'report_type': 'details',
+                                   'report_version': create_report_version()}
             has_errors, validation_result = validate_details_report_json(
-                details_report_json)
+                details_report_json, False)
 
             if has_errors:
                 message = 'Scan producted invalid details report JSON: %s' % \
