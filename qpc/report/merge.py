@@ -102,6 +102,7 @@ class ReportMergeCommand(CliCommand):
         :param files: list(str) of the files to be merged
         """
         # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-locals
         print(_(messages.REPORT_VALIDATE_JSON % files))
         all_sources = []
         report_version = None
@@ -118,12 +119,14 @@ class ReportMergeCommand(CliCommand):
                         continue
 
                     # validate report type
-                    report_type = details_report.get('report_type', None)
-                    if not report_type:
+                    file_report_version = details_report.get(
+                        'report_version', None)
+                    if not file_report_version:
                         print(_(messages.REPORT_MISSING_REPORT_VERSION % file))
-                    if report_type and report_type != 'details':
+                    file_report_type = details_report.get('report_type', None)
+                    if file_report_type and file_report_type != 'details':
                         print(_(messages.REPORT_INVALID_REPORT_TYPE %
-                                report_type))
+                                file_report_type))
                         continue
 
                     # validate sources
@@ -146,12 +149,10 @@ class ReportMergeCommand(CliCommand):
                                 break
                         if not has_error:
                             if not report_version and \
-                                    details_report.get('report_version',
-                                                       None) and \
-                                    details_report.get('report_type',
-                                                       None):
-                                report_version = details_report.get(
-                                    'report_version')
+                                    file_report_version and \
+                                    file_report_type:
+                                report_version = file_report_version
+                                report_type = file_report_type
 
                             # Source is valid so add it
                             all_sources += sources
