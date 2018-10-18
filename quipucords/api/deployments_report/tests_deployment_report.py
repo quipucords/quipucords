@@ -13,7 +13,7 @@
 import json
 import uuid
 
-from api.deployments_report.cvs_renderer import (DeploymentCSVRenderer,
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
                                                  sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
@@ -51,7 +51,7 @@ class DeploymentReportTest(TestCase):
 
     def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')

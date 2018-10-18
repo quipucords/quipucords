@@ -85,7 +85,7 @@ class AsyncMergeReports(TestCase):
     # Test Async Report Merge
     ##############################################################
 
-    @patch('api.deployments_report.view.start_scan', side_effect=dummy_start)
+    @patch('api.merge_report.view.start_scan', side_effect=dummy_start)
     def test_greenpath_create(self, start_scan):
         """Create report merge job object via API."""
         # pylint: disable=unused-argument
@@ -351,11 +351,11 @@ class AsyncMergeReports(TestCase):
             json_response, {'reports':
                             [messages.REPORT_MERGE_NOT_FOUND % '5, 6']})
 
-    @patch('api.deployments_report.view.start_scan', side_effect=dummy_start)
+    @patch('api.merge_report.view.start_scan', side_effect=dummy_start)
     def test_by_id_merge_jobs_success(self, mock_dummy_start):
         """Test report merge by id jobs success."""
         # pylint: disable=unused-argument
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         sources1 = [{'server_id': self.server_id,
                      'source_name': self.net_source.name,
                      'source_type': self.net_source.source_type,

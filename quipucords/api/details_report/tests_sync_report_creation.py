@@ -51,7 +51,7 @@ class DetailsReportTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -72,17 +72,6 @@ class DetailsReportTest(TestCase):
             print('Failure cause: ')
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        return response.json()
-
-    def retrieve_expect_200(self, identifier):
-        """Create a source, return the response as a dict."""
-        url = reverse('facts-detail', args=(identifier,))
-        response = self.client.get(url)
-
-        if response.status_code != status.HTTP_200_OK:
-            print('Failure cause: ')
-            print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()
 
     ################################################################
