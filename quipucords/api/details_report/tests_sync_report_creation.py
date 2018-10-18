@@ -14,7 +14,7 @@ import json
 
 from api import messages
 from api.models import (Credential,
-                        FactCollection,
+                        DetailsReport,
                         ServerInformation,
                         Source)
 
@@ -24,8 +24,8 @@ from django.urls import reverse
 from rest_framework import status
 
 
-class FactCollectionTest(TestCase):
-    """Tests against the FactCollection model and view set."""
+class DetailsReportTest(TestCase):
+    """Tests against the DetailsReport model and view set."""
 
     # pylint: disable=no-self-use,too-many-arguments,invalid-name
     # pylint: disable=too-many-locals,too-many-branches
@@ -51,7 +51,7 @@ class FactCollectionTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -74,17 +74,6 @@ class FactCollectionTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def retrieve_expect_200(self, identifier):
-        """Create a source, return the response as a dict."""
-        url = reverse('facts-detail', args=(identifier,))
-        response = self.client.get(url)
-
-        if response.status_code != status.HTTP_200_OK:
-            print('Failure cause: ')
-            print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        return response.json()
-
     ################################################################
     # Test Model Create
     ################################################################
@@ -101,7 +90,7 @@ class FactCollectionTest(TestCase):
         self.assertEqual(
             response_json['sources'],
             request_json['sources'])
-        self.assertEqual(FactCollection.objects.count(), 1)
+        self.assertEqual(DetailsReport.objects.count(), 1)
 
     def test_missing_sources(self):
         """Test missing sources attribute."""

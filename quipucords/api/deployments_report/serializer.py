@@ -11,23 +11,24 @@
 
 """Serializer for system fingerprint models."""
 
-from api.common.serializer import CustomJSONField
-from api.models import (Entitlement,
-                        FactCollection,
-                        Product,
-                        SystemFingerprint)
+from api.common.serializer import CustomJSONField, NotEmptySerializer
+from api.models import (
+    DeploymentsReport,
+    DetailsReport,
+    Entitlement,
+    Product,
+    SystemFingerprint)
 
 from rest_framework.serializers import (CharField,
                                         ChoiceField,
                                         DateField,
                                         FloatField,
                                         IntegerField,
-                                        ModelSerializer,
                                         NullBooleanField,
                                         PrimaryKeyRelatedField)
 
 
-class ProductSerializer(ModelSerializer):
+class ProductSerializer(NotEmptySerializer):
     """Serializer for the Product model."""
 
     version = CustomJSONField(required=False)
@@ -40,7 +41,7 @@ class ProductSerializer(ModelSerializer):
         fields = ('name', 'version', 'presence', 'metadata')
 
 
-class EntitlementSerializer(ModelSerializer):
+class EntitlementSerializer(NotEmptySerializer):
     """Serializer for the Entitlement model."""
 
     metadata = CustomJSONField(required=True)
@@ -52,12 +53,8 @@ class EntitlementSerializer(ModelSerializer):
         fields = ('name', 'entitlement_id', 'metadata')
 
 
-class FingerprintSerializer(ModelSerializer):
+class SystemFingerprintSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
-
-    # Scan information
-    report_id = PrimaryKeyRelatedField(
-        queryset=FactCollection.objects.all())
 
     # Common facts
     name = CharField(required=False, max_length=256)
@@ -84,6 +81,7 @@ class FingerprintSerializer(ModelSerializer):
     cpu_core_count = FloatField(required=False, min_value=0)
 
     system_creation_date = DateField(required=False)
+    system_last_checkin_date = DateField(required=False)
 
     virtualized_type = CharField(required=False, max_length=64)
 
@@ -114,7 +112,7 @@ class FingerprintSerializer(ModelSerializer):
     sources = CustomJSONField(required=True)
 
     class Meta:
-        """Meta class for FingerprintSerializer."""
+        """Meta class for SystemFingerprintSerializer."""
 
         model = SystemFingerprint
         fields = '__all__'
@@ -131,3 +129,33 @@ class FingerprintSerializer(ModelSerializer):
             Entitlement.objects.create(fingerprint=fingerprint,
                                        **entitlement_data)
         return fingerprint
+
+
+class FingerprintField(PrimaryKeyRelatedField):
+    """Representation the system fingerprint."""
+
+    def to_representation(self, value):
+        """Create output representation."""
+        serializer = SystemFingerprintSerializer(value)
+        return serializer.data
+
+
+class DeploymentReportSerializer(NotEmptySerializer):
+    """Serializer for the Fingerprint model."""
+
+    # Scan information
+    details_report = PrimaryKeyRelatedField(
+        queryset=DetailsReport.objects.all())
+    report_id = IntegerField(read_only=True)
+    cached_json = CustomJSONField(read_only=True)
+    cached_csv = CharField(read_only=True)
+
+    status = ChoiceField(
+        read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
+    system_fingerprints = FingerprintField(many=True, read_only=True)
+
+    class Meta:
+        """Meta class for DeploymentReportSerializer."""
+
+        model = DeploymentsReport
+        fields = '__all__'

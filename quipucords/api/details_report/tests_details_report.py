@@ -13,11 +13,11 @@
 import copy
 import json
 
+from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.models import (Credential,
-                        FactCollection,
+                        DetailsReport,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DetailsCSVRenderer)
 
 from django.core import management
 from django.test import TestCase
@@ -54,7 +54,7 @@ class DetailReportTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -92,9 +92,9 @@ class DetailReportTest(TestCase):
 
         response_json = self.create_expect_201(
             request_json)
-        identifier = response_json['id']
+        identifier = response_json['report_id']
         response_json = self.retrieve_expect_200(identifier)
-        self.assertEqual(response_json['id'], identifier)
+        self.assertEqual(response_json['report_id'], identifier)
 
     ##############################################################
     # Test CSV Renderer
@@ -134,9 +134,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
+        details_report = DetailsReport.objects.get(
+            report_id=response_json['report_id'])
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -146,9 +147,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
+        details_report = DetailsReport.objects.get(
+            id=response_json['report_id'])
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -158,9 +160,10 @@ class DetailReportTest(TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        fact_collection = FactCollection.objects.get(id=response_json['id'])
-        fact_collection.csv_content = None
-        fact_collection.save()
+        details_report = DetailsReport.objects.get(
+            report_id=response_json['report_id'])
+        details_report.cached_csv = None
+        details_report.save()
 
         # Remove facts
         test_json = copy.deepcopy(response_json)

@@ -47,16 +47,16 @@ class SyncMergeReports(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
 
-    def create_fact_collection(self, data):
+    def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_fact_collection_expect_201(self, data):
+    def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())
@@ -157,7 +157,7 @@ class SyncMergeReports(TestCase):
 
     def test_sync_merge_jobs_success(self):
         """Test sync merge jobs success."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         sources1 = [{'server_id': self.server_id,
                      'source_name': self.net_source.name,
                      'source_type': self.net_source.source_type,
@@ -176,7 +176,7 @@ class SyncMergeReports(TestCase):
         self.assertEqual(
             response_json['sources'],
             sources1)
-        report1_id = response_json['id']
+        report1_id = response_json['report_id']
 
         request_json = {'sources': sources2}
         response = self.client.post(url,
@@ -188,7 +188,7 @@ class SyncMergeReports(TestCase):
         self.assertEqual(
             response_json['sources'],
             sources2)
-        report2_id = response_json['id']
+        report2_id = response_json['report_id']
 
         url = '/api/v1/reports/merge/'
         data = {'reports': [report1_id, report2_id]}
@@ -199,7 +199,7 @@ class SyncMergeReports(TestCase):
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
-        expected = {'id': 3,
+        expected = {'report_id': 3,
                     'sources': [
                         {'server_id': 'abc',
                          'source_name': 'another_name',
@@ -208,8 +208,7 @@ class SyncMergeReports(TestCase):
                         {'server_id': self.server_id,
                          'source_name': 'test_source',
                          'source_type': 'network',
-                         'facts': [{'key1': 'value1'}]}],
-                    'status': 'complete'}
+                         'facts': [{'key1': 'value1'}]}]}
 
         self.assertEqual(
             json_response, expected)

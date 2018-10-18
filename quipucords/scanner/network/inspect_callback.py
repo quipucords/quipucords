@@ -184,7 +184,7 @@ class InspectResultCallback(CallbackBase):
             else:
                 self._ansible_facts[host] = host_facts
 
-    # Called after all fact collection is complete for host. Writing
+    # Called after all details report is complete for host. Writing
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
     @transaction.atomic
@@ -194,7 +194,7 @@ class InspectResultCallback(CallbackBase):
         for host in host_list:
             self._finalize_host(host, SystemInspectionResult.FAILED)
 
-    # Called after all fact collection is complete for host. Writing
+    # Called after all details report is complete for host. Writing
     # results needs to be atomic so that the host won't be marked
     # as complete unless we actually save its results.
     @transaction.atomic

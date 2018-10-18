@@ -107,9 +107,9 @@ class ConnectTaskRunnerTest(TestCase):
         with patch('scanner.vcenter.connect.vcenter_connect',
                    return_value=Mock()) as mock_vcenter_connect:
             with patch('scanner.vcenter.connect.get_vm_names',
-                       return_value=['vm1', 'vm2']) as mock_names:
+                       return_value=['vm1', 'vm2', 'vm2']) as mock_names:
                 vm_names = self.runner.connect()
-                self.assertEqual(vm_names, set(['vm1', 'vm2']))
+                self.assertEqual(vm_names, ['vm1', 'vm2', 'vm2'])
                 mock_vcenter_connect.assert_called_once_with(ANY)
                 mock_names.assert_called_once_with(ANY)
 
