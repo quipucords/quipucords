@@ -159,6 +159,11 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
     'A list of fully-qualified paths to search for extended product '\
     'search.'
 
+REPORT_DETAIL_DEPRECATED = 'WARNING: "qpc report detail" is deprecated. ' \
+    'Use "qpc report details" instead.'
+REPORT_SUMMARY_DEPRECATED = 'WARNING: "qpc report summary" is deprecated. ' \
+    'Use "qpc report deployments" instead.'
+
 REPORT_JSON_FILE_HELP = 'A list of files that contain the json details ' \
                         'reports to merge.'
 REPORT_JSON_DIR_HELP = 'The path to a directory that contain files of json ' \
@@ -194,9 +199,9 @@ REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
     'Scan Job %s does not exist.'
 REPORT_SJS_DO_NOT_EXIST = 'The following scan jobs do not exist: %s.'
-REPORT_NO_SUMMARY_REPORT_FOR_SJ = \
+REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ = \
     'No report summary available for scan job %s.'
-REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID = \
+REPORT_NO_DEPLOYMENTS_REPORT_FOR_REPORT_ID = \
     'No report summary available for report id %s.'
 REPORT_NO_DETAIL_REPORT_FOR_SJ = \
     'No report detail available for scan job %s.'
