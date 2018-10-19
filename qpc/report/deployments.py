@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportDeploymentsCommand is used to show summary report information."""
+"""ReportDeploymentsCommand is to show deployments report."""
 
 from __future__ import print_function
 
@@ -28,9 +28,9 @@ from requests import codes
 
 # pylint: disable=too-few-public-methods
 class ReportDeploymentsCommand(CliCommand):
-    """Defines the report summary command.
+    """Defines the report deployments command.
 
-    This command is for showing the summary report.
+    This command is for showing the deployments report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND

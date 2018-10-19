@@ -13,16 +13,14 @@
 
 SUBCOMMAND = 'report'
 
-
 DEPLOYMENTS = 'deployments'
 DETAILS = 'details'
+MERGE = 'merge'
+MERGE_STATUS = 'merge-status'
 
 # deprecated
 SUMMARY = 'summary'
 DETAIL = 'detail'
-
-MERGE = 'merge'
-MERGE_STATUS = 'merge-status'
 
 REPORT_URI = '/api/v1/reports/'
 DETAILS_PATH_SUFFIX = '/details/'

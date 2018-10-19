@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportDetailsCommand is used to show detail report information."""
+"""ReportDetailsCommand is used to show details report."""
 
 from __future__ import print_function
 

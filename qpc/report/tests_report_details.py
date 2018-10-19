@@ -33,7 +33,7 @@ SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
 class ReportDetailsTests(unittest.TestCase):
-    """Class for testing the scan show commands for qpc."""
+    """Class for testing the details report command."""
 
     # pylint: disable=invalid-name
     def setUp(self):
