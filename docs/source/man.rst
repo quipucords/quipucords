@@ -60,7 +60,7 @@ The ``qpc`` command has several subcommands that encompass the inspection and re
 
 * Generating reports:
 
-  ``qpc report summary --id 1 --csv --output-file=~/scan_result.csv``
+  ``qpc report deployments --id 1 --csv --output-file=~/scan_result.csv``
 
 The following sections describe these commands, their subcommands, and their options in more detail. They also describe additional tasks that are not highlighted in the previous list of major workflow tasks.
 
@@ -343,7 +343,7 @@ Scans
 
 Use the ``qpc scan`` command to create, run and manage scans.
 
-A scan contains a set of one or more sources of any type plus additional options that refine how the scan runs, such as the products to omit from the scan and the maximum number of parallel system scans. Because a scan can combine sources of different types, you can include network and systems management solution (such as Satellite and vCenter Server) sources in a single scan. When you configure a scan to include multiple sources of different types, for example, a network source and a satellite source, the same part of your infrastructure might be scanned more than once. The results for this type of scan could show duplicate information in the reported results. However, you have the option to view the unprocessed detailed report that would show these duplicate results, or a processed summary report with deduplicated and merged results.
+A scan contains a set of one or more sources of any type plus additional options that refine how the scan runs, such as the products to omit from the scan and the maximum number of parallel system scans. Because a scan can combine sources of different types, you can include network and systems management solution (such as Satellite and vCenter Server) sources in a single scan. When you configure a scan to include multiple sources of different types, for example, a network source and a satellite source, the same part of your infrastructure might be scanned more than once. The results for this type of scan could show duplicate information in the reported results. However, you have the option to view the unprocessed detailed report that would show these duplicate results, or a processed deployments report with deduplicated and merged results.
 
 The creation of a scan references the sources, the credentials contained within those sources, and the other options so that the act of running the scan is repeatable. When you run the scan, each instance is saved as a scan job.
 
@@ -492,14 +492,14 @@ The ``qpc scan cancel`` command cancels the execution of a scan job. A canceled 
 Reports
 --------
 
-Use the ``qpc report`` command to generate a report from a scan. You can generate a report as JavaScript Object Notation (JSON) format or as comma-separated values (CSV) format. There are two different types of report that you can generate, a *detail* report and a *summary* report.
+Use the ``qpc report`` command to generate a report from a scan. You can generate a report as JavaScript Object Notation (JSON) format or as comma-separated values (CSV) format. There are two different types of report that you can generate, a *details* report and a *deployments* report.
 
 
-Viewing the Detail Report
+Viewing the Details Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report detail`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.
+The ``qpc report details`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.  The ``qpc report detail`` commands is now deprecated.  The ``qpc report details`` command should be used instead.
 
-**qpc report detail (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
+**qpc report details (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
 ``--scan-job=scan_job_identifier``
 
@@ -521,13 +521,13 @@ The ``qpc report detail`` command generates a detailed report that contains the 
 
   Required. Path to a file location where the report data is saved.
 
-Viewing the Summary Report
+Viewing the Deployments Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report summary`` command generates a report that contains the processed fingerprints from a scan. A *fingerprint* is the set of system, product, and entitlement facts for a particular physical or virtual machine. A processed fingerprint results from a procedure that merges facts from various sources, and, when possible, deduplicates redundant systems.
+The ``qpc report deployments`` command generates a report that contains the processed fingerprints from a scan. A *fingerprint* is the set of system, product, and entitlement facts for a particular physical or virtual machine. A processed fingerprint results from a procedure that merges facts from various sources, and, when possible, deduplicates redundant systems.  The ``qpc report summary`` commands is now deprecated.  The ``qpc report deployments`` command should be used instead.
 
-For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a report summary results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
+For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a deployments report results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
 
-**qpc report summary (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
+**qpc report deployments (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
 ``--scan-job=scan_job_identifier``
 
@@ -551,7 +551,7 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 Merging Scan Job Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report merge`` command combines results from two or more scan job identifiers, report identifers, or JSON details report files to create a single report. The ``qpc report summary`` or ``qpc report detail`` can be used to obtain the report.
+The ``qpc report merge`` command combines results from two or more scan job identifiers, report identifers, or JSON details report files to create a single report. The ``qpc report deployments`` or ``qpc report details`` can be used to obtain the report.
 
 **qpc report merge (--job-ids** *scan_job_identifiers* **|** **--report-ids** *report_identifiers* **|** **--json-files** *json_details_report_files* **|** **--json-directory** *path_to_directory_of_json_files* **)**
 
@@ -570,6 +570,10 @@ The ``qpc report merge`` command combines results from two or more scan job iden
 ``--json-directory=path_to_directory_of_json_files``
 
   A Path to a directory with JSON details report files that will be merged. Mutually exclusive with the ``--job-ids`` and the ``--report-ids`` option.
+
+The above commands run an asynchronous job.  The output of the above commands provides a job id that can be used to check the status of the merge job.  To check the status of a merge job, run the following command::
+
+# qpc report merge-status --job 1
 
 Viewing the status of a Report Merge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
