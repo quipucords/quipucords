@@ -497,7 +497,7 @@ Use the ``qpc report`` command to generate a report from a scan. You can generat
 
 Viewing the Details Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report details`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.  The ``qpc report details`` command is now deprecated.  The ``qpc report details`` command should be used instead.
+The ``qpc report details`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.  The ``qpc report detail`` command is now deprecated.  The ``qpc report details`` command should be used instead.
 
 **qpc report details (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
