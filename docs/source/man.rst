@@ -497,7 +497,7 @@ Use the ``qpc report`` command to generate a report from a scan. You can generat
 
 Viewing the Details Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report details`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.  The ``qpc report detail`` commands is now deprecated.  The ``qpc report details`` command should be used instead.
+The ``qpc report details`` command generates a detailed report that contains the unprocessed facts that are gathered during a scan. These facts are the raw output from network, vcenter, and satellite scans, as applicable.  The ``qpc report details`` command is now deprecated.  The ``qpc report details`` command should be used instead.
 
 **qpc report details (--scan-job** *scan_job_identifier* **|** **--report** *report_identifier* **)** **(--json|--csv)** **--output-file** *path*
 
@@ -523,7 +523,7 @@ The ``qpc report details`` command generates a detailed report that contains the
 
 Viewing the Deployments Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report deployments`` command generates a report that contains the processed fingerprints from a scan. A *fingerprint* is the set of system, product, and entitlement facts for a particular physical or virtual machine. A processed fingerprint results from a procedure that merges facts from various sources, and, when possible, deduplicates redundant systems.  The ``qpc report summary`` commands is now deprecated.  The ``qpc report deployments`` command should be used instead.
+The ``qpc report deployments`` command generates a report that contains the processed fingerprints from a scan. A *fingerprint* is the set of system, product, and entitlement facts for a particular physical or virtual machine. A processed fingerprint results from a procedure that merges facts from various sources, and, when possible, deduplicates redundant systems.  The ``qpc report summary`` command is now deprecated.  The ``qpc report deployments`` command should be used instead.
 
 For example, the raw facts of a scan that includes both network and vcenter sources could show two instances of a machine, indicated by an identical MAC address. The generation of a deployments report results in a deduplicated and merged fingerprint that shows both the network and vcenter facts for that machine.
 
@@ -551,7 +551,7 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 Merging Scan Job Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
-The ``qpc report merge`` command combines results from two or more scan job identifiers, report identifers, or JSON details report files to create a single report. The ``qpc report deployments`` or ``qpc report details`` can be used to obtain the report.
+The ``qpc report merge`` command returns the identifier of the report that is created. You can use this identifier and the ``qpc report`` command with the ``details`` or ``deployments`` subcommands to generate a report from the merged results.
 
 **qpc report merge (--job-ids** *scan_job_identifiers* **|** **--report-ids** *report_identifiers* **|** **--json-files** *json_details_report_files* **|** **--json-directory** *path_to_directory_of_json_files* **)**
 

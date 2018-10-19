@@ -36,8 +36,8 @@ You may also specify a directory with many JSON details reports with the followi
 
   # qpc report merge --json-directory /path/to/directory_with_json
 
-The above commands run an asynchronous job.  The output of the above commands provides a job id that can be used to check the status of the merge job.  To check the status of a merge job, run the following command::
+The above command run an asynchronous job.  The output of the above commands provides a job id that can be used to check the status of the merge job.  To check the status of a merge job, run the following command::
 
 # qpc report merge-status --job 1
 
-The output of the above commands provides a report identifier that can be used to access the merged data. You can use this identifier and the ``qpc report`` command with the ``details`` or ``deployments`` subcommands to generate a report from the merged results.
+The output of the above command provides a report identifier that can be used to access the merged data. You can use this identifier and the ``qpc report`` command with the ``details`` or ``deployments`` subcommands to generate a report from the merged results.

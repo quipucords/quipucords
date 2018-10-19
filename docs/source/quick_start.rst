@@ -98,7 +98,7 @@ When you run the ``scan start`` command, the output provides an identifier for t
 
 Viewing the Scan Report
 -----------------------
-When the scan job completes, you have the capability to produce a report for that scan job. You can request a report with all the details, or facts, of the scan, or request a report deployments. The deployments report process runs steps to merge the facts found during the inspection of the various hosts that are contacted during the scan. When possible, the report process also runs steps to deduplicate redundant systems. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
+When the scan job completes, you have the capability to produce a report for that scan job. You can request a report with all the details, or facts, of the scan, or request a deployments report. The deployments report process runs steps to merge the facts found during the inspection of the various hosts that are contacted during the scan. When possible, the report process also runs steps to deduplicate redundant systems. For both types of reports, you can produce the report in JavaScript Object Notation (JSON) format or comma-separated values (CSV) format.
 
 To generate a deployments report, enter the ``qpc report deployments`` command and specify the identifier for the scan job and the format for the output file.
 
