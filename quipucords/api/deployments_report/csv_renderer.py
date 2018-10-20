@@ -108,7 +108,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
 
         headers = csv_helper.generate_headers(
             systems_list,
-            exclude={'id', 'report_id', 'metadata'})
+            exclude={'id', 'report_id', 'metadata', 'deployment_report'})
         if SOURCES_KEY in headers:
             headers += self.source_headers
             headers = sorted(list(set(headers)))

@@ -165,6 +165,7 @@ class CSVHelper:
     @staticmethod
     def generate_headers(fact_list, exclude=None):
         """Generate column headers from fact list."""
+        # pylint: disable=too-many-nested-blocks
         headers = set()
         for fact in fact_list:
             fact_addon = {}
