@@ -72,12 +72,20 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
 
         sources = details_report_dict.get('sources')
 
-        csv_writer.writerow(['Report', 'Number Sources'])
+        csv_writer.writerow(['Report ID', 'Report Type',
+                             'Report Version', 'Number Sources'])
         if sources is None:
-            csv_writer.writerow([report_id, 0])
+            csv_writer.writerow(
+                [report_id,
+                 details_report.report_type,
+                 details_report.report_version,
+                 0])
             return details_report_csv_buffer.getvalue()
 
-        csv_writer.writerow([report_id, len(sources)])
+        csv_writer.writerow([report_id,
+                             details_report.report_type,
+                             details_report.report_version,
+                             len(sources)])
         csv_writer.writerow([])
         csv_writer.writerow([])
 

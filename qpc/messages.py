@@ -159,6 +159,11 @@ SCAN_EXT_SEARCH_DIRS_HELP = \
     'A list of fully-qualified paths to search for extended product '\
     'search.'
 
+REPORT_DETAIL_DEPRECATED = 'WARNING: "qpc report detail" is deprecated. ' \
+    'Use "qpc report details" instead.'
+REPORT_SUMMARY_DEPRECATED = 'WARNING: "qpc report summary" is deprecated. ' \
+    'Use "qpc report deployments" instead.'
+
 REPORT_JSON_FILE_HELP = 'A list of files that contain the json details ' \
                         'reports to merge.'
 REPORT_JSON_DIR_HELP = 'The path to a directory that contain files of json ' \
@@ -167,11 +172,19 @@ REPORT_JSON_FILES_HELP = 'At least two json details report files are ' \
                          'required to merge.'
 REPORT_INVALID_JSON_FILE = 'The file %s does not contain a valid json ' \
                            'details report.'
+REPORT_MISSING_REPORT_VERSION = 'WARNING: '\
+    'The file %s is missing report_version.  '\
+    'Future releases will not tolerate a missing or invalid report_version.'
+REPORT_INVALID_REPORT_TYPE = 'The file %s contains invalid report type %s.  '\
+    'Only details reports can be merged. Excluding from merge.'
 REPORT_JSON_DIR_NO_FILES = \
     'No files with extension .json found in %s.'
 REPORT_VALIDATE_JSON = 'Checking files for valid json details report. %s'
-REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report.'
-REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a details report.'
+REPORT_JSON_DIR_FILE_FAILED = 'Failed: %s is not a details report. '\
+    'Excluding from merge.'
+REPORT_JSON_MISSING_ATTR = 'Failed: %s is not a details report.'\
+    ' Missing %s. Excluding from merge.'
+REPORT_JSON_DIR_FILE_SUCCESS = 'Success: %s is a valid details report.'
 REPORT_JSON_DIR_ALL_FAIL = 'No details reports were found.'
 REPORTS_REPORTS_DO_NOT_EXIST = 'The following scan jobs did not produce ' \
                                'reports: %s.'
@@ -186,9 +199,9 @@ REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
     'Scan Job %s does not exist.'
 REPORT_SJS_DO_NOT_EXIST = 'The following scan jobs do not exist: %s.'
-REPORT_NO_SUMMARY_REPORT_FOR_SJ = \
+REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ = \
     'No report summary available for scan job %s.'
-REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID = \
+REPORT_NO_DEPLOYMENTS_REPORT_FOR_REPORT_ID = \
     'No report summary available for report id %s.'
 REPORT_NO_DETAIL_REPORT_FOR_SJ = \
     'No report detail available for scan job %s.'

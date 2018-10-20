@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportDetailCommand is used to show detail report information."""
+"""ReportDeploymentsCommand is to show deployments report."""
 
 from __future__ import print_function
 
@@ -27,14 +27,14 @@ from requests import codes
 
 
 # pylint: disable=too-few-public-methods
-class ReportDetailCommand(CliCommand):
-    """Defines the report details command.
+class ReportDeploymentsCommand(CliCommand):
+    """Defines the report deployments command.
 
-    This command is for showing the details report.
+    This command is for showing the deployments report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.DETAIL
+    ACTION = report.DEPLOYMENTS
 
     def __init__(self, subparsers):
         """Create command."""
@@ -85,11 +85,10 @@ class ReportDetailCommand(CliCommand):
                 self.report_id = json_data.get('report_id')
                 if self.report_id:
                     self.req_path = '%s%s%s' % (
-                        self.req_path,
-                        self.report_id,
-                        report.DETAILS_PATH_SUFFIX)
+                        self.req_path, self.report_id,
+                        report.DEPLOYMENTS_PATH_SUFFIX)
                 else:
-                    print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_SJ %
+                    print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ %
                             self.args.scan_job_id))
                     sys.exit(1)
             else:
@@ -99,7 +98,8 @@ class ReportDetailCommand(CliCommand):
         else:
             self.report_id = self.args.report_id
             self.req_path = '%s%s%s' % (
-                self.req_path, self.report_id, report.DETAILS_PATH_SUFFIX)
+                self.req_path, self.report_id,
+                report.DEPLOYMENTS_PATH_SUFFIX)
 
     def _handle_response_success(self):
         file_content = None
@@ -108,7 +108,6 @@ class ReportDetailCommand(CliCommand):
             file_content = pretty_print(file_content)
         else:
             file_content = self.response.text
-            print()
 
         try:
             write_file(self.args.path, file_content)
@@ -119,9 +118,9 @@ class ReportDetailCommand(CliCommand):
 
     def _handle_response_error(self):
         if self.args.report_id is None:
-            print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_SJ %
+            print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ %
                     self.args.scan_job_id))
         else:
-            print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_REPORT_ID %
+            print(_(messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_REPORT_ID %
                     self.args.report_id))
         sys.exit(1)

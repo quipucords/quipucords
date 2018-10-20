@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (c) 2018 Red Hat, Inc.
 #
@@ -9,20 +8,19 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""Constants for the Report commands."""
 
-SUBCOMMAND = 'report'
+"""Util for common report operations."""
 
-DEPLOYMENTS = 'deployments'
-DETAILS = 'details'
-MERGE = 'merge'
-MERGE_STATUS = 'merge-status'
 
-# deprecated
-SUMMARY = 'summary'
-DETAIL = 'detail'
+from quipucords.environment import commit
 
-REPORT_URI = '/api/v1/reports/'
-DETAILS_PATH_SUFFIX = '/details/'
-DEPLOYMENTS_PATH_SUFFIX = '/deployments/'
-ASYNC_MERGE_URI = '/api/v1/reports/merge/jobs/'
+
+REPORT_TYPE_DETAILS = 'details'
+REPORT_TYPE_DEPLOYMENT = 'deployments'
+REPORT_TYPE_CHOICES = ((REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
+                       (REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DEPLOYMENT))
+
+
+def create_report_version():
+    """Create the report version string."""
+    return '1.0.0.%s' % commit()

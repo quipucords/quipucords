@@ -12,6 +12,7 @@
 import logging
 from multiprocessing import Process, Value
 
+from api.common.common_report import create_report_version
 from api.details_report.util import (build_sources_from_tasks,
                                      create_details_report,
                                      validate_details_report_json)
@@ -252,9 +253,11 @@ class ScanJobRunner(Process):
         sources = build_sources_from_tasks(
             inspect_tasks.filter(status=ScanTask.COMPLETED))
         if bool(sources):
-            details_report_json = {'sources': sources}
+            details_report_json = {'sources': sources,
+                                   'report_type': 'details',
+                                   'report_version': create_report_version()}
             has_errors, validation_result = validate_details_report_json(
-                details_report_json)
+                details_report_json, False)
 
             if has_errors:
                 message = 'Scan producted invalid details report JSON: %s' % \
@@ -263,8 +266,8 @@ class ScanJobRunner(Process):
                 return ScanTask.FAILED
 
             # Create FC model and save data to JSON file
-            details_report = create_details_report(
-                details_report_json)
+            details_report = create_details_report(create_report_version(),
+                                                   details_report_json)
             return details_report
 
         return None
