@@ -16,7 +16,8 @@ from io import StringIO
 
 from api.common.util import CSVHelper
 from api.models import (DeploymentsReport,
-                        Source)
+                        Source,
+                        SystemFingerprint)
 
 from rest_framework import renderers
 
@@ -54,7 +55,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                renderer_context=None):
         """Render deployment report as CSV."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches,too-many-statements
 
         if not bool(report_dict):
             return None
@@ -95,9 +96,19 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
         if not systems_list:
             return None
         csv_writer.writerow(['System Fingerprints:'])
+
+        valid_fact_attributes = {
+            field.name for field in SystemFingerprint._meta.get_fields()}
+
+        # Add fields to just one fingerprint
+        system = systems_list[0]
+        for attr in valid_fact_attributes:
+            if not system.get(attr, None):
+                system[attr] = None
+
         headers = csv_helper.generate_headers(
             systems_list,
-            exclude={'id', 'report_id', 'metadata'})
+            exclude={'id', 'report_id', 'metadata', 'deployment_report'})
         if SOURCES_KEY in headers:
             headers += self.source_headers
             headers = sorted(list(set(headers)))
@@ -118,8 +129,9 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                         fact_value = sources_info.get(header)
                 elif header == 'entitlements':
                     fact_value = system.get(header)
-                    for entitlement in fact_value:
-                        entitlement.pop('metadata')
+                    if fact_value:
+                        for entitlement in fact_value:
+                            entitlement.pop('metadata')
                 else:
                     fact_value = system.get(header)
                 row.append(csv_helper.serialize_value(header, fact_value))
