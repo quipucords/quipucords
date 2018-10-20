@@ -171,13 +171,14 @@ class CSVHelper:
             for fact_key in fact.keys():
                 if fact_key == 'products':
                     prods = fact.get(fact_key, [])
-                    for prod in prods:
-                        prod_name = prod.get('name')
-                        if prod_name:
-                            prod_name = prod_name.lower()
-                            headers.add(prod_name)
-                            fact_addon[prod_name] = prod.get('presence',
-                                                             'unknown')
+                    if prods:
+                        for prod in prods:
+                            prod_name = prod.get('name')
+                            if prod_name:
+                                prod_name = prod_name.lower()
+                                headers.add(prod_name)
+                                fact_addon[prod_name] = prod.get('presence',
+                                                                 'unknown')
                 else:
                     headers.add(fact_key)
             fact.update(fact_addon)

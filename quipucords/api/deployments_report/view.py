@@ -76,17 +76,15 @@ def deployments(request, pk=None):
                          '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
 
-    # pylint: disable=no-else-return
     if request.query_params.get('group_count', None):
         report_dict = build_grouped_report(
             report, request.query_params.get('group_count'))
-        return Response(report_dict)
     elif filters:
         report_dict = build_filtered_report(report, filters)
-        return Response(report_dict)
     else:
         report_dict = build_cached_json_report(report)
-        return Response(report_dict)
+
+    return Response(report_dict)
 
 
 def validate_filters(filters):
