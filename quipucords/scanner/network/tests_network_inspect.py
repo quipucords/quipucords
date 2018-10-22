@@ -192,7 +192,7 @@ class NetworkInspectScannerTest(TestCase):
         self.scan_task.update_stats(
             'TEST NETWORK INSPECT.', sys_failed=0)
 
-        self.fact_endpoint = 'http://testserver' + reverse('facts-list')
+        self.fact_endpoint = 'http://testserver' + reverse('reports-list')
 
         self.scan_job.save()
 

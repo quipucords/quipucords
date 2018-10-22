@@ -33,7 +33,7 @@ quipucords/quipucords/templates/client/
 *.manifest
 
 
-# Installer 
+# Installer
 pip-log.txt
 pip-delete-this-directory.txt
 install/packages/*
@@ -77,7 +77,7 @@ target/
 # pyenv
 .python-version
 
-# pipenv
+# Pipenv
 Pipfile
 
 # celery beat schedule file
@@ -112,6 +112,7 @@ ENV/
 
 # sqlite
 db.sqlite3
+db.sqlite3-journal
 
 # From ide
 .idea/

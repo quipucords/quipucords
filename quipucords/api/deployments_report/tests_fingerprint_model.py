@@ -9,8 +9,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the fingerprint model."""
-from api.models import FactCollection
-from api.serializers import FingerprintSerializer
+from api.common.common_report import create_report_version
+from api.models import DeploymentsReport
+from api.serializers import SystemFingerprintSerializer
 
 from django.test import TestCase
 
@@ -20,19 +21,20 @@ class FingerprintModelTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.fact_collection = FactCollection()
-        self.fact_collection.save()
+        self.deployment_report = DeploymentsReport(
+            report_version=create_report_version())
+        self.deployment_report.save()
 
     ################################################################
     # Test Model Create
     ################################################################
     def test_empty_fingerprint(self):
         """Create an empty fingerprint."""
-        fingerprint_dict = {'report_id': self.fact_collection.id,
+        fingerprint_dict = {'deployment_report': self.deployment_report.id,
                             'metadata': {},
                             'sources': []}
 
-        serializer = FingerprintSerializer(data=fingerprint_dict)
+        serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
@@ -46,12 +48,12 @@ class FingerprintModelTest(TestCase):
                         'presence': 'unknown',
                         'version': ['1', '2'],
                         'metadata': {}}
-        fingerprint_dict = {'report_id': self.fact_collection.id,
+        fingerprint_dict = {'deployment_report': self.deployment_report.id,
                             'metadata': {},
                             'products': [product_dict],
                             'sources': []}
 
-        serializer = FingerprintSerializer(data=fingerprint_dict)
+        serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
@@ -63,12 +65,12 @@ class FingerprintModelTest(TestCase):
         product_dict = {'name': 'product1',
                         'presence': 'unknown',
                         'metadata': {}}
-        fingerprint_dict = {'report_id': self.fact_collection.id,
+        fingerprint_dict = {'deployment_report': self.deployment_report.id,
                             'metadata': {},
                             'products': [product_dict],
                             'sources': []}
 
-        serializer = FingerprintSerializer(data=fingerprint_dict)
+        serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
@@ -80,12 +82,12 @@ class FingerprintModelTest(TestCase):
         entitlement_dict = {'name': 'RHEL Server',
                             'entitlement_id': '69',
                             'metadata': {}}
-        fingerprint_dict = {'report_id': self.fact_collection.id,
+        fingerprint_dict = {'deployment_report': self.deployment_report.id,
                             'metadata': {},
                             'entitlements': [entitlement_dict],
                             'sources': []}
 
-        serializer = FingerprintSerializer(data=fingerprint_dict)
+        serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)

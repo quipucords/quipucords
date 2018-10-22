@@ -16,8 +16,8 @@ from argparse import ArgumentParser, Namespace
 from io import StringIO
 
 from qpc import messages
-from qpc.report import JOB_URI
-from qpc.report.job import ReportMergeStatusCommand
+from qpc.report import ASYNC_MERGE_URI
+from qpc.report.merge_status import ReportMergeStatusCommand
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
 
@@ -36,7 +36,7 @@ class ReportMergeStatusTests(unittest.TestCase):
         write_server_config(DEFAULT_CONFIG)
         self.orig_stderr = sys.stderr
         sys.stderr = HushUpStderr()
-        self.url = get_server_location() + JOB_URI
+        self.url = get_server_location() + ASYNC_MERGE_URI
 
     def tearDown(self):
         """Remove test setup."""
@@ -67,10 +67,12 @@ class ReportMergeStatusTests(unittest.TestCase):
             args = Namespace(job_id='1')
             with redirect_stdout(report_out):
                 nac.main(args)
-                self.assertIn(messages.JOB_ID_STATUS % ('1',
-                                                        'complete'),
-                                                        \
-                              report_out.getvalue().strip())
+                result1 = messages.MERGE_JOB_ID_STATUS % (
+                    '1', 'completed')
+                result2 = messages.DISPLAY_REPORT_ID % (
+                    '10', '10')
+                result = '%s\n%s' % (result1, result2)
+                self.assertEqual(result, report_out.getvalue().strip())
 
     def test_job_id_not_exist(self):
         """Test the job command with an invalid ID."""
@@ -83,4 +85,4 @@ class ReportMergeStatusTests(unittest.TestCase):
                 with redirect_stdout(report_out):
                     nac.main(args)
                     self.assertEqual(report_out.getvalue(),
-                                     messages.JOB_ID_NOT_FOUND % '1')
+                                     messages.MERGE_JOB_ID_NOT_FOUND % '1')

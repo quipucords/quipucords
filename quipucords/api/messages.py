@@ -16,6 +16,8 @@
 FC_REQUIRED_ATTRIBUTE = 'Required. May not be null or empty.'
 FC_SOURCE_NAME_NOT_STR = 'Source name must be type string.'
 FC_MUST_BE_ONE_OF = 'Must be one of the following: %s'
+FC_MISSING_REPORT_VERSION = 'Missing report_version.  '\
+    'Future releases will not tolerate a missing or invalid report_version.'
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = 'Credentials'
@@ -123,7 +125,7 @@ SJ_MERGE_JOB_NOT_FOUND = 'Not all scan job ids exist. Scan jobs not found: %s'
 SJ_MERGE_JOB_NOT_COMPLETE = 'Not all scan job are completed.'\
     '  Only completed scan jobs may be merged. Incomplete scan jobs: %s'
 SJ_MERGE_JOB_NO_RESULTS = 'The specified set of jobs'\
-    ' produced invalid fact collection.  Error: %s'
+    ' produced invalid details report.  Error: %s'
 SJ_MERGE_JOB_NO_TASKS = 'Merge cannot be completed. Source for job with '\
     'id=%d has been deleted.'
 
@@ -135,7 +137,7 @@ REPORT_MERGE_NOT_UNIQUE = 'Set of ids must be unique.'
 REPORT_MERGE_NOT_FOUND = 'Not all scan report ids exist. '\
     'Scan reports not found: %s'
 REPORT_MERGE_NO_RESULTS = 'The specified set of reports '\
-    'produced invalid fact collection.  Error: %s'
+    'produced invalid details report.  Error: %s'
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = 'SIGNAL %s received for scan job.'
@@ -191,3 +193,5 @@ REPORT_GROUP_COUNT_FILTER = 'The group_count filter cannot be used with ' \
     'other filters.'
 REPORT_GROUP_COUNT_FIELD = 'The group_count filter cannot be used with ' \
     'the invalid filter key %s.'
+REPORT_INVALID_FILTER_QUERY_PARAM = 'One or more filter keys are not '\
+    'attributes of the system fingerprint: %s.'

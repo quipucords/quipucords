@@ -110,8 +110,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = 'Prerequisites scan task with id %d failed.' %\
-                self.connect_scan_task.id
+            error_message = 'Prerequisites scan task %d failed.' %\
+                self.connect_scan_task.sequence_number
             return error_message, ScanTask.FAILED
 
         try:

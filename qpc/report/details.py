@@ -9,7 +9,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""ReportSummaryCommand is used to show summary report information."""
+"""ReportDetailsCommand is used to show details report."""
 
 from __future__ import print_function
 
@@ -27,14 +27,14 @@ from requests import codes
 
 
 # pylint: disable=too-few-public-methods
-class ReportSummaryCommand(CliCommand):
-    """Defines the report summary command.
+class ReportDetailsCommand(CliCommand):
+    """Defines the report details command.
 
-    This command is for showing the summary report.
+    This command is for showing the details report.
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.SUMMARY
+    ACTION = report.DETAILS
 
     def __init__(self, subparsers):
         """Create command."""
@@ -85,10 +85,11 @@ class ReportSummaryCommand(CliCommand):
                 self.report_id = json_data.get('report_id')
                 if self.report_id:
                     self.req_path = '%s%s%s' % (
-                        self.req_path, self.report_id,
-                        report.DEPLOYMENTS_PATH_SUFFIX)
+                        self.req_path,
+                        self.report_id,
+                        report.DETAILS_PATH_SUFFIX)
                 else:
-                    print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+                    print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_SJ %
                             self.args.scan_job_id))
                     sys.exit(1)
             else:
@@ -98,8 +99,7 @@ class ReportSummaryCommand(CliCommand):
         else:
             self.report_id = self.args.report_id
             self.req_path = '%s%s%s' % (
-                self.req_path, self.report_id,
-                report.DEPLOYMENTS_PATH_SUFFIX)
+                self.req_path, self.report_id, report.DETAILS_PATH_SUFFIX)
 
     def _handle_response_success(self):
         file_content = None
@@ -119,9 +119,9 @@ class ReportSummaryCommand(CliCommand):
 
     def _handle_response_error(self):
         if self.args.report_id is None:
-            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_SJ %
+            print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_SJ %
                     self.args.scan_job_id))
         else:
-            print(_(messages.REPORT_NO_SUMMARY_REPORT_FOR_REPORT_ID %
+            print(_(messages.REPORT_NO_DETAIL_REPORT_FOR_REPORT_ID %
                     self.args.report_id))
         sys.exit(1)

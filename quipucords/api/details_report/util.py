@@ -17,7 +17,7 @@ from api import messages
 from api.models import (ScanTask,
                         ServerInformation,
                         Source)
-from api.serializers import FactCollectionSerializer
+from api.serializers import DetailsReportSerializer
 
 from django.utils.translation import ugettext as _
 
@@ -27,6 +27,8 @@ INVALID_SOURCES_KEY = 'invalid_sources'
 VALID_SOURCES_KEY = 'valid_sources'
 
 # JSON attribute constants
+REPORT_VERSION_KEY = 'report_version'
+REPORT_TYPE_KEY = 'report_type'
 SOURCES_KEY = 'sources'
 SOURCE_KEY = 'source'
 SERVER_ID_KEY = 'server_id'
@@ -61,16 +63,25 @@ def build_sources_from_tasks(tasks):
     return sources
 
 
-def validate_fact_collection_json(fact_collection_json):
-    """Validate fact_collection field.
+def validate_details_report_json(details_report_json, external_json):
+    """Validate details_report field.
 
-    :param fact_collection_json: dict representing a fact collection
+    :param details_report_json: dict representing a details report
+    :param external_json: bool True if json came in via REST
     :returns: bool indicating if there are errors and dict with result.
     """
-    if not fact_collection_json.get(SOURCES_KEY):
+    if not external_json and \
+            not details_report_json.get(REPORT_VERSION_KEY):
+        # Internal JSON should always have this
+        return True, {REPORT_VERSION_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
+
+    if not details_report_json.get(REPORT_TYPE_KEY):
+        return True, {REPORT_TYPE_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
+
+    if not details_report_json.get(SOURCES_KEY):
         return True, {SOURCES_KEY: _(messages.FC_REQUIRED_ATTRIBUTE)}
 
-    return _validate_sources_json(fact_collection_json.get(SOURCES_KEY))
+    return _validate_sources_json(details_report_json.get(SOURCES_KEY))
 
 
 def _validate_sources_json(sources_json):
@@ -104,8 +115,15 @@ def _validate_source_json(source_json):
     dict with error result or None.
     """
     invalid_field_obj = {}
-    server_id = source_json.get(SERVER_ID_KEY)
     has_error = False
+
+    report_version = source_json.get(REPORT_VERSION_KEY)
+    if not report_version:
+        has_error = True
+        invalid_field_obj[REPORT_VERSION_KEY] = _(
+            messages.FC_REQUIRED_ATTRIBUTE)
+
+    server_id = source_json.get(SERVER_ID_KEY)
     if not server_id:
         has_error = True
         invalid_field_obj[SERVER_ID_KEY] = _(
@@ -152,23 +170,27 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_fact_collection(json_fact_collection):
-    """Create fact collection.
+def create_details_report(report_version, json_details_report):
+    """Create details report.
 
-    Fact collection consists of a FactCollection record
-    :param json_fact_collection: dict representing a fact collection
-    :returns: The newly created FactCollection
+    Fact collection consists of a DetailsReport record
+    :param report_version: major.minor.patch version of report.
+    :param json_details_report: dict representing a details report
+    :returns: The newly created DetailsReport
     """
-    # Create new fact collection
-    serializer = FactCollectionSerializer(data=json_fact_collection)
+    # Create new details report
+    serializer = DetailsReportSerializer(data=json_details_report)
     if serializer.is_valid():
-        fact_collection = serializer.save()
-        logger.debug('Fact collection created: %s', fact_collection)
-        return fact_collection
+        details_report = serializer.save()
+        # removed by serializer since it is read-only.  Set again.
+        details_report.report_version = report_version
+        details_report.save()
+        logger.debug('Fact collection created: %s', details_report)
+        return details_report
 
-    logger.error('Fact collection could not be persisted.')
-    logger.error('Invalid json_fact_collection: %s',
-                 json_fact_collection)
-    logger.error('FactCollection errors: %s', serializer.errors)
+    logger.error('Details report could not be persisted.')
+    logger.error('Invalid json_details_report: %s',
+                 json_details_report)
+    logger.error('DetailsReport errors: %s', serializer.errors)
 
     return None

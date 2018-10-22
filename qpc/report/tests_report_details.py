@@ -21,7 +21,7 @@ from io import StringIO
 from qpc import messages
 from qpc.cli import CLI
 from qpc.report import REPORT_URI
-from qpc.report.detail import ReportDetailCommand
+from qpc.report.details import ReportDetailsCommand
 from qpc.scan import SCAN_JOB_URI
 from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
 from qpc.utils import get_server_location, write_server_config
@@ -32,8 +32,8 @@ PARSER = ArgumentParser()
 SUBPARSER = PARSER.add_subparsers(dest='subcommand')
 
 
-class ReportDetailTests(unittest.TestCase):
-    """Class for testing the scan show commands for qpc."""
+class ReportDetailsTests(unittest.TestCase):
+    """Class for testing the details report command."""
 
     # pylint: disable=invalid-name
     def setUp(self):
@@ -74,7 +74,7 @@ class ReportDetailTests(unittest.TestCase):
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=True,
@@ -99,7 +99,7 @@ class ReportDetailTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_report_url, status_code=200,
                        json=get_report_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id=None,
                              report_id='1',
                              output_json=True,
@@ -133,7 +133,7 @@ class ReportDetailTests(unittest.TestCase):
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
                        json=get_report_csv_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=False,
@@ -181,7 +181,7 @@ class ReportDetailTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=400,
                        json=get_scanjob_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=True,
@@ -203,7 +203,7 @@ class ReportDetailTests(unittest.TestCase):
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
-            nac = ReportDetailCommand(SUBPARSER)
+            nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
                              output_json=True,

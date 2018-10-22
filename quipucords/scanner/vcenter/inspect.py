@@ -86,8 +86,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = 'Prerequisites scan task with id %d failed.' %\
-                self.connect_scan_task.id
+            error_message = 'Prerequisites scan task %d failed.' %\
+                self.connect_scan_task.sequence_number
             return error_message, ScanTask.FAILED
 
         try:
@@ -102,7 +102,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return None, ScanTask.COMPLETED
 
-    @transaction.atomic
     # pylint: disable=no-self-use
     def parse_parent_props(self, obj, props):
         """Parse Parent properties.
@@ -120,7 +119,6 @@ class InspectTaskRunner(ScanTaskRunner):
                     facts['parent'] = str(prop.val)
         return facts
 
-    @transaction.atomic
     # pylint: disable=no-self-use
     def parse_cluster_props(self, props, parents_dict):
         """Parse Cluster properties.
@@ -140,7 +138,6 @@ class InspectTaskRunner(ScanTaskRunner):
                     parent.get('name') if parent else None
         return facts
 
-    @transaction.atomic
     # pylint: disable=no-self-use
     def parse_host_props(self, props, cluster_dict):
         """Parse Host properties.
@@ -232,7 +229,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
-    @transaction.atomic
     def retrieve_properties(self, content):
         """Retrieve properties from all VirtualMachines.
 
@@ -289,7 +285,6 @@ class InspectTaskRunner(ScanTaskRunner):
                 props = object_content.propSet
                 self.parse_vm_props(props, host_dict)
 
-    @transaction.atomic
     def _init_stats(self):
         """Initialize the scan_task stats."""
         # Save counts

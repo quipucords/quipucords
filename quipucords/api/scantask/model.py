@@ -18,7 +18,7 @@ from datetime import datetime
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.fact.model import FactCollection
+from api.details_report.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
 from api.source.model import Source
 
@@ -90,8 +90,13 @@ class ScanTask(models.Model):
         TaskInspectionResult, null=True, on_delete=models.CASCADE)
 
     # Fingerprint task field
-    fact_collection = models.ForeignKey(
-        FactCollection, null=True, on_delete=models.CASCADE)
+    details_report = models.ForeignKey(
+        DetailsReport, null=True, on_delete=models.CASCADE)
+
+    def __init__(self, *args, **kwargs):
+        """Constructore for ScanTask."""
+        super().__init__(*args, **kwargs)
+        self.scan_job_task_count = None
 
     def __str__(self):
         """Convert to string."""
@@ -110,21 +115,21 @@ class ScanTask(models.Model):
             'end_time: {}, '\
             'connection_result: {}, '\
             'inspection_result: {}, '\
-            'fact_collection: {}'.format(self.id,
-                                         self.job.id,
-                                         self.scan_type,
-                                         self.status,
-                                         self.source,
-                                         self.sequence_number,
-                                         self.systems_count,
-                                         self.systems_scanned,
-                                         self.systems_failed,
-                                         self.systems_unreachable,
-                                         self.start_time,
-                                         self.end_time,
-                                         self.connection_result,
-                                         self.inspection_result,
-                                         self.fact_collection) + '}'
+            'details_report: {}'.format(self.id,
+                                        self.job.id,
+                                        self.scan_type,
+                                        self.status,
+                                        self.source,
+                                        self.sequence_number,
+                                        self.systems_count,
+                                        self.systems_scanned,
+                                        self.systems_failed,
+                                        self.systems_unreachable,
+                                        self.start_time,
+                                        self.end_time,
+                                        self.connection_result,
+                                        self.inspection_result,
+                                        self.details_report) + '}'
 
     class Meta:
         """Metadata for model."""
@@ -181,12 +186,17 @@ class ScanTask(models.Model):
 
     def _log_fingerprint_stats(self, prefix):
         """Log stats for fingerprinter."""
-        fingerprint_count = self.systems_count
-        if fingerprint_count is None:
-            fingerprint_count = 0
+        system_fingerprint_count = 0
+        if self.details_report:
+            self.details_report.refresh_from_db()
+            if self.details_report.deployment_report:
+                # pylint: disable=no-member
+                system_fingerprint_count = \
+                    self.details_report.deployment_report.\
+                    system_fingerprints.count()
         message = '%s Stats: system_fingerprint_count=%d,' %\
             (prefix,
-             fingerprint_count)
+             system_fingerprint_count)
         self.log_message(message)
 
     # All task types
@@ -194,6 +204,8 @@ class ScanTask(models.Model):
                     static_options=None):
         """Log a message for this task."""
         # pylint: disable=no-member
+        if self.scan_job_task_count is None:
+            self.scan_job_task_count = self.job.tasks.all().count()
         if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             self._log_fingerprint_message(message, log_level)
         else:
@@ -205,18 +217,20 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         # pylint: disable=no-member
         if static_options is not None:
-            actual_message = 'Job %d, Task %d (%s, %s, %s) - ' % \
+            actual_message = 'Job %d, Task %d of %d (%s, %s, %s) - ' % \
                 (static_options['job_id'],
                  static_options['task_sequence_number'],
+                 self.scan_job_task_count,
                  static_options['scan_type'],
                  static_options['source_type'],
                  static_options['source_name'])
         else:
             elapsed_time = self._compute_elapsed_time()
-            actual_message = 'Job %d, Task %d '\
+            actual_message = 'Job %d, Task %d of %d '\
                 '(%s, %s, %s, elapsed_time: %ds) - ' % \
                 (self.job.id,
                  self.sequence_number,
+                 self.scan_job_task_count,
                  self.scan_type,
                  self.source.source_type,
                  self.source.name,
@@ -229,15 +243,16 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         elapsed_time = self._compute_elapsed_time()
         # pylint: disable=no-member
-        fact_collection_id = None
-        if self.fact_collection:
-            fact_collection_id = self.fact_collection.id
-        actual_message = 'Job %d, Task %d '\
-            '(%s, fact_collection=%s, elapsed_time: %ds) - ' % \
+        details_report_id = None
+        if self.details_report:
+            details_report_id = self.details_report.id
+        actual_message = 'Job %d, Task %d of %d '\
+            '(%s, details_report=%s, elapsed_time: %ds) - ' % \
             (self.job.id,
              self.sequence_number,
+             self.scan_job_task_count,
              self.scan_type,
-             fact_collection_id,
+             details_report_id,
              elapsed_time)
         actual_message += message.strip()
         logger.log(log_level, actual_message)
@@ -268,6 +283,7 @@ class ScanTask(models.Model):
         :param sys_unreachable: Systems unreachable during scan.
         """
         # pylint: disable=too-many-arguments
+        self.refresh_from_db()
         stats_changed = False
         if sys_count is not None and sys_count != self.systems_count:
             self.systems_count = sys_count
@@ -306,6 +322,7 @@ class ScanTask(models.Model):
         :param increment_sys_unreachable: True if should be incremented.
         """
         # pylint: disable=too-many-arguments
+        self.refresh_from_db()
         sys_count = None
         sys_failed = None
         sys_unreachable = None
@@ -375,17 +392,17 @@ class ScanTask(models.Model):
             systems_unreachable
 
     # All task types
-    @transaction.atomic
     def start(self):
         """Start a task."""
         self.start_time = datetime.utcnow()
         self.status = ScanTask.RUNNING
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
+        # pylint: disable=no-member
+        self.scan_job_task_count = self.job.tasks.all().count()
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def restart(self):
         """Start a task."""
         self.status = ScanTask.PENDING
@@ -394,7 +411,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def pause(self):
         """Pause a task."""
         self.status = ScanTask.PAUSED
@@ -403,7 +419,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def cancel(self):
         """Cancel a task."""
         self.end_time = datetime.utcnow()
@@ -416,6 +431,7 @@ class ScanTask(models.Model):
     @transaction.atomic
     def complete(self, message=None):
         """Complete a task."""
+        self.refresh_from_db()
         self.end_time = datetime.utcnow()
         self.status = ScanTask.COMPLETED
         if message:
@@ -436,7 +452,6 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    @transaction.atomic
     def fail(self, message):
         """Fail a task.
 
@@ -509,12 +524,12 @@ class ScanTask(models.Model):
         using a ScanTask object so others can retrieve them if needed.
 
         :returns: Scan result object for task (either TaskConnectionResult,
-            TaskInspectionResult, or FactCollection)
+            TaskInspectionResult, or DetailsReport)
         """
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             return self.inspection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-            return self.fact_collection
+            return self.details_report
         return None

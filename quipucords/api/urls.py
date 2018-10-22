@@ -11,7 +11,7 @@
 """Describes the urls and patterns for the API application."""
 
 from api.views import (CredentialViewSet,
-                       FactViewSet,
+                       DetailsReportsViewSet,
                        ScanJobViewSet,
                        ScanViewSet,
                        SourceViewSet,
@@ -34,9 +34,9 @@ ROUTER = SimpleRouter()
 ROUTER.register(r'credentials',
                 CredentialViewSet,
                 base_name='cred')
-ROUTER.register(r'facts',
-                FactViewSet,
-                base_name='facts')
+ROUTER.register(r'reports',
+                DetailsReportsViewSet,
+                base_name='reports')
 ROUTER.register(r'sources',
                 SourceViewSet,
                 base_name='source')
