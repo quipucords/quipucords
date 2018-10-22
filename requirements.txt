@@ -36,7 +36,7 @@ python-dateutil==2.7.3
 pytz==2018.5
 pyvmomi==6.7.0.2018.9
 PyYAML==3.13
-requests==2.19.1
+requests==2.20.0
 six==1.11.0
 whitenoise==4.1
 wrapt==1.10.11
