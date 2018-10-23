@@ -28,4 +28,8 @@ SourcesEmptyState.propTypes = {
   onAddSource: PropTypes.func
 };
 
+SourcesEmptyState.defaultProps = {
+  onAddSource: helpers.noop
+};
+
 export { SourcesEmptyState as default, SourcesEmptyState };

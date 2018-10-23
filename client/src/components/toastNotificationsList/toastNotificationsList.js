@@ -4,6 +4,7 @@ import { ToastNotificationList, TimedToastNotification } from 'patternfly-react'
 import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import { toastNotificationTypes } from '../../redux/constants';
+import helpers from '../../common/helpers';
 
 class ToastNotificationsList extends React.Component {
   onHover = () => {
@@ -31,7 +32,7 @@ class ToastNotificationsList extends React.Component {
             if (!toast.removed) {
               return (
                 <TimedToastNotification
-                  key={index}
+                  key={helpers.generateId('key')}
                   toastIndex={index}
                   type={toast.alertType}
                   paused={paused}
@@ -57,6 +58,11 @@ class ToastNotificationsList extends React.Component {
 ToastNotificationsList.propTypes = {
   toasts: PropTypes.array,
   paused: PropTypes.bool
+};
+
+ToastNotificationsList.defaultProps = {
+  toasts: [],
+  paused: false
 };
 
 const mapStateToProps = state => ({ ...state.toastNotifications });

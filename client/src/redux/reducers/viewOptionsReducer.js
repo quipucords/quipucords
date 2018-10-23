@@ -50,11 +50,11 @@ const viewOptionsReducer = (state = initialState, action) => {
     });
   };
 
-  const selectedIndex = (state, item) =>
-    _.findIndex(state.selectedItems, nextSelected => nextSelected.id === _.get(item, 'id'));
+  const selectedIndex = (stateObj, item) =>
+    _.findIndex(stateObj.selectedItems, nextSelected => nextSelected.id === _.get(item, 'id'));
 
-  const expandedIndex = (state, item) =>
-    _.findIndex(state.expandedItems, nextExpanded => nextExpanded.id === _.get(item, 'id'));
+  const expandedIndex = (stateObj, item) =>
+    _.findIndex(stateObj.expandedItems, nextExpanded => nextExpanded.id === _.get(item, 'id'));
 
   switch (action.type) {
     case viewToolbarTypes.SET_FILTER_TYPE:

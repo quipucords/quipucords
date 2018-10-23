@@ -4,8 +4,7 @@ import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Alert, Button, DropdownButton, EmptyState, Grid, Form, ListView, MenuItem, Modal } from 'patternfly-react';
 import _ from 'lodash';
-import { getScans, startScan, pauseScan, cancelScan, restartScan, deleteScan } from '../../redux/actions/scansActions';
-import { getReportSummaryCsv, getReportDetailsCsv } from '../../redux/actions/reportsActions';
+import { reduxActions } from '../../redux/actions';
 import {
   confirmationModalTypes,
   scansTypes,
@@ -23,9 +22,25 @@ import ScanListItem from './scanListItem';
 import { ScanFilterFields, ScanSortFields } from './scanConstants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
-import { getScansSources } from '../../redux/actions/sourcesActions';
 
 class Scans extends React.Component {
+  static notifyDownloadStatus(error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: helpers.getErrorMessageFromResults(results)
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: <span>Report downloaded.</span>
+      });
+    }
+  }
+
   constructor() {
     super();
 
@@ -46,17 +61,18 @@ class Scans extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const { fulfilled, update, viewOptions } = this.props;
     // Check for changes resulting in a fetch
-    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
+    if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
       this.onRefresh(nextProps);
     }
 
-    if (nextProps.fulfilled && !this.props.fulfilled) {
+    if (nextProps.fulfilled && !fulfilled) {
       this.setState({ lastRefresh: Date.now() });
     }
 
     if (_.get(nextProps, 'update.delete')) {
-      if (nextProps.update.fulfilled && !this.props.update.fulfilled) {
+      if (nextProps.update.fulfilled && !update.fulfilled) {
         Store.dispatch({
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'success',
@@ -77,7 +93,7 @@ class Scans extends React.Component {
         this.deleteNextScan();
       }
 
-      if (nextProps.update.error && !this.props.update.error) {
+      if (nextProps.update.error && !update.error) {
         Store.dispatch({
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'error',
@@ -95,56 +111,22 @@ class Scans extends React.Component {
     }
   }
 
-  notifyActionStatus(scan, actionText, error, results) {
-    if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'error',
-        header: 'Error',
-        message: helpers.getErrorMessageFromResults(results)
-      });
-    } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'success',
-        message: (
-          <span>
-            Scan <strong>{scan.name}</strong> {actionText}.
-          </span>
-        )
-      });
-
-      this.onRefresh();
-    }
-  }
-
-  static notifyDownloadStatus(error, results) {
-    if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'error',
-        header: 'Error',
-        message: helpers.getErrorMessageFromResults(results)
-      });
-    } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
-        alertType: 'success',
-        message: <span>Report downloaded.</span>
-      });
-    }
-  }
-
   onDownloadSummaryReport = reportId => {
-    this.props
-      .getReportSummaryCsv(reportId)
-      .then(() => Scans.notifyDownloadStatus(false), error => Scans.notifyDownloadStatus(true, error.message));
+    const { getReportSummaryCsv } = this.props;
+
+    getReportSummaryCsv(reportId).then(
+      () => Scans.notifyDownloadStatus(false),
+      error => Scans.notifyDownloadStatus(true, error.message)
+    );
   };
 
   onDownloadDetailedReport = reportId => {
-    this.props
-      .getReportDetailsCsv(reportId)
-      .then(() => Scans.notifyDownloadStatus(false), error => Scans.notifyDownloadStatus(true, error.message));
+    const { getReportDetailsCsv } = this.props;
+
+    getReportDetailsCsv(reportId).then(
+      () => Scans.notifyDownloadStatus(false),
+      error => Scans.notifyDownloadStatus(true, error.message)
+    );
   };
 
   onMergeScanResults = details => {
@@ -159,39 +141,39 @@ class Scans extends React.Component {
   };
 
   onDoStartScan = item => {
-    this.props
-      .startScan(item.id)
-      .then(
-        response => this.notifyActionStatus(item, 'started', false, response.value),
-        error => this.notifyActionStatus(item, 'started', true, error)
-      );
+    const { startScan } = this.props;
+
+    startScan(item.id).then(
+      response => this.notifyActionStatus(item, 'started', false, response.value),
+      error => this.notifyActionStatus(item, 'started', true, error)
+    );
   };
 
   onDoPauseScan = item => {
-    this.props
-      .pauseScan(item.id)
-      .then(
-        response => this.notifyActionStatus(item, 'paused', false, response.value),
-        error => this.notifyActionStatus(item, 'paused', true, error)
-      );
+    const { pauseScan } = this.props;
+
+    pauseScan(item.id).then(
+      response => this.notifyActionStatus(item, 'paused', false, response.value),
+      error => this.notifyActionStatus(item, 'paused', true, error)
+    );
   };
 
   onDoResumeScan = item => {
-    this.props
-      .restartScan(item.id)
-      .then(
-        response => this.notifyActionStatus(item, 'resumed', false, response.value),
-        error => this.notifyActionStatus(item, 'resumed', true, error)
-      );
+    const { restartScan } = this.props;
+
+    restartScan(item.id).then(
+      response => this.notifyActionStatus(item, 'resumed', false, response.value),
+      error => this.notifyActionStatus(item, 'resumed', true, error)
+    );
   };
 
   onDoCancelScan = item => {
-    this.props
-      .cancelScan(item.id)
-      .then(
-        response => this.notifyActionStatus(item, 'canceled', false, response.value),
-        error => this.notifyActionStatus(item, 'canceled', true, error)
-      );
+    const { cancelScan } = this.props;
+
+    cancelScan(item.id).then(
+      response => this.notifyActionStatus(item, 'canceled', false, response.value),
+      error => this.notifyActionStatus(item, 'canceled', true, error)
+    );
   };
 
   onAddSource = () => {
@@ -207,49 +189,12 @@ class Scans extends React.Component {
   };
 
   onRefresh = props => {
-    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
-    this.props.getScansSources();
-    this.props.getScans(helpers.createViewQueryObject(options, { scan_type: 'inspect' }));
+    const { getScans, getScansSources, viewOptions } = this.props;
+    const options = _.get(props, 'viewOptions') || viewOptions;
+
+    getScansSources();
+    getScans(helpers.createViewQueryObject(options, { scan_type: 'inspect' }));
   };
-
-  deleteNextScan() {
-    const { deleteScan } = this.props;
-
-    if (this.scansToDelete.length > 0) {
-      this.deletingScan = this.scansToDelete.pop();
-      if (this.deletingScan) {
-        deleteScan(this.deletingScan.id);
-      }
-    }
-  }
-
-  doDeleteScans(items) {
-    this.scansToDelete = [...items];
-
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-    });
-
-    this.deleteNextScan();
-  }
-
-  handleDeleteScan(item) {
-    const heading = (
-      <span>
-        Are you sure you want to delete the scan <strong>{item.name}</strong>?
-      </span>
-    );
-
-    const onConfirm = () => this.doDeleteScans([item]);
-
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Delete Scan',
-      heading,
-      confirmButtonText: 'Delete',
-      onConfirm
-    });
-  }
 
   onDeleteScans = () => {
     const { viewOptions } = this.props;
@@ -302,6 +247,68 @@ class Scans extends React.Component {
     });
   };
 
+  notifyActionStatus(scan, actionText, error, results) {
+    if (error) {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'error',
+        header: 'Error',
+        message: helpers.getErrorMessageFromResults(results)
+      });
+    } else {
+      Store.dispatch({
+        type: toastNotificationTypes.TOAST_ADD,
+        alertType: 'success',
+        message: (
+          <span>
+            Scan <strong>{scan.name}</strong> {actionText}.
+          </span>
+        )
+      });
+
+      this.onRefresh();
+    }
+  }
+
+  deleteNextScan() {
+    const { deleteScan } = this.props;
+
+    if (this.scansToDelete.length > 0) {
+      this.deletingScan = this.scansToDelete.pop();
+      if (this.deletingScan) {
+        deleteScan(this.deletingScan.id);
+      }
+    }
+  }
+
+  doDeleteScans(items) {
+    this.scansToDelete = [...items];
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    this.deleteNextScan();
+  }
+
+  handleDeleteScan(item) {
+    const heading = (
+      <span>
+        Are you sure you want to delete the scan <strong>{item.name}</strong>?
+      </span>
+    );
+
+    const onConfirm = () => this.doDeleteScans([item]);
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      title: 'Delete Scan',
+      heading,
+      confirmButtonText: 'Delete',
+      onConfirm
+    });
+  }
+
   renderPendingMessage() {
     const { pending } = this.props;
 
@@ -321,7 +328,6 @@ class Scans extends React.Component {
 
   renderScansActions() {
     const { viewOptions } = this.props;
-
     const mergeAllowed = _.size(viewOptions.selectedItems) > 1;
 
     // FUTURE: deletion is not currently enabled
@@ -361,10 +367,10 @@ class Scans extends React.Component {
     if (_.size(items)) {
       return (
         <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
+          {items.map(item => (
             <ScanListItem
               item={item}
-              key={index}
+              key={item.id}
               lastRefresh={lastRefresh}
               onSummaryDownload={this.onDownloadSummaryReport}
               onDetailedDownload={this.onDownloadDetailedReport}
@@ -464,16 +470,36 @@ Scans.propTypes = {
   update: PropTypes.object
 };
 
+Scans.defaultProps = {
+  getScans: helpers.noop,
+  startScan: helpers.noop,
+  pauseScan: helpers.noop,
+  cancelScan: helpers.noop,
+  restartScan: helpers.noop,
+  deleteScan: helpers.noop,
+  getScansSources: helpers.noop,
+  getReportSummaryCsv: helpers.noop,
+  getReportDetailsCsv: helpers.noop,
+  fulfilled: false,
+  error: false,
+  errorMessage: null,
+  pending: false,
+  scans: [],
+  sourcesCount: 0,
+  viewOptions: {},
+  update: {}
+};
+
 const mapDispatchToProps = dispatch => ({
-  getScans: queryObj => dispatch(getScans(queryObj)),
-  startScan: id => dispatch(startScan(id)),
-  pauseScan: id => dispatch(pauseScan(id)),
-  restartScan: id => dispatch(restartScan(id)),
-  cancelScan: id => dispatch(cancelScan(id)),
-  deleteScan: id => dispatch(deleteScan(id)),
-  getScansSources: queryObj => dispatch(getScansSources(queryObj)),
-  getReportSummaryCsv: (id, query) => dispatch(getReportSummaryCsv(id, query)),
-  getReportDetailsCsv: id => dispatch(getReportDetailsCsv(id))
+  getScans: queryObj => dispatch(reduxActions.scans.getScans(queryObj)),
+  startScan: id => dispatch(reduxActions.scans.startScan(id)),
+  pauseScan: id => dispatch(reduxActions.scans.pauseScan(id)),
+  restartScan: id => dispatch(reduxActions.scans.restartScan(id)),
+  cancelScan: id => dispatch(reduxActions.scans.cancelScan(id)),
+  deleteScan: id => dispatch(reduxActions.scans.deleteScan(id)),
+  getScansSources: queryObj => dispatch(reduxActions.sources.getScansSources(queryObj)),
+  getReportSummaryCsv: (id, query) => dispatch(reduxActions.reports.getReportSummaryCsv(id, query)),
+  getReportDetailsCsv: id => dispatch(reduxActions.reports.getReportDetailsCsv(id))
 });
 
 const mapStateToProps = state =>

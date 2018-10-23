@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown, Icon, MenuItem } from 'patternfly-react';
+import helpers from '../../common/helpers';
 
 const MastheadOptions = ({ user, logoutUser, showAboutModal }) => (
   <nav className="collapse navbar-collapse">
@@ -29,6 +30,12 @@ MastheadOptions.propTypes = {
   user: PropTypes.object,
   logoutUser: PropTypes.func,
   showAboutModal: PropTypes.func
+};
+
+MastheadOptions.defaultProps = {
+  user: {},
+  logoutUser: helpers.noop,
+  showAboutModal: helpers.noop
 };
 
 export { MastheadOptions as default, MastheadOptions };

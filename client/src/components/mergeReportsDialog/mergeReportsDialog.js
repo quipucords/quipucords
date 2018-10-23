@@ -6,17 +6,35 @@ import _ from 'lodash';
 import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { scansTypes, toastNotificationTypes } from '../../redux/constants';
-import {
-  getMergedScanReportDetailsCsv,
-  getMergedScanReportSummaryCsv,
-  mergeScanReports
-} from '../../redux/actions/reportsActions';
+import { reduxActions } from '../../redux/actions';
 
 class MergeReportsDialog extends React.Component {
   onClose = () => {
     Store.dispatch({
       type: scansTypes.MERGE_SCAN_DIALOG_HIDE
     });
+  };
+
+  onMergeScanResults = () => {
+    const { mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
+    const data = { reports: this.getValidReportId() };
+
+    mergeScans(data).then(
+      response => {
+        if (details) {
+          getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
+            () => this.notifyDownloadStatus(false),
+            error => this.notifyDownloadStatus(true, error)
+          );
+        } else {
+          getMergedScanReportSummaryCsv(_.get(response, 'value.data.id')).then(
+            () => this.notifyDownloadStatus(false),
+            error => this.notifyDownloadStatus(true, error)
+          );
+        }
+      },
+      error => this.notifyDownloadStatus(true, error)
+    );
   };
 
   getValidScans() {
@@ -51,28 +69,6 @@ class MergeReportsDialog extends React.Component {
 
     this.onClose();
   }
-
-  onMergeScanResults = () => {
-    const { mergeScans, details, getMergedScanReportDetailsCsv, getMergedScanReportSummaryCsv } = this.props;
-    const data = { reports: this.getValidReportId() };
-
-    mergeScans(data).then(
-      response => {
-        if (details) {
-          getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
-            () => this.notifyDownloadStatus(false),
-            error => this.notifyDownloadStatus(true, error)
-          );
-        } else {
-          getMergedScanReportSummaryCsv(_.get(response, 'value.data.id')).then(
-            () => this.notifyDownloadStatus(false),
-            error => this.notifyDownloadStatus(true, error)
-          );
-        }
-      },
-      error => this.notifyDownloadStatus(true, error)
-    );
-  };
 
   renderValidScans() {
     const validScans = this.getValidScans();
@@ -203,10 +199,17 @@ MergeReportsDialog.propTypes = {
   details: PropTypes.bool.isRequired
 };
 
+MergeReportsDialog.defaultProps = {
+  mergeScans: helpers.noop,
+  getMergedScanReportDetailsCsv: helpers.noop,
+  getMergedScanReportSummaryCsv: helpers.noop,
+  scans: []
+};
+
 const mapDispatchToProps = dispatch => ({
-  mergeScans: data => dispatch(mergeScanReports(data)),
-  getMergedScanReportDetailsCsv: id => dispatch(getMergedScanReportDetailsCsv(id)),
-  getMergedScanReportSummaryCsv: id => dispatch(getMergedScanReportSummaryCsv(id))
+  mergeScans: data => dispatch(reduxActions.reports.mergeScanReports(data)),
+  getMergedScanReportDetailsCsv: id => dispatch(reduxActions.reports.getMergedScanReportDetailsCsv(id)),
+  getMergedScanReportSummaryCsv: id => dispatch(reduxActions.reports.getMergedScanReportSummaryCsv(id))
 });
 
 const mapStateToProps = state => ({

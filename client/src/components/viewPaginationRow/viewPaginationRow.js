@@ -1,73 +1,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { PaginationRow, PAGINATION_VIEW } from 'patternfly-react';
-import helpers from '../../common/helpers';
 import Store from '../../redux/store';
 import { viewPaginationTypes } from '../../redux/constants';
 
 class ViewPaginationRow extends React.Component {
-  constructor() {
-    super();
-
-    helpers.bindMethods(this, [
-      'onFirstPage',
-      'onLastPage',
-      'onPreviousPage',
-      'onNextPage',
-      'onPageInput',
-      'onPerPageSelect'
-    ]);
-  }
-
-  onFirstPage() {
+  onFirstPage = () => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.VIEW_FIRST_PAGE,
       viewType
     });
-  }
+  };
 
-  onLastPage() {
+  onLastPage = () => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.VIEW_LAST_PAGE,
       viewType
     });
-  }
+  };
 
-  onPreviousPage() {
+  onPreviousPage = () => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.VIEW_PREVIOUS_PAGE,
       viewType
     });
-  }
+  };
 
-  onNextPage() {
+  onNextPage = () => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.VIEW_NEXT_PAGE,
       viewType
     });
-  }
+  };
 
-  onPageInput(e) {
+  onPageInput = e => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.VIEW_PAGE_NUMBER,
       viewType,
       pageNumber: parseInt(e.target.value, 10)
     });
-  }
+  };
 
-  onPerPageSelect(eventKey) {
+  onPerPageSelect = eventKey => {
     const { viewType } = this.props;
     Store.dispatch({
       type: viewPaginationTypes.SET_PER_PAGE,
       viewType,
       pageSize: eventKey
     });
-  }
+  };
 
   render() {
     const perPageOptions = [10, 15, 25, 50, 100];
@@ -110,6 +96,14 @@ ViewPaginationRow.propTypes = {
   pageSize: PropTypes.number,
   totalCount: PropTypes.number,
   totalPages: PropTypes.number
+};
+
+ViewPaginationRow.defaultProps = {
+  viewType: null,
+  currentPage: 0,
+  pageSize: 0,
+  totalCount: 0,
+  totalPages: 0
 };
 
 export { ViewPaginationRow as default, ViewPaginationRow };

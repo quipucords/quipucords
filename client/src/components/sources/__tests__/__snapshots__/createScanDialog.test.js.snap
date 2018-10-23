@@ -56,12 +56,7 @@ exports[`CreateScanDialog Component should render a basic component 1`] = `
                 class="col-sm-3 control-label"
                 for="scanName"
               >
-                <label
-                  class="control-label"
-                  for="scanName"
-                >
-                  Name
-                </label>
+                Name
               </label>
               <div
                 class="col-sm-9"
