@@ -10,12 +10,16 @@
 #
 """Test the report API."""
 
+import io
 import json
+import tarfile
 import uuid
 
 from api.common.common_report import create_report_version
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
                                                  sanitize_row)
+from api.deployments_report.json_gzip_renderer import \
+    (DeploymentsJsonGzipRenderer)
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -323,3 +327,44 @@ class DeploymentReportTest(TestCase):
         # pylint: disable=line-too-long
         expected = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)
+
+    ##############################################################
+    # Test Json Gzip Render
+    ##############################################################
+    def test_json_gzip_renderer(self):
+        """Test DeploymentsJsonGzipRenderer."""
+        renderer = DeploymentsJsonGzipRenderer()
+        # Test no FC id
+        test_json = {}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Test doesn't exist
+        test_json = {'id': 42}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Create a system fingerprint via collection receiver
+        self.generate_fingerprints(
+            os_versions=['7.4', '7.4', '7.5'])
+        url = '/api/v1/reports/1/deployments/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report_dict = response.json()
+
+        # Test that a BytesIO Object is returned
+        tar_gz_result = renderer.render(report_dict)
+        self.assertIsInstance(tar_gz_result, (io.BytesIO))
+
+        # Test that the tar file is readable
+        self.assertEqual(tar_gz_result.readable(), True)
+
+        # Test that the tar file has a sub file
+        tar = tarfile.open(fileobj=tar_gz_result)
+        self.assertNotEqual(tar.getmembers(), [])
+
+        # Test that the data in the subfile equals the report_dict
+        json_file = tar.getmembers()[0]
+        tar_info = tar.extractfile(json_file)
+        tar_dict_data = json.loads(tar_info.read().decode())
+        self.assertEqual(tar_dict_data, report_dict)

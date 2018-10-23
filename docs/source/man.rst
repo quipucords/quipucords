@@ -511,7 +511,7 @@ The ``qpc report details`` command generates a detailed report that contains the
 
 ``--json``
 
-  Displays the results of the report in JSON format. Mutually exclusive with the ``--csv`` option.
+  Displays the results of the report in TAR.GZ format. Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
 
@@ -539,7 +539,7 @@ For example, the raw facts of a scan that includes both network and vcenter sour
 
 ``--json``
 
-  Displays the results of the report in JSON format. Mutually exclusive with the ``--csv`` option.
+  Displays the results of the report in TAR.GZ format. Mutually exclusive with the ``--csv`` option.
 
 ``--csv``
 

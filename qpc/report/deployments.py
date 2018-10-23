@@ -11,16 +11,14 @@
 #
 """ReportDeploymentsCommand is to show deployments report."""
 
-from __future__ import print_function
-
+import os
 import sys
 
 from qpc import messages, report, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET, request
 from qpc.translation import _
-from qpc.utils import (pretty_print,
-                       validate_write_file,
+from qpc.utils import (validate_write_file,
                        write_file)
 
 from requests import codes
@@ -64,7 +62,7 @@ class ReportDeploymentsCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
         if self.args.output_json:
-            self.req_headers = {'Accept': 'application/json'}
+            self.req_headers = {'Accept': 'application/json+gzip'}
         if self.args.output_csv:
             self.req_headers = {'Accept': 'text/csv'}
 
@@ -103,14 +101,22 @@ class ReportDeploymentsCommand(CliCommand):
 
     def _handle_response_success(self):
         file_content = None
+        binary = False
         if self.args.output_json:
-            file_content = self.response.json()
-            file_content = pretty_print(file_content)
+            correct_file_ext = '.tar.gz'
+            file_content = self.response.content
+            binary = True
+            if correct_file_ext not in self.args.path:
+                filename = os.path.splitext(self.args.path)[0]
+                self.args.path = filename + correct_file_ext
+                print(_(messages.REPORT_REQUIRE_TAR % self.args.path))
         else:
             file_content = self.response.text
 
         try:
-            write_file(self.args.path, file_content)
+            write_file(self.args.path,
+                       file_content,
+                       binary)
             print(_(messages.REPORT_SUCCESSFULLY_WRITTEN))
         except EnvironmentError as err:
             err_msg = _(messages.WRITE_FILE_ERROR % (self.args.path, err))

@@ -42,7 +42,7 @@ class ReportDeploymentsTests(unittest.TestCase):
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
-        self.test_json_filename = 'test_%d.json' % time.time()
+        self.test_json_filename = 'test_%d.tar.gz' % time.time()
         self.test_csv_filename = 'test_%d.csv' % time.time()
         sys.stderr = HushUpStderr()
 
@@ -172,7 +172,7 @@ class ReportDeploymentsTests(unittest.TestCase):
             CLI().main()
 
     def test_deployments_report_scan_job_not_exist(self):
-        """Summary report with nonexistent scanjob."""
+        """Deployments report with nonexistent scanjob."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
@@ -194,7 +194,7 @@ class ReportDeploymentsTests(unittest.TestCase):
                                      messages.REPORT_SJ_DOES_NOT_EXIST)
 
     def test_deployments_report_invalid_scan_job(self):
-        """Summary report with scanjob but no report_id."""
+        """Deployments report with scanjob but no report_id."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
@@ -215,3 +215,31 @@ class ReportDeploymentsTests(unittest.TestCase):
                     self.assertEqual(
                         report_out.getvalue(),
                         messages.REPORT_NO_DEPLOYMENTS_REPORT_FOR_SJ)
+
+    def test_deployments_report_convert_file_ext(self):
+        """Testing converting file extension to tar.gz for json."""
+        report_out = StringIO()
+
+        filename = self.test_json_filename.split('.')[0]
+        unacceptable_extension = filename + '.json'
+        get_report_url = get_server_location() + \
+            REPORT_URI + '1/deployments/'
+        get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        with requests_mock.Mocker() as mocker:
+            mocker.get(get_report_url, status_code=200,
+                       json=get_report_json_data)
+            nac = ReportDeploymentsCommand(SUBPARSER)
+            args = Namespace(scan_job_id=None,
+                             report_id='1',
+                             output_json=True,
+                             output_csv=False,
+                             path=unacceptable_extension)
+            with redirect_stdout(report_out):
+                nac.main(args)
+                self.assertIn(messages.REPORT_REQUIRE_TAR %
+                              self.test_json_filename,
+                              report_out.getvalue().strip())
+                with open(self.test_json_filename, 'r') as json_file:
+                    data = json_file.read()
+                    file_content_dict = json.loads(data)
+                self.assertDictEqual(get_report_json_data, file_content_dict)

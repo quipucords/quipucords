@@ -11,10 +11,13 @@
 """Test the report API."""
 
 import copy
+import io
 import json
+import tarfile
 
 from api.common.common_report import create_report_version
 from api.details_report.csv_renderer import (DetailsCSVRenderer)
+from api.details_report.json_gzip_renderer import (DetailsJsonGzipRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
@@ -178,3 +181,47 @@ class DetailReportTest(TestCase):
         # pylint: disable=line-too-long
         expected = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % (self.report_version, self.server_id)  # noqa
         self.assertEqual(csv_result, expected)
+
+    ##############################################################
+    # Test Json Gzip Render
+    ##############################################################
+    def test_json_gzip_renderer(self):
+        """Test DetailsJsonGzipRenderer."""
+        renderer = DetailsJsonGzipRenderer()
+        # Test no FC id
+        test_json = {}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        # Test doesn't exist
+        test_json = {'id': 42}
+        value = renderer.render(test_json)
+        self.assertIsNone(value)
+
+        request_json = {'report_type': 'details',
+                        'sources':
+                        [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
+                          'source_name': self.net_source.name,
+                          'source_type': self.net_source.source_type,
+                          'facts': [{'key': 'value'}]}]}
+
+        report_dict = self.create_expect_201(
+            request_json)
+
+        # Test that a BytesIO Object is returned
+        tar_gz_result = renderer.render(report_dict)
+        self.assertIsInstance(tar_gz_result, (io.BytesIO))
+
+        # Test that the tar file is readable
+        self.assertEqual(tar_gz_result.readable(), True)
+
+        # Test that the tar file has a sub file
+        tar = tarfile.open(fileobj=tar_gz_result)
+        self.assertNotEqual(tar.getmembers(), [])
+
+        # Test that the data in the subfile equals the report_dict
+        json_file = tar.getmembers()[0]
+        tar_info = tar.extractfile(json_file)
+        tar_dict_data = json.loads(tar_info.read().decode())
+        self.assertEqual(tar_dict_data, report_dict)

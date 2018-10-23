@@ -347,7 +347,7 @@ def validate_write_file(filename, param_name):
             t(messages.REPORT_DIRECTORY_DOES_NOT_EXIST % directory))
 
 
-def write_file(filename, content):
+def write_file(filename, content, binary=False):
     """Write content to a file.
 
     :param filename: the filename to write
@@ -356,7 +356,9 @@ def write_file(filename, content):
     """
     result = None
     input_path = os.path.expanduser(os.path.expandvars(filename))
-
-    with open(input_path, 'w') as out_file:
+    mode = 'w'
+    if binary:
+        mode = 'wb'
+    with open(input_path, mode) as out_file:
         out_file.write(content)
     return result

@@ -193,7 +193,7 @@ REPORT_JOB_ID_HELP = 'Merge report job identifier'
 REPORT_REPORT_ID_HELP = 'Report identifier.'
 REPORT_REPORT_IDS_HELP = 'Report identifiers.'
 REPORT_SCAN_JOB_IDS_HELP = 'Scan job identifiers.'
-REPORT_OUTPUT_JSON_HELP = 'Output as a JSON file.'
+REPORT_OUTPUT_JSON_HELP = 'Output as a tarball containing a JSON file'
 REPORT_OUTPUT_CSV_HELP = 'Output as a CSV file.'
 REPORT_PATH_HELP = 'Output file location.'
 REPORT_SJ_DOES_NOT_EXIST = \
@@ -215,6 +215,8 @@ REPORT_JSON_DIR_NOT_FOUND = '%s is not a directory'
 REPORT_SUCCESSFULLY_WRITTEN = 'Report written successfully.'
 REPORT_SUCCESSFULLY_MERGED = 'Report merge job %s created. '\
     'To check merge status, run "qpc report merge-status --job %s"'
+REPORT_REQUIRE_TAR = 'A json report requires the file type to be tar.gz, '\
+    'changed the output file to %s.'
 
 DISABLE_OPT_PRODUCTS_HELP = 'The product inspection exclusions. '\
     'Contains the list of products to exclude from inspection. '\

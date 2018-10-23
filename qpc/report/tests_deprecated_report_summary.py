@@ -42,7 +42,7 @@ class ReportSummaryTests(unittest.TestCase):
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
-        self.test_json_filename = 'test_%d.json' % time.time()
+        self.test_json_filename = 'test_%d.tar.gz' % time.time()
         self.test_csv_filename = 'test_%d.csv' % time.time()
         sys.stderr = HushUpStderr()
 
