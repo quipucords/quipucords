@@ -265,7 +265,7 @@ class ScanJobRunner(Process):
                 message = 'Scan producted invalid details report JSON: %s' % \
                     validation_result
                 self.scan_job.fail(message)
-                return True, ScanTask.FAILED
+                return True, {}
 
             # Create FC model and save data to JSON file
             details_report = create_details_report(create_report_version(),
