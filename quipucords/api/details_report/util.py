@@ -14,6 +14,7 @@
 import logging
 
 from api import messages
+from api.common.common_report import create_report_version
 from api.models import (ScanTask,
                         ServerInformation,
                         Source)
@@ -56,6 +57,7 @@ def build_sources_from_tasks(tasks):
             if source is not None:
                 source_dict = {
                     SERVER_ID_KEY: server_id,
+                    REPORT_VERSION_KEY: create_report_version(),
                     SOURCE_NAME_KEY: source.name,
                     SOURCE_TYPE_KEY: source.source_type,
                     FACTS_KEY: task_facts}
