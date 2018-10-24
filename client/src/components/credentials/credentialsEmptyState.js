@@ -42,4 +42,9 @@ CredentialsEmptyState.propTypes = {
   onAddSource: PropTypes.func
 };
 
+CredentialsEmptyState.defaultProps = {
+  onAddCredential: helpers.noop,
+  onAddSource: helpers.noop
+};
+
 export { CredentialsEmptyState as default, CredentialsEmptyState };

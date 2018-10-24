@@ -5,15 +5,46 @@ import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-rea
 import Store from '../../redux/store';
 import { helpers } from '../../common/helpers';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
-import {
-  addCredential,
-  getCredentials,
-  getWizardCredentials,
-  updateCredential
-} from '../../redux/actions/credentialsActions';
+import { reduxActions } from '../../redux/actions';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
 
 class CreateCredentialDialog extends React.Component {
+  static renderFormLabel(label) {
+    return (
+      <Grid.Col componentClass={Form.ControlLabel} sm={5}>
+        {label}
+      </Grid.Col>
+    );
+  }
+
+  static validateCredentialName(credentialName) {
+    if (!credentialName) {
+      return 'You must enter a credential name';
+    }
+
+    if (credentialName.length > 64) {
+      return 'The credential name can only contain up to 64 characters';
+    }
+
+    return '';
+  }
+
+  static validateUsername(username) {
+    if (!username || !username.length) {
+      return 'You must enter a user name';
+    }
+
+    return '';
+  }
+
+  static validatePassword(password) {
+    if (!password || !password.length) {
+      return 'You must enter a password';
+    }
+
+    return '';
+  }
+
   constructor() {
     super();
 
@@ -44,26 +75,148 @@ class CreateCredentialDialog extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.show && nextProps.show) {
+    const { edit, fulfilled, getCredentials, show, viewOptions } = this.props;
+
+    if (!show && nextProps.show) {
       this.resetInitialState(nextProps);
     }
 
-    if (this.props.show && nextProps.fulfilled && !this.props.fulfilled) {
+    if (show && nextProps.fulfilled && !fulfilled) {
       Store.dispatch({
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'success',
         message: (
           <span>
             Credential <strong>{nextProps.credential.name}</strong> successfully
-            {this.props.edit ? ' updated' : ' added'}.
+            {edit ? ' updated' : ' added'}.
           </span>
         )
       });
 
       this.onCancel();
-      this.props.getCredentials(helpers.createViewQueryObject(this.props.viewOptions));
+      getCredentials(helpers.createViewQueryObject(viewOptions));
     }
   }
+
+  onCancel = () => {
+    Store.dispatch({
+      type: credentialsTypes.UPDATE_CREDENTIAL_HIDE
+    });
+  };
+
+  onSave = () => {
+    const { addCredential, credential, edit, getWizardCredentials, updateCredential } = this.props;
+    const {
+      authorizationType,
+      becomeMethod,
+      becomePassword,
+      becomeUser,
+      credentialName,
+      credentialType,
+      passphrase,
+      password,
+      sshKeyFile,
+      username
+    } = this.state;
+
+    const submitCredential = {
+      username,
+      name: credentialName
+    };
+
+    if (edit) {
+      submitCredential.id = credential.id;
+    } else {
+      submitCredential.cred_type = credentialType;
+    }
+
+    if (authorizationType === 'sshKey') {
+      submitCredential.ssh_keyfile = sshKeyFile;
+      submitCredential.sshpassphrase = passphrase;
+    } else {
+      submitCredential.password = password;
+    }
+
+    if (credentialType === 'network') {
+      submitCredential.become_method = becomeMethod;
+      if (becomeUser) {
+        submitCredential.become_user = becomeUser;
+      }
+      if (becomePassword) {
+        submitCredential.become_password = becomePassword;
+      }
+    }
+
+    if (edit) {
+      updateCredential(submitCredential.id, submitCredential);
+    } else {
+      addCredential(submitCredential).finally(() => {
+        getWizardCredentials();
+      });
+    }
+  };
+
+  onSetAuthType = authType => {
+    this.setState({ authorizationType: authType });
+  };
+
+  onUpdateCredentialName = event => {
+    this.setState({
+      credentialName: event.target.value,
+      credentialNameError: CreateCredentialDialog.validateCredentialName(event.target.value)
+    });
+  };
+
+  onUpdateUsername = event => {
+    this.setState({
+      username: event.target.value,
+      usernameError: CreateCredentialDialog.validateUsername(event.target.value)
+    });
+  };
+
+  onUpdatePassword = event => {
+    this.setState({
+      password: event.target.value,
+      passwordError: CreateCredentialDialog.validatePassword(event.target.value)
+    });
+  };
+
+  onUpdateSshKeyFile = event => {
+    this.setState({
+      sshKeyFile: event.target.value,
+      sskKeyFileError: this.validateSshKeyFile(event.target.value)
+    });
+  };
+
+  onUpdatePassphrase = event => {
+    this.setState({
+      passphrase: event.target.value
+    });
+  };
+
+  onSetBecomeMethod = method => {
+    this.setState({
+      becomeMethod: method
+    });
+  };
+
+  onUpdateBecomeUser = event => {
+    this.setState({
+      becomeUser: event.target.value
+    });
+  };
+
+  onUpdateBecomePassword = event => {
+    this.setState({
+      becomePassword: event.target.value
+    });
+  };
+
+  onErrorDismissed = () => {
+    Store.dispatch({
+      type: credentialsTypes.RESET_CREDENTIAL_UPDATE_STATUS
+    });
+  };
 
   resetInitialState(nextProps) {
     let sshKeyDisabled = true;
@@ -103,113 +256,26 @@ class CreateCredentialDialog extends React.Component {
     }
   }
 
-  onCancel = () => {
-    Store.dispatch({
-      type: credentialsTypes.UPDATE_CREDENTIAL_HIDE
-    });
-  };
-
-  onSave = () => {
-    const credential = {
-      username: this.state.username,
-      name: this.state.credentialName
-    };
-
-    if (this.props.edit) {
-      credential.id = this.props.credential.id;
-    } else {
-      credential.cred_type = this.state.credentialType;
-    }
-
-    if (this.state.authorizationType === 'sshKey') {
-      credential.ssh_keyfile = this.state.sshKeyFile;
-      credential.sshpassphrase = this.state.passphrase;
-    } else {
-      credential.password = this.state.password;
-    }
-
-    if (this.state.credentialType === 'network') {
-      credential.become_method = this.state.becomeMethod;
-      if (this.state.becomeUser) {
-        credential.become_user = this.state.becomeUser;
-      }
-      if (this.state.becomePassword) {
-        credential.become_password = this.state.becomePassword;
-      }
-    }
-
-    if (this.props.edit) {
-      this.props.updateCredential(credential.id, credential);
-    } else {
-      this.props.addCredential(credential).finally(() => {
-        this.props.getWizardCredentials();
-      });
-    }
-  };
-
-  setAuthType(authType) {
-    this.setState({ authorizationType: authType });
-  }
-
   validateForm() {
+    const {
+      credentialName,
+      credentialNameError,
+      username,
+      usernameError,
+      authorizationType,
+      password,
+      passwordError,
+      sshKeyFile,
+      sskKeyFileError
+    } = this.state;
+
     return (
-      this.state.credentialName &&
-      !this.state.credentialNameError &&
-      this.state.username &&
-      !this.state.usernameError &&
-      (this.state.authorizationType === 'usernamePassword'
-        ? this.state.password && !this.state.passwordError
-        : this.state.sshKeyFile && !this.state.sskKeyFileError)
+      credentialName &&
+      !credentialNameError &&
+      username &&
+      !usernameError &&
+      (authorizationType === 'usernamePassword' ? password && !passwordError : sshKeyFile && !sskKeyFileError)
     );
-  }
-
-  static validateCredentialName(credentialName) {
-    if (!credentialName) {
-      return 'You must enter a credential name';
-    }
-
-    if (credentialName.length > 64) {
-      return 'The credential name can only contain up to 64 characters';
-    }
-
-    return '';
-  }
-
-  updateCredentialName(event) {
-    this.setState({
-      credentialName: event.target.value,
-      credentialNameError: CreateCredentialDialog.validateCredentialName(event.target.value)
-    });
-  }
-
-  static validateUsername(username) {
-    if (!username || !username.length) {
-      return 'You must enter a user name';
-    }
-
-    return '';
-  }
-
-  updateUsername(event) {
-    this.setState({
-      username: event.target.value,
-      usernameError: CreateCredentialDialog.validateUsername(event.target.value)
-    });
-  }
-
-  static validatePassword(password) {
-    if (!password || !password.length) {
-      return 'You must enter a password';
-    }
-
-    return '';
-  }
-
-  updatePassword(event) {
-    this.setState({
-      password: event.target.value,
-      passwordError: CreateCredentialDialog.validatePassword(event.target.value)
-    });
   }
 
   validateSshKeyFile(keyFile) {
@@ -218,45 +284,6 @@ class CreateCredentialDialog extends React.Component {
     }
 
     return '';
-  }
-
-  updateSshKeyFile(event) {
-    this.setState({
-      sshKeyFile: event.target.value,
-      sskKeyFileError: this.validateSshKeyFile(event.target.value)
-    });
-  }
-
-  updatePassphrase(event) {
-    this.setState({
-      passphrase: event.target.value
-    });
-  }
-
-  setBecomeMethod(method) {
-    this.setState({
-      becomeMethod: method
-    });
-  }
-
-  updateBecomeUser(event) {
-    this.setState({
-      becomeUser: event.target.value
-    });
-  }
-
-  updateBecomePassword(event) {
-    this.setState({
-      becomePassword: event.target.value
-    });
-  }
-
-  static renderFormLabel(label) {
-    return (
-      <Grid.Col componentClass={Form.ControlLabel} sm={5}>
-        {label}
-      </Grid.Col>
-    );
   }
 
   renderAuthForm() {
@@ -280,7 +307,7 @@ class CreateCredentialDialog extends React.Component {
                 type="password"
                 value={password}
                 placeholder="Enter Password"
-                onChange={e => this.updatePassword(e)}
+                onChange={e => this.onUpdatePassword(e)}
               />
               {passwordError && <Form.HelpBlock>{passwordError}</Form.HelpBlock>}
             </Grid.Col>
@@ -300,7 +327,7 @@ class CreateCredentialDialog extends React.Component {
                   type="text"
                   value={sshKeyFile}
                   placeholder="Enter the full path to the SSH key file"
-                  onChange={e => this.updateSshKeyFile(e)}
+                  onChange={e => this.onUpdateSshKeyFile(e)}
                 />
                 {sskKeyFileError && <Form.HelpBlock>{sskKeyFileError}</Form.HelpBlock>}
               </Grid.Col>
@@ -312,7 +339,7 @@ class CreateCredentialDialog extends React.Component {
                   type="password"
                   value={passphrase}
                   placeholder="optional"
-                  onChange={e => this.updatePassphrase(e)}
+                  onChange={e => this.onUpdatePassphrase(e)}
                 />
               </Grid.Col>
             </Form.FormGroup>
@@ -344,10 +371,10 @@ class CreateCredentialDialog extends React.Component {
               >
                 {this.becomeMethods.map((nextMethod, index) => (
                   <MenuItem
-                    key={index}
+                    key={nextMethod}
                     className={{ 'quipucords-dropdownselect-menuitem-selected': nextMethod === becomeMethod }}
                     eventKey={`become${index}`}
-                    onClick={() => this.setBecomeMethod(nextMethod)}
+                    onClick={() => this.onSetBecomeMethod(nextMethod)}
                   >
                     {nextMethod}
                   </MenuItem>
@@ -363,7 +390,7 @@ class CreateCredentialDialog extends React.Component {
               type="text"
               placeholder="optional"
               value={becomeUser}
-              onChange={e => this.updateBecomeUser(e)}
+              onChange={e => this.onUpdateBecomeUser(e)}
             />
           </Grid.Col>
         </Form.FormGroup>
@@ -374,19 +401,13 @@ class CreateCredentialDialog extends React.Component {
               type="password"
               value={becomePassword}
               placeholder="optional"
-              onChange={e => this.updateBecomePassword(e)}
+              onChange={e => this.onUpdateBecomePassword(e)}
             />
           </Grid.Col>
         </Form.FormGroup>
       </React.Fragment>
     );
   }
-
-  onErrorDismissed = () => {
-    Store.dispatch({
-      type: credentialsTypes.RESET_CREDENTIAL_UPDATE_STATUS
-    });
-  };
 
   renderErrorMessage() {
     const { error, errorMessage } = this.props;
@@ -446,7 +467,7 @@ class CreateCredentialDialog extends React.Component {
                   placeholder="Enter a name for the credential"
                   autoFocus={!edit}
                   value={credentialName}
-                  onChange={e => this.updateCredentialName(e)}
+                  onChange={e => this.onUpdateCredentialName(e)}
                 />
                 {credentialNameError && <Form.HelpBlock>{credentialNameError}</Form.HelpBlock>}
               </Grid.Col>
@@ -468,7 +489,7 @@ class CreateCredentialDialog extends React.Component {
                           'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
                         }}
                         eventKey="1"
-                        onClick={() => this.setAuthType('usernamePassword')}
+                        onClick={() => this.onSetAuthType('usernamePassword')}
                       >
                         {helpers.authorizationTypeString('usernamePassword')}
                       </MenuItem>
@@ -476,7 +497,7 @@ class CreateCredentialDialog extends React.Component {
                         key="sshKey"
                         className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
                         eventKey="2"
-                        onClick={() => this.setAuthType('sshKey')}
+                        onClick={() => this.onSetAuthType('sshKey')}
                       >
                         {helpers.authorizationTypeString('sshKey')}
                       </MenuItem>
@@ -492,7 +513,7 @@ class CreateCredentialDialog extends React.Component {
                   type="text"
                   placeholder="Enter Username"
                   value={username}
-                  onChange={e => this.updateUsername(e)}
+                  onChange={e => this.onUpdateUsername(e)}
                 />
                 {usernameError && <Form.HelpBlock>{usernameError}</Form.HelpBlock>}
               </Grid.Col>
@@ -529,11 +550,26 @@ CreateCredentialDialog.propTypes = {
   viewOptions: PropTypes.object
 };
 
+CreateCredentialDialog.defaultProps = {
+  addCredential: helpers.noop,
+  getCredentials: helpers.noop,
+  getWizardCredentials: helpers.noop,
+  updateCredential: helpers.noop,
+  credential: {},
+  credentialType: null, // eslint-disable-line react/no-unused-prop-types
+  show: false,
+  edit: false,
+  fulfilled: false,
+  error: false,
+  errorMessage: null,
+  viewOptions: {}
+};
+
 const mapDispatchToProps = dispatch => ({
-  getCredentials: queryObj => dispatch(getCredentials(queryObj)),
-  getWizardCredentials: () => dispatch(getWizardCredentials()),
-  addCredential: data => dispatch(addCredential(data)),
-  updateCredential: (id, data) => dispatch(updateCredential(id, data))
+  getCredentials: queryObj => dispatch(reduxActions.credentials.getCredentials(queryObj)),
+  getWizardCredentials: () => dispatch(reduxActions.credentials.getWizardCredentials()),
+  addCredential: data => dispatch(reduxActions.credentials.addCredential(data)),
+  updateCredential: (id, data) => dispatch(reduxActions.credentials.updateCredential(id, data))
 });
 
 const mapStateToProps = state =>

@@ -7,17 +7,17 @@ exports[`ConfirmationModal Component should shallow render a basic component 1`]
   <Switch>
     <Route
       component={[Function]}
-      key="0"
+      key="/sources"
       path="/sources"
     />
     <Route
       component={[Function]}
-      key="1"
+      key="/scans"
       path="/scans"
     />
     <Route
       component={[Function]}
-      key="2"
+      key="/credentials"
       path="/credentials"
     />
     <Redirect

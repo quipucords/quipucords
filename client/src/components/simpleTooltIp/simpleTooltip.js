@@ -22,6 +22,8 @@ SimpleTooltip.propTypes = {
 };
 
 SimpleTooltip.defaultProps = {
+  children: null,
+  tooltip: null,
   placement: 'top',
   trigger: ['hover'],
   delayShow: 500

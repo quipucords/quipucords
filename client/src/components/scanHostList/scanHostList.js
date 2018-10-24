@@ -5,13 +5,11 @@ import { connect } from 'react-redux';
 import { EmptyState, Grid } from 'patternfly-react';
 import _ from 'lodash';
 import helpers from '../../common/helpers';
-import { getConnectionScanResults, getInspectionScanResults } from '../../redux/actions/scansActions';
+import { reduxActions } from '../../redux/actions';
 
 class ScanHostList extends React.Component {
   constructor() {
     super();
-
-    helpers.bindMethods(this, ['loadMore']);
 
     this.state = {
       scanResults: [],
@@ -30,15 +28,105 @@ class ScanHostList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const { lastRefresh, status, useConnectionResults, useInspectionResults } = this.props;
     // Check for changes resulting in a fetch
     if (
-      !_.isEqual(nextProps.lastRefresh, this.props.lastRefresh) ||
-      nextProps.status !== this.props.status ||
-      nextProps.useConnectionResults !== this.props.useConnectionResults ||
-      nextProps.useInspectionResults !== this.props.useInspectionResults
+      !_.isEqual(nextProps.lastRefresh, lastRefresh) ||
+      nextProps.status !== status ||
+      nextProps.useConnectionResults !== useConnectionResults ||
+      nextProps.useInspectionResults !== useInspectionResults
     ) {
       this.refresh(nextProps);
     }
+  }
+
+  onLoadMore = page => {
+    if (this.loading) {
+      return;
+    }
+
+    this.loading = true;
+    this.refresh(this.props, page);
+  };
+
+  getInspectionResults(passedPage, status) {
+    const { scanId, sourceId, getInspectionScanResults, useConnectionResults, useInspectionResults } = this.props;
+    const { connectionScanResultsPending, page, prevResults } = this.state;
+    const fetchAll = useConnectionResults && useInspectionResults;
+
+    const queryObject = {
+      page: passedPage === undefined ? page : passedPage,
+      page_size: 100,
+      ordering: 'name',
+      status
+    };
+
+    if (sourceId) {
+      queryObject.source_id = sourceId;
+    }
+
+    getInspectionScanResults(scanId, queryObject)
+      .then(results => {
+        const morePages = fetchAll && _.get(results.value, 'data.next') !== null;
+
+        this.setState({
+          inspectionScanResultsPending: morePages,
+          scanResults: this.addResults(results),
+          prevResults: morePages || connectionScanResultsPending ? prevResults : []
+        });
+        this.loading = connectionScanResultsPending;
+
+        if (morePages) {
+          this.getInspectionResults(passedPage + 1, status);
+        }
+      })
+      .catch(error => {
+        this.setState({
+          inspectionScanResultsPending: false,
+          scanResultsError: helpers.getErrorMessageFromResults(error)
+        });
+      });
+  }
+
+  getConnectionResults(passedPage, status) {
+    const { scanId, sourceId, getConnectionScanResults, useConnectionResults, useInspectionResults } = this.props;
+    const { inspectionScanResultsPending, page, prevResults } = this.state;
+    const usePaging = !useConnectionResults || !useInspectionResults;
+
+    const queryObject = {
+      page: passedPage === undefined ? page : passedPage,
+      page_size: 100,
+      ordering: 'name',
+      status
+    };
+
+    if (sourceId) {
+      queryObject.source_id = sourceId;
+    }
+
+    getConnectionScanResults(scanId, queryObject)
+      .then(results => {
+        const allResults = this.addResults(results);
+        const morePages = _.get(results.value, 'data.next') !== null;
+
+        this.setState({
+          moreResults: morePages,
+          connectionScanResultsPending: morePages && !usePaging,
+          scanResults: allResults,
+          prevResults: morePages || inspectionScanResultsPending ? prevResults : []
+        });
+        this.loading = inspectionScanResultsPending;
+
+        if (morePages && !usePaging) {
+          this.getConnectionResults(passedPage + 1, status);
+        }
+      })
+      .catch(error => {
+        this.setState({
+          connectionScanResultsPending: false,
+          scanResultsError: helpers.getErrorMessageFromResults(error)
+        });
+      });
   }
 
   addResults(results) {
@@ -64,93 +152,15 @@ class ScanHostList extends React.Component {
     return allResults;
   }
 
-  getInspectionResults(page, status) {
-    const { scanId, sourceId, getInspectionScanResults, useConnectionResults, useInspectionResults } = this.props;
-    const fetchAll = useConnectionResults && useInspectionResults;
-
-    const queryObject = {
-      page: page === undefined ? this.state.page : page,
-      page_size: 100,
-      ordering: 'name',
-      status
-    };
-
-    if (sourceId) {
-      queryObject.source_id = sourceId;
-    }
-
-    getInspectionScanResults(scanId, queryObject)
-      .then(results => {
-        const morePages = fetchAll && _.get(results.value, 'data.next') !== null;
-
-        this.setState({
-          inspectionScanResultsPending: morePages,
-          scanResults: this.addResults(results),
-          prevResults: morePages || this.state.connectionScanResultsPending ? this.state.prevResults : []
-        });
-        this.loading = this.state.connectionScanResultsPending;
-
-        if (morePages) {
-          this.getInspectionResults(page + 1, status);
-        }
-      })
-      .catch(error => {
-        this.setState({
-          inspectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
-        });
-      });
-  }
-
-  getConnectionResults(page, status) {
-    const { scanId, sourceId, getConnectionScanResults, useConnectionResults, useInspectionResults } = this.props;
-    const usePaging = !useConnectionResults || !useInspectionResults;
-
-    const queryObject = {
-      page: page === undefined ? this.state.page : page,
-      page_size: 100,
-      ordering: 'name',
-      status
-    };
-
-    if (sourceId) {
-      queryObject.source_id = sourceId;
-    }
-
-    getConnectionScanResults(scanId, queryObject)
-      .then(results => {
-        const allResults = this.addResults(results);
-        const morePages = _.get(results.value, 'data.next') !== null;
-
-        this.setState({
-          moreResults: morePages,
-          connectionScanResultsPending: morePages && !usePaging,
-          scanResults: allResults,
-          prevResults: morePages || this.state.inspectionScanResultsPending ? this.state.prevResults : []
-        });
-        this.loading = this.state.inspectionScanResultsPending;
-
-        if (morePages && !usePaging) {
-          this.getConnectionResults(page + 1, status);
-        }
-      })
-      .catch(error => {
-        this.setState({
-          connectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
-        });
-      });
-  }
-
   refresh(useProps, page = 1) {
     const { useConnectionResults, useInspectionResults, status } = useProps;
+    const { scanResults } = this.state;
 
     this.setState({
-      scanResultsPending: true,
       connectionScanResultsPending: useConnectionResults,
       inspectionScanResultsPending: useInspectionResults,
-      scanResults: page === 1 ? [] : this.state.scanResults,
-      prevResults: this.state.scanResults,
+      scanResults: page === 1 ? [] : scanResults,
+      prevResults: scanResults,
       moreResults: false
     });
     this.loading = true;
@@ -162,15 +172,6 @@ class ScanHostList extends React.Component {
     if (useInspectionResults) {
       this.getInspectionResults(page, status);
     }
-  }
-
-  loadMore(page) {
-    if (this.loading) {
-      return;
-    }
-
-    this.loading = true;
-    this.refresh(this.props, page);
   }
 
   renderResults(results) {
@@ -185,19 +186,21 @@ class ScanHostList extends React.Component {
       <Grid.Row key={`${host.name}-${host.source.id}`}>{renderHostRow(host)}</Grid.Row>
     ));
 
+    const loader = (
+      <div key="loader" className="loader">
+        Loading...
+      </div>
+    );
+
     return (
       <div className="host-results">
         <Grid fluid className="host-list">
           <InfiniteScroll
             pageStart={1}
-            loadMore={this.loadMore}
+            loadMore={this.onLoadMore}
             hasMore={moreResults}
             useWindow={false}
-            loader={
-              <div key="loader" className="loader">
-                Loading...
-              </div>
-            }
+            loader={loader}
           >
             {rowItems}
           </InfiniteScroll>
@@ -267,13 +270,20 @@ ScanHostList.propTypes = {
 };
 
 ScanHostList.defaultProps = {
+  scanId: null,
+  sourceId: null,
+  lastRefresh: 0,
+  status: null,
+  renderHostRow: helpers.noop,
   useConnectionResults: false,
-  useInspectionResults: false
+  useInspectionResults: false,
+  getConnectionScanResults: helpers.noop,
+  getInspectionScanResults: helpers.noop
 };
 
 const mapDispatchToProps = dispatch => ({
-  getConnectionScanResults: (id, query) => dispatch(getConnectionScanResults(id, query)),
-  getInspectionScanResults: (id, query) => dispatch(getInspectionScanResults(id, query))
+  getConnectionScanResults: (id, query) => dispatch(reduxActions.scans.getConnectionScanResults(id, query)),
+  getInspectionScanResults: (id, query) => dispatch(reduxActions.scans.getInspectionScanResults(id, query))
 });
 
 const mapStateToProps = () => ({});

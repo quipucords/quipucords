@@ -18,6 +18,15 @@ const actions = {
 
 const reduxActions = { ...actions };
 
-export { reduxActions, actions };
-
-export default reduxActions;
+export {
+  reduxActions as default,
+  reduxActions,
+  actions,
+  credentialsActions,
+  factsActions,
+  reportsActions,
+  scansActions,
+  sourcesActions,
+  statusActions,
+  userActions
+};

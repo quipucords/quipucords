@@ -12,7 +12,7 @@ exports[`RefreshTimeButton Component should render 1`] = `
   <span
     class="last-refresh-time"
   >
-    Refreshed 
+    Refreshed 0
   </span>
 </button>
 `;
