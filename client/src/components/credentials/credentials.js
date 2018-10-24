@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Alert, Button, DropdownButton, EmptyState, Form, Grid, ListView, MenuItem, Modal } from 'patternfly-react';
 import _ from 'lodash';
-import { getCredentials, deleteCredential } from '../../redux/actions/credentialsActions';
+import { reduxActions } from '../../redux/actions';
 import {
   confirmationModalTypes,
   credentialsTypes,
@@ -37,28 +37,19 @@ class Credentials extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(nextProps.credentials, this.props.credentials)) {
-      // Reset selection state though we may want to keep selections over refreshes...
-      nextProps.credentials.forEach(credential => {
-        if (credential.ssh_keyfile && credential.ssh_keyfile !== '') {
-          credential.auth_type = 'sshKey';
-        } else {
-          credential.auth_type = 'usernamePassword';
-        }
-      });
+    const { credentials, fulfilled, update, viewOptions } = this.props;
 
-      if (nextProps.fulfilled && !this.props.fulfilled) {
-        this.setState({ lastRefresh: Date.now() });
-      }
+    if (!_.isEqual(nextProps.credentials, credentials) && nextProps.fulfilled && !fulfilled) {
+      this.setState({ lastRefresh: Date.now() });
     }
 
     // Check for changes resulting in a fetch
-    if (helpers.viewPropsChanged(nextProps.viewOptions, this.props.viewOptions)) {
+    if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
       this.onRefresh(nextProps);
     }
 
     if (_.get(nextProps, 'update.delete')) {
-      if (nextProps.update.fulfilled && !this.props.update.fulfilled) {
+      if (nextProps.update.fulfilled && !update.fulfilled) {
         Store.dispatch({
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'success',
@@ -79,7 +70,7 @@ class Credentials extends React.Component {
         this.deleteNextCredential();
       }
 
-      if (nextProps.update.error && !this.props.update.error) {
+      if (nextProps.update.error && !update.error) {
         Store.dispatch({
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'error',
@@ -103,25 +94,6 @@ class Credentials extends React.Component {
       credentialType
     });
   };
-
-  deleteNextCredential() {
-    if (this.credentialsToDelete.length > 0) {
-      this.deletingCredential = this.credentialsToDelete.pop();
-      if (this.deletingCredential) {
-        this.props.deleteCredential(this.deletingCredential.id);
-      }
-    }
-  }
-
-  doDeleteCredentials(items) {
-    this.credentialsToDelete = [...items];
-
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-    });
-
-    this.deleteNextCredential();
-  }
 
   onDeleteCredentials = () => {
     const { viewOptions } = this.props;
@@ -195,8 +167,10 @@ class Credentials extends React.Component {
   };
 
   onRefresh = props => {
-    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
-    this.props.getCredentials(helpers.createViewQueryObject(options));
+    const { getCredentials, viewOptions } = this.props;
+    const options = _.get(props, 'viewOptions') || viewOptions;
+
+    getCredentials(helpers.createViewQueryObject(options));
   };
 
   onClearFilters = () => {
@@ -205,6 +179,27 @@ class Credentials extends React.Component {
       viewType: viewTypes.CREDENTIALS_VIEW
     });
   };
+
+  deleteNextCredential() {
+    const { deleteCredential } = this.props;
+
+    if (this.credentialsToDelete.length > 0) {
+      this.deletingCredential = this.credentialsToDelete.pop();
+      if (this.deletingCredential) {
+        deleteCredential(this.deletingCredential.id);
+      }
+    }
+  }
+
+  doDeleteCredentials(items) {
+    this.credentialsToDelete = [...items];
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    this.deleteNextCredential();
+  }
 
   renderCredentialActions() {
     const { viewOptions } = this.props;
@@ -253,10 +248,10 @@ class Credentials extends React.Component {
     if (_.size(items)) {
       return (
         <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
+          {items.map(item => (
             <CredentialListItem
               item={item}
-              key={index}
+              key={item.id}
               onEdit={this.onEditCredential}
               onDelete={this.onDeleteCredential}
             />
@@ -338,9 +333,21 @@ Credentials.propTypes = {
   update: PropTypes.object
 };
 
+Credentials.defaultProps = {
+  getCredentials: helpers.noop,
+  deleteCredential: helpers.noop,
+  fulfilled: false,
+  error: false,
+  errorMessage: null,
+  pending: false,
+  credentials: [],
+  viewOptions: {},
+  update: {}
+};
+
 const mapDispatchToProps = dispatch => ({
-  getCredentials: queryObj => dispatch(getCredentials(queryObj)),
-  deleteCredential: id => dispatch(deleteCredential(id))
+  getCredentials: queryObj => dispatch(reduxActions.credentials.getCredentials(queryObj)),
+  deleteCredential: id => dispatch(reduxActions.credentials.deleteCredential(id))
 });
 
 const mapStateToProps = state =>

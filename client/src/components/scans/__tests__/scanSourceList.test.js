@@ -12,6 +12,8 @@ describe('ScanSourceList Component', () => {
       scan: {
         sources: [
           {
+            id: 15,
+            name: 'TestSource',
             source_type: 'network'
           }
         ]

@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
 import { addSourceWizardSteps, editSourceWizardSteps } from './addSourceWizardConstants';
-import { addSource, updateSource } from '../../redux/actions/sourcesActions';
+import { reduxActions } from '../../redux/actions';
+import helpers from '../../common/helpers';
 
 class AddSourceWizard extends React.Component {
   constructor(props) {
@@ -21,7 +22,9 @@ class AddSourceWizard extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.show && nextProps.show) {
+    const { show } = this.props;
+
+    if (!show && nextProps.show) {
       this.resetInitialState(nextProps);
     }
 
@@ -29,14 +32,6 @@ class AddSourceWizard extends React.Component {
       stepOneValid: nextProps.stepOneValid || false,
       stepTwoValid: nextProps.stepTwoValid || false
     });
-  }
-
-  resetInitialState(nextProps) {
-    if (nextProps && nextProps.edit && nextProps.source) {
-      this.setState(Object.assign({ ...this.initialState }, { source: nextProps.source }));
-    } else {
-      this.setState(Object.assign({ ...this.initialState }));
-    }
   }
 
   onCancel = () => {
@@ -113,6 +108,14 @@ class AddSourceWizard extends React.Component {
     }
   };
 
+  resetInitialState(nextProps) {
+    if (nextProps && nextProps.edit && nextProps.source) {
+      this.setState(Object.assign({ ...this.initialState }, { source: nextProps.source }));
+    } else {
+      this.setState(Object.assign({ ...this.initialState }));
+    }
+  }
+
   renderWizardSteps() {
     const { activeStepIndex } = this.state;
     const { edit } = this.props;
@@ -121,7 +124,7 @@ class AddSourceWizard extends React.Component {
 
     return wizardSteps.map((step, stepIndex) => (
       <Wizard.Step
-        key={stepIndex}
+        key={step.title}
         stepIndex={stepIndex}
         step={step.step}
         label={step.label}
@@ -213,9 +216,20 @@ AddSourceWizard.propTypes = {
   error: PropTypes.bool
 };
 
+AddSourceWizard.defaultProps = {
+  addSource: helpers.noop,
+  updateSource: helpers.noop,
+  edit: false,
+  source: {},
+  stepOneValid: false,
+  stepTwoValid: false,
+  fulfilled: false,
+  error: false
+};
+
 const mapDispatchToProps = dispatch => ({
-  addSource: (data, query) => dispatch(addSource(data, query)),
-  updateSource: (id, data) => dispatch(updateSource(id, data))
+  addSource: (data, query) => dispatch(reduxActions.sources.addSource(data, query)),
+  updateSource: (id, data) => dispatch(reduxActions.sources.updateSource(id, data))
 });
 
 const mapStateToProps = state => ({ ...state.addSourceWizard.view });

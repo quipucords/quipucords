@@ -1,12 +1,5 @@
 import _ from 'lodash';
 
-// ToDo: update and remove all bindMethods calls in favor of public class fields syntax
-const bindMethods = (context, methods) => {
-  methods.forEach(method => {
-    context[method] = context[method].bind(context);
-  });
-};
-
 const devModeNormalizeCount = (count, modulus = 100) => Math.abs(count) % modulus;
 
 const generateId = prefix => `${prefix || 'generatedid'}-${Math.ceil(1e5 * Math.random())}`;
@@ -219,7 +212,6 @@ const PENDING_ACTION = base => `${base}_PENDING`;
 const REJECTED_ACTION = base => `${base}_REJECTED`;
 
 export const helpers = {
-  bindMethods,
   devModeNormalizeCount,
   generateId,
   noop,
