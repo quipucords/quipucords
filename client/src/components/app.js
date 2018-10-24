@@ -5,8 +5,7 @@ import { withRouter } from 'react-router';
 import { Alert, EmptyState, Modal, VerticalNav } from 'patternfly-react';
 import _ from 'lodash';
 import { routes } from '../routes';
-import { authorizeUser, getUser, logoutUser } from '../redux/actions/userActions';
-import { getStatus } from '../redux/actions/statusActions';
+import { reduxActions } from '../redux/actions';
 import helpers from '../common/helpers';
 import About from './about/about';
 import AddSourceWizard from './addSourceWizard/addSourceWizard';
@@ -26,33 +25,35 @@ class App extends React.Component {
     this.state = {
       aboutShown: false
     };
-
-    helpers.bindMethods(this, ['showAbout', 'closeAbout']);
   }
 
   componentDidMount() {
-    this.props.authorizeUser();
-    this.props.getStatus();
+    const { authorizeUser, getStatus } = this.props;
+
+    authorizeUser();
+    getStatus();
   }
 
   componentWillReceiveProps(nextProps) {
+    const { getUser } = this.props;
+
     if (_.get(nextProps, 'session.loggedIn') && !_.get(this.props, 'session.loggedIn')) {
-      this.props.getUser();
+      getUser();
     }
   }
 
-  navigateTo(path) {
+  onNavigateTo = path => {
     const { history } = this.props;
     history.push(path);
-  }
+  };
 
-  showAbout() {
+  onShowAbout = () => {
     this.setState({ aboutShown: true });
-  }
+  };
 
-  closeAbout() {
+  onCloseAbout = () => {
     this.setState({ aboutShown: false });
-  }
+  };
 
   renderMenuItems() {
     const { location } = this.props;
@@ -65,7 +66,7 @@ class App extends React.Component {
         title={item.title}
         iconClass={item.iconClass}
         active={item === activeItem || (!activeItem && item.redirect)}
-        onClick={() => this.navigateTo(item.to)}
+        onClick={() => this.onNavigateTo(item.to)}
       />
     ));
   }
@@ -74,7 +75,7 @@ class App extends React.Component {
     const { logoutUser } = this.props;
 
     return [
-      <VerticalNav.Item key="about" className="collapsed-nav-item" title="About" onClick={() => this.showAbout()} />,
+      <VerticalNav.Item key="about" className="collapsed-nav-item" title="About" onClick={() => this.onShowAbout()} />,
       <VerticalNav.Item key="logout" className="collapsed-nav-item" title="Logout" onClick={logoutUser} />
     ];
   }
@@ -121,7 +122,7 @@ class App extends React.Component {
         <Content />
         <ToastNotificationsList key="toastList" />
         <ConfirmationModal key="confirmationModal" />
-        <About user={user} status={status} shown={aboutShown} onClose={this.closeAbout} />
+        <About user={user} status={status} shown={aboutShown} onClose={this.onCloseAbout} />
         <AddSourceWizard />
         <CreateCredentialDialog />
       </React.Fragment>
@@ -157,7 +158,7 @@ class App extends React.Component {
         <VerticalNav persistentSecondary={false}>
           <VerticalNav.Masthead>
             <VerticalNav.Brand titleImg={titleImg} />
-            <MastheadOptions user={user} showAboutModal={this.showAbout} logoutUser={logoutUser} />
+            <MastheadOptions user={user} showAboutModal={this.onShowAbout} logoutUser={logoutUser} />
           </VerticalNav.Masthead>
           {this.renderMenuItems()}
           {this.renderMenuActions()}
@@ -182,11 +183,22 @@ App.propTypes = {
   }).isRequired
 };
 
+App.defaultProps = {
+  authorizeUser: helpers.noop,
+  getUser: helpers.noop,
+  getStatus: helpers.noop,
+  logoutUser: helpers.noop,
+  session: {},
+  user: {},
+  status: {},
+  location: {}
+};
+
 const mapDispatchToProps = dispatch => ({
-  authorizeUser: () => dispatch(authorizeUser()),
-  getUser: () => dispatch(getUser()),
-  logoutUser: () => dispatch(logoutUser()),
-  getStatus: () => dispatch(getStatus())
+  authorizeUser: () => dispatch(reduxActions.user.authorizeUser()),
+  getUser: () => dispatch(reduxActions.user.getUser()),
+  logoutUser: () => dispatch(reduxActions.user.logoutUser()),
+  getStatus: () => dispatch(reduxActions.status.getStatus())
 });
 
 const mapStateToProps = state => ({

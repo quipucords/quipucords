@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, EmptyState, Grid, Row } from 'patternfly-react';
 import SourcesEmptyState from '../sources/sourcesEmptyState';
+import helpers from '../../common/helpers';
 
 const ScansEmptyState = ({ onAddSource, sourcesExist }) => {
   if (sourcesExist) {
@@ -29,6 +30,11 @@ const ScansEmptyState = ({ onAddSource, sourcesExist }) => {
 ScansEmptyState.propTypes = {
   onAddSource: PropTypes.func,
   sourcesExist: PropTypes.bool
+};
+
+ScansEmptyState.defaultProps = {
+  onAddSource: helpers.noop,
+  sourcesExist: false
 };
 
 export { ScansEmptyState as default, ScansEmptyState };

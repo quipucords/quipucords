@@ -50,4 +50,11 @@ About.propTypes = {
   onClose: PropTypes.func
 };
 
+About.defaultProps = {
+  user: {},
+  status: {},
+  shown: false,
+  onClose: helpers.noop
+};
+
 export { About as default, About };

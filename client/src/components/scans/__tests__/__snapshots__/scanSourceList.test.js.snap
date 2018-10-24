@@ -9,7 +9,7 @@ exports[`ScanSourceList Component should shallow render a basic component with s
   <Row
     bsClass="row"
     componentClass="div"
-    key="0"
+    key="15"
   >
     <Col
       bsClass="col"
@@ -22,6 +22,7 @@ exports[`ScanSourceList Component should shallow render a basic component with s
         type="pf"
       />
         
+      TestSource
     </Col>
     <Col
       bsClass="col"

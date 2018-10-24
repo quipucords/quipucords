@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Alert, Button, EmptyState, ListView, Modal } from 'patternfly-react';
 import _ from 'lodash';
-import { getSources, deleteSource } from '../../redux/actions/sourcesActions';
+import { reduxActions } from '../../redux/actions';
 import {
   sourcesTypes,
   toastNotificationTypes,
@@ -21,6 +21,37 @@ import CreateScanDialog from './createScanDialog';
 import { SourceFilterFields, SourceSortFields } from './sourceConstants';
 
 class Sources extends React.Component {
+  static notifyDeleteStatus(item, error, results) {
+    try {
+      if (error) {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'error',
+          header: 'Error',
+          message: helpers.getErrorMessageFromResults(results)
+        });
+      } else {
+        Store.dispatch({
+          type: toastNotificationTypes.TOAST_ADD,
+          alertType: 'success',
+          message: (
+            <span>
+              Deleted source <strong>{_.get(item, 'name')}</strong>.
+            </span>
+          )
+        });
+
+        Store.dispatch({
+          type: viewTypes.DESELECT_ITEM,
+          viewType: viewTypes.SOURCES_VIEW,
+          item
+        });
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
   constructor() {
     super();
 
@@ -50,37 +81,6 @@ class Sources extends React.Component {
 
     if (nextProps.fulfilled && !fulfilled) {
       this.setState({ lastRefresh: Date.now() });
-    }
-  }
-
-  static notifyDeleteStatus(item, error, results) {
-    try {
-      if (error) {
-        Store.dispatch({
-          type: toastNotificationTypes.TOAST_ADD,
-          alertType: 'error',
-          header: 'Error',
-          message: helpers.getErrorMessageFromResults(results)
-        });
-      } else {
-        Store.dispatch({
-          type: toastNotificationTypes.TOAST_ADD,
-          alertType: 'success',
-          message: (
-            <span>
-              Deleted source <strong>{_.get(item, 'name')}</strong>.
-            </span>
-          )
-        });
-
-        Store.dispatch({
-          type: viewTypes.DESELECT_ITEM,
-          viewType: viewTypes.SOURCES_VIEW,
-          item
-        });
-      }
-    } catch (e) {
-      console.warn(e);
     }
   }
 
@@ -117,19 +117,6 @@ class Sources extends React.Component {
     }
   };
 
-  doDeleteSource(item) {
-    const { deleteSource } = this.props;
-
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-    });
-
-    deleteSource(item.id).then(
-      response => Sources.notifyDeleteStatus(item, false, response.value),
-      error => Sources.notifyDeleteStatus(item, true, error)
-    );
-  }
-
   onHandleDeleteSource = item => {
     const heading = (
       <span>
@@ -149,8 +136,10 @@ class Sources extends React.Component {
   };
 
   onRefresh = props => {
-    const options = _.get(props, 'viewOptions') || this.props.viewOptions;
-    this.props.getSources(helpers.createViewQueryObject(options));
+    const { getSources, viewOptions } = this.props;
+    const options = _.get(props, 'viewOptions') || viewOptions;
+
+    getSources(helpers.createViewQueryObject(options));
   };
 
   onClearFilters = () => {
@@ -159,6 +148,19 @@ class Sources extends React.Component {
       viewType: viewTypes.SOURCES_VIEW
     });
   };
+
+  doDeleteSource(item) {
+    const { deleteSource } = this.props;
+
+    Store.dispatch({
+      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    });
+
+    deleteSource(item.id).then(
+      response => Sources.notifyDeleteStatus(item, false, response.value),
+      error => Sources.notifyDeleteStatus(item, true, error)
+    );
+  }
 
   renderSourceActions() {
     const { viewOptions } = this.props;
@@ -201,10 +203,10 @@ class Sources extends React.Component {
     if (_.size(items)) {
       return (
         <ListView className="quipicords-list-view">
-          {items.map((item, index) => (
+          {items.map(item => (
             <SourceListItem
               item={item}
-              key={index}
+              key={item.id}
               lastRefresh={lastRefresh}
               onEdit={this.onEditSource}
               onDelete={this.onHandleDeleteSource}
@@ -295,9 +297,23 @@ Sources.propTypes = {
   deleted: PropTypes.bool
 };
 
+Sources.defaultProps = {
+  getSources: helpers.noop,
+  deleteSource: helpers.noop,
+  error: false,
+  errorMessage: null,
+  pending: false,
+  sources: [],
+  lastRefresh: {},
+  viewOptions: {},
+  fulfilled: false,
+  updated: false,
+  deleted: false
+};
+
 const mapDispatchToProps = dispatch => ({
-  getSources: queryObj => dispatch(getSources(queryObj)),
-  deleteSource: id => dispatch(deleteSource(id))
+  getSources: queryObj => dispatch(reduxActions.sources.getSources(queryObj)),
+  deleteSource: id => dispatch(reduxActions.sources.deleteSource(id))
 });
 
 const mapStateToProps = state =>
