@@ -2,7 +2,8 @@ import { toastNotificationTypes } from '../constants';
 
 const initialState = {
   toasts: [],
-  paused: false
+  paused: false,
+  displayedToasts: 0
 };
 
 const toastNotificationsReducer = (state = initialState, action) => {
@@ -15,30 +16,45 @@ const toastNotificationsReducer = (state = initialState, action) => {
         persistent: action.persistent
       };
 
-      return Object.assign({}, state, {
-        toasts: [...state.toasts, newToast],
-        displayedToasts: state.displayedToasts + 1
-      });
+      return {
+        ...state,
+        ...{
+          toasts: [...state.toasts, newToast],
+          displayedToasts: state.displayedToasts + 1
+        }
+      };
 
     case toastNotificationTypes.TOAST_REMOVE:
-      const index = state.toasts.indexOf(action.toast);
-      action.toast.removed = true;
-
       const displayedToast = state.toasts.find(toast => !toast.removed);
+      let updatedToasts = [];
 
-      if (!displayedToast) {
-        return Object.assign({}, state, { toasts: [] });
+      if (displayedToast) {
+        updatedToasts = [...state.toasts];
+        updatedToasts[state.toasts.indexOf(action.toast)].removed = true;
       }
 
-      return Object.assign({}, state, {
-        toasts: [...state.toasts.slice(0, index), action.toast, ...state.toasts.slice(index + 1)]
-      });
+      return {
+        ...state,
+        ...{
+          toasts: updatedToasts
+        }
+      };
 
     case toastNotificationTypes.TOAST_PAUSE:
-      return Object.assign({}, state, { paused: true });
+      return {
+        ...state,
+        ...{
+          paused: true
+        }
+      };
 
     case toastNotificationTypes.TOAST_RESUME:
-      return Object.assign({}, state, { paused: false });
+      return {
+        ...state,
+        ...{
+          paused: false
+        }
+      };
 
     default:
       return state;

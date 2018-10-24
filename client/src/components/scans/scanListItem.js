@@ -15,45 +15,15 @@ import ScanJobsList from './scanJobsList';
 import ListStatusItem from '../listStatusItem/listStatusItem';
 
 class ScanListItem extends React.Component {
-  constructor() {
-    super();
-
-    this.state = {
-      scanResultsPending: false,
-      scanResultsError: null,
-      scanResults: null,
-      scanJobsPending: false,
-      scanJobsError: null,
-      scanJobs: null
-    };
+  static isSelected(item, selectedSources) {
+    return _.find(selectedSources, nextSelected => nextSelected.id === item.id) !== undefined;
   }
 
   componentWillReceiveProps(nextProps) {
+    const { lastRefresh } = this.props;
     // Check for changes resulting in a fetch
-    if (!_.isEqual(nextProps.lastRefresh, this.props.lastRefresh)) {
+    if (!_.isEqual(nextProps.lastRefresh, lastRefresh)) {
       this.closeExpandIfNoData(this.expandType());
-    }
-  }
-
-  expandType() {
-    const { item, expandedScans } = this.props;
-
-    return _.get(_.find(expandedScans, nextExpanded => nextExpanded.id === item.id), 'expandType');
-  }
-
-  closeExpandIfNoData(expandType) {
-    const { item } = this.props;
-
-    const successHosts = _.get(item, 'most_recent.systems_scanned', 0);
-    const failedHosts = _.get(item, 'most_recent.systems_failed', 0);
-    const prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
-
-    if (
-      (expandType === 'systemsScanned' && successHosts === 0) ||
-      (expandType === 'systemsFailed' && failedHosts === 0) ||
-      (expandType === 'jobs' && prevCount === 0)
-    ) {
-      this.onCloseExpand();
     }
   }
 
@@ -85,10 +55,6 @@ class ScanListItem extends React.Component {
     });
   };
 
-  static isSelected(item, selectedSources) {
-    return _.find(selectedSources, nextSelected => nextSelected.id === item.id) !== undefined;
-  }
-
   onItemSelectChange = () => {
     const { item, selectedScans } = this.props;
 
@@ -98,6 +64,28 @@ class ScanListItem extends React.Component {
       item
     });
   };
+
+  expandType() {
+    const { item, expandedScans } = this.props;
+
+    return _.get(_.find(expandedScans, nextExpanded => nextExpanded.id === item.id), 'expandType');
+  }
+
+  closeExpandIfNoData(expandType) {
+    const { item } = this.props;
+
+    const successHosts = _.get(item, 'most_recent.systems_scanned', 0);
+    const failedHosts = _.get(item, 'most_recent.systems_failed', 0);
+    const prevCount = Math.max(_.get(item, 'jobs', []).length - 1, 0);
+
+    if (
+      (expandType === 'systemsScanned' && successHosts === 0) ||
+      (expandType === 'systemsFailed' && failedHosts === 0) ||
+      (expandType === 'jobs' && prevCount === 0)
+    ) {
+      this.onCloseExpand();
+    }
+  }
 
   renderDescription() {
     const { item } = this.props;
@@ -365,6 +353,18 @@ ScanListItem.propTypes = {
   onResume: PropTypes.func,
   selectedScans: PropTypes.array,
   expandedScans: PropTypes.array
+};
+
+ScanListItem.defaultProps = {
+  lastRefresh: 0,
+  onSummaryDownload: helpers.noop,
+  onDetailedDownload: helpers.noop,
+  onPause: helpers.noop,
+  onCancel: helpers.noop,
+  onStart: helpers.noop,
+  onResume: helpers.noop,
+  selectedScans: [],
+  expandedScans: []
 };
 
 const mapStateToProps = state => ({

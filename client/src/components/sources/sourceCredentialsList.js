@@ -10,8 +10,8 @@ const SourceCredentialsList = ({ source }) => {
 
   return (
     <Grid fluid>
-      {credentials.map((item, index) => (
-        <Grid.Row key={index}>
+      {credentials.map(item => (
+        <Grid.Row key={item.name}>
           <Grid.Col xs={12} sm={4}>
             <span>
               <Icon type="fa" name="id-card" />
@@ -26,6 +26,10 @@ const SourceCredentialsList = ({ source }) => {
 
 SourceCredentialsList.propTypes = {
   source: PropTypes.object
+};
+
+SourceCredentialsList.defaultProps = {
+  source: {}
 };
 
 export { SourceCredentialsList as default, SourceCredentialsList };

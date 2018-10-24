@@ -110,7 +110,9 @@ class ScanJobRunner(Process):
 
             if not details_report:
                 # Create the details report
-                details_report = self._create_details_report()
+                has_errors, details_report = self._create_details_report()
+                if has_errors:
+                    return ScanTask.FAILED
 
             if not details_report:
                 self.scan_job.fail('No facts gathered from scan.')
@@ -246,7 +248,7 @@ class ScanJobRunner(Process):
         """Send collected host scan facts to fact endpoint.
 
         :param facts: The array of fact dictionaries
-        :returns: Identifer for the sent facts
+        :returns: bool indicating if there are errors and dict with result.
         """
         inspect_tasks = self.scan_job.tasks.filter(
             scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
@@ -263,12 +265,12 @@ class ScanJobRunner(Process):
                 message = 'Scan producted invalid details report JSON: %s' % \
                     validation_result
                 self.scan_job.fail(message)
-                return ScanTask.FAILED
+                return True, {}
 
             # Create FC model and save data to JSON file
             details_report = create_details_report(create_report_version(),
                                                    details_report_json)
-            return details_report
+            return False, details_report
 
         return None
 
