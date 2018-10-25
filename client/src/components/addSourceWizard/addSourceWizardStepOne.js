@@ -27,6 +27,15 @@ class AddSourceWizardStepOne extends React.Component {
     });
   }
 
+  onChangeSourceType = event => {
+    this.setState(
+      {
+        sourceType: event.target.value
+      },
+      () => this.validateStep()
+    );
+  };
+
   validateStep() {
     const { sourceType } = this.state;
     const { source } = this.props;
@@ -38,15 +47,6 @@ class AddSourceWizardStepOne extends React.Component {
       });
     }
   }
-
-  onChangeSourceType = event => {
-    this.setState(
-      {
-        sourceType: event.target.value
-      },
-      () => this.validateStep()
-    );
-  };
 
   render() {
     const { sourceType, sourceTypeError } = this.state;
@@ -87,6 +87,10 @@ class AddSourceWizardStepOne extends React.Component {
 
 AddSourceWizardStepOne.propTypes = {
   source: PropTypes.object
+};
+
+AddSourceWizardStepOne.defaultProps = {
+  source: {}
 };
 
 const mapStateToProps = state => ({ ...state.addSourceWizard.view });

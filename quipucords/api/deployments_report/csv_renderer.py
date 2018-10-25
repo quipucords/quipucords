@@ -15,8 +15,9 @@ import logging
 from io import StringIO
 
 from api.common.util import CSVHelper
-from api.models import (DeploymentsReport, DetailsReport,
-                        Source)
+from api.models import (DeploymentsReport,
+                        Source,
+                        SystemFingerprint)
 
 from rest_framework import renderers
 
@@ -34,91 +35,6 @@ def sanitize_row(row):
     """Replace commas in fact values to prevent false csv parsing."""
     return [fact.replace(',', ';')
             if isinstance(fact, str) else fact for fact in row]
-
-
-class DetailsCSVRenderer(renderers.BaseRenderer):
-    """Class to render detailed report as CSV."""
-
-    # pylint: disable=too-few-public-methods
-    media_type = 'text/csv'
-    format = 'csv'
-
-    def render(self,
-               fact_collection_dict,
-               media_type=None,
-               renderer_context=None):
-        """Render detailed report as CSV."""
-        # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        report_id = fact_collection_dict.get('report_id')
-        if report_id is None:
-            return None
-
-        details_report = DetailsReport.objects.filter(
-            report_id=report_id).first()
-        if details_report is None:
-            return None
-
-        # Check for a cached copy of csv
-        cached_csv = details_report.cached_csv
-        if cached_csv:
-            logger.info('Using cached csv results for details report %d',
-                        report_id)
-            return cached_csv
-        logger.info('No cached csv results for details report %d',
-                    report_id)
-
-        csv_helper = CSVHelper()
-        details_report_csv_buffer = StringIO()
-        csv_writer = csv.writer(details_report_csv_buffer, delimiter=',')
-
-        sources = fact_collection_dict.get('sources')
-
-        csv_writer.writerow(['Report', 'Number Sources'])
-        if sources is None:
-            csv_writer.writerow([report_id, 0])
-            return details_report_csv_buffer.getvalue()
-
-        csv_writer.writerow([report_id, len(sources)])
-        csv_writer.writerow([])
-        csv_writer.writerow([])
-
-        for source in sources:
-            csv_writer.writerow(['Source'])
-            csv_writer.writerow(
-                ['Server Identifier',
-                 'Source Name',
-                 'Source Type'])
-            csv_writer.writerow([
-                source.get('server_id'),
-                source.get('source_name'),
-                source.get('source_type')])
-            csv_writer.writerow(['Facts'])
-            fact_list = source.get('facts')
-            if not fact_list:
-                # write a space line and move to next
-                csv_writer.writerow([])
-                continue
-            headers = csv_helper.generate_headers(fact_list)
-            csv_writer.writerow(headers)
-
-            for fact in fact_list:
-                row = []
-                for header in headers:
-                    fact_value = fact.get(header)
-                    row.append(csv_helper.serialize_value(header, fact_value))
-
-                csv_writer.writerow(sanitize_row(row))
-
-            csv_writer.writerow([])
-            csv_writer.writerow([])
-
-        logger.info('Caching csv results for details report %d',
-                    report_id)
-        cached_csv = details_report_csv_buffer.getvalue()
-        details_report.cached_csv = cached_csv
-        details_report.save()
-
-        return cached_csv
 
 
 class DeploymentCSVRenderer(renderers.BaseRenderer):
@@ -139,7 +55,7 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                renderer_context=None):
         """Render deployment report as CSV."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches,too-many-statements
 
         if not bool(report_dict):
             return None
@@ -168,17 +84,31 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
 
         systems_list = report_dict.get('system_fingerprints')
 
-        csv_writer.writerow(['Report'])
-        csv_writer.writerow([report_id])
+        csv_writer.writerow(['Report ID',
+                             'Report Type',
+                             'Report Version'])
+        csv_writer.writerow([report_id,
+                             deployment_report.report_type,
+                             deployment_report.report_version])
         csv_writer.writerow([])
         csv_writer.writerow([])
 
         if not systems_list:
             return None
-        csv_writer.writerow(['Report:'])
+        csv_writer.writerow(['System Fingerprints:'])
+
+        valid_fact_attributes = {
+            field.name for field in SystemFingerprint._meta.get_fields()}
+
+        # Add fields to just one fingerprint
+        system = systems_list[0]
+        for attr in valid_fact_attributes:
+            if not system.get(attr, None):
+                system[attr] = None
+
         headers = csv_helper.generate_headers(
             systems_list,
-            exclude={'id', 'report_id', 'metadata'})
+            exclude={'id', 'report_id', 'metadata', 'deployment_report'})
         if SOURCES_KEY in headers:
             headers += self.source_headers
             headers = sorted(list(set(headers)))
@@ -199,8 +129,9 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
                         fact_value = sources_info.get(header)
                 elif header == 'entitlements':
                     fact_value = system.get(header)
-                    for entitlement in fact_value:
-                        entitlement.pop('metadata')
+                    if fact_value:
+                        for entitlement in fact_value:
+                            entitlement.pop('metadata')
                 else:
                     fact_value = system.get(header)
                 row.append(csv_helper.serialize_value(header, fact_value))

@@ -12,9 +12,10 @@
 import logging
 from multiprocessing import Process, Value
 
-from api.fact.util import (build_sources_from_tasks,
-                           create_fact_collection,
-                           validate_fact_collection_json)
+from api.common.common_report import create_report_version
+from api.details_report.util import (build_sources_from_tasks,
+                                     create_details_report,
+                                     validate_details_report_json)
 from api.models import (ScanJob,
                         ScanTask,
                         Source)
@@ -109,7 +110,9 @@ class ScanJobRunner(Process):
 
             if not details_report:
                 # Create the details report
-                details_report = self._create_fact_collection()
+                has_errors, details_report = self._create_details_report()
+                if has_errors:
+                    return ScanTask.FAILED
 
             if not details_report:
                 self.scan_job.fail('No facts gathered from scan.')
@@ -125,7 +128,7 @@ class ScanJobRunner(Process):
             task_status = self._run_task(fingerprint_task_runner)
             if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
-                failed_tasks.append(runner.scan_task)
+                failed_tasks.append(fingerprint_task_runner.scan_task)
                 fingerprint_task_runner.scan_task.log_message(
                     'Task %s failed.' % (
                         fingerprint_task_runner.scan_task.sequence_number),
@@ -185,8 +188,7 @@ class ScanJobRunner(Process):
                 creds = [str(cred)
                          for cred in failed_task.source.credentials.all()]
                 context_message += 'CREDENTIALS: [%s]' % creds
-            failed_task.log_message(
-                context_message, log_level=logging.ERROR)
+            failed_task.fail(context_message)
 
             message = 'FATAL ERROR. %s' % str(error)
             self.scan_job.fail(message)
@@ -242,31 +244,33 @@ class ScanJobRunner(Process):
                 self.scan_job, scan_task)
         return runner
 
-    def _create_fact_collection(self):
+    def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
 
         :param facts: The array of fact dictionaries
-        :returns: Identifer for the sent facts
+        :returns: bool indicating if there are errors and dict with result.
         """
         inspect_tasks = self.scan_job.tasks.filter(
             scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
         sources = build_sources_from_tasks(
             inspect_tasks.filter(status=ScanTask.COMPLETED))
         if bool(sources):
-            fact_collection_json = {'sources': sources}
-            has_errors, validation_result = validate_fact_collection_json(
-                fact_collection_json)
+            details_report_json = {'sources': sources,
+                                   'report_type': 'details',
+                                   'report_version': create_report_version()}
+            has_errors, validation_result = validate_details_report_json(
+                details_report_json, False)
 
             if has_errors:
                 message = 'Scan producted invalid details report JSON: %s' % \
                     validation_result
                 self.scan_job.fail(message)
-                return ScanTask.FAILED
+                return True, {}
 
             # Create FC model and save data to JSON file
-            details_report = create_fact_collection(
-                fact_collection_json)
-            return details_report
+            details_report = create_details_report(create_report_version(),
+                                                   details_report_json)
+            return False, details_report
 
         return None
 

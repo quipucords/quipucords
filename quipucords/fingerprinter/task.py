@@ -14,6 +14,7 @@ import logging
 import uuid
 from datetime import datetime
 
+from api.common.common_report import create_report_version
 from api.models import (DeploymentsReport,
                         Product,
                         ScanJob,
@@ -128,7 +129,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # remove results from previous interrupted scan
         deployment_report = details_report.deployment_report
         if not deployment_report:
-            deployment_report = DeploymentsReport()
+            deployment_report = DeploymentsReport(
+                report_version=create_report_version())
             deployment_report.save()
 
             # Set the report ids.  Right now they are deployment report id
@@ -144,12 +146,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(
                 'REMOVING PARTIAL RESULTS - deleting %d '
                 'fingerprints from previous scan'
-                % len(deployment_report.system_fingerprints().all()))
-            deployment_report.system_fingerprints().all().delete()
+                % len(deployment_report.system_fingerprints.all()))
+            deployment_report.system_fingerprints.all().delete()
             deployment_report.save()
 
         try:
-            message, status = self._process_fact_collection(
+            message, status = self._process_details_report(
                 manager_interrupt, details_report)
 
             interrupt_message, interrupt_status = self.check_for_interrupt(
@@ -176,7 +178,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
-    def _process_fact_collection(self, manager_interrupt, details_report):
+    def _process_details_report(self, manager_interrupt, details_report):
         """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
@@ -200,7 +202,17 @@ class FingerprintTaskRunner(ScanTaskRunner):
         deployment_report = details_report.deployment_report
         date_field = DateField()
         final_fingerprint_list = []
+
+        valid_fact_attributes = {
+            field.name for field in SystemFingerprint._meta.get_fields()}
+
         for fingerprint_dict in fingerprints_list:
+            # Remove keys that are not part of SystemFingerprint model
+            fingerprint_attributes = set(fingerprint_dict.keys())
+            invalid_attributes = fingerprint_attributes - valid_fact_attributes
+            for invalid_attribute in invalid_attributes:
+                fingerprint_dict.pop(invalid_attribute, None)
+
             status_count += 1
             name = fingerprint_dict.get('name', 'unknown')
             os_release = fingerprint_dict.get('os_release', 'unknown')

@@ -9,52 +9,9 @@ import DropdownSelect from '../dropdownSelect/dropdownSelect';
 import { AddSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
 import { sourcesTypes, credentialsTypes } from '../../redux/constants';
-import { getWizardCredentials } from '../../redux/actions/credentialsActions';
+import { reduxActions } from '../../redux/actions';
 
 class AddSourceWizardStepTwo extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.initialState = {
-      sourceName: '',
-      sourceNameError: null,
-      multiHostDisplay: '',
-      hosts: [],
-      hostsError: null,
-      credentials: [],
-      credentialsError: null,
-      port: '',
-      portError: null,
-      singleHostPortDisplay: '',
-      sslCertVerify: ''
-    };
-
-    this.state = { ...this.initialState };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const nextSourceType = _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]);
-
-    if (nextSourceType !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])) {
-      let sslCertVerify = '';
-
-      if (nextSourceType === 'vcenter' || nextSourceType === 'satellite') {
-        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
-      }
-
-      this.setState(Object.assign({ ...this.initialState }, { sslCertVerify }), () => {
-        AddSourceWizardStepTwo.invalidateStep();
-      });
-    }
-  }
-
-  componentDidMount() {
-    this.setState({ ...AddSourceWizardStepTwo.initializeState(this.props) }, () => {
-      this.props.getWizardCredentials();
-      this.validateStep();
-    });
-  }
-
   static initializeState(nextProps) {
     if (nextProps.source) {
       const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
@@ -96,72 +53,12 @@ class AddSourceWizardStepTwo extends React.Component {
     });
   }
 
-  validateStep() {
-    const {
-      sourceName,
-      sourceNameError,
-      hosts,
-      hostsError,
-      port,
-      portError,
-      credentials,
-      credentialsError,
-      sslCertVerify
-    } = this.state;
-    const { source } = this.props;
-
-    if (
-      sourceName !== '' &&
-      !sourceNameError &&
-      hosts.length &&
-      !hostsError &&
-      !portError &&
-      credentials.length &&
-      !credentialsError
-    ) {
-      const updatedSource = {};
-
-      _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
-      _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
-      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value, 10)));
-
-      if (port !== '') {
-        _.set(updatedSource, apiTypes.API_SOURCE_PORT, port);
-      }
-
-      if (sslCertVerify !== '') {
-        _.set(updatedSource, ['options', apiTypes.API_SOURCE_SSL_CERT], sslCertVerify);
-      }
-
-      Store.dispatch({
-        type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO,
-        source: Object.assign({ ...source }, updatedSource)
-      });
-    } else {
-      AddSourceWizardStepTwo.invalidateStep();
-    }
-  }
-
   static validateSourceName(value) {
     if (value === '') {
       return 'You must enter a source name';
     }
 
     return null;
-  }
-
-  onChangeSourceName = event => {
-    this.setState(
-      {
-        sourceName: event.target.value,
-        sourceNameError: AddSourceWizardStepTwo.validateSourceName(event.target.value)
-      },
-      () => this.validateStep()
-    );
-  };
-
-  credentialInfo(id) {
-    return _.find(this.props.allCredentials, { id }) || {};
   }
 
   static validateCredentials(value) {
@@ -172,41 +69,6 @@ class AddSourceWizardStepTwo extends React.Component {
     return null;
   }
 
-  onChangeCredential = (event, value) => {
-    const { credentials } = this.state;
-    const { source } = this.props;
-
-    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
-    let submitCreds = [];
-
-    if (sourceType === 'vcenter' || sourceType === 'satellite') {
-      submitCreds = [value.id];
-    } else {
-      submitCreds = [...credentials];
-      const credentialIndex = submitCreds.indexOf(value.id);
-
-      if (credentialIndex < 0) {
-        submitCreds.push(value.id);
-      } else {
-        submitCreds.splice(credentialIndex, 1);
-      }
-    }
-
-    this.setState(
-      { credentials: submitCreds, credentialsError: AddSourceWizardStepTwo.validateCredentials(submitCreds) },
-      () => this.validateStep()
-    );
-  };
-
-  onClickCredential = () => {
-    const { source } = this.props;
-
-    Store.dispatch({
-      type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: _.get(source, apiTypes.API_SOURCE_TYPE)
-    });
-  };
-
   static validateHosts(value) {
     let validation = null;
 
@@ -215,7 +77,7 @@ class AddSourceWizardStepTwo extends React.Component {
         if (
           host !== '' &&
           (!new RegExp(
-            '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31))$'
+            '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31|32))$'
           ).test(host) &&
             !new RegExp(
               '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$',
@@ -253,6 +115,96 @@ class AddSourceWizardStepTwo extends React.Component {
 
     return null;
   }
+
+  constructor(props) {
+    super(props);
+
+    this.initialState = {
+      sourceName: '',
+      sourceNameError: null,
+      multiHostDisplay: '',
+      hosts: [],
+      hostsError: null,
+      credentials: [],
+      credentialsError: null,
+      port: '',
+      portError: null,
+      singleHostPortDisplay: '',
+      sslCertVerify: ''
+    };
+
+    this.state = { ...this.initialState };
+  }
+
+  componentDidMount() {
+    const { getWizardCredentials } = this.props;
+
+    this.setState({ ...AddSourceWizardStepTwo.initializeState(this.props) }, () => {
+      getWizardCredentials();
+      this.validateStep();
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const nextSourceType = _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]);
+
+    if (nextSourceType !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])) {
+      let sslCertVerify = '';
+
+      if (nextSourceType === 'vcenter' || nextSourceType === 'satellite') {
+        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
+      }
+
+      this.setState(Object.assign({ ...this.initialState }, { sslCertVerify }), () => {
+        AddSourceWizardStepTwo.invalidateStep();
+      });
+    }
+  }
+
+  onChangeSourceName = event => {
+    this.setState(
+      {
+        sourceName: event.target.value,
+        sourceNameError: AddSourceWizardStepTwo.validateSourceName(event.target.value)
+      },
+      () => this.validateStep()
+    );
+  };
+
+  onChangeCredential = (event, value) => {
+    const { credentials } = this.state;
+    const { source } = this.props;
+
+    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
+    let submitCreds = [];
+
+    if (sourceType === 'vcenter' || sourceType === 'satellite') {
+      submitCreds = [value.id];
+    } else {
+      submitCreds = [...credentials];
+      const credentialIndex = submitCreds.indexOf(value.id);
+
+      if (credentialIndex < 0) {
+        submitCreds.push(value.id);
+      } else {
+        submitCreds.splice(credentialIndex, 1);
+      }
+    }
+
+    this.setState(
+      { credentials: submitCreds, credentialsError: AddSourceWizardStepTwo.validateCredentials(submitCreds) },
+      () => this.validateStep()
+    );
+  };
+
+  onClickCredential = () => {
+    const { source } = this.props;
+
+    Store.dispatch({
+      type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
+      credentialType: _.get(source, apiTypes.API_SOURCE_TYPE)
+    });
+  };
 
   onChangePort = targetValue => {
     const { source } = this.props;
@@ -336,6 +288,58 @@ class AddSourceWizardStepTwo extends React.Component {
     );
   };
 
+  validateStep() {
+    const {
+      sourceName,
+      sourceNameError,
+      hosts,
+      hostsError,
+      port,
+      portError,
+      credentials,
+      credentialsError,
+      sslCertVerify
+    } = this.state;
+    const { source } = this.props;
+
+    if (
+      sourceName !== '' &&
+      !sourceNameError &&
+      hosts.length &&
+      !hostsError &&
+      !portError &&
+      credentials.length &&
+      !credentialsError
+    ) {
+      const updatedSource = {};
+
+      _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
+      _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
+      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value, 10)));
+
+      if (port !== '') {
+        _.set(updatedSource, apiTypes.API_SOURCE_PORT, port);
+      }
+
+      if (sslCertVerify !== '') {
+        _.set(updatedSource, ['options', apiTypes.API_SOURCE_SSL_CERT], sslCertVerify);
+      }
+
+      Store.dispatch({
+        type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO,
+        source: Object.assign({ ...source }, updatedSource)
+      });
+    } else {
+      AddSourceWizardStepTwo.invalidateStep();
+    }
+  }
+
+  credentialInfo(id) {
+    const { allCredentials } = this.props;
+
+    return _.find(allCredentials, { id }) || {};
+  }
+
   renderHosts() {
     const { hostsError, port, portError, multiHostDisplay, singleHostPortDisplay } = this.state;
     const { source } = this.props;
@@ -346,7 +350,7 @@ class AddSourceWizardStepTwo extends React.Component {
       case 'network':
         return (
           <React.Fragment>
-            <FieldGroup label={'Search Addresses'} error={hostsError} errorMessage={hostsError}>
+            <FieldGroup label="Search Addresses" error={hostsError} errorMessage={hostsError}>
               <Form.FormControl
                 componentClass="textarea"
                 name="hosts"
@@ -360,7 +364,7 @@ class AddSourceWizardStepTwo extends React.Component {
                 ranges.
               </Form.HelpBlock>
             </FieldGroup>
-            <FieldGroup label={'Port'} error={portError} errorMessage={portError}>
+            <FieldGroup label="Port" error={portError} errorMessage={portError}>
               <Form.FormControl
                 name="port"
                 type="text"
@@ -377,7 +381,7 @@ class AddSourceWizardStepTwo extends React.Component {
         return (
           <React.Fragment>
             <FieldGroup
-              label={'IP Address or Hostname'}
+              label="IP Address or Hostname"
               error={hostsError || portError}
               errorMessage={hostsError || portError}
             >
@@ -419,7 +423,7 @@ class AddSourceWizardStepTwo extends React.Component {
     }
 
     return (
-      <FieldGroup label={'Credentials'} error={credentialsError} errorMessage={credentialsError}>
+      <FieldGroup label="Credentials" error={credentialsError} errorMessage={credentialsError}>
         <Form.InputGroup>
           <div className="quipucords-dropdownselect">
             <DropdownSelect
@@ -473,7 +477,7 @@ class AddSourceWizardStepTwo extends React.Component {
       case 'vcenter':
       case 'satellite':
         return (
-          <FieldGroup label={'Options'}>
+          <FieldGroup label="Options">
             <div className="quipucords-checkbox">
               <Checkbox checked={sslCertVerify} bsClass="" onChange={this.onChangeSslCertVerify}>
                 &nbsp; Verify SSL Certificate
@@ -494,7 +498,7 @@ class AddSourceWizardStepTwo extends React.Component {
 
     return (
       <Form horizontal>
-        <FieldGroup label={'Name'} error={sourceNameError} errorMessage={sourceNameError}>
+        <FieldGroup label="Name" error={sourceNameError} errorMessage={sourceNameError}>
           <Form.FormControl
             type="text"
             name="sourceName"
@@ -517,8 +521,14 @@ AddSourceWizardStepTwo.propTypes = {
   allCredentials: PropTypes.array
 };
 
+AddSourceWizardStepTwo.defaultProps = {
+  getWizardCredentials: helpers.noop,
+  source: {},
+  allCredentials: []
+};
+
 const mapDispatchToProps = dispatch => ({
-  getWizardCredentials: () => dispatch(getWizardCredentials())
+  getWizardCredentials: () => dispatch(reduxActions.credentials.getWizardCredentials())
 });
 
 const mapStateToProps = state => ({ ...state.addSourceWizard.view });

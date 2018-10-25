@@ -13,11 +13,12 @@
 import json
 import uuid
 
+from api.common.common_report import create_report_version
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
+                                                 sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DeploymentCSVRenderer,
-                                     sanitize_row)
 
 from django.core import management
 from django.test import TestCase
@@ -48,26 +49,27 @@ class DeploymentReportTest(TestCase):
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.report_version = create_report_version()
 
-    def create_fact_collection(self, data):
+    def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_fact_collection_expect_201(self, data):
+    def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def create_fact_collection_expect_400(self, data):
+    def create_details_report_expect_400(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print('Failure cause: ')
             print(response.json())
@@ -79,7 +81,9 @@ class DeploymentReportTest(TestCase):
                               os_versions=None):
         """Create a DetailsReport for test."""
         facts = []
-        fc_json = {'sources': [{'server_id': self.server_id,
+        fc_json = {'report_type': 'details',
+                   'sources': [{'server_id': self.server_id,
+                                'report_version': create_report_version(),
                                 'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
@@ -113,10 +117,10 @@ class DeploymentReportTest(TestCase):
                 'virt_what_type': 'vt'
             }
             facts.append(fact_json)
-        details_report = self.create_fact_collection_expect_201(fc_json)
+        details_report = self.create_details_report_expect_201(fc_json)
         return details_report
 
-    def test_get_fact_collection_group_report_count(self):
+    def test_get_details_report_group_report_count(self):
         """Get a specific group count report."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -133,7 +137,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(report['system_fingerprints'][0]['count'], 2)
         self.assertEqual(report['system_fingerprints'][1]['count'], 1)
 
-    def test_get_fact_collection_group_report(self):
+    def test_get_details_report_group_report(self):
         """Get a specific group count report."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -148,7 +152,7 @@ class DeploymentReportTest(TestCase):
         self.assertIsInstance(report, dict)
         self.assertEqual(len(report['system_fingerprints'][0].keys()), 14)
 
-    def test_get_fact_collection_filter_report(self):
+    def test_get_details_report_filter_report(self):
         """Get a specific group count report with filter."""
         url = '/api/v1/reports/1/deployments/'
 
@@ -168,7 +172,7 @@ class DeploymentReportTest(TestCase):
         diff = [x for x in expected if x not in report['system_fingerprints']]
         self.assertEqual(diff, [])
 
-    def test_get_fact_collection_404(self):
+    def test_get_details_report_404(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/2/deployments/'
 
@@ -186,7 +190,9 @@ class DeploymentReportTest(TestCase):
 
         # Create a system fingerprint via collection receiver
         facts = []
-        fc_json = {'sources': [{'server_id': self.server_id,
+        fc_json = {'report_type': 'details',
+                   'sources': [{'server_id': self.server_id,
+                                'report_version': create_report_version(),
                                 'source_name': self.net_source.name,
                                 'source_type': self.net_source.source_type,
                                 'facts': facts}]}
@@ -195,14 +201,14 @@ class DeploymentReportTest(TestCase):
             'cpu_core_count': 'cat',
         }
         facts.append(fact_json)
-        self.create_fact_collection_expect_400(fc_json)
+        self.create_details_report_expect_400(fc_json)
 
         # Query API
         response = self.client.get(url)
         self.assertEqual(response.status_code,
                          status.HTTP_424_FAILED_DEPENDENCY)
 
-    def test_get_fact_collection_bad_id(self):
+    def test_get_details_report_bad_id(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/string/deployments/'
 
@@ -281,13 +287,11 @@ class DeploymentReportTest(TestCase):
 
         csv_result = renderer.render(report)
         # pylint: disable=line-too-long
-        data_rows = ["2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.4,7.4,[test_source],2017-07-18,vmware",  # noqa
-                     # pylint: disable=line-too-long
-                     "2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.4,7.4,[test_source],2017-07-18,vmware",  # noqa
-                     # pylint: disable=line-too-long
-                     "2,2,2,True,False,False,,virtualized,absent,absent,absent,absent,1.2.3.4,RHEL,RHEL 7.5,7.5,[test_source],2017-07-18,vmware",  # noqa
-                     # pylint: disable=line-too-long
-                     "cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,jboss brms,jboss eap,jboss fuse,jboss web server,name,os_name,os_release,os_version,sources,system_creation_date,virtualized_type"]  # noqa
+        data_rows = ['architecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,vmware,,,,,,,']  # noqa
+  # noqa
         for row in data_rows:
             result = row in csv_result
             self.assertEqual(result, True)
@@ -317,5 +321,5 @@ class DeploymentReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Report\r\n1\r\n\r\n\r\nReport:\r\nname\r\n1.2.3.4\r\n1.2.3.4\r\n1.2.3.4\r\n\r\n'  # noqa
+        expected = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)

@@ -34,6 +34,15 @@ except AttributeError:
 # pylint: disable=too-few-public-methods
 
 
+SOURCES_KEY = 'sources'
+FACTS_KEY = 'facts'
+SERVER_ID_KEY = 'server_id'
+REPORT_VERSION_KEY = 'report_version'
+REPORT_TYPE_KEY = 'report_type'
+DEFAULT_REPORT_VERSION = '1.0.0.legacy'
+DETAILS_REPORT_TYPE = 'details'
+
+
 class ReportMergeCommand(CliCommand):
     """Defines the report merge command.
 
@@ -49,7 +58,7 @@ class ReportMergeCommand(CliCommand):
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), PUT,
-                            report.MERGE_URI, [codes.created])
+                            report.ASYNC_MERGE_URI, [codes.created])
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--job-ids', dest='scan_job_ids', nargs='+',
                            metavar='SCAN_JOB_IDS', default=[],
@@ -64,33 +73,6 @@ class ReportMergeCommand(CliCommand):
                            help=_(messages.REPORT_JSON_DIR_HELP))
         self.json = None
         self.report_ids = None
-
-    @staticmethod
-    def get_id_and_sources(filename):
-        """Return the sources and id from a valid json details report file.
-
-        :param filename: the filename to read
-        :returns: the id and list of sources found
-        :raises: ValueError if incoming value is not a file that could be found
-        """
-        input_path = os.path.expanduser(os.path.expandvars(filename))
-        # pylint: disable=no-else-return
-        if os.path.isfile(input_path):
-            try:
-                with open(input_path, 'r') as in_file:
-                    result = in_file.read()
-                    report_id = json.loads(result).get('id')
-                    sources = json.loads(result).get('sources')
-                    if not report_id or not sources:
-                        print(_(messages.REPORT_INVALID_JSON_FILE % filename))
-                        sys.exit(1)
-            except EnvironmentError as err:
-                err_msg = (messages.READ_FILE_ERROR % (input_path, err))
-                print(err_msg)
-                sys.exit(1)
-            return report_id, sources
-        else:
-            raise ValueError(_(messages.NOT_A_FILE % input_path))
 
     def _get_report_ids(self):
         """Grab the report ids from the scan job if it exists.
@@ -124,42 +106,79 @@ class ReportMergeCommand(CliCommand):
         return not_found, report_ids, job_not_found, report_not_found
 
     def _validate_create_json(self, files):
+        """Validate the set of files to be merged.
+
+        :param files: list(str) of the files to be merged
+        """
+        # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-locals
         print(_(messages.REPORT_VALIDATE_JSON % files))
         all_sources = []
-        report_id = None
         for file in files:
-            error = True
             if os.path.isfile(file):
+                details_report = None
                 with open(file) as lint_f:
                     try:
-                        json_data = json.load(lint_f)
+                        details_report = json.load(lint_f)
                     except json_exception_class:
                         print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
                         continue
-                    sources = json_data.get('sources')
+
+                    # validate version type
+                    file_report_version = details_report.get(
+                        REPORT_VERSION_KEY, None)
+                    if not file_report_version:
+                        # warn about old format but continue
+                        print(_(messages.REPORT_MISSING_REPORT_VERSION % file))
+                        file_report_version = DEFAULT_REPORT_VERSION
+
+                    file_report_type = details_report.get(
+                        REPORT_TYPE_KEY, DETAILS_REPORT_TYPE)
+                    if file_report_type != DETAILS_REPORT_TYPE:
+                        # terminate if different from details type
+                        print(_(messages.REPORT_INVALID_REPORT_TYPE %
+                                (file, file_report_type)))
+                        continue
+
+                    # validate sources
+                    sources = details_report.get(SOURCES_KEY, None)
                     if sources:
-                        facts = sources[0].get('facts')
-                        server_id = sources[0].get('server_id')
-                        if facts and server_id:
-                            error = False
-                if not error:
-                    print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS % file))
-                    try:
-                        report_id, sources = self.get_id_and_sources(file)
-                        all_sources += sources
-                    except ValueError:
-                        print(_(messages.REPORT_INVALID_JSON_FILE % file))
-                        sys.exit(1)
-                else:
-                    print(_(messages.REPORT_JSON_DIR_FILE_FAILED % file))
+                        has_error = False
+                        for source in sources:
+                            facts = source.get(FACTS_KEY)
+                            server_id = source.get(SERVER_ID_KEY)
+                            if not facts:
+                                print(_(messages.REPORT_JSON_MISSING_ATTR %
+                                        (file, FACTS_KEY)))
+                                has_error = True
+                                break
+                            if not server_id:
+                                print(
+                                    _(messages.REPORT_JSON_MISSING_ATTR %
+                                      (file, SERVER_ID_KEY)))
+                                has_error = True
+                                break
+                            # Add version/type to all sources since merge
+                            source[REPORT_TYPE_KEY] = file_report_type
+                            source[REPORT_VERSION_KEY] = file_report_version
+
+                        if not has_error:
+                            # Source is valid so add it
+                            all_sources += sources
+                            print(_(messages.REPORT_JSON_DIR_FILE_SUCCESS %
+                                    file))
+                    else:
+                        print(_(messages.REPORT_JSON_MISSING_ATTR %
+                                (file, SOURCES_KEY)))
+                        continue
             else:
                 print(_(messages.FILE_NOT_FOUND % file))
                 sys.exit(1)
         if all_sources == []:
             print(_(messages.REPORT_JSON_DIR_ALL_FAIL))
             sys.exit(1)
-        self.json = {'id': report_id,
-                     'sources': all_sources}
+        self.json = {SOURCES_KEY: all_sources,
+                     REPORT_TYPE_KEY: DETAILS_REPORT_TYPE}
 
     def _merge_json(self):
         """Combine the sources for each json file provided.
@@ -215,17 +234,20 @@ class ReportMergeCommand(CliCommand):
         :returns: a dictionary representing the jobs to merge
         """
         if self.args.json_files or self.args.json_dir:
-            self.req_path = report.MERGE_URI
             self.req_method = POST
             self.req_payload = self.json
         else:
+            self.req_method = PUT
             self.req_payload = {
                 'reports': self.report_ids,
             }
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        print(_(messages.REPORT_SUCCESSFULLY_MERGED % json_data['id']))
+        if json_data.get('id'):
+            print(_(messages.REPORT_SUCCESSFULLY_MERGED % (
+                json_data.get('id'),
+                json_data.get('id'))))
 
     def _handle_response_error(self):
         json_data = self.response.json()

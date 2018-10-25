@@ -999,6 +999,30 @@ paths:
           description: "Reports not merged due to invalid request"
         401:
           description: "Not authorized"
+    put:
+      tags:
+        - "Report"
+      summary: "Asynchronously merge results from multiple details reports."
+      description: "Merge results from two or more existing reports."
+      operationId: "asyncMergeReportByIdResults"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Reports to combine"
+        required: true
+        schema:
+          $ref: "#/definitions/ReportMergeSync"
+      responses:
+        201:
+          description: "Job to track results of merge report operation."
+          schema:
+            $ref: "#/definitions/ReportMergeAsyncCreatedOut"
+        400:
+          description: "Reports not merged due to invalid request"
+        401:
+          description: "Not authorized"
   /reports/merge/jobs/{job_id}/:
     get:
       tags:
@@ -1214,14 +1238,22 @@ definitions:
           format: "int64"
           description: "The deployment report identifier"
           example: 1
+        report_type:
+          type: "string"
+          description: "The report type"
+          example: "deployments"
+        report_version:
+          type: "string"
+          description: "The report version"
+          example: "1.0.0.afdsgev"
         status:
           type: "string"
           enum:
             - pending
-            - complete
+            - completed
             - failed
           description: "The status of creating the report"
-          example: complete
+          example: completed
         system_fingerprints:
           type: "array"
           items:
@@ -1248,6 +1280,14 @@ definitions:
           format: "int64"
           description: "The details report identifier"
           example: 15
+        report_type:
+          type: "string"
+          description: "The report type"
+          example: "details"
+        report_version:
+          type: "string"
+          description: "The report version"
+          example: "1.0.0.afdsgev"
         sources:
           type: "array"
           items:
@@ -1265,6 +1305,10 @@ definitions:
         type: "string"
         description: "Globally unique server identifier"
         example: "1953cea7-4628-4eb7-a2d7-8344c0864dc4"
+      report_version:
+        type: "string"
+        description: "The report version"
+        example: "1.0.0.afdsgev"
       source_name:
         type: "string"
         description: "The source name associated with these facts"

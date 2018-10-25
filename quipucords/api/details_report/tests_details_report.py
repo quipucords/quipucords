@@ -13,11 +13,12 @@
 import copy
 import json
 
+from api.common.common_report import create_report_version
+from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
                         Source)
-from api.report.cvs_renderer import (DetailsCSVRenderer)
 
 from django.core import management
 from django.test import TestCase
@@ -47,6 +48,7 @@ class DetailReportTest(TestCase):
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.report_version = create_report_version()
 
     def tearDown(self):
         """Create test case tearDown."""
@@ -54,7 +56,7 @@ class DetailReportTest(TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
@@ -84,8 +86,10 @@ class DetailReportTest(TestCase):
     ##############################################################
     def test_details(self):
         """Get details for a report via API."""
-        request_json = {'sources':
+        request_json = {'report_type': 'details',
+                        'sources':
                         [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
@@ -112,8 +116,10 @@ class DetailReportTest(TestCase):
         value = renderer.render(test_json)
         self.assertIsNone(value)
 
-        request_json = {'sources':
+        request_json = {'report_type': 'details',
+                        'sources':
                         [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
                           'facts': [{'key': 'value'}]}]}
@@ -123,7 +129,7 @@ class DetailReportTest(TestCase):
         test_json = copy.deepcopy(response_json)
         csv_result = renderer.render(test_json)
         # pylint: disable=line-too-long
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n' % self.server_id  # noqa
+        expected = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n' % (self.report_version, self.server_id)  # noqa
         self.assertEqual(csv_result, expected)
 
         # Test cached works too
@@ -143,7 +149,7 @@ class DetailReportTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = None
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,0\r\n'
+        expected = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,0\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)
 
         # Clear cache
@@ -156,7 +162,7 @@ class DetailReportTest(TestCase):
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = []
         csv_result = renderer.render(test_json)
-        expected = 'Report,Number Sources\r\n1,0\r\n\r\n\r\n'
+        expected = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,0\r\n\r\n\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)
 
         # Clear cache
@@ -170,5 +176,5 @@ class DetailReportTest(TestCase):
         test_json['sources'][0]['facts'] = []
         csv_result = renderer.render(test_json)
         # pylint: disable=line-too-long
-        expected = 'Report,Number Sources\r\n1,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % self.server_id  # noqa
+        expected = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % (self.report_version, self.server_id)  # noqa
         self.assertEqual(csv_result, expected)

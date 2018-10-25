@@ -13,6 +13,7 @@
 import json
 
 from api import messages
+from api.common.common_report import create_report_version
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -47,16 +48,16 @@ class SyncMergeReports(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
 
-    def create_fact_collection(self, data):
+    def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
 
-    def create_fact_collection_expect_201(self, data):
+    def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
-        response = self.create_fact_collection(data)
+        response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('Failure cause: ')
             print(response.json())
@@ -157,16 +158,19 @@ class SyncMergeReports(TestCase):
 
     def test_sync_merge_jobs_success(self):
         """Test sync merge jobs success."""
-        url = reverse('facts-list')
+        url = reverse('reports-list')
         sources1 = [{'server_id': self.server_id,
+                     'report_version': create_report_version(),
                      'source_name': self.net_source.name,
                      'source_type': self.net_source.source_type,
                      'facts': [{'key1': 'value1'}]}]
         sources2 = [{'server_id': 'abc',
+                     'report_version': create_report_version(),
                      'source_name': 'another_name',
                      'source_type': 'network',
                      'facts': [{'key2': 'value2'}]}]
-        request_json = {'sources': sources1}
+        request_json = {'report_type': 'details',
+                        'sources': sources1}
         response = self.client.post(url,
                                     json.dumps(request_json),
                                     'application/json')
@@ -178,7 +182,8 @@ class SyncMergeReports(TestCase):
             sources1)
         report1_id = response_json['report_id']
 
-        request_json = {'sources': sources2}
+        request_json = {'report_type': 'details',
+                        'sources': sources2}
         response = self.client.post(url,
                                     json.dumps(request_json),
                                     'application/json')
@@ -200,12 +205,16 @@ class SyncMergeReports(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
         expected = {'report_id': 3,
+                    'report_type': 'details',
+                    'report_version': create_report_version(),
                     'sources': [
                         {'server_id': 'abc',
+                         'report_version': create_report_version(),
                          'source_name': 'another_name',
                          'source_type': 'network',
                          'facts': [{'key2': 'value2'}]},
                         {'server_id': self.server_id,
+                         'report_version': create_report_version(),
                          'source_name': 'test_source',
                          'source_type': 'network',
                          'facts': [{'key1': 'value1'}]}]}

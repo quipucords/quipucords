@@ -32,29 +32,30 @@ class ReportMergeStatusCommand(CliCommand):
     """
 
     SUBCOMMAND = report.SUBCOMMAND
-    ACTION = report.JOB
+    ACTION = report.MERGE_STATUS
 
     def __init__(self, subparsers):
         """Create command."""
         # pylint: disable=no-member
         CliCommand.__init__(self, self.SUBCOMMAND, self.ACTION,
                             subparsers.add_parser(self.ACTION), GET,
-                            report.JOB_URI, [codes.ok])
+                            report.ASYNC_MERGE_URI, [codes.ok])
         self.parser.add_argument('--job', dest='job_id', metavar='JOB_ID',
                                  help=_(messages.REPORT_JOB_ID_HELP),
                                  required=True)
 
     def _build_req_params(self):
-        self.req_path = report.JOB_URI + str(self.args.job_id) + '/'
+        self.req_path = report.ASYNC_MERGE_URI + str(self.args.job_id) + '/'
 
     def _handle_response_success(self):
         json_data = self.response.json()
-        print(_(messages.JOB_ID_STATUS % (self.args.job_id,
-                                          json_data.get('status').lower())))
+        print(_(messages.MERGE_JOB_ID_STATUS % (
+            self.args.job_id,
+            json_data.get('status').lower())))
         if json_data.get('report_id'):
             print(_(messages.DISPLAY_REPORT_ID % (json_data.get('report_id'),
                                                   json_data.get('report_id'))))
 
     def _handle_response_error(self):
-        print(_(messages.JOB_ID_NOT_FOUND % self.args.job_id))
+        print(_(messages.MERGE_JOB_ID_NOT_FOUND % self.args.job_id))
         sys.exit(1)
