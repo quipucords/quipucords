@@ -8,7 +8,7 @@ cffi==1.11.5
 cryptography==2.3.1
 django-factory-boy==1.0.0
 django-filter==2.0.0
-djangorestframework==3.8.2
+djangorestframework==3.9.0
 djangorestframework-expiring-authtoken==0.1.4
 dnspython==1.15.0
 drf-generators==0.3.0
@@ -36,7 +36,7 @@ python-dateutil==2.7.3
 pytz==2018.5
 pyvmomi==6.7.0.2018.9
 PyYAML==3.13
-requests==2.19.1
+requests==2.20.0
 six==1.11.0
 whitenoise==4.1
 wrapt==1.10.11
