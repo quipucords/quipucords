@@ -29,4 +29,4 @@ sphinx-autobuild==0.7.1
 sphinx-rtd-theme==0.4.2
 
 # Editor
-autopep8==1.4.1
+autopep8==1.4.2
