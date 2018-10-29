@@ -23,7 +23,7 @@ class DetailsReportSerializer(NotEmptySerializer):
     """Serializer for the DetailsReport model."""
 
     report_type = CharField(read_only=True)
-    report_version = CharField(max_length=32, read_only=True)
+    report_version = CharField(max_length=64, read_only=True)
 
     sources = CustomJSONField(required=True)
     report_id = IntegerField(read_only=True)

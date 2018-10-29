@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('report_type', models.CharField(choices=[('details', 'details'), ('deployments', 'deployments')], default='details', max_length=11)),
-                ('report_version', models.CharField(max_length=32)),
+                ('report_version', models.CharField(max_length=64)),
                 ('sources', models.TextField()),
                 ('report_id', models.IntegerField(null=True)),
                 ('cached_csv', models.TextField(null=True)),
