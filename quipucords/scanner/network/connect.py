@@ -354,8 +354,8 @@ def _handle_ssh_passphrase(credential):
             child = pexpect.spawn(cmd_string, timeout=12)
             phrase = [pexpect.EOF, 'Enter passphrase for .*:']
             i = child.expect(phrase)
-            child.sendline(passphrase)
             while i:
+                child.sendline(passphrase)
                 i = child.expect(phrase)
         except pexpect.exceptions.TIMEOUT:
             pass
