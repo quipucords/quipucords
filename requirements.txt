@@ -40,4 +40,5 @@ requests==2.20.0
 six==1.11.0
 whitenoise==4.1
 wrapt==1.10.11
+pycodestyle==2.4.0
 psycopg2-binary==2.7.5

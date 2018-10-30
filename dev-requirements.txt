@@ -1,6 +1,5 @@
 # Include Production Server Requirements & locked Dev Requirements
 -r requirements.txt
--r dev-locked-requirements.txt
 --editable .
 
 #Coverage
@@ -20,6 +19,7 @@ flake8-quotes==1.0.0
 pylint==2.1.1
 pylint-django==2.0.2
 pylint-plugin-utils==0.4
+pyflakes==2.0.0
 
 
 # Doc
