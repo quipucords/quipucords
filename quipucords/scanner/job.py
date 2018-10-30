@@ -271,8 +271,7 @@ class ScanJobRunner(Process):
             details_report = create_details_report(create_report_version(),
                                                    details_report_json)
             return False, details_report
-        message = 'Details report does not contain results.'\
-            '  Check connection results.'
+        message = 'No connection results found.'
         self.scan_job.fail(message)
         return True, {}
 
