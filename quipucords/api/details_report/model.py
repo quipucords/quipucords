@@ -27,7 +27,7 @@ class DetailsReport(models.Model):
         choices=REPORT_TYPE_CHOICES,
         default=REPORT_TYPE_DETAILS
     )
-    report_version = models.CharField(max_length=32,
+    report_version = models.CharField(max_length=64,
                                       null=False)
     sources = models.TextField(null=False)
     report_id = models.IntegerField(null=True)
