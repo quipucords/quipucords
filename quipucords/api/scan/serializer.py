@@ -330,7 +330,6 @@ class ScanSerializer(NotEmptySerializer):
             else:
                 # Update existing instance
                 # Grab the new extended search options
-
                 if extended_search.get(ScanOptions.JBOSS_EAP, None):
                     extended_search_instance.jboss_eap = extended_search.get(
                         ScanOptions.JBOSS_EAP, None)

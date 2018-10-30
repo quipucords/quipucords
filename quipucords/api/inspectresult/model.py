@@ -20,7 +20,7 @@ from api.source.model import Source
 
 
 class JobInspectionResult(models.Model):
-    """The results of a connection scan."""
+    """The results of a inspection scan."""
 
     def __str__(self):
         """Convert to string."""
@@ -34,7 +34,7 @@ class JobInspectionResult(models.Model):
 
 
 class TaskInspectionResult(models.Model):
-    """The captured connection results from a scan."""
+    """The captured inspection results from a scan."""
 
     job_inspection_result = models.ForeignKey(JobInspectionResult,
                                               on_delete=models.CASCADE,
