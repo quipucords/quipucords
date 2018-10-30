@@ -16,7 +16,7 @@ PLAYBOOKFILE="qpc_playbook.yml"
 RELEASE_TAG='-e RELEASE_TAG=master'
 POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
 #TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
-#CLI_PACKAGE_VERSION='-e CLI_DEFAULT_VERSION=qpc'
+#CLI_PACKAGE_VERSION="-e CLI_DEFAULT_VERSION=qpc"
 
 
 
@@ -66,7 +66,7 @@ then
 fi
 
 if [ ! -f /etc/redhat-release ]; then
-  echo '/etc/redhat-release not found. You need to run this on a Red Hat based OS.'
+  echo "/etc/redhat-release not found. You need to run this on a Red Hat based OS."
   exit 1
 fi
 
@@ -74,18 +74,27 @@ if dnf --version; then
   PKG_MGR=dnf
 else
   PKG_MGR=yum
+  if grep -q -i "release 7" /etc/redhat-release
+  then
+    RHEL7=1
+  fi
 fi
 
-echo 'Checking if ansible is installed...'
+echo "Checking if ansible is installed..."
 command -v ansible > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
-  echo 'Ansible prerequisite could not be found. Trying to install ansible...'
+  echo "Ansible prerequisite could not be found. Trying to install ansible..."
   ansible_not_installed=1
 fi
 
 if [ $ansible_not_installed ]; then
+  if [ $RHEL7 ]; then
+    echo "Trying to install RHEL7 dependencies..."
+    sudo subscription-manager repos --enable="rhel-7-server-extras-rpms" || true
+    sudo subscription-manager repos --enable="rhel-7-server-optional-rpms" || true
+  fi
   sudo "${PKG_MGR}" install -y ansible
 fi
 
@@ -93,6 +102,7 @@ command -v ansible > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
+  echo ""
   echo "Installation failed. Ansible prerequisite could not be installed."
   echo "Follow installation documentation for installing Ansible."
   exit 1
