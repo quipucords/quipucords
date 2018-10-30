@@ -145,7 +145,7 @@ class DeploymentReportSerializer(NotEmptySerializer):
 
     # Scan information
     report_type = CharField(read_only=True)
-    report_version = CharField(max_length=32, read_only=True)
+    report_version = CharField(max_length=64, read_only=True)
     details_report = PrimaryKeyRelatedField(
         queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)

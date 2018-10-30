@@ -25,7 +25,7 @@ class DeploymentsReport(models.Model):
         choices=REPORT_TYPE_CHOICES,
         default=REPORT_TYPE_DEPLOYMENT
     )
-    report_version = models.CharField(max_length=32,
+    report_version = models.CharField(max_length=64,
                                       null=False)
 
     STATUS_PENDING = 'pending'
