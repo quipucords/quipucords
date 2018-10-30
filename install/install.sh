@@ -13,8 +13,8 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-RELEASE_TAG="-e RELEASE_TAG=1.0.0"
-POSTGRES_VERSION="-e POSTGRES_VERSION=9.6.10"
+RELEASE_TAG='-e RELEASE_TAG=master'
+POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
 #TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
 #CLI_PACKAGE_VERSION="-e CLI_DEFAULT_VERSION=qpc"
 
@@ -122,5 +122,5 @@ then
   echo "Installation complete."
 else
   echo "Installation failed. Review the install logs."
-  exit $?
+  exit 1
 fi

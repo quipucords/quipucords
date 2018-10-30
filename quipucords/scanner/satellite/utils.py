@@ -147,7 +147,7 @@ def status(scan_task):
     except SatelliteException as sat_error:
         message = 'Satellite 6 status check failed with error:' \
             ' "%s". Attempting Satellite 5.' % sat_error
-        scan_task.log_message(message, log_level=logging.ERROR)
+        scan_task.log_message(message)
     try:
         return _status5(scan_task)
     except SatelliteException as sat_error:
