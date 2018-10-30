@@ -341,7 +341,7 @@ def _connect(manager_interrupt,
 
 
 def _handle_ssh_passphrase(credential):
-    """Attempt to setup loggin via passphrase if necessary.
+    """Attempt to setup login via passphrase if necessary.
 
     :param credential: The credential used for connections
     """
@@ -350,16 +350,24 @@ def _handle_ssh_passphrase(credential):
         keyfile = credential.get('ssh_keyfile')
         passphrase = \
             decrypt_data_as_unicode(credential['ssh_passphrase'])
+        start_ssh = 'ssh-agent /bin/bash'
         cmd_string = 'ssh-add {}'.format(keyfile)
 
         try:
-            child = pexpect.spawn(cmd_string, timeout=12)
+            child = pexpect.spawn(start_ssh, timeout=30)
+            child.expect('')
+            child.sendline(cmd_string)
             phrase = [pexpect.EOF, 'Enter passphrase for .*:']
             i = child.expect(phrase)
-            while i:
+            print('\n\n')
+            print('i: ' + str(i))
+            if i:
                 child.sendline(passphrase)
-                i = child.expect(phrase)
+                print('sent passphrase: ' + str(passphrase))
+                print('\n\n')
+                child.close()
         except pexpect.exceptions.TIMEOUT:
+            print('actually I timed out :grimace:')
             pass
 
 
