@@ -74,23 +74,9 @@
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'
 
-- name: check for jws cert in product directory
-  raw: ls /etc/pki/product/185.pem 2>/dev/null
-  register: jws_product
-  ignore_errors: yes
-  when: 'jboss_ws'
-
-- name: check for jws cert in product-default directory
-  raw: ls /etc/pki/product-default/185.pem 2>/dev/null
-  register: jws_product_default
-  ignore_errors: yes
-  when: 'jboss_ws'
-
-- name: combine jws certs
-  set_fact:
-    jws_has_cert: "{{
-         (jws_product.get('stdout_lines', []) +
-          jws_product_default.get('stdout_lines', [])) | difference(['']) | unique }}"
+- name: check for jws cert
+  raw: ls /etc/pki/product/185.pem /etc/pki/product-default/185.pem 2>/dev/null | sort -u 
+  register: jws_has_cert
   ignore_errors: yes
   when: 'jboss_ws'
 
