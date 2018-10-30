@@ -88,7 +88,7 @@
 
 - name: combine jws certs
   set_fact:
-    jws_has_certs: "{{
+    jws_has_cert: "{{
          (jws_product.get('stdout_lines', []) +
           jws_product_default.get('stdout_lines', [])) | difference(['']) | unique }}"
   ignore_errors: yes
