@@ -80,7 +80,7 @@ class Source(models.Model):
         null=False
     )
     port = models.IntegerField(null=True)
-    options = models.ForeignKey(
+    options = models.OneToOneField(
         SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
     hosts = models.TextField(unique=False, null=False)

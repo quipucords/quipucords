@@ -31,6 +31,10 @@ def is_int(value):
     """
     if isinstance(value, int):
         return True
+    if isinstance(value, bool):
+        return False
+    if not isinstance(value, str):
+        return False
 
     try:
         int(value)
@@ -56,6 +60,10 @@ def is_boolean(value):
     :param value: The value to check
     :returns True if it is a bool, False if not
     """
+    if isinstance(value, bool):
+        return True
+    if not isinstance(value, str):
+        return False
     return value.lower() in ('true', 'false')
 
 
@@ -65,6 +73,8 @@ def convert_to_boolean(value):
     :param value: The value to convert
     :return The value as a bool
     """
+    if isinstance(value, bool):
+        return value
     if is_boolean(value):
         return value.lower() == 'true'
     return False
