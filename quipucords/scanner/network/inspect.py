@@ -196,10 +196,9 @@ class InspectTaskRunner(ScanTaskRunner):
             sys_result = SystemInspectionResult(
                 name=host,
                 status=SystemInspectionResult.UNREACHABLE,
-                source=self.scan_task.source)
+                source=self.scan_task.source,
+                task_inspection_result=self.scan_task.inspection_result)
             sys_result.save()
-            self.scan_task.inspection_result.systems.add(sys_result)
-            self.scan_task.inspection_result.save()
 
     # pylint: disable=too-many-locals,W0102,too-many-arguments
     def _inspect_scan(self, manager_interrupt, connected, roles=DEFAULT_ROLES,

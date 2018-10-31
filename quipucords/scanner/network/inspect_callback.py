@@ -224,11 +224,11 @@ class InspectResultCallback(CallbackBase):
                     host, increment_sys_failed=True)
 
         sys_result = SystemInspectionResult(
-            name=host, status=host_status, source=self.scan_task.source)
+            name=host,
+            status=host_status,
+            source=self.scan_task.source,
+            task_inspection_result=self.scan_task.inspection_result)
         sys_result.save()
-
-        self.scan_task.inspection_result.systems.add(sys_result)
-        self.scan_task.inspection_result.save()
 
         # Generate facts for host
         for result_key, result_value in results.items():
@@ -238,10 +238,9 @@ class InspectResultCallback(CallbackBase):
             # Convert all values to JSON.  Noop for str, int
             final_value = json.dumps(result_value)
             stored_fact = RawFact(name=result_key,
-                                  value=final_value)
+                                  value=final_value,
+                                  system_inspection_result=sys_result)
             stored_fact.save()
-            sys_result.facts.add(stored_fact)
-        sys_result.save()
 
     # Make this atomic for the same reason as _finalize_host.
     @transaction.atomic

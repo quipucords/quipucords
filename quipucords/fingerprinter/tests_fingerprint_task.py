@@ -65,8 +65,8 @@ class EngineTest(TestCase):
             etc_release_release='RHEL 7.4 (Maipo)',
             ifconfig_ip_addresses=None,
             ifconfig_mac_addresses=None,
-            dmi_system_uuid='1234',
-            subman_virt_uuid='4567',
+            dmi_system_uuid=1234,
+            subman_virt_uuid=4567,
             subman_consumed=SUBMAN_CONSUMED,
             connection_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
             connection_host='1.2.3.4',
@@ -82,7 +82,7 @@ class EngineTest(TestCase):
             virt_num_guests=1,
             virt_num_running_guests=1,
             virt_what_type='vt',
-            is_redhat='true',
+            is_redhat=True,
             redhat_certs='fake certs',
             redhat_package_count=100,
             architecture='x86_64'):
@@ -505,11 +505,11 @@ class EngineTest(TestCase):
         nfingerprints = [
             self._create_network_fingerprint(dmi_system_uuid='match',
                                              ifconfig_mac_addresses=['1']),
-            self._create_network_fingerprint(dmi_system_uuid='1',
+            self._create_network_fingerprint(dmi_system_uuid=1,
                                              ifconfig_mac_addresses=['2'])]
         vfingerprints = [
             self._create_vcenter_fingerprint(vm_uuid='match'),
-            self._create_vcenter_fingerprint(vm_uuid='2')]
+            self._create_vcenter_fingerprint(vm_uuid=2)]
 
         n_cpu_count = nfingerprints[0]['cpu_count']
         v_cpu_count = vfingerprints[0]['cpu_count']

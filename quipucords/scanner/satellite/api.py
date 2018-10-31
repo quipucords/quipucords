@@ -81,11 +81,9 @@ class SatelliteInterface():
             name=name,
             source=self.source,
             credential=credential,
-            status=SystemConnectionResult.SUCCESS)
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=self.connect_scan_task.connection_result)
         sys_result.save()
-
-        self.connect_scan_task.connection_result.systems.add(sys_result)
-        self.connect_scan_task.connection_result.save()
 
         self.connect_scan_task.increment_stats(
             name, increment_sys_scanned=True)
@@ -102,19 +100,19 @@ class SatelliteInterface():
         sys_result = SystemInspectionResult(
             name=name,
             source=self.source,
-            status=status)
+            status=status,
+            task_inspection_result=self.inspect_scan_task.inspection_result)
         sys_result.save()
 
         if status == SystemInspectionResult.SUCCESS:
             for key, val in facts.items():
                 if val is not None:
                     final_value = json.dumps(val)
-                    stored_fact = RawFact(name=key, value=final_value)
+                    stored_fact = RawFact(
+                        name=key,
+                        value=final_value,
+                        system_inspection_result=sys_result)
                     stored_fact.save()
-                    sys_result.facts.add(stored_fact)
-
-        self.inspect_scan_task.inspection_result.systems.add(sys_result)
-        self.inspect_scan_task.inspection_result.save()
 
         if status == SystemInspectionResult.SUCCESS:
             self.inspect_scan_task.increment_stats(

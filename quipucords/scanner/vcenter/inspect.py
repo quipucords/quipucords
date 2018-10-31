@@ -214,20 +214,18 @@ class InspectTaskRunner(ScanTaskRunner):
 
         sys_result = SystemInspectionResult(
             name=vm_name, status=SystemInspectionResult.SUCCESS,
-            source=self.scan_task.source)
+            source=self.scan_task.source,
+            task_inspection_result=self.scan_task.inspection_result)
         sys_result.save()
 
         for key, val in facts.items():
             if val is not None:
                 final_value = json.dumps(val)
-                stored_fact = RawFact(name=key, value=final_value)
+                stored_fact = RawFact(
+                    name=key,
+                    value=final_value,
+                    system_inspection_result=sys_result)
                 stored_fact.save()
-                sys_result.facts.add(stored_fact)
-
-        sys_result.save()
-
-        self.scan_task.inspection_result.systems.add(sys_result)
-        self.scan_task.inspection_result.save()
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
