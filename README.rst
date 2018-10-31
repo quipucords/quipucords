@@ -216,7 +216,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
 
-7. If you need to enter the container use the following command::
+7. To enter the container use the following command::
 
     docker exec -it quipucords bash
 
