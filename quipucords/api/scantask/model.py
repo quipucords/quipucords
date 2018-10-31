@@ -82,11 +82,11 @@ class ScanTask(models.Model):
     source = models.ForeignKey(Source, null=True, on_delete=models.CASCADE)
 
     # Connect task field
-    connection_result = models.ForeignKey(
+    connection_result = models.OneToOneField(
         TaskConnectionResult, null=True, on_delete=models.CASCADE)
 
     # Inspect task field
-    inspection_result = models.ForeignKey(
+    inspection_result = models.OneToOneField(
         TaskInspectionResult, null=True, on_delete=models.CASCADE)
 
     # Fingerprint task field

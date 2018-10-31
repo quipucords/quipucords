@@ -15,6 +15,10 @@ import uuid
 from datetime import datetime
 
 from api.common.common_report import create_report_version
+from api.common.util import (convert_to_boolean,
+                             convert_to_int,
+                             is_boolean,
+                             is_int)
 from api.models import (DeploymentsReport,
                         Product,
                         ScanJob,
@@ -744,9 +748,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Merge keys from to_merge into priority.  These
         # are keys not in priority or have a reverse priority.
         keys_to_add_list = to_merge_keys - priority_keys
+
+        # Additionally, add reverse priority keys
         if reverse_priority_keys is not None and \
                 isinstance(reverse_priority_keys, set):
             keys_to_add_list = keys_to_add_list | reverse_priority_keys
+
+        # Look for keys that are in both but none in priority
+        key_intersection = priority_keys.intersection(to_merge_fingerprint)
+        for key in key_intersection:
+            if priority_fingerprint.get(key, None) is None:
+                # reverse the priority since value is None
+                keys_to_add_list.add(key)
         keys_to_add_list = list(keys_to_add_list)
         if META_DATA_KEY in keys_to_add_list:
             keys_to_add_list.remove(META_DATA_KEY)
@@ -826,6 +839,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Remove empty string values
         if isinstance(actual_fact_value, str) and not actual_fact_value:
             actual_fact_value = None
+        if is_boolean(actual_fact_value):
+            actual_fact_value = convert_to_boolean(actual_fact_value)
+        elif is_int(actual_fact_value):
+            actual_fact_value = convert_to_int(actual_fact_value)
 
         if actual_fact_value is not None:
             fingerprint[fingerprint_key] = actual_fact_value
@@ -990,18 +1007,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
             elif virt_type:
                 self._add_fact_to_fingerprint(
                     source, 'virt_type', fact, 'infrastructure_type',
-                    fingerprint, fact_value='virtualized')
+                    fingerprint, fact_value=SystemFingerprint.VIRTUALIZED)
             else:
                 # virt_what_type is not bare metal or None
                 # (since both cannot be)
                 self._add_fact_to_fingerprint(
                     source, 'virt_what_type', fact, 'infrastructure_type',
-                    fingerprint, fact_value='unknown')
+                    fingerprint, fact_value=SystemFingerprint.UNKNOWN)
         else:
             self._add_fact_to_fingerprint(
                 source, 'virt_what_type/virt_type', fact,
                 'infrastructure_type',
-                fingerprint, fact_value='unknown')
+                fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
         # Determine if VM facts
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
@@ -1167,6 +1184,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             infrastructure_type = 'virtualized'
         elif is_virtualized is False:
             infrastructure_type = SystemFingerprint.BARE_METAL
+        else:
+            infrastructure_type = SystemFingerprint.UNKNOWN
         if infrastructure_type:
             self._add_fact_to_fingerprint(source, 'is_virtualized', fact,
                                           'infrastructure_type', fingerprint,

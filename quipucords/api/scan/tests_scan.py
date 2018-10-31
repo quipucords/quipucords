@@ -340,6 +340,7 @@ class ScanTest(TestCase):
                                      content_type='application/json',
                                      format='json')
         response_json = response.json()
+
         options = {'disabled_optional_products':
                    {'jboss_eap': True,
                     'jboss_fuse': True,

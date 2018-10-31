@@ -118,12 +118,12 @@ class ScanOptions(models.Model):
 
     max_concurrency = models.PositiveIntegerField(default=50)
     disabled_optional_products = \
-        models.ForeignKey(DisabledOptionalProductsOptions,
-                          on_delete=models.CASCADE,
-                          null=True)
+        models.OneToOneField(DisabledOptionalProductsOptions,
+                             on_delete=models.CASCADE,
+                             null=True)
     enabled_extended_product_search = \
-        models.ForeignKey(ExtendedProductSearchOptions,
-                          on_delete=models.CASCADE, null=True)
+        models.OneToOneField(ExtendedProductSearchOptions,
+                             on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -228,7 +228,7 @@ class Scan(models.Model):
         choices=SCAN_TYPE_CHOICES,
         default=ScanTask.SCAN_TYPE_INSPECT,
     )
-    options = models.ForeignKey(
+    options = models.OneToOneField(
         ScanOptions, null=True, on_delete=models.CASCADE)
 
     most_recent_scanjob = models.ForeignKey(

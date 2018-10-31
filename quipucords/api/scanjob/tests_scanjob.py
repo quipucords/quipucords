@@ -261,15 +261,14 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         response = self.client.get(url)
@@ -294,15 +293,14 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?ordering=' + bad_param
@@ -317,15 +315,14 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?status=' + bad_param
@@ -340,15 +337,14 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?source_id=' + bad_param
@@ -363,15 +359,14 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?status=' + SystemConnectionResult.FAILED
@@ -391,22 +386,21 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result.save()
-        sys_result2.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
+        sys_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         response = self.client.get(url)
@@ -440,22 +434,21 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result.save()
-        sys_result2.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
+        sys_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?ordering=-name'
@@ -497,39 +490,37 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result3 = SystemConnectionResult(name='Woot',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result4 = SystemConnectionResult(name='Ness',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .SUCCESS)
-        sys_result.save()
-        sys_result2.save()
-        sys_result3.save()
-        sys_result4.save()
         conn_result = scan_tasks[0].connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
-
         conn_result2 = scan_tasks[1].connection_result
-        conn_result2.systems.add(sys_result3)
-        conn_result2.systems.add(sys_result4)
-        conn_result2.save()
+
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name='Woot',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result2)
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name='Ness',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result2)
+        sys_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         response = self.client.get(url)
@@ -582,39 +573,36 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result3 = SystemConnectionResult(name='Woot',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result4 = SystemConnectionResult(name='Ness',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .SUCCESS)
+        conn_result = scan_tasks[0].connection_result
+        conn_result2 = scan_tasks[1].connection_result
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result2 = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
+        sys_result3 = SystemConnectionResult(
+            name='Woot',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result2)
+        sys_result4 = SystemConnectionResult(
+            name='Ness',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result2)
         sys_result.save()
         sys_result2.save()
         sys_result3.save()
         sys_result4.save()
-        conn_result = scan_tasks[0].connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
-
-        conn_result2 = scan_tasks[1].connection_result
-        conn_result2.systems.add(sys_result3)
-        conn_result2.systems.add(sys_result4)
-        conn_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         url += '?source_id=' + str(source2.id)
@@ -655,39 +643,36 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result3 = SystemConnectionResult(name='Woot',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
-        sys_result4 = SystemConnectionResult(name='Ness',
-                                             source=source2,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .SUCCESS)
+        conn_result = scan_tasks[0].connection_result
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result2 = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
+        conn_result2 = scan_tasks[1].connection_result
+        sys_result3 = SystemConnectionResult(
+            name='Woot',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result2)
+        sys_result4 = SystemConnectionResult(
+            name='Ness',
+            source=source2,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result2)
         sys_result.save()
         sys_result2.save()
         sys_result3.save()
         sys_result4.save()
-        conn_result = scan_tasks[0].connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
-
-        conn_result2 = scan_tasks[1].connection_result
-        conn_result2.systems.add(sys_result3)
-        conn_result2.systems.add(sys_result4)
-        conn_result2.save()
 
         url = \
             reverse('scanjob-detail',
@@ -732,25 +717,21 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create two connection system results one failure & one success
-        sys_result = SystemConnectionResult(name='Foo',
-                                            source=self.source,
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result2 = SystemConnectionResult(name='Bar',
-                                             source=self.source,
-                                             credential=self.cred,
-                                             status=SystemConnectionResult
-                                             .FAILED)
+        conn_result = scan_tasks[0].connection_result
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result2 = SystemConnectionResult(
+            name='Bar',
+            source=self.source,
+            credential=self.cred,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
         sys_result.save()
         sys_result2.save()
-        conn_result = scan_tasks[0].connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.systems.add(sys_result2)
-        conn_result.save()
-
-        conn_result2 = scan_tasks[1].connection_result
-        conn_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         response = self.client.get(url)
@@ -796,18 +777,16 @@ class ScanJobTest(TestCase):
             source2, ScanTask.SCAN_TYPE_CONNECT)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Woot',
-                                            source=source2,
-                                            credential=cred2,
-                                            status=SystemConnectionResult
-                                            .FAILED)
+        conn_result = scan_task.connection_result
+        sys_result = SystemConnectionResult(
+            name='Woot',
+            source=source2,
+            credential=cred2,
+            status=SystemConnectionResult.FAILED,
+            task_connection_result=conn_result)
         sys_result.save()
         source2.delete()
         cred2.delete()
-
-        conn_result = scan_task.connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'connection/'
         response = self.client.get(url)
@@ -843,20 +822,19 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(
+            name='fact_key',
+            value='"fact_value"',
+            system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
 
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
@@ -872,20 +850,18 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
 
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
@@ -901,20 +877,18 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
 
         bad_param = 'bad_param'
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
@@ -930,20 +904,17 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key', value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         url += '?status=' + SystemConnectionResult.FAILED
@@ -963,34 +934,29 @@ class ScanJobTest(TestCase):
             self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
 
         inspect_sys_result2 = SystemInspectionResult(
             name='Foo',
-            status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            status=SystemConnectionResult.FAILED,
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result2.save()
 
-        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2 = RawFact(name='fact_key2', value='"fact_value2"',
+                        system_inspection_result=inspect_sys_result2)
         fact2.save()
-        inspect_sys_result2.facts.add(fact)
-        inspect_sys_result2.save()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
-
-        inspection_result.systems.add(inspect_sys_result2)
-        inspection_result.save()
 
         url = reverse('scanjob-detail',
                       args=(scan_job.id,)) + 'inspection/?page_size=1'
@@ -1004,12 +970,12 @@ class ScanJobTest(TestCase):
                     'previous': None,
                     'results': [
                         {'name': 'Foo',
-                         'status': 'success',
+                         'status': 'failed',
                          'source': {'id': 1,
                                     'name': 'source1',
                                     'source_type': 'network'},
-                         'facts': [{'name': 'fact_key',
-                                    'value': 'fact_value'}]}]}
+                         'facts': [{'name': 'fact_key2',
+                                    'value': 'fact_value2'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_ordering_by_name(self):
@@ -1024,49 +990,46 @@ class ScanJobTest(TestCase):
         scan_job, scan_tasks = create_scan_job_two_tasks(
             self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
 
+        inspection_result = scan_tasks[2].inspection_result
+        inspection_result2 = scan_tasks[3].inspection_result
         # Create an inspection system result
         inspect_sys_result = SystemInspectionResult(
             name='Foo1',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
 
         inspect_sys_result2 = SystemInspectionResult(
             name='Foo2',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result2.save()
 
-        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2 = RawFact(name='fact_key2',
+                        value='"fact_value2"',
+                        system_inspection_result=inspect_sys_result2)
         fact2.save()
-        inspect_sys_result2.facts.add(fact)
-        inspect_sys_result2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name='Foo3',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result3.save()
 
         inspect_sys_result4 = SystemInspectionResult(
             name='Foo4',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result4.save()
-        inspection_result = scan_tasks[2].inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.systems.add(inspect_sys_result2)
-        inspection_result.save()
-
-        inspection_result2 = scan_tasks[3].inspection_result
-        inspection_result2.systems.add(inspect_sys_result3)
-        inspection_result2.systems.add(inspect_sys_result4)
-        inspection_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         url += '?ordering=-name'
@@ -1094,8 +1057,8 @@ class ScanJobTest(TestCase):
                          'source': {'id': 1,
                                     'name': 'source1',
                                     'source_type': 'network'},
-                         'facts': [{'name': 'fact_key',
-                                    'value': 'fact_value'}]},
+                         'facts': [{'name': 'fact_key2',
+                                    'value': 'fact_value2'}]},
                         {'name': 'Foo1',
                          'status': 'success',
                          'source': {'id': 1,
@@ -1118,48 +1081,45 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_tasks[2].inspection_result
+        inspection_result2 = scan_tasks[3].inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo1',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
 
         inspect_sys_result2 = SystemInspectionResult(
             name='Foo2',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result2.save()
 
-        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2 = RawFact(name='fact_key2',
+                        value='"fact_value2"',
+                        system_inspection_result=inspect_sys_result2)
         fact2.save()
-        inspect_sys_result2.facts.add(fact)
-        inspect_sys_result2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name='Foo3',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result3.save()
 
         inspect_sys_result4 = SystemInspectionResult(
             name='Foo4',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result4.save()
-        inspection_result = scan_tasks[2].inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.systems.add(inspect_sys_result2)
-        inspection_result.save()
-
-        inspection_result2 = scan_tasks[3].inspection_result
-        inspection_result2.systems.add(inspect_sys_result3)
-        inspection_result2.systems.add(inspect_sys_result4)
-        inspection_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         url += '?source_id=' + str(source2.id)
@@ -1199,48 +1159,45 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_tasks[2].inspection_result
+        inspection_result2 = scan_tasks[3].inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
 
         inspect_sys_result2 = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result2.save()
 
-        fact2 = RawFact(name='fact_key2', value='"fact_value2"')
+        fact2 = RawFact(name='fact_key2',
+                        value='"fact_value2"',
+                        system_inspection_result=inspect_sys_result2)
         fact2.save()
-        inspect_sys_result2.facts.add(fact)
-        inspect_sys_result2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result3.save()
 
         inspect_sys_result4 = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.FAILED,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result2)
         inspect_sys_result4.save()
-        inspection_result = scan_tasks[2].inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.systems.add(inspect_sys_result2)
-        inspection_result.save()
-
-        inspection_result2 = scan_tasks[3].inspection_result
-        inspection_result2.systems.add(inspect_sys_result3)
-        inspection_result2.systems.add(inspect_sys_result4)
-        inspection_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         response = self.client.get(url)
@@ -1274,8 +1231,8 @@ class ScanJobTest(TestCase):
                          'source': {'id': 1,
                                     'name': 'source1',
                                     'source_type': 'network'},
-                         'facts': [{'name': 'fact_key',
-                                    'value': 'fact_value'}]}]}
+                         'facts': [{'name': 'fact_key2',
+                                    'value': 'fact_value2'}]}]}
         self.assertEqual(json_response, expected)
 
     def test_inspection_results_with_none(self):
@@ -1290,23 +1247,18 @@ class ScanJobTest(TestCase):
             self.source, source2, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_tasks[2].inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.FAILED,
-            source=self.source)
+            source=self.source,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
-
-        inspection_result = scan_tasks[2].inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
-
-        inspection_result2 = scan_tasks[3].inspection_result
-        inspection_result2.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         response = self.client.get(url)
@@ -1338,22 +1290,20 @@ class ScanJobTest(TestCase):
             source2, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
+        inspection_result = scan_task.inspection_result
         inspect_sys_result = SystemInspectionResult(
             name='Foo',
             status=SystemConnectionResult.SUCCESS,
-            source=source2)
+            source=source2,
+            task_inspection_result=inspection_result)
         inspect_sys_result.save()
 
-        fact = RawFact(name='fact_key', value='"fact_value"')
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=inspect_sys_result)
         fact.save()
-        inspect_sys_result.facts.add(fact)
-        inspect_sys_result.save()
 
         source2.delete()
-
-        inspection_result = scan_task.inspection_result
-        inspection_result.systems.add(inspect_sys_result)
-        inspection_result.save()
 
         url = reverse('scanjob-detail', args=(scan_job.id,)) + 'inspection/'
         response = self.client.get(url)
@@ -1809,29 +1759,26 @@ class ScanJobTest(TestCase):
         self.create_job_expect_201(scan_id)
 
         # Create a connection system result
-        sys_result = SystemConnectionResult(name='Foo',
-                                            credential=self.cred,
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
         conn_result = scan_task.prerequisites.first().connection_result
-        conn_result.systems.add(sys_result)
-        conn_result.save()
-
+        sys_result = SystemConnectionResult(
+            name='Foo',
+            credential=self.cred,
+            status=SystemConnectionResult.SUCCESS,
+            task_connection_result=conn_result)
+        sys_result.save()
         # Create an inspection system result
-        sys_result = SystemInspectionResult(name='Foo',
-                                            status=SystemConnectionResult
-                                            .SUCCESS)
-        sys_result.save()
-
-        fact = RawFact(name='fact_key', value='"fact_value"')
-        fact.save()
-        sys_result.facts.add(fact)
-        sys_result.save()
-
         inspect_result = scan_task.inspection_result
-        inspect_result.systems.add(sys_result)
-        inspect_result.save()
+        sys_result = SystemInspectionResult(
+            name='Foo',
+            status=SystemConnectionResult.SUCCESS,
+            task_inspection_result=inspect_result)
+        sys_result.save()
+
+        fact = RawFact(name='fact_key',
+                       value='"fact_value"',
+                       system_inspection_result=sys_result)
+        fact.save()
+
         scan_job.save()
 
         job_count = len(scan.jobs.all())
