@@ -1,7 +1,7 @@
 FROM fedora:26
 
 RUN dnf -y groupinstall "Development tools" \
-    && dnf -y install python-devel python-tools python3-devel python3-tools sshpass which supervisor \
+    && dnf -y install python-devel python-tools python3-devel python3-tools sshpass which supervisor procps\
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
@@ -48,6 +48,7 @@ VOLUME /etc/ansible/roles/
 # Copy server code
 COPY . /app/
 WORKDIR /app
+VOLUME /app
 
 # Set production environment
 ARG BUILD_COMMIT=master

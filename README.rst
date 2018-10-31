@@ -190,7 +190,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
-4. There are 3 different options for running the QPC server.
+4. There are many different options for running the QPC server.
     A. Run the Docker image with Postgres container::
 
         docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
@@ -205,12 +205,25 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
         docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
 
+    D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory::
+
+        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:1.0.0
+
 5. Configure the CLI by using the following commands::
 
     qpc server config --host 127.0.0.1
     qpc server login
 
 6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
+
+7. If you need to enter the container use the following command::
+
+    docker exec -it quipucords bash
+
+8. If you need to restart the server inside of the container, run the following after entering the container to get the server PIDs and restart::
+
+    ps -ef | grep gunicorn
+    kill -9 PID
 
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
