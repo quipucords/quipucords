@@ -11,7 +11,11 @@
 """Test utilities for the CLI module."""
 
 import contextlib
+import io
+import json
 import sys
+import tarfile
+import uuid
 
 
 DEFAULT_CONFIG = {'host': '127.0.0.1', 'port': 8000, 'use_http': True}
@@ -35,3 +39,17 @@ def redirect_stdout(stream):
         yield
     finally:
         sys.stdout = old_stdout
+
+
+def create_tar_buffer(data_array):
+    """Run to mock a renderer, capturing stream given list of json."""
+    tar_buffer = io.BytesIO()
+    with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
+        for data in data_array:
+            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
+            json_name = '%s.json' % str(uuid.uuid4())
+            info = tarfile.TarInfo(name=json_name)
+            info.size = len(json_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+    tar_buffer.seek(0)
+    return tar_buffer.getvalue()

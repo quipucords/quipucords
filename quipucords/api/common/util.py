@@ -11,8 +11,13 @@
 
 """Util for common operations."""
 
+import io
+import json
 import logging
 import os
+import tarfile
+import uuid
+
 
 from api.scantask.model import ScanTask
 
@@ -248,3 +253,20 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
                 status_details[task_key] = task.status_message
 
     return job_json
+
+
+def create_tar_buffer(data_array):
+    """Generate a tar buffer when data_array is list of json.
+
+    :param data_array: A list of json strings.
+    """
+    tar_buffer = io.BytesIO()
+    with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
+        for data in data_array:
+            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
+            json_name = '%s.json' % str(uuid.uuid4())
+            info = tarfile.TarInfo(name=json_name)
+            info.size = len(json_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+    tar_buffer.seek(0)
+    return tar_buffer

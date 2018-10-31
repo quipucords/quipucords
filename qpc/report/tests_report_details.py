@@ -23,7 +23,8 @@ from qpc.cli import CLI
 from qpc.report import REPORT_URI
 from qpc.report.details import ReportDetailsCommand
 from qpc.scan import SCAN_JOB_URI
-from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
+from qpc.tests_utilities import (DEFAULT_CONFIG, HushUpStderr,
+                                 create_tar_buffer, redirect_stdout)
 from qpc.utils import get_server_location, write_server_config
 
 import requests_mock
@@ -42,7 +43,7 @@ class ReportDetailsTests(unittest.TestCase):
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
-        self.test_json_filename = 'test_%d.tar.gz' % time.time()
+        self.test_json_filename = 'test_%d.json' % time.time()
         self.test_csv_filename = 'test_%d.csv' % time.time()
         sys.stderr = HushUpStderr()
 
@@ -69,11 +70,12 @@ class ReportDetailsTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
@@ -96,9 +98,10 @@ class ReportDetailsTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = ReportDetailsCommand(SUBPARSER)
             args = Namespace(scan_job_id=None,
                              report_id='1',
@@ -214,31 +217,3 @@ class ReportDetailsTests(unittest.TestCase):
                     nac.main(args)
                     self.assertEqual(report_out.getvalue(),
                                      messages.REPORT_NO_DETAIL_REPORT_FOR_SJ)
-
-    def test_details_report_convert_file_ext(self):
-        """Testing converting file extension to tar.gz for json."""
-        report_out = StringIO()
-
-        filename = self.test_json_filename.split('.')[0]
-        unacceptable_extension = filename + '.json'
-        get_report_url = get_server_location() + \
-            REPORT_URI + '1/details/'
-        get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
-        with requests_mock.Mocker() as mocker:
-            mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
-            nac = ReportDetailsCommand(SUBPARSER)
-            args = Namespace(scan_job_id=None,
-                             report_id='1',
-                             output_json=True,
-                             output_csv=False,
-                             path=unacceptable_extension)
-            with redirect_stdout(report_out):
-                nac.main(args)
-                self.assertIn(messages.REPORT_REQUIRE_TAR %
-                              self.test_json_filename,
-                              report_out.getvalue().strip())
-                with open(self.test_json_filename, 'r') as json_file:
-                    data = json_file.read()
-                    file_content_dict = json.loads(data)
-                self.assertDictEqual(get_report_json_data, file_content_dict)

@@ -16,8 +16,8 @@ import json
 import tarfile
 
 from api.common.common_report import create_report_version
+from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.details_report.csv_renderer import (DetailsCSVRenderer)
-from api.details_report.json_gzip_renderer import (DetailsJsonGzipRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
@@ -186,15 +186,10 @@ class DetailReportTest(TestCase):
     # Test Json Gzip Render
     ##############################################################
     def test_json_gzip_renderer(self):
-        """Test DetailsJsonGzipRenderer."""
-        renderer = DetailsJsonGzipRenderer()
+        """Test ReportJsonGzipRenderer for details."""
+        renderer = ReportJsonGzipRenderer()
         # Test no FC id
         test_json = {}
-        value = renderer.render(test_json)
-        self.assertIsNone(value)
-
-        # Test doesn't exist
-        test_json = {'id': 42}
         value = renderer.render(test_json)
         self.assertIsNone(value)
 

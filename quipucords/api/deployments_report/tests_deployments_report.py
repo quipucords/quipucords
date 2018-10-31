@@ -16,10 +16,9 @@ import tarfile
 import uuid
 
 from api.common.common_report import create_report_version
+from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
                                                  sanitize_row)
-from api.deployments_report.json_gzip_renderer import \
-    (DeploymentsJsonGzipRenderer)
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -332,8 +331,8 @@ class DeploymentReportTest(TestCase):
     # Test Json Gzip Render
     ##############################################################
     def test_json_gzip_renderer(self):
-        """Test DeploymentsJsonGzipRenderer."""
-        renderer = DeploymentsJsonGzipRenderer()
+        """Test ReportJsonGzipRenderer for deployments."""
+        renderer = ReportJsonGzipRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)

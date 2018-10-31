@@ -10,12 +10,9 @@
 #
 """tar.gz renderer for reports."""
 
-import io
-import json
 import logging
-import tarfile
 
-from api.models import (DeploymentsReport)
+from api.common.util import create_tar_buffer
 
 from rest_framework import renderers
 
@@ -23,8 +20,8 @@ from rest_framework import renderers
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class DeploymentsJsonGzipRenderer(renderers.BaseRenderer):
-    """Class to render Deployment report as tar.gz containging a json file."""
+class ReportJsonGzipRenderer(renderers.BaseRenderer):
+    """Class to render reports as tar.gz containing a json file."""
 
     # pylint: disable=too-few-public-methods
     media_type = 'application/json+gzip'
@@ -32,7 +29,7 @@ class DeploymentsJsonGzipRenderer(renderers.BaseRenderer):
     render_style = 'binary'
 
     def render(self, report_dict, media_type=None, renderer_context=None):
-        """Render deployment report as json gzip."""
+        """Render report as json gzip."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
         # pylint: disable=too-many-branches,too-many-statements
 
@@ -43,18 +40,5 @@ class DeploymentsJsonGzipRenderer(renderers.BaseRenderer):
         if report_id is None:
             return None
 
-        deployment_report = DeploymentsReport.objects.filter(
-            report_id=report_id).first()
-        if deployment_report is None:
-            return None
-
-        json_buffer = io.BytesIO(json.dumps(report_dict).encode('utf-8'))
-        tar_buffer = io.BytesIO()
-        with tarfile.TarFile(fileobj=tar_buffer,
-                             mode='w',
-                             debug=3) as tar_file:
-            info = tarfile.TarInfo(name='report.json')
-            info.size = len(json_buffer.getvalue())
-            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
-        tar_buffer.seek(0)
+        tar_buffer = create_tar_buffer([report_dict])
         return tar_buffer

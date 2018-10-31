@@ -16,9 +16,9 @@ import os
 
 import api.messages as messages
 from api.common.common_report import create_report_version
+from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
 from api.common.util import is_int
 from api.details_report.csv_renderer import (DetailsCSVRenderer)
-from api.details_report.json_gzip_renderer import (DetailsJsonGzipRenderer)
 from api.details_report.util import (create_details_report,
                                      validate_details_report_json)
 from api.models import (DetailsReport,
@@ -64,7 +64,7 @@ else:
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   DetailsCSVRenderer, DetailsJsonGzipRenderer))
+                   DetailsCSVRenderer, ReportJsonGzipRenderer))
 def details(request, pk=None):
     """Lookup and return a details system report."""
     if pk is not None:

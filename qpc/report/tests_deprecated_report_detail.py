@@ -23,7 +23,8 @@ from qpc.cli import CLI
 from qpc.report import REPORT_URI
 from qpc.report.deprecated_detail import DeprecatedReportDetailCommand
 from qpc.scan import SCAN_JOB_URI
-from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
+from qpc.tests_utilities import (DEFAULT_CONFIG, HushUpStderr,
+                                 create_tar_buffer, redirect_stdout)
 from qpc.utils import get_server_location, write_server_config
 
 import requests_mock
@@ -42,7 +43,7 @@ class ReportDetailTests(unittest.TestCase):
         # Temporarily disable stderr for these tests, CLI errors clutter up
         # nosetests command.
         self.orig_stderr = sys.stderr
-        self.test_json_filename = 'test_%d.tar.gz' % time.time()
+        self.test_json_filename = 'test_%d.json' % time.time()
         self.test_csv_filename = 'test_%d.csv' % time.time()
         sys.stderr = HushUpStderr()
 
@@ -69,11 +70,12 @@ class ReportDetailTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = DeprecatedReportDetailCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
@@ -97,9 +99,10 @@ class ReportDetailTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/details/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = DeprecatedReportDetailCommand(SUBPARSER)
             args = Namespace(scan_job_id=None,
                              report_id='1',

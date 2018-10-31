@@ -11,14 +11,16 @@
 #
 """ReportDetailsCommand is used to show details report."""
 
-import os
+from __future__ import print_function
+
 import sys
 
 from qpc import messages, report, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET, request
 from qpc.translation import _
-from qpc.utils import (validate_write_file,
+from qpc.utils import (extract_json_from_tar,
+                       validate_write_file,
                        write_file)
 
 from requests import codes
@@ -101,21 +103,13 @@ class ReportDetailsCommand(CliCommand):
 
     def _handle_response_success(self):
         file_content = None
-        binary = False
         if self.args.output_json:
-            correct_file_ext = '.tar.gz'
-            file_content = self.response.content
-            binary = True
-            if correct_file_ext not in self.args.path:
-                filename = os.path.splitext(self.args.path)[0]
-                self.args.path = filename + correct_file_ext
-                print(_(messages.REPORT_REQUIRE_TAR % self.args.path))
+            file_content = extract_json_from_tar(self.response.content)
         else:
             file_content = self.response.text
-            print()
 
         try:
-            write_file(self.args.path, file_content, binary)
+            write_file(self.args.path, file_content)
             print(_(messages.REPORT_SUCCESSFULLY_WRITTEN))
         except EnvironmentError as err:
             err_msg = _(messages.WRITE_FILE_ERROR % (self.args.path, err))

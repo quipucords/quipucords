@@ -16,6 +16,8 @@ from __future__ import print_function
 import json
 import logging
 import os
+import tarfile
+import time
 
 from qpc import messages
 from qpc.translation import _ as t
@@ -362,3 +364,17 @@ def write_file(filename, content, binary=False):
     with open(input_path, mode) as out_file:
         out_file.write(content)
     return result
+
+
+def extract_json_from_tar(fileobj_content):
+    """Extract json data from tar.gz bytes.
+
+    :param fileobj_content: BytesIo object with tarball of json dict
+    """
+    filename = '/tmp/cli_tmp_%s.tar.gz' % time.strftime('%Y%m%d_%H%M%S')
+    write_file(filename, fileobj_content, True)
+    tar = tarfile.open(filename)
+    json_file = tar.getmembers()[0]
+    tar_info = tar.extractfile(json_file)
+    json_data = pretty_print(json.loads(tar_info.read().decode('utf-8')))
+    return json_data
