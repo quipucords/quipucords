@@ -382,7 +382,8 @@ class ScanTest(TestCase):
                          ScanTask.SCAN_TYPE_INSPECT)
         data = {'name': 'test2',
                 'options': {'enabled_extended_product_search':
-                            {'search_directories': ['/foo/bar/']}}}
+                            {'jboss_ws': False,
+                             'search_directories': ['/foo/bar/']}}}
         response = self.client.patch(url,
                                      json.dumps(data),
                                      content_type='application/json',
@@ -393,7 +394,7 @@ class ScanTest(TestCase):
                    {'jboss_eap': False,
                     'jboss_fuse': False,
                     'jboss_brms': True,
-                    'jboss_ws': True,
+                    'jboss_ws': False,
                     'search_directories': ['/foo/bar/']}}
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK)
