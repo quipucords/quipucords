@@ -11,7 +11,6 @@
 """ScanTask used for network connection discovery."""
 import logging
 import os.path
-import time
 
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
