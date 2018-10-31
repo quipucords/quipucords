@@ -11,6 +11,7 @@
 """ScanTask used for network connection discovery."""
 import logging
 import os.path
+import time
 
 from ansible.errors import AnsibleError
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -350,24 +351,16 @@ def _handle_ssh_passphrase(credential):
         keyfile = credential.get('ssh_keyfile')
         passphrase = \
             decrypt_data_as_unicode(credential['ssh_passphrase'])
-        start_ssh = 'ssh-agent /bin/bash'
         cmd_string = 'ssh-add {}'.format(keyfile)
 
         try:
-            child = pexpect.spawn(start_ssh, timeout=30)
-            child.expect('')
-            child.sendline(cmd_string)
+            child = pexpect.spawn(cmd_string, timeout=12)
             phrase = [pexpect.EOF, 'Enter passphrase for .*:']
             i = child.expect(phrase)
-            print('\n\n')
-            print('i: ' + str(i))
-            if i:
+            while i:
                 child.sendline(passphrase)
-                print('sent passphrase: ' + str(passphrase))
-                print('\n\n')
-                child.close()
+                i = child.expect(phrase)
         except pexpect.exceptions.TIMEOUT:
-            print('actually I timed out :grimace:')
             pass
 
 
