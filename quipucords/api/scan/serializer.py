@@ -279,6 +279,12 @@ class ScanSerializer(NotEmptySerializer):
                 options_instance.save()
                 instance.options = options_instance
                 instance.save()
+            else:
+                max_concurrency = options.pop('max_concurrency', None)
+                if max_concurrency is not None:
+                    options_instance.max_concurrency = max_concurrency
+                    options_instance.save()
+
             if not optional_products and not extended_search:
                 return instance
         # Update disable optional products
@@ -296,19 +302,23 @@ class ScanSerializer(NotEmptySerializer):
                 instance.options.save()
             else:
                 # Existing values so update
-                if optional_products.get(ScanOptions.JBOSS_EAP, None):
+                if optional_products.get(
+                        ScanOptions.JBOSS_EAP, None) is not None:
                     optional_products_instance.jboss_eap = \
                         optional_products.get(
                             ScanOptions.JBOSS_EAP, None)
-                if optional_products.get(ScanOptions.JBOSS_FUSE, None):
+                if optional_products.get(
+                        ScanOptions.JBOSS_FUSE, None) is not None:
                     optional_products_instance.jboss_fuse = \
                         optional_products.get(
                             ScanOptions.JBOSS_FUSE, None)
-                if optional_products.get(ScanOptions.JBOSS_BRMS, None):
+                if optional_products.get(
+                        ScanOptions.JBOSS_BRMS, None) is not None:
                     optional_products_instance.jboss_brms = \
                         optional_products.get(
                             ScanOptions.JBOSS_BRMS, None)
-                if optional_products.get(ScanOptions.JBOSS_WS, None):
+                if optional_products.get(
+                        ScanOptions.JBOSS_WS, None) is not None:
                     optional_products_instance.jboss_ws = \
                         optional_products.get(
                             ScanOptions.JBOSS_WS, None)
@@ -330,22 +340,27 @@ class ScanSerializer(NotEmptySerializer):
             else:
                 # Update existing instance
                 # Grab the new extended search options
-                if extended_search.get(ScanOptions.JBOSS_EAP, None):
+                if extended_search.get(
+                        ScanOptions.JBOSS_EAP, None) is not None:
                     extended_search_instance.jboss_eap = extended_search.get(
                         ScanOptions.JBOSS_EAP, None)
 
-                if extended_search.get(ScanOptions.JBOSS_FUSE, None):
+                if extended_search.get(
+                        ScanOptions.JBOSS_FUSE, None) is not None:
                     extended_search_instance.jboss_fuse = extended_search.get(
                         ScanOptions.JBOSS_FUSE, None)
 
-                if extended_search.get(ScanOptions.JBOSS_BRMS, None):
+                if extended_search.get(
+                        ScanOptions.JBOSS_BRMS, None) is not None:
                     extended_search_instance.jboss_brms = extended_search.get(
                         ScanOptions.JBOSS_BRMS, None)
 
-                if extended_search.get(ScanOptions.JBOSS_WS, None):
+                if extended_search.get(
+                        ScanOptions.JBOSS_WS, None) is not None:
                     extended_search_instance.jboss_ws = extended_search.get(
                         ScanOptions.JBOSS_WS, None)
-                if extended_search.get('search_directories', None):
+                if extended_search.get(
+                        'search_directories', None) is not None:
                     extended_search_instance.search_directories = \
                         extended_search.get(
                             'search_directories', None)

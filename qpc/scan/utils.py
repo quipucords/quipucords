@@ -87,7 +87,8 @@ def get_optional_products(disabled_optional_products):
     disabled_products = {}
     disabled_default = {scan.JBOSS_FUSE: False,
                         scan.JBOSS_EAP: False,
-                        scan.JBOSS_BRMS: False}
+                        scan.JBOSS_BRMS: False,
+                        scan.JBOSS_WS: False}
 
     if disabled_optional_products:
         for product in disabled_optional_products:
@@ -117,6 +118,7 @@ def get_enabled_products(enabled_ext_product_search,
         enabled_default = {scan.JBOSS_FUSE: False,
                            scan.JBOSS_EAP: False,
                            scan.JBOSS_BRMS: False,
+                           scan.JBOSS_WS: False,
                            'search_directories': []}
         return enabled_default
     if ext_product_search_dirs == []:
@@ -130,7 +132,8 @@ def get_enabled_products(enabled_ext_product_search,
     if enabled_ext_product_search == []:
         enabled_default = {scan.JBOSS_FUSE: False,
                            scan.JBOSS_EAP: False,
-                           scan.JBOSS_BRMS: False}
+                           scan.JBOSS_BRMS: False,
+                           scan.JBOSS_WS: False}
         # if just the products are reset, check if dirs are provided
         if ext_product_search_dirs:
             enabled_default['search_directories'] = ext_product_search_dirs
