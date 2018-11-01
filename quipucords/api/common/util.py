@@ -11,8 +11,14 @@
 
 """Util for common operations."""
 
+import io
+import json
 import logging
 import os
+import tarfile
+import time
+import uuid
+
 
 from api.scantask.model import ScanTask
 
@@ -289,3 +295,56 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
                 status_details[task_key] = task.status_message
 
     return job_json
+
+
+def create_tar_buffer(data_array):
+    """Generate a tar buffer when data_array is list of json.
+
+    :param data_array: A list of json.
+    """
+    if not isinstance(data_array, (list,)):
+        return None
+    for data in data_array:
+        if not isinstance(data, (dict,)):
+            return None
+    tar_buffer = io.BytesIO()
+    with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
+        for data in data_array:
+            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
+            json_name = '%s.json' % str(uuid.uuid4())
+            info = tarfile.TarInfo(name=json_name)
+            info.size = len(json_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+    tar_buffer.seek(0)
+    return tar_buffer
+
+
+def extract_tar_gz(file_like_obj):
+    """Retrieve the contents of a tar.gz file like object.
+
+    :param file_like_obj: A hexstring or BytesIO tarball saved in memory
+    with gzip encryption.
+    """
+    if isinstance(file_like_obj, io.BytesIO):
+        tar = tarfile.open(fileobj=file_like_obj)
+    else:
+        if not isinstance(file_like_obj, (bytes, bytearray)):
+            return None
+        tar_name = '/tmp/api_tmp_%s.tar.gz' % time.strftime('%Y%m%d_%H%M%S')
+        with open(tar_name, 'wb') as out_file:
+            out_file.write(file_like_obj)
+        tar = tarfile.open(tar_name)
+        os.remove(tar_name)
+
+    file_data_list = list()
+    files = tar.getmembers()
+    for file in files:
+        tarfile_obj = tar.extractfile(file)
+        file_data = tarfile_obj.read().decode('utf-8')
+        if '.json' in file.name:
+            try:
+                file_data = json.loads(file_data)
+            except ValueError:
+                return None
+        file_data_list.append(file_data)
+    return file_data_list

@@ -23,7 +23,8 @@ from qpc.cli import CLI
 from qpc.report import REPORT_URI
 from qpc.report.deployments import ReportDeploymentsCommand
 from qpc.scan import SCAN_JOB_URI
-from qpc.tests_utilities import DEFAULT_CONFIG, HushUpStderr, redirect_stdout
+from qpc.tests_utilities import (DEFAULT_CONFIG, HushUpStderr,
+                                 create_tar_buffer, redirect_stdout)
 from qpc.utils import get_server_location, write_server_config
 
 import requests_mock
@@ -69,11 +70,12 @@ class ReportDeploymentsTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/deployments/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_scanjob_url, status_code=200,
                        json=get_scanjob_json_data)
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = ReportDeploymentsCommand(SUBPARSER)
             args = Namespace(scan_job_id='1',
                              report_id=None,
@@ -96,9 +98,10 @@ class ReportDeploymentsTests(unittest.TestCase):
         get_report_url = get_server_location() + \
             REPORT_URI + '1/deployments/'
         get_report_json_data = {'id': 1, 'report': [{'key': 'value'}]}
+        buffer_content = create_tar_buffer([get_report_json_data])
         with requests_mock.Mocker() as mocker:
             mocker.get(get_report_url, status_code=200,
-                       json=get_report_json_data)
+                       content=buffer_content)
             nac = ReportDeploymentsCommand(SUBPARSER)
             args = Namespace(scan_job_id=None,
                              report_id='1',
@@ -146,7 +149,6 @@ class ReportDeploymentsTests(unittest.TestCase):
                 with open(self.test_csv_filename, 'r') as json_file:
                     data = json_file.read()
                     file_content_dict = json.loads(data)
-                    print(file_content_dict)
                 self.assertDictEqual(get_report_csv_data, file_content_dict)
 
     # Test validation
@@ -172,7 +174,7 @@ class ReportDeploymentsTests(unittest.TestCase):
             CLI().main()
 
     def test_deployments_report_scan_job_not_exist(self):
-        """Summary report with nonexistent scanjob."""
+        """Deployments report with nonexistent scanjob."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \
@@ -194,7 +196,7 @@ class ReportDeploymentsTests(unittest.TestCase):
                                      messages.REPORT_SJ_DOES_NOT_EXIST)
 
     def test_deployments_report_invalid_scan_job(self):
-        """Summary report with scanjob but no report_id."""
+        """Deployments report with scanjob but no report_id."""
         report_out = StringIO()
 
         get_scanjob_url = get_server_location() + \

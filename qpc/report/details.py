@@ -19,7 +19,7 @@ from qpc import messages, report, scan
 from qpc.clicommand import CliCommand
 from qpc.request import GET, request
 from qpc.translation import _
-from qpc.utils import (pretty_print,
+from qpc.utils import (extract_json_from_tar,
                        validate_write_file,
                        write_file)
 
@@ -64,7 +64,7 @@ class ReportDetailsCommand(CliCommand):
     def _validate_args(self):
         CliCommand._validate_args(self)
         if self.args.output_json:
-            self.req_headers = {'Accept': 'application/json'}
+            self.req_headers = {'Accept': 'application/json+gzip'}
         if self.args.output_csv:
             self.req_headers = {'Accept': 'text/csv'}
 
@@ -104,11 +104,9 @@ class ReportDetailsCommand(CliCommand):
     def _handle_response_success(self):
         file_content = None
         if self.args.output_json:
-            file_content = self.response.json()
-            file_content = pretty_print(file_content)
+            file_content = extract_json_from_tar(self.response.content)
         else:
             file_content = self.response.text
-            print()
 
         try:
             write_file(self.args.path, file_content)
