@@ -186,28 +186,29 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 3. Build the Docker image::
 
-    docker -D build . -t quipucords:1.0.0
+    docker -D build . -t quipucords:master
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
 4. There are many different options for running the QPC server.
-    A. Run the Docker image with Postgres container::
 
-        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-        docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:1.0.0
+   A. Run the Docker image with Postgres container::
 
-    B. Run the Docker image with external Postgres container::
+       docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
+       docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:master
 
-        ifconfig (get your computer's external IP if Postgres is local)
-        docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:1.0.0
+   B. Run the Docker image with external Postgres container::
 
-    C. Run the Docker image with SQLite::
+       ifconfig (get your computer's external IP if Postgres is local)
+       docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:master
 
-        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:1.0.0
+   C. Run the Docker image with SQLite::
 
-    D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory::
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:master
 
-        docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:1.0.0
+   D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory. Mapping the /app directory allows you to rapidly change server code without having to rebuild the container. Mapping the logs to /tmp allows you to tail a local copy without having to exec into the container.::
+
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:master
 
 5. Configure the CLI by using the following commands::
 
@@ -223,7 +224,9 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 8. If you need to restart the server inside of the container, run the following after entering the container to get the server PIDs and restart::
 
     ps -ef | grep gunicorn
-    kill -9 PID
+    kill -9 PID PID
+
+  **NOTE:** There are usually multiple gunicorn processes running. You can kill them all at once by listing PIDs as shown in the example above.
 
 Running quipucords server in gunicorn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
