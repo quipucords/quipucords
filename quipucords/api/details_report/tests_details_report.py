@@ -11,7 +11,6 @@
 """Test the report API."""
 
 import copy
-import io
 import json
 import tarfile
 
@@ -83,6 +82,14 @@ class DetailReportTest(TestCase):
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()
+
+    def test_get_details_report_404(self):
+        """Fail to get a report for missing collection."""
+        url = '/api/v1/reports/24/details/'
+
+        # Query API
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     ##############################################################
     # Test details endpoint
@@ -204,18 +211,9 @@ class DetailReportTest(TestCase):
         report_dict = self.create_expect_201(
             request_json)
 
-        # Test that a BytesIO Object is returned
-        tar_gz_result = renderer.render(report_dict)
-        self.assertIsInstance(tar_gz_result, (io.BytesIO))
-
-        # Test that the tar file is readable
-        self.assertEqual(tar_gz_result.readable(), True)
-
-        # Test that the tar file has a sub file
-        tar = tarfile.open(fileobj=tar_gz_result)
-        self.assertNotEqual(tar.getmembers(), [])
-
         # Test that the data in the subfile equals the report_dict
+        tar_gz_result = renderer.render(report_dict)
+        tar = tarfile.open(fileobj=tar_gz_result)
         json_file = tar.getmembers()[0]
         tar_info = tar.extractfile(json_file)
         tar_dict_data = json.loads(tar_info.read().decode())

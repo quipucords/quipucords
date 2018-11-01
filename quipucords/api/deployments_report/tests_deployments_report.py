@@ -10,7 +10,6 @@
 #
 """Test the report API."""
 
-import io
 import json
 import tarfile
 import uuid
@@ -175,7 +174,7 @@ class DeploymentReportTest(TestCase):
         diff = [x for x in expected if x not in report['system_fingerprints']]
         self.assertEqual(diff, [])
 
-    def test_get_details_report_404(self):
+    def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/2/deployments/'
 
@@ -351,18 +350,9 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report_dict = response.json()
 
-        # Test that a BytesIO Object is returned
-        tar_gz_result = renderer.render(report_dict)
-        self.assertIsInstance(tar_gz_result, (io.BytesIO))
-
-        # Test that the tar file is readable
-        self.assertEqual(tar_gz_result.readable(), True)
-
-        # Test that the tar file has a sub file
-        tar = tarfile.open(fileobj=tar_gz_result)
-        self.assertNotEqual(tar.getmembers(), [])
-
         # Test that the data in the subfile equals the report_dict
+        tar_gz_result = renderer.render(report_dict)
+        tar = tarfile.open(fileobj=tar_gz_result)
         json_file = tar.getmembers()[0]
         tar_info = tar.extractfile(json_file)
         tar_dict_data = json.loads(tar_info.read().decode())

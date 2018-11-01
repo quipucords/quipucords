@@ -42,7 +42,15 @@ def redirect_stdout(stream):
 
 
 def create_tar_buffer(data_array):
-    """Run to mock a renderer, capturing stream given list of json."""
+    """Generate a tar buffer when data_array is list of json.
+
+    :param data_array: A list of json.
+    """
+    if not isinstance(data_array, (list,)):
+        return None
+    for data in data_array:
+        if not isinstance(data, (dict,)):
+            return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
         for data in data_array:

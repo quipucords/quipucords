@@ -365,6 +365,7 @@ def write_file(filename, content, binary=False):
         out_file.write(content)
     return result
 
+
 def extract_json_from_tar(fileobj_content):
     """Extract json data from tar.gz bytes.
 
