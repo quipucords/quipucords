@@ -341,7 +341,7 @@ def _connect(manager_interrupt,
 
 
 def _handle_ssh_passphrase(credential):
-    """Attempt to setup loggin via passphrase if necessary.
+    """Attempt to setup login via passphrase if necessary.
 
     :param credential: The credential used for connections
     """
