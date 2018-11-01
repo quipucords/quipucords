@@ -22,3 +22,4 @@ from . import date
 from . import subman
 from . import yum
 from . import virt
+from . import redhat_packages
