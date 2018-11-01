@@ -16,8 +16,10 @@ from datetime import datetime
 
 from api.common.common_report import create_report_version
 from api.common.util import (convert_to_boolean,
+                             convert_to_float,
                              convert_to_int,
                              is_boolean,
+                             is_float,
                              is_int)
 from api.models import (DeploymentsReport,
                         Product,
@@ -841,6 +843,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             actual_fact_value = None
         if is_boolean(actual_fact_value):
             actual_fact_value = convert_to_boolean(actual_fact_value)
+        elif is_float(actual_fact_value):
+            actual_fact_value = convert_to_float(actual_fact_value)
         elif is_int(actual_fact_value):
             actual_fact_value = convert_to_int(actual_fact_value)
 

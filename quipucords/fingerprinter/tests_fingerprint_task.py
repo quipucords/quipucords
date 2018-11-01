@@ -234,7 +234,7 @@ class EngineTest(TestCase):
             hostname='9.8.7.6',
             os_name='RHEL',
             os_release='RHEL 7.3',
-            os_version='7.3',
+            os_version=7.3,
             mac_addresses=None,
             ip_addresses=None,
             cores=32,
