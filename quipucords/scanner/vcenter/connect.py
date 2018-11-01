@@ -86,9 +86,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         for system in connected:
             sys_result = SystemConnectionResult(
                 name=system, status=SystemConnectionResult.SUCCESS,
-                credential=credential, source=source)
+                credential=credential, source=source,
+                task_connection_result=self.scan_task.connection_result)
             sys_result.save()
-            self.scan_task.connection_result.systems.add(sys_result)
             self.scan_task.increment_stats(
                 sys_result.name, increment_sys_scanned=True)
 

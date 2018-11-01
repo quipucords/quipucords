@@ -33,10 +33,14 @@ def is_int(value):
     """Check if a value is convertable to int.
 
     :param value: The value to convert
-    :returns: The int or None if not convertable
+    :returns: bool indicating if it can be converted
     """
     if isinstance(value, int):
         return True
+    if isinstance(value, bool):
+        return False
+    if not isinstance(value, str):
+        return False
 
     try:
         int(value)
@@ -46,7 +50,7 @@ def is_int(value):
 
 
 def convert_to_int(value):
-    """Convert value to in if possible.
+    """Convert value to int if possible.
 
     :param value: The value to convert
     :returns: The int or None if not convertable
@@ -56,12 +60,47 @@ def convert_to_int(value):
     return int(value)
 
 
+def is_float(value):
+    """Check if a value is convertable to float.
+
+    :param value: The value to convert
+    :returns: bool indicating if it can be converted
+    """
+    if isinstance(value, float):
+        return True
+    if isinstance(value, int):
+        return False
+    if not isinstance(value, str):
+        return False
+
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def convert_to_float(value):
+    """Convert value to float if possible.
+
+    :param value: The value to convert
+    :returns: The int or None if not convertable
+    """
+    if not is_float(value):
+        return None
+    return float(value)
+
+
 def is_boolean(value):
     """Check if a value is a bool cast as string.
 
     :param value: The value to check
-    :returns True if it is a bool, False if not
+    :returns: bool indicating if it can be converted
     """
+    if isinstance(value, bool):
+        return True
+    if not isinstance(value, str):
+        return False
     return value.lower() in ('true', 'false')
 
 
@@ -71,6 +110,8 @@ def convert_to_boolean(value):
     :param value: The value to convert
     :return The value as a bool
     """
+    if isinstance(value, bool):
+        return value
     if is_boolean(value):
         return value.lower() == 'true'
     return False

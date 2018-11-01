@@ -25,7 +25,7 @@ class DeploymentsReport(models.Model):
         choices=REPORT_TYPE_CHOICES,
         default=REPORT_TYPE_DEPLOYMENT
     )
-    report_version = models.CharField(max_length=32,
+    report_version = models.CharField(max_length=64,
                                       null=False)
 
     STATUS_PENDING = 'pending'
@@ -61,16 +61,18 @@ class SystemFingerprint(models.Model):
                    'system_creation_date']
 
     BARE_METAL = 'bare_metal'
+    UNKNOWN = 'unknown'
+    VIRTUALIZED = 'virtualized'
     SOURCE_TYPE = (
         ('network', 'Ansible'),
         ('vcenter', 'VCenter'),
-        ('unknown', 'Unknown')
+        (UNKNOWN, 'Unknown')
     )
 
     INFRASTRUCTURE_TYPE = (
         (BARE_METAL, 'Bare Metal'),
-        ('virtualized', 'Virtualized'),
-        ('unknown', 'Unknown')
+        (VIRTUALIZED, 'Virtualized'),
+        (UNKNOWN, 'Unknown')
     )
 
     # Scan information
@@ -81,11 +83,11 @@ class SystemFingerprint(models.Model):
     name = models.CharField(max_length=256, unique=False, null=True)
     os_name = models.CharField(max_length=64, unique=False)
     os_release = models.CharField(
-        max_length=128, unique=False, default='unknown')
+        max_length=128, unique=False)
     os_version = models.CharField(max_length=64, unique=False, null=True)
 
     infrastructure_type = models.CharField(
-        max_length=12, choices=INFRASTRUCTURE_TYPE, default='unknown')
+        max_length=12, choices=INFRASTRUCTURE_TYPE)
 
     mac_addresses = models.TextField(unique=False, null=True)
     ip_addresses = models.TextField(unique=False, null=True)
@@ -207,7 +209,7 @@ class Product(models.Model):
     name = models.CharField(max_length=256, unique=False, null=False)
     version = models.CharField(max_length=256, unique=False, null=True)
     presence = models.CharField(
-        max_length=10, choices=PRESENCE_TYPE, default='unknown')
+        max_length=10, choices=PRESENCE_TYPE)
 
     metadata = models.TextField(unique=False, null=False)
 

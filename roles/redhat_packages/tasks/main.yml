@@ -70,15 +70,9 @@
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather redhat-packages.certs fact
-  raw: ls /etc/pki/product/ 2> /dev/null |grep '.pem' | tr '\n' ';'
-  register: internal_redhat_packages_certs_cmd
+  raw: ls /etc/pki/product/ /etc/pki/product-default/ 2> /dev/null |grep '.pem' | sort -u | tr '\n' ';'
+  register: redhat_packages_certs
   ignore_errors: yes
-
-- name: extract result value for redhat-packages.certs
-  set_fact:
-    redhat_packages_certs: '{{  internal_redhat_packages_certs_cmd | json_query("stdout") | trim | default("") }}'
-  ignore_errors: yes
-  when: '"stdout" in internal_redhat_packages_certs_cmd'
 
 - name: gather enabled repositories
   raw: yum repolist enabled 2> /dev/null
