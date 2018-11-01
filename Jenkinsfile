@@ -1,4 +1,4 @@
-node('f25-os') {
+node('f28-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients nodejs"
         sh "which oc"
