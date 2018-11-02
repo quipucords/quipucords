@@ -1,6 +1,5 @@
 # Include Production Server Requirements & locked Dev Requirements
 -r requirements.txt
---editable .
 
 #Coverage
 coverage==4.5.1
