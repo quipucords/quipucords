@@ -18,7 +18,9 @@ from django.test import TestCase
 # pylint: disable=wrong-import-order
 from api.models import ServerInformation  # noqa
 
-from fingerprinter.jboss_eap import detect_jboss_eap, version_aware_dedup
+from fingerprinter.jboss_eap import (detect_jboss_eap,
+                                     verify_classification,
+                                     version_aware_dedup)
 
 
 class TestVersionAwareDedup(unittest.TestCase):
@@ -122,3 +124,25 @@ class ProductEAPTest(TestCase):
                         'source_type': 'satellite',
                         'raw_fact_key': None}}
         self.assertEqual(product, expected)
+
+
+class TestVerifyClassification(unittest.TestCase):
+    """Test the classification verification."""
+
+    def test_wildfly(self):
+        """Test that a wildfly version returns False."""
+        self.assertEqual(
+            verify_classification('WildFly-10'),
+            False)
+
+    def test_jbossas(self):
+        """Test that a jbossas version returns False."""
+        self.assertEqual(
+            verify_classification('JBossAS-7'),
+            False)
+
+    def test_eap(self):
+        """Test that an eap version returns True."""
+        self.assertEqual(
+            verify_classification('6.0.1'),
+            True)
