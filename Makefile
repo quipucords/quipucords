@@ -27,30 +27,21 @@ help:
 	@echo "  html                to build the docs"
 	@echo "  build-ui       to build ui and place result in django server"
 
-all: build lint test-coverage
+all: lint test-coverage
 
-build: clean-cli
-	$(PYTHON) setup.py build -f
-
-clean-cli:
-	-rm -rf dist/ build/ quipucords.egg-info/
-
-clean: clean-cli
+clean:
 	rm -rf quipucords/db.sqlite3
 	docker rm -f qpc-db
 
-install: build
-	$(PYTHON) setup.py install -f
-
 test:
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/
+	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/
 
 test-case:
 	echo $(pattern)
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ qpc/ -p $(pattern)
+	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ -p $(pattern)
 
 test-coverage:
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/,qpc/ quipucords/manage.py test -v 2 quipucords/ qpc/
+	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 swagger-valid:
@@ -90,12 +81,3 @@ build-ui:
 
 html:
 	@cd docs; $(MAKE) html
-
-manpage:
-	@mkdir -p build
-	pandoc docs/source/man.rst \
-	  --standalone -t man -o build/qpc.1 \
-	  --variable=section:1 \
-	  --variable=date:'July 17, 2018' \
-	  --variable=footer:'version 0.0.44' \
-	  --variable=header:'QPC Command Line Guide'

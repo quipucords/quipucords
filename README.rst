@@ -12,10 +12,6 @@
     :alt: Documentation Status
     :scale: 100%
     :target: https://quipucords.readthedocs.io/en/latest/?badge=latest
-.. image:: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/package/qpc/status_image/last_build.png
-    :alt: CLI RPM Build Status
-    :scale: 100%
-    :target: https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/
 
 quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment
 ===================================================================================================================

@@ -2,7 +2,6 @@ language: python
 
 python:
   - "3.6"
-  - "3.4"
 
 cache: pip
 
@@ -33,7 +32,6 @@ install:
 
 # command to run tests
 script:
-  - make build
   - make lint
   - make server-init
   - make test-coverage
