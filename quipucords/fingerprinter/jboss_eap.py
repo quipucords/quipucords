@@ -190,6 +190,14 @@ def process_version_txt(version_dict):
 IMPLEMENTATION_VERSION = 'Implementation-Version:'
 
 
+def verify_classification(classification):
+    """Check whether a classification is EAP vs Wildfly or JBossAS."""
+    if 'wildfly' in classification.lower() or \
+            'jbossas' in classification.lower():
+        return False
+    return True
+
+
 def is_eap_manifest_version(manifest_dict):
     """Check whether a manifest contains an EAP version string or not."""
     for _, manifest in manifest_dict.items():
@@ -198,7 +206,8 @@ def is_eap_manifest_version(manifest_dict):
                 if IMPLEMENTATION_VERSION in line:
                     _, _, ver = line.partition(IMPLEMENTATION_VERSION)
                     classification = EAP_CLASSIFICATIONS.get(ver.strip())
-                    if classification and 'EAP' in classification:
+                    if classification and \
+                            verify_classification(classification):
                         return Product.PRESENT
         else:
             logger.warning('Expected a dictionary of strings for %s, '
@@ -232,7 +241,7 @@ def is_eap_jar_version(version_dict):
         if isinstance(version, str):
             _, _, rest = version.partition('version')
             classification = EAP_CLASSIFICATIONS.get(rest.strip())
-            if classification and 'EAP' in classification:
+            if classification and verify_classification(classification):
                 return Product.PRESENT
         else:
             logger.warning('Expected a dictionary of strings for %s, '
