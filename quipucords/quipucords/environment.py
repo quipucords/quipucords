@@ -39,6 +39,11 @@ def commit():
     return commit_info
 
 
+def server_version():
+    """Return server version."""
+    return '0.0.45.%s' % commit()
+
+
 def platform_info():
     """Collect the platform information.
 
@@ -124,5 +129,6 @@ def startup():
                     'Using default of "postgres".',
                     (qpc_dbms))
 
+    logger.info('Server version: %s', server_version())
     logger.info('Commit: %s', commit())
     init_server_identifier()

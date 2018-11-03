@@ -19,7 +19,8 @@ from api.status.model import ServerInformation
 from quipucords.environment import (commit,
                                     modules,
                                     platform_info,
-                                    python_version)
+                                    python_version,
+                                    server_version)
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -28,10 +29,11 @@ from rest_framework.response import Response
 @api_view(['GET'])
 def status(request):
     """Provide the server status information."""
+    commit_info = commit()
     server_info = {
         'api_version': API_VERSION,
+        'server_version': server_version()
     }
-    commit_info = commit()
     if commit_info:
         server_info['build'] = commit_info
     server_info['server_address'] = request.META.get('HTTP_HOST', 'localhost')

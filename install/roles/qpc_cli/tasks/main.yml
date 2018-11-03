@@ -81,7 +81,7 @@
 
 - name: Set qpc version (Fedora 28)
   set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERISION}}.fc28']"
+    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc28']"
   when:
     - qpc_version is not defined
     - is_fedora_28
