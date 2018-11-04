@@ -1811,6 +1811,10 @@ definitions:
         format: "int64"
         description: "API version number"
         example: 1
+      server_version:
+        type: "string"
+        description: "Server version number"
+        example: 1.0.0.17de132
       build:
         type: "string"
         description: "The build number"
