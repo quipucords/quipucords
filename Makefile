@@ -74,7 +74,7 @@ server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
-	$(PYTHON) quipucords/manage.py runserver
+	$(PYTHON) quipucords/manage.py runserver --nostatic
 
 build-ui:
 	cd client;npm install;npm run build
