@@ -29,3 +29,6 @@ sphinx-rtd-theme==0.4.2
 
 # Editor
 autopep8==1.4.2
+
+# Gunicorn local development
+gunicorn==19.9.0
