@@ -40,6 +40,10 @@ VOLUME /sshkeys
 RUN mkdir -p /var/data
 VOLUME /var/data
 
+#Create /secret_vault/
+RUN mkdir -p /var/data/secret_vault
+VOLUME /var/data/secret_vault
+
 # Create /etc/ansible/roles/
 RUN mkdir -p /etc/ansible/roles/
 COPY roles/ /etc/ansible/roles/
@@ -54,7 +58,7 @@ VOLUME /app
 ARG BUILD_COMMIT=master
 ENV QUIPUCORDS_COMMIT=$BUILD_COMMIT
 ENV PRODUCTION=True
-ENV DJANGO_SECRET_PATH=/var/data/secret.txt
+ENV DJANGO_SECRET_PATH=/var/data/secret_vault/secret.txt
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
 ENV DJANGO_LOG_LEVEL=INFO
