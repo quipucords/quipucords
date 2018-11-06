@@ -2,7 +2,7 @@ def qpc_version = "0.0.45"
 def image_name = "quipucords:${qpc_version}"
 def tarfile = "quipucords.${qpc_version}.tar"
 def targzfile = "${tarfile}.gz"
-def install_tar = "quipucords.install.tar"
+def install_tar = "quipucords.${qpc_version}.install.tar"
 def install_targzfile = "${install_tar}.gz"
 
 node('f28-os') {
