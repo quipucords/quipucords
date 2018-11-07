@@ -13,10 +13,10 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-RELEASE_TAG='-e RELEASE_TAG=master'
+RELEASE_TAG='-e RELEASE_TAG=0.0.46'
 POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
 #TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
-#CLI_PACKAGE_VERSION="-e CLI_DEFAULT_VERSION=qpc"
+#CLI_PACKAGE_VERSION="-e CLI_PACKAGE_VERSION=0.0.46-ACTUAL_COPR_GIT_COMMIT"
 
 
 
@@ -55,7 +55,7 @@ usage() {
     * Optionally specify the postgres db password (if not specified the default value is 'password')
          -e QPC_DBMS_PASSWORD=password
     * Override default server timeout for HTTP requests (if not specified the default value is 120):
-         -e QPC_SERVER_TIMEOUT=30
+         -e QPC_SERVER_TIMEOUT=120
 EOM
     exit 0
 }

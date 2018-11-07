@@ -11,8 +11,14 @@
 
 """Util for common operations."""
 
+import io
+import json
 import logging
 import os
+import tarfile
+import time
+import uuid
+
 
 from api.scantask.model import ScanTask
 
@@ -27,7 +33,7 @@ def is_int(value):
     """Check if a value is convertable to int.
 
     :param value: The value to convert
-    :returns: The int or None if not convertable
+    :returns: bool indicating if it can be converted
     """
     if isinstance(value, int):
         return True
@@ -44,7 +50,7 @@ def is_int(value):
 
 
 def convert_to_int(value):
-    """Convert value to in if possible.
+    """Convert value to int if possible.
 
     :param value: The value to convert
     :returns: The int or None if not convertable
@@ -54,11 +60,42 @@ def convert_to_int(value):
     return int(value)
 
 
+def is_float(value):
+    """Check if a value is convertable to float.
+
+    :param value: The value to convert
+    :returns: bool indicating if it can be converted
+    """
+    if isinstance(value, float):
+        return True
+    if isinstance(value, int):
+        return False
+    if not isinstance(value, str):
+        return False
+
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def convert_to_float(value):
+    """Convert value to float if possible.
+
+    :param value: The value to convert
+    :returns: The int or None if not convertable
+    """
+    if not is_float(value):
+        return None
+    return float(value)
+
+
 def is_boolean(value):
     """Check if a value is a bool cast as string.
 
     :param value: The value to check
-    :returns True if it is a bool, False if not
+    :returns: bool indicating if it can be converted
     """
     if isinstance(value, bool):
         return True
@@ -258,3 +295,56 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
                 status_details[task_key] = task.status_message
 
     return job_json
+
+
+def create_tar_buffer(data_array):
+    """Generate a tar buffer when data_array is list of json.
+
+    :param data_array: A list of json.
+    """
+    if not isinstance(data_array, (list,)):
+        return None
+    for data in data_array:
+        if not isinstance(data, (dict,)):
+            return None
+    tar_buffer = io.BytesIO()
+    with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
+        for data in data_array:
+            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
+            json_name = '%s.json' % str(uuid.uuid4())
+            info = tarfile.TarInfo(name=json_name)
+            info.size = len(json_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+    tar_buffer.seek(0)
+    return tar_buffer
+
+
+def extract_tar_gz(file_like_obj):
+    """Retrieve the contents of a tar.gz file like object.
+
+    :param file_like_obj: A hexstring or BytesIO tarball saved in memory
+    with gzip encryption.
+    """
+    if isinstance(file_like_obj, io.BytesIO):
+        tar = tarfile.open(fileobj=file_like_obj)
+    else:
+        if not isinstance(file_like_obj, (bytes, bytearray)):
+            return None
+        tar_name = '/tmp/api_tmp_%s.tar.gz' % time.strftime('%Y%m%d_%H%M%S')
+        with open(tar_name, 'wb') as out_file:
+            out_file.write(file_like_obj)
+        tar = tarfile.open(tar_name)
+        os.remove(tar_name)
+
+    file_data_list = list()
+    files = tar.getmembers()
+    for file in files:
+        tarfile_obj = tar.extractfile(file)
+        file_data = tarfile_obj.read().decode('utf-8')
+        if '.json' in file.name:
+            try:
+                file_data = json.loads(file_data)
+            except ValueError:
+                return None
+        file_data_list.append(file_data)
+    return file_data_list

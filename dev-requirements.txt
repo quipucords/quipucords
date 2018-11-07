@@ -1,12 +1,11 @@
 # Include Production Server Requirements & locked Dev Requirements
 -r requirements.txt
---editable .
 
 #Coverage
 coverage==4.5.1
 
 # Test runner/testing utils
-pytest==3.9.3
+pytest==3.10.0
 pytest-django==3.4.3
 requests-mock==1.5.2
 
@@ -30,3 +29,6 @@ sphinx-rtd-theme==0.4.2
 
 # Editor
 autopep8==1.4.2
+
+# Gunicorn local development
+gunicorn==19.9.0

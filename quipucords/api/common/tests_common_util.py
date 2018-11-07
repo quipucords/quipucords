@@ -10,9 +10,12 @@
 #
 """Test the common util."""
 
+import io
+import json
+import tarfile
 from collections import OrderedDict
 
-from api.common.util import CSVHelper
+from api.common.util import (CSVHelper, create_tar_buffer, extract_tar_gz)
 
 from django.test import TestCase
 
@@ -97,3 +100,74 @@ class CommonUtilTest(TestCase):
         self.assertEqual(3, len(headers))
         expected = set(['header1', 'header2', 'header3'])
         self.assertSetEqual(expected, set(headers))
+
+    def test_create_tar_buffer(self):
+        """Test create_tar_buffer method."""
+        json0 = {'id': 1, 'report': [{'key': 'value'}]}
+        json1 = {'id': 2, 'report': [{'key': 'value'}]}
+        json_list = [json0, json1]
+        tar_buffer = create_tar_buffer(json_list)
+        self.assertIsInstance(tar_buffer, (io.BytesIO))
+        self.assertIn('getvalue', dir(tar_buffer))
+        tar = tarfile.open(fileobj=tar_buffer)
+        files = tar.getmembers()
+        self.assertNotEqual(files, [])
+        self.assertEqual(2, len(files))
+        for file_obj in files:
+            file = tar.extractfile(file_obj)
+            extracted_content = json.loads(file.read().decode())
+            self.assertIn(extracted_content, json_list)
+
+    def test_bad_param_type_create_tar_buffer(self):
+        """Test passing in a non-list into create_tar_buffer."""
+        json0 = {'id': 1, 'report': [{'key': 'value'}]}
+        tar_result = create_tar_buffer(json0)
+        self.assertEqual(tar_result, None)
+
+    def test_bad_list_contents_create_tar_buffer(self):
+        """Test passing in a list of none json into create_tar_buffer."""
+        json_list = ["{'id': 1, 'report': [{'key': 'value'}]}",
+                     "{'id': 2, 'report': [{'key': 'value'}]}"]
+        tar_result = create_tar_buffer(json_list)
+        self.assertEqual(tar_result, None)
+
+    def test_extract_tar_gz_content_good(self):
+        """Test extracting files by passing a BytesIO object."""
+        json0 = {'id': 1, 'report': [{'key': 'value'}]}
+        json1 = {'id': 2, 'report': [{'key': 'value'}]}
+        json_list = [json0, json1]
+        tar_buffer = create_tar_buffer(json_list)
+        self.assertIsInstance(tar_buffer, (io.BytesIO))
+        # bytesIO
+        file_contents = extract_tar_gz(tar_buffer)
+        for data in file_contents:
+            self.assertIn(data, json_list)
+        self.assertEqual(len(file_contents), len(json_list))
+        # hexstring
+        file_contents = extract_tar_gz(tar_buffer.getvalue())
+        for data in file_contents:
+            self.assertIn(data, json_list)
+        self.assertEqual(len(file_contents), len(json_list))
+
+    def test_extract_tar_gz_content_bad_param_type(self):
+        """Test passing bad types as parameters."""
+        bad_types = ['', 7, ['test'], {'key': 'value'}]
+        for bad_type in bad_types:
+            file_contents = extract_tar_gz(bad_type)
+            self.assertEqual(file_contents, None)
+
+    def test_extract_tar_gz_empty_tar_gz(self):
+        """Test trying to extract and empty tar.gz file."""
+        tar_buffer = io.BytesIO()
+        json_buffer = io.BytesIO()
+        with tarfile.TarFile(fileobj=tar_buffer, mode='w') as tar_file:
+            info = tarfile.TarInfo(name='report.json')
+            info.size = len(json_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+        tar_buffer.seek(0)
+        # bytesIO
+        file_contents = extract_tar_gz(tar_buffer)
+        self.assertEqual(file_contents, None)
+        # hexstring
+        file_contents = extract_tar_gz(tar_buffer.getvalue())
+        self.assertEqual(file_contents, None)
