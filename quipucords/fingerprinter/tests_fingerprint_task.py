@@ -77,6 +77,7 @@ class EngineTest(TestCase):
             date_filesystem_create='2017-06-17',
             date_anaconda_log='2017-05-17',
             date_machine_id='2017-04-17',
+            system_intent_json=None,
             virt_virt='virt-guest',
             virt_type='vmware',
             virt_num_guests=1,
@@ -138,6 +139,8 @@ class EngineTest(TestCase):
             fact['date_filesystem_create'] = date_filesystem_create
         if date_machine_id:
             fact['date_machine_id'] = date_machine_id
+        if system_intent_json:
+            fact['system_intent_json'] = system_intent_json
         if virt_virt:
             fact['virt_virt'] = virt_virt
         if virt_type:
@@ -349,6 +352,25 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('redhat_packages_gpg_num_rh_packages'),
                          fingerprint.get(
                              'redhat_package_count'))
+        system_intent_json = fact.get('system_intent_json', None)
+        if system_intent_json:
+            self.assertEqual(
+                system_intent_json.get('role', None),
+                fingerprint.get('system_intent_role'))
+            self.assertEqual(
+                system_intent_json.get('addons', None),
+                fingerprint.get('system_intent_addons'))
+            self.assertEqual(
+                system_intent_json.get('service_level_agreement', None),
+                fingerprint.get('system_intent_sla'))
+            self.assertEqual(
+                system_intent_json.get('usage_type', None),
+                fingerprint.get('system_intent_usage_type'))
+        else:
+            self.assertIsNone(fingerprint.get('system_intent_role'))
+            self.assertIsNone(fingerprint.get('system_intent_addons'))
+            self.assertIsNone(fingerprint.get('system_intent_sla'))
+            self.assertIsNone(fingerprint.get('system_intent_usage_type'))
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
@@ -460,6 +482,45 @@ class EngineTest(TestCase):
     ################################################################
     def test_process_network_source(self):
         """Test process network source."""
+        # Note the create method runs a validate
+        system_intent_json = None
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json = {}
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['_version'] = 1
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['_version'] = 1
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['role'] = 'server'
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['service_level_agreement'] = 'self-service'
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['usage_type'] = 'dev'
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['addons'] = ['ibm']
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+        system_intent_json['random_extra_field'] = ['redhat']
+        self._create_network_fingerprint(
+            system_intent_json=system_intent_json)
+
+    def test_process_network_system_intent(self):
+        """Test process network system_intent."""
         details_report = self._create_network_fc_json()
         fact = details_report['facts'][0]
         source = {'server_id': self.server_id,

@@ -39,6 +39,7 @@ from scanner.task import ScanTaskRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+
 DEFAULT_ROLES = [
     'check_dependencies',
     'connection',
@@ -60,6 +61,7 @@ DEFAULT_ROLES = [
     'subman',
     'uname',
     'virt_what',
+    'system_intent',
     'host_done',
 ]
 
