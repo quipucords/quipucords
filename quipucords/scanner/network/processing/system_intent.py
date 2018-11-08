@@ -7,7 +7,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Initial processing of the shell output from the subman role."""
+"""Initial processing of the system intent role."""
 
 import json
 import logging
