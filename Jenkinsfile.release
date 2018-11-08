@@ -1,4 +1,4 @@
-def qpc_version = "0.0.45"
+def qpc_version = "0.0.46"
 def image_name = "quipucords:${qpc_version}"
 def tarfile = "quipucords.${qpc_version}.tar"
 def targzfile = "${tarfile}.gz"
