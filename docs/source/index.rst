@@ -32,6 +32,6 @@ Quipucords is an *agentless* inspection tool, so there is no need to install the
    cli_server_interaction
    quick_start
    using_qpc
-   Command Line Reference <command_line_reference>
+   Command Line Reference 2 <command_line_reference>
    troubleshooting
    concepts
