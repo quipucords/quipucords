@@ -20,6 +20,7 @@ from . import cpu
 from . import ifconfig
 from . import date
 from . import subman
+from . import system_intent
 from . import yum
 from . import virt
 from . import redhat_packages
