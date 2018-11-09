@@ -354,9 +354,6 @@ class EngineTest(TestCase):
                              'redhat_package_count'))
         system_purpose_json = fact.get('system_purpose_json', None)
         if system_purpose_json:
-            print('#' * 1200)
-            print(system_purpose_json)
-            print(fingerprint)
             self.assertEqual(
                 system_purpose_json.get('role', None),
                 fingerprint.get('system_role'))
