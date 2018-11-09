@@ -1024,6 +1024,47 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'infrastructure_type',
                 fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
+        # System intent facts
+        system_intent_json = fact.get('system_intent_json', None)
+        if system_intent_json:
+            system_intent_role = system_intent_json.get('role', None)
+            if system_intent_role:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_intent_json', fact,
+                    'system_intent_role', fingerprint,
+                    fact_value=system_intent_role
+                )
+
+            system_intent_addons = system_intent_json.get('addons', None)
+            if system_intent_addons:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_intent_json', fact,
+                    'system_intent_addons', fingerprint,
+                    fact_value=system_intent_addons
+                )
+
+            system_intent_sla = system_intent_json.get(
+                'service_level_agreement', None)
+            if system_intent_sla:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_intent_json', fact,
+                    'system_intent_sla', fingerprint,
+                    fact_value=system_intent_sla
+                )
+
+            system_intent_usage_type = system_intent_json.get(
+                'usage_type', None)
+            if system_intent_usage_type:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_intent_json', fact,
+                    'system_intent_usage_type', fingerprint,
+                    fact_value=system_intent_usage_type
+                )
+
         # Determine if VM facts
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
                                       'virtualized_type', fingerprint)

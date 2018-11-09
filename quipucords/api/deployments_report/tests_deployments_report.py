@@ -289,11 +289,11 @@ class DeploymentReportTest(TestCase):
 
         csv_result = renderer.render(report)
         # pylint: disable=line-too-long
-        data_rows = ['architecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid',  # noqa
-                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,',  # noqa
-                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,vmware,,,,,,,',  # noqa
-                     ',,2,2,2,True,False,False,,virtualized,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,vmware,,,,,,,']  # noqa
-  # noqa
+        data_rows = ['',
+                     'architecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_intent_addons,system_intent_role,system_intent_sla,system_intent_usage_type,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,,,,,vmware,,,,,,,',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,2017-07-18,,,,,,vmware,,,,,,,',  # noqa
+                     ',,2,2,2,True,False,False,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,2017-07-18,,,,,,vmware,,,,,,,']  # noqa
         for row in data_rows:
             result = row in csv_result
             self.assertEqual(result, True)
@@ -323,7 +323,7 @@ class DeploymentReportTest(TestCase):
         csv_result = renderer.render(report)
 
         # pylint: disable=line-too-long
-        expected = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,\r\n\r\n' % self.report_version  # noqa
+        expected = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_creation_date,system_intent_addons,system_intent_role,system_intent_sla,system_intent_usage_type,system_last_checkin_date,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,\r\n\r\n' % self.report_version  # noqa
         self.assertEqual(csv_result, expected)
 
     ##############################################################

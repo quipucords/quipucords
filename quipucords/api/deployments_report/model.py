@@ -107,6 +107,16 @@ class SystemFingerprint(models.Model):
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
 
+    system_intent_role = models.CharField(
+        max_length=128, unique=False, null=True)
+    system_intent_addons = models.TextField(unique=False, null=True)
+    system_intent_sla = models.CharField(
+        max_length=128, unique=False, null=True)
+    system_intent_usage_type = models.CharField(
+        max_length=128, unique=False, null=True)
+    insights_client_id = models.CharField(
+        max_length=128, unique=False, null=True)
+
     virtualized_type = models.CharField(max_length=64, unique=False, null=True)
 
     # VCenter scan facts
@@ -144,6 +154,11 @@ class SystemFingerprint(models.Model):
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'system_creation_date:{}, '\
+            'system_intent_role:{}, '\
+            'system_intent_addons:{}, '\
+            'system_intent_sla:{}, '\
+            'system_intent_usage_type:{}, '\
+            'insights_client_id:{}, '\
             'infrastructure_type:{}, '\
             'virtualized_type:{}, '\
             'vm_state:{}, '\
@@ -172,6 +187,11 @@ class SystemFingerprint(models.Model):
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.system_creation_date,
+                                  self.system_intent_role,
+                                  self.system_intent_addons,
+                                  self.system_intent_sla,
+                                  self.system_intent_usage_type,
+                                  self.insights_client_id,
                                   self.infrastructure_type,
                                   self.virtualized_type,
                                   self.vm_state,
