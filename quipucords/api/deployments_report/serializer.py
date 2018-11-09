@@ -88,7 +88,6 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     system_addons = JSONField(required=False)
     system_service_level_agreement = CharField(required=False, max_length=128)
     system_usage_type = CharField(required=False, max_length=128)
-    system_usage_type = CharField(required=False, max_length=128)
 
     insights_client_id = CharField(required=False, max_length=128)
 
