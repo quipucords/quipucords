@@ -114,6 +114,8 @@ class SystemFingerprint(models.Model):
         max_length=128, unique=False, null=True)
     system_intent_usage_type = models.CharField(
         max_length=128, unique=False, null=True)
+    insights_client_id = models.CharField(
+        max_length=128, unique=False, null=True)
 
     virtualized_type = models.CharField(max_length=64, unique=False, null=True)
 
@@ -156,6 +158,7 @@ class SystemFingerprint(models.Model):
             'system_intent_addons:{}, '\
             'system_intent_sla:{}, '\
             'system_intent_usage_type:{}, '\
+            'insights_client_id:{}, '\
             'infrastructure_type:{}, '\
             'virtualized_type:{}, '\
             'vm_state:{}, '\
@@ -188,6 +191,7 @@ class SystemFingerprint(models.Model):
                                   self.system_intent_addons,
                                   self.system_intent_sla,
                                   self.system_intent_usage_type,
+                                  self.insights_client_id,
                                   self.infrastructure_type,
                                   self.virtualized_type,
                                   self.vm_state,
