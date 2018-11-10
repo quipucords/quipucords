@@ -61,7 +61,7 @@ DEFAULT_ROLES = [
     'subman',
     'uname',
     'virt_what',
-    'system_intent',
+    'system_purpose',
     'host_done',
 ]
 

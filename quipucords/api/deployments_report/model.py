@@ -107,12 +107,12 @@ class SystemFingerprint(models.Model):
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
 
-    system_intent_role = models.CharField(
+    system_role = models.CharField(
         max_length=128, unique=False, null=True)
-    system_intent_addons = models.TextField(unique=False, null=True)
-    system_intent_sla = models.CharField(
+    system_addons = models.TextField(unique=False, null=True)
+    system_service_level_agreement = models.CharField(
         max_length=128, unique=False, null=True)
-    system_intent_usage_type = models.CharField(
+    system_usage_type = models.CharField(
         max_length=128, unique=False, null=True)
     insights_client_id = models.CharField(
         max_length=128, unique=False, null=True)
@@ -154,10 +154,10 @@ class SystemFingerprint(models.Model):
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'system_creation_date:{}, '\
-            'system_intent_role:{}, '\
-            'system_intent_addons:{}, '\
-            'system_intent_sla:{}, '\
-            'system_intent_usage_type:{}, '\
+            'system_role:{}, '\
+            'system_addons:{}, '\
+            'system_service_level_agreement:{}, '\
+            'system_usage_type:{}, '\
             'insights_client_id:{}, '\
             'infrastructure_type:{}, '\
             'virtualized_type:{}, '\
@@ -187,10 +187,10 @@ class SystemFingerprint(models.Model):
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.system_creation_date,
-                                  self.system_intent_role,
-                                  self.system_intent_addons,
-                                  self.system_intent_sla,
-                                  self.system_intent_usage_type,
+                                  self.system_role,
+                                  self.system_addons,
+                                  self.system_service_level_agreement,
+                                  self.system_usage_type,
                                   self.insights_client_id,
                                   self.infrastructure_type,
                                   self.virtualized_type,
