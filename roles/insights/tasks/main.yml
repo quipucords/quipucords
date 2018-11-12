@@ -6,11 +6,10 @@
 
 - name: gather insights.machine-id
   raw: if [ -f /etc/insights-client/machine-id ] ; then cat /etc/insights-client/machine-id; fi || if [ -f /etc/redhat-access-insights ] ; then cat /etc/redhat-access-insights/machine-id; fi
-  register: internal_cat_insights_client_id
+  register: internal_get_insights_client_id
   ignore_errors: yes
 
-- name: set instnum
+- name: extract insights client id from internal_get_insights_client_id
   set_fact:
-    insights_client_id: "{{ internal_cat_insights_client_id.get('stdout') | default('') }}"
+    insights_client_id: "{{ internal_get_insights_client_id.get('stdout') | default('') }}"
   ignore_errors: yes
-  when: '"stdout" in internal_cat_insights_client_id'
