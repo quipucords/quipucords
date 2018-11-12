@@ -60,7 +60,8 @@ DEFAULT_ROLES = [
     'subman',
     'uname',
     'virt_what',
-    'host_done',
+    'insights',
+    'host_done'
 ]
 
 DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']

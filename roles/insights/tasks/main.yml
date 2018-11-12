@@ -1,0 +1,15 @@
+---
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "insights"
+
+- name: gather insights.machine-id
+  raw: if [ -f /etc/insights-client/machine-id ] ; then cat /etc/insights-client/machine-id; fi || if [ -f /etc/redhat-access-insights ] ; then cat /etc/redhat-access-insights/machine-id; fi
+  register: internal_cat_insights_machine_id
+  ignore_errors: yes
+
+- name: set instnum
+  set_fact:
+    insights_machine_id: "{{ internal_cat_insights_machine_id.get('stdout') | default('') }}"
+  ignore_errors: yes
