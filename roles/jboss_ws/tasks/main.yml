@@ -69,7 +69,7 @@
   when: 'jws_home is defined and jboss_ws'
 
 - name: see if JBossEULA.txt exists
-  raw: ls "{{ jws_home }}"/JBossEULA.txt
+  raw: if [ -f "{{ jws_home }}"/JBossEULA.txt ]; then FOUND="true"; else FOUND="false"; fi; echo ${FOUND}
   register: jws_has_eula_txt_file
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'

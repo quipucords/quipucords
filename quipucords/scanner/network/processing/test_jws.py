@@ -40,13 +40,12 @@ class TestProcessHasJBossEula(unittest.TestCase):
     def test_has_eula_file(self):
         """Return true if jboss eula file exists."""
         self.assertEqual(jws.ProcessHasJBossEULA.
-                         process(ansible_result('JBossEula.txt')), True)
+                         process(ansible_result('true')), True)
 
     def test_has_no_eula_file(self):
         """Return false if jboss eula file does not exist."""
-        ls_err = 'No such file or directory'
         self.assertEqual(jws.ProcessHasJBossEULA.
-                         process(ansible_item(ls_err, '', rc=2)), False)
+                         process(ansible_item('false', 'false', rc=2)), False)
 
 
 class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
