@@ -37,10 +37,8 @@ class ProcessHasJBossEULA(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Check if JBossEULA.txt exists in JWS_Home directory."""
-        stdout = output.get('stdout_lines', [])
-        if len(stdout) == 1 and 'No such file or directory' not in stdout[0]:
-            return True
-        return False
+        stdout = output.get('stdout', 'false')
+        return stdout == 'true'
 
 
 # pylint: disable=too-few-public-methods
