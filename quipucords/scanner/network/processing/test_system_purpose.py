@@ -8,20 +8,20 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 
-"""Unit tests for initial processing of system intent fact."""
+"""Unit tests for initial processing of system purpose fact."""
 
 
 import unittest
 
-from scanner.network.processing import system_intent
+from scanner.network.processing import system_purpose
 from scanner.network.processing.util_for_test import ansible_result
 
 
-class TestProcessSystemIntent(unittest.TestCase):
-    """Test ProcessSystemIntent."""
+class TestProcessSystemPurpose(unittest.TestCase):
+    """Test ProcessSystemPurpose."""
 
     def test_success_case(self):
-        """Valid system intent json."""
+        """Valid system purpose json."""
         input_data = """
             {
                 "_version": "1",
@@ -45,11 +45,11 @@ class TestProcessSystemIntent(unittest.TestCase):
         }
 
         self.assertEqual(
-            system_intent.ProcessSystemIntent.process(
+            system_purpose.ProcessSystemPurpose.process(
                 ansible_result(input_data)), expected)
 
     def test_invalid_json_case(self):
-        """Invalid system intent json."""
+        """Invalid system purpose json."""
         input_data = """
                 "_version": "1",
                 "role": "server",
@@ -64,5 +64,5 @@ class TestProcessSystemIntent(unittest.TestCase):
         expected = None
 
         self.assertEqual(
-            system_intent.ProcessSystemIntent.process(
+            system_purpose.ProcessSystemPurpose.process(
                 ansible_result(input_data)), expected)

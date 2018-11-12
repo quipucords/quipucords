@@ -1024,45 +1024,45 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'infrastructure_type',
                 fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
-        # System intent facts
-        system_intent_json = fact.get('system_intent_json', None)
-        if system_intent_json:
-            system_intent_role = system_intent_json.get('role', None)
-            if system_intent_role:
+        # System purpose facts
+        system_purpose_json = fact.get('system_purpose_json', None)
+        if system_purpose_json:
+            system_purpose_role = system_purpose_json.get('role', None)
+            if system_purpose_role:
                 self._add_fact_to_fingerprint(
                     source,
-                    'system_intent_json', fact,
-                    'system_intent_role', fingerprint,
-                    fact_value=system_intent_role
+                    'system_purpose_json', fact,
+                    'system_role', fingerprint,
+                    fact_value=system_purpose_role
                 )
 
-            system_intent_addons = system_intent_json.get('addons', None)
-            if system_intent_addons:
+            system_addons = system_purpose_json.get('addons', None)
+            if system_addons:
                 self._add_fact_to_fingerprint(
                     source,
-                    'system_intent_json', fact,
-                    'system_intent_addons', fingerprint,
-                    fact_value=system_intent_addons
+                    'system_purpose_json', fact,
+                    'system_addons', fingerprint,
+                    fact_value=system_addons
                 )
 
-            system_intent_sla = system_intent_json.get(
+            system_service_level_agreement = system_purpose_json.get(
                 'service_level_agreement', None)
-            if system_intent_sla:
+            if system_service_level_agreement:
                 self._add_fact_to_fingerprint(
                     source,
-                    'system_intent_json', fact,
-                    'system_intent_sla', fingerprint,
-                    fact_value=system_intent_sla
+                    'system_purpose_json', fact,
+                    'system_service_level_agreement', fingerprint,
+                    fact_value=system_service_level_agreement
                 )
 
-            system_intent_usage_type = system_intent_json.get(
+            system_usage_type = system_purpose_json.get(
                 'usage_type', None)
-            if system_intent_usage_type:
+            if system_usage_type:
                 self._add_fact_to_fingerprint(
                     source,
-                    'system_intent_json', fact,
-                    'system_intent_usage_type', fingerprint,
-                    fact_value=system_intent_usage_type
+                    'system_purpose_json', fact,
+                    'system_usage_type', fingerprint,
+                    fact_value=system_usage_type
                 )
 
         # Determine if VM facts
