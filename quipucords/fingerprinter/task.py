@@ -988,7 +988,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fingerprint)
         self._add_fact_to_fingerprint(source, 'date_yum_history',
                                       fact, 'date_yum_history', fingerprint)
-        self._add_fact_to_fingerprint(source, 'insights_machine_id',
+        self._add_fact_to_fingerprint(source, 'insights_client_id',
                                       fact, 'insights_client_id', fingerprint)
 
         if fact.get('connection_timestamp'):
