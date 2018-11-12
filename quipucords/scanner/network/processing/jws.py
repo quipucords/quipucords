@@ -33,6 +33,7 @@ class ProcessHasJBossEULA(process.Processor):
     """Process result of $(ls $JWS_HOME/JBossEULA.txt)."""
 
     KEY = 'jws_has_eula_txt_file'
+    RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
