@@ -1026,6 +1026,47 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'infrastructure_type',
                 fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
+        # System purpose facts
+        system_purpose_json = fact.get('system_purpose_json', None)
+        if system_purpose_json:
+            system_purpose_role = system_purpose_json.get('role', None)
+            if system_purpose_role:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_purpose_json', fact,
+                    'system_role', fingerprint,
+                    fact_value=system_purpose_role
+                )
+
+            system_addons = system_purpose_json.get('addons', None)
+            if system_addons:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_purpose_json', fact,
+                    'system_addons', fingerprint,
+                    fact_value=system_addons
+                )
+
+            system_service_level_agreement = system_purpose_json.get(
+                'service_level_agreement', None)
+            if system_service_level_agreement:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_purpose_json', fact,
+                    'system_service_level_agreement', fingerprint,
+                    fact_value=system_service_level_agreement
+                )
+
+            system_usage_type = system_purpose_json.get(
+                'usage_type', None)
+            if system_usage_type:
+                self._add_fact_to_fingerprint(
+                    source,
+                    'system_purpose_json', fact,
+                    'system_usage_type', fingerprint,
+                    fact_value=system_usage_type
+                )
+
         # Determine if VM facts
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
                                       'virtualized_type', fingerprint)

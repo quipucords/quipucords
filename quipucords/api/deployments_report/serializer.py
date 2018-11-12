@@ -24,6 +24,7 @@ from rest_framework.serializers import (CharField,
                                         DateField,
                                         FloatField,
                                         IntegerField,
+                                        JSONField,
                                         NullBooleanField,
                                         PrimaryKeyRelatedField)
 
@@ -82,6 +83,13 @@ class SystemFingerprintSerializer(NotEmptySerializer):
 
     system_creation_date = DateField(required=False)
     system_last_checkin_date = DateField(required=False)
+
+    system_role = CharField(required=False, max_length=128)
+    system_addons = JSONField(required=False)
+    system_service_level_agreement = CharField(required=False, max_length=128)
+    system_usage_type = CharField(required=False, max_length=128)
+
+    insights_client_id = CharField(required=False, max_length=128)
 
     virtualized_type = CharField(required=False, max_length=64)
 
