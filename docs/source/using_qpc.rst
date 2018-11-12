@@ -14,3 +14,5 @@ You can save multiple credentials and sources to use with Quipucords in various 
 .. include:: working_with_scan_jobs.rst
 
 .. include:: working_with_reports.rst
+
+.. include:: working_with_insights.rst
