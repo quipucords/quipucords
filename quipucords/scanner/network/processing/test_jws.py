@@ -15,8 +15,7 @@
 import unittest
 
 from scanner.network.processing import jws
-from scanner.network.processing.util_for_test import (ansible_item,
-                                                      ansible_result)
+from scanner.network.processing.util_for_test import (ansible_result)
 
 
 class TestProcessJWSInstalledWithRpm(unittest.TestCase):
@@ -45,7 +44,7 @@ class TestProcessHasJBossEula(unittest.TestCase):
     def test_has_no_eula_file(self):
         """Return false if jboss eula file does not exist."""
         self.assertEqual(jws.ProcessHasJBossEULA.
-                         process(ansible_item('false', 'false', rc=2)), False)
+                         process(ansible_result('false')), False)
 
 
 class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
