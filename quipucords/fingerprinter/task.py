@@ -940,6 +940,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'redhat_certs', fingerprint)
         self._add_fact_to_fingerprint(source, 'redhat_packages_gpg_is_redhat',
                                       fact, 'is_redhat', fingerprint)
+        self._add_fact_to_fingerprint(source,'etc_machine_id',
+                                      fact, 'etc_machine_id', fingerprint)
 
         # Set OS information
         self._add_fact_to_fingerprint(source, 'etc_release_name',

@@ -129,3 +129,14 @@
     - internal_uname_version is defined
     - '"stdout_lines" in internal_uname_version'
     - 'internal_uname_version["stdout_lines"]|length > 0'
+
+# gather RHEL machine id
+- name: Gather the etc machine id
+  raw: if [ -f /etc/machine-id ]; then cat /etc/machine-id; fi
+  register: internal_get_etc_machine_id
+  ignore_errors: yes
+
+- name: extract etc machine id from intern_get_etc_machine_id
+  set_fact:
+    etc_machine_id: "{{ internal_get_etc_machine_id.get('stdout') | default('') }}"
+  ignore_errors: yes
