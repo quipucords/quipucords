@@ -132,7 +132,7 @@
 
 # gather etc machine id
 - name: Gather the etc machine id
-  raw: if [ -f /etc/machine-id ]; then cat /etc/machine-id; fi
+  raw: if [ -f /etc/machine-id ]; then cat /etc/machine-id; fi | tr -d '\r' | tr -d '\n'
   register: internal_get_etc_machine_id
   ignore_errors: yes
 

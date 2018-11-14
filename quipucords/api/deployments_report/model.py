@@ -137,7 +137,7 @@ class SystemFingerprint(models.Model):
 
     metadata = models.TextField(unique=False, null=False)
     sources = models.TextField(unique=False, null=False)
-    etc_machine_id = models.TextField(unique=False, null=True)
+    etc_machine_id = models.CharField(max_length=48, unique=False, null=True)
 
     def __str__(self):
         """Convert to string."""

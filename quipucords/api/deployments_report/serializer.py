@@ -118,6 +118,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
 
     metadata = CustomJSONField(required=True)
     sources = CustomJSONField(required=True)
+    etc_machine_id = CharField(required=False, max_length=48)
 
     class Meta:
         """Meta class for SystemFingerprintSerializer."""
