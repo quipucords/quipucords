@@ -30,6 +30,7 @@ ID = 'id'
 NAME = 'name'
 INTERFACE = 'interface'
 LOOPBACK = 'lo'
+LOOPBACK_MAC_ADDR = '00:00:00:00:00:00'
 IP = 'ip'
 HARDWARE_ADDRESS = 'hardware_address'
 IP_ADDRESSES = 'ip_addresses'
@@ -244,7 +245,7 @@ class SatelliteFive(SatelliteInterface):
                         if ip_addr:
                             ip_addresses.append(ip_addr.lower())
                         mac = device.get(HARDWARE_ADDRESS)
-                        if mac:
+                        if mac and mac.lower() != LOOPBACK_MAC_ADDR:
                             mac_addresses.append(mac.lower())
 
                 mac_addresses = list(set(mac_addresses))
