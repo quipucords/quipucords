@@ -212,9 +212,13 @@ def host_fields(api_version, response):
             mac_addr = (key.endswith(MAC_PERIOD) or
                         key.endswith(MAC_COLON))
             if ipv4_addr and facts[key]:
-                ipv4s.append(facts[key])
+                ipv4s.append(facts[key].lower())
             if mac_addr and facts[key]:
-                macs.append(facts[key])
+                macs.append(facts[key].lower())
+
+    macs = list(set(macs))
+    ipv4s = list(set(ipv4s))
+
     host_info[IP_ADDRESSES] = ipv4s
     host_info[MAC_ADDRESSES] = macs
 
