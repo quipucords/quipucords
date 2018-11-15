@@ -29,7 +29,8 @@ UNKNOWN = 'unknown'
 ID = 'id'
 NAME = 'name'
 INTERFACE = 'interface'
-ETHERNET = 'eth'
+LOOPBACK = 'lo'
+LOOPBACK_MAC_ADDR = '00:00:00:00:00:00'
 IP = 'ip'
 HARDWARE_ADDRESS = 'hardware_address'
 IP_ADDRESSES = 'ip_addresses'
@@ -160,13 +161,17 @@ class SatelliteFive(SatelliteInterface):
             mac_addresses = []
             for device in network_devices:
                 interface = device.get(INTERFACE)
-                if interface and interface.startswith(ETHERNET):
+                if interface and not interface.startswith(LOOPBACK):
                     ip_addr = device.get(IP)
                     if ip_addr:
                         ip_addresses.append(ip_addr)
                     mac = device.get(HARDWARE_ADDRESS)
-                    if mac:
-                        mac_addresses.append(mac)
+                    if mac and mac.lower() != LOOPBACK_MAC_ADDR:
+                        mac_addresses.append(mac.lower())
+
+            mac_addresses = list(set(mac_addresses))
+            ip_addresses = list(set(ip_addresses))
+
             registration_date = client.system.get_registration_date(key,
                                                                     host_id)
 

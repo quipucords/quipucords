@@ -224,10 +224,14 @@ def host_fields(scan_task, api_version, url, org_id, host_id):
             mac_addr = (key.endswith(MAC_PERIOD) or
                         key.endswith(MAC_COLON))
             if ipv4_addr and facts[key]:
-                ipv4s.append(facts[key])
+                ipv4s.append(facts[key].lower())
             if mac_addr and facts[key]:
-                macs.append(facts[key])
+                macs.append(facts[key].lower())
+
+    ipv4s = list(set(ipv4s))
     host_info[IP_ADDRESSES] = ipv4s
+
+    macs = list(set(macs))
     host_info[MAC_ADDRESSES] = macs
 
     os_release = host_info.get(OS_RELEASE)
