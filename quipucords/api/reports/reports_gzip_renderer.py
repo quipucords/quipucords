@@ -20,12 +20,7 @@ from rest_framework import renderers
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-NETWORK_DETECTION_KEY = 'detection-network'
-VCENTER_DETECTION_KEY = 'detection-vcenter'
-SATELLITE_DETECTION_KEY = 'detection-satellite'
-SOURCES_KEY = 'sources'
-
+# FIXME: Implement Logging for when None is returned
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
     """Class to render reports as tar.gz."""
