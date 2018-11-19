@@ -15,8 +15,8 @@ import json
 import tarfile
 
 from api.common.common_report import create_report_version
+from api.common.report_csv_renderer import ReportCSVRenderer
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
-from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.models import (Credential,
                         DetailsReport,
                         ServerInformation,
@@ -114,8 +114,8 @@ class DetailReportTest(TestCase):
     # Test CSV Renderer
     ##############################################################
     def test_csv_renderer(self):
-        """Test DetailsCSVRenderer."""
-        renderer = DetailsCSVRenderer()
+        """Test ReportCSVRenderer."""
+        renderer = ReportCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)

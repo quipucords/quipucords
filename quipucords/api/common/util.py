@@ -17,7 +17,6 @@ import logging
 import os
 import tarfile
 import time
-import uuid
 
 
 from api.scantask.model import ScanTask
@@ -304,17 +303,34 @@ def create_tar_buffer(data_array):
     """
     if not isinstance(data_array, (list,)):
         return None
-    for data in data_array:
-        if not isinstance(data, (dict,)):
-            return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
         for data in data_array:
-            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
-            json_name = '%s.json' % str(uuid.uuid4())
-            info = tarfile.TarInfo(name=json_name)
-            info.size = len(json_buffer.getvalue())
-            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+            file_name = 'report_id_%s/%s_%s.%s'
+            timestamp = time.strftime('%Y%m%d%H%M%S')
+            print(type(data))
+            if isinstance(data, (dict,)):
+                file_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
+                report_type = data.get('report_type')
+                if report_type is None:
+                    report_type = 'unknown'
+                report_id = data.get('report_id')
+                filename = file_name % (report_id, report_type,
+                                        timestamp, 'json')
+            elif isinstance(data, (tuple,)):
+                try:
+                    file_buffer = io.BytesIO(data[0].encode('utf-8'))
+                    filename = file_name % (data[1], data[2],
+                                            timestamp, 'csv')
+                except IndexError:
+                    print('Index Error')
+                    return None
+            else:
+                return None
+            info = tarfile.TarInfo(name=filename)
+            info.size = len(file_buffer.getvalue())
+            print(info)
+            tar_file.addfile(tarinfo=info, fileobj=file_buffer)
     tar_buffer.seek(0)
     return tar_buffer
 

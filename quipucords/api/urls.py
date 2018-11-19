@@ -20,6 +20,7 @@ from api.views import (CredentialViewSet,
                        deployments,
                        details,
                        jobs,
+                       reports,
                        status,
                        sync_merge_reports)
 
@@ -52,6 +53,7 @@ ROUTER.register(r'users',
 
 # pylint: disable=invalid-name
 urlpatterns = [
+    path('reports/<int:pk>/', reports),
     path('reports/<int:pk>/details/', details),
     path('reports/<int:pk>/deployments/', deployments),
     path('reports/merge/', sync_merge_reports),

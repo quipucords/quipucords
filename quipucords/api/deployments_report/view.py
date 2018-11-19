@@ -15,9 +15,9 @@ import logging
 import os
 
 import api.messages as messages
+from api.common.report_csv_renderer import (ReportCSVRenderer)
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
 from api.common.util import is_int
-from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.models import (DeploymentsReport)
 
 from django.core.exceptions import FieldError
@@ -59,7 +59,7 @@ else:
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   DeploymentCSVRenderer, ReportJsonGzipRenderer))
+                   ReportCSVRenderer, ReportJsonGzipRenderer))
 def deployments(request, pk=None):
     """Lookup and return a deployment system report."""
     if not is_int(pk):
