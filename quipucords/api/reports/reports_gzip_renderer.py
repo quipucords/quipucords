@@ -76,7 +76,4 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         tar_buffer = create_tar_buffer(report_list)
         if tar_buffer is None:
             return None
-        tar_buffer = tar_buffer.getvalue()
-        with open('test.tar.gz', 'wb') as out_file:
-            out_file.write(tar_buffer)
         return tar_buffer

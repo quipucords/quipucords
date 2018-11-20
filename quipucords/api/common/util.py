@@ -308,7 +308,6 @@ def create_tar_buffer(data_array):
         for data in data_array:
             file_name = 'report_id_%s/%s_%s.%s'
             timestamp = time.strftime('%Y%m%d%H%M%S')
-            print(type(data))
             if isinstance(data, (dict,)):
                 file_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
                 report_type = data.get('report_type')
@@ -323,13 +322,11 @@ def create_tar_buffer(data_array):
                     filename = file_name % (data[1], data[2],
                                             timestamp, 'csv')
                 except IndexError:
-                    print('Index Error')
                     return None
             else:
                 return None
             info = tarfile.TarInfo(name=filename)
             info.size = len(file_buffer.getvalue())
-            print(info)
             tar_file.addfile(tarinfo=info, fileobj=file_buffer)
     tar_buffer.seek(0)
     return tar_buffer

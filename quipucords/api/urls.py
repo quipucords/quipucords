@@ -53,9 +53,9 @@ ROUTER.register(r'users',
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    path('reports/<int:pk>/', reports),
     path('reports/<int:pk>/details/', details),
     path('reports/<int:pk>/deployments/', deployments),
+    path('reports/<int:pk>/', reports),
     path('reports/merge/', sync_merge_reports),
     path('reports/merge/jobs/', async_merge_reports),
     path('reports/merge/jobs/<int:pk>/', async_merge_reports),

@@ -59,6 +59,8 @@ class DetailReportTest(TestCase):
     def create(self, data):
         """Call the create endpoint."""
         url = reverse('reports-list')
+        print('%' *1500)
+        print(url)
         return self.client.post(url,
                                 json.dumps(data),
                                 'application/json')
