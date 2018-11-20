@@ -11,7 +11,9 @@
 """tar.gz renderer for reports."""
 
 import logging
+import time
 
+import api.messages as messages
 from api.common.util import create_tar_buffer
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
@@ -20,7 +22,16 @@ from rest_framework import renderers
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-# FIXME: Implement Logging for when None is returned
+
+
+def create_filename(report_type, file_ext, report_id):
+    """Create the filename."""
+    file_name = 'report_id_%s/%s_%s.%s' % (report_id,
+                                           report_type,
+                                           time.strftime('%Y%m%d%H%M%S'),
+                                           file_ext)
+    return file_name
+
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
     """Class to render reports as tar.gz."""
@@ -34,46 +45,36 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         """Render all reports as gzip."""
         # pylint: disable=arguments-differ,unused-argument,too-many-locals
         # pylint: disable=too-many-branches,too-many-statements
-        # pylint: disable=too-many-return-statements
-        report_list = []
         if not bool(reports_dict):
             return None
 
+        files_data = dict()
+
         report_id = reports_dict.get('report_id')
-        if report_id is None:
-            return None
-
-        # details
+        # Collect Json Data
         details_json = reports_dict.get('details_json')
-        if details_json is None:
-            return None
-        report_list.append(details_json)
-
-        details_csv = create_details_csv(details_json)
-        if details_csv is None:
-            return None
-        report_type = details_json.get('report_type')
-        if report_type is None:
-            report_type = 'details'
-        details_csv_tuple = (details_csv, report_id, report_type)
-        report_list.append(details_csv_tuple)
-
-        # deployments
         deployments_json = reports_dict.get('deployments_json')
-        if deployments_json is None:
+        if all(value is None for value in [self.report_id,
+                                           details_json,
+                                           deployments_json]):
+            logger.error(messages.REPORTS_MISSING_REQUIRED_VALUE)
             return None
-        report_list.append(deployments_json)
-
+        details_name = create_filename('details', 'json', report_id)
+        files_data[details_name] = details_json
+        deployments_name = create_filename('deployments', 'json', report_id)
+        files_data[deployments_name] = deployments_json
+        # Collect CSV Data
+        details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)
-        if deployments_csv is None:
+        if all(value is None for value in [details_csv, deployments_json]):
+            logger.error(messages.REPORTS_NO_CSV)
             return None
-        report_type = deployments_json.get('report_type')
-        if report_type is None:
-            report_type = 'deployments'
-        deployments_csv_tuple = (deployments_csv, report_id, report_type)
-        report_list.append(deployments_csv_tuple)
-
-        tar_buffer = create_tar_buffer(report_list)
+        details_csv_name = create_filename('details', 'csv', report_id)
+        files_data[details_csv_name] = details_csv
+        deployments_csv_name = create_filename('deployments', 'csv', report_id)
+        files_data[deployments_csv_name] = deployments_csv
+        tar_buffer = create_tar_buffer(files_data)
         if tar_buffer is None:
+            logger.error(messages.REPORTS_TAR_ERROR)
             return None
         return tar_buffer

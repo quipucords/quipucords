@@ -296,36 +296,24 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     return job_json
 
 
-def create_tar_buffer(data_array):
-    """Generate a tar buffer when data_array is list of json.
+def create_tar_buffer(files_data):
+    """Gernerate a file buffer based off a dictionary.
 
-    :param data_array: A list of json.
+    :param files_data: A dictionary of strings.
+        :key: filepath with filename included
+        :value: the contents of the file as a string
     """
-    if not isinstance(data_array, (list,)):
-        return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
-        for data in data_array:
-            file_name = 'report_id_%s/%s_%s.%s'
-            timestamp = time.strftime('%Y%m%d%H%M%S')
-            if isinstance(data, (dict,)):
-                file_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
-                report_type = data.get('report_type')
-                if report_type is None:
-                    report_type = 'unknown'
-                report_id = data.get('report_id')
-                filename = file_name % (report_id, report_type,
-                                        timestamp, 'json')
-            elif isinstance(data, (tuple,)):
-                try:
-                    file_buffer = io.BytesIO(data[0].encode('utf-8'))
-                    filename = file_name % (data[1], data[2],
-                                            timestamp, 'csv')
-                except IndexError:
-                    return None
+        for file_name, file_content in files_data.items():
+            if file_name.endswith('json'):
+                file_buffer = \
+                    io.BytesIO(json.dumps(file_content).encode('utf-8'))
+            elif file_name.endswith('csv'):
+                file_buffer = io.BytesIO(file_content.encode('utf-8'))
             else:
                 return None
-            info = tarfile.TarInfo(name=filename)
+            info = tarfile.TarInfo(name=file_name)
             info.size = len(file_buffer.getvalue())
             tar_file.addfile(tarinfo=info, fileobj=file_buffer)
     tar_buffer.seek(0)

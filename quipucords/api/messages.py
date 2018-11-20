@@ -195,3 +195,6 @@ REPORT_GROUP_COUNT_FIELD = 'The group_count filter cannot be used with ' \
     'the invalid filter key %s.'
 REPORT_INVALID_FILTER_QUERY_PARAM = 'One or more filter keys are not '\
     'attributes of the system fingerprint: %s.'
+REPORTS_MISSING_REQUIRED_VALUE = 'A required value for Reports was missing.'
+REPORTS_NO_CSV = 'A CSV file could not be created.'
+REPORTS_TAR_ERROR = 'An error occured compressing files.'

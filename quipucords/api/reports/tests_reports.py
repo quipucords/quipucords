@@ -11,23 +11,21 @@
 """Test the reports API."""
 
 import json
-import uuid
-import tarfile
-import re
-import csv
 import sys
+import tarfile
 
 from api.common.common_report import create_report_version
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from api.models import (Credential,
                         ServerInformation,
                         Source)
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
+
 
 class ReportsTest(TestCase):
     """Tests against the Reports function."""
@@ -54,11 +52,6 @@ class ReportsTest(TestCase):
         self.report_version = create_report_version()
         self.details_json = None
         self.deployments_json = None
-        self.reports_url = '/api/v1/reports/1'
-        # pylint: disable=line-too-long
-        self.details_csv = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, self.server_id) # noqa
-        # pylint: disable=line-too-long
-        self.deployments_csv = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,count,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2,,,,,,,,,,,,,,,,RHEL 7.4,,,,,,,,,,,,,,,,,,,\r\n,,1,,,,,,,,,,,,,,,,RHEL 7.5,,,,,,,,,,,,,,,,,,,\r\n\r\n' % (self.report_version) # noqa
 
     def tearDown(self):
         """Create test case tearDown."""
@@ -135,7 +128,7 @@ class ReportsTest(TestCase):
         return details_report
 
     def create_reports_dict(self):
-        """Create a deployments report"""
+        """Create a deployments report."""
         url = '/api/v1/reports/1/deployments/'
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
@@ -150,8 +143,12 @@ class ReportsTest(TestCase):
         reports_dict['deployments_json'] = self.deployments_json
         return reports_dict
 
-    def test_reports_200(self):
+    def test_reports_gzip_renderer(self):
         """Get a tar.gz return for report_d via API."""
+        # pylint: disable=line-too-long
+        deployments_csv = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,count,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2,,,,,,,,,,,,,,,,RHEL 7.4,,,,,,,,,,,,,,,,,,,\r\n,,1,,,,,,,,,,,,,,,,RHEL 7.5,,,,,,,,,,,,,,,,,,,\r\n\r\n' % (self.report_version) # noqa
+        # pylint: disable=line-too-long
+        details_csv = 'Report ID,Report Type,Report Version,Number Sources\r\n1,details,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, self.server_id) # noqa
         reports_dict = self.create_reports_dict()
         renderer = ReportsGzipRenderer()
         tar_gz_result = renderer.render(reports_dict)
@@ -159,17 +156,15 @@ class ReportsTest(TestCase):
         tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
         filenames = tar.getnames()
-        reports_num = len(files)
-        self.assertEqual(reports_num, 4)
+        self.assertEqual(len(files), 4)
         # tar.getnames() always returns same order as tar.getmembers()
-        for idx in range(len(files)):
-            tar_extract = tar.extractfile(files[idx])
-            file_contents = tar_extract.read().decode()
+        for idx, file in enumerate(files):
+            file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith('csv'):
                 if 'details' in file_contents:
-                    self.assertEqual(file_contents, self.details_csv)
+                    self.assertEqual(file_contents, details_csv)
                 elif 'deployments' in file_contents:
-                    self.assertEqual(file_contents, self.deployments_csv)
+                    self.assertEqual(file_contents, deployments_csv)
                 else:
                     sys.exit('Could not identify .csv return.')
             else:
