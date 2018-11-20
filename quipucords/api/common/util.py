@@ -301,8 +301,12 @@ def create_tar_buffer(files_data):
 
     :param files_data: A dictionary of strings.
         :key: filepath with filename included
-        :value: the contents of the file as a string
+        :value: the contents of the file as a string or dictionary
     """
+    if not isinstance(files_data, (dict,)) or files_data.keys() is 0:
+        return None
+    if not all(isinstance(v, (str, dict)) for v in files_data.values()):
+        return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
         for file_name, file_content in files_data.items():

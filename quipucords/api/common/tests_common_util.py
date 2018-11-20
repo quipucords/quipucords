@@ -103,10 +103,10 @@ class CommonUtilTest(TestCase):
 
     def test_create_tar_buffer(self):
         """Test create_tar_buffer method."""
-        json0 = {'id': 1, 'report': [{'key': 'value'}]}
-        json1 = {'id': 2, 'report': [{'key': 'value'}]}
-        json_list = [json0, json1]
-        tar_buffer = create_tar_buffer(json_list)
+        files_data = dict()
+        files_data['test0.json'] = {'id': 1, 'report': [{'key': 'value'}]}
+        files_data['test1.json'] = {'id': 2, 'report': [{'key': 'value'}]}
+        tar_buffer = create_tar_buffer(files_data)
         self.assertIsInstance(tar_buffer, (io.BytesIO))
         self.assertIn('getvalue', dir(tar_buffer))
         tar = tarfile.open(fileobj=tar_buffer)
@@ -116,38 +116,38 @@ class CommonUtilTest(TestCase):
         for file_obj in files:
             file = tar.extractfile(file_obj)
             extracted_content = json.loads(file.read().decode())
-            self.assertIn(extracted_content, json_list)
+            self.assertIn(extracted_content, files_data.values())
 
     def test_bad_param_type_create_tar_buffer(self):
         """Test passing in a non-list into create_tar_buffer."""
-        json0 = {'id': 1, 'report': [{'key': 'value'}]}
-        tar_result = create_tar_buffer(json0)
-        self.assertEqual(tar_result, None)
-
-    def test_bad_list_contents_create_tar_buffer(self):
-        """Test passing in a list of none json into create_tar_buffer."""
         json_list = ["{'id': 1, 'report': [{'key': 'value'}]}",
                      "{'id': 2, 'report': [{'key': 'value'}]}"]
         tar_result = create_tar_buffer(json_list)
         self.assertEqual(tar_result, None)
 
+    def test_bad_dict_contents_type_create_tar_buffer(self):
+        """Test passing in a list of none json into create_tar_buffer."""
+        json0 = {'id.csv': 1, 'report': [{'key.csv': 'value'}]}
+        tar_result = create_tar_buffer(json0)
+        self.assertEqual(tar_result, None)
+
     def test_extract_tar_gz_content_good(self):
         """Test extracting files by passing a BytesIO object."""
-        json0 = {'id': 1, 'report': [{'key': 'value'}]}
-        json1 = {'id': 2, 'report': [{'key': 'value'}]}
-        json_list = [json0, json1]
-        tar_buffer = create_tar_buffer(json_list)
+        files_data = dict()
+        files_data['test0.json'] = {'id': 1, 'report': [{'key': 'value'}]}
+        files_data['test1.json'] = {'id': 2, 'report': [{'key': 'value'}]}
+        tar_buffer = create_tar_buffer(files_data)
         self.assertIsInstance(tar_buffer, (io.BytesIO))
         # bytesIO
         file_contents = extract_tar_gz(tar_buffer)
         for data in file_contents:
-            self.assertIn(data, json_list)
-        self.assertEqual(len(file_contents), len(json_list))
+            self.assertIn(data, files_data.values())
+        self.assertEqual(len(file_contents), len(files_data.values()))
         # hexstring
         file_contents = extract_tar_gz(tar_buffer.getvalue())
         for data in file_contents:
-            self.assertIn(data, json_list)
-        self.assertEqual(len(file_contents), len(json_list))
+            self.assertIn(data, files_data.values())
+        self.assertEqual(len(file_contents), len(files_data.values()))
 
     def test_extract_tar_gz_content_bad_param_type(self):
         """Test passing bad types as parameters."""

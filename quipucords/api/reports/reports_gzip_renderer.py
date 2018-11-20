@@ -34,7 +34,7 @@ def create_filename(report_type, file_ext, report_id):
 
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
-    """Class to render reports as tar.gz."""
+    """Class to render all reports as tar.gz."""
 
     # pylint: disable=too-few-public-methods
     media_type = 'application/gzip'
@@ -54,7 +54,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         # Collect Json Data
         details_json = reports_dict.get('details_json')
         deployments_json = reports_dict.get('deployments_json')
-        if all(value is None for value in [self.report_id,
+        if all(value is None for value in [report_id,
                                            details_json,
                                            deployments_json]):
             logger.error(messages.REPORTS_MISSING_REQUIRED_VALUE)
