@@ -59,7 +59,7 @@ else:
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   DeploymentsCSVRenderer, ReportJsonGzipRenderer))
+                   DeploymentCSVRenderer, ReportJsonGzipRenderer))
 def deployments(request, pk=None):
     """Lookup and return a deployment system report."""
     if not is_int(pk):
