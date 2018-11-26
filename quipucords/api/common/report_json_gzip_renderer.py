@@ -41,7 +41,7 @@ class ReportJsonGzipRenderer(renderers.BaseRenderer):
         report_type = report_dict.get('report_type')
         if report_id is None:
             return None
-        if any(value is None for value in [report_id, report_type]):
+        if report_type is None:
             file_name = '%s.json' % time.strftime('%Y%m%d%H%M%S')
         else:
             file_name = create_filename(report_id, report_type, '.json')
