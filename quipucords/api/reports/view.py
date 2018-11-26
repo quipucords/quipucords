@@ -17,9 +17,6 @@ import os
 import api.messages as messages
 from api.common.util import is_int
 from api.deployments_report.view import (build_cached_json_report,
-                                         build_filtered_report,
-                                         build_grouped_report,
-                                         filter_keys,
                                          validate_filters)
 from api.models import (DeploymentsReport, DetailsReport)
 from api.reports.reports_gzip_renderer import (ReportsGzipRenderer)
@@ -78,7 +75,6 @@ def reports(request, pk=None):
     reports_dict['details_json'] = json_details
     # deployments
     validate_filters(request.query_params)
-    filters = filter_keys(request.query_params)
     deployments_data = get_object_or_404(DeploymentsReport.objects.all(),
                                          report_id=pk)
     if deployments_data.status != DeploymentsReport.STATUS_COMPLETE:

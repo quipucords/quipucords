@@ -15,8 +15,8 @@ import tarfile
 import uuid
 
 from api.common.common_report import create_report_version
-from api.common.report_csv_renderer import ReportCSVRenderer
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.deployments_report.util import (sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
@@ -267,8 +267,8 @@ class DeploymentReportTest(TestCase):
                          ['data', None, 'data;data'])
 
     def test_csv_renderer(self):
-        """Test ReportCSVRenderer."""
-        renderer = ReportCSVRenderer()
+        """Test DeploymentCSVRenderer."""
+        renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
@@ -298,8 +298,8 @@ class DeploymentReportTest(TestCase):
             self.assertEqual(result, True)
 
     def test_csv_renderer_only_name(self):
-        """Test ReportCSVRenderer name filter."""
-        renderer = ReportCSVRenderer()
+        """Test DeploymentCSVRenderer name filter."""
+        renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)

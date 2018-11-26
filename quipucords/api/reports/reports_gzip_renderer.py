@@ -11,10 +11,9 @@
 """tar.gz renderer for reports."""
 
 import logging
-import time
 
 import api.messages as messages
-from api.common.util import (create_tar_buffer, create_filename)
+from api.common.util import (create_filename, create_tar_buffer)
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
 
@@ -42,7 +41,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         files_data = dict()
 
         report_id = reports_dict.get('report_id')
-        report_id = None
         # Collect Json Data
         details_json = reports_dict.get('details_json')
         deployments_json = reports_dict.get('deployments_json')
