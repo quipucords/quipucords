@@ -14,7 +14,7 @@ import logging
 import time
 
 import api.messages as messages
-from api.common.util import create_tar_buffer
+from api.common.util import (create_tar_buffer, create_filename)
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
 
@@ -22,15 +22,6 @@ from rest_framework import renderers
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def create_filename(report_type, file_ext, report_id):
-    """Create the filename."""
-    file_name = 'report_id_%s/%s_%s.%s' % (report_id,
-                                           report_type,
-                                           time.strftime('%Y%m%d%H%M%S'),
-                                           file_ext)
-    return file_name
 
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
