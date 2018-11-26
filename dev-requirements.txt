@@ -2,10 +2,10 @@
 -r requirements.txt
 
 #Coverage
-coverage==4.5.1
+coverage==4.5.2
 
 # Test runner/testing utils
-pytest==3.10.0
+pytest==3.10.1
 pytest-django==3.4.3
 requests-mock==1.5.2
 
@@ -23,12 +23,12 @@ pyflakes==2.0.0
 
 # Doc
 pandoc==1.0.2
-sphinx==1.8.1
+sphinx==1.8.2
 sphinx-autobuild==0.7.1
 sphinx-rtd-theme==0.4.2
 
 # Editor
-autopep8==1.4.2
+autopep8==1.4.3
 
 # Gunicorn local development
 gunicorn==19.9.0
