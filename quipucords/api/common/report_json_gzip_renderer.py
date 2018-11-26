@@ -47,5 +47,4 @@ class ReportJsonGzipRenderer(renderers.BaseRenderer):
             file_name = create_filename(report_type, 'json', report_id)
         file_data = {file_name: report_dict}
         tar_buffer = create_tar_buffer(file_data)
-        print(tar_buffer)
         return tar_buffer
