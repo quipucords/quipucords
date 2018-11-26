@@ -51,10 +51,11 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         files_data = dict()
 
         report_id = reports_dict.get('report_id')
+        report_id = None
         # Collect Json Data
         details_json = reports_dict.get('details_json')
         deployments_json = reports_dict.get('deployments_json')
-        if all(value is None for value in [report_id,
+        if any(value is None for value in [report_id,
                                            details_json,
                                            deployments_json]):
             logger.error(messages.REPORTS_MISSING_REQUIRED_VALUE)
@@ -66,7 +67,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         # Collect CSV Data
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)
-        if all(value is None for value in [details_csv, deployments_json]):
+        if any(value is None for value in [details_csv, deployments_json]):
             logger.error(messages.REPORTS_NO_CSV)
             return None
         details_csv_name = create_filename('details', 'csv', report_id)
