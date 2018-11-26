@@ -47,7 +47,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         if any(value is None for value in [report_id,
                                            details_json,
                                            deployments_json]):
-            logger.error(messages.REPORTS_MISSING_REQUIRED_VALUE)
             return None
         details_name = create_filename('details', 'json', report_id)
         files_data[details_name] = details_json
@@ -57,7 +56,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)
         if any(value is None for value in [details_csv, deployments_json]):
-            logger.error(messages.REPORTS_NO_CSV)
             return None
         details_csv_name = create_filename('details', 'csv', report_id)
         files_data[details_csv_name] = details_csv
