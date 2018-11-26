@@ -87,15 +87,5 @@ def reports(request, pk=None):
                          'Deployment report %s could not be created.'
                          '  See server logs.' % deployments_id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
-
-    if request.query_params.get('group_count', None):
-        deployments_report_dict = build_grouped_report(
-            deployments_data, request.query_params.get('group_count'))
-    elif filters:
-        deployments_report_dict = build_filtered_report(deployments_data,
-                                                        filters)
-    else:
-        deployments_report_dict = build_cached_json_report(deployments_data)
-
-    reports_dict['deployments_json'] = deployments_report_dict
+    reports_dict = build_cached_json_report(deployments_data)
     return Response(reports_dict)
