@@ -357,8 +357,7 @@ def extract_tar_gz(file_like_obj):
 
 def create_filename(report_type, file_ext, report_id):
     """Create the filename."""
-    file_name = 'report_id_%s/%s_%s.%s' % (report_id,
-                                           report_type,
-                                           time.strftime('%Y%m%d%H%M%S'),
-                                           file_ext)
+    file_name = 'report_id_%s/%s.%s' % (report_id,
+                                        report_type,
+                                        file_ext)
     return file_name
