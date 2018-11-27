@@ -126,7 +126,7 @@ class CommonUtilTest(TestCase):
         self.assertEqual(tar_result, None)
 
     def test_bad_dict_contents_type_create_tar_buffer(self):
-        """Test passing in a list of none json into create_tar_buffer."""
+        """Test passing in a list of json into create_tar_buffer."""
         json0 = {'id.csv': 1, 'report': [{'key.csv': 'value'}]}
         tar_result = create_tar_buffer(json0)
         self.assertEqual(tar_result, None)
