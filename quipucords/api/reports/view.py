@@ -32,9 +32,9 @@ from rest_framework.decorators import (api_view,
                                        permission_classes,
                                        renderer_classes)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import (BrowsableAPIRenderer)
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
+
 
 from rest_framework_expiring_authtoken.authentication import \
     ExpiringTokenAuthentication
@@ -56,8 +56,7 @@ else:
 @api_view(['GET'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-@renderer_classes((BrowsableAPIRenderer,
-                   ReportsGzipRenderer))
+@renderer_classes((ReportsGzipRenderer,))
 def reports(request, pk=None):
     """Lookup and return reports."""
     reports_dict = dict()
@@ -83,5 +82,6 @@ def reports(request, pk=None):
                          'Deployment report %s could not be created.'
                          '  See server logs.' % deployments_id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
-    reports_dict = build_cached_json_report(deployments_data)
+    reports_dict['deployments_json'] = \
+        build_cached_json_report(deployments_data)
     return Response(reports_dict)
