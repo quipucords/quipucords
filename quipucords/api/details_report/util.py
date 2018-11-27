@@ -11,11 +11,15 @@
 
 """Util for validating and persisting source facts."""
 
+import csv
 import logging
+from io import StringIO
 
 from api import messages
 from api.common.common_report import create_report_version
-from api.models import (ScanTask,
+from api.common.util import CSVHelper
+from api.models import (DetailsReport,
+                        ScanTask,
                         ServerInformation,
                         Source)
 from api.serializers import DetailsReportSerializer
@@ -196,3 +200,91 @@ def create_details_report(report_version, json_details_report):
     logger.error('DetailsReport errors: %s', serializer.errors)
 
     return None
+
+
+def sanitize_row(row):
+    """Replace commas in fact values to prevent false csv parsing."""
+    return [fact.replace(',', ';')
+            if isinstance(fact, str) else fact for fact in row]
+
+
+def create_details_csv(details_report_dict):
+    """Create details csv."""
+    report_id = details_report_dict.get('report_id')
+    if report_id is None:
+        return None
+
+    details_report = DetailsReport.objects.filter(
+        report_id=report_id).first()
+    if details_report is None:
+        return None
+
+    # Check for a cached copy of csv
+    cached_csv = details_report.cached_csv
+    if cached_csv:
+        logger.info('Using cached csv results for details report %d',
+                    report_id)
+        return cached_csv
+    logger.info('No cached csv results for details report %d',
+                report_id)
+
+    csv_helper = CSVHelper()
+    details_report_csv_buffer = StringIO()
+    csv_writer = csv.writer(details_report_csv_buffer, delimiter=',')
+
+    sources = details_report_dict.get('sources')
+
+    csv_writer.writerow(['Report ID', 'Report Type',
+                         'Report Version', 'Number Sources'])
+    if sources is None:
+        csv_writer.writerow(
+            [report_id,
+             details_report.report_type,
+             details_report.report_version,
+             0])
+        return details_report_csv_buffer.getvalue()
+
+    csv_writer.writerow([report_id,
+                         details_report.report_type,
+                         details_report.report_version,
+                         len(sources)])
+    csv_writer.writerow([])
+    csv_writer.writerow([])
+
+    for source in sources:
+        csv_writer.writerow(['Source'])
+        csv_writer.writerow(
+            ['Server Identifier',
+             'Source Name',
+             'Source Type'])
+        csv_writer.writerow([
+            source.get('server_id'),
+            source.get('source_name'),
+            source.get('source_type')])
+        csv_writer.writerow(['Facts'])
+        fact_list = source.get('facts')
+        if not fact_list:
+            # write a space line and move to next
+            csv_writer.writerow([])
+            continue
+        headers = csv_helper.generate_headers(fact_list)
+        csv_writer.writerow(headers)
+
+        for fact in fact_list:
+            row = []
+            for header in headers:
+                fact_value = fact.get(header)
+                row.append(csv_helper.serialize_value(header, fact_value))
+
+            csv_writer.writerow(sanitize_row(row))
+
+        csv_writer.writerow([])
+        csv_writer.writerow([])
+
+    logger.info('Caching csv results for details report %d',
+                report_id)
+    cached_csv = details_report_csv_buffer.getvalue()
+    details_report.cached_csv = cached_csv
+    details_report.save()
+
+    return cached_csv

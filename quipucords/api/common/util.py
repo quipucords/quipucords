@@ -17,7 +17,6 @@ import logging
 import os
 import tarfile
 import time
-import uuid
 
 
 from api.scantask.model import ScanTask
@@ -297,24 +296,30 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     return job_json
 
 
-def create_tar_buffer(data_array):
-    """Generate a tar buffer when data_array is list of json.
+def create_tar_buffer(files_data):
+    """Generate a file buffer based off a dictionary.
 
-    :param data_array: A list of json.
+    :param files_data: A dictionary of strings.
+        :key: filepath with filename included
+        :value: the contents of the file as a string or dictionary
     """
-    if not isinstance(data_array, (list,)):
+    if not isinstance(files_data, (dict,)):
         return None
-    for data in data_array:
-        if not isinstance(data, (dict,)):
-            return None
+    if not all(isinstance(v, (str, dict)) for v in files_data.values()):
+        return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
-        for data in data_array:
-            json_buffer = io.BytesIO(json.dumps(data).encode('utf-8'))
-            json_name = '%s.json' % str(uuid.uuid4())
-            info = tarfile.TarInfo(name=json_name)
-            info.size = len(json_buffer.getvalue())
-            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
+        for file_name, file_content in files_data.items():
+            if file_name.endswith('json'):
+                file_buffer = \
+                    io.BytesIO(json.dumps(file_content).encode('utf-8'))
+            elif file_name.endswith('csv'):
+                file_buffer = io.BytesIO(file_content.encode('utf-8'))
+            else:
+                return None
+            info = tarfile.TarInfo(name=file_name)
+            info.size = len(file_buffer.getvalue())
+            tar_file.addfile(tarinfo=info, fileobj=file_buffer)
     tar_buffer.seek(0)
     return tar_buffer
 
@@ -348,3 +353,11 @@ def extract_tar_gz(file_like_obj):
                 return None
         file_data_list.append(file_data)
     return file_data_list
+
+
+def create_filename(report_type, file_ext, report_id):
+    """Create the filename."""
+    file_name = 'report_id_%s/%s.%s' % (report_id,
+                                        report_type,
+                                        file_ext)
+    return file_name

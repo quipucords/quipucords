@@ -16,8 +16,8 @@ import uuid
 
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
-from api.deployments_report.csv_renderer import (DeploymentCSVRenderer,
-                                                 sanitize_row)
+from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
+from api.deployments_report.util import (sanitize_row)
 from api.models import (Credential,
                         ServerInformation,
                         Source)

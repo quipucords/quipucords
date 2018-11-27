@@ -23,3 +23,4 @@ from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
 from api.user.view import UserViewSet
 from api.status.view import status
+from api.reports.view import reports

@@ -11,8 +11,9 @@
 """tar.gz renderer for reports."""
 
 import logging
+import time
 
-from api.common.util import create_tar_buffer
+from api.common.util import (create_filename, create_tar_buffer)
 
 from rest_framework import renderers
 
@@ -37,8 +38,13 @@ class ReportJsonGzipRenderer(renderers.BaseRenderer):
             return None
 
         report_id = report_dict.get('report_id')
+        report_type = report_dict.get('report_type')
         if report_id is None:
             return None
-
-        tar_buffer = create_tar_buffer([report_dict])
+        if report_type is None:
+            file_name = '%s.json' % time.strftime('%Y%m%d%H%M%S')
+        else:
+            file_name = create_filename(report_type, 'json', report_id)
+        file_data = {file_name: report_dict}
+        tar_buffer = create_tar_buffer(file_data)
         return tar_buffer
