@@ -29,18 +29,18 @@
   ignore_errors: yes
   when: 'user_has_sudo and "stdout_lines" in internal_sudo_ifconfig_mac_addresses_cmd'
 
-- name: gather ifconfig.ip-address fact (no sudo)
-  raw: /sbin/ifconfig -a
+- name: gather ip-address fact (no sudo)
+  raw: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
   register: internal_ifconfig_ip_addresses_cmd
   ignore_errors: yes
-  when: '(not user_has_sudo) and internal_have_ifconfig'
+  when: '(not user_has_sudo)'
 
-- name: gather ifconfig.ip-address fact (sudo)
-  raw: /sbin/ifconfig -a
+- name: gather ip-address fact (sudo)
+  raw: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
   register: internal_sudo_ifconfig_ip_addresses_cmd
   ignore_errors: yes
   become: yes
-  when: 'user_has_sudo and internal_have_ifconfig'
+  when: 'user_has_sudo'
 
 - name: extract result value for ifconfig.ip-address
   set_fact:
