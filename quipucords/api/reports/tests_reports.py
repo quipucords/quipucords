@@ -144,7 +144,7 @@ class ReportsTest(TestCase):
         return reports_dict
 
     def test_reports_gzip_renderer(self):
-        """Get a tar.gz return for report_d via API."""
+        """Get a tar.gz return for report_id via API."""
         # pylint: disable=line-too-long
         deployments_csv = 'Report ID,Report Type,Report Version\r\n1,deployments,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,count,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_socket_count,vm_state,vm_uuid\r\n,,2,,,,,,,,,,,,,,,,RHEL 7.4,,,,,,,,,,,,,,,,,,,\r\n,,1,,,,,,,,,,,,,,,,RHEL 7.5,,,,,,,,,,,,,,,,,,,\r\n\r\n' % (self.report_version) # noqa
         # pylint: disable=line-too-long
