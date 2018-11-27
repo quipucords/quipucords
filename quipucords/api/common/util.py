@@ -297,7 +297,7 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
 
 
 def create_tar_buffer(files_data):
-    """Gernerate a file buffer based off a dictionary.
+    """Generate a file buffer based off a dictionary.
 
     :param files_data: A dictionary of strings.
         :key: filepath with filename included
