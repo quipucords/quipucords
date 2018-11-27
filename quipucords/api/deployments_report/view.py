@@ -165,7 +165,7 @@ def build_grouped_report(report, group):
         }
         raise ValidationError(error)
 
-    if counts_by_group:
+    if not counts_by_group:
         return None
 
     # Build response dictionary

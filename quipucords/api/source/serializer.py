@@ -529,7 +529,7 @@ class SourceSerializer(NotEmptySerializer):
                 normalized_hosts.append(host_range)
                 logging.warning('%s did not match a pattern or produce error',
                                 host_range)
-        if host_errors:
+        if not host_errors:
             return normalized_hosts
         error_message = [error.detail.pop() for error in host_errors]
         raise ValidationError(error_message)
