@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Viewset for system facts models."""
+"""View for reports."""
 
 import logging
 import os
