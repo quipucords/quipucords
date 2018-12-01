@@ -123,6 +123,7 @@ if not PRODUCTION:
 
 
 MIDDLEWARE = [
+    'api.common.middleware.ServerVersionMiddle',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
