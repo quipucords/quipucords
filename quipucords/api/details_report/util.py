@@ -234,19 +234,24 @@ def create_details_csv(details_report_dict):
 
     sources = details_report_dict.get('sources')
 
-    csv_writer.writerow(['Report ID', 'Report Type',
-                         'Report Version', 'Number Sources'])
+    csv_writer.writerow(['Report ID',
+                         'Report Type',
+                         'Report Version',
+                         'Report Platform ID',
+                         'Number Sources'])
     if sources is None:
         csv_writer.writerow(
             [report_id,
              details_report.report_type,
              details_report.report_version,
+             details_report.report_platform_id,
              0])
         return details_report_csv_buffer.getvalue()
 
     csv_writer.writerow([report_id,
                          details_report.report_type,
                          details_report.report_version,
+                         details_report.report_platform_id,
                          len(sources)])
     csv_writer.writerow([])
     csv_writer.writerow([])

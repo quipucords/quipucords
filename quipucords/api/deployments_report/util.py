@@ -89,10 +89,12 @@ def create_deployments_csv(deployments_report_dict):
 
     csv_writer.writerow(['Report ID',
                          'Report Type',
-                         'Report Version'])
+                         'Report Version',
+                         'Report Platform ID'])
     csv_writer.writerow([report_id,
                          deployment_report.report_type,
-                         deployment_report.report_version])
+                         deployment_report.report_version,
+                         deployment_report.report_platform_id])
     csv_writer.writerow([])
     csv_writer.writerow([])
 

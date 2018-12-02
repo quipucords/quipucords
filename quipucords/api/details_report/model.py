@@ -12,6 +12,7 @@
 """Models to capture system facts."""
 
 import json
+import uuid
 
 from api.common.common_report import (REPORT_TYPE_CHOICES,
                                       REPORT_TYPE_DETAILS)
@@ -29,6 +30,8 @@ class DetailsReport(models.Model):
     )
     report_version = models.CharField(max_length=64,
                                       null=False)
+    report_platform_id = models.UUIDField(
+        default=uuid.uuid4, editable=False)
     sources = models.TextField(null=False)
     report_id = models.IntegerField(null=True)
     deployment_report = models.OneToOneField(

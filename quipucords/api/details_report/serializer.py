@@ -16,7 +16,8 @@ from api.common.serializer import (CustomJSONField,
 from api.models import DetailsReport
 
 from rest_framework.serializers import (CharField,
-                                        IntegerField)
+                                        IntegerField,
+                                        UUIDField)
 
 
 class DetailsReportSerializer(NotEmptySerializer):
@@ -27,6 +28,8 @@ class DetailsReportSerializer(NotEmptySerializer):
 
     sources = CustomJSONField(required=True)
     report_id = IntegerField(read_only=True)
+    report_platform_id = UUIDField(format='hex_verbose',
+                                   read_only=True)
     cached_csv = CharField(required=False, read_only=True)
 
     class Meta:
