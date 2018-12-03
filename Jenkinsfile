@@ -225,7 +225,9 @@ node('f28-os') {
         startQPCServer()
 
         sshagent(['390bdc1f-73c6-457e-81de-9e794478e0e']) {
-            sh 'sudo docker run --net="host" -d -p 4444:4444 -v /dev/shm:/dev/shm:z -v /tmp:/tmp:z selenium/standalone-chrome-debug:3.14.0-arsenic'
+            sh 'sudo docker run --net="host" -d -p 4444:4444 -v /dev/shm:/dev/shm:z -v /tmp:/tmp:z selenium/standalone-chrome'
+
+            sleep 3
 
             sh '''\
             export XDG_CONFIG_HOME=$PWD
@@ -250,7 +252,9 @@ node('f28-os') {
         startQPCServer()
 
         sshagent(['390bdc1f-73c6-457e-81de-9e794478e0e']) {
-            sh 'sudo docker run --net="host" -d -p 4444:4444 -v /dev/shm:/dev/shm:z -v /tmp:/tmp:z selenium/standalone-firefox-debug:3.14.0-arsenic'
+            sh 'sudo docker run --net="host" -d -p 4444:4444 -v /dev/shm:/dev/shm:z -v /tmp:/tmp:z selenium/standalone-firefox'
+
+            sleep 3
 
             sh '''\
             export XDG_CONFIG_HOME=$PWD
