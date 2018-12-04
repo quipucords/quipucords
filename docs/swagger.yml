@@ -1053,7 +1053,7 @@ paths:
       tags:
         - "Report"
       summary: "Retrieves a tar.gz file for the deployments and details reports."
-      description: "The tar.gz contains the reports in both the .csv and .json format"
+      description: "The tar.gz contains the reports in both the .csv and .json format."
       operationId: "downloadReports"
       produces:
       - "application/gzip"
@@ -1065,9 +1065,9 @@ paths:
           type: "integer"
           format: "int64"
       responses:
-        201:
+        200:
           description: "Downloads a tar.gz file"
-        400:
+        404:
           description: "Reports id not found"
         401:
           description: "Not authorized"
