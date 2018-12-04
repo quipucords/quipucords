@@ -1048,6 +1048,29 @@ paths:
           description: "Not authorized"
         404:
           description: "Report merge job not found"
+  /reports/{report_id}/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieves a tar.gz file for the deployments and details reports."
+      description: "The tar.gz contains the reports in both the .csv and .json format"
+      operationId: "downloadReports"
+      produces:
+      - "application/gzip"
+      parameters:
+        - name: "report_id"
+          in: "path"
+          description: "The Report ID to be queried"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        201:
+          description: "Downloads a tar.gz file"
+        400:
+          description: "Reports id not found"
+        401:
+          description: "Not authorized"
   /token/:
     post:
       tags:
