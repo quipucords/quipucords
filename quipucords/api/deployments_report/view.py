@@ -131,7 +131,7 @@ def build_report(report, fingerprint_dicts):
                    'status': report.status,
                    'report_type': report.report_type,
                    'report_version': report.report_version,
-                   'report_platform_id': report.report_platform_id,
+                   'report_platform_id': str(report.report_platform_id),
                    'system_fingerprints': fingerprint_dicts}
     return report_dict
 

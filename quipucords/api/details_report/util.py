@@ -16,8 +16,9 @@ import logging
 from io import StringIO
 
 from api import messages
-from api.common.common_report import create_report_version
-from api.common.util import CSVHelper
+from api.common.common_report import (CSVHelper,
+                                      create_report_version,
+                                      sanitize_row)
 from api.models import (DetailsReport,
                         ScanTask,
                         ServerInformation,
@@ -200,12 +201,6 @@ def create_details_report(report_version, json_details_report):
     logger.error('DetailsReport errors: %s', serializer.errors)
 
     return None
-
-
-def sanitize_row(row):
-    """Replace commas in fact values to prevent false csv parsing."""
-    return [fact.replace(',', ';')
-            if isinstance(fact, str) else fact for fact in row]
 
 
 def create_details_csv(details_report_dict):

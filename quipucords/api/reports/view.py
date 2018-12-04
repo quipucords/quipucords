@@ -71,6 +71,7 @@ def reports(request, pk=None):
     details_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
+    json_details.pop('cached_csv', None)
     reports_dict['details_json'] = json_details
     # deployments
     validate_filters(request.query_params)
