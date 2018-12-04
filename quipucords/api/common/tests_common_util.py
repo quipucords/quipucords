@@ -15,7 +15,9 @@ import json
 import tarfile
 from collections import OrderedDict
 
-from api.common.util import (CSVHelper, create_tar_buffer, extract_tar_gz)
+from api.common.common_report import (CSVHelper,
+                                      create_tar_buffer,
+                                      extract_tar_gz)
 
 from django.test import TestCase
 
