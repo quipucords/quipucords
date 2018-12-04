@@ -205,6 +205,8 @@ class SyncMergeReports(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         json_response = response.json()
         expected = {'report_id': 3,
+                    'report_platform_id': json_response.get(
+                        'report_platform_id'),
                     'report_type': 'details',
                     'report_version': create_report_version(),
                     'sources': [

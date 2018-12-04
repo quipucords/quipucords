@@ -13,7 +13,7 @@
 import logging
 import time
 
-from api.common.util import (create_filename, create_tar_buffer)
+from api.common.common_report import (create_filename, create_tar_buffer)
 
 from rest_framework import renderers
 
