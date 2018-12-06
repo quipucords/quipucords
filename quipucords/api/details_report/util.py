@@ -16,8 +16,9 @@ import logging
 from io import StringIO
 
 from api import messages
-from api.common.common_report import create_report_version
-from api.common.util import CSVHelper
+from api.common.common_report import (CSVHelper,
+                                      create_report_version,
+                                      sanitize_row)
 from api.models import (DetailsReport,
                         ScanTask,
                         ServerInformation,
@@ -202,12 +203,6 @@ def create_details_report(report_version, json_details_report):
     return None
 
 
-def sanitize_row(row):
-    """Replace commas in fact values to prevent false csv parsing."""
-    return [fact.replace(',', ';')
-            if isinstance(fact, str) else fact for fact in row]
-
-
 def create_details_csv(details_report_dict):
     """Create details csv."""
     report_id = details_report_dict.get('report_id')
@@ -234,19 +229,24 @@ def create_details_csv(details_report_dict):
 
     sources = details_report_dict.get('sources')
 
-    csv_writer.writerow(['Report ID', 'Report Type',
-                         'Report Version', 'Number Sources'])
+    csv_writer.writerow(['Report ID',
+                         'Report Type',
+                         'Report Version',
+                         'Report Platform ID',
+                         'Number Sources'])
     if sources is None:
         csv_writer.writerow(
             [report_id,
              details_report.report_type,
              details_report.report_version,
+             details_report.report_platform_id,
              0])
         return details_report_csv_buffer.getvalue()
 
     csv_writer.writerow([report_id,
                          details_report.report_type,
                          details_report.report_version,
+                         details_report.report_platform_id,
                          len(sources)])
     csv_writer.writerow([])
     csv_writer.writerow([])

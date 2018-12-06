@@ -15,7 +15,7 @@ import csv
 import logging
 from io import StringIO
 
-from api.common.util import CSVHelper
+from api.common.common_report import CSVHelper, sanitize_row
 from api.models import (DeploymentsReport,
                         Source,
                         SystemFingerprint)
@@ -51,12 +51,6 @@ def compute_source_info(sources):
     return result
 
 
-def sanitize_row(row):
-    """Replace commas in fact values to prevent false csv parsing."""
-    return [fact.replace(',', ';')
-            if isinstance(fact, str) else fact for fact in row]
-
-
 def create_deployments_csv(deployments_report_dict):
     """Create deployments report csv."""
     source_headers = {NETWORK_DETECTION_KEY,
@@ -89,10 +83,12 @@ def create_deployments_csv(deployments_report_dict):
 
     csv_writer.writerow(['Report ID',
                          'Report Type',
-                         'Report Version'])
+                         'Report Version',
+                         'Report Platform ID'])
     csv_writer.writerow([report_id,
                          deployment_report.report_type,
-                         deployment_report.report_version])
+                         deployment_report.report_version,
+                         deployment_report.report_platform_id])
     csv_writer.writerow([])
     csv_writer.writerow([])
 

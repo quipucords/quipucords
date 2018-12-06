@@ -11,6 +11,8 @@
 
 """Models system fingerprints."""
 
+import uuid
+
 from api.common.common_report import (REPORT_TYPE_CHOICES,
                                       REPORT_TYPE_DEPLOYMENT)
 
@@ -27,6 +29,8 @@ class DeploymentsReport(models.Model):
     )
     report_version = models.CharField(max_length=64,
                                       null=False)
+    report_platform_id = models.UUIDField(
+        default=uuid.uuid4, editable=False)
 
     STATUS_PENDING = 'pending'
     STATUS_FAILED = 'failed'
