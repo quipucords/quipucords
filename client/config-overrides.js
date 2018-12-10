@@ -7,8 +7,8 @@ const WriteFilePlugin = require('write-file-webpack-plugin');
  * @param env
  * @returns {Object}
  */
-const webpack = function(config, env) {
-  let newConfig = { ...config };
+const webpack = (config, env) => {
+  const newConfig = { ...config };
 
   // extended props
   if (Array.isArray(newConfig.plugins)) {
@@ -27,7 +27,7 @@ const webpack = function(config, env) {
  * @param config
  * @returns {Object}
  */
-const jest = function(config) {
+const jest = config => {
   const newConfig = { ...config };
 
   // extended props
@@ -40,14 +40,12 @@ const jest = function(config) {
  * @param configFunction
  * @returns {Function}
  */
-const devServer = function(configFunction) {
-  return function(proxy, allowedHost) {
-    const newConfig = configFunction(proxy, allowedHost);
+const devServer = configFunction => (proxy, allowedHost) => {
+  const newConfig = configFunction(proxy, allowedHost);
 
-    // extended props
+  // extended props
 
-    return newConfig;
-  };
+  return newConfig;
 };
 
 module.exports = { webpack, jest, devServer };

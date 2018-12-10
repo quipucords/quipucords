@@ -10,7 +10,10 @@ Requirements
 ------------
 Before developing for Quipucords UI, the requirements:
  * Your system needs to be running `NodeJS version 8+ <https://nodejs.org/>`_
- * And `Docker <https://docs.docker.com/engine/installation/>`_
+ * `Docker <https://docs.docker.com/engine/installation/>`_
+
+Optional requirements:
+ * `Yarn 1.12+ <https://yarnpkg.com>`_
 
 Docker & Mac
 ^^^^^^^^^^^^

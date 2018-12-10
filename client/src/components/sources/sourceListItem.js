@@ -255,14 +255,13 @@ class SourceListItem extends React.Component {
 
     const itemHostsPopover = (
       <Popover id={helpers.generateId()} className="quipucords-sources-popover-scroll">
-        {item.hosts &&
-          item.hosts.length > 1 && (
-            <ul className="quipucords-popover-list">
-              {item.hosts.map(host => (
-                <li>{host}</li>
-              ))}
-            </ul>
-          )}
+        {item.hosts && item.hosts.length > 1 && (
+          <ul className="quipucords-popover-list">
+            {item.hosts.map(host => (
+              <li>{host}</li>
+            ))}
+          </ul>
+        )}
         {item.hosts && item.hosts.length === 1 && <div>{item.hosts[0]}</div>}
       </Popover>
     );
