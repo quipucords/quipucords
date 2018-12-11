@@ -1,17 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { Modal, Button, Icon } from 'patternfly-react';
 import _ from 'lodash';
+import { connect, reduxActions, reduxTypes, store } from '../../redux';
 import helpers from '../../common/helpers';
-import Store from '../../redux/store';
-import { scansTypes, toastNotificationTypes } from '../../redux/constants';
-import { reduxActions } from '../../redux/actions';
 
 class MergeReportsDialog extends React.Component {
   onClose = () => {
-    Store.dispatch({
-      type: scansTypes.MERGE_SCAN_DIALOG_HIDE
+    store.dispatch({
+      type: reduxTypes.scans.MERGE_SCAN_DIALOG_HIDE
     });
   };
 
@@ -22,12 +19,12 @@ class MergeReportsDialog extends React.Component {
     mergeScans(data).then(
       response => {
         if (details) {
-          getMergedScanReportDetailsCsv(_.get(response, 'value.data.id')).then(
+          getMergedScanReportDetailsCsv(_.get(response, 'value.data.report_id')).then(
             () => this.notifyDownloadStatus(false),
             error => this.notifyDownloadStatus(true, error)
           );
         } else {
-          getMergedScanReportSummaryCsv(_.get(response, 'value.data.id')).then(
+          getMergedScanReportSummaryCsv(_.get(response, 'value.data.report_id')).then(
             () => this.notifyDownloadStatus(false),
             error => this.notifyDownloadStatus(true, error)
           );
@@ -53,15 +50,15 @@ class MergeReportsDialog extends React.Component {
 
   notifyDownloadStatus(error, results) {
     if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
         message: helpers.getErrorMessageFromResults(results)
       });
     } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'success',
         message: <span>Report downloaded.</span>
       });
@@ -137,6 +134,7 @@ class MergeReportsDialog extends React.Component {
     if (!scans || scans.length === 0 || !scans[0]) {
       return null;
     }
+
     const validCount = _.size(this.getValidScans());
     const invalidCount = _.size(this.getInvalidScans());
 
