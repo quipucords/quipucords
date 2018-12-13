@@ -1,19 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
 import { Alert, Button, DropdownButton, EmptyState, Grid, Form, ListView, MenuItem, Modal } from 'patternfly-react';
 import _ from 'lodash';
-import { reduxActions } from '../../redux/actions';
-import {
-  confirmationModalTypes,
-  scansTypes,
-  sourcesTypes,
-  toastNotificationTypes,
-  viewToolbarTypes,
-  viewTypes
-} from '../../redux/constants';
-import Store from '../../redux/store';
+import { connect, reduxActions, reduxTypes, store } from '../../redux';
 import helpers from '../../common/helpers';
 import ViewToolbar from '../viewToolbar/viewToolbar';
 import ViewPaginationRow from '../viewPaginationRow/viewPaginationRow';
@@ -26,15 +16,15 @@ import MergeReportsDialog from '../mergeReportsDialog/mergeReportsDialog';
 class Scans extends React.Component {
   static notifyDownloadStatus(error, results) {
     if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
         message: helpers.getErrorMessageFromResults(results)
       });
     } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'success',
         message: <span>Report downloaded.</span>
       });
@@ -43,9 +33,10 @@ class Scans extends React.Component {
 
   constructor() {
     super();
-
-    // FUTURE: Deletions of scans is not currently desired. This is here in case it ever gets added.
-    //         Delete is fully functional by setting this.okToDelete to true.
+    /**
+     * FixMe: Deletions of scans is not currently desired. This is here in case it ever gets added.
+     * FUTURE: Delete is fully functional by setting this.okToDelete to true.
+     */
     this.okToDelete = false;
     this.scansToDelete = [];
     this.deletingScan = null;
@@ -73,8 +64,8 @@ class Scans extends React.Component {
 
     if (_.get(nextProps, 'update.delete')) {
       if (nextProps.update.fulfilled && !update.fulfilled) {
-        Store.dispatch({
-          type: toastNotificationTypes.TOAST_ADD,
+        store.dispatch({
+          type: reduxTypes.toastNotifications.TOAST_ADD,
           alertType: 'success',
           message: (
             <span>
@@ -84,9 +75,9 @@ class Scans extends React.Component {
         });
         this.onRefresh();
 
-        Store.dispatch({
-          type: viewTypes.DESELECT_ITEM,
-          viewType: viewTypes.SCANS_VIEW,
+        store.dispatch({
+          type: reduxTypes.view.DESELECT_ITEM,
+          viewType: reduxTypes.view.SCANS_VIEW,
           item: this.deletingScan
         });
 
@@ -94,8 +85,8 @@ class Scans extends React.Component {
       }
 
       if (nextProps.update.error && !update.error) {
-        Store.dispatch({
-          type: toastNotificationTypes.TOAST_ADD,
+        store.dispatch({
+          type: reduxTypes.toastNotifications.TOAST_ADD,
           alertType: 'error',
           header: 'Error',
           message: (
@@ -132,8 +123,8 @@ class Scans extends React.Component {
   onMergeScanResults = details => {
     const { viewOptions } = this.props;
 
-    Store.dispatch({
-      type: scansTypes.MERGE_SCAN_DIALOG_SHOW,
+    store.dispatch({
+      type: reduxTypes.scans.MERGE_SCAN_DIALOG_SHOW,
       show: true,
       scans: viewOptions.selectedItems,
       details
@@ -182,8 +173,8 @@ class Scans extends React.Component {
     if (sourcesCount) {
       this.setState({ redirectTo: '/sources' });
     } else {
-      Store.dispatch({
-        type: sourcesTypes.CREATE_SOURCE_SHOW
+      store.dispatch({
+        type: reduxTypes.sources.CREATE_SOURCE_SHOW
       });
     }
   };
@@ -230,8 +221,8 @@ class Scans extends React.Component {
 
     const onConfirm = () => this.doDeleteScans(viewOptions.selectedItems);
 
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+    store.dispatch({
+      type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_SHOW,
       title: 'Delete Scans',
       heading,
       body,
@@ -241,23 +232,23 @@ class Scans extends React.Component {
   };
 
   onClearFilters = () => {
-    Store.dispatch({
-      type: viewToolbarTypes.CLEAR_FILTERS,
-      viewType: viewTypes.SCANS_VIEW
+    store.dispatch({
+      type: reduxTypes.viewToolbar.CLEAR_FILTERS,
+      viewType: reduxTypes.view.SCANS_VIEW
     });
   };
 
   notifyActionStatus(scan, actionText, error, results) {
     if (error) {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
         message: helpers.getErrorMessageFromResults(results)
       });
     } else {
-      Store.dispatch({
-        type: toastNotificationTypes.TOAST_ADD,
+      store.dispatch({
+        type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'success',
         message: (
           <span>
@@ -284,8 +275,8 @@ class Scans extends React.Component {
   doDeleteScans(items) {
     this.scansToDelete = [...items];
 
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
+    store.dispatch({
+      type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_HIDE
     });
 
     this.deleteNextScan();
@@ -300,8 +291,8 @@ class Scans extends React.Component {
 
     const onConfirm = () => this.doDeleteScans([item]);
 
-    Store.dispatch({
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+    store.dispatch({
+      type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_SHOW,
       title: 'Delete Scan',
       heading,
       confirmButtonText: 'Delete',
@@ -421,7 +412,7 @@ class Scans extends React.Component {
         <React.Fragment>
           <div className="quipucords-view-container">
             <ViewToolbar
-              viewType={viewTypes.SCANS_VIEW}
+              viewType={reduxTypes.view.SCANS_VIEW}
               filterFields={ScanFilterFields}
               sortFields={ScanSortFields}
               onRefresh={this.onRefresh}
@@ -432,7 +423,7 @@ class Scans extends React.Component {
               selectedCount={viewOptions.selectedItems.length}
               {...viewOptions}
             />
-            <ViewPaginationRow viewType={viewTypes.SCANS_VIEW} {...viewOptions} />
+            <ViewPaginationRow viewType={reduxTypes.view.SCANS_VIEW} {...viewOptions} />
             <div className="quipucords-list-container">{this.renderScansList(scans)}</div>
           </div>
           {this.renderPendingMessage()}
@@ -504,7 +495,7 @@ const mapDispatchToProps = dispatch => ({
 
 const mapStateToProps = state =>
   Object.assign({}, state.scans.view, {
-    viewOptions: state.viewOptions[viewTypes.SCANS_VIEW],
+    viewOptions: state.viewOptions[reduxTypes.view.SCANS_VIEW],
     update: state.scans.update
   });
 

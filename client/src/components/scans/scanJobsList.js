@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { connect } from 'react-redux';
 import { Dropdown, EmptyState, Grid, Icon, MenuItem, Pager } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment/moment';
+import { connect, reduxActions } from '../../redux';
 import helpers from '../../common/helpers';
-import { reduxActions } from '../../redux/actions';
 
 class ScanJobsList extends React.Component {
   constructor() {
