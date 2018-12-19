@@ -76,7 +76,7 @@ Command Syntax and Usage
 ------------------------
 The complete list of options for each qpc command and subcommand are listed in the qpc man page. The man page information also contains usage examples and some best practice recommendations.
 
-For expanded information on credential entries, sources, scanning, and output, see the `syntax and usage document <docs/source/man.rst>`_.
+For expanded information on credential entries, sources, scanning, and output, see the `syntax and usage document <https://github.com/quipucords/qpc/blob/master/docs/source/man.rst>`_.
 
 Development
 -----------
