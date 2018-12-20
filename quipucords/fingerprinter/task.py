@@ -29,6 +29,8 @@ from api.models import (DeploymentsReport,
                         SystemFingerprint)
 from api.serializers import (SystemFingerprintSerializer)
 
+from django.db import DataError
+
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
@@ -192,7 +194,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param scan_task: Task that is running this merge
         :returns: Status message and status
         """
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,too-many-statements
         self.scan_task.log_message('START DEDUPLICATION')
 
         # Invoke ENGINE to create fingerprints from facts
@@ -236,14 +238,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
             serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
                 number_valid += 1
-                serializer.save()
-                fingerprint_dict.pop('deployment_report')
-                # Serialize the date
-                for field in SystemFingerprint.DATE_FIELDS:
-                    if fingerprint_dict.get(field, None):
-                        fingerprint_dict[field] = date_field.to_representation(
-                            fingerprint_dict.get(field))
-                final_fingerprint_list.append(fingerprint_dict)
+                try:
+                    serializer.save()
+                    fingerprint_dict.pop('deployment_report')
+                    # Serialize the date
+                    for field in SystemFingerprint.DATE_FIELDS:
+                        if fingerprint_dict.get(field, None):
+                            fingerprint_dict[field] = \
+                                date_field.to_representation(
+                                    fingerprint_dict.get(field))
+                    final_fingerprint_list.append(fingerprint_dict)
+                except DataError as error:
+                    # do no raise again
+                    self.scan_task.log_message(
+                        'The following fingerprint failed with error "%s": %s'
+                        % (str(error).strip(), fingerprint_dict),
+                        log_level=logging.ERROR)
             else:
                 number_invalid += 1
                 self.scan_task.log_message(
