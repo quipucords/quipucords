@@ -15,7 +15,7 @@ const statusReducer = (state = initialState, action) => {
     case helpers.REJECTED_ACTION(statusTypes.STATUS_INFO):
       return Object.assign({}, initialState, {
         error: action.error,
-        errorMessage: helpers.getErrorMessageFromResults(action.payload)
+        errorMessage: helpers.getMessageFromResults(action.payload)
       });
 
     // Loading/Pending

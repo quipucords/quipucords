@@ -105,7 +105,7 @@ const addSourceWizardReducer = (state = initialState, action) => {
         'view',
         {
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -118,7 +118,7 @@ const addSourceWizardReducer = (state = initialState, action) => {
         'view',
         {
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
