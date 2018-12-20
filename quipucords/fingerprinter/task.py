@@ -237,7 +237,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fingerprint_dict['deployment_report'] = deployment_report.id
             serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
-                number_valid += 1
                 try:
                     serializer.save()
                     fingerprint_dict.pop('deployment_report')
@@ -248,8 +247,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 date_field.to_representation(
                                     fingerprint_dict.get(field))
                     final_fingerprint_list.append(fingerprint_dict)
+                    number_valid += 1
                 except DataError as error:
-                    # do no raise again
+                    number_invalid += 1
                     self.scan_task.log_message(
                         'The following fingerprint failed with error "%s": %s'
                         % (str(error).strip(), fingerprint_dict),
