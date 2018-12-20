@@ -266,7 +266,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                        (details_report.id, fingerprint_dict),
                                        log_level=logging.DEBUG)
 
-        # Mark completed because engine has process raw facts
+        # Mark completed because engine has processed raw facts
         status = ScanTask.COMPLETED
         status_message = 'success'
         if final_fingerprint_list:

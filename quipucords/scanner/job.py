@@ -262,7 +262,7 @@ class ScanJobRunner(Process):
                 details_report_json, False)
 
             if has_errors:
-                message = 'Scan producted invalid details report JSON: %s' % \
+                message = 'Scan produced invalid details report JSON: %s' % \
                     validation_result
                 self.scan_job.fail(message)
                 return True, {}
