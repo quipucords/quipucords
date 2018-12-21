@@ -1,131 +1,163 @@
 import axios from 'axios';
+import serviceConfig from './config';
 
-class ScansService {
-  static addScan(data = {}) {
-    return axios({
+const addScan = (data = {}) =>
+  axios(
+    serviceConfig({
       method: 'post',
       url: `${process.env.REACT_APP_SCANS_SERVICE}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
+    })
+  );
 
-  static getScan(id) {
-    return this.getScans(id);
-  }
+const getScans = (id = '', params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
+        params
+      },
+      false
+    )
+  );
 
-  static getScans(id = '', query = {}) {
-    return axios({
-      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      params: query
-    });
-  }
+const getScan = id => getScans(id);
 
-  static updateScan(id, data = {}) {
-    return axios({
+const updateScan = (id, data = {}) =>
+  axios(
+    serviceConfig({
       method: 'put',
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
+    })
+  );
 
-  static updatePartialScan(id, data = {}) {
-    return axios({
+const updatePartialScan = (id, data = {}) =>
+  axios(
+    serviceConfig({
       method: 'patch',
       url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
+    })
+  );
 
-  static deleteScan(id) {
-    return axios({
+const deleteScan = id =>
+  axios(
+    serviceConfig({
       method: 'delete',
-      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: `${process.env.REACT_APP_SCANS_SERVICE}${id}`
+    })
+  );
 
-  static startScan(id) {
-    return axios({
+const startScan = id =>
+  axios(
+    serviceConfig({
       method: 'post',
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id)
+    })
+  );
 
-  static getScanJobs(id, query = {}) {
-    return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      params: query
-    });
-  }
+const getScanJobs = (id, params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: process.env.REACT_APP_SCAN_JOBS_SERVICE_START_GET.replace('{0}', id),
+        timeout: process.env.REACT_APP_AJAX_TIMEOUT,
+        params
+      },
+      false
+    )
+  );
 
-  static getScanJob(id) {
-    return axios({
-      url: `${process.env.REACT_APP_SCAN_JOBS_SERVICE}${id}`,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+const getScanJob = id =>
+  axios(
+    serviceConfig(
+      {
+        url: `${process.env.REACT_APP_SCAN_JOBS_SERVICE}${id}`,
+        timeout: process.env.REACT_APP_AJAX_TIMEOUT
+      },
+      false
+    )
+  );
 
-  static getConnectionScanResults(id, query = {}) {
-    return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id),
-      params: query,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+const getConnectionScanResults = (id, params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CONNECTION.replace('{0}', id),
+        params
+      },
+      false
+    )
+  );
 
-  static getInspectionScanResults(id, query = {}) {
-    return axios({
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id),
-      params: query,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+const getInspectionScanResults = (id, params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: process.env.REACT_APP_SCAN_JOBS_SERVICE_INSPECTION.replace('{0}', id),
+        params
+      },
+      false
+    )
+  );
 
-  static pauseScan(id) {
-    return axios({
+const pauseScan = id =>
+  axios(
+    serviceConfig({
       method: 'put',
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id),
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_PAUSE.replace('{0}', id)
+    })
+  );
 
-  static cancelScan(id) {
-    return axios({
+const cancelScan = id =>
+  axios(
+    serviceConfig({
       method: 'put',
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id),
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_CANCEL.replace('{0}', id)
+    })
+  );
 
-  static restartScan(id) {
-    return axios({
+const restartScan = id =>
+  axios(
+    serviceConfig({
       method: 'put',
-      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id),
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
-}
+      url: process.env.REACT_APP_SCAN_JOBS_SERVICE_RESTART.replace('{0}', id)
+    })
+  );
 
-export default ScansService;
+const scansService = {
+  addScan,
+  getScans,
+  getScan,
+  updateScan,
+  updatePartialScan,
+  deleteScan,
+  startScan,
+  getScanJobs,
+  getScanJob,
+  getConnectionScanResults,
+  getInspectionScanResults,
+  pauseScan,
+  cancelScan,
+  restartScan
+};
+
+export {
+  scansService as default,
+  scansService,
+  addScan,
+  getScans,
+  getScan,
+  updateScan,
+  updatePartialScan,
+  deleteScan,
+  startScan,
+  getScanJobs,
+  getScanJob,
+  getConnectionScanResults,
+  getInspectionScanResults,
+  pauseScan,
+  cancelScan,
+  restartScan
+};

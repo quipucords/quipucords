@@ -1,6 +1,37 @@
 import _ from 'lodash';
+import moment from 'moment';
 
 const devModeNormalizeCount = (count, modulus = 100) => Math.abs(count) % modulus;
+
+const downloadData = (data = '', fileName = 'download.txt', fileType = 'text/plain') =>
+  new Promise((resolve, reject) => {
+    try {
+      const blob = new Blob([data], { type: fileType });
+
+      if (window.navigator && window.navigator.msSaveBlob) {
+        window.navigator.msSaveBlob(blob, fileName);
+        resolve({ fileName, data });
+      } else {
+        const anchorTag = window.document.createElement('a');
+
+        anchorTag.href = window.URL.createObjectURL(blob);
+        anchorTag.style.display = 'none';
+        anchorTag.download = fileName;
+
+        window.document.body.appendChild(anchorTag);
+
+        anchorTag.click();
+
+        setTimeout(() => {
+          window.document.body.removeChild(anchorTag);
+          window.URL.revokeObjectURL(blob);
+          resolve({ fileName, data });
+        }, 250);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
 
 const generateId = prefix => `${prefix || 'generatedid'}-${Math.ceil(1e5 * Math.random())}`;
 
@@ -241,6 +272,8 @@ const getStatusFromResults = results => {
   return status;
 };
 
+const getTimeStampFromResults = results => moment(_.get(results, 'headers.date', Date.now())).format('YYYYMMDD_HHmmss');
+
 const isIpAddress = name => {
   const vals = name.split('.');
   if (vals.length === 4) {
@@ -256,6 +289,8 @@ const ipAddressValue = name => {
 
 const DEV_MODE = process.env.REACT_APP_ENV === 'development';
 
+const TEST_MODE = process.env.REACT_APP_ENV === 'test';
+
 const RH_BRAND = process.env.REACT_APP_RH_BRAND === 'true';
 
 const FULFILLED_ACTION = base => `${base}_FULFILLED`;
@@ -266,6 +301,7 @@ const REJECTED_ACTION = base => `${base}_REJECTED`;
 
 export const helpers = {
   devModeNormalizeCount,
+  downloadData,
   generateId,
   noop,
   sourceTypeString,
@@ -280,9 +316,11 @@ export const helpers = {
   createViewQueryObject,
   getMessageFromResults,
   getStatusFromResults,
+  getTimeStampFromResults,
   isIpAddress,
   ipAddressValue,
   DEV_MODE,
+  TEST_MODE,
   RH_BRAND,
   FULFILLED_ACTION,
   PENDING_ACTION,
