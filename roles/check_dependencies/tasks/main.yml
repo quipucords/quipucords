@@ -108,6 +108,7 @@
   raw: locate echo
   register: internal_test_locate
   ignore_errors: yes
+  when: (internal_have_locate_cmd.get('rc') == 0)
 
 - name: set internal_have_locate
   set_fact:
