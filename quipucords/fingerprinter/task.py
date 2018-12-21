@@ -251,7 +251,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 except DataError as error:
                     number_invalid += 1
                     self.scan_task.log_message(
-                        'The fingerprint could not be saved. Fingerprint: %s. Error: %s'
+                        'The fingerprint could not be saved. '
+                        'Fingerprint: %s. Error: %s'
                         % (str(error).strip(), fingerprint_dict),
                         log_level=logging.ERROR)
             else:
