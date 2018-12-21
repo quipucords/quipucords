@@ -13,9 +13,14 @@
 
 import json
 from datetime import datetime
+from unittest.mock import patch
 
-from api.models import ServerInformation, Source
+from api.models import (DeploymentsReport,
+                        DetailsReport,
+                        ServerInformation,
+                        Source)
 
+from django.db import DataError
 from django.test import TestCase  # pylint: disable=wrong-import-order
 
 from fingerprinter.task import (FINGERPRINT_GLOBAL_ID_KEY,
@@ -47,7 +52,7 @@ class EngineTest(TestCase):
         self.fp_task = scan_job.tasks.last()  # pylint: disable=no-member
         self.fp_task_runner = FingerprintTaskRunner(scan_job, self.fp_task)
 
-    # pylint: disable=no-self-use,too-many-arguments
+    # pylint: disable=no-self-use,too-many-arguments,too-many-lines
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
     # pylint: disable=protected-access, W0102
 
@@ -978,3 +983,57 @@ class EngineTest(TestCase):
             '2018-4-7 12:45:02 -0400',
             ['%Y-%m-%d %H:%M:%S'])
         self.assertIsNone(date_value)
+
+    def test_process_details_report_failed(self):
+        """Test processing a details report no valid fps."""
+        fact_collection = {}
+        deployments_report = DeploymentsReport(report_id=1)
+        details_report = DetailsReport(deployment_report=deployments_report)
+        with patch('fingerprinter.task.FingerprintTaskRunner._process_sources',
+                   return_value=fact_collection):
+            status_message, status = \
+                self.fp_task_runner._process_details_report('',
+                                                            details_report)
+
+            self.assertIn('failed', status_message.lower())
+            self.assertEqual(status, 'failed')
+
+    def test_process_details_report_success(self):
+        """Test processing a details report success."""
+        fact_collection = {'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                           'metadata': {},
+                           'sources': []}
+        deployments_report = DeploymentsReport(report_id=1,
+                                               id=1)
+        deployments_report.save()
+        details_report = DetailsReport(id=1,
+                                       deployment_report=deployments_report)
+        with patch('fingerprinter.task.FingerprintTaskRunner._process_sources',
+                   return_value=[fact_collection]):
+            status_message, status = \
+                self.fp_task_runner._process_details_report('',
+                                                            details_report)
+
+            self.assertIn('success', status_message.lower())
+            self.assertEqual(status, 'completed')
+
+    def test_process_details_report_exception(self):
+        """Test processing a details report with an exception."""
+        fact_collection = {'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                           'metadata': {},
+                           'sources': []}
+        deployments_report = DeploymentsReport(report_id=1,
+                                               id=1)
+        deployments_report.save()
+        details_report = DetailsReport(id=1,
+                                       deployment_report=deployments_report)
+        with patch('fingerprinter.task.FingerprintTaskRunner._process_sources',
+                   return_value=[fact_collection]):
+            with patch('fingerprinter.task.SystemFingerprintSerializer.save',
+                       side_effect=DataError):
+                status_message, status = \
+                    self.fp_task_runner._process_details_report('',
+                                                                details_report)
+
+                self.assertIn('failed', status_message.lower())
+                self.assertEqual(status, 'failed')

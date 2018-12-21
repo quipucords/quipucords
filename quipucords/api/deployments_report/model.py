@@ -232,7 +232,7 @@ class Product(models.Model):
                                     models.CASCADE,
                                     related_name='products')
     name = models.CharField(max_length=256, unique=False, null=False)
-    version = models.CharField(max_length=256, unique=False, null=True)
+    version = models.TextField(unique=False, null=True)
     presence = models.CharField(
         max_length=10, choices=PRESENCE_TYPE)
 
