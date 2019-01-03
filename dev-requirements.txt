@@ -23,7 +23,7 @@ pyflakes==2.0.0
 
 # Doc
 pandoc==1.0.2
-sphinx==1.8.2
+sphinx==1.8.3
 sphinx-autobuild==0.7.1
 sphinx-rtd-theme==0.4.2
 
