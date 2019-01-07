@@ -8,6 +8,9 @@ def targzfile = "${tarfile}.gz"
 def postgres_targzfile = "${postgres_tarfile}.gz"
 def install_tar = "quipucords.${qpc_version}.install.tar"
 def install_targzfile = "${install_tar}.gz"
+def install_postgres_dir = "install/postgres_info"
+def install_postgres_targzfile = install/postgres_info.tar.gz
+def postgres_license = "PostgreSQL_License.txt"
 
 node('f28-os') {
     stage('Install') {
@@ -67,12 +70,17 @@ node('f28-os') {
         sh "sudo gzip -f --best $postgres_tarfile"
         sh "sudo chmod 755 $postgres_targzfile"
 
+        sh "mkdir $install_postgres_dir"
+        sh "mv $postgres_targzfile $install_postgres_dir"
+        sh "cp install/$postgres_license $install_postgres_dir/"
+        sh "tar -zcvf $install_postgres_targzfile $install_postgres_dir"
+
         sh "sudo tar -cvf $install_tar install/*"
         sh "sudo chmod 755 $install_tar"
         sh "sudo gzip -f --best $install_tar"
         sh "sudo chmod 755 $install_targzfile"
 
-        archive postgres_targzfile
+        archive install_postgres_targzfile
         archive targzfile
         archive install_targzfile
     }
