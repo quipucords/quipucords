@@ -54,7 +54,7 @@ class MergeReportsDialog extends React.Component {
         type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: helpers.getErrorMessageFromResults(results)
+        message: helpers.getMessageFromResults(results)
       });
     } else {
       store.dispatch({

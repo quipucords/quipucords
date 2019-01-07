@@ -79,7 +79,7 @@ class CreateScanDialog extends React.Component {
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: helpers.getErrorMessageFromResults(results)
+        message: helpers.getMessageFromResults(results)
       });
     } else {
       Store.dispatch({
@@ -112,7 +112,7 @@ class CreateScanDialog extends React.Component {
         type: toastNotificationTypes.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: helpers.getErrorMessageFromResults(results)
+        message: helpers.getMessageFromResults(results)
       });
     } else {
       Store.dispatch({

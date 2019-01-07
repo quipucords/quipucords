@@ -113,25 +113,36 @@ const authorizationTypeString = authorizationType => {
 
 const setStateProp = (prop, data, options) => {
   const { state = {}, initialState = {}, reset = true } = options;
-  const obj = { ...state };
+  let obj = { ...state };
 
-  if (!state[prop]) {
+  if (prop && !state[prop]) {
     console.error(`Error: Property ${prop} does not exist within the passed state.`, state);
   }
 
-  if (reset && !initialState[prop]) {
+  if (reset && prop && !initialState[prop]) {
     console.warn(`Warning: Property ${prop} does not exist within the passed initialState.`, initialState);
   }
 
-  if (reset) {
+  if (reset && prop) {
     obj[prop] = {
       ...state[prop],
       ...initialState[prop],
       ...data
     };
-  } else {
+  } else if (reset && !prop) {
+    obj = {
+      ...state,
+      ...initialState,
+      ...data
+    };
+  } else if (prop) {
     obj[prop] = {
       ...state[prop],
+      ...data
+    };
+  } else {
+    obj = {
+      ...state,
       ...data
     };
   }
@@ -169,23 +180,65 @@ const createViewQueryObject = (viewOptions, queryObj) => {
   return queryObject;
 };
 
-const getErrorMessageFromResults = results => {
-  const responseData = _.get(results, 'response.data', results.message);
+const getMessageFromResults = (results, filterField = null) => {
+  const status = _.get(results, 'response.status', results.status);
+  const statusResponse = _.get(results, 'response.statusText', results.statusText);
+  const messageResponse = _.get(results, 'response.data', results.message);
+  const detailResponse = _.get(results, 'response.data', results.detail);
 
-  if (typeof responseData === 'string') {
-    return responseData;
+  let serverStatus = '';
+
+  if (status < 400 && !messageResponse && !detailResponse) {
+    return statusResponse;
   }
 
-  const getMessages = messageObject =>
-    _.map(messageObject, next => {
-      if (_.isArray(next)) {
-        return getMessages(next);
-      }
+  if ((status >= 500 || status === undefined) && !messageResponse && !detailResponse) {
+    return `${status || ''} Server is currently unable to handle this request.`;
+  }
 
-      return next;
-    });
+  if (status >= 500 && /Request\sURL:/.test(messageResponse)) {
+    return `${status} ${messageResponse.split(/Request\sURL:/)[0]}`;
+  }
 
-  return _.join(getMessages(responseData), '\n');
+  if (status >= 500 || status === undefined) {
+    serverStatus = status ? `${status} ` : '';
+  }
+
+  if (typeof messageResponse === 'string') {
+    return `${serverStatus}${messageResponse}`;
+  }
+
+  if (typeof detailResponse === 'string') {
+    return `${serverStatus}${detailResponse}`;
+  }
+
+  const getMessages = (messageObject, filterKey) => {
+    const obj = filterKey ? messageObject[filterKey] : messageObject;
+
+    return _.map(
+      obj,
+      next => {
+        if (_.isArray(next)) {
+          return getMessages(next);
+        }
+
+        return next;
+      },
+      null
+    );
+  };
+
+  return `${serverStatus}${_.join(getMessages(messageResponse || detailResponse, filterField), '\n')}`;
+};
+
+const getStatusFromResults = results => {
+  let status = _.get(results, 'response.status', results.status);
+
+  if (status === undefined) {
+    status = 0;
+  }
+
+  return status;
 };
 
 const isIpAddress = name => {
@@ -225,7 +278,8 @@ export const helpers = {
   setStateProp,
   viewPropsChanged,
   createViewQueryObject,
-  getErrorMessageFromResults,
+  getMessageFromResults,
+  getStatusFromResults,
   isIpAddress,
   ipAddressValue,
   DEV_MODE,

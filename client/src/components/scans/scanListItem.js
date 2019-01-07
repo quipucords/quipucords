@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { connect } from 'react-redux';
 import { Button, Checkbox, DropdownButton, Grid, Icon, ListView, MenuItem } from 'patternfly-react';
 import _ from 'lodash';
 import * as moment from 'moment';
+import { connect, reduxTypes, store } from '../../redux';
 import { helpers } from '../../common/helpers';
-import Store from '../../redux/store';
-import { viewTypes } from '../../redux/constants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import ScanSourceList from './scanSourceList';
 import ScanHostList from '../scanHostList/scanHostList';
@@ -31,15 +29,15 @@ class ScanListItem extends React.Component {
     const { item } = this.props;
 
     if (expandType === this.expandType()) {
-      Store.dispatch({
-        type: viewTypes.EXPAND_ITEM,
-        viewType: viewTypes.SCANS_VIEW,
+      store.dispatch({
+        type: reduxTypes.view.EXPAND_ITEM,
+        viewType: reduxTypes.view.SCANS_VIEW,
         item
       });
     } else {
-      Store.dispatch({
-        type: viewTypes.EXPAND_ITEM,
-        viewType: viewTypes.SCANS_VIEW,
+      store.dispatch({
+        type: reduxTypes.view.EXPAND_ITEM,
+        viewType: reduxTypes.view.SCANS_VIEW,
         item,
         expandType
       });
@@ -48,9 +46,9 @@ class ScanListItem extends React.Component {
 
   onCloseExpand = () => {
     const { item } = this.props;
-    Store.dispatch({
-      type: viewTypes.EXPAND_ITEM,
-      viewType: viewTypes.SCANS_VIEW,
+    store.dispatch({
+      type: reduxTypes.view.EXPAND_ITEM,
+      viewType: reduxTypes.view.SCANS_VIEW,
       item
     });
   };
@@ -58,9 +56,9 @@ class ScanListItem extends React.Component {
   onItemSelectChange = () => {
     const { item, selectedScans } = this.props;
 
-    Store.dispatch({
-      type: ScanListItem.isSelected(item, selectedScans) ? viewTypes.DESELECT_ITEM : viewTypes.SELECT_ITEM,
-      viewType: viewTypes.SCANS_VIEW,
+    store.dispatch({
+      type: ScanListItem.isSelected(item, selectedScans) ? reduxTypes.view.DESELECT_ITEM : reduxTypes.view.SELECT_ITEM,
+      viewType: reduxTypes.view.SCANS_VIEW,
       item
     });
   };
@@ -368,8 +366,8 @@ ScanListItem.defaultProps = {
 };
 
 const mapStateToProps = state => ({
-  expandedScans: state.viewOptions[viewTypes.SCANS_VIEW].expandedItems,
-  selectedScans: state.viewOptions[viewTypes.SCANS_VIEW].selectedItems
+  expandedScans: state.viewOptions[reduxTypes.view.SCANS_VIEW].expandedItems,
+  selectedScans: state.viewOptions[reduxTypes.view.SCANS_VIEW].selectedItems
 });
 
 const ConnectedScanListItem = connect(mapStateToProps)(ScanListItem);

@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { Grid, Icon } from 'patternfly-react';
 import _ from 'lodash';
+import { connect, reduxActions } from '../../redux';
 import { helpers } from '../../common/helpers';
-import { reduxActions } from '../../redux/actions';
 
 class ScanSourceList extends React.Component {
   static renderSourceIcon(source) {

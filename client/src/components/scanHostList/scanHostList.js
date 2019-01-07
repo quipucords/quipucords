@@ -83,7 +83,7 @@ class ScanHostList extends React.Component {
       .catch(error => {
         this.setState({
           inspectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
+          scanResultsError: helpers.getMessageFromResults(error)
         });
       });
   }
@@ -124,7 +124,7 @@ class ScanHostList extends React.Component {
       .catch(error => {
         this.setState({
           connectionScanResultsPending: false,
-          scanResultsError: helpers.getErrorMessageFromResults(error)
+          scanResultsError: helpers.getMessageFromResults(error)
         });
       });
   }

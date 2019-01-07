@@ -80,7 +80,7 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -125,7 +125,7 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -169,7 +169,7 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -213,7 +213,7 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -257,7 +257,7 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -302,7 +302,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           add: true,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -361,7 +361,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           start: true,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -406,7 +406,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           cancel: true,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -451,7 +451,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           pause: true,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -496,7 +496,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           restart: true,
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
@@ -551,7 +551,7 @@ const scansReducer = (state = initialState, action) => {
         'update',
         {
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload),
           delete: true
         },
         {

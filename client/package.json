@@ -100,8 +100,8 @@
     "prettier": "^1.14.2",
     "react-app-rewired": "^1.5.0",
     "redux-mock-store": "^1.5.3",
-    "swagger-parser": "^5.0.5",
-    "swagger-ui-express": "^4.0.1",
+    "swagger-parser": "^6.0.2",
+    "swagger-ui-express": "^4.0.2",
     "write-file-webpack-plugin": "^4.4.0",
     "yamljs": "^0.3.0"
   }

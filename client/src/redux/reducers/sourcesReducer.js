@@ -30,7 +30,7 @@ const sourcesReducer = (state = initialState, action) => {
         'update',
         {
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload),
           delete: true
         },
         {
@@ -72,7 +72,7 @@ const sourcesReducer = (state = initialState, action) => {
         'view',
         {
           error: action.error,
-          errorMessage: helpers.getErrorMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload)
         },
         {
           state,
