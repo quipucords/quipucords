@@ -72,7 +72,7 @@ node('f28-os') {
 
         sh "mkdir $install_postgres_dir"
         sh "mv $postgres_targzfile $install_postgres_dir"
-        sh "cp install/$postgres_license $install_postgres_dir/"
+        sh "cp install/$postgres_license $install_postgres_dir"
         sh "tar -zcvf $install_postgres_targzfile $install_postgres_dir"
 
         sh "sudo tar -cvf $install_tar install/*"
