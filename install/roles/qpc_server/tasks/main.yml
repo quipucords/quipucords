@@ -5,20 +5,10 @@
     install_server: "{{ install_server | bool | default(true) }}"
   when: install_server is defined
 
-- name: Install database setting
-  set_fact:
-    install_db_offline: "{{ install_db_offline | bool | default (true) }}"
-  when: install_db_offline is defined
-
 - name: Defaulting server install setting
   set_fact:
     install_server: true
   when: install_server is not defined
-
-- name: Defaulting db install setting
-  set_fact:
-    install_db_offline: false
-  when: install_offline is not defined
 
 - name: Set server directory
   set_fact:
@@ -80,7 +70,6 @@
   become: true
   register: postgres_docker_image_raw
   ignore_errors: yes
-  when: install_db_offline
 
 - name: Set quipucords_docker_image_present false
   set_fact:
@@ -92,7 +81,6 @@
   set_fact:
     postgres_docker_image_present: false
   when:
-    - install_db_offline
     - postgres_docker_image_raw.rc != 0
 
 - name: Set quipucords_docker_image_present true
@@ -106,7 +94,6 @@
   set_fact:
     postgres_docker_image_present: "{{ postgres_docker_image_raw['stdout_lines']|length > 0 }}"
   when:
-    - install_db_offline
     - postgres_docker_image_raw.rc == 0
     - "'stdout_lines' in postgres_docker_image_raw"
 
@@ -120,7 +107,6 @@
     postgres_image_local_path: "{{ pkg_install_dir }}postgres.{{POSTGRES_VERSION}}.tar.gz"
   when:
     - postgres_image_local_path is not defined
-    - install_db_offline
 
 - name: Check if local server release exists
   stat:
@@ -131,7 +117,6 @@
   stat:
     path: "{{postgres_image_local_path}}"
   register: find_posrgres_local_image
-  when: install_db_offline
 
 - name: Ensure packages directory exists
   shell: mkdir -p "{{ pkg_install_dir }}"
@@ -161,7 +146,6 @@
   shell: docker load -i "{{postgres_image_local_path}}"
   become: true
   when:
-    - install_db_offline
     - not postgres_docker_image_present
 
 - name: Make server home directory

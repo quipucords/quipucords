@@ -56,8 +56,8 @@ usage() {
          -e QPC_DBMS_PASSWORD=password
     * Override default server timeout for HTTP requests (if not specified the default value is 120):
          -e QPC_SERVER_TIMEOUT=120
-    * Specify if installing the database offline
-         -e install_db_offline=true
+    * Specify if installing offline
+         -e install_offline=true
 EOM
     exit 0
 }
