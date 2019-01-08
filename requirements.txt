@@ -1,7 +1,7 @@
 # Include Locked Server Requirements
 -r locked-requirements.txt
 
-Django==2.1.4
+Django==2.1.5
 django-filter==2.0.0
 djangorestframework==3.9.0
 djangorestframework-expiring-authtoken==0.1.4
