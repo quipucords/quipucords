@@ -62,10 +62,48 @@ EOM
     exit 0
 }
 
+  offline_check() {
+    echo 'Checking if required files exists for an offline installation.'
+    pkg_dir='package/'
+    for i in "${args[@]}"
+    do
+      if [[ "$i" == *"pkg_install_dir"* ]]; then
+        string_copy="$i"
+        split_equals="$(cut -d'=' -f2 <<<"$string_copy")"
+        pkg_dir=$split_equals
+      fi
+    done
+    server_image_path="$pkg_dir/quipucords.$(cut -d'=' -f2 <<<"$RELEASE_TAG").tar.gz"
+    postgres_image_path="$pkg_dir/postgres.$(cut -d'=' -f2 <<<"$POSTGRES_VERSION").tar.gz"
+    declare -a check=($server_image_path $postgres_image_path)
+    for i in "${check[@]}"
+    do
+      if [ ! -f "$i" ]; then
+        echo "$i is required for an offline installation."
+        unset check
+        exit 1
+      fi
+    done
+    cli_rpm_path="$pkg_dir/qpc-$(cut -d'=' -f2 <<<"$CLI_PACKAGE_VERSION").*.noarch.rpm"
+    echo "$cli_rpm_path"
+    if compgen -G "$cli_rpm_path > /dev/null"; then
+      echo "WARNING: $cli_rpm_path was not found, but could be configured through satellite."
+    fi
+    echo "Checks passed continuing with installation."
+  }
+
 if [[ ($1 == "--help") ||  ($1 == "-h") ]]
 then
   usage;
 fi
+
+for i in "${args[@]}"
+do
+  if [[ "$i" == *"offline"* ]]
+  then
+    offline_check;
+  fi
+done
 
 if [ ! -f /etc/redhat-release ]; then
   echo "/etc/redhat-release not found. You need to run this on a Red Hat based OS."
