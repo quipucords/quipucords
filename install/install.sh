@@ -64,7 +64,7 @@ EOM
 
   offline_check() {
     echo 'Checking if required files exists for an offline installation.'
-    pkg_dir='package/'
+    pkg_dir='packages/'
     for i in "${args[@]}"
     do
       if [[ "$i" == *"pkg_install_dir"* ]]; then
@@ -84,6 +84,7 @@ EOM
         exit 1
       fi
     done
+    unset check
     cli_rpm_path="$pkg_dir/qpc-$(cut -d'=' -f2 <<<"$CLI_PACKAGE_VERSION").*.noarch.rpm"
     echo "$cli_rpm_path"
     if compgen -G "$cli_rpm_path > /dev/null"; then
