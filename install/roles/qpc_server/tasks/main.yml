@@ -116,7 +116,7 @@
 - name: Check if postgres image exists
   stat:
     path: "{{postgres_image_local_path}}"
-  register: find_posrgres_local_image
+  register: find_postgres_local_image
 
 - name: Ensure packages directory exists
   shell: mkdir -p "{{ pkg_install_dir }}"
@@ -147,6 +147,7 @@
   become: true
   when:
     - not postgres_docker_image_present
+    - find_postgres_local_image.stat.exists == true
 
 - name: Make server home directory
   shell: mkdir -p "{{server_install_dir}}"

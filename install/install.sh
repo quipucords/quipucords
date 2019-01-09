@@ -69,22 +69,21 @@ EOM
     do
       if [[ "$i" == *"pkg_install_dir"* ]]; then
         string_copy="$i"
-        split_equals="$(cut -d'=' -f2 <<<"$string_copy")"
-        pkg_dir=$split_equals
+        pkg_dir="$(cut -d'=' -f2 <<<"$string_copy")"
       fi
     done
     server_image_path="$pkg_dir/quipucords.$(cut -d'=' -f2 <<<"$RELEASE_TAG").tar.gz"
     postgres_image_path="$pkg_dir/postgres.$(cut -d'=' -f2 <<<"$POSTGRES_VERSION").tar"
-    declare -a check=($server_image_path $postgres_image_path)
-    for i in "${check[@]}"
+    declare -a required_images=($server_image_path $postgres_image_path)
+    for i in "${required_images[@]}"
     do
       if [ ! -f "$i" ]; then
         echo "$i is required for an offline installation."
-        unset check
+        unset required_images
         exit 1
       fi
     done
-    unset check
+    unset required_images
     cli_rpm_path="$pkg_dir/qpc-$(cut -d'=' -f2 <<<"$CLI_PACKAGE_VERSION").*.noarch.rpm"
     echo "$cli_rpm_path"
     if compgen -G "$cli_rpm_path > /dev/null"; then
