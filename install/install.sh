@@ -74,7 +74,7 @@ EOM
       fi
     done
     server_image_path="$pkg_dir/quipucords.$(cut -d'=' -f2 <<<"$RELEASE_TAG").tar.gz"
-    postgres_image_path="$pkg_dir/postgres.$(cut -d'=' -f2 <<<"$POSTGRES_VERSION").tar.gz"
+    postgres_image_path="$pkg_dir/postgres.$(cut -d'=' -f2 <<<"$POSTGRES_VERSION").tar"
     declare -a check=($server_image_path $postgres_image_path)
     for i in "${check[@]}"
     do

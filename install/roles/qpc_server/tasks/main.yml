@@ -104,7 +104,7 @@
 
 - name: Set postgres_image_path
   set_fact:
-    postgres_image_local_path: "{{ pkg_install_dir }}postgres.{{POSTGRES_VERSION}}.tar.gz"
+    postgres_image_local_path: "{{ pkg_install_dir }}postgres.{{POSTGRES_VERSION}}.tar"
   when:
     - postgres_image_local_path is not defined
 
