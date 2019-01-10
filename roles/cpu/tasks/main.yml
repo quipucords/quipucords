@@ -64,68 +64,24 @@
     cpu_hyperthreading: "{{ cpu_siblings != None and (cpu_siblings | int) == ((cpu_core_per_socket | int) * 2) }}"
   ignore_errors: yes
 
-- name: initialize cpu.socket_count fact
-  set_fact:
-    cpu_socket_count: "0"
-  ignore_errors: yes
-
 - name: gather cpu.socket_count fact
   raw: /usr/sbin/dmidecode -t 4 | grep 'Socket Designation'| wc -l
-  register: internal_cpu_socket_count_cmd
+  register: internal_cpu_socket_count_dmi_cmd
   become: yes
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_dmidecode'
 
-- name: extract result value for cpu.socket_count
-  set_fact:
-    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
-  ignore_errors: yes
-  when: '"stdout" in internal_cpu_socket_count_cmd'
-
 - name: gather cpu.socket_count fact with fallback
   raw: cat /proc/cpuinfo 2>/dev/null | grep 'physical id' | sort -u | wc -l
-  register: internal_cpu_socket_count_cmd
+  register: internal_cpu_socket_count_cpuinfo_cmd
   ignore_errors: yes
-  when: '"failed" in internal_cpu_socket_count_cmd and internal_cpu_socket_count_cmd["failed"] == true'
 
-- name: extract result from internal_cpu_socket_count_cmd
+- name: initialize cpu.socket_count fact
   set_fact:
-    cpu_socket_count: "{{ internal_cpu_socket_count_cmd['stdout_lines'][0] }}"
+    cpu_socket_count: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
-  when: '"stdout_lines" in internal_cpu_socket_count_cmd'
 
-- name: assume cpu.socket_count equals 1 if result is 0
+- name: default cpu.core_count
   set_fact:
-    cpu_socket_count: "{{ cpu_count }}"
+    cpu_core_count: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
-  when: 'cpu_socket_count == "0"'
-
-- name: calculate cpu.core_count
-  set_fact:
-    cpu_core_count: "{{ (cpu_core_per_socket | int) *  (cpu_socket_count | int)}}"
-  ignore_errors: yes
-  when: 'cpu_core_per_socket is defined and cpu_core_per_socket'
-
-- name: calculate cpu.core_count fallback no hyperthreading
-  set_fact:
-    cpu_core_count: "{{ cpu_count }}"
-  ignore_errors: yes
-  when: 'cpu_core_per_socket is defined and not cpu_core_per_socket and not cpu_hyperthreading'
-
-- name: calculate cpu.core_count fallback with hyperthreading
-  set_fact:
-    cpu_core_count: "{{ (cpu_count | int) /  2 }}"
-  ignore_errors: yes
-  when: 'cpu_core_per_socket is defined and not cpu_core_per_socket and cpu_hyperthreading'
-
-- name: set cpu.core_count to cpu_count if vmware
-  set_fact:
-    cpu_core_count: "{{ (cpu_count | int) }}"
-  ignore_errors: yes
-  when: 'cpu_count is defined and virt_type is defined and virt_type == "vmware"'
-
-- name: default cpu.core_count to error if it doesn't exists
-  set_fact:
-    cpu_core_count: ""
-  ignore_errors: yes
-  when: 'cpu_core_count is not defined'
