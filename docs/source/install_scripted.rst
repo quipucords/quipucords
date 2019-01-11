@@ -43,7 +43,7 @@ If you choose the offline option to run the installer, these associated dependen
 **Server Dependencies:**
 
 - `Ansible <install.html#installing-the-ansible-prerequisite>`_
-- `Docker <install.html#install.html#installing-docker-and-the-quipucords-server-container-image>`_
+- `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
 
 **Command Line Tool Dependencies:**
 
@@ -58,14 +58,14 @@ After the dependencies are installed, you must gather packages through the `Gith
 **Server Packages:**
 
 - Server Container Image (quipucords.version.tar.gz)
-- Postgres Container Image (quipucords.version.tar.gz)
+- Postgres Container Image (postgres.version.tar.gz)
 - **Note:** You must extract the tarball to access the postgres image with the command::
 
   # tar -xzv postgres.version.tar.gz
 
-**Command Line Tool RPM Package: **
+**Command Line Tool RPM Package:**
 
-- QPC Package (all of the qpc.rpm)
+- QPC Package (all of the qpc-version.rpm)
 
 
 1. Change to the installer directory by entering following command::
@@ -115,10 +115,3 @@ Options:
     - (Optional) Specifies the database user for postgres. Defaults to ``postgres``.
  - **QPC_DBMS_PASSWORD**
     - (Optional) Specifies the database password for postgres. Defaults to ``password``.
-
-Configuring Quipucords
-----------------------
-When the installation completes, the Quipucords server is installed and started. In addition, a connection to the command line tool is configured on the same system on which the server is installed. However, you must still complete the following steps before you can begin using Quipucords:
-
-- `Changing the Default Password for the Quipucords Server <install.html#change-default-pw>`_
-- `Logging in to the Quipucords Server <cli_server_interaction.html#login>`_
