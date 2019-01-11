@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 2 (GPLv2). There is NO WARRANTY for this software, express or
@@ -117,7 +117,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '5')
+            5)
 
     def test_dmiresult_contains_nonint_characters(self):
         """Test that we use cpuinfo cmd if dmi cmd can't be changed to int."""
@@ -128,7 +128,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '2')
+            2)
 
     def test_dmiresult_cpuinfo_fails(self):
         """Test that we use cpu count when dmi and cpuinfo cmds fail."""
@@ -140,7 +140,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '4')
+            4)
 
     def test_dmiresult_cpuinfo_not_in_dependencies(self):
         """Test that we use cpu count when the dependencies are None."""
@@ -148,7 +148,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '4')
+            4)
 
     def test_dmiresult_cpuinfo_failed_tasks(self):
         """Test the sc is the same as cpu count when the deps raise errors."""
@@ -160,7 +160,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '4')
+            4)
 
     def test_cpuinfo_failed_value_error(self):
         """Test that cpu count is used when other deps rasie value errors."""
@@ -172,7 +172,18 @@ class TestProcessCpuSocketCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '1')
+            1)
+
+    def test_cpuinfo_failed_return_none(self):
+        """Test that none is returned if everything else fails."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('Failure')}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            None)
 
 
 class TestProcessCpuCoreCount(unittest.TestCase):
@@ -185,7 +196,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '4')
+            4)
 
     def test_core_count_success_with_virt_type(self):
         """Test the core count when virt_type is vmware."""
@@ -196,7 +207,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '3')
+            3)
 
     def test_core_count_success_with_hyperthreading(self):
         """Test the core count when there is hyperthreading."""
@@ -206,7 +217,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '1.5')
+            1.5)
 
     def test_core_count_success_without_hyperthreading(self):
         """Test the core count when there is not hyperthreading."""
@@ -216,7 +227,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '3')
+            3)
 
     def test_core_count_return_empty_string(self):
         """Test the core count is set to '' when deps not available."""
@@ -224,4 +235,4 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            '')
+            None)

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -10,6 +10,8 @@
 """Initial processing of the shell output from the cpu role."""
 
 import logging
+
+from api.common.util import convert_to_int, is_int
 
 from scanner.network.processing import process
 from scanner.network.processing.util import get_line
@@ -93,11 +95,9 @@ class ProcessCpuSocketCount(process.Processor):
             dependencies.get('internal_cpu_socket_count_dmi_cmd')
         if dmi_cpu_socket_count and dmi_cpu_socket_count.get('rc') == 0:
             dmi_count = dmi_cpu_socket_count.get('stdout').strip()
-            try:
-                if int(dmi_count) != 0:
-                    return dmi_count
-            except ValueError:
-                pass
+            if is_int(dmi_count):
+                if convert_to_int(dmi_count) != 0:
+                    return convert_to_int(dmi_count)
 
         # process the cpuinfo socket count as a fallback
         cpuinfo_cpu_socket_count = \
@@ -107,15 +107,15 @@ class ProcessCpuSocketCount(process.Processor):
                 cpuinfo_cpu_socket_count.get('stdout_lines'):
             cpuinfo_count = cpuinfo_cpu_socket_count.get(
                 'stdout_lines', [0])[0]
-            try:
-                if int(cpuinfo_count) != 0:
-                    return cpuinfo_count
-            except ValueError:
-                pass
+            if is_int(cpuinfo_count):
+                if convert_to_int(cpuinfo_count) != 0:
+                    return convert_to_int(cpuinfo_count)
 
         # assign the socket_count to the cpu_count as a last resort
         cpu_count = dependencies.get('cpu_count')
-        return cpu_count
+        if is_int(cpu_count):
+            return convert_to_int(cpu_count)
+        return None
 
 
 class ProcessCpuCoreCount(process.Processor):
@@ -139,15 +139,16 @@ class ProcessCpuCoreCount(process.Processor):
         virt_type = dependencies.get('virt_type')
         # if the virt_type is vmware and cpu_count exists
         # then return cpu_count
-        if virt_type and virt_type == 'vmware' and cpu_count:
-            return str(cpu_count)
+        if virt_type and virt_type == 'vmware' and is_int(cpu_count):
+            return convert_to_int(cpu_count)
         # if the cpu_core_per_socket & the cpu_socket_count are present
         # return the product of the two
-        if cpu_core_per_socket and cpu_socket_count:
-            return str(int(cpu_core_per_socket) * int(cpu_socket_count))
-        if cpu_count:
+        if is_int(cpu_core_per_socket) and is_int(cpu_socket_count):
+            return convert_to_int(cpu_core_per_socket) * \
+                convert_to_int(cpu_socket_count)
+        if is_int(cpu_count):
             if cpu_hyperthreading:
-                return str(int(cpu_count) / 2)
+                return convert_to_int(cpu_count) / 2
             # if there is no threading, return the cpu count
-            return str(cpu_count)
-        return ''
+            return convert_to_int(cpu_count)
+        return None
