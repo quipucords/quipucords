@@ -185,6 +185,54 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                 'QPC_FORCE_POST_PROCESS', dependencies),
             None)
 
+    def test_dmiresult_greater_than_8(self):
+        """Test that cpu count is used when other deps greater than 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('9'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            3)
+
+    def test_dmiresult_equal_to_8(self):
+        """Test that socket count is set to dmicode dep when equal to 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('8'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            8)
+
+    def test_cpuinfo_equal_to_8(self):
+        """Test that socket count is set to cpuinfo dep when equal to 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('10'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('8'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            8)
+
+    def test_cpu_count_greater_than_8(self):
+        """Test that the sc is set to cpuinfo even if greater thatn 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('10'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '12'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            12)
+
 
 class TestProcessCpuCoreCount(unittest.TestCase):
     """Test ProcessCpuCoreCount."""

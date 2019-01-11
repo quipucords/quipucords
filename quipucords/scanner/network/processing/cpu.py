@@ -96,7 +96,8 @@ class ProcessCpuSocketCount(process.Processor):
         if dmi_cpu_socket_count and dmi_cpu_socket_count.get('rc') == 0:
             dmi_count = dmi_cpu_socket_count.get('stdout').strip()
             if is_int(dmi_count):
-                if convert_to_int(dmi_count) != 0:
+                if convert_to_int(dmi_count) != 0 and \
+                        convert_to_int(dmi_count) <= 8:
                     return convert_to_int(dmi_count)
 
         # process the cpuinfo socket count as a fallback
@@ -108,7 +109,8 @@ class ProcessCpuSocketCount(process.Processor):
             cpuinfo_count = cpuinfo_cpu_socket_count.get(
                 'stdout_lines', [0])[0]
             if is_int(cpuinfo_count):
-                if convert_to_int(cpuinfo_count) != 0:
+                if convert_to_int(cpuinfo_count) != 0 and \
+                        convert_to_int(cpuinfo_count) <= 8:
                     return convert_to_int(cpuinfo_count)
 
         # assign the socket_count to the cpu_count as a last resort
