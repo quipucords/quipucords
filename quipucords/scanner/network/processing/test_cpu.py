@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 2 (GPLv2). There is NO WARRANTY for this software, express or
@@ -162,6 +162,18 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                 'QPC_FORCE_POST_PROCESS', dependencies),
             '4')
 
+    def test_cpuinfo_failed_value_error(self):
+        """Test that cpu count is used when other deps rasie value errors."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('Failure'),
+                        'cpu_count': '1'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '1')
+
 
 class TestProcessCpuCoreCount(unittest.TestCase):
     """Test ProcessCpuCoreCount."""
@@ -173,7 +185,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            4)
+            '4')
 
     def test_core_count_success_with_virt_type(self):
         """Test the core count when virt_type is vmware."""
@@ -184,7 +196,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            3)
+            '3')
 
     def test_core_count_success_with_hyperthreading(self):
         """Test the core count when there is hyperthreading."""
@@ -194,7 +206,7 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            1.5)
+            '1.5')
 
     def test_core_count_success_without_hyperthreading(self):
         """Test the core count when there is not hyperthreading."""
@@ -204,4 +216,12 @@ class TestProcessCpuCoreCount(unittest.TestCase):
         self.assertEqual(
             cpu.ProcessCpuCoreCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            3)
+            '3')
+
+    def test_core_count_return_empty_string(self):
+        """Test the core count is set to '' when deps not available."""
+        dependencies = {}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '')

@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -140,14 +140,14 @@ class ProcessCpuCoreCount(process.Processor):
         # if the virt_type is vmware and cpu_count exists
         # then return cpu_count
         if virt_type and virt_type == 'vmware' and cpu_count:
-            return int(cpu_count)
+            return str(cpu_count)
         # if the cpu_core_per_socket & the cpu_socket_count are present
         # return the product of the two
         if cpu_core_per_socket and cpu_socket_count:
-            return int(cpu_core_per_socket) * int(cpu_socket_count)
+            return str(int(cpu_core_per_socket) * int(cpu_socket_count))
         if cpu_count:
             if cpu_hyperthreading:
-                return int(cpu_count) / 2
+                return str(int(cpu_count) / 2)
             # if there is no threading, return the cpu count
-            return int(cpu_count)
+            return str(cpu_count)
         return ''
