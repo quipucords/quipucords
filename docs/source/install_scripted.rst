@@ -1,6 +1,6 @@
 Scripted Installation
 ----------------------
-The scripted installation runs an installer that uses Ansible to install the command line tool, quipucords server image, and the database image. When you run the scripted installation, the server is installed and started as described in `Configuring and Starting Quipucords <install.html#config-and-start>`_. However, you can change some of the defaults used by the scripted installation with the `Installation Options <install.html#installation-options>`_ .
+The scripted installation runs an installer that uses Ansible to install the command line tool, quipucords server image, and the database image. When you run the scripted installation, the server is installed and started as described in `Configuring and Starting Quipucords <install.html#config-and-start>`_. However, you can change some of the defaults used by the scripted installation with the `Installation Options <install.html#installation-options>`_.
 
 Obtaining the Installer
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,7 +28,7 @@ If you choose the internet connectivity option, use the following steps to run t
 
     # cd install/
 
-2. Start the installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
+2. Start the installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options <install.html#installation-options>`_::
 
     # ./install.sh
 
