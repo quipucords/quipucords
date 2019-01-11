@@ -1,0 +1,2449 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`defined type MERGE_SCAN_DIALOG_HIDE 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "MERGE_SCAN_DIALOG_HIDE",
+}
+`;
+
+exports[`defined type MERGE_SCAN_DIALOG_SHOW 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": undefined,
+      "scans": undefined,
+      "show": true,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "MERGE_SCAN_DIALOG_SHOW",
+}
+`;
+
+exports[`defined type RESET_SCAN_ADD_STATUS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "RESET_SCAN_ADD_STATUS",
+}
+`;
+
+exports[`fulfilled types ADD_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": true,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "ADD_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types CANCEL_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "CANCEL_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types DELETE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "DELETE_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "scan": undefined,
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SCAN_CONNECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "results": undefined,
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_CONNECTION_RESULTS_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SCAN_INSPECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "results": undefined,
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_INSPECTION_RESULTS_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SCAN_JOBS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "jobs": undefined,
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_JOBS_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SCANS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": undefined,
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCANS_FULFILLED",
+}
+`;
+
+exports[`fulfilled types PAUSE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pause": true,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "PAUSE_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types RESTART_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pause": false,
+      "pending": false,
+      "restart": true,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "RESTART_SCAN_FULFILLED",
+}
+`;
+
+exports[`fulfilled types START_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": true,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "START_SCAN_FULFILLED",
+}
+`;
+
+exports[`pending types ADD_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": true,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": true,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "ADD_SCAN_PENDING",
+}
+`;
+
+exports[`pending types CANCEL_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": true,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "CANCEL_SCAN_PENDING",
+}
+`;
+
+exports[`pending types DELETE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "DELETE_SCAN_PENDING",
+}
+`;
+
+exports[`pending types GET_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "scan": undefined,
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_PENDING",
+}
+`;
+
+exports[`pending types GET_SCAN_CONNECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_CONNECTION_RESULTS_PENDING",
+}
+`;
+
+exports[`pending types GET_SCAN_INSPECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_INSPECTION_RESULTS_PENDING",
+}
+`;
+
+exports[`pending types GET_SCAN_JOBS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": true,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_JOBS_PENDING",
+}
+`;
+
+exports[`pending types GET_SCANS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": true,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCANS_PENDING",
+}
+`;
+
+exports[`pending types PAUSE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": true,
+      "pending": true,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "PAUSE_SCAN_PENDING",
+}
+`;
+
+exports[`pending types RESTART_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": true,
+      "restart": true,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "RESTART_SCAN_PENDING",
+}
+`;
+
+exports[`pending types START_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": true,
+      "restart": false,
+      "start": true,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "START_SCAN_PENDING",
+}
+`;
+
+exports[`rejected types ADD_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": true,
+      "cancel": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "ADD_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types CANCEL_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": true,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "CANCEL_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types DELETE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": true,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "DELETE_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SCAN_CONNECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_CONNECTION_RESULTS_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SCAN_INSPECTION_RESULTS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_INSPECTION_RESULTS_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SCAN_JOBS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCAN_JOBS_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SCANS 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "GET_SCANS_REJECTED",
+}
+`;
+
+exports[`rejected types PAUSE_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pause": true,
+      "pending": false,
+      "restart": false,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "PAUSE_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types RESTART_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": true,
+      "start": false,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "RESTART_SCAN_REJECTED",
+}
+`;
+
+exports[`rejected types START_SCAN 1`] = `
+Object {
+  "result": Object {
+    "action": Object {
+      "add": false,
+      "cancel": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pause": false,
+      "pending": false,
+      "restart": false,
+      "start": true,
+    },
+    "connectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "detail": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "scan": Object {},
+    },
+    "inspectionResults": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "results": Array [],
+    },
+    "jobs": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "jobs": Array [],
+      "pending": false,
+    },
+    "merge_dialog": Object {
+      "details": false,
+      "scans": Array [],
+      "show": false,
+    },
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "lastRefresh": 0,
+      "pending": false,
+      "scans": Array [],
+      "sourcesCount": 0,
+    },
+  },
+  "type": "START_SCAN_REJECTED",
+}
+`;

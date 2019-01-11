@@ -31,68 +31,63 @@ class Scans extends React.Component {
     }
   }
 
-  constructor() {
-    super();
-    /**
-     * FixMe: Deletions of scans is not currently desired. This is here in case it ever gets added.
-     * FUTURE: Delete is fully functional by setting this.okToDelete to true.
-     */
-    this.okToDelete = false;
-    this.scansToDelete = [];
-    this.deletingScan = null;
+  /**
+   * FixMe: Deletions of scans is not currently desired. This is here in case it ever gets added.
+   * FUTURE: Delete is fully functional by setting okToDelete to true.
+   */
+  okToDelete = false;
 
-    this.state = {
-      lastRefresh: null,
-      redirectTo: null
-    };
-  }
+  state = {
+    scansToDelete: [],
+    deletingScan: null,
+    redirectTo: null
+  };
 
   componentDidMount() {
     this.onRefresh();
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { fulfilled, update, viewOptions } = this.props;
+  componentDidUpdate(previousProps) {
+    const { update, viewOptions } = this.props;
+    const { deletingScan } = this.state;
+
     // Check for changes resulting in a fetch
-    if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
-      this.onRefresh(nextProps);
+    if (helpers.viewPropsChanged(previousProps.viewOptions, viewOptions)) {
+      this.onRefresh();
     }
 
-    if (nextProps.fulfilled && !fulfilled) {
-      this.setState({ lastRefresh: Date.now() });
-    }
-
-    if (_.get(nextProps, 'update.delete')) {
-      if (nextProps.update.fulfilled && !update.fulfilled) {
+    if (_.get(update, 'delete')) {
+      if (previousProps.update.fulfilled && !update.fulfilled) {
         store.dispatch({
           type: reduxTypes.toastNotifications.TOAST_ADD,
           alertType: 'success',
           message: (
             <span>
-              Scan <strong>{this.deletingScan.name}</strong> successfully deleted.
+              Scan <strong>{deletingScan.name}</strong> successfully deleted.
             </span>
           )
         });
+
         this.onRefresh();
 
         store.dispatch({
           type: reduxTypes.view.DESELECT_ITEM,
           viewType: reduxTypes.view.SCANS_VIEW,
-          item: this.deletingScan
+          item: deletingScan
         });
 
         this.deleteNextScan();
       }
 
-      if (nextProps.update.error && !update.error) {
+      if (previousProps.update.error && !update.error) {
         store.dispatch({
           type: reduxTypes.toastNotifications.TOAST_ADD,
           alertType: 'error',
           header: 'Error',
           message: (
             <span>
-              Error removing scan <strong>{this.deletingScan.name}</strong>
-              <p>{nextProps.update.errorMessage}</p>
+              Error removing scan <strong>{deletingScan.name}</strong>
+              <p>{update.errorMessage}</p>
             </span>
           )
         });
@@ -143,7 +138,7 @@ class Scans extends React.Component {
   onDoPauseScan = item => {
     const { pauseScan } = this.props;
 
-    pauseScan(item.id).then(
+    pauseScan(item.most_recent.id).then(
       response => this.notifyActionStatus(item, 'paused', false, response.value),
       error => this.notifyActionStatus(item, 'paused', true, error)
     );
@@ -152,7 +147,7 @@ class Scans extends React.Component {
   onDoResumeScan = item => {
     const { restartScan } = this.props;
 
-    restartScan(item.id).then(
+    restartScan(item.most_recent.id).then(
       response => this.notifyActionStatus(item, 'resumed', false, response.value),
       error => this.notifyActionStatus(item, 'resumed', true, error)
     );
@@ -161,7 +156,7 @@ class Scans extends React.Component {
   onDoCancelScan = item => {
     const { cancelScan } = this.props;
 
-    cancelScan(item.id).then(
+    cancelScan(item.most_recent.id).then(
       response => this.notifyActionStatus(item, 'canceled', false, response.value),
       error => this.notifyActionStatus(item, 'canceled', true, error)
     );
@@ -179,12 +174,11 @@ class Scans extends React.Component {
     }
   };
 
-  onRefresh = props => {
+  onRefresh = () => {
     const { getScans, getScansSources, viewOptions } = this.props;
-    const options = _.get(props, 'viewOptions') || viewOptions;
 
     getScansSources();
-    getScans(helpers.createViewQueryObject(options, { scan_type: 'inspect' }));
+    getScans(helpers.createViewQueryObject(viewOptions, { scan_type: 'inspect' }));
   };
 
   onDeleteScans = () => {
@@ -263,23 +257,35 @@ class Scans extends React.Component {
 
   deleteNextScan() {
     const { deleteScan } = this.props;
+    const { scansToDelete } = this.state;
 
-    if (this.scansToDelete.length > 0) {
-      this.deletingScan = this.scansToDelete.pop();
-      if (this.deletingScan) {
-        deleteScan(this.deletingScan.id);
-      }
+    if (scansToDelete.length > 0) {
+      const nextDeletingScan = scansToDelete.pop();
+
+      this.setState(
+        {
+          deletingScan: nextDeletingScan
+        },
+        () => {
+          if (nextDeletingScan) {
+            deleteScan(nextDeletingScan.id);
+          }
+        }
+      );
     }
   }
 
   doDeleteScans(items) {
-    this.scansToDelete = [...items];
+    this.setState(
+      {
+        scansToDelete: [...items]
+      },
+      () => this.deleteNextScan()
+    );
 
     store.dispatch({
       type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_HIDE
     });
-
-    this.deleteNextScan();
   }
 
   handleDeleteScan(item) {
@@ -353,7 +359,7 @@ class Scans extends React.Component {
   }
 
   renderScansList(items) {
-    const { lastRefresh } = this.state;
+    const { lastRefresh } = this.props;
 
     if (_.size(items)) {
       return (
@@ -389,8 +395,8 @@ class Scans extends React.Component {
   }
 
   render() {
-    const { error, errorMessage, scans, sourcesCount, viewOptions } = this.props;
-    const { lastRefresh, redirectTo } = this.state;
+    const { lastRefresh, error, errorMessage, scans, sourcesCount, viewOptions } = this.props;
+    const { redirectTo } = this.state;
 
     if (error) {
       return (
@@ -456,6 +462,7 @@ Scans.propTypes = {
   errorMessage: PropTypes.string,
   pending: PropTypes.bool,
   scans: PropTypes.array,
+  lastRefresh: PropTypes.number,
   sourcesCount: PropTypes.number,
   viewOptions: PropTypes.object,
   update: PropTypes.object
@@ -476,6 +483,7 @@ Scans.defaultProps = {
   errorMessage: null,
   pending: false,
   scans: [],
+  lastRefresh: 0,
   sourcesCount: 0,
   viewOptions: {},
   update: {}
