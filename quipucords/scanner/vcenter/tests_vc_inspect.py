@@ -257,80 +257,79 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual('hostname', sys_results.first().name)
             self.assertEqual(expected_facts, sys_fact)
 
-        # pylint: disable=too-many-locals
-        @patch('scanner.vcenter.inspect.datetime')
-        def test_parse_vm_props_with_no_dns_name(self, mock_dt):
-            """Test the parse_vm_props method with no vm.dns.name."""
-            mock_dt.utcnow.return_value = datetime(2000, 1, 1, 4, 20)
+    # pylint: disable=too-many-locals
+    @patch('scanner.vcenter.inspect.datetime')
+    def test_parse_vm_props_with_no_dns_name(self, mock_dt):
+        """Test the parse_vm_props method with no vm.dns.name."""
+        mock_dt.utcnow.return_value = datetime(2000, 1, 1, 4, 20)
 
-            ip_addresses, mac_addresses = ['1.2.3.4'], ['00:50:56:9e:09:8c']
+        ip_addresses, mac_addresses = ['1.2.3.4'], ['00:50:56:9e:09:8c']
 
-            facts = {'name': 'vm1',
-                     'guest.net': '',  # mac/ip addr returned by get_nics
-                     'summary.runtime.powerState': 'poweredOn',
-                     'summary.config.guestFullName': 'Red Hat 7',
-                     'summary.config.memorySizeMB': 1024,
-                     'summary.config.numCpu': 4,
-                     'summary.config.uuid': '1111',
-                     'runtime.host': ''}  # runs through host_facts values
-            host_facts = {
-                'host.name': 'host1',
-                'host.cpu_cores': 12,
-                'host.cpu_count': 2,
-                'host.cpu_threads': 24,
-                'host.cluster': 'cluster1',
-                'host.datacenter': 'dc1'}
+        facts = {'name': 'vm1',
+                 'guest.net': '',  # mac/ip addr returned by get_nics
+                 'summary.runtime.powerState': 'poweredOn',
+                 'summary.config.guestFullName': 'Red Hat 7',
+                 'summary.config.memorySizeMB': 1024,
+                 'summary.config.numCpu': 4,
+                 'summary.config.uuid': '1111',
+                 'runtime.host': ''}  # runs through host_facts values
+        host_facts = {
+            'host.name': 'host1',
+            'host.cpu_cores': 12,
+            'host.cpu_count': 2,
+            'host.cpu_threads': 24,
+            'host.cluster': 'cluster1',
+            'host.datacenter': 'dc1'}
 
-            host = vim.HostSystem('host-1')
+        host = vim.HostSystem('host-1')
 
-            host_dict = {}
-            host_dict[str(host)] = host_facts
-            props = []
+        host_dict = {}
+        host_dict[str(host)] = host_facts
+        props = []
 
-            for key in facts:
-                prop = Mock()
-                prop.name, prop.val = key, facts[key]
-                if key == 'runtime.host':
-                    prop.val = host
-                props.append(prop)
+        for key in facts:
+            prop = Mock()
+            prop.name, prop.val = key, facts[key]
+            if key == 'runtime.host':
+                prop.val = host
+            props.append(prop)
 
-            self.scan_task.update_stats(
-                'TEST_VC.',
-                sys_count=5,
-                sys_failed=0,
-                sys_scanned=0,
-                sys_unreachable=0)
+        self.scan_task.update_stats(
+            'TEST_VC.',
+            sys_count=5,
+            sys_failed=0,
+            sys_scanned=0,
+            sys_unreachable=0)
 
-            with patch('scanner.vcenter.inspect.get_nics',
-                       return_value=(mac_addresses, ip_addresses)):
-                self.runner.parse_vm_props(props, host_dict)
+        with patch('scanner.vcenter.inspect.get_nics',
+                   return_value=(mac_addresses, ip_addresses)):
+            self.runner.parse_vm_props(props, host_dict)
 
-                inspect_result = self.scan_task.inspection_result
-                sys_results = inspect_result.systems.all()
-                expected_facts = {'vm.cluster': 'cluster1',
-                                  'vm.cpu_count': 4,
-                                  'vm.datacenter': 'dc1',
-                                  'vm.dns_name': 'hostname',
-                                  'vm.host.cpu_cores': 12,
-                                  'vm.host.cpu_count': 2,
-                                  'vm.host.cpu_threads': 24,
-                                  'vm.host.name': 'host1',
-                                  'vm.ip_addresses': ['1.2.3.4'],
-                                  'vm.mac_addresses': ['00:50:56:9e:09:8c'],
-                                  'vm.memory_size': 1,
-                                  'vm.name': 'vm1',
-                                  'vm.os': 'Red Hat 7',
-                                  'vm.state': 'poweredOn',
-                                  'vm.last_check_in': '2000-01-01 04:20:00',
-                                  'vm.uuid': '1111'}
-                sys_fact = {}
-                for raw_fact in sys_results.first().facts.all():
-                    # Must read as JSON as this is what task.py does
-                    sys_fact[raw_fact.name] = json.loads(raw_fact.value)
+            inspect_result = self.scan_task.inspection_result
+            sys_results = inspect_result.systems.all()
+            expected_facts = {'vm.cluster': 'cluster1',
+                              'vm.cpu_count': 4,
+                              'vm.datacenter': 'dc1',
+                              'vm.host.cpu_cores': 12,
+                              'vm.host.cpu_count': 2,
+                              'vm.host.cpu_threads': 24,
+                              'vm.host.name': 'host1',
+                              'vm.ip_addresses': ['1.2.3.4'],
+                              'vm.mac_addresses': ['00:50:56:9e:09:8c'],
+                              'vm.memory_size': 1,
+                              'vm.name': 'vm1',
+                              'vm.os': 'Red Hat 7',
+                              'vm.state': 'poweredOn',
+                              'vm.last_check_in': '2000-01-01 04:20:00',
+                              'vm.uuid': '1111'}
+            sys_fact = {}
+            for raw_fact in sys_results.first().facts.all():
+                # Must read as JSON as this is what task.py does
+                sys_fact[raw_fact.name] = json.loads(raw_fact.value)
 
-                self.assertEqual(1, len(sys_results))
-                self.assertEqual('vm1', sys_results.first().name)
-                self.assertEqual(expected_facts, sys_fact)
+            self.assertEqual(1, len(sys_results))
+            self.assertEqual('vm1', sys_results.first().name)
+            self.assertEqual(expected_facts, sys_fact)
 
     # pylint: disable=too-many-locals
     def test_retrieve_properties(self):
