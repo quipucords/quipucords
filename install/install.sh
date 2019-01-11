@@ -39,6 +39,8 @@ usage() {
 
 
     Extra Variables:
+    * Specify if quipucords docker container should run the server without supervisord(defaults to true):
+         -e use_supervisord=false
     * Specify fully-qualified directory path for local install packages (defaults to `pwd`/packages/):
          -e pkg_install_dir=/home/user/pkgs
     * Skipping install for server:
