@@ -81,7 +81,7 @@
 
 - name: Set qpc version (Fedora 28)
   set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc28']"
+    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc28"
   when:
     - qpc_version is not defined
     - is_fedora_28
@@ -100,30 +100,23 @@
     - qpc_version is not defined
     - is_rhel_centos_7
 
-- name: Find installable local QPC rpm
-  find:
-    paths: "{{ pkg_install_dir }}"
-    patterns: 'qpc*.rpm'
-  register: find_qpc_rpm_local_raw
-
-- name: Set find_qpc_rpm_local
+- name: set qpc_rpm_local_path
   set_fact:
-    find_qpc_rpm_local: "{{ find_qpc_rpm_local_raw['matched'] == 1 }}"
+    qpc_rpm_local_path: "{{ pkg_install_dir }}{{ qpc_version }}.noarch.rpm"
   when:
-    - find_qpc_rpm_local_raw is defined
-    - "'matched' in find_qpc_rpm_local_raw"
+    - install_cli
 
-- name: Set find_qpc_rpm_local_path
-  set_fact:
-    find_qpc_rpm_local_path: "{{ find_qpc_rpm_local_raw['files'][0]['path'] }}"
+- name: Check if local qpc rpm exists
+  stat:
+    path: "{{ qpc_rpm_local_path }}"
+  register: find_qpc_rpm_local
   when:
-    - find_qpc_rpm_local is defined
-    - find_qpc_rpm_local
+    - install_cli
 
 - name: Install QPC from local path
-  shell: rpm -Uvh --force "{{find_qpc_rpm_local_path}}"
+  shell: rpm -Uvh --force "{{qpc_rpm_local_path}}"
   become: true
-  when: find_qpc_rpm_local
+  when: find_qpc_rpm_local.stat.exists == true
 
 - name: Add QPC repository (RHEL/CentOS 7)
   get_url:
@@ -134,7 +127,7 @@
   become: true
   when:
     - install_cli
-    - not find_qpc_rpm_local
+    - find_qpc_rpm_local.stat.exists == false
 
 - name: Install the latest version (QPC RHEL/Centos)
   yum:
@@ -144,7 +137,7 @@
   when:
     - not is_fedora
     - install_cli
-    - not find_qpc_rpm_local
+    - find_qpc_rpm_local.stat.exists == false
 
 - name: Install the latest version (QPC Fedora)
   dnf:
@@ -154,7 +147,7 @@
   when:
     - is_fedora
     - install_cli
-    - not find_qpc_rpm_local
+    - find_qpc_rpm_local.stat.exists == false
 
 - name: Configure QPC to talk to server
   shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"

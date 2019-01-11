@@ -23,7 +23,8 @@ VOLUME /etc/ssl
 # Create /deploy
 RUN mkdir -p /deploy
 COPY deploy/gunicorn.conf.py  /deploy
-COPY deploy/run.sh  /deploy
+COPY deploy/docker_run.sh  /deploy
+COPY deploy/server_run.sh  /deploy
 
 # Config supervisor
 COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -72,4 +73,4 @@ RUN ls -lta /var/data
 WORKDIR /var/log
 
 EXPOSE 443
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/bin/bash", "/deploy/docker_run.sh"]
