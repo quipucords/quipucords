@@ -29,7 +29,7 @@
     server_url: "{{ ansible_env['SERVER_URL'] |  default(default_server_url)}}"
   when: server_url is not defined
 
-- name: Set image
+- name: Set server image name
   set_fact:
     image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords') }}"
   when: image is not defined
@@ -58,42 +58,72 @@
     dir_mount_selinux: ":z"
   when: selinux_on
 
-- name: Check for server image presence
+- name: Check for quipucords image presence
   shell: docker images | grep "{{ image }}" | grep "{{ RELEASE_TAG }}"
   become: true
-  register: docker_image_raw
+  register: quipucords_docker_image_raw
   ignore_errors: yes
   when: install_server
 
-- name: Set docker_image_present false
-  set_fact:
-    docker_image_present: false
-  when:
-    - docker_image_raw.rc != 0
+- name: Check for postgres image presence
+  shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
+  become: true
+  register: postgres_docker_image_raw
+  ignore_errors: yes
 
-- name: Set docker_image_present true
+- name: Set quipucords_docker_image_present false
   set_fact:
-    docker_image_present: "{{ docker_image_raw['stdout_lines']|length > 0 }}"
+    quipucords_docker_image_present: false
   when:
-    - docker_image_raw.rc == 0
-    - "'stdout_lines' in docker_image_raw"
+    - quipucords_docker_image_raw.rc != 0
+
+- name: Set postgres_docker_image_present false
+  set_fact:
+    postgres_docker_image_present: false
+  when:
+    - postgres_docker_image_raw.rc != 0
+
+- name: Set quipucords_docker_image_present true
+  set_fact:
+    quipucords_docker_image_present: "{{ quipucords_docker_image_raw['stdout_lines']|length > 0 }}"
+  when:
+    - quipucords_docker_image_raw.rc == 0
+    - "'stdout_lines' in quipucords_docker_image_raw"
+
+- name: Set postgres_docker_image_present true
+  set_fact:
+    postgres_docker_image_present: "{{ postgres_docker_image_raw['stdout_lines']|length > 0 }}"
+  when:
+    - postgres_docker_image_raw.rc == 0
+    - "'stdout_lines' in postgres_docker_image_raw"
 
 - name: Set qpc_local_server_path
   set_fact:
     qpc_server_local_path: "{{ pkg_install_dir }}quipucords.{{RELEASE_TAG}}.tar.gz"
   when: qpc_server_local_path is not defined
 
+- name: Set postgres_image_path
+  set_fact:
+    postgres_image_local_path: "{{ pkg_install_dir }}postgres.{{POSTGRES_VERSION}}.tar"
+  when:
+    - postgres_image_local_path is not defined
+
 - name: Check if local server release exists
   stat:
     path: "{{qpc_server_local_path}}"
   register: find_qpc_server_local
+
+- name: Check if postgres image exists
+  stat:
+    path: "{{postgres_image_local_path}}"
+  register: find_postgres_local_image
 
 - name: Ensure packages directory exists
   shell: mkdir -p "{{ pkg_install_dir }}"
   when:
     - install_server
     - find_qpc_server_local.stat.exists == false
-    - not docker_image_present
+    - not quipucords_docker_image_present
 
 - name: Obtain Quipucords server container image
   get_url:
@@ -103,14 +133,21 @@
   when:
     - install_server
     - find_qpc_server_local.stat.exists == false
-    - not docker_image_present
+    - not quipucords_docker_image_present
 
 - name: Load Quipucords image into local Docker registry
   shell: docker load -i "{{qpc_server_local_path}}"
   become: true
   when:
     - install_server
-    - not docker_image_present
+    - not quipucords_docker_image_present
+
+- name: Load postgres image into local Docker registry
+  shell: docker load -i "{{postgres_image_local_path}}"
+  become: true
+  when:
+    - not postgres_docker_image_present
+    - find_postgres_local_image.stat.exists == true
 
 - name: Make server home directory
   shell: mkdir -p "{{server_install_dir}}"

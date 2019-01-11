@@ -34,6 +34,7 @@
   become: true
   when:
     - not is_fedora
+    - not have_docker
 
 - name: Install yum-utils (Fedora)
   dnf:
@@ -42,6 +43,7 @@
   become: true
   when:
     - is_fedora
+    - not have_docker
 
 - name: Install device-mapper-persistent-data (RHEL/Centos)
   yum:
@@ -50,6 +52,7 @@
   become: true
   when:
     - not is_fedora
+    - not have_docker
 
 - name: Install device-mapper-persistent-data (Fedora)
   dnf:
@@ -58,6 +61,7 @@
   become: true
   when:
     - is_fedora
+    - not have_docker
 
 - name: Install lvm2 (RHEL/Centos)
   yum:
@@ -66,6 +70,7 @@
   become: true
   when:
     - not is_fedora
+    - not have_docker
 
 - name: Install lvm2 (Fedora)
   dnf:
@@ -74,20 +79,25 @@
   become: true
   when:
     - is_fedora
+    - not have_docker
 
 - name: Install libcgroup (RHEL 6)
   yum:
     name: libcgroup
     state: present
   become: true
-  when: is_rhel_centos_6
+  when:
+    - is_rhel_centos_6
+    - not have_docker
 
 - name: Install xz (RHEL 6)
   yum:
     name: xz
     state: present
   become: true
-  when: is_rhel_centos_6
+  when:
+    - is_rhel_centos_6
+    - not have_docker
 
 - name: Install libselinux-python (RHEL/Centos 6)
   yum:
@@ -97,6 +107,7 @@
   when:
     - is_rhel_centos_6
     - selinux_on
+    - not have_docker
 
 - name: Install libselinux-python (Fedora)
   dnf:
@@ -106,13 +117,15 @@
   when:
     - is_fedora
     - selinux_on
+    - not have_docker
 
 - name: Find installable local epel rpm
   find:
     paths: "{{ pkg_install_dir }}"
     patterns: 'docker*.rpm'
   register: find_docker_rpm_local_raw
-  when: not have_docker
+  when:
+    - not have_docker
 
 - name: Set find_docker_rpm_local
   set_fact:

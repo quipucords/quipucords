@@ -4,12 +4,19 @@ def tarfile = "quipucords.${qpc_version}.tar"
 def targzfile = "${tarfile}.gz"
 def install_tar = "quipucords.${qpc_version}.install.tar"
 def install_targzfile = "${install_tar}.gz"
+def postgres_version = "9.6.10"
+def postgres_image_name = "postgres:${postgres_version}"
+def postgres_tarfile = "postgres.${postgres_version}.tar"
+def postgres_dir = "postgres.${postgres_version}"
+def postgres_targzfile = "postgres.${postgres_version}.tar.gz"
+def postgres_license = "PostgreSQL_License.txt"
+def rename_license = "${postgres_dir}/license.txt"
 
 node('f28-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients nodejs"
         sh "which oc"
-        sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPHENSHIFT_LOGIN_URL"
+        sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPENSHIFT_LOGIN_URL"
         sh "oc project quipucords"
         sh "rpm -q docker"
         sh "which docker"
@@ -58,12 +65,22 @@ node('f28-os') {
         sh "sudo gzip -f --best $tarfile"
         sh "sudo chmod 755 $targzfile"
 
+        sh "sudo docker pull $postgres_image_name"
+        sh "sudo docker save -o $postgres_tarfile $postgres_image_name"
+        sh "sudo chmod 755 $postgres_tarfile"
+
+        sh "mkdir $postgres_dir"
+        sh "mv $postgres_tarfile $postgres_dir"
+        sh "cp $postgres_license $rename_license"
+        sh "tar -zcvf $postgres_targzfile $postgres_dir"
+        sh "sudo chmod 775 $postgres_targzfile"
 
         sh "sudo tar -cvf $install_tar install/*"
         sh "sudo chmod 755 $install_tar"
         sh "sudo gzip -f --best $install_tar"
         sh "sudo chmod 755 $install_targzfile"
 
+        archive postgres_targzfile
         archive targzfile
         archive install_targzfile
     }
