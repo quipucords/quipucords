@@ -16,9 +16,9 @@ Running the Installer
 ^^^^^^^^^^^^^^^^^^^^^
 You can run the installer in different ways, depending on your needs:
 
-1. **Online:** You can run with internet connectivity to install any associated dependencies, download required packages, and pull for needed repositories. This choice is the recommended approach because it simplifies the installation.
+- **Online:** You can run with internet connectivity to install any associated dependencies, download required packages, and pull for needed repositories. This choice is the recommended approach because it simplifies the installation.
 
-2. **Offline:** You can run the installer offline by manually installing dependencies, downloading RPM packages and container images and placing them into a specified directory. This choice is useful when you are installing on systems with limited or no access to the internet.
+- **Offline:** You can run the installer offline by manually installing dependencies, downloading RPM packages and container images and placing them into a specified directory. This choice is useful when you are installing on systems with limited or no access to the internet.
 
 Installing with Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +61,7 @@ After the dependencies are installed, you must gather packages through the `Gith
 - Postgres Container Image (postgres.version.tar.gz)
 - **Note:** You must extract the tarball to access the postgres image with the command::
 
-  # tar -xzv postgres.version.tar.gz
+  # tar -xzvf postgres.version.tar.gz
 
 **Command Line Tool RPM Package:**
 
@@ -95,6 +95,8 @@ The installer has various options, each of which has a default value. You can ei
     # ./install.sh -e option1=value1 -e option2=value2 ...
 
 Options:
+ - **install_offline**
+    - Contains a ``true`` or ``false`` value. Defaults to ``false``. Supply ``true`` to start an offline installation.
  - **use_supervisord**
     - Contains a ``true`` or ``false`` value. Defaults to ``true``. Supply ``false`` to start server without supervisord.
  - **install_server**
