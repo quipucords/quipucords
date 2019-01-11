@@ -101,6 +101,8 @@ The installer has various options, each of which has a default value. You can ei
     # ./install.sh -e option1=value1 -e option2=value2 ...
 
 Options:
+ - **use_supervisord**
+    - Contains a ``true`` or ``false`` value. Defaults to ``true``. Supply ``false`` to start server without supervisord.
  - **install_server**
     - Contains a ``true`` or ``false`` value. Defaults to ``true``. Supply ``false`` to skip the installation of the server.
  - **install_cli**

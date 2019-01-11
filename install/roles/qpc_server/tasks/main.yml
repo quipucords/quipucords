@@ -224,6 +224,6 @@
   when:
     - is_rhel_centos_7 or is_fedora
 
-- name: Start server using internal Postgres
+- name: Start QPC server using linked Postgres Docker container
   shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e USE_SUPERVISORD="{{ use_supervisord }}" -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
