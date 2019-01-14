@@ -6,7 +6,7 @@ coverage==4.5.2
 
 # Test runner/testing utils
 pytest==4.1.1
-pytest-django==3.4.4
+pytest-django==3.4.5
 requests-mock==1.5.2
 
 
