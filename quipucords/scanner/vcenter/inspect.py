@@ -208,10 +208,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     facts['vm.cluster'] = host_facts.get('host.cluster')
                     facts['vm.datacenter'] = host_facts.get('host.datacenter')
 
-        if facts.get('vm.dns_name'):
-            vm_name = facts['vm.dns_name']
-        else:
-            vm_name = facts['vm.name']
+        vm_name = facts['vm.name']
 
         logger.debug('system %s facts=%s', vm_name, facts)
 
