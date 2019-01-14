@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 2 (GPLv2). There is NO WARRANTY for this software, express or
@@ -105,3 +105,182 @@ class TestProcessCpuBogomips(unittest.TestCase):
             cpu.ProcessCpuBogomips.process(
                 ansible_result('')),
             process.NO_DATA)
+
+
+class TestProcessCpuSocketCount(unittest.TestCase):
+    """Test ProcessCpuSocketCount."""
+
+    def test_success_case_dmiresult(self):
+        """Test socket count when internal dmi cmd returns valid result."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('5')}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            5)
+
+    def test_dmiresult_contains_nonint_characters(self):
+        """Test that we use cpuinfo cmd if dmi cmd can't be changed to int."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        ansible_result('2')}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            2)
+
+    def test_dmiresult_cpuinfo_fails(self):
+        """Test that we use cpu count when dmi and cpuinfo cmds fail."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        ansible_result(''),
+                        'cpu_count': '4'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            4)
+
+    def test_dmiresult_cpuinfo_not_in_dependencies(self):
+        """Test that we use cpu count when the dependencies are None."""
+        dependencies = {'cpu_count': '4'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            4)
+
+    def test_dmiresult_cpuinfo_failed_tasks(self):
+        """Test the sc is the same as cpu count when the deps raise errors."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Failed', 1),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        ansible_result('Failed', 1),
+                        'cpu_count': '4'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            4)
+
+    def test_cpuinfo_failed_value_error(self):
+        """Test that cpu count is used when other deps rasie value errors."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('Failure'),
+                        'cpu_count': '1'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            1)
+
+    def test_cpuinfo_failed_return_none(self):
+        """Test that none is returned if everything else fails."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('Permission Denied.'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('Failure')}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            None)
+
+    def test_dmiresult_greater_than_8(self):
+        """Test that cpu count is used when other deps greater than 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('9'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            3)
+
+    def test_dmiresult_equal_to_8(self):
+        """Test that socket count is set to dmicode dep when equal to 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('8'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            8)
+
+    def test_cpuinfo_equal_to_8(self):
+        """Test that socket count is set to cpuinfo dep when equal to 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('10'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('8'),
+                        'cpu_count': '3'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            8)
+
+    def test_cpu_count_greater_than_8(self):
+        """Test that the sc is set to cpuinfo even if greater thatn 8."""
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result('10'),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                            ansible_result('9'),
+                        'cpu_count': '12'}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            12)
+
+
+class TestProcessCpuCoreCount(unittest.TestCase):
+    """Test ProcessCpuCoreCount."""
+
+    def test_core_count_success(self):
+        """Test the cc when virt_type is None and cpu per socket is defined."""
+        dependencies = {'cpu_core_per_socket': 2,
+                        'cpu_socket_count': 2}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            4)
+
+    def test_core_count_success_with_virt_type(self):
+        """Test the core count when virt_type is vmware."""
+        dependencies = {'cpu_core_per_socket': 2,
+                        'cpu_socket_count': 2,
+                        'cpu_count': 3,
+                        'virt_type': 'vmware'}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            3)
+
+    def test_core_count_success_with_hyperthreading(self):
+        """Test the core count when there is hyperthreading."""
+        dependencies = {'cpu_socket_count': 2,
+                        'cpu_count': 3,
+                        'cpu_hyperthreading': True}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            1.5)
+
+    def test_core_count_success_without_hyperthreading(self):
+        """Test the core count when there is not hyperthreading."""
+        dependencies = {'cpu_socket_count': 2,
+                        'cpu_count': 3,
+                        'cpu_hyperthreading': False}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            3)
+
+    def test_core_count_return_empty_string(self):
+        """Test the core count is set to '' when deps not available."""
+        dependencies = {}
+        self.assertEqual(
+            cpu.ProcessCpuCoreCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            None)

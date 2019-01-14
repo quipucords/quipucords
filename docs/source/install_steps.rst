@@ -2,6 +2,10 @@ Step-by-Step Installation
 -------------------------
 You can install the command line and server components by using the following instructions.
 
+Installing the Ansible Prerequisite
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Ansible installation documentation <http://docs.ansible.com/ansible/latest/intro_installation.html#installing-the-control-machine>`_.
+
 .. include:: install_cli.rst
 
 Installing Docker and the Quipucords Server Container Image
