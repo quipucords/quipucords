@@ -380,7 +380,12 @@ class EngineTest(TestCase):
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
-        self.assertEqual(fact.get('vm.name'), fingerprint.get('name'))
+        if fact.get('vm.dns_name'):
+            self.assertEqual(fact.get('vm.dns_name'),
+                             fingerprint.get('name'))
+        else:
+            self.assertEqual(fact.get('vm.name'),
+                             fingerprint.get('name'))
 
         self.assertEqual(fact.get('vm.os'), fingerprint.get('os_release'))
 
@@ -538,9 +543,34 @@ class EngineTest(TestCase):
         fingerprint = fingerprints[0]
         self._validate_network_result(fingerprint, fact)
 
-    def test_process_vcenter_source(self):
-        """Test process vcenter source."""
+    def test_process_vcenter_source_with_dns(self):
+        """Test process vcenter source that has a dns name."""
         details_report = self._create_vcenter_fc_json()
+        fact = details_report['facts'][0]
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
+                  'source_type': Source.VCENTER_SOURCE_TYPE,
+                  'facts': details_report['facts']}
+        fingerprints = self.fp_task_runner._process_source(
+            source)
+        fingerprint = fingerprints[0]
+        self._validate_vcenter_result(fingerprint, fact)
+
+    def test_process_vcenter_source_no_dns_name(self):
+        """Test process vcenter source with no dns name."""
+        details_report = self._create_vcenter_fc_json(
+            report_id=1,
+            source_name='source2',
+            source_type=Source.VCENTER_SOURCE_TYPE,
+            vm_cpu_count=2,
+            vm_os='RHEL 7.3',
+            vm_mac_addresses=None,
+            vm_ip_addresses=None,
+            vm_name='TestMachine',
+            vm_state='On',
+            vm_uuid='a037f26f-2988-57bd-85d8-de7617a3aab0',
+            vm_dns_name=None,
+        )
         fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
@@ -580,6 +610,7 @@ class EngineTest(TestCase):
 
         n_cpu_count = nfingerprints[0]['cpu_count']
         v_cpu_count = vfingerprints[0]['cpu_count']
+        v_name = vfingerprints[0]['name']
         self.assertNotEqual(n_cpu_count, v_cpu_count)
 
         reverse_priority_keys = {'cpu_count'}
@@ -597,6 +628,8 @@ class EngineTest(TestCase):
                     'cpu_count'), v_cpu_count)
                 self.assertNotEqual(
                     result_fingerprint.get('cpu_count'), n_cpu_count)
+                self.assertNotEqual(
+                    result_fingerprint.get('name'), v_name)
 
     def test_merge_network_and_vcenter_infrastructure_type(self):
         """Test if VCenter infrastructure_type is prefered over network."""
