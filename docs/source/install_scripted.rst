@@ -38,7 +38,7 @@ The output appears similar to the following example::
 
 Installing without Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you choose the offline option to run the installer, these associated dependencies must be installed.
+If you choose the offline option to run the installer, the following associated dependencies must be installed.
 
 **Server Dependencies:**
 
@@ -57,15 +57,18 @@ After the dependencies are installed, you must gather packages through the `Gith
 
 **Server Packages:**
 
-- Server Container Image (quipucords.version.tar.gz)
-- Postgres Container Image (postgres.version.tar.gz)
+- Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
+- Postgres Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/postgres.9.6.10.tar.gz>`_)
 - **Note:** You must extract the tarball to access the postgres image with the command::
 
   # tar -xzvf postgres.version.tar.gz
 
 **Command Line Tool RPM Package:**
 
-- QPC Package (all of the qpc-version.rpm)
+- RHEL & Centos 6 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el6.noarch.rpm>`_)
+- RHEL & Centos 7 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
+- Fedora 27 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
+- Fedora 28 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
 
 
 1. Change to the installer directory by entering following command::
