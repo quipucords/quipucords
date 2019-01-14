@@ -25,7 +25,7 @@
     "api:clean": "npm run api:dev -- -u; npm run api:stage -- -uc; npm run api:prod -- -uc",
     "api:dev": "sh ./scripts/api.sh -p 5000 -f \"$(pwd)/../docs/swagger.yml\"",
     "api:stage": "sh ./scripts/api.sh -p 5001 -t stage -d \"$(pwd)/build\"",
-    "api:prod": "sh ./scripts/api.sh -p 443 -t prod",
+    "api:prod": "sh ./scripts/api.sh -p 9443 -t prod",
     "api:update": "npm run api:dev -- -u; npm run api:stage -- -u; npm run api:prod -- -u",
     "api:doc": "open http://localhost:5050/docs/api & node ./scripts/swagger.js",
     "build:clean": "rm -rf -- \"$(pwd)\"/build; rm -rf -- \"$(pwd)\"/public/assets",
