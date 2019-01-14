@@ -1103,8 +1103,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Common facts
         # Set name
-        self._add_fact_to_fingerprint(
-            source, 'vm.name', fact, 'name', fingerprint)
+        if fact.get('vm.dns_name'):
+            self._add_fact_to_fingerprint(
+                source, 'vm.dns_name', fact, 'name', fingerprint)
+        else:
+            self._add_fact_to_fingerprint(
+                source, 'vm.name', fact, 'name', fingerprint)
 
         self._add_fact_to_fingerprint(source, 'vm.os', fact,
                                       'os_release', fingerprint)
