@@ -47,8 +47,8 @@ usage() {
          -e install_server=false
     * Skipping install for CLI:
          -e install_cli=false
-    * Specify server port (defaults to 443):
-         -e server_port=8443
+    * Specify server port (defaults to 9443):
+         -e server_port=9443
     * Specify server container name (defaults to quipucords):
          -e server_name=qpc_server
     * Optionally specify the postgres db user (if not specified the default value is 'postgres'):

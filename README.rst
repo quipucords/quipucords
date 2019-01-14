@@ -191,27 +191,27 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
    A. Run the Docker image with Postgres container::
 
        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-       docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p443:443 -i quipucords:0.0.46
+       docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p 9443:443 -i quipucords:0.0.46
 
    B. Run the Docker image with external Postgres container::
 
        ifconfig (get your computer's external IP if Postgres is local)
-       docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p443:443 -i quipucords:0.0.46
+       docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p 9443:443 -i quipucords:0.0.46
 
    C. Run the Docker image with SQLite::
 
-       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -i quipucords:0.0.46
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quipucords:0.0.46
 
    D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory. Mapping the /app directory allows you to rapidly change server code without having to rebuild the container. Mapping the logs to /tmp allows you to tail a local copy without having to exec into the container.::
 
-       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:0.0.46
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:0.0.46
 
 5. Configure the CLI by using the following commands::
 
     qpc server config --host 127.0.0.1
     qpc server login
 
-6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1/>`_ if you installed the UI in step 2 above).
+6.  You can work with the APIs, the CLI, and UI (visit `<https://127.0.0.1:9443/>`_ if you installed the UI in step 2 above).
 
 7. To enter the container use the following command::
 

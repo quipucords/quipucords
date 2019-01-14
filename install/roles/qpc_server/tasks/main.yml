@@ -17,7 +17,7 @@
 
 - name: Set server port
   set_fact:
-    server_port: "{{ ansible_env['SERVER_PORT'] | default('443') }}"
+    server_port: "{{ ansible_env['SERVER_PORT'] | default('9443') }}"
   when: server_port is not defined
 
 
