@@ -358,6 +358,40 @@ class ScanTest(TestCase):
         self.assertEqual(response_json.get('name'), 'test2')
         self.assertEqual(response_json.get('options'), options)
 
+    def test_partial_update_sources(self):
+        """Test partial update on sources."""
+        source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        source2.save()
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
+        initial = self.create_expect_201(data_discovery)
+
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        data = {'name': 'test2',
+                'sources': [source2.id]}
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertEqual(response_json.get('sources'), [source2.id])
+
     def test_partial_update_enabled(self):
         """Test partial update retains unprovided info."""
         data_discovery = {'name': 'test',
