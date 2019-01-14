@@ -92,6 +92,7 @@ The output appears similar to the following example::
     Installation complete.
 
 .. _installation-options:
+
 Installation Options
 ~~~~~~~~~~~~~~~~~~~~
 The installer has various options, each of which has a default value. You can either run the installer with no options to use all the default values, or provide values for one or more of these options. You can pass values for these options by using the ``-e`` flag when you run the command to start the installer, as shown in the following example::
