@@ -1158,6 +1158,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'vm.host.cpu_count',
                                       fact, 'vm_host_socket_count',
                                       fingerprint)
+        self._add_fact_to_fingerprint(source, 'vm.host.cpu_cores',
+                                      fact, 'vm_host_core_count',
+                                      fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.datacenter',
                                       fact, 'vm_datacenter', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.cluster', fact,
