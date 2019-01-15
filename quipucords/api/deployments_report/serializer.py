@@ -101,6 +101,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
 
     vm_host = CharField(required=False, max_length=128)
     vm_host_socket_count = IntegerField(required=False, min_value=0)
+    vm_host_core_count = IntegerField(required=False, min_value=0)
 
     vm_cluster = CharField(required=False, max_length=128)
     vm_datacenter = CharField(required=False, max_length=128)

@@ -2278,6 +2278,10 @@ definitions:
           type: "string"
           description: "The socket count for the virtual machine host"
           example: ""
+        vm_host_core_count:
+          type: "string"
+          description: "The core count for the virtual machine host"
+          example: "8"
         vm_cluster:
           type: "string"
           description: "The cluster of virtual machine"

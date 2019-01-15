@@ -51,7 +51,13 @@ class ScanTest(TestCase):
             source_type='network',
             port=22)
         self.source.save()
-        self.source.credentials.add(self.cred)
+
+        self.source2 = Source(
+            name='source2',
+            source_type='network',
+            port=22)
+        self.source2.save()
+        self.source2.credentials.add(self.cred)
 
     def create(self, data):
         """Call the create endpoint."""
@@ -248,7 +254,7 @@ class ScanTest(TestCase):
         initial = self.create_expect_201(data_discovery)
 
         data = {'name': 'test2',
-                'sources': [self.source.id],
+                'sources': [self.source2.id],
                 'scan_type': ScanTask.SCAN_TYPE_INSPECT,
                 'options': {'disabled_optional_products':
                             {'jboss_eap': False,
@@ -267,6 +273,8 @@ class ScanTest(TestCase):
                          ScanTask.SCAN_TYPE_INSPECT)
         self.assertEqual(response_json.get('name'), 'test2')
         self.assertFalse(response_json.get('options').get('jboss_eap'))
+        self.assertEqual(response_json.get('sources'),
+                         [self.source2.id])
 
     def test_partial_update(self):
         """Test partial update a scan."""
@@ -357,6 +365,36 @@ class ScanTest(TestCase):
                          status.HTTP_200_OK)
         self.assertEqual(response_json.get('name'), 'test2')
         self.assertEqual(response_json.get('options'), options)
+
+    def test_partial_update_sources(self):
+        """Test partial update on sources."""
+        data_discovery = {'name': 'test',
+                          'sources': [self.source.id],
+                          'scan_type': ScanTask.SCAN_TYPE_CONNECT}
+        initial = self.create_expect_201(data_discovery)
+
+        data = {'scan_type': ScanTask.SCAN_TYPE_INSPECT}
+        url = reverse('scan-detail', args=(initial['id'],))
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_json.get('scan_type'),
+                         ScanTask.SCAN_TYPE_INSPECT)
+        data = {'name': 'test2',
+                'sources': [self.source2.id]}
+        response = self.client.patch(url,
+                                     json.dumps(data),
+                                     content_type='application/json',
+                                     format='json')
+        response_json = response.json()
+        self.assertEqual(response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(response_json.get('name'), 'test2')
+        self.assertEqual(response_json.get('sources'),
+                         [self.source2.id])
 
     def test_partial_update_enabled(self):
         """Test partial update retains unprovided info."""
