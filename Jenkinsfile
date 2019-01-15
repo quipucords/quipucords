@@ -9,7 +9,7 @@ def install_targzfile = "${install_tar}.gz"
 def startQPCServer = {
     sh """\
     sudo docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-    sudo docker run -d -p "443:443" --link qpc-db:qpc-link \\
+    sudo docker run -d -p "9443:443" --link qpc-db:qpc-link \\
         -e QPC_DBMS_HOST=qpc-db \\
         -e QPC_DBMS_PASSWORD=password \\
         -v /tmp:/tmp \
