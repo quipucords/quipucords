@@ -258,7 +258,7 @@ class ScanSerializer(NotEmptySerializer):
         if scan_type is not None:
             instance.scan_type = scan_type
         if sources is not None:
-            instance.sources = sources
+            instance.sources.set(sources)
 
         options = validated_data.pop('options', None)
         if not options:
