@@ -20,7 +20,7 @@ The following steps guide you through those choices.
 1. Accept or change the default exposed server port to use for HTTPS communication. By default, the server exposes port 9443, which is the standard HTTPS port. You can choose to use that port or remap the port to be used on your server.
 
    - If you select to expose port 9443, you would use the following option when you run the Docker command to start the server: ``-p 9443:443``.
-   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``9443``, you would enter the following option in the command: ``-p 9443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
+   - If you want to remap the port on your system, you would supply a new value for the port when you run the Docker command to start the server. The syntax of this option is  ``-p <host_port>:<container_port>``. For example, to remap the port to ``8443``, you would enter the following option in the command: ``-p 8443:443``. Additionally, Docker supplies an option to select a free port for all exposed ports by using the ``-P`` option; the port mapping is then available from the ``sudo docker ps`` command.
 
 2. Select values for the directory for SSH key and the directory for the log output. The most efficient way to configure these options is to create a home directory for the Quipucords server and then use that home directory for each of these three options.
 
@@ -101,7 +101,7 @@ To change the default password for the Quipucords server, use the following step
 1. In a browser window, enter the URL to the Quipucords server. When you enter the URL to the Quipucords server, the browser loads a web page that shows an administrative login dialog box.
 
    - If the browser window is running on the same system as the server and you used the default port of ``9443`` for the server, the URL is ``https://localhost:9433/admin``.
-   - If the browser window is running on a remote system, or if it is on the same system but you changed the default HTTPS port, enter the URL in the following format: ``https://ip_address:port/admin``. For example, if the IP address for the server is 192.0.2.0 and the port is remapped to ``9443``, you would enter ``https://192.0.2.0:9443/admin`` in the browser window.
+   - If the browser window is running on a remote system, or if it is on the same system but you changed the default HTTPS port, enter the URL in the following format: ``https://ip_address:port/admin``. For example, if the IP address for the server is 192.0.2.0 and the port is remapped to ``8443``, you would enter ``https://192.0.2.0:8443/admin`` in the browser window.
 
 2. In the resulting web page that contains the Quipucords administrative login dialog box, enter the default user name ``admin`` and the default password ``pass`` to log in to the Quipucords server.
 
