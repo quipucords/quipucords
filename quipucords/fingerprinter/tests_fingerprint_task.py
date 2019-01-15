@@ -184,6 +184,7 @@ class EngineTest(TestCase):
             vm_dns_name='site.com',
             vm_host_name='1.2.3.4',
             vm_host_cpu_count=8,
+            vm_host_core_count=8,
             vm_datacenter='NY',
             vm_cluster='23sd',
             architecture='x86_64',
@@ -222,6 +223,8 @@ class EngineTest(TestCase):
             fact['vm.host.name'] = vm_host_name
         if vm_host_cpu_count:
             fact['vm.host.cpu_count'] = vm_host_cpu_count
+        if vm_host_core_count:
+            fact['vm.host.cpu_cores'] = vm_host_core_count
         if vm_datacenter:
             fact['vm.datacenter'] = vm_datacenter
         if vm_cluster:
@@ -408,6 +411,8 @@ class EngineTest(TestCase):
 
         self.assertEqual(fact.get('vm.host.cpu_count'),
                          fingerprint.get('vm_host_socket_count'))
+        self.assertEqual(fact.get('vm.host.cpu_cores'),
+                         fingerprint.get('vm_host_core_count'))
         self.assertEqual(fact.get('vm.datacenter'),
                          fingerprint.get('vm_datacenter'))
         self.assertEqual(fact.get('vm.cluster'),

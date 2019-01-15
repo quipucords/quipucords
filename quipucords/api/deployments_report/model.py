@@ -129,6 +129,7 @@ class SystemFingerprint(models.Model):
     vm_dns_name = models.CharField(max_length=256, unique=False, null=True)
     vm_host = models.CharField(max_length=128, unique=False, null=True)
     vm_host_socket_count = models.PositiveIntegerField(unique=False, null=True)
+    vm_host_core_count = models.PositiveIntegerField(unique=False, null=True)
     vm_cluster = models.CharField(max_length=128, unique=False, null=True)
     vm_datacenter = models.CharField(max_length=128, unique=False, null=True)
 
@@ -171,6 +172,7 @@ class SystemFingerprint(models.Model):
             'vm_dns_name:{}, '\
             'vm_host:{}, '\
             'vm_host_socket_count:{}, '\
+            'vm_host_core_count:{}, '\
             'vm_datacenter:{}, '\
             'vm_cluster:{}, '\
             'is_redhat:{}, '\
@@ -204,6 +206,7 @@ class SystemFingerprint(models.Model):
                                   self.vm_dns_name,
                                   self.vm_host,
                                   self.vm_host_socket_count,
+                                  self.vm_host_core_count,
                                   self.vm_datacenter,
                                   self.vm_cluster,
                                   self.is_redhat,
