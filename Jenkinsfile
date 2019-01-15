@@ -20,7 +20,7 @@ def startQPCServer = {
 
     sh '''\
     for i in {1..30}; do
-        SERVER_ID="$(curl -ks https://localhost:443/api/v1/status/ | grep server_id || true)"
+        SERVER_ID="$(curl -ks https://localhost:9443/api/v1/status/ | grep server_id || true)"
 
         if [ "${SERVER_ID}" ]; then
             break

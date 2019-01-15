@@ -45,7 +45,7 @@
     "start:ui-stage": "sh -ac '. .env.staging; react-app-rewired start'",
     "start": "run-p -l api:dev api:doc start:css start:ui",
     "start:stage": "open https://localhost:5001/login/; npm run build:clean; run-p -l api:stage start:css start:ui-stage",
-    "start:prod": "npm run api:prod; open https://localhost/login/",
+    "start:prod": "npm run api:prod; open https://localhost:9443/login/",
     "support:create-react-app": "create-react-app",
     "test": "run-s test:**",
     "test:lint-js": "eslint --ext=js --ext=jsx src",

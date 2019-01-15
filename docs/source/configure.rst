@@ -100,7 +100,7 @@ To change the default password for the Quipucords server, use the following step
 
 1. In a browser window, enter the URL to the Quipucords server. When you enter the URL to the Quipucords server, the browser loads a web page that shows an administrative login dialog box.
 
-   - If the browser window is running on the same system as the server and you used the default port of ``9443`` for the server, the URL is ``https://localhost/admin``.
+   - If the browser window is running on the same system as the server and you used the default port of ``9443`` for the server, the URL is ``https://localhost:9433/admin``.
    - If the browser window is running on a remote system, or if it is on the same system but you changed the default HTTPS port, enter the URL in the following format: ``https://ip_address:port/admin``. For example, if the IP address for the server is 192.0.2.0 and the port is remapped to ``9443``, you would enter ``https://192.0.2.0:9443/admin`` in the browser window.
 
 2. In the resulting web page that contains the Quipucords administrative login dialog box, enter the default user name ``admin`` and the default password ``pass`` to log in to the Quipucords server.
