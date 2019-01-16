@@ -10,7 +10,7 @@ The ``qpc server config`` command configures the connection between the qpc comm
 The ``qpc server config`` command takes the following options:
 
 - The ``--host`` option is required. If you are using the qpc command line interface on the same system where the server is running, you can supply the loopback address ``127.0.0.1`` as the value. Otherwise, supply the IP address for your Quipucords server.
-- The ``--port`` option is optional. The default value for this option is ``443``. If you decided to remap the Quipucords default exposed server port to another port, the port option is required. You must supply the port option and the remapped value in the command, for example, ``--port 8443``.
+- The ``--port`` option is optional. The default value for this option is ``9443``. If you decided to remap the Quipucords default exposed server port to another port, the port option is required. You must supply the port option and the remapped value in the command, for example, ``--port 8443``.
 
 For example, if you are configuring the command line tool on the same system as the server and the server uses the default exposed server port, you would enter the following command to configure the qpc command line tool::
 

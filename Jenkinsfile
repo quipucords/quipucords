@@ -9,7 +9,7 @@ def install_targzfile = "${install_tar}.gz"
 def startQPCServer = {
     sh """\
     sudo docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
-    sudo docker run -d -p "443:443" --link qpc-db:qpc-link \\
+    sudo docker run -d -p "9443:443" --link qpc-db:qpc-link \\
         -e QPC_DBMS_HOST=qpc-db \\
         -e QPC_DBMS_PASSWORD=password \\
         -v /tmp:/tmp \
@@ -20,7 +20,7 @@ def startQPCServer = {
 
     sh '''\
     for i in {1..30}; do
-        SERVER_ID="$(curl -ks https://localhost:443/api/v1/status/ | grep server_id || true)"
+        SERVER_ID="$(curl -ks https://localhost:9443/api/v1/status/ | grep server_id || true)"
 
         if [ "${SERVER_ID}" ]; then
             break

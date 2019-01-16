@@ -1368,11 +1368,11 @@ definitions:
       next:
         type: "string"
         description: "URL for next page of results"
-        example: "http://localhost:8000/api/v1/scans/?page=3"
+        example: "http://127.0.0.1:9443/api/v1/scans/?page=3"
       previous:
         type: "string"
         description: "URL for previous page of results"
-        example: "http://localhost:8000/api/v1/scans/?page=1"
+        example: "http://127.0.0.1:9443/api/v1/scans/?page=1"
   ObtainTokenIn:
     type: "object"
     required:
@@ -1849,7 +1849,7 @@ definitions:
       server_address:
         type: "string"
         description: "The ip and port information"
-        example: "127.0.0.1:8000"
+        example: "127.0.0.1:9433"
       python:
         type: "string"
         description: "The python string version"
