@@ -9,3 +9,9 @@ Before installing Quipucords in your environment, review the following guideline
 - The credential user account requires a ``bash`` shell. For example, the shell *cannot* be the ``/sbin/nologin`` or ``/bin/false`` shell.
 - Quipucords server requires a Postgres 9.6.10 database (this will be installed for scripted installations).
 - QPC CLI requires python 3.4+.
+
+Hardware Requirements
+~~~~~~~~~~~~~~~~~~~~~
+- *CPU:* 2 core minimum with a recommended 4 cores.
+- *Disk:* Storage: 30 GB
+- *RAM:* 1 GB minimum with a recommeded 2 GB.
