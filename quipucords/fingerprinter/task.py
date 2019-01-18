@@ -1246,15 +1246,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'virtualized_type', fingerprint)
 
         is_virtualized = fact.get('is_virtualized')
-        infrastructure_type = None
+        metadata_source = 'is_virtualized'
+        name = fact.get('hostname', '')
         if is_virtualized:
-            infrastructure_type = 'virtualized'
+            infrastructure_type = SystemFingerprint.VIRTUALIZED
         elif is_virtualized is False:
             infrastructure_type = SystemFingerprint.BARE_METAL
         else:
             infrastructure_type = SystemFingerprint.UNKNOWN
+        if name.startswith('virt-who-') and \
+                name.endswith(tuple(['-' + str(num) for num in range(1, 10)])):
+            infrastructure_type = SystemFingerprint.HYPERVISOR
+            metadata_source = 'hostname'
         if infrastructure_type:
-            self._add_fact_to_fingerprint(source, 'is_virtualized', fact,
+            self._add_fact_to_fingerprint(source, metadata_source, fact,
                                           'infrastructure_type', fingerprint,
                                           fact_value=infrastructure_type)
         # Satellite specific facts
