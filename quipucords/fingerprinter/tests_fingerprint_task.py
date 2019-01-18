@@ -439,8 +439,14 @@ class EngineTest(TestCase):
             'registration_time'))
         self.assertEqual(fact.get('uuid'), fingerprint.get(
             'subscription_manager_id'))
-
-        self.assertEqual('virtualized', fingerprint.get('infrastructure_type'))
+        if fact.get('hostname', '').endswith(tuple(['-' + str(num) for
+                                                    num in range(1, 10)])) \
+                and fact.get('hostname').startswith('virt-who-'):
+            self.assertEqual('hypervisor',
+                             fingerprint.get('infrastructure_type'))
+        else:
+            self.assertEqual('virtualized',
+                             fingerprint.get('infrastructure_type'))
 
         self.assertEqual(fact.get('cores'), fingerprint.get('cpu_core_count'))
         self.assertEqual(fact.get('num_sockets'),
@@ -589,6 +595,40 @@ class EngineTest(TestCase):
     def test_process_satellite_source(self):
         """Test process satellite source."""
         details_report = self._create_satellite_fc_json()
+        fact = details_report['facts'][0]
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
+                  'source_type': Source.SATELLITE_SOURCE_TYPE,
+                  'facts': details_report['facts']}
+        fingerprints = self.fp_task_runner._process_source(
+            source)
+        fingerprint = fingerprints[0]
+        self._validate_satellite_result(fingerprint, fact)
+
+    def test_process_satellite_source_hypervisor(self):
+        """Test processing sat source for hypervisor infrastructure."""
+        details_report = self._create_satellite_fc_json(
+            report_id=1,
+            source_name='source3',
+            source_type=Source.SATELLITE_SOURCE_TYPE,
+            hostname='virt-who-9384389442-5')
+        fact = details_report['facts'][0]
+        source = {'server_id': self.server_id,
+                  'source_name': 'source1',
+                  'source_type': Source.SATELLITE_SOURCE_TYPE,
+                  'facts': details_report['facts']}
+        fingerprints = self.fp_task_runner._process_source(
+            source)
+        fingerprint = fingerprints[0]
+        self._validate_satellite_result(fingerprint, fact)
+
+    def test_process_satellite_source_not_hypervisor(self):
+        """Test processing sat source for virtualized infrastructure."""
+        details_report = self._create_satellite_fc_json(
+            report_id=1,
+            source_name='source3',
+            source_type=Source.SATELLITE_SOURCE_TYPE,
+            hostname='virt-who-9384389442-0')
         fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',
