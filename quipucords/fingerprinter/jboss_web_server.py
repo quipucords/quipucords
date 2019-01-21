@@ -111,7 +111,7 @@ def detect_jboss_ws(source, facts):
             else:
                 product_dict[PRESENCE_KEY] = Product.POTENTIAL
                 break
-    if facts.get(JWS_INSTALLED_WITH_RPM):
+    if installed_with_rpm:
         product_dict[PRESENCE_KEY] = Product.PRESENT
         raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
     # If jws was installed (not as zip) it will have a certifcate
