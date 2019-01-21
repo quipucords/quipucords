@@ -940,8 +940,13 @@ class EngineTest(TestCase):
         """Test merging two network one sudo and one without."""
         # Test that sudo is preferred when part of priority fingerprint
         sudo_fingerprint = self._create_network_fingerprint()
+        sudo_fingerprint['products'] = []
+        sudo_fingerprint['entitlements'] = []
+
         regular_fingerprint = self._create_network_fingerprint(
             user_has_sudo=False)
+        regular_fingerprint['products'] = []
+        regular_fingerprint['entitlements'] = []
 
         result = self.fp_task_runner._merge_fingerprint(
             sudo_fingerprint, regular_fingerprint)
@@ -952,8 +957,13 @@ class EngineTest(TestCase):
 
         # Test that sudo is preferred when part of to merge fingerprint
         sudo_fingerprint = self._create_network_fingerprint()
+        sudo_fingerprint['products'] = []
+        sudo_fingerprint['entitlements'] = []
+
         regular_fingerprint = self._create_network_fingerprint(
             user_has_sudo=False)
+        regular_fingerprint['products'] = []
+        regular_fingerprint['entitlements'] = []
 
         result = self.fp_task_runner._merge_fingerprint(
             regular_fingerprint, sudo_fingerprint)
