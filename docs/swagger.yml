@@ -2206,6 +2206,7 @@ definitions:
           enum:
             - virtualized
             - bare_metal
+            - hypervisor
             - unknown
           description: "The infrastructure type"
         mac_addresses:
