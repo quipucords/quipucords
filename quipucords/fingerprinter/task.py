@@ -675,7 +675,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 unique_id_value = fingerprint.get(id_key)
                 if unique_id_value:
                     # Add or update fingerprint value
-                    unique_dict[unique_id_value] = fingerprint
+                    existing_fingerprint = unique_dict.get(unique_id_value)
+                    if existing_fingerprint:
+                        unique_dict[unique_id_value] = self._merge_fingerprint(
+                            existing_fingerprint,
+                            fingerprint)
+                    else:
+                        unique_dict[unique_id_value] = fingerprint
                 else:
                     no_global_id_list.append(fingerprint)
 
@@ -773,10 +779,26 @@ class FingerprintTaskRunner(ScanTaskRunner):
             if priority_fingerprint.get(key, None) is None:
                 # reverse the priority since value is None
                 keys_to_add_list.add(key)
+                continue
+
+            # If priority do not have sudo and to merge has sudo
+            # use the to merge value
+            priority_sudo = priority_fingerprint.get(
+                META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
+            to_merge_sudo = to_merge_fingerprint.get(
+                META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
+            if not priority_sudo and to_merge_sudo:
+                keys_to_add_list.add(key)
+
         keys_to_add_list = list(keys_to_add_list)
         if META_DATA_KEY in keys_to_add_list:
             keys_to_add_list.remove(META_DATA_KEY)
+        if ENTITLEMENTS_KEY in keys_to_add_list:
+            keys_to_add_list.remove(ENTITLEMENTS_KEY)
+        if PRODUCTS_KEY in keys_to_add_list:
+            keys_to_add_list.remove(PRODUCTS_KEY)
 
+        # merge facts
         for fact_key in keys_to_add_list:
             to_merge_fact = to_merge_fingerprint.get(fact_key)
             if to_merge_fact:
@@ -792,12 +814,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
             if source not in priority_sources.keys():
                 priority_sources[source] = to_merge_sources[source]
 
+        # merge entitlements
         if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
             if ENTITLEMENTS_KEY not in priority_fingerprint:
                 priority_fingerprint[ENTITLEMENTS_KEY] = []
             priority_fingerprint[ENTITLEMENTS_KEY] += \
                 to_merge_fingerprint.get(ENTITLEMENTS_KEY, [])
 
+        # merge products
         if to_merge_fingerprint.get(PRODUCTS_KEY):
             if PRODUCTS_KEY not in priority_fingerprint:
                 priority_fingerprint[PRODUCTS_KEY] = \
@@ -865,7 +889,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'server_id': source['server_id'],
                 'source_name': source['source_name'],
                 'source_type': source['source_type'],
-                'raw_fact_key': raw_fact_key
+                'raw_fact_key': raw_fact_key,
+                'has_sudo': raw_fact.get('user_has_sudo', False)
             }
 
     def _add_products_to_fingerprint(self, source,
@@ -1246,15 +1271,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'virtualized_type', fingerprint)
 
         is_virtualized = fact.get('is_virtualized')
-        infrastructure_type = None
+        metadata_source = 'is_virtualized'
+        name = fact.get('hostname', '')
         if is_virtualized:
-            infrastructure_type = 'virtualized'
+            infrastructure_type = SystemFingerprint.VIRTUALIZED
         elif is_virtualized is False:
             infrastructure_type = SystemFingerprint.BARE_METAL
         else:
             infrastructure_type = SystemFingerprint.UNKNOWN
+        if name.startswith('virt-who-') and \
+                name.endswith(tuple(['-' + str(num) for num in range(1, 10)])):
+            infrastructure_type = SystemFingerprint.HYPERVISOR
+            metadata_source = 'hostname'
         if infrastructure_type:
-            self._add_fact_to_fingerprint(source, 'is_virtualized', fact,
+            self._add_fact_to_fingerprint(source, metadata_source, fact,
                                           'infrastructure_type', fingerprint,
                                           fact_value=infrastructure_type)
         # Satellite specific facts

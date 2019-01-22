@@ -67,6 +67,7 @@ class SystemFingerprint(models.Model):
     BARE_METAL = 'bare_metal'
     UNKNOWN = 'unknown'
     VIRTUALIZED = 'virtualized'
+    HYPERVISOR = 'hypervisor'
     SOURCE_TYPE = (
         ('network', 'Ansible'),
         ('vcenter', 'VCenter'),
@@ -76,6 +77,7 @@ class SystemFingerprint(models.Model):
     INFRASTRUCTURE_TYPE = (
         (BARE_METAL, 'Bare Metal'),
         (VIRTUALIZED, 'Virtualized'),
+        (HYPERVISOR, 'Hypervisor'),
         (UNKNOWN, 'Unknown')
     )
 
