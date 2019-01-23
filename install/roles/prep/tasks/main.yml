@@ -42,4 +42,3 @@
     selinux_on: true
   when:
     - have_selinux_raw.rc == 0
-    
