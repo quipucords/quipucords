@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import _findIndex from 'lodash/findIndex';
+import _get from 'lodash/get';
 import helpers from '../../common/helpers';
 import {
   viewTypes,
@@ -8,6 +9,7 @@ import {
   scansTypes,
   sourcesTypes
 } from '../constants';
+import apiTypes from '../../constants/apiConstants';
 
 const initialState = {};
 
@@ -51,10 +53,10 @@ const viewOptionsReducer = (state = initialState, action) => {
   };
 
   const selectedIndex = (stateObj, item) =>
-    _.findIndex(stateObj.selectedItems, nextSelected => nextSelected.id === _.get(item, 'id'));
+    _findIndex(stateObj.selectedItems, nextSelected => nextSelected.id === _get(item, 'id'));
 
   const expandedIndex = (stateObj, item) =>
-    _.findIndex(stateObj.expandedItems, nextExpanded => nextExpanded.id === _.get(item, 'id'));
+    _findIndex(stateObj.expandedItems, nextExpanded => nextExpanded.id === _get(item, 'id'));
 
   switch (action.type) {
     case viewToolbarTypes.SET_FILTER_TYPE:
@@ -129,8 +131,8 @@ const viewOptionsReducer = (state = initialState, action) => {
 
       updateState[action.viewType] = Object.assign({}, state[action.viewType], {
         sortType: action.sortType,
-        sortField: action.sortType.id,
-        sortAscending: _.get(action, 'sortType.sortAscending', true),
+        sortField: action.sortType && action.sortType.id,
+        sortAscending: _get(action, 'sortType.sortAscending', true),
         currentPage: 1
       });
 
@@ -194,19 +196,16 @@ const viewOptionsReducer = (state = initialState, action) => {
       });
       return Object.assign({}, state, updateState);
 
-    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIAL):
     case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS):
-      updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.data.count);
+      updatePageCounts(viewTypes.CREDENTIALS_VIEW, action.payload.data[apiTypes.API_RESPONSE_CREDENTIALS_COUNT]);
       return Object.assign({}, state, updateState);
 
-    case helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCE):
     case helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCES):
-      updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.data.count);
+      updatePageCounts(viewTypes.SOURCES_VIEW, action.payload.data[apiTypes.API_RESPONSE_SOURCES_COUNT]);
       return Object.assign({}, state, updateState);
 
-    case helpers.FULFILLED_ACTION(scansTypes.GET_SCAN):
     case helpers.FULFILLED_ACTION(scansTypes.GET_SCANS):
-      updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data.count);
+      updatePageCounts(viewTypes.SCANS_VIEW, action.payload.data[apiTypes.API_RESPONSE_SCANS_COUNT]);
       return Object.assign({}, state, updateState);
 
     case viewTypes.SELECT_ITEM:

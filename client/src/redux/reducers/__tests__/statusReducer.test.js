@@ -1,14 +1,14 @@
-import userReducer from '../userReducer';
-import { userTypes as types } from '../../constants';
+import statusReducer from '../statusReducer';
+import { statusTypes as types } from '../../constants';
 import helpers from '../../../common/helpers';
 
-describe('userReducer', () => {
+describe('StatusReducer', () => {
   it('should return the initial state', () => {
-    expect(userReducer.initialState).toBeDefined();
+    expect(statusReducer.initialState).toBeDefined();
   });
 
   it('should handle all defined error types', () => {
-    const specificTypes = [types.USER_INFO, types.USER_AUTH, types.USER_LOGOUT];
+    const specificTypes = [types.STATUS_INFO];
 
     specificTypes.forEach(value => {
       const dispatched = {
@@ -26,28 +26,28 @@ describe('userReducer', () => {
         }
       };
 
-      const resultState = userReducer(undefined, dispatched);
+      const resultState = statusReducer(undefined, dispatched);
 
       expect({ type: helpers.REJECTED_ACTION(value), result: resultState }).toMatchSnapshot(`rejected types ${value}`);
     });
   });
 
   it('should handle all defined pending types', () => {
-    const specificTypes = [types.USER_INFO, types.USER_AUTH, types.USER_LOGOUT];
+    const specificTypes = [types.STATUS_INFO];
 
     specificTypes.forEach(value => {
       const dispatched = {
         type: helpers.PENDING_ACTION(value)
       };
 
-      const resultState = userReducer(undefined, dispatched);
+      const resultState = statusReducer(undefined, dispatched);
 
       expect({ type: helpers.PENDING_ACTION(value), result: resultState }).toMatchSnapshot(`pending types ${value}`);
     });
   });
 
   it('should handle all defined fulfilled types', () => {
-    const specificTypes = [types.USER_INFO, types.USER_AUTH, types.USER_LOGOUT];
+    const specificTypes = [types.STATUS_INFO];
 
     specificTypes.forEach(value => {
       const dispatched = {
@@ -59,7 +59,7 @@ describe('userReducer', () => {
         }
       };
 
-      const resultState = userReducer(undefined, dispatched);
+      const resultState = statusReducer(undefined, dispatched);
 
       expect({ type: helpers.FULFILLED_ACTION(value), result: resultState }).toMatchSnapshot(
         `fulfilled types ${value}`

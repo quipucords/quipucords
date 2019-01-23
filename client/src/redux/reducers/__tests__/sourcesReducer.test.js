@@ -1,120 +1,69 @@
-import helpers from '../../../common/helpers';
-import { sourcesTypes } from '../../constants/index';
 import sourcesReducer from '../sourcesReducer';
-
-const initialState = {
-  view: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false,
-    sources: []
-  },
-
-  update: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false,
-    sourceId: '',
-    delete: false
-  }
-};
+import { sourcesTypes as types } from '../../constants';
+import helpers from '../../../common/helpers';
 
 describe('SourcesReducer', () => {
   it('should return the initial state', () => {
-    expect(sourcesReducer(undefined, {})).toEqual(initialState);
+    expect(sourcesReducer.initialState).toBeDefined();
   });
 
-  it('should handle DELETE_SOURCE_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCE),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'DELETE ERROR'
-          }
-        }
-      }
-    };
+  it('should handle all defined error types', () => {
+    const specificTypes = [types.DELETE_SOURCE, types.DELETE_SOURCES, types.GET_SOURCES];
 
-    const resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.update.error).toBeTruthy();
-    expect(resultState.update.errorMessage).toEqual('DELETE ERROR');
-    expect(resultState.update.delete).toBeTruthy();
-
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
-  it('should handle GET_SOURCES_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(sourcesTypes.GET_SOURCES),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'GET ERROR'
-          }
-        }
-      }
-    };
-
-    const resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.view.error).toBeTruthy();
-    expect(resultState.view.errorMessage).toEqual('GET ERROR');
-
-    expect(resultState.update).toEqual(initialState.update);
-  });
-
-  it('should handle GET_SOURCES_PENDING', () => {
-    const dispatched = {
-      type: helpers.PENDING_ACTION(sourcesTypes.GET_SOURCES)
-    };
-
-    const resultState = sourcesReducer(undefined, dispatched);
-
-    expect(resultState.view.pending).toBeTruthy();
-
-    expect(resultState.update).toEqual(initialState.update);
-  });
-
-  it('should handle GET_SOURCES_FULFILLED', () => {
-    const dispatched = {
-      type: helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCES),
-      payload: {
-        data: {
-          results: [
-            {
-              name: '1',
-              id: 1
-            },
-            {
-              name: '2',
-              id: 2
-            },
-            {
-              name: '3',
-              id: 3
-            },
-            {
-              name: '4',
-              id: 4
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.REJECTED_ACTION(value),
+        error: true,
+        payload: {
+          message: 'MESSAGE',
+          response: {
+            status: 0,
+            statusText: 'ERROR TEST',
+            data: {
+              detail: 'ERROR'
             }
-          ]
+          }
         }
-      }
-    };
+      };
 
-    const resultState = sourcesReducer(undefined, dispatched);
+      const resultState = sourcesReducer(undefined, dispatched);
 
-    expect(resultState.view.fulfilled).toBeTruthy();
-    expect(resultState.view.sources).toHaveLength(4);
+      expect({ type: helpers.REJECTED_ACTION(value), result: resultState }).toMatchSnapshot(`rejected types ${value}`);
+    });
+  });
 
-    expect(resultState.update).toEqual(initialState.update);
+  it('should handle all defined pending types', () => {
+    const specificTypes = [types.DELETE_SOURCE, types.DELETE_SOURCES, types.GET_SOURCES];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.PENDING_ACTION(value)
+      };
+
+      const resultState = sourcesReducer(undefined, dispatched);
+
+      expect({ type: helpers.PENDING_ACTION(value), result: resultState }).toMatchSnapshot(`pending types ${value}`);
+    });
+  });
+
+  it('should handle all defined fulfilled types', () => {
+    const specificTypes = [types.DELETE_SOURCE, types.DELETE_SOURCES, types.GET_SOURCES];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.FULFILLED_ACTION(value),
+        payload: {
+          data: {
+            test: 'success'
+          }
+        }
+      };
+
+      const resultState = sourcesReducer(undefined, dispatched);
+
+      expect({ type: helpers.FULFILLED_ACTION(value), result: resultState }).toMatchSnapshot(
+        `fulfilled types ${value}`
+      );
+    });
   });
 });
