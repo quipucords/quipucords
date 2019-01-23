@@ -32,16 +32,13 @@
   set_fact:
     selinux_on: false
 
-- name: Get selinux_on setting from ansible (Fedora)
-  set_fact:
-    selinux_on: true
-  when:
-    - is_fedora
-    - ansible_selinux is defined and ansible_selinux != false
+- name: Register selinux enabled command
+  shell: selinuxenabled
+  register: have_selinux_raw
+  ignore_errors: yes
 
-- name: Get selinux_on setting from ansible for (RHEL/Centos)
+- name: Set selinux_on if selinux is enabled
   set_fact:
     selinux_on: true
   when:
-    - not is_fedora
-    - ansible_selinux is defined and ansible_selinux != false and ansible_selinux.status == 'enabled'
+    - have_selinux_raw.rc == 0
