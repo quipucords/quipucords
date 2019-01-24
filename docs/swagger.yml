@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "The models and API for the Quipucords server."
-  version: "0.0.46"
+  version: "0.0.47"
   title: "Quipucords API"
   contact:
     email: "quipucords@redhat.com"
@@ -1268,7 +1268,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "0.0.46.afdsgev"
+          example: "0.0.47.afdsgev"
         report_platform_id:
           type: "string"
           description: "Globally unique uuid for report"
@@ -1314,7 +1314,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "0.0.46.afdsgev"
+          example: "0.0.47.afdsgev"
         sources:
           type: "array"
           items:
@@ -1335,7 +1335,7 @@ definitions:
       report_version:
         type: "string"
         description: "The report version"
-        example: "0.0.46.afdsgev"
+        example: "0.0.47.afdsgev"
       source_name:
         type: "string"
         description: "The source name associated with these facts"
@@ -1841,7 +1841,7 @@ definitions:
       server_version:
         type: "string"
         description: "Server version number"
-        example: 0.0.46.17de132
+        example: 0.0.47.17de132
       build:
         type: "string"
         description: "The build number"

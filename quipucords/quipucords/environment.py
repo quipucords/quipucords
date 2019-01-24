@@ -41,7 +41,7 @@ def commit():
 
 def server_version():
     """Return server version."""
-    return '0.0.46.%s' % commit()
+    return '0.0.47.%s' % commit()
 
 
 def platform_info():
