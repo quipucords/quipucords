@@ -129,7 +129,7 @@
   become: true
   when:
     - install_cli
-    - install_offline is not defined
+    - install_offline is not defined or install_offline == false
 
 - name: Install the latest version (QPC RHEL/Centos)
   yum:
@@ -139,7 +139,7 @@
   when:
     - not is_fedora
     - install_cli
-    - install_offline is not defined
+    - install_offline is not defined or install_offline == false
 
 - name: Install the latest version (QPC Fedora)
   dnf:
@@ -149,7 +149,7 @@
   when:
     - is_fedora
     - install_cli
-    - install_offline is not defined
+    - install_offline is not defined or install_offline == false
 
 - name: Configure QPC to talk to server
   shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"
