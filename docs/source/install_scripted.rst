@@ -44,8 +44,11 @@ If you choose the offline option to run the installer, you will need to obtain t
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
 - Build the Postgres Image
+
   1. Install Docker (`Documentation <https://docs.docker.com/install/>`_)
+
   2. Create the image tar with the following commands::
+
     docker pull postgres:9.6.10
     docker save -o postgres.9.6.10.tar postgres:9.6.10
 
@@ -57,6 +60,8 @@ If you choose the offline option to run the installer, you will need to obtain t
 - RHEL & Centos 7 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
 - Fedora 27 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
 - Fedora 28 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
+
+**Transfer Packages**
 
 After the required packages have been collected, they will need to be transfered to the machine without internet connectivity.
 
@@ -72,9 +77,10 @@ After the required packages have been collected, they will need to be transfered
 
     # mv /path/to/package ./packages/
 
-Dependencies:
-+++++++++++++
-After the packages have been placed into the directory, the following associated dependencies must be installed onto the offline machine.
+Offline Dependencies:
++++++++++++++++++++++
+
+The following associated dependencies must be installed onto the offline machine before the offline installation script can be executed.
 
 **Server Dependencies:**
 
@@ -86,6 +92,8 @@ After the packages have been placed into the directory, the following associated
 - `Download & Configure EPEL <install.html#commandline>`_
 - Python 3.4
 - Python 3.4-requests
+
+**Start Offline Install**
 
 Start the offline installtiion by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
 
