@@ -52,7 +52,7 @@ def configureDocker = {
 
 def installQpcClient() {
     sh '''\
-    sudo wget -O /etc/yum.repos.d/chambridge-qpc-fedora-28.repo https://copr.fedorainfracloud.org/coprs/chambridge/qpc/repo/fedora-28/chambridge-qpc-fedora-28.repo
+    sudo wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-29.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora28.repo
     sudo dnf -y install qpc
     '''.stripIndent()
 }
@@ -164,8 +164,8 @@ node('f28-os') {
         sh "sudo gzip -f --best $install_tar"
         sh "sudo chmod 755 $install_targzfile"
 
-        archive targzfile
-        archive install_targzfile
+        archiveArtifacts targzfile
+        archiveArtifacts install_targzfile
 
         build job: 'qpc-master-test-install', wait: false
     }
