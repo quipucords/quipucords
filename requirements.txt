@@ -2,8 +2,8 @@
 -r locked-requirements.txt
 
 Django==2.1.5
-django-filter==2.0.0
-djangorestframework==3.9.0
+django-filter==2.1.0
+djangorestframework==3.9.1
 djangorestframework-expiring-authtoken==0.1.4
 drf-generators==0.3.0
 drf-url-filters==0.5.1

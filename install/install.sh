@@ -93,7 +93,7 @@ else
 fi
 
 offline_check() {
-  echo 'Checking if required files exists for an offline installation.'
+  echo 'Checking if required files exist for an offline installation.'
   pkg_dir='packages/'
   for i in "${args[@]}"; do
     if [[ "$i" == *"pkg_install_dir"* ]]; then

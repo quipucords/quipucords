@@ -91,7 +91,8 @@ class EngineTest(TestCase):
             is_redhat=True,
             redhat_certs='fake certs',
             redhat_package_count=100,
-            architecture='x86_64'):
+            architecture='x86_64',
+            user_has_sudo=True):
         """Create an in memory DetailsReport for tests."""
         # pylint: disable=too-many-statements
         fact = {}
@@ -165,6 +166,8 @@ class EngineTest(TestCase):
                 redhat_package_count
         if architecture:
             fact['uname_processor'] = architecture
+
+        fact['user_has_sudo'] = user_has_sudo
 
         details_report = {'id': report_id, 'facts': [fact]}
         return details_report
@@ -866,12 +869,15 @@ class EngineTest(TestCase):
         fingerprints = [
             {'id': 1,
              'os_release': 'RHEL 7',
-             'mac_addresses': ['1234', '2345']},
+             'mac_addresses': ['1234', '2345'],
+             'sources': []},
             {'id': 2,
              'os_release': 'RHEL 7',
-             'mac_addresses': ['9876', '8765']},
+             'mac_addresses': ['9876', '8765'],
+             'sources': []},
             {'id': 3,
-             'os_release': 'RHEL 6'}
+             'os_release': 'RHEL 6',
+             'sources': []}
         ]
         index, no_key_found = \
             self.fp_task_runner._create_index_for_fingerprints(
@@ -969,6 +975,41 @@ class EngineTest(TestCase):
         self.assertIsNotNone(new_fingerprint.get('subscription_manager_id'))
         self.assertIsNotNone(new_fingerprint.get('cpu_socket_count'))
         self.assertIsNotNone(new_fingerprint.get('cpu_core_count'))
+
+    def test_merge_fingerprint_sudo(self):
+        """Test merging two network one sudo and one without."""
+        # Test that sudo is preferred when part of priority fingerprint
+        sudo_fingerprint = self._create_network_fingerprint()
+        sudo_fingerprint['products'] = []
+        sudo_fingerprint['entitlements'] = []
+
+        regular_fingerprint = self._create_network_fingerprint(
+            user_has_sudo=False)
+        regular_fingerprint['products'] = []
+        regular_fingerprint['entitlements'] = []
+
+        result = self.fp_task_runner._merge_fingerprint(
+            sudo_fingerprint, regular_fingerprint)
+        self.assertEqual(result, sudo_fingerprint)
+        metadata = result.get('metadata')
+        for key in metadata:
+            self.assertTrue(metadata.get(key).get('has_sudo'))
+
+        # Test that sudo is preferred when part of to merge fingerprint
+        sudo_fingerprint = self._create_network_fingerprint()
+        sudo_fingerprint['products'] = []
+        sudo_fingerprint['entitlements'] = []
+
+        regular_fingerprint = self._create_network_fingerprint(
+            user_has_sudo=False)
+        regular_fingerprint['products'] = []
+        regular_fingerprint['entitlements'] = []
+
+        result = self.fp_task_runner._merge_fingerprint(
+            regular_fingerprint, sudo_fingerprint)
+        metadata = result.get('metadata')
+        for key in metadata:
+            self.assertTrue(metadata.get(key).get('has_sudo'))
 
     def test_merge_fingerprint_network_win(self):
         """Test merge of fingerprint prioritizes network values."""

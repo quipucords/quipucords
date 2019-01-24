@@ -675,7 +675,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 unique_id_value = fingerprint.get(id_key)
                 if unique_id_value:
                     # Add or update fingerprint value
-                    unique_dict[unique_id_value] = fingerprint
+                    existing_fingerprint = unique_dict.get(unique_id_value)
+                    if existing_fingerprint:
+                        unique_dict[unique_id_value] = self._merge_fingerprint(
+                            existing_fingerprint,
+                            fingerprint)
+                    else:
+                        unique_dict[unique_id_value] = fingerprint
                 else:
                     no_global_id_list.append(fingerprint)
 
@@ -738,6 +744,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         return result_by_key, key_not_found_list
 
     # pylint: disable=too-many-branches, too-many-locals
+    # pylint: disable=too-many-statements
     def _merge_fingerprint(self, priority_fingerprint,
                            to_merge_fingerprint,
                            reverse_priority_keys=None):
@@ -773,10 +780,26 @@ class FingerprintTaskRunner(ScanTaskRunner):
             if priority_fingerprint.get(key, None) is None:
                 # reverse the priority since value is None
                 keys_to_add_list.add(key)
+                continue
+
+            # If priority do not have sudo and to merge has sudo
+            # use the to merge value
+            priority_sudo = priority_fingerprint.get(
+                META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
+            to_merge_sudo = to_merge_fingerprint.get(
+                META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
+            if not priority_sudo and to_merge_sudo:
+                keys_to_add_list.add(key)
+
         keys_to_add_list = list(keys_to_add_list)
         if META_DATA_KEY in keys_to_add_list:
             keys_to_add_list.remove(META_DATA_KEY)
+        if ENTITLEMENTS_KEY in keys_to_add_list:
+            keys_to_add_list.remove(ENTITLEMENTS_KEY)
+        if PRODUCTS_KEY in keys_to_add_list:
+            keys_to_add_list.remove(PRODUCTS_KEY)
 
+        # merge facts
         for fact_key in keys_to_add_list:
             to_merge_fact = to_merge_fingerprint.get(fact_key)
             if to_merge_fact:
@@ -792,12 +815,29 @@ class FingerprintTaskRunner(ScanTaskRunner):
             if source not in priority_sources.keys():
                 priority_sources[source] = to_merge_sources[source]
 
+        # merge entitlements
         if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
-            if ENTITLEMENTS_KEY not in priority_fingerprint:
-                priority_fingerprint[ENTITLEMENTS_KEY] = []
-            priority_fingerprint[ENTITLEMENTS_KEY] += \
+            combined_entitlements_list = \
+                priority_fingerprint.get(ENTITLEMENTS_KEY, []) + \
                 to_merge_fingerprint.get(ENTITLEMENTS_KEY, [])
 
+            unique_entitlement_dict = {}
+            unique_entitlement_list = []
+            # remove duplicate entitlements
+            for entitlement in combined_entitlements_list:
+                # entitlements have a name, entitlement_id or both
+                unique_entitlement_id = '%s:%s' % (
+                    entitlement.get('name', '_'),
+                    entitlement.get('entitlement_id', '_'))
+                if unique_entitlement_dict.get(unique_entitlement_id) is None:
+                    # we haven't seen this entitlement
+                    unique_entitlement_dict[unique_entitlement_id] = \
+                        entitlement
+                    unique_entitlement_list.append(entitlement)
+
+            priority_fingerprint[ENTITLEMENTS_KEY] = unique_entitlement_list
+
+        # merge products
         if to_merge_fingerprint.get(PRODUCTS_KEY):
             if PRODUCTS_KEY not in priority_fingerprint:
                 priority_fingerprint[PRODUCTS_KEY] = \
@@ -865,7 +905,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'server_id': source['server_id'],
                 'source_name': source['source_name'],
                 'source_type': source['source_type'],
-                'raw_fact_key': raw_fact_key
+                'raw_fact_key': raw_fact_key,
+                'has_sudo': raw_fact.get('user_has_sudo', False)
             }
 
     def _add_products_to_fingerprint(self, source,

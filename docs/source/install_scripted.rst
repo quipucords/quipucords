@@ -58,10 +58,10 @@ The Quipucords server requires a Postgres Docker image.  You must build the imag
 
 **Command Line Tool RPM Package:**
 
-- RHEL & Centos 6 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el6.noarch.rpm>`_)
-- RHEL & Centos 7 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
-- Fedora 27 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
-- Fedora 28 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
+- RHEL & Centos 6 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el6.noarch.rpm>`_)
+- RHEL & Centos 7 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
+- Fedora 27 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
+- Fedora 28 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
 
 **Transfer Packages**
 
