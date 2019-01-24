@@ -744,6 +744,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         return result_by_key, key_not_found_list
 
     # pylint: disable=too-many-branches, too-many-locals
+    # pylint: disable=too-many-statements
     def _merge_fingerprint(self, priority_fingerprint,
                            to_merge_fingerprint,
                            reverse_priority_keys=None):
@@ -816,10 +817,25 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # merge entitlements
         if to_merge_fingerprint.get(ENTITLEMENTS_KEY):
-            if ENTITLEMENTS_KEY not in priority_fingerprint:
-                priority_fingerprint[ENTITLEMENTS_KEY] = []
-            priority_fingerprint[ENTITLEMENTS_KEY] += \
+            combined_entitlements_list = \
+                priority_fingerprint.get(ENTITLEMENTS_KEY, []) + \
                 to_merge_fingerprint.get(ENTITLEMENTS_KEY, [])
+
+            unique_entitlement_dict = {}
+            unique_entitlement_list = []
+            # remove duplicate entitlements
+            for entitlement in combined_entitlements_list:
+                # entitlements have a name, entitlement_id or both
+                unique_entitlement_id = '%s:%s' % (
+                    entitlement.get('name', '_'),
+                    entitlement.get('entitlement_id', '_'))
+                if unique_entitlement_dict.get(unique_entitlement_id) is None:
+                    # we haven't seen this entitlement
+                    unique_entitlement_dict[unique_entitlement_id] = \
+                        entitlement
+                    unique_entitlement_list.append(entitlement)
+
+            priority_fingerprint[ENTITLEMENTS_KEY] = unique_entitlement_list
 
         # merge products
         if to_merge_fingerprint.get(PRODUCTS_KEY):
