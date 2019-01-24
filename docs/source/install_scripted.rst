@@ -47,10 +47,9 @@ If you choose the offline option to run the installer, you will need to obtain t
 
   1. Install Docker (`Documentation <https://docs.docker.com/install/>`_)
 
-  2. Create the image tar with the following commands::
-
-    docker pull postgres:9.6.10
-    docker save -o postgres.9.6.10.tar postgres:9.6.10
+  2. Create the postgres image tar with the following commands::
+      docker pull postgres:9.6.10
+      docker save -o postgres.9.6.10.tar postgres:9.6.10
 
 **Note:** The offline installation script requires the postgres tar to be named ``postgres.9.6.10.tar``.
 
@@ -80,7 +79,7 @@ After the required packages have been collected, they will need to be transfered
 Offline Dependencies:
 +++++++++++++++++++++
 
-The following associated dependencies must be installed onto the offline machine before the offline installation script can be executed.
+The following associated dependencies must be installed onto the offline machine before the installation script can be executed.
 
 **Server Dependencies:**
 
