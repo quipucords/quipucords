@@ -38,13 +38,15 @@ The output appears similar to the following example::
 
 Installing without Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you choose the offline option to run the installer, you will need to obtain the following packages on a machine with internet connectivity. Most of the packages can be obtained through the `Github Release Page <https://github.com/quipucords/quipucords/releases/tag/0.0.46>`_.
+If you choose the offline option to run the installer, you will need to obtain the following packages on a machine with internet connectivity.
 
 **Server Package:**
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
 
 **Build the Postgres Image:**
+
+The Quipucords server requires a Postgres Docker image.  You must build the image on a machine with internet connectivity.  Follow the steps documented below to create a Postgres Docker image.
 
 - Install Docker (`Documentation <https://docs.docker.com/install/>`_)
 - Create the postgres image tar with the following commands::
@@ -63,7 +65,7 @@ If you choose the offline option to run the installer, you will need to obtain t
 
 **Transfer Packages**
 
-After the required packages have been collected, they will need to be transferred to the machine without internet connectivity.
+After the required packages have been collected, they will need to be transferred to the machine where the Quipucords server will be installed.
 
 1. Change to the installer directory by entering following command::
 
