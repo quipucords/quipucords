@@ -40,7 +40,7 @@ Installing without Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If you choose the offline option to run the installer, you will need to obtain the following packages on a machine with internet connectivity.
 
-**Server Package:**
+**Quipucords Server Package:**
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
 
