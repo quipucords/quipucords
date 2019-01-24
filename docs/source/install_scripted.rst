@@ -44,7 +44,6 @@ If you choose the offline option to run the installer, the following associated 
 
 - `Ansible <install.html#installing-the-ansible-prerequisite>`_
 - `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
-- `Postgres Image <install.html#postgres-image-create>`_
 
 **Command Line Tool Dependencies:**
 
@@ -59,6 +58,7 @@ After the dependencies are installed, you must gather packages through the `Gith
 **Server Packages:**
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
+- `Postgres Image <install.html#postgres-image-create>`_
 
 **Command Line Tool RPM Package:**
 
