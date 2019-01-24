@@ -126,9 +126,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
     def test_dmiresult_contains_no_enabled_sockets(self):
         """Test that we use cpuinfo cmd if dmi cmd finds 0 sockets."""
         no_dmi_result = '\tSocket Designation: CPU #000\r\n\t' \
-                         'Status: Unpopulated\r\n ' \
-                         '\tSocket Designation: CPU #001\r\n\t' \
-                         'Status: Unpopulated\r\n'
+                        'Status: Unpopulated\r\n ' \
+                        '\tSocket Designation: CPU #001\r\n\t' \
+                        'Status: Unpopulated\r\n'
         dependencies = {'internal_cpu_socket_count_dmi_cmd':
                         ansible_result(no_dmi_result),
                         'internal_cpu_socket_count_cpuinfo_cmd':
@@ -225,11 +225,11 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                            '\tSocket Designation: CPU #002\r\n\t' \
                            'Status: Populated, Enabled\r\n' \
                            '\tSocket Designation: CPU #003\r\n\t' \
-                           'Status: Populated, Enabled\r\n' \
+                           'Status: Populated, Disabled\r\n' \
                            '\tSocket Designation: CPU #004\r\n\t' \
                            'Status: Populated, Enabled\r\n' \
                            '\tSocket Designation: CPU #005\r\n\t' \
-                           'Status: Populated, Enabled\r\n' \
+                           'Status: Populated, Disabled\r\n' \
                            '\tSocket Designation: CPU #006\r\n\t' \
                            'Status: Populated, Enabled\r\n' \
                            '\tSocket Designation: CPU #007\r\n\t' \

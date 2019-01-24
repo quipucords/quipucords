@@ -97,7 +97,7 @@ class ProcessCpuSocketCount(process.Processor):
             dmi_status = dmi_cpu_socket_count.get('stdout_lines')
             dmi_count = 0
             for status in dmi_status:
-                if 'populated, enabled' in status.lower():
+                if 'status: populated' in status.lower():
                     dmi_count += 1
             if dmi_count > 0:
                 return dmi_count
