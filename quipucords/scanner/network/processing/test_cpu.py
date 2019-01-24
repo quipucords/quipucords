@@ -112,12 +112,31 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_success_case_dmiresult(self):
         """Test socket count when internal dmi cmd returns valid result."""
+        one_dmi_result = '\tSocket Designation: CPU #000\r\n\t' \
+                         'Status: Populated, Enabled\r\n ' \
+                         '\tSocket Designation: CPU #001\r\n\t' \
+                         'Status: Unpopulated\r\n'
         dependencies = {'internal_cpu_socket_count_dmi_cmd':
-                        ansible_result('5')}
+                        ansible_result(one_dmi_result)}
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            5)
+            1)
+
+    def test_dmiresult_contains_no_enabled_sockets(self):
+        """Test that we use cpuinfo cmd if dmi cmd finds 0 sockets."""
+        no_dmi_result = '\tSocket Designation: CPU #000\r\n\t' \
+                        'Status: Unpopulated\r\n ' \
+                        '\tSocket Designation: CPU #001\r\n\t' \
+                        'Status: Unpopulated\r\n'
+        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+                        ansible_result(no_dmi_result),
+                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        ansible_result('2')}
+        self.assertEqual(
+            cpu.ProcessCpuSocketCount.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            2)
 
     def test_dmiresult_contains_nonint_characters(self):
         """Test that we use cpuinfo cmd if dmi cmd can't be changed to int."""
@@ -199,8 +218,24 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_dmiresult_equal_to_8(self):
         """Test that socket count is set to dmicode dep when equal to 8."""
+        eight_dmi_result = '\tSocket Designation: CPU #000\r\n\t' \
+                           'Status: Populated, Enabled\r\n ' \
+                           '\tSocket Designation: CPU #001\r\n\t' \
+                           'Status: Populated, Enabled\r\n ' \
+                           '\tSocket Designation: CPU #002\r\n\t' \
+                           'Status: Populated, Enabled\r\n' \
+                           '\tSocket Designation: CPU #003\r\n\t' \
+                           'Status: Populated, Disabled\r\n' \
+                           '\tSocket Designation: CPU #004\r\n\t' \
+                           'Status: Populated, Enabled\r\n' \
+                           '\tSocket Designation: CPU #005\r\n\t' \
+                           'Status: Populated, Disabled\r\n' \
+                           '\tSocket Designation: CPU #006\r\n\t' \
+                           'Status: Populated, Enabled\r\n' \
+                           '\tSocket Designation: CPU #007\r\n\t' \
+                           'Status: Populated, Enabled\r\n'
         dependencies = {'internal_cpu_socket_count_dmi_cmd':
-                        ansible_result('8'),
+                        ansible_result(eight_dmi_result),
                         'internal_cpu_socket_count_cpuinfo_cmd':
                             ansible_result('9'),
                         'cpu_count': '3'}
