@@ -116,7 +116,9 @@
 - name: Install QPC from local path
   shell: rpm -Uvh --force "{{qpc_rpm_local_path}}"
   become: true
-  when: find_qpc_rpm_local.stat.exists == true
+  when:
+    - find_qpc_rpm_local.stat.exists == true
+    - install_offline is defined
 
 - name: Add QPC repository (RHEL/CentOS 7)
   get_url:
@@ -127,7 +129,7 @@
   become: true
   when:
     - install_cli
-    - find_qpc_rpm_local.stat.exists == false
+    - install_offline is not defined
 
 - name: Install the latest version (QPC RHEL/Centos)
   yum:
@@ -137,7 +139,7 @@
   when:
     - not is_fedora
     - install_cli
-    - find_qpc_rpm_local.stat.exists == false
+    - install_offline is not defined
 
 - name: Install the latest version (QPC Fedora)
   dnf:
@@ -147,7 +149,7 @@
   when:
     - is_fedora
     - install_cli
-    - find_qpc_rpm_local.stat.exists == false
+    - install_offline is not defined
 
 - name: Configure QPC to talk to server
   shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"
