@@ -63,7 +63,7 @@ If you choose the offline option to run the installer, you will need to obtain t
 
 **Transfer Packages**
 
-After the required packages have been collected, they will need to be transfered to the machine without internet connectivity.
+After the required packages have been collected, they will need to be transferred to the machine without internet connectivity.
 
 1. Change to the installer directory by entering following command::
 
@@ -95,7 +95,7 @@ The following associated dependencies must be installed onto the offline machine
 
 **Start Offline Install**
 
-Start the offline installtiion by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
+Start the offline installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
 
     # ./install.sh -e install_offline=true
 
