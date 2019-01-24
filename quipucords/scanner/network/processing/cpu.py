@@ -94,11 +94,13 @@ class ProcessCpuSocketCount(process.Processor):
         dmi_cpu_socket_count = \
             dependencies.get('internal_cpu_socket_count_dmi_cmd')
         if dmi_cpu_socket_count and dmi_cpu_socket_count.get('rc') == 0:
-            dmi_count = dmi_cpu_socket_count.get('stdout').strip()
-            if is_int(dmi_count):
-                if convert_to_int(dmi_count) != 0 and \
-                        convert_to_int(dmi_count) <= 8:
-                    return convert_to_int(dmi_count)
+            dmi_status = dmi_cpu_socket_count.get('stdout_lines')
+            dmi_count = 0
+            for status in dmi_status:
+                if 'populated, enabled' in status.lower():
+                    dmi_count += 1
+            if dmi_count > 0:
+                return dmi_count
 
         # process the cpuinfo socket count as a fallback
         cpuinfo_cpu_socket_count = \
