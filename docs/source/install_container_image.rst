@@ -40,4 +40,4 @@ How to Create a Postgres Image
 
 **Note:** These steps do require the use of the internet.
 
-2. Follow the same steps start at number two from above to load the image into the environment. 
+2. Follow the same steps starting at number two from above to load the image into the environment. 
