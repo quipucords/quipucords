@@ -38,38 +38,34 @@ The output appears similar to the following example::
 
 Installing without Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you choose the offline option to run the installer, the following associated dependencies must be installed.
+If you choose the offline option to run the installer, you will need to obtain the following packages on a machine with internet connectivity.
 
-**Server Dependencies:**
-
-- `Ansible <install.html#installing-the-ansible-prerequisite>`_
-- `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
-
-**Command Line Tool Dependencies:**
-
-- `Download & Configure EPEL <install.html#commandline>`_
-- Python 3.4
-- Python 3.4-requests
-
-Packages
-++++++++
-After the dependencies are installed, you must gather packages through the `Github Release Page <https://github.com/quipucords/quipucords/releases/tag/0.0.46>`_.
-
-**Server Packages:**
+**Quipucords Server Package:**
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
-- Postgres Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/postgres.9.6.10.tar.gz>`_)
-- **Note:** You must extract the tarball to access the postgres image with the command::
 
-  # tar -xzvf postgres.version.tar.gz
+**Build the Postgres Docker Image:**
+
+The Quipucords server requires a Postgres Docker image.  You must build the Docker image on a machine with internet connectivity.  Follow the steps documented below to create a Postgres Docker image.
+
+- Install Docker (`Documentation <https://docs.docker.com/install/>`_)
+- Create the postgres image tar with the following commands::
+
+      # docker pull postgres:9.6.10
+      # docker save -o postgres.9.6.10.tar postgres:9.6.10
+
+**Note:** The offline installation script requires the postgres tar to be named ``postgres.9.6.10.tar``.
 
 **Command Line Tool RPM Package:**
 
-- RHEL & Centos 6 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el6.noarch.rpm>`_)
-- RHEL & Centos 7 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
-- Fedora 27 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
-- Fedora 28 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
+- RHEL & Centos 6 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el6.noarch.rpm>`_)
+- RHEL & Centos 7 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.el7.noarch.rpm>`_)
+- Fedora 27 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
+- Fedora 28 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
 
+**Transfer Packages**
+
+After the required packages have been collected, they will need to be transferred to the machine where the Quipucords server will be installed.
 
 1. Change to the installer directory by entering following command::
 
@@ -83,7 +79,25 @@ After the dependencies are installed, you must gather packages through the `Gith
 
     # mv /path/to/package ./packages/
 
-4. Start the installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
+Offline Dependencies:
++++++++++++++++++++++
+
+The following associated dependencies must be installed onto the offline machine before the installation script can be executed.
+
+**Server Dependencies:**
+
+- `Ansible <install.html#installing-the-ansible-prerequisite>`_
+- `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
+
+**Command Line Tool Dependencies:**
+
+- `Download & Configure EPEL <install.html#commandline>`_
+- Python 3.4
+- Python 3.4-requests
+
+**Start Offline Install**
+
+Start the offline installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
 
     # ./install.sh -e install_offline=true
 
