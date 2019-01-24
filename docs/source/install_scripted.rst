@@ -38,27 +38,18 @@ The output appears similar to the following example::
 
 Installing without Internet Connectivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you choose the offline option to run the installer, the following associated dependencies must be installed.
-
-**Server Dependencies:**
-
-- `Ansible <install.html#installing-the-ansible-prerequisite>`_
-- `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
-
-**Command Line Tool Dependencies:**
-
-- `Download & Configure EPEL <install.html#commandline>`_
-- Python 3.4
-- Python 3.4-requests
-
-Packages
-++++++++
-After the dependencies are installed, you must gather packages through the `Github Release Page <https://github.com/quipucords/quipucords/releases/tag/0.0.46>`_.
+If you choose the offline option to run the installer, you will need to obtain the following packages on a machine with internet connectivity. Most of the packages can be obtained through the `Github Release Page <https://github.com/quipucords/quipucords/releases/tag/0.0.46>`_.
 
 **Server Packages:**
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
-- `Postgres Image <install.html#postgres-image-create>`_
+- Build the Postgres Image
+  1. Install Docker (`Documentation <https://docs.docker.com/install/>`_)
+  2. Create the image tar with the following commands::
+    docker pull postgres:9.6.10
+    docker save -o postgres.9.6.10.tar postgres:9.6.10
+
+**Note:** The offline installation script requires the postgres tar to be named ``postgres.9.6.10.tar``.
 
 **Command Line Tool RPM Package:**
 
@@ -67,6 +58,7 @@ After the dependencies are installed, you must gather packages through the `Gith
 - Fedora 27 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc27.noarch.rpm>`_)
 - Fedora 28 (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/qpc-0.0.46-ACTUAL_COPR_GIT_COMMIT.fc28.noarch.rpm>`_)
 
+After the required packages have been collected, they will need to be transfered to the machine without internet connectivity.
 
 1. Change to the installer directory by entering following command::
 
@@ -80,7 +72,22 @@ After the dependencies are installed, you must gather packages through the `Gith
 
     # mv /path/to/package ./packages/
 
-4. Start the installation by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
+Dependencies:
++++++++++++++
+After the packages have been placed into the directory, the following associated dependencies must be installed onto the offline machine.
+
+**Server Dependencies:**
+
+- `Ansible <install.html#installing-the-ansible-prerequisite>`_
+- `Docker <install.html#installing-docker-and-the-quipucords-server-container-image>`_
+
+**Command Line Tool Dependencies:**
+
+- `Download & Configure EPEL <install.html#commandline>`_
+- Python 3.4
+- Python 3.4-requests
+
+Start the offline installtiion by entering the following command. Alternatively, enter the following command with options as described in `Installation Options`_::
 
     # ./install.sh -e install_offline=true
 

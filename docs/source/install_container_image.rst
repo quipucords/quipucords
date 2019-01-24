@@ -26,18 +26,3 @@ The output appears similar to the following example::
 
   REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
   quipucords              0.0.46               fdadcc4b326f        3 days ago          969MB
-
-
-.. _postgres-image-create:
-
-How to Create a Postgres Image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. After Docker is installed, you can obtain the postgres container image with these steps::
-
-    docker pull postgres:9.6.10
-    docker save -o postgres.9.6.10.tar postgres:9.6.10
-
-**Note:** These steps do require the use of the internet.
-
-2. Follow the steps starting at number 2 from `above <install.html#container>`_, to load the image into the environment.
