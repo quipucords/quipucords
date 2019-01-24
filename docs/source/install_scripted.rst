@@ -44,7 +44,7 @@ If you choose the offline option to run the installer, you will need to obtain t
 
 - Server Container Image (`Download <https://github.com/quipucords/quipucords/releases/download/0.0.46/quipucords.0.0.46.tar.gz>`_)
 
-**Build the Postgres Image:**
+**Build the Postgres Docker Image:**
 
 The Quipucords server requires a Postgres Docker image.  You must build the image on a machine with internet connectivity.  Follow the steps documented below to create a Postgres Docker image.
 
