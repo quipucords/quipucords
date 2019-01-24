@@ -118,7 +118,7 @@
   become: true
   when:
     - find_qpc_rpm_local.stat.exists == true
-    - install_offline is defined
+    - install_offline is defined and install_offline == true
 
 - name: Add QPC repository (RHEL/CentOS 7)
   get_url:
