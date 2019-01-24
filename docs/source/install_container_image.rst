@@ -31,7 +31,7 @@ The output appears similar to the following example::
 .. _postgres-image-create:
 
 How to Create a Postgres Image
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. After Docker is installed, you can obtain the postgres container image with these steps::
 
@@ -40,4 +40,4 @@ How to Create a Postgres Image
 
 **Note:** These steps do require the use of the internet.
 
-2. Follow the same steps starting at number two from above to load the image into the environment. 
+2. Follow the steps starting at number 2 from `above <install.html#container>`_, to load the image into the environment.
