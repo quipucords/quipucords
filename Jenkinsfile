@@ -52,7 +52,7 @@ def configureDocker = {
 
 def installQpcClient() {
     sh '''\
-    sudo wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-29.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora28.repo
+    sudo wget -O /etc/yum.repos.d/group_quipucords-qpc-fedora-28.repo https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora28.repo
     sudo dnf -y install qpc
     '''.stripIndent()
 }
