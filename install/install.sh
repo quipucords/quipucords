@@ -73,7 +73,7 @@ if [ ! -f /etc/redhat-release ]; then
   exit 1
 fi
 
-if dnf --version; then
+if dnf --version > /dev/null 2>&1; then
   PKG_MGR=dnf
   if grep -q -i "27" /etc/redhat-release; then
     rpm_version="fc27"
@@ -124,19 +124,20 @@ for i in "${args[@]}"; do
   fi
 done
 
+if [ $RHEL7 ]; then
+  echo "Trying to install RHEL7 dependencies..."
+  sudo subscription-manager repos --enable="rhel-7-server-extras-rpms" || true
+  sudo subscription-manager repos --enable="rhel-7-server-optional-rpms" || true
+fi
+
 echo "Checking if ansible is installed..."
 command -v ansible > /dev/null 2>&1
 
 if [ $? -ne 0 ]; then
   echo "Ansible prerequisite could not be found. Trying to install ansible..."
-  if [ $RHEL7 ]; then
-    echo "Trying to install RHEL7 dependencies..."
-    sudo subscription-manager repos --enable="rhel-7-server-extras-rpms" || true
-    sudo subscription-manager repos --enable="rhel-7-server-optional-rpms" || true
-  fi
   sudo "${PKG_MGR}" install -y ansible
   command -v ansible > /dev/null 2>&1
-  if [ $? -ne 0]; then
+  if [ $? -ne 0 ]; then
     echo ""
     echo "Installation failed. Ansible prerequisite could not be installed."
     echo "Follow installation documentation for installing Ansible."
