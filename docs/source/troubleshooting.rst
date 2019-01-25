@@ -26,11 +26,11 @@ Default logging levels for the server can be altered by setting logging environm
 
 If your system does not have SELinux enabled, you can start the Quipucords server with the following Docker command with increased logging::
 
-  # sudo docker run --name quipucords -d -p 9443:443 -e QUIPUCORDS_LOGGING_LEVEL=DEBUG -e DJANGO_LOGGING_LEVEL=DEBUG -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:0.0.46
+  # sudo docker run --name quipucords -d -p 9443:443 -e QUIPUCORDS_LOGGING_LEVEL=DEBUG -e DJANGO_LOGGING_LEVEL=DEBUG -v ~/quipucords/sshkeys:/sshkeys -v ~/quipucords/data:/var/data -v ~/quipucords/log:/var/log -i quipucords:0.0.47
 
 If your system does have SELinux enabled, you must append ``:z`` to each volume as follows::
 
-  # sudo docker run --name quipucords -d -p 9443:443 -e QUIPUCORDS_LOGGING_LEVEL=DEBUG -e DJANGO_LOGGING_LEVEL=DEBUG -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:0.0.46
+  # sudo docker run --name quipucords -d -p 9443:443 -e QUIPUCORDS_LOGGING_LEVEL=DEBUG -e DJANGO_LOGGING_LEVEL=DEBUG -v ~/quipucords/sshkeys:/sshkeys:z -v ~/quipucords/data:/var/data:z -v ~/quipucords/log:/var/log:z -i quipucords:0.0.47
 
 These commands start the server on port ``9443`` and map the ``sshkeys``, ``data``, and ``log`` directories to the ``~/quipucords`` home directory for the server with increased logging information.
 
