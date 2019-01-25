@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Quipucords'
-copyright = '2018, Red Hat'
+copyright = '2018-2019, Red Hat'
 author = 'Red Hat'
 
 # The version info for the project you're documenting, acts as replacement for
