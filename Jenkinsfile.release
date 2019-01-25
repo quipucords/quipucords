@@ -9,7 +9,7 @@ node('f28-os') {
     stage('Install') {
         sh "sudo dnf -y install origin-clients nodejs"
         sh "which oc"
-        sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPHENSHIFT_LOGIN_URL"
+        sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPENSHIFT_LOGIN_URL"
         sh "oc project quipucords"
         sh "rpm -q docker"
         sh "which docker"
