@@ -2236,6 +2236,33 @@ definitions:
           type: "string"
           description: "The system bios uuid"
           example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+        insights_client_id:
+          type: "string"
+          description: "The insights client id"
+          example: "b077190b74f14b3582e57ce8243ae356"
+        system_intent_role:
+          type: "string"
+          description: "The system role"
+          example: "server"
+        system_intent_addons:
+          type: "array"
+          items:
+            type: "string"
+            description: "System addon"
+          example: ["addon1","addon2"]
+          description: "System addons"
+        system_intent_sla:
+          type: "string"
+          description: "The system service level agreement"
+          example: "self-service"
+        system_intent_usage_type:
+          type: "string"
+          description: "The system usage type"
+          example: "dev"
+        etc_machine_id:
+          type: "string"
+          description: "The system machine id"
+          example: "b077190b74f14b3582e57ce8243ae356"
         subscription_manager_id:
           type: "string"
           description: "The subscription manager identitifer"
