@@ -125,8 +125,19 @@ class ScanJobRunner(Process):
             # Associate details report with fingerprint task
             fingerprint_task_runner.scan_task.details_report = details_report
             fingerprint_task_runner.scan_task.save()
-            task_status = self._run_task(fingerprint_task_runner)
-            if task_status != ScanTask.COMPLETED:
+            try:
+                task_status = self._run_task(fingerprint_task_runner)
+            except Exception as error:
+                fingerprint_task_runner.scan_task.log_message(
+                    'DETAILS REPORT - '
+                    'The following details report failed to generate a'
+                    ' deployments report: %s' % details_report,
+                    log_level=logging.ERROR
+                )
+                raise error
+            if task_status in [ScanTask.CANCELED, ScanTask.PAUSED]:
+                return task_status
+            elif task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
                 failed_tasks.append(fingerprint_task_runner.scan_task)
                 fingerprint_task_runner.scan_task.log_message(
@@ -134,6 +145,7 @@ class ScanJobRunner(Process):
                         fingerprint_task_runner.scan_task.sequence_number),
                     log_level=logging.ERROR)
                 fingerprint_task_runner.scan_task.log_message(
+                    'DETAILS REPORT - '
                     'The following details report failed to generate a'
                     ' deployments report: %s' % details_report,
                     log_level=logging.ERROR
