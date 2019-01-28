@@ -141,6 +141,7 @@
     url: "{{ server_url }}"
     dest: "{{ pkg_install_dir }}"
     mode: 0644
+    timeout: 300
   when:
     - install_server
     - find_qpc_server_local.stat.exists == false
