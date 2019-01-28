@@ -45,18 +45,9 @@ class InspectTaskRunner(ScanTaskRunner):
     # pylint: disable=too-many-return-statements,too-many-branches
     def run(self, manager_interrupt):
         """Scan satellite manager and obtain host facts."""
-        # Make sure job is not cancelled or paused
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan canceled for %s.' % self.source.name
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan paused for %s.' % self.source.name
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
+        super_message, super_status = super().run(manager_interrupt)
+        if super_status != ScanTask.COMPLETED:
+            return super_message, super_status
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:

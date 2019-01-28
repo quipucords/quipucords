@@ -143,18 +143,9 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self, manager_interrupt):
         """Scan network range and attempt connections."""
-        # Make sure job is not cancelled or paused
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan canceled'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan paused'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
+        super_message, super_status = super().run(manager_interrupt)
+        if super_status != ScanTask.COMPLETED:
+            return super_message, super_status
 
         result_store = ConnectResultStore(self.scan_task)
         try:

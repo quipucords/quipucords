@@ -134,29 +134,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         details_report = self.scan_task.details_report
 
-        # remove results from previous interrupted scan
-        deployment_report = details_report.deployment_report
-        if not deployment_report:
-            deployment_report = DeploymentsReport(
-                report_version=create_report_version())
-            deployment_report.save()
+        deployment_report = DeploymentsReport(
+            report_version=create_report_version())
+        deployment_report.save()
 
-            # Set the report ids.  Right now they are deployment report id
-            # but they do not have to
-            deployment_report.report_id = deployment_report.id
-            deployment_report.save()
+        # Set the report ids.  Right now they are deployment report id
+        # but they do not have to
+        deployment_report.report_id = deployment_report.id
+        deployment_report.save()
 
-            details_report.deployment_report = deployment_report
-            details_report.report_id = deployment_report.id
-            details_report.save()
-        else:
-            # remove partial results
-            self.scan_task.log_message(
-                'REMOVING PARTIAL RESULTS - deleting %d '
-                'fingerprints from previous scan'
-                % len(deployment_report.system_fingerprints.all()))
-            deployment_report.system_fingerprints.all().delete()
-            deployment_report.save()
+        details_report.deployment_report = deployment_report
+        details_report.report_id = deployment_report.id
+        details_report.save()
 
         try:
             message, status = self._process_details_report(

@@ -86,7 +86,7 @@ class InspectTaskRunner(ScanTaskRunner):
         :param scan_task: the scan task model for this task
         to store results
         """
-        super().__init__(scan_job, scan_task)
+        super().__init__(scan_job, scan_task, supports_partial_results=True)
         self.connect_scan_task = None
 
     def run(self, manager_interrupt):
@@ -98,18 +98,9 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
-        # Make sure job is not cancelled or paused
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan canceled'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan paused'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
+        super_message, super_status = super().run(manager_interrupt)
+        if super_status != ScanTask.COMPLETED:
+            return super_message, super_status
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
