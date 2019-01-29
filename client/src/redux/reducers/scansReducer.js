@@ -8,6 +8,7 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false,
+    lastRefresh: 0,
     scans: [],
     sourcesCount: 0
   },
@@ -80,7 +81,8 @@ const scansReducer = (state = initialState, action) => {
         {
           pending: false,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload),
+          lastRefresh: state.view.lastRefresh
         },
         {
           state,
@@ -94,7 +96,8 @@ const scansReducer = (state = initialState, action) => {
         'view',
         {
           pending: true,
-          scans: state.view.scans
+          scans: state.view.scans,
+          lastRefresh: state.view.lastRefresh
         },
         {
           state,
@@ -110,6 +113,7 @@ const scansReducer = (state = initialState, action) => {
           scans: action.payload.data.results,
           pending: false,
           fulfilled: true,
+          lastRefresh: (action.payload.headers && new Date(action.payload.headers.date).getTime()) || 0,
           sourcesCount: state.view.sourcesCount
         },
         {
