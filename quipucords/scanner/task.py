@@ -66,19 +66,6 @@ class ScanTaskRunner():
         the ScanTask.STATUS_CHOICES status
         """
         # pylint: disable=no-self-use,unused-argument
-        # Make sure job is not cancelled or paused
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan canceled'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan paused'
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
-
         return 'Task ran successfully', ScanTask.COMPLETED
 
     def __str__(self):

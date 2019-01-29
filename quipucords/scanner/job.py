@@ -180,7 +180,7 @@ class ScanJobRunner(Process):
         return None
 
     def _run_task(self, runner):
-        """Run a sigle scan task."""
+        """Run a single scan task."""
         # pylint: disable=no-else-return
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK

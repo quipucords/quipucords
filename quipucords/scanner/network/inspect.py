@@ -98,10 +98,6 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
-
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task %d failed.' %\

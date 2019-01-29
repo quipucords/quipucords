@@ -43,10 +43,6 @@ class ConnectTaskRunner(ScanTaskRunner):
     # pylint: disable=too-many-return-statements
     def run(self, manager_interrupt):
         """Scan Satellite for system connection data."""
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
-
         try:
             status_code, api_version, satellite_version = \
                 utils.status(self.scan_task)
