@@ -37,21 +37,21 @@ class ScanTaskRunner():
                 self.scan_task.inspection_result.systems.all().delete()
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
                 details_report = self.scan_task.details_report
+                if details_report:
+                    # remove results from previous interrupted scan
+                    deployment_report = details_report.deployment_report
 
-                # remove results from previous interrupted scan
-                deployment_report = details_report.deployment_report
-
-                if deployment_report:
-                    # remove partial results
-                    self.scan_task.log_message(
-                        'REMOVING PARTIAL RESULTS - deleting %d '
-                        'fingerprints from previous scan'
-                        % len(deployment_report.system_fingerprints.all()))
-                    deployment_report.system_fingerprints.all().delete()
-                    deployment_report.save()
-                    details_report.deployment_report = None
-                    details_report.save()
-                    deployment_report.delete()
+                    if deployment_report:
+                        # remove partial results
+                        self.scan_task.log_message(
+                            'REMOVING PARTIAL RESULTS - deleting %d '
+                            'fingerprints from previous scan'
+                            % len(deployment_report.system_fingerprints.all()))
+                        deployment_report.system_fingerprints.all().delete()
+                        deployment_report.save()
+                        details_report.deployment_report = None
+                        details_report.save()
+                        deployment_report.delete()
 
     def run(self, manager_interrupt):
         """Block that will be executed.
