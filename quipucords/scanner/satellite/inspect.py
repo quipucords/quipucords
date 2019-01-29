@@ -45,6 +45,10 @@ class InspectTaskRunner(ScanTaskRunner):
     # pylint: disable=too-many-return-statements,too-many-branches
     def run(self, manager_interrupt):
         """Scan satellite manager and obtain host facts."""
+        super_message, super_status = super().run(manager_interrupt)
+        if super_status != ScanTask.COMPLETED:
+            return super_message, super_status
+
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = 'Prerequisites scan task %d failed.' %\

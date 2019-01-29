@@ -143,6 +143,10 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     def run(self, manager_interrupt):
         """Scan network range and attempt connections."""
+        super_message, super_status = super().run(manager_interrupt)
+        if super_status != ScanTask.COMPLETED:
+            return super_message, super_status
+
         result_store = ConnectResultStore(self.scan_task)
         try:
             scan_message, scan_result = self.run_with_result_store(
