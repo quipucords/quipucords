@@ -31,7 +31,7 @@ REPORT_TYPE_CHOICES = ((REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
 
 def create_report_version():
     """Create the report version string."""
-    return '0.0.47.%s' % commit()
+    return '0.0.46.%s' % commit()
 
 
 def sanitize_row(row):
