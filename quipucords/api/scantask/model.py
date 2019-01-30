@@ -305,6 +305,20 @@ class ScanTask(models.Model):
 
     # All task types
     @transaction.atomic
+    def reset_stats(self):
+        """Reset scan task stats default state."""
+        # pylint: disable=too-many-arguments
+        self.refresh_from_db()
+        self.systems_count = None
+        self.systems_scanned = None
+        self.systems_failed = None
+        self.systems_unreachable = None
+
+        self.save()
+        self._log_stats('INITIALIZING SYSTEM COUNTS - default all to 0')
+
+    # All task types
+    @transaction.atomic
     def increment_stats(self, name,
                         increment_sys_count=False,
                         increment_sys_scanned=False,

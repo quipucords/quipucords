@@ -198,6 +198,39 @@ class ScanTaskTest(TestCase):
         self.assertEqual(2, task.systems_failed)
         self.assertEqual(2, task.systems_unreachable)
 
+    def test_scantask_reset_stats(self):
+        """Test scan task reset stat feature."""
+        task = ScanTask.objects.create(
+            job=self.scan_job,
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING)
+        # pylint: disable=invalid-name
+        task.save()
+        task.increment_stats('foo', increment_sys_count=True,
+                             increment_sys_scanned=True,
+                             increment_sys_failed=True,
+                             increment_sys_unreachable=True)
+        self.assertEqual(1, task.systems_count)
+        self.assertEqual(1, task.systems_scanned)
+        self.assertEqual(1, task.systems_failed)
+        self.assertEqual(1, task.systems_unreachable)
+        task.reset_stats()
+        self.assertEqual(None, task.systems_count)
+        self.assertEqual(None, task.systems_scanned)
+        self.assertEqual(None, task.systems_failed)
+        self.assertEqual(None, task.systems_unreachable)
+
+        systems_count,\
+            systems_scanned,\
+            systems_failed,\
+            systems_unreachable = task.calculate_counts()
+
+        self.assertEqual(systems_count, 0)
+        self.assertEqual(systems_scanned, 0)
+        self.assertEqual(systems_failed, 0)
+        self.assertEqual(systems_unreachable, 0)
+
     def test_calculate_counts(self):
         """Test calculate counts."""
         task = ScanTask.objects.create(
