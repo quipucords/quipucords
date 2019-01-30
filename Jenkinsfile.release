@@ -80,8 +80,8 @@ node('f28-os') {
         sh "sudo gzip -f --best $install_tar"
         sh "sudo chmod 755 $install_targzfile"
 
-        archive postgres_targzfile
-        archive targzfile
-        archive install_targzfile
+        archiveArtifacts postgres_targzfile
+        archiveArtifacts targzfile
+        archiveArtifacts install_targzfile
     }
 }
