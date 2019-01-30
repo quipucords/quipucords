@@ -10,7 +10,7 @@
 #
 """ScanTaskRunner is a logical breakdown of work."""
 
-from api.models import ScanTask
+from api.models import ScanJob, ScanTask
 
 
 class ScanTaskRunner():
