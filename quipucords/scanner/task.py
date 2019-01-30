@@ -10,29 +10,48 @@
 #
 """ScanTaskRunner is a logical breakdown of work."""
 
-from api.models import ScanTask
+from api.models import ScanJob, ScanTask
 
 
 class ScanTaskRunner():
     """ScanTaskRunner is a logical breakdown of work."""
 
     # pylint: disable=too-few-public-methods
-    def __init__(self, scan_job, scan_task):
+    def __init__(self, scan_job, scan_task, supports_partial_results=False):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param prerequisite_tasks: An array of scan task model objects
-        that were execute prior to running this task.
+        :param supports_partial_results: Indicates if task supports
+            partial results.
         """
         self.scan_job = scan_job
         self.scan_task = scan_task
+        self.supports_partial_results = supports_partial_results
 
-        if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-            # If we're restarting the scan after a pause, systems that
-            # were previously up might be down. So we throw out any
-            # partial results and start over.
-            self.scan_task.connection_result.systems.all().delete()
+        if not supports_partial_results:
+            self.scan_task.reset_stats()
+            if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+                self.scan_task.connection_result.systems.all().delete()
+            elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
+                self.scan_task.inspection_result.systems.all().delete()
+            elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
+                details_report = self.scan_task.details_report
+                if details_report:
+                    # remove results from previous interrupted scan
+                    deployment_report = details_report.deployment_report
+
+                    if deployment_report:
+                        # remove partial results
+                        self.scan_task.log_message(
+                            'REMOVING PARTIAL RESULTS - deleting %d '
+                            'fingerprints from previous scan'
+                            % len(deployment_report.system_fingerprints.all()))
+                        deployment_report.system_fingerprints.all().delete()
+                        deployment_report.save()
+                        details_report.deployment_report = None
+                        details_report.save()
+                        deployment_report.delete()
 
     def run(self, manager_interrupt):
         """Block that will be executed.
@@ -47,6 +66,19 @@ class ScanTaskRunner():
         the ScanTask.STATUS_CHOICES status
         """
         # pylint: disable=no-self-use,unused-argument
+        # Make sure job is not cancelled or paused
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan canceled'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.CANCELED
+
+        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            error_message = 'Scan paused'
+            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+            return error_message, ScanTask.PAUSED
+
         return 'Task ran successfully', ScanTask.COMPLETED
 
     def __str__(self):
