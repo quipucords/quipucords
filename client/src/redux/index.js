@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import store from './store';
-import reduxActions from './actions/index';
-import reduxReducers from './reducers/index';
-import reduxTypes from './constants/index';
+import reduxActions from './actions';
+import reduxReducers from './reducers';
+import reduxTypes from './constants';
 
 const connectRouter = (mapStateToProps, mapDispatchToProps) => component =>
   withRouter(
