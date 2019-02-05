@@ -107,7 +107,11 @@ def create_deployments_csv(deployments_report_dict):
 
     headers = csv_helper.generate_headers(
         systems_list,
-        exclude={'id', 'report_id', 'metadata', 'deployment_report'})
+        exclude={'id',
+                 'report_id',
+                 'metadata',
+                 'deployment_report',
+                 'system_platform_id'})
     if SOURCES_KEY in headers:
         headers += source_headers
         headers = sorted(list(set(headers)))

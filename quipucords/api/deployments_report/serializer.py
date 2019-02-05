@@ -59,6 +59,8 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
 
     # Common facts
+    system_platform_id = UUIDField(format='hex_verbose',
+                                   read_only=True)
     name = CharField(required=False, max_length=256)
 
     os_name = CharField(required=False, max_length=64)
@@ -162,7 +164,7 @@ class DeploymentReportSerializer(NotEmptySerializer):
     details_report = PrimaryKeyRelatedField(
         queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
-    cached_json = CustomJSONField(read_only=True)
+    cached_fingerprints = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
 
     status = ChoiceField(

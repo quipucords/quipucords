@@ -143,7 +143,7 @@ def build_cached_json_report(report):
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
-    return build_report(report, json.loads(report.cached_json))
+    return build_report(report, json.loads(report.cached_fingerprints))
 
 
 def build_grouped_report(report, group):
