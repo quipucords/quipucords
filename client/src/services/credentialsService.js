@@ -1,53 +1,64 @@
 import axios from 'axios';
+import serviceConfig from './config';
 
-class CredentialsService {
-  static addCredential(data = {}) {
-    return axios({
+const addCredential = (data = {}) =>
+  axios(
+    serviceConfig({
       method: 'post',
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
+    })
+  );
 
-  static deleteCredential(id) {
-    return axios({
+const deleteCredential = id =>
+  axios(
+    serviceConfig({
       method: 'delete',
-      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`
+    })
+  );
 
-  static deleteCredentials(data = []) {
-    return Promise.all.apply(this, data.map(id => this.deleteCredential(id)));
-  }
+const deleteCredentials = (data = []) =>
+  Promise.all(data.map(id => deleteCredential(id))).then(success => new Promise(resolve => resolve({ data: success })));
 
-  static getCredential(id) {
-    return this.getCredentials(id);
-  }
+const getCredentials = (id = '', params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
+        params
+      },
+      false
+    )
+  );
 
-  static getCredentials(id = '', query = {}) {
-    return axios({
-      url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}`,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      params: query
-    });
-  }
+const getCredential = id => getCredentials(id);
 
-  static updateCredential(id, data = {}) {
-    return axios({
+const updateCredential = (id, data = {}) =>
+  axios(
+    serviceConfig({
       method: 'put',
       url: `${process.env.REACT_APP_CREDENTIALS_SERVICE}${id}/`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
-}
+    })
+  );
 
-export default CredentialsService;
+const credentialsService = {
+  addCredential,
+  deleteCredential,
+  deleteCredentials,
+  getCredential,
+  getCredentials,
+  updateCredential
+};
+
+export {
+  credentialsService as default,
+  credentialsService,
+  addCredential,
+  deleteCredential,
+  deleteCredentials,
+  getCredential,
+  getCredentials,
+  updateCredential
+};

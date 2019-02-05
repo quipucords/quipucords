@@ -1,0 +1,219 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fulfilled types USER_AUTH 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": undefined,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "loggedIn": true,
+      "pending": false,
+      "wasLoggedIn": true,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_AUTH_FULFILLED",
+}
+`;
+
+exports[`fulfilled types USER_INFO 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {
+        "test": "success",
+      },
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+    },
+  },
+  "type": "USER_INFO_FULFILLED",
+}
+`;
+
+exports[`fulfilled types USER_LOGOUT 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_LOGOUT_FULFILLED",
+}
+`;
+
+exports[`pending types USER_AUTH 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": true,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_AUTH_PENDING",
+}
+`;
+
+exports[`pending types USER_INFO 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+    },
+  },
+  "type": "USER_INFO_PENDING",
+}
+`;
+
+exports[`pending types USER_LOGOUT 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": true,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_LOGOUT_PENDING",
+}
+`;
+
+exports[`rejected types USER_AUTH 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_AUTH_REJECTED",
+}
+`;
+
+exports[`rejected types USER_INFO 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_INFO_REJECTED",
+}
+`;
+
+exports[`rejected types USER_LOGOUT 1`] = `
+Object {
+  "result": Object {
+    "session": Object {
+      "authToken": null,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "loggedIn": false,
+      "pending": false,
+      "wasLoggedIn": false,
+    },
+    "user": Object {
+      "currentUser": Object {},
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "USER_LOGOUT_REJECTED",
+}
+`;
