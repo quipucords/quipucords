@@ -73,7 +73,7 @@
     "test:clearCache": "react-scripts test --clearCache",
     "test:dev": "run-s test:lint-js test:unit",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "sh -ac '. ./.env.development; react-scripts test --env=jsdom'"
+    "test:unit": "sh -ac '. ./.env.test; react-scripts test --env=jsdom'"
   },
   "dependencies": {
     "axios": "^0.18.0",

@@ -1,16 +1,39 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
-import { shallow } from 'enzyme';
-import AddSourceWizard from '../addSourceWizard';
+import { mount, shallow } from 'enzyme';
+import { ConnectedAddSourceWizard, AddSourceWizard } from '../addSourceWizard';
 
 describe('AddSourceWizard Component', () => {
-  const generateEmptyStore = () => configureMockStore()({ addSourceWizard: {} });
+  const generateEmptyStore = (obj = {}) => configureMockStore()(obj);
 
-  it('should shallow render a basic component', () => {
-    const store = generateEmptyStore();
-    const props = { show: true };
-    const wrapper = shallow(<AddSourceWizard {...props} />, { context: { store } });
+  it('should render a connected component', () => {
+    const store = generateEmptyStore({ addSourceWizard: { view: { show: true } } });
+    const component = shallow(<ConnectedAddSourceWizard />, { context: { store } });
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(component.dive()).toMatchSnapshot('connected');
+  });
+
+  it('should not display a wizard', () => {
+    const props = {
+      show: false
+    };
+
+    const component = mount(<AddSourceWizard {...props} />);
+    expect(component.render()).toMatchSnapshot();
+  });
+
+  it('should have specific events defined', () => {
+    const props = {
+      show: false
+    };
+
+    const component = mount(<AddSourceWizard {...props} />);
+    const componentInstance = component.instance();
+
+    expect(componentInstance.onCancel).toBeDefined();
+    expect(componentInstance.onNext).toBeDefined();
+    expect(componentInstance.onBack).toBeDefined();
+    expect(componentInstance.onSubmit).toBeDefined();
+    expect(componentInstance.onStep).toBeDefined();
   });
 });
