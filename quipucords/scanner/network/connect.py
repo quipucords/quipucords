@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,9 +12,8 @@
 import logging
 import os.path
 
-from ansible.errors import AnsibleError
-from ansible.executor.task_queue_manager import TaskQueueManager
-from ansible.parsing.splitter import parse_kv
+import ansible_runner
+from ansible_runner.exceptions import AnsibleRunnerException
 
 from api.models import (Credential,
                         ScanJob,
@@ -22,6 +21,7 @@ from api.models import (Credential,
                         ScanTask,
                         SystemConnectionResult)
 from api.serializers import CredentialSerializer, SourceSerializer
+from api.vault import decrypt_data_as_unicode, write_to_yaml
 
 from django.db import transaction
 
@@ -32,12 +32,8 @@ from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
-from scanner.network.utils import (_construct_error_msg,
-                                   _construct_vars,
-                                   decrypt_data_as_unicode,
-                                   expand_hostpattern,
-                                   run_playbook,
-                                   write_inventory)
+from scanner.network.utils import (_construct_vars,
+                                   expand_hostpattern)
 from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
@@ -204,7 +200,7 @@ class ConnectTaskRunner(ScanTaskRunner):
                          connection_port,
                          use_paramiko,
                          forks=forks)
-            except AnsibleError as ansible_error:
+            except AnsibleRunnerException as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
                 error_message = 'Connect scan task failed with credential %s.'\
                     ' Error: %s Hosts: %s' %\
@@ -280,22 +276,16 @@ def _connect(manager_interrupt,
                                                           exclude_hosts,
                                                           ssh_executable,
                                                           ssh_args)
-    inventory_file = write_inventory(inventory)
-    extra_vars = {}
-
+    inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
 
-    error_msg = ''
     log_message = 'START CONNECT PROCESSING GROUPS'\
-        ' with use_paramiko: %s,' \
-        '%d forks and extra_vars=%s' % (use_paramiko,
-                                        forks,
-                                        extra_vars)
+        ' with use_paramiko: %s and %d forks' % (use_paramiko, forks)
     scan_task.log_message(log_message)
+
     for idx, group_name in enumerate(group_names):
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             raise NetworkCancelException()
-
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
             raise NetworkPauseException()
 
@@ -309,24 +299,46 @@ def _connect(manager_interrupt,
         scan_task.log_message(log_message)
         callback = ConnectResultCallback(result_store, credential,
                                          scan_task.source)
-        playbook = {'name': 'attempt connection to systems',
-                    'hosts': group_name,
-                    'gather_facts': False,
-                    'tasks': [
-                        {'action': {'module': 'raw',
-                                    'args': parse_kv('echo "Hello"')}}]}
-        result = run_playbook(
-            inventory_file, callback, playbook,
-            extra_vars, use_paramiko, forks=forks)
 
-        if result != TaskQueueManager.RUN_OK:
-            new_error_msg = _construct_error_msg(result)
-            if result not in [TaskQueueManager.RUN_UNREACHABLE_HOSTS,
-                              TaskQueueManager. RUN_FAILED_HOSTS]:
-                error_msg += '{}\n'.format(new_error_msg)
+        # Create parameters for ansible runner
+        runner_settings = dict()
+        runner_settings['idle_timeout'] = 5
+        runner_settings['job_timeout'] = 300
+        runner_settings['pexpect_timeout'] = 10
 
-    if error_msg != '':
-        raise AnsibleError(error_msg)
+        extra_vars_dict = dict()
+        extra_vars_dict['variable_host'] = group_name
+
+        playbook_path = os.path.join(settings.BASE_DIR,
+                                     'scanner/network/runner/connect.yml')
+
+        cmdline_list = []
+        if hasattr(settings, 'DJANGO_SECRET_PATH'):
+            vault_file_path = '--vault-password-file=%s' % (
+                settings.DJANGO_SECRET_PATH)
+        else:
+            # ansible runner only accepts the secret key as a file path
+            path = settings.BASE_DIR + '/secret.txt'
+            with open(path, 'w') as dev_file:
+                dev_file.write(settings.SECRET_KEY)
+            vault_file_path = '--vault-password-file=%s' % path
+        cmdline_list.append(vault_file_path)
+        cmdline_list.append('--become-user=root')  # become user cmd
+        cmdline_list.append('--become-method=sudo')  # become command
+        if use_paramiko:
+            cmdline_list.append('--connection=paramiko')  # paramiko conn
+        all_commands = ' '.join(cmdline_list)
+
+        try:
+            ansible_runner.run(quiet=True,
+                               settings=runner_settings,
+                               inventory=inventory_file,
+                               extravars=extra_vars_dict,
+                               event_handler=callback.runner_event,
+                               playbook=playbook_path,
+                               cmdline=all_commands)
+        except Exception as err_msg:
+            raise AnsibleRunnerException(err_msg)
 
 
 def _handle_ssh_passphrase(credential):

@@ -1,0 +1,7 @@
+---
+- hosts: " {{variable_host | default('all') }}"
+  gather_facts: no
+  tasks:
+  - name: attempt connection to the systems
+    raw: echo "Hello"
+    register: connection_test

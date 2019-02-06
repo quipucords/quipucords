@@ -12,7 +12,9 @@
 
 import tempfile
 
-
+# ANSIBLE API DEPENDENCY
+# There is work we can do to allow vaultlib to be used on Ansible >= 2.4
+# https://stackoverflow.com/questions/44142208/how-to-view-decrypt-ansible-vault-credentials-files-from-within-a-python-script
 from ansible.parsing.vault import VaultLib
 from ansible.parsing.yaml.dumper import AnsibleDumper
 

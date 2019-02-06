@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,7 +16,7 @@ import unittest
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
-from ansible.errors import AnsibleError
+from ansible_runner.exceptions import AnsibleRunnerException
 
 from api.connresult.model import SystemConnectionResult
 from api.models import (Credential,
@@ -76,35 +76,20 @@ class MockResultStore():
         return list(self._remaining_hosts)
 
 
-def make_result(hostname, rc):  # pylint: disable=invalid-name
-    """Mock the result structure that Ansible pass the callback."""
-    if rc is not None:
-        result = {'rc': rc}
-    else:
-        result = {}
-
-    host = Mock()
-    host.name = hostname
-
-    return Mock(
-        _host=host,
-        _result=result)
-
-
 class TestConnectResultCallback(unittest.TestCase):
     """Test ConnectResultCallback."""
 
-    def test_callback(self):
+    def test_callback_on_ok(self):
         """Test the callback."""
         result_store = MockResultStore(['host1', 'host2', 'host3'])
         credential = Mock(name='credential')
         source = Mock(name='source')
-        callback = ConnectResultCallback(result_store, credential,
+        callback = ConnectResultCallback(result_store,
+                                         credential,
                                          source)
-        callback.v2_runner_on_ok(make_result('host1', 0))
-        callback.v2_runner_on_ok(make_result('host2', 1))
-        callback.v2_runner_on_ok(make_result('host3', None))
-
+        callback.v2_runner_on_ok({'host': 'host1', 'res': {'rc': 0}})
+        callback.v2_runner_on_ok({'host': 'host2', 'res': {'rc': 1}})
+        callback.v2_runner_on_ok({'host': 'host2', 'res': {'rc': None}})
         self.assertEqual(result_store.succeeded,
                          [('host1', source, credential, 'success')])
         self.assertEqual(result_store.failed, [])
@@ -233,28 +218,28 @@ class NetworkConnectTaskRunnerTest(TestCase):
                       'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_failed)
+    @patch('ansible_runner.run')
     @patch('scanner.network.connect._handle_ssh_passphrase',
            side_effect=mock_handle_ssh)
     def test_connect_failure(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure."""
+        mock_run.side_effect = AnsibleRunnerException('Fail')
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
         exclude_hosts = source['exclude_hosts']
         connection_port = source['port']
-        with self.assertRaises(AnsibleError):
+        with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN),
                      self.scan_task, hosts, Mock(), self.cred,
                      connection_port, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_connect(self, mock_run):
         """Test connect flow with mocked manager."""
+        mock_run.side_effect = None
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
@@ -263,12 +248,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
                  connection_port, exclude_hosts)
-        mock_run.assert_called_with(ANY)
+        mock_run.assert_called()
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_connect_ssh_crash(self, mock_run):
         """Simulate an ssh crash."""
+        mock_run.side_effect = None
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
@@ -280,10 +265,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
                  hosts, Mock(), self.cred, connection_port,
                  exclude_hosts, base_ssh_executable=path)
-        mock_run.assert_called_with(ANY)
+        mock_run.assert_called()
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_connect_ssh_hang(self, mock_run):
         """Simulate an ssh hang."""
         serializer = SourceSerializer(self.source)
@@ -302,7 +286,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             exclude_hosts,
             base_ssh_executable=path,
             ssh_timeout='0.1s')
-        mock_run.assert_called_with(ANY)
+        mock_run.assert_called()
 
     @patch('scanner.network.connect._connect')
     def test_connect_runner(self, mock_connect):
@@ -359,33 +343,33 @@ class NetworkConnectTaskRunnerTest(TestCase):
                       'ansible_become_user': 'root'}}}
         self.assertEqual(inventory_dict, expected)
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_failed)
+    @patch('ansible_runner.run')
     @patch('scanner.network.connect._handle_ssh_passphrase',
            side_effect=mock_handle_ssh)
     def test_connect_failure_src2(self, mock_run, mock_ssh_pass):
         """Test connect flow with mocked manager and failure."""
+        mock_run.side_effect = AnsibleRunnerException('Fail')
         serializer = SourceSerializer(self.source2)
         source = serializer.data
         hosts = source['hosts']
         connection_port = source['port']
-        with self.assertRaises(AnsibleError):
+        with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
                      hosts, Mock(), self.cred, connection_port)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_connect_src2(self, mock_run):
         """Test connect flow with mocked manager."""
+        mock_run.side_effect = None
         serializer = SourceSerializer(self.source2)
         source = serializer.data
         hosts = source['hosts']
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
                  hosts, Mock(), self.cred, connection_port)
-        mock_run.assert_called_with(ANY)
+        mock_run.assert_called()
 
     @patch('scanner.network.connect._connect')
     def test_connect_runner_src2(self, mock_connect):
