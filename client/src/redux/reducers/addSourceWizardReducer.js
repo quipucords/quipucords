@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { credentialsTypes, sourcesTypes } from '../constants';
 import helpers from '../../common/helpers';
+import apiTypes from '../../constants/apiConstants';
 
 const initialState = {
   view: {
@@ -19,7 +19,6 @@ const initialState = {
 
 const addSourceWizardReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Show/Hide
     case sourcesTypes.CREATE_SOURCE_SHOW:
       return helpers.setStateProp(
         'view',
@@ -99,7 +98,6 @@ const addSourceWizardReducer = (state = initialState, action) => {
         }
       );
 
-    // Error/Rejected
     case helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE):
       return helpers.setStateProp(
         'view',
@@ -126,7 +124,6 @@ const addSourceWizardReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(sourcesTypes.UPDATE_SOURCE):
     case helpers.FULFILLED_ACTION(sourcesTypes.ADD_SOURCE):
       return helpers.setStateProp(
@@ -145,7 +142,7 @@ const addSourceWizardReducer = (state = initialState, action) => {
       return helpers.setStateProp(
         'view',
         {
-          allCredentials: _.get(action, 'payload.data.results', [])
+          allCredentials: (action.payload.data && action.payload.data[apiTypes.API_RESPONSE_CREDENTIALS_RESULTS]) || []
         },
         {
           state,

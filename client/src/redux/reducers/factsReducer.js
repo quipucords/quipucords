@@ -2,8 +2,6 @@ import helpers from '../../common/helpers';
 import { factsTypes } from '../constants';
 
 const initialState = {
-  persist: {},
-
   update: {
     error: false,
     errorMessage: '',
@@ -15,7 +13,6 @@ const initialState = {
 
 const factsReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Error/Rejected
     case helpers.REJECTED_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',
@@ -29,7 +26,6 @@ const factsReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',
@@ -42,7 +38,6 @@ const factsReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(factsTypes.ADD_FACTS):
       return helpers.setStateProp(
         'update',

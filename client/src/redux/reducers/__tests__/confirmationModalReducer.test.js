@@ -1,45 +1,22 @@
-import { confirmationModalTypes } from '../../constants/index';
 import confirmationModalReducer from '../confirmationModalReducer';
+import { confirmationModalTypes as types } from '../../constants';
 
 describe('ConfirmationModalReducer', () => {
   it('should return the initial state', () => {
-    const initialState = {
-      show: false,
-      title: 'Confirm',
-      heading: null,
-      icon: null,
-      body: null,
-      confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel'
-    };
-
-    expect(confirmationModalReducer(undefined, {})).toEqual(initialState);
+    expect(confirmationModalReducer.initialState).toBeDefined();
   });
 
-  it('should handle CONFIRMATION_MODAL_SHOW', () => {
-    const dispatched = {
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
-      title: 'Confirm',
-      heading: null,
-      icon: null,
-      body: null,
-      confirmButtonText: 'Confirm',
-      cancelActionText: ''
-    };
+  it('should handle specific defined types', () => {
+    const specificTypes = [types.CONFIRMATION_MODAL_HIDE, types.CONFIRMATION_MODAL_SHOW];
 
-    expect(confirmationModalReducer(undefined, dispatched).show).toEqual(true);
-  });
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: value
+      };
 
-  it('should handle CONFIRMATION_MODAL_HIDE', () => {
-    const dispatchShow = {
-      type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW
-    };
+      const resultState = confirmationModalReducer(undefined, dispatched);
 
-    const dispatchHide = {
-      type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-    };
-
-    expect(confirmationModalReducer(undefined, dispatchShow).show).toEqual(true);
-    expect(confirmationModalReducer(undefined, dispatchHide).show).toEqual(false);
+      expect({ type: value, result: resultState }).toMatchSnapshot(`defined type ${value}`);
+    });
   });
 });

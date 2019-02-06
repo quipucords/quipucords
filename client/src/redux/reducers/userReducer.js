@@ -22,7 +22,6 @@ const initialState = {
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Error/Rejected
     case helpers.REJECTED_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
@@ -36,7 +35,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
@@ -49,7 +47,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(userTypes.USER_INFO):
       return helpers.setStateProp(
         'user',
@@ -63,7 +60,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Error/Rejected
     case helpers.REJECTED_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
@@ -78,7 +74,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
@@ -92,7 +87,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(userTypes.USER_AUTH):
       return helpers.setStateProp(
         'session',
@@ -108,7 +102,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Error/Rejected
     case helpers.REJECTED_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',
@@ -123,7 +116,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',
@@ -137,7 +129,6 @@ const userReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(userTypes.USER_LOGOUT):
       return helpers.setStateProp(
         'session',

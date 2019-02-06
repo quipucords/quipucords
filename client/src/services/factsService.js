@@ -1,16 +1,17 @@
 import axios from 'axios';
+import serviceConfig from './config';
 
-class FactsService {
-  static addFacts(data = {}) {
-    return axios({
+const addFacts = (data = {}) =>
+  axios(
+    serviceConfig({
       method: 'post',
       url: `${process.env.REACT_APP_FACTS_SERVICE}`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
-}
+    })
+  );
 
-export default FactsService;
+const factsService = {
+  addFacts
+};
+
+export { factsService as default, factsService, addFacts };

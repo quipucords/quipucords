@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`defined type CREATE_SOURCE_SHOW 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": true,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": true,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "CREATE_SOURCE_SHOW",
+}
+`;
+
+exports[`defined type EDIT_SOURCE_SHOW 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": true,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": true,
+      "source": undefined,
+      "stepOneValid": true,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "EDIT_SOURCE_SHOW",
+}
+`;
+
+exports[`defined type INVALID_SOURCE_WIZARD_STEPTWO 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": false,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "INVALID_SOURCE_WIZARD_STEPTWO",
+}
+`;
+
+exports[`defined type UPDATE_SOURCE_HIDE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": false,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "UPDATE_SOURCE_HIDE",
+}
+`;
+
+exports[`defined type UPDATE_SOURCE_WIZARD_STEPONE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": false,
+      "source": undefined,
+      "stepOneValid": true,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "UPDATE_SOURCE_WIZARD_STEPONE",
+}
+`;
+
+exports[`defined type UPDATE_SOURCE_WIZARD_STEPTWO 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": false,
+      "source": undefined,
+      "stepOneValid": false,
+      "stepTwoValid": true,
+    },
+  },
+  "type": "UPDATE_SOURCE_WIZARD_STEPTWO",
+}
+`;
+
+exports[`fulfilled types ADD_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": true,
+      "show": false,
+      "source": Object {
+        "test": "success",
+      },
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "ADD_SOURCE_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_WIZARD_CREDENTIALS 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": false,
+      "show": false,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "GET_WIZARD_CREDENTIALS_FULFILLED",
+}
+`;
+
+exports[`fulfilled types UPDATE_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": false,
+      "errorMessage": null,
+      "fulfilled": true,
+      "show": false,
+      "source": Object {
+        "test": "success",
+      },
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "UPDATE_SOURCE_FULFILLED",
+}
+`;
+
+exports[`rejected types ADD_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "show": false,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "ADD_SOURCE_REJECTED",
+}
+`;
+
+exports[`rejected types UPDATE_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "view": Object {
+      "add": false,
+      "allCredentials": Array [],
+      "edit": false,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "show": false,
+      "source": Object {},
+      "stepOneValid": false,
+      "stepTwoValid": false,
+    },
+  },
+  "type": "UPDATE_SOURCE_REJECTED",
+}
+`;

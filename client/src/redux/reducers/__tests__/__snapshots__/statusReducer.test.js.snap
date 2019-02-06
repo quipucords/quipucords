@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fulfilled types STATUS_INFO 1`] = `
+Object {
+  "result": Object {
+    "currentStatus": Object {
+      "test": "success",
+    },
+    "error": false,
+    "errorMessage": "",
+    "fulfilled": true,
+    "pending": false,
+  },
+  "type": "STATUS_INFO_FULFILLED",
+}
+`;
+
+exports[`pending types STATUS_INFO 1`] = `
+Object {
+  "result": Object {
+    "currentStatus": Object {},
+    "error": false,
+    "errorMessage": "",
+    "fulfilled": false,
+    "pending": true,
+  },
+  "type": "STATUS_INFO_PENDING",
+}
+`;
+
+exports[`rejected types STATUS_INFO 1`] = `
+Object {
+  "result": Object {
+    "currentStatus": Object {},
+    "error": true,
+    "errorMessage": "ERROR",
+    "fulfilled": false,
+    "pending": false,
+  },
+  "type": "STATUS_INFO_REJECTED",
+}
+`;

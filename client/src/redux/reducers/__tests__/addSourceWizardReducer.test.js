@@ -1,188 +1,76 @@
-import helpers from '../../../common/helpers';
-import { sourcesTypes } from '../../constants/index';
 import addSourceWizardReducer from '../addSourceWizardReducer';
-
-const initialState = {
-  view: {
-    show: false,
-    add: false,
-    edit: false,
-    allCredentials: [],
-    source: {},
-    error: false,
-    errorMessage: null,
-    stepOneValid: false,
-    stepTwoValid: false,
-    fulfilled: false
-  }
-};
+import { sourcesTypes as types, credentialsTypes } from '../../constants';
+import helpers from '../../../common/helpers';
 
 describe('AddSourceWizardReducer', () => {
   it('should return the initial state', () => {
-    expect(addSourceWizardReducer(undefined, {})).toEqual(initialState);
+    expect(addSourceWizardReducer.initialState).toBeDefined();
   });
 
-  it('should handle CREATE_SOURCE_SHOW', () => {
-    let dispatched = {
-      type: sourcesTypes.CREATE_SOURCE_SHOW
-    };
+  it('should handle specific defined types', () => {
+    const specificTypes = [
+      types.CREATE_SOURCE_SHOW,
+      types.EDIT_SOURCE_SHOW,
+      types.UPDATE_SOURCE_HIDE,
+      types.UPDATE_SOURCE_WIZARD_STEPONE,
+      types.UPDATE_SOURCE_WIZARD_STEPTWO,
+      types.INVALID_SOURCE_WIZARD_STEPTWO
+    ];
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: value
+      };
 
-    expect(resultState.view.show).toBeTruthy();
-    expect(resultState.view.add).toBeTruthy();
-    expect(resultState.view.edit).toBeFalsy();
+      const resultState = addSourceWizardReducer(undefined, dispatched);
 
-    dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_HIDE
-    };
-
-    resultState = addSourceWizardReducer(resultState, dispatched);
-
-    expect(resultState.view.show).toBeFalsy();
-    expect(resultState.view).toEqual(initialState.view);
+      expect({ type: value, result: resultState }).toMatchSnapshot(`defined type ${value}`);
+    });
   });
 
-  it('should handle EDIT_SOURCE_SHOW', () => {
-    let dispatched = {
-      type: sourcesTypes.EDIT_SOURCE_SHOW
-    };
+  it('should handle all defined error types', () => {
+    const specificTypes = [types.ADD_SOURCE, types.UPDATE_SOURCE];
 
-    let resultState = addSourceWizardReducer(undefined, dispatched);
-
-    expect(resultState.view.show).toBeTruthy();
-    expect(resultState.view.add).toBeFalsy();
-    expect(resultState.view.edit).toBeTruthy();
-
-    dispatched = {
-      type: sourcesTypes.UPDATE_SOURCE_HIDE
-    };
-
-    resultState = addSourceWizardReducer(resultState, dispatched);
-
-    expect(resultState.view.show).toBeFalsy();
-    expect(resultState.view).toEqual(initialState.view);
-  });
-
-  it('should handle ADD_SOURCE_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'ADD ERROR'
-          }
-        }
-      }
-    };
-
-    const resultState = addSourceWizardReducer(undefined, dispatched);
-
-    expect(resultState.view.error).toBeTruthy();
-    expect(resultState.view.errorMessage).toEqual('ADD ERROR');
-  });
-
-  it('should handle UPDATE_SOURCE_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(sourcesTypes.UPDATE_SOURCE),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'UPDATE ERROR'
-          }
-        }
-      }
-    };
-
-    const resultState = addSourceWizardReducer(undefined, dispatched);
-
-    expect(resultState.view.error).toBeTruthy();
-    expect(resultState.view.errorMessage).toEqual('UPDATE ERROR');
-  });
-
-  it('should handle UPDATE_SOURCE_FULFILLED', () => {
-    const dispatched = {
-      type: helpers.FULFILLED_ACTION(sourcesTypes.UPDATE_SOURCE),
-      payload: {
-        data: {
-          name: 'string',
-          source_type: 'network',
-          hosts: ['string'],
-          port: 0,
-          id: 0,
-          credentials: [
-            {
-              id: 0,
-              name: 'string',
-              cred_type: 'network'
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.REJECTED_ACTION(value),
+        error: true,
+        payload: {
+          message: 'MESSAGE',
+          response: {
+            status: 0,
+            statusText: 'ERROR TEST',
+            data: {
+              detail: 'ERROR'
             }
-          ],
-          options: {
-            satellite_version: '5',
-            ssl_cert_verify: true,
-            ssl_protocol: 'SSLv2',
-            disable_ssl: true
-          },
-          connection: {
-            id: 0,
-            start_time: '2018-02-21T19:04:18.820Z',
-            end_time: '2018-02-21T19:04:18.820Z',
-            status: 'created',
-            source_systems_count: 0,
-            source_systems_scanned: 0,
-            source_systems_failed: 0
           }
         }
-      }
-    };
+      };
 
-    const resultState = addSourceWizardReducer(undefined, dispatched);
+      const resultState = addSourceWizardReducer(undefined, dispatched);
 
-    expect(Object.keys(resultState.view.source).length).toBeGreaterThan(0);
+      expect({ type: helpers.REJECTED_ACTION(value), result: resultState }).toMatchSnapshot(`rejected types ${value}`);
+    });
   });
 
-  it('should handle ADD_SOURCE_FULFILLED', () => {
-    const dispatched = {
-      type: helpers.FULFILLED_ACTION(sourcesTypes.ADD_SOURCE),
-      payload: {
-        data: {
-          name: 'string',
-          source_type: 'network',
-          hosts: ['string'],
-          port: 0,
-          id: 0,
-          credentials: [
-            {
-              id: 0,
-              name: 'string',
-              cred_type: 'network'
-            }
-          ],
-          options: {
-            satellite_version: '5',
-            ssl_cert_verify: true,
-            ssl_protocol: 'SSLv2',
-            disable_ssl: true
-          },
-          connection: {
-            id: 0,
-            start_time: '2018-02-21T19:04:18.820Z',
-            end_time: '2018-02-21T19:04:18.820Z',
-            status: 'created',
-            systems_count: 0,
-            systems_scanned: 0,
-            systems_failed: 0
+  it('should handle all defined fulfilled types', () => {
+    const specificTypes = [types.ADD_SOURCE, types.UPDATE_SOURCE, credentialsTypes.GET_WIZARD_CREDENTIALS];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.FULFILLED_ACTION(value),
+        payload: {
+          data: {
+            test: 'success'
           }
         }
-      }
-    };
+      };
 
-    const resultState = addSourceWizardReducer(undefined, dispatched);
+      const resultState = addSourceWizardReducer(undefined, dispatched);
 
-    expect(Object.keys(resultState.view.source).length).toBeGreaterThan(0);
+      expect({ type: helpers.FULFILLED_ACTION(value), result: resultState }).toMatchSnapshot(
+        `fulfilled types ${value}`
+      );
+    });
   });
 });
