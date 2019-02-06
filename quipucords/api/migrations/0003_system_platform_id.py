@@ -7,30 +7,19 @@ import json
 from distutils.version import LooseVersion
 from api.deployments_report.serializer import SystemFingerprintSerializer
 
-
 def add_system_platform_id(apps, schema_editor):
     # Get old deployment reports
     DeploymentsReport = apps.get_model('api', 'DeploymentsReport')
-    SystemFingerprint = apps.get_model('api', 'SystemFingerprint')
     reports = DeploymentsReport.objects.all()
     cached_fingerprints = []
-    print('Migrating deployment reports')
     for report in reports:
         if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
-            primary_key_ids = report.system_fingerprints.all().order_by(
-                'id').values_list('id', flat=True)
-            for pk in primary_key_ids:
-                system_fingerprint = SystemFingerprint.objects.get(pk=pk)
-                system_fingerprint.system_platform_id = uuid.uuid4()
-                system_fingerprint.save()
-                print('Migrating system fingerprint %s' %
-                      system_fingerprint.system_platform_id)
+            for system_fingerprint in report.system_fingerprints.all():
                 serializer = SystemFingerprintSerializer(system_fingerprint)
                 cached_fingerprints.append(serializer.data)
             report.cached_fingerprints = json.dumps(cached_fingerprints)
             report.cached_csv = None
             report.save()
-
 
 class Migration(migrations.Migration):
 
