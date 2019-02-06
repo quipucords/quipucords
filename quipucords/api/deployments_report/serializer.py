@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -91,6 +91,9 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     system_addons = JSONField(required=False)
     system_service_level_agreement = CharField(required=False, max_length=128)
     system_usage_type = CharField(required=False, max_length=128)
+
+    "['foo', 'bar']"
+    '["foo", "bar"]'
 
     insights_client_id = CharField(required=False, max_length=128)
 
