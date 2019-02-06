@@ -115,7 +115,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
 
     # Red Hat facts
     is_redhat = NullBooleanField(required=False)
-    redhat_certs = CharField(required=False, max_length=128)
+    redhat_certs = CharField(required=False)
     # pylint: disable=invalid-name
     redhat_package_count = IntegerField(
         required=False, min_value=0)
@@ -166,6 +166,7 @@ class DeploymentReportSerializer(NotEmptySerializer):
     report_id = IntegerField(read_only=True)
     cached_fingerprints = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
+    cached_insights = CharField(read_only=True)
 
     status = ChoiceField(
         read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
