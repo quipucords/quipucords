@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -37,7 +37,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 
-from rest_framework.serializers import DateField
+from rest_framework.serializers import DateField, UUIDField
 
 from scanner.task import ScanTaskRunner
 
@@ -198,6 +198,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         total_count = len(fingerprints_list)
         deployment_report = details_report.deployment_report
         date_field = DateField()
+        uuid_field = UUIDField()
         final_fingerprint_list = []
 
         valid_fact_attributes = {
@@ -227,14 +228,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
             serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
                 try:
-                    serializer.save()
-                    fingerprint_dict.pop('deployment_report')
+                    fingerprint = serializer.save()
+
+                    # Add auto-generated fields
+                    fingerprint_dict['id'] = fingerprint.id
+                    fingerprint_dict['system_platform_id'] = \
+                        fingerprint.system_platform_id
+
                     # Serialize the date
                     for field in SystemFingerprint.DATE_FIELDS:
                         if fingerprint_dict.get(field, None):
                             fingerprint_dict[field] = \
                                 date_field.to_representation(
                                     fingerprint_dict.get(field))
+                    fingerprint_dict['system_platform_id'] = \
+                        uuid_field.to_representation(
+                            fingerprint_dict.get('system_platform_id'))
                     final_fingerprint_list.append(fingerprint_dict)
                     number_valid += 1
                 except DataError as error:
@@ -268,7 +277,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
-        deployment_report.cached_json = json.dumps(final_fingerprint_list)
+        deployment_report.cached_fingerprints = json.dumps(
+            final_fingerprint_list)
         deployment_report.save()
 
         self.scan_task.log_message('RESULTS (report id=%d) -  '

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -152,7 +152,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), 14)
+        self.assertEqual(len(report['system_fingerprints'][0].keys()), 17)
 
     def test_get_details_report_filter_report(self):
         """Get a specific group count report with filter."""
