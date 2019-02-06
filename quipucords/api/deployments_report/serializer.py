@@ -92,9 +92,6 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     system_service_level_agreement = CharField(required=False, max_length=128)
     system_usage_type = CharField(required=False, max_length=128)
 
-    "['foo', 'bar']"
-    '["foo", "bar"]'
-
     insights_client_id = CharField(required=False, max_length=128)
 
     virtualized_type = CharField(required=False, max_length=64)
