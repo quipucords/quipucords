@@ -16,7 +16,9 @@ def add_system_platform_id(apps, schema_editor):
         if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
             for system_fingerprint in report.system_fingerprints.all():
                 serializer = SystemFingerprintSerializer(system_fingerprint)
-                cached_fingerprints.append(serializer.data)
+                # json dumps/loads changes type of dictionary
+                # removes massive memory growth for cached_fingerprints
+                cached_fingerprints.append(json.loads(json.dumps(serializer.data)))
             report.cached_fingerprints = json.dumps(cached_fingerprints)
             report.cached_csv = None
             report.save()
