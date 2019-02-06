@@ -10,14 +10,14 @@ from distutils.version import LooseVersion
 from api.deployments_report.serializer import SystemFingerprintSerializer
 
 def add_system_platform_id(apps, schema_editor):
-    # Get old deployment reports
+    # Get old deployments reports
     DeploymentsReport = apps.get_model('api', 'DeploymentsReport')
-    print('Migrating deployment reports')
+    print('Migrating deployments reports')
     count = 0
     for report in DeploymentsReport.objects.all():
         cached_fingerprints = []
         if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
-            print('Migrating deployment report %s' % report.id)
+            print('Migrating deployments report %s' % report.id)
             try:
                 for system_fingerprint in report.system_fingerprints.all():
                     count += 1
