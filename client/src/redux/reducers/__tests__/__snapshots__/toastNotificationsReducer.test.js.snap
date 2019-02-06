@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`defined type TOAST_ADD 1`] = `
+Object {
+  "result": Object {
+    "displayedToasts": 1,
+    "paused": false,
+    "toasts": Array [
+      Object {
+        "alertType": undefined,
+        "header": undefined,
+        "message": undefined,
+        "persistent": undefined,
+      },
+    ],
+  },
+  "type": "TOAST_ADD",
+}
+`;
+
+exports[`defined type TOAST_PAUSE 1`] = `
+Object {
+  "result": Object {
+    "displayedToasts": 0,
+    "paused": true,
+    "toasts": Array [],
+  },
+  "type": "TOAST_PAUSE",
+}
+`;
+
+exports[`defined type TOAST_REMOVE 1`] = `
+Object {
+  "result": Object {
+    "displayedToasts": 0,
+    "paused": false,
+    "toasts": Array [],
+  },
+  "type": "TOAST_REMOVE",
+}
+`;
+
+exports[`defined type TOAST_RESUME 1`] = `
+Object {
+  "result": Object {
+    "displayedToasts": 0,
+    "paused": false,
+    "toasts": Array [],
+  },
+  "type": "TOAST_RESUME",
+}
+`;
+
+exports[`toast added 1`] = `
+Object {
+  "displayedToasts": 2,
+  "paused": false,
+  "toasts": Array [
+    Object {
+      "alertType": "success",
+      "header": "Lorem",
+      "message": "Lorem ipsum dolor",
+      "persistent": undefined,
+    },
+    Object {
+      "alertType": "success",
+      "header": "Lorem",
+      "message": "Lorem ipsum dolor",
+      "persistent": undefined,
+    },
+  ],
+}
+`;
+
+exports[`toast removed 1`] = `
+Object {
+  "displayedToasts": 2,
+  "paused": false,
+  "toasts": Array [
+    Object {
+      "alertType": "success",
+      "header": "Lorem",
+      "message": "Lorem ipsum dolor",
+      "persistent": undefined,
+      "removed": true,
+    },
+    Object {
+      "alertType": "success",
+      "header": "Lorem",
+      "message": "Lorem ipsum dolor",
+      "persistent": undefined,
+    },
+  ],
+}
+`;

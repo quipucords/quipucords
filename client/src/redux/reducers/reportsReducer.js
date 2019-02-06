@@ -20,7 +20,6 @@ const initialState = {
 
 const reportsReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Error/Rejected
     case helpers.REJECTED_ACTION(reportsTypes.GET_REPORT):
       return helpers.setStateProp(
         'report',
@@ -47,7 +46,6 @@ const reportsReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(reportsTypes.GET_REPORT):
       return helpers.setStateProp(
         'report',
@@ -72,7 +70,6 @@ const reportsReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(reportsTypes.GET_REPORT):
       return helpers.setStateProp(
         'report',

@@ -434,7 +434,9 @@ Object {
       "errorMessage": "",
       "fulfilled": true,
       "pending": false,
-      "scan": undefined,
+      "scan": Object {
+        "test": "success",
+      },
     },
     "inspectionResults": Object {
       "error": false,
@@ -495,7 +497,7 @@ Object {
       "errorMessage": "",
       "fulfilled": true,
       "pending": false,
-      "results": undefined,
+      "results": Array [],
     },
     "detail": Object {
       "error": false,
@@ -577,7 +579,7 @@ Object {
       "errorMessage": "",
       "fulfilled": true,
       "pending": false,
-      "results": undefined,
+      "results": Array [],
     },
     "jobs": Object {
       "error": false,
@@ -651,7 +653,7 @@ Object {
       "error": false,
       "errorMessage": "",
       "fulfilled": true,
-      "jobs": undefined,
+      "jobs": Array [],
       "pending": false,
     },
     "merge_dialog": Object {
@@ -740,7 +742,7 @@ Object {
       "fulfilled": true,
       "lastRefresh": 0,
       "pending": false,
-      "scans": undefined,
+      "scans": Array [],
       "sourcesCount": 0,
     },
   },

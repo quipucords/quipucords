@@ -1,54 +1,64 @@
 import axios from 'axios';
+import serviceConfig from './config';
 
-class SourcesService {
-  static addSource(data = {}, query = {}) {
-    return axios({
+const addSource = (data = {}, params = {}) =>
+  axios(
+    serviceConfig({
       method: 'post',
       url: process.env.REACT_APP_SOURCES_SERVICE,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data,
-      params: query
-    });
-  }
+      params
+    })
+  );
 
-  static deleteSource(id) {
-    return axios({
+const deleteSource = id =>
+  axios(
+    serviceConfig({
       method: 'delete',
-      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
+      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`
+    })
+  );
 
-  static deleteSources(data = []) {
-    return Promise.all.apply(this, data.map(id => this.deleteSource(id)));
-  }
+const deleteSources = (data = []) => Promise.all(data.map(id => deleteSource(id)));
 
-  static getSource(id) {
-    return this.getSources(id);
-  }
+const getSources = (id = '', params = {}) =>
+  axios(
+    serviceConfig(
+      {
+        url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
+        params
+      },
+      false
+    )
+  );
 
-  static getSources(id = '', query = {}) {
-    return axios({
-      url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}`,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
-      params: query
-    });
-  }
+const getSource = id => getSources(id);
 
-  static updateSource(id, data = {}) {
-    return axios({
+const updateSource = (id, data = {}) =>
+  axios(
+    serviceConfig({
       method: 'put',
       url: `${process.env.REACT_APP_SOURCES_SERVICE}${id}/`,
-      xsrfCookieName: process.env.REACT_APP_AUTH_TOKEN,
-      xsrfHeaderName: process.env.REACT_APP_AUTH_HEADER,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT,
       data
-    });
-  }
-}
+    })
+  );
 
-export default SourcesService;
+const sourcesService = {
+  addSource,
+  deleteSource,
+  deleteSources,
+  getSources,
+  getSource,
+  updateSource
+};
+
+export {
+  sourcesService as default,
+  sourcesService,
+  addSource,
+  deleteSource,
+  deleteSources,
+  getSources,
+  getSource,
+  updateSource
+};

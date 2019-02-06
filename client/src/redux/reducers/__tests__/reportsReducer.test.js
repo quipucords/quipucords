@@ -1,98 +1,69 @@
-import helpers from '../../../common/helpers';
-import { reportsTypes } from '../../constants/index';
 import reportsReducer from '../reportsReducer';
-
-const initialState = {
-  report: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false,
-    reports: []
-  },
-
-  merge: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false
-  }
-};
+import { reportsTypes as types } from '../../constants';
+import helpers from '../../../common/helpers';
 
 describe('ReportsReducer', () => {
   it('should return the initial state', () => {
-    expect(reportsReducer(undefined, {})).toEqual(initialState);
+    expect(reportsReducer.initialState).toBeDefined();
   });
 
-  it('should handle GET_REPORT_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(reportsTypes.GET_REPORT),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'GET ERROR'
+  it('should handle all defined error types', () => {
+    const specificTypes = [types.GET_REPORT, types.GET_MERGE_REPORT];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.REJECTED_ACTION(value),
+        error: true,
+        payload: {
+          message: 'MESSAGE',
+          response: {
+            status: 0,
+            statusText: 'ERROR TEST',
+            data: {
+              detail: 'ERROR'
+            }
           }
         }
-      }
-    };
+      };
 
-    const resultState = reportsReducer(undefined, dispatched);
-    expect(resultState.report.error).toBeTruthy();
-    expect(resultState.report.errorMessage).toEqual('GET ERROR');
-    expect(resultState.report.pending).toBeFalsy();
-    expect(resultState.report.fulfilled).toBeFalsy();
-    expect(resultState.report.reports).toHaveLength(0);
+      const resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.report.persist).toEqual(initialState.report.persist);
+      expect({ type: helpers.REJECTED_ACTION(value), result: resultState }).toMatchSnapshot(`rejected types ${value}`);
+    });
   });
 
-  it('should handle GET_REPORT_PENDING', () => {
-    const dispatched = {
-      type: helpers.PENDING_ACTION(reportsTypes.GET_REPORT)
-    };
+  it('should handle all defined pending types', () => {
+    const specificTypes = [types.GET_REPORT, types.GET_MERGE_REPORT];
 
-    const resultState = reportsReducer(undefined, dispatched);
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.PENDING_ACTION(value)
+      };
 
-    expect(resultState.report.error).toBeFalsy();
-    expect(resultState.report.errorMessage).toEqual('');
-    expect(resultState.report.pending).toBeTruthy();
-    expect(resultState.report.fulfilled).toBeFalsy();
-    expect(resultState.report.reports).toHaveLength(0);
+      const resultState = reportsReducer(undefined, dispatched);
+
+      expect({ type: helpers.PENDING_ACTION(value), result: resultState }).toMatchSnapshot(`pending types ${value}`);
+    });
   });
 
-  it('should handle GET_REPORT_FULFILLED', () => {
-    const dispatched = {
-      type: helpers.FULFILLED_ACTION(reportsTypes.GET_REPORT),
-      payload: {
-        data: [
-          {
-            name: '1',
-            id: 1
-          },
-          {
-            name: '2',
-            id: 2
-          },
-          {
-            name: '3',
-            id: 3
-          },
-          {
-            name: '4',
-            id: 4
+  it('should handle all defined fulfilled types', () => {
+    const specificTypes = [types.GET_REPORT, types.GET_MERGE_REPORT];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.FULFILLED_ACTION(value),
+        payload: {
+          data: {
+            test: 'success'
           }
-        ]
-      }
-    };
+        }
+      };
 
-    const resultState = reportsReducer(undefined, dispatched);
+      const resultState = reportsReducer(undefined, dispatched);
 
-    expect(resultState.report.error).toBeFalsy();
-    expect(resultState.report.errorMessage).toEqual('');
-    expect(resultState.report.pending).toBeFalsy();
-    expect(resultState.report.fulfilled).toBeTruthy();
-    expect(resultState.report.reports).toHaveLength(4);
+      expect({ type: helpers.FULFILLED_ACTION(value), result: resultState }).toMatchSnapshot(
+        `fulfilled types ${value}`
+      );
+    });
   });
 });

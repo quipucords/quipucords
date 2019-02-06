@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`defined type CONFIRMATION_MODAL_HIDE 1`] = `
+Object {
+  "result": Object {
+    "body": null,
+    "cancelButtonText": "Cancel",
+    "confirmButtonText": "Confirm",
+    "heading": null,
+    "icon": null,
+    "show": false,
+    "title": "Confirm",
+  },
+  "type": "CONFIRMATION_MODAL_HIDE",
+}
+`;
+
+exports[`defined type CONFIRMATION_MODAL_SHOW 1`] = `
+Object {
+  "result": Object {
+    "body": undefined,
+    "cancelButtonText": "Cancel",
+    "confirmButtonText": "Confirm",
+    "heading": undefined,
+    "icon": undefined,
+    "onCancel": undefined,
+    "onConfirm": undefined,
+    "show": true,
+    "title": undefined,
+  },
+  "type": "CONFIRMATION_MODAL_SHOW",
+}
+`;

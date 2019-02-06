@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { sourcesTypes } from '../constants';
+import apiTypes from '../../constants/apiConstants';
 
 const initialState = {
   view: {
@@ -23,7 +23,6 @@ const initialState = {
 
 const sourcesReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Error/Rejected
     case helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCE):
     case helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(
@@ -80,7 +79,6 @@ const sourcesReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(sourcesTypes.GET_SOURCES):
       return helpers.setStateProp(
         'view',
@@ -94,14 +92,11 @@ const sourcesReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(sourcesTypes.GET_SOURCES):
-      // Get resulting sources and update the selected state of each
-      const sources = _.get(action, 'payload.data.results', []);
       return helpers.setStateProp(
         'view',
         {
-          sources,
+          sources: (action.payload.data && action.payload.data[apiTypes.API_RESPONSE_SOURCES_RESULTS]) || [],
           fulfilled: true
         },
         {
