@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -15,8 +15,9 @@
 from api.details_report.view import DetailsReportsViewSet
 from api.credential.view import CredentialViewSet
 from api.source.view import SourceViewSet
-from api.deployments_report.view import (deployments)
-from api.details_report.view import (details)
+from api.deployments_report.view import deployments
+from api.details_report.view import details
+from api.insights_report.view import insights
 from api.merge_report.view import (async_merge_reports,
                                    sync_merge_reports)
 from api.scan.view import ScanViewSet, jobs

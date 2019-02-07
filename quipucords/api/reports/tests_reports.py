@@ -52,6 +52,7 @@ class ReportsTest(TestCase):
         self.report_version = create_report_version()
         self.details_json = None
         self.deployments_json = None
+        self.insights_json = None
 
     def tearDown(self):
         """Create test case tearDown."""
@@ -121,7 +122,9 @@ class ReportsTest(TestCase):
                 'virt_type': 'vmware',
                 'virt_num_guests': 1,
                 'virt_num_running_guests': 1,
-                'virt_what_type': 'vt'
+                'virt_what_type': 'vt',
+                'system_platform_id': '834c8f3b-5015-4156-bfb7-286d3ffe11b5',
+                'ifconfig_ip_addresses': ['1.2.3.4']
             }
             facts.append(fact_json)
         details_report = self.create_details_report_expect_201(fc_json)
@@ -130,6 +133,7 @@ class ReportsTest(TestCase):
     def create_reports_dict(self):
         """Create a deployments report."""
         url = '/api/v1/reports/1/deployments/'
+        url2 = '/api/v1/reports/1/insights/'
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
         filters = {'group_count': 'os_release'}
@@ -137,10 +141,14 @@ class ReportsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.deployments_json = report
+        response2 = self.client.get(url2)
+        insights_report = response2.json()
+        self.insights_json = insights_report
         reports_dict = dict()
         reports_dict['report_id'] = 1
         reports_dict['details_json'] = self.details_json
         reports_dict['deployments_json'] = self.deployments_json
+        reports_dict['insights_json'] = self.insights_json
         return reports_dict
 
     def test_reports_gzip_renderer(self):
@@ -150,14 +158,15 @@ class ReportsTest(TestCase):
         deployments_csv = 'Report ID,Report Type,Report Version,Report Platform ID\r\n1,deployments,%s,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,count,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n,,2,,,,,,,,,,,,,,,,RHEL 7.4,,,,,,,,,,,,,,,,,,,,\r\n,,1,,,,,,,,,,,,,,,,RHEL 7.5,,,,,,,,,,,,,,,,,,,,\r\n\r\n' % (self.report_version, reports_dict.get('deployments_json').get('report_platform_id'))  # noqa
 
         # pylint: disable=line-too-long
-        details_csv = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, reports_dict.get('details_json').get('report_platform_id'), self.server_id) # noqa
+        details_csv = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,system_platform_id,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],834c8f3b-5015-4156-bfb7-286d3ffe11b5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],834c8f3b-5015-4156-bfb7-286d3ffe11b5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],834c8f3b-5015-4156-bfb7-286d3ffe11b5,1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, reports_dict.get('details_json').get('report_platform_id'), self.server_id) # noqa
+
         renderer = ReportsGzipRenderer()
         tar_gz_result = renderer.render(reports_dict)
         self.assertNotEqual(tar_gz_result, None)
         tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
         filenames = tar.getnames()
-        self.assertEqual(len(files), 4)
+        self.assertEqual(len(files), 5)
         # tar.getnames() always returns same order as tar.getmembers()
         for idx, file in enumerate(files):
             file_contents = tar.extractfile(file).read().decode()
@@ -175,5 +184,19 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.details_json)
                 elif tar_json_type == 'deployments':
                     self.assertEqual(tar_json, self.deployments_json)
+                elif tar_json_type == 'insights':
+                    self.assertEqual(tar_json, self.insights_json)
                 else:
                     sys.exit('Could not identify .json return')
+
+    def test_reports_gzip_renderer_no_insights(self):
+        """Make sure there is no insights report if it is not in the dict."""
+        reports_dict = self.create_reports_dict()
+        reports_dict.pop('insights_json')
+        renderer = ReportsGzipRenderer()
+        tar_gz_result = renderer.render(reports_dict)
+        self.assertNotEqual(tar_gz_result, None)
+        tar = tarfile.open(fileobj=tar_gz_result)
+        files = tar.getmembers()
+        # make sure there are only 4 files
+        self.assertEqual(len(files), 4)

@@ -949,6 +949,33 @@ paths:
           description: "Not authorized"
         404:
           description: "Report for report id not found"
+    /reports/{report_id}/insights/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve an insights report for systems scanned"
+      description: "Get insights report for systems that have been scanned"
+      operationId: "getInsightsReport"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "report_id"
+          in: "path"
+          description: "The Report ID to be queried"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Insights report for scanned systems retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/InsightsReport"
+        401:
+          description: "Not authorized"
+        404:
+          description: "Report for report id not found or could not be created because there were no canonical facts."
   /reports/merge/:
     put:
       tags:
@@ -1353,6 +1380,30 @@ definitions:
           $ref: "#/definitions/SystemFact"
         description: "The facts associated with this source"
         minItems: 1
+   InsightsReport:
+    properties:
+        report_id:
+          type: "integer"
+          format: "int64"
+          description: "The insights report identifier"
+          example: 1
+        report_type:
+          type: "string"
+          description: "The report type"
+          example: "insights"
+        report_version:
+          type: "string"
+          description: "The report version"
+          example: "0.0.47.afdsgev"
+        report_platform_id:
+          type: "string"
+          description: "Globally unique uuid for report"
+          example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+        hosts:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemFingerprint"
+          description: "The insights report for the systems that were scanned"
   ListPagination:
     type: "object"
     required:
