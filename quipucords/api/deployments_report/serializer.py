@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -59,6 +59,8 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
 
     # Common facts
+    system_platform_id = UUIDField(format='hex_verbose',
+                                   read_only=True)
     name = CharField(required=False, max_length=256)
 
     os_name = CharField(required=False, max_length=64)
@@ -113,7 +115,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
 
     # Red Hat facts
     is_redhat = NullBooleanField(required=False)
-    redhat_certs = CharField(required=False, max_length=128)
+    redhat_certs = CharField(required=False)
     # pylint: disable=invalid-name
     redhat_package_count = IntegerField(
         required=False, min_value=0)
@@ -162,8 +164,9 @@ class DeploymentReportSerializer(NotEmptySerializer):
     details_report = PrimaryKeyRelatedField(
         queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
-    cached_json = CustomJSONField(read_only=True)
+    cached_fingerprints = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
+    cached_insights = CharField(read_only=True)
 
     status = ChoiceField(
         read_only=True, choices=DeploymentsReport.STATUS_CHOICES)

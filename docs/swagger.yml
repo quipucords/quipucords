@@ -2180,10 +2180,14 @@ definitions:
           format: "int64"
           description: "Fingerprint database identifier"
           example: 15
-        report_id:
+        system_platform_id:
+          type: "string"
+          description: "Globally unique uuid for fingerprint"
+          example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+        deployment_report:
             type: "integer"
             format: "int64"
-            description: "Fact collection identifier"
+            description: "Deployments report identifier"
             example: 20
         name:
           type: "string"

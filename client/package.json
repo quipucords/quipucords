@@ -16,6 +16,27 @@
     "node": ">=8.0.0"
   },
   "jest": {
+    "coverageThreshold": {
+      "global": {
+        "branches": 60,
+        "functions": 60,
+        "lines": 60,
+        "statements": 60
+      }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/common/helpers.js",
+      "!src/components/app.js",
+      "!src/index.js",
+      "!src/setupTests.js",
+      "!src/redux/index.js",
+      "!src/redux/store.js",
+      "!src/redux/middleware/**",
+      "!src/redux/actions/index.js",
+      "!src/redux/reducers/index.js",
+      "!src/redux/selectors/index.js"
+    ],
     "snapshotSerializers": [
       "enzyme-to-json/serializer"
     ]
@@ -42,14 +63,17 @@
     "build": "run-s -l build:clean build:assets build:ui build:finish",
     "start:css": "npm run build:css && node-sass --include-path ./src/styles $npm_package_sassDepIncludes src/styles/entitlements.scss -o src/styles/css --watch --recursive",
     "start:ui": "react-scripts start",
-    "start:ui-stage": "sh -ac '. .env.staging; react-app-rewired start'",
+    "start:ui-stage": "sh -ac '. ./.env.staging; react-app-rewired start'",
     "start": "run-p -l api:dev api:doc start:css start:ui",
     "start:stage": "open https://localhost:5001/login/; npm run build; run-p -l api:stage start:css start:ui-stage",
     "start:prod": "npm run api:prod; open https://localhost:9443/login/",
     "support:create-react-app": "create-react-app",
-    "test": "run-s test:**",
+    "test": "run-s test:lint-js test:ci",
+    "test:ci": "CI=true; react-scripts test --env=jsdom --coverage",
+    "test:clearCache": "react-scripts test --clearCache",
+    "test:dev": "run-s test:lint-js test:unit",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "sh -ac '. .env.development; react-scripts test --env=jsdom'"
+    "test:unit": "sh -ac '. ./.env.development; react-scripts test --env=jsdom'"
   },
   "dependencies": {
     "axios": "^0.18.0",

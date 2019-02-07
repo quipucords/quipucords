@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import helpers from '../../common/helpers';
 import { credentialsTypes } from '../constants';
+import apiTypes from '../../constants/apiConstants';
 
 const initialState = {
   view: {
@@ -10,7 +10,6 @@ const initialState = {
     fulfilled: false,
     credentials: []
   },
-
   update: {
     error: false,
     errorMessage: '',
@@ -27,7 +26,6 @@ const initialState = {
 
 const credentialsReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Show/Hide
     case credentialsTypes.CREATE_CREDENTIAL_SHOW:
       return helpers.setStateProp(
         'update',
@@ -68,15 +66,14 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    // Error/Rejected
     case helpers.REJECTED_ACTION(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
+          add: true,
           error: action.error,
           errorMessage: helpers.getMessageFromResults(action.payload),
-          pending: false,
-          add: true
+          pending: false
         },
         {
           state,
@@ -115,7 +112,6 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    case helpers.REJECTED_ACTION(credentialsTypes.GET_CREDENTIAL):
     case helpers.REJECTED_ACTION(credentialsTypes.GET_CREDENTIALS):
       return helpers.setStateProp(
         'view',
@@ -129,7 +125,6 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    // Loading/Pending
     case helpers.PENDING_ACTION(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
@@ -174,7 +169,6 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    case helpers.PENDING_ACTION(credentialsTypes.GET_CREDENTIAL):
     case helpers.PENDING_ACTION(credentialsTypes.GET_CREDENTIALS):
       return helpers.setStateProp(
         'view',
@@ -188,63 +182,12 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    // Success/Fulfilled
     case helpers.FULFILLED_ACTION(credentialsTypes.ADD_CREDENTIAL):
       return helpers.setStateProp(
         'update',
         {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case helpers.FULFILLED_ACTION(credentialsTypes.DELETE_CREDENTIAL):
-    case helpers.FULFILLED_ACTION(credentialsTypes.DELETE_CREDENTIALS):
-      return helpers.setStateProp(
-        'update',
-        {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          delete: true,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case helpers.FULFILLED_ACTION(credentialsTypes.UPDATE_CREDENTIAL):
-      return helpers.setStateProp(
-        'update',
-        {
-          credential: action.payload,
-          fulfilled: true,
-          pending: false,
-          error: false,
-          errorMessage: ''
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIAL):
-    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS):
-      return helpers.setStateProp(
-        'view',
-        {
-          credentials: _.get(action, 'payload.data.results', []),
+          add: true,
+          credential: action.payload.data || {},
           fulfilled: true
         },
         {
@@ -253,16 +196,44 @@ const credentialsReducer = (state = initialState, action) => {
         }
       );
 
-    case credentialsTypes.UPDATE_CREDENTIAL_RESET_STATUS:
+    case helpers.FULFILLED_ACTION(credentialsTypes.DELETE_CREDENTIAL):
+    case helpers.FULFILLED_ACTION(credentialsTypes.DELETE_CREDENTIALS):
       return helpers.setStateProp(
         'update',
         {
-          error: false,
-          errorMessage: ''
+          delete: true,
+          fulfilled: true
         },
         {
           state,
-          reset: false
+          initialState
+        }
+      );
+
+    case helpers.FULFILLED_ACTION(credentialsTypes.UPDATE_CREDENTIAL):
+      return helpers.setStateProp(
+        'update',
+        {
+          credential: action.payload.data || {},
+          edit: true,
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
+        }
+      );
+
+    case helpers.FULFILLED_ACTION(credentialsTypes.GET_CREDENTIALS):
+      return helpers.setStateProp(
+        'view',
+        {
+          credentials: (action.payload.data && action.payload.data[apiTypes.API_RESPONSE_CREDENTIALS_RESULTS]) || [],
+          fulfilled: true
+        },
+        {
+          state,
+          initialState
         }
       );
 

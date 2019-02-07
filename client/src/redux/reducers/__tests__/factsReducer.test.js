@@ -1,86 +1,69 @@
-import helpers from '../../../common/helpers';
-import { factsTypes } from '../../constants/index';
 import factsReducer from '../factsReducer';
-
-const initialState = {
-  persist: {},
-
-  update: {
-    error: false,
-    errorMessage: '',
-    pending: false,
-    fulfilled: false,
-    facts: {}
-  }
-};
+import { factsTypes as types } from '../../constants';
+import helpers from '../../../common/helpers';
 
 describe('factsReducer', () => {
   it('should return the initial state', () => {
-    expect(factsReducer(undefined, {})).toEqual(initialState);
+    expect(factsReducer.initialState).toBeDefined();
   });
 
-  it('should handle ADD_FACTS_REJECTED', () => {
-    const dispatched = {
-      type: helpers.REJECTED_ACTION(factsTypes.ADD_FACTS),
-      error: true,
-      payload: {
-        message: 'BACKUP MESSAGE',
-        response: {
-          data: {
-            detail: 'GET ERROR'
+  it('should handle all defined error types', () => {
+    const specificTypes = [types.ADD_FACTS];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.REJECTED_ACTION(value),
+        error: true,
+        payload: {
+          message: 'MESSAGE',
+          response: {
+            status: 0,
+            statusText: 'ERROR TEST',
+            data: {
+              detail: 'ERROR'
+            }
           }
         }
-      }
-    };
+      };
 
-    const resultState = factsReducer(undefined, dispatched);
-    expect(resultState.update.error).toBeTruthy();
-    expect(resultState.update.errorMessage).toEqual('GET ERROR');
+      const resultState = factsReducer(undefined, dispatched);
 
-    expect(resultState.persist).toEqual(initialState.persist);
+      expect({ type: helpers.REJECTED_ACTION(value), result: resultState }).toMatchSnapshot(`rejected types ${value}`);
+    });
   });
 
-  it('should handle ADD_FACTS_PENDING', () => {
-    const dispatched = {
-      type: helpers.PENDING_ACTION(factsTypes.ADD_FACTS)
-    };
+  it('should handle all defined pending types', () => {
+    const specificTypes = [types.ADD_FACTS];
 
-    const resultState = factsReducer(undefined, dispatched);
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.PENDING_ACTION(value)
+      };
 
-    expect(resultState.update.pending).toBeTruthy();
-    expect(resultState.persist).toEqual(initialState.persist);
+      const resultState = factsReducer(undefined, dispatched);
+
+      expect({ type: helpers.PENDING_ACTION(value), result: resultState }).toMatchSnapshot(`pending types ${value}`);
+    });
   });
 
-  it('should handle ADD_FACTS_FULFILLED', () => {
-    const dispatched = {
-      type: helpers.FULFILLED_ACTION(factsTypes.ADD_FACTS),
-      payload: {
-        data: [
-          {
-            name: '1',
-            id: 1
-          },
-          {
-            name: '2',
-            id: 2
-          },
-          {
-            name: '3',
-            id: 3
-          },
-          {
-            name: '4',
-            id: 4
+  it('should handle all defined fulfilled types', () => {
+    const specificTypes = [types.ADD_FACTS];
+
+    specificTypes.forEach(value => {
+      const dispatched = {
+        type: helpers.FULFILLED_ACTION(value),
+        payload: {
+          data: {
+            test: 'success'
           }
-        ]
-      }
-    };
+        }
+      };
 
-    const resultState = factsReducer(undefined, dispatched);
+      const resultState = factsReducer(undefined, dispatched);
 
-    expect(resultState.update.fulfilled).toBeTruthy();
-    expect(resultState.update.facts).toHaveLength(4);
-
-    expect(resultState.persist).toEqual(initialState.persist);
+      expect({ type: helpers.FULFILLED_ACTION(value), result: resultState }).toMatchSnapshot(
+        `fulfilled types ${value}`
+      );
+    });
   });
 });
