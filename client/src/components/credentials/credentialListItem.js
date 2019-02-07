@@ -5,10 +5,10 @@ import cx from 'classnames';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import _ from 'lodash';
 import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
-import { dictionary } from '../../constants/dictionaryConstants';
 
 class CredentialListItem extends React.Component {
   static authType(item) {
@@ -131,7 +131,7 @@ class CredentialListItem extends React.Component {
                 <Grid.Row key={source.name}>
                   <Grid.Col xs={12} sm={4}>
                     <span>
-                      <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(source.source_type)}>
+                      <SimpleTooltip id="sourceTypeTip" tooltip={dictionary[source.source_type]}>
                         <Icon type={typeIcon.type} name={typeIcon.name} />
                       </SimpleTooltip>
                       &nbsp; {source.name}
@@ -157,7 +157,7 @@ class CredentialListItem extends React.Component {
     });
 
     const leftContent = (
-      <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
+      <SimpleTooltip id="credentialTypeTip" tooltip={dictionary[item.cred_type]}>
         <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
       </SimpleTooltip>
     );

@@ -1,4 +1,5 @@
-import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
+
 const SourceFilterFields = [
   {
     id: 'search_by_name',
@@ -18,9 +19,9 @@ const SourceFilterFields = [
     placeholder: 'Filter by Source Type',
     filterType: 'select',
     filterValues: [
-      { title: helpers.sourceTypeString('network'), id: 'network' },
-      { title: helpers.sourceTypeString('satellite'), id: 'satellite' },
-      { title: helpers.sourceTypeString('vcenter'), id: 'vcenter' }
+      { title: dictionary.network, id: 'network' },
+      { title: dictionary.satellite, id: 'satellite' },
+      { title: dictionary.vcenter, id: 'vcenter' }
     ]
   }
 ];

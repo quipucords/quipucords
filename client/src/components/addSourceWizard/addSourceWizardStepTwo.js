@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import { Button, Icon, Form, Checkbox } from 'patternfly-react';
 import _ from 'lodash';
 import Store from '../../redux/store';
-import helpers from '../../common/helpers';
+import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
 import { AddSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
@@ -471,8 +472,6 @@ class AddSourceWizardStepTwo extends React.Component {
     const { sourceName, sourceNameError } = this.state;
     const { source } = this.props;
 
-    const sourceTypeString = helpers.sourceTypeString(_.get(source, apiTypes.API_SOURCE_TYPE));
-
     return (
       <Form horizontal>
         <FieldGroup label="Name" error={sourceNameError} errorMessage={sourceNameError}>
@@ -480,7 +479,7 @@ class AddSourceWizardStepTwo extends React.Component {
             type="text"
             name="sourceName"
             value={sourceName}
-            placeholder={`Enter a name for the ${sourceTypeString} source`}
+            placeholder={`Enter a name for the ${dictionary[_.get(source, apiTypes.API_SOURCE_TYPE)] || ''} source`}
             onChange={this.onChangeSourceName}
           />
         </FieldGroup>

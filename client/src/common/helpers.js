@@ -38,19 +38,6 @@ const generateId = prefix =>
 
 const noop = Function.prototype;
 
-const sourceTypeString = sourceType => {
-  switch (sourceType) {
-    case 'vcenter':
-      return 'VCenter';
-    case 'network':
-      return 'Network';
-    case 'satellite':
-      return 'Satellite';
-    default:
-      return '';
-  }
-};
-
 const sourceTypeIcon = sourceType => {
   switch (sourceType) {
     case 'vcenter':
@@ -64,17 +51,6 @@ const sourceTypeIcon = sourceType => {
   }
 };
 
-const scanTypeString = scanType => {
-  switch (scanType) {
-    case 'connect':
-      return 'Connection Scan';
-    case 'inspect':
-      return 'Inspection Scan';
-    default:
-      return '';
-  }
-};
-
 const scanTypeIcon = scanType => {
   switch (scanType) {
     case 'connect':
@@ -83,30 +59,6 @@ const scanTypeIcon = scanType => {
       return { type: 'fa', name: 'search' };
     default:
       return { type: 'pf', name: '' };
-  }
-};
-
-const scanStatusString = scanStatus => {
-  switch (scanStatus) {
-    case 'success':
-      return 'Successful';
-    case 'completed':
-      return 'Completed';
-    case 'failed':
-      return 'Failed';
-    case 'created':
-      return 'Created';
-    case 'running':
-      return 'Running';
-    case 'paused':
-      return 'Paused';
-    case 'pending':
-      return 'Pending';
-    case 'canceled':
-      return 'Canceled';
-    default:
-      console.error(`Unknown status: ${scanStatus}`);
-      return '';
   }
 };
 
@@ -294,10 +246,7 @@ export const helpers = {
   downloadData,
   generateId,
   noop,
-  sourceTypeString,
   sourceTypeIcon,
-  scanTypeString,
-  scanStatusString,
   scanTypeIcon,
   scanStatusIcon,
   setStateProp,

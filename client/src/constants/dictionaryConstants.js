@@ -3,8 +3,27 @@ const authDictionary = {
   usernamePassword: 'Username and Password'
 };
 
-const dictionary = {
-  ...authDictionary
+const scanStatusDictionary = {
+  success: 'Successful',
+  completed: 'Completed',
+  failed: 'Failed',
+  created: 'Created',
+  running: 'Running',
+  paused: 'Paused',
+  pending: 'Pending',
+  canceled: 'Canceled'
 };
 
-export { dictionary as default, dictionary, authDictionary };
+const srcDictionary = {
+  network: 'Network',
+  satellite: 'Satellite',
+  vcenter: 'VCenter'
+};
+
+const dictionary = {
+  ...authDictionary,
+  ...scanStatusDictionary,
+  ...srcDictionary
+};
+
+export { dictionary as default, dictionary, authDictionary, scanStatusDictionary, srcDictionary };

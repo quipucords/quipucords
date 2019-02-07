@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { Modal, Alert, Button, Icon, Form, Grid } from 'patternfly-react';
 import Store from '../../redux/store';
 import { helpers } from '../../common/helpers';
+import { authDictionary, dictionary } from '../../constants/dictionaryConstants';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
 import { reduxActions } from '../../redux/actions';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
-import { authDictionary } from '../../constants/dictionaryConstants';
 
 class CreateCredentialDialog extends React.Component {
   static renderFormLabel(label) {
@@ -443,7 +443,7 @@ class CreateCredentialDialog extends React.Component {
                   className="quipucords-form-control"
                   type="text"
                   readOnly
-                  value={helpers.sourceTypeString(credentialType)}
+                  value={dictionary[credentialType] || ''}
                 />
               </Grid.Col>
             </Form.FormGroup>
