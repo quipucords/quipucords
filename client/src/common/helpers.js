@@ -132,17 +132,6 @@ const scanStatusIcon = scanStatus => {
   }
 };
 
-const authorizationTypeString = authorizationType => {
-  switch (authorizationType) {
-    case 'usernamePassword':
-      return 'Username and Password';
-    case 'sshKey':
-      return 'SSH Key';
-    default:
-      return '';
-  }
-};
-
 const setStateProp = (prop, data, options) => {
   const { state = {}, initialState = {}, reset = true } = options;
   let obj = { ...state };
@@ -311,7 +300,6 @@ export const helpers = {
   scanStatusString,
   scanTypeIcon,
   scanStatusIcon,
-  authorizationTypeString,
   setStateProp,
   viewPropsChanged,
   createViewQueryObject,

@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Modal, Alert, Button, Icon, Form, Grid, MenuItem } from 'patternfly-react';
+import { Modal, Alert, Button, Icon, Form, Grid } from 'patternfly-react';
 import Store from '../../redux/store';
 import { helpers } from '../../common/helpers';
 import { credentialsTypes, toastNotificationTypes, viewTypes } from '../../redux/constants';
 import { reduxActions } from '../../redux/actions';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
+import { authDictionary } from '../../constants/dictionaryConstants';
 
 class CreateCredentialDialog extends React.Component {
   static renderFormLabel(label) {
@@ -157,7 +158,7 @@ class CreateCredentialDialog extends React.Component {
   };
 
   onSetAuthType = authType => {
-    this.setState({ authorizationType: authType });
+    this.setState({ authorizationType: authType.value });
   };
 
   onUpdateCredentialName = event => {
@@ -196,7 +197,7 @@ class CreateCredentialDialog extends React.Component {
 
   onSetBecomeMethod = method => {
     this.setState({
-      becomeMethod: method
+      becomeMethod: method.value
     });
   };
 
@@ -362,25 +363,13 @@ class CreateCredentialDialog extends React.Component {
         <Form.FormGroup>
           {CreateCredentialDialog.renderFormLabel('Become Method')}
           <Grid.Col sm={7}>
-            <div className="quipucords-dropdownselect">
-              <DropdownSelect
-                title={becomeMethod}
-                id="become-method-select"
-                className="form-control"
-                multiselect={false}
-              >
-                {this.becomeMethods.map((nextMethod, index) => (
-                  <MenuItem
-                    key={nextMethod}
-                    className={{ 'quipucords-dropdownselect-menuitem-selected': nextMethod === becomeMethod }}
-                    eventKey={`become${index}`}
-                    onClick={() => this.onSetBecomeMethod(nextMethod)}
-                  >
-                    {nextMethod}
-                  </MenuItem>
-                ))}
-              </DropdownSelect>
-            </div>
+            <DropdownSelect
+              id="become-method-select"
+              multiselect={false}
+              onSelect={this.onSetBecomeMethod}
+              selectValue={becomeMethod}
+              options={this.becomeMethods}
+            />
           </Grid.Col>
         </Form.FormGroup>
         <Form.FormGroup validationState={becomeUserError ? 'error' : null}>
@@ -476,33 +465,13 @@ class CreateCredentialDialog extends React.Component {
               <Form.FormGroup>
                 {CreateCredentialDialog.renderFormLabel('Authentication Type')}
                 <Grid.Col sm={7}>
-                  <div className="quipucords-dropdownselect">
-                    <DropdownSelect
-                      title={helpers.authorizationTypeString(authorizationType)}
-                      id="auth-type-select"
-                      className="form-control"
-                      multiselect={false}
-                    >
-                      <MenuItem
-                        key="usernamePassword"
-                        className={{
-                          'quipucords-dropdownselect-menuitem-selected': authorizationType === 'usernamePassword'
-                        }}
-                        eventKey="1"
-                        onClick={() => this.onSetAuthType('usernamePassword')}
-                      >
-                        {helpers.authorizationTypeString('usernamePassword')}
-                      </MenuItem>
-                      <MenuItem
-                        key="sshKey"
-                        className={{ 'quipucords-dropdownselect-menuitem-selected': authorizationType === 'sshKey' }}
-                        eventKey="2"
-                        onClick={() => this.onSetAuthType('sshKey')}
-                      >
-                        {helpers.authorizationTypeString('sshKey')}
-                      </MenuItem>
-                    </DropdownSelect>
-                  </div>
+                  <DropdownSelect
+                    id="auth-type-select"
+                    multiselect={false}
+                    onSelect={this.onSetAuthType}
+                    options={authDictionary}
+                    selectValue={authorizationType}
+                  />
                 </Grid.Col>
               </Form.FormGroup>
             )}

@@ -8,6 +8,7 @@ import { helpers } from '../../common/helpers';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
+import { dictionary } from '../../constants/dictionaryConstants';
 
 class CredentialListItem extends React.Component {
   static authType(item) {
@@ -168,7 +169,7 @@ class CredentialListItem extends React.Component {
         </span>
         <span className="quipucords-description-right">
           <SimpleTooltip id="methodTip" tooltip="Authorization Type">
-            {helpers.authorizationTypeString(CredentialListItem.authType(item))}
+            {dictionary[CredentialListItem.authType(item)]}
           </SimpleTooltip>
         </span>
       </div>

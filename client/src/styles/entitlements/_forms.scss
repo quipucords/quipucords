@@ -1,0 +1,41 @@
+.quipucords-dropdownselect {
+  &.dropdown {
+    width:100%;
+
+    .dropdown-menu,
+    .dropdown-toggle.btn {
+      text-align: inherit;
+      width: 100%;
+    }
+
+    .dropdown-toggle.btn {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+
+      > span:first-child {
+        flex-direction: column;
+        flex: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 1px;
+      }
+    }
+
+    .quipucords-dropdownselect-menuitem {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .quipucords-dropdownselect-menuitemname {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .quipucords-dropdownselect-menuitemcheck {
+      padding-left: 0;
+      padding-right: 0;
+      text-align: right;
+    }
+  }
+}
