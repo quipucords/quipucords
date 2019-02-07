@@ -301,17 +301,10 @@ def _connect(manager_interrupt,
                                          scan_task.source)
 
         # Create parameters for ansible runner
-        runner_settings = dict()
-        runner_settings['idle_timeout'] = 5
-        runner_settings['job_timeout'] = 300
-        runner_settings['pexpect_timeout'] = 10
-
-        extra_vars_dict = dict()
-        extra_vars_dict['variable_host'] = group_name
-
+        runner_settings = {'job_timeout':300} #TODO: make an env var
+        extra_vars_dict = {'variable_host': group_name}
         playbook_path = os.path.join(settings.BASE_DIR,
                                      'scanner/network/runner/connect.yml')
-
         cmdline_list = []
         if hasattr(settings, 'DJANGO_SECRET_PATH'):
             vault_file_path = '--vault-password-file=%s' % (
@@ -323,12 +316,9 @@ def _connect(manager_interrupt,
                 dev_file.write(settings.SECRET_KEY)
             vault_file_path = '--vault-password-file=%s' % path
         cmdline_list.append(vault_file_path)
-        cmdline_list.append('--become-user=root')  # become user cmd
-        cmdline_list.append('--become-method=sudo')  # become command
         if use_paramiko:
             cmdline_list.append('--connection=paramiko')  # paramiko conn
         all_commands = ' '.join(cmdline_list)
-
         try:
             ansible_runner.run(quiet=True,
                                settings=runner_settings,
