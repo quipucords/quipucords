@@ -68,6 +68,7 @@ class InsightsReportTest(TestCase):
         url = '/api/v1/reports/1/insights/'
         expected_hosts = {
             self.sys_platform_id: {
+                'system_platform_id': self.sys_platform_id,
                 'connection_host': '1.2.3.4',
                 'connection_port': 22,
                 'connection_uuid': self.connection_uuid,
@@ -248,7 +249,8 @@ class InsightsReportTest(TestCase):
 
         expected_hosts = {
             self.sys_platform_id:
-                {'connection_host': '1.2.3.4',
+                {'system_platform_id': self.sys_platform_id,
+                 'connection_host': '1.2.3.4',
                  'connection_port': 22,
                  'connection_uuid': self.connection_uuid,
                  'cpu_count': 2,

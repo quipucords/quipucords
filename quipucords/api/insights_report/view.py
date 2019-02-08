@@ -88,18 +88,33 @@ def verify_report_fingerprints(fingerprints):
     returns: valid, invalid fingerprints
     """
     valid_fp = []
+    invalid_fp = []
+    missing_sys_platform_id = 0
     for fingerprint in fingerprints:
         found_facts = False
-        for fact in CANONICAL_FACTS:
-            if fingerprint.get(fact):
-                found_facts = True
-                break
-        if found_facts:
-            valid_fp.append(fingerprint)
+        if fingerprint.get('system_platform_id'):
+            for fact in CANONICAL_FACTS:
+                if fingerprint.get(fact):
+                    found_facts = True
+                    break
+            if found_facts:
+                valid_fp.append(fingerprint)
+            else:
+                invalid_fp.append(fingerprint.get('system_platform_id'))
         else:
-            logger.warning('The following host has no canonical facts: %s',
-                           fingerprint)
-
+            missing_sys_platform_id += 1
+    message = '%d of %d fingerprints valid for Insights.' \
+              % (len(valid_fp),
+                 len(valid_fp) + missing_sys_platform_id + len(invalid_fp))
+    logger.info(message)
+    if invalid_fp:
+        logger.warning('The following fingerprints have no canonical '
+                       'facts and will be excluded from the insights '
+                       'report: %s', str(invalid_fp))
+    if missing_sys_platform_id > 0:
+        logger.warning('%d fingerprints were missing the required '
+                       '"system_platform_id: field.',
+                       missing_sys_platform_id)
     return valid_fp
 
 
@@ -113,12 +128,9 @@ def get_hosts_from_fp(report, fingerprint_dicts):
     valid_hosts = verify_report_fingerprints(fingerprint_dicts)
     insights_hosts = {}
     for host in valid_hosts:
-        host_id = host.pop('system_platform_id', None)
+        host_id = host.get('system_platform_id', None)
         if host_id:
             insights_hosts[host_id] = host
-        else:
-            logger.warning('The following host has no system_platform_id: %s',
-                           host)
     # save the insights format after generating
     report.cached_insights = json.dumps(insights_hosts)
     return insights_hosts

@@ -40,15 +40,13 @@ def add_system_platform_id(apps, schema_editor):
                     cached_fingerprints.append(json.loads(json.dumps(serializer.data)))
                     # Check if fingerprint has canonical facts
                     for fact in CANONICAL_FACTS:
-                        if has_attr(system_fingerprint, fact):
-                            if system_fingerprint.fact:
-                                found_canonical_facts = True
+                        if json.loads(json.dumps(serializer.data)).get(fact):
+                            found_canonical_facts = True
                             break
                     # If canonical facts, add it to the insights_hosts dict
                     if found_canonical_facts:
-                        insights_id = system_fingerprint.system_platform_id
-                        insights_hosts[insights_id] = \
-                            json.dumps(json.loads(serializer.data).pop('system_platform_id'))
+                        insights_id = json.loads(json.dumps(serializer.data)).get('system_platform_id')
+                        insights_hosts[insights_id] = dict(json.loads(json.dumps(serializer.data)))
                 report.cached_fingerprints = json.dumps(cached_fingerprints)
                 report.cached_insights = json.dumps(insights_hosts)
                 report.cached_csv = None
