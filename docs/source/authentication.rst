@@ -14,7 +14,7 @@ The Quipucords server inspects the remote systems in a network scan by using the
 
 vCenter Server Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-For a vcenter scan, the connectivity and access to the server for vCenter Server derives from basic authentication (user name and password) that is encrypted over HTTPS. If the vCenter Server system that is being accessed does not have a verified SSL certificate from a certificate authority, you can supply the ``ssl-cert-verify False`` option when creating the source. This option disregards the SSL certificate verification during authentication. For more information about authentication that is related to vcenter scans, see `Working with Sources <working_with_sources.html#vcenter>`_.
+For a vcenter scan, the connectivity and access to the server for vCenter Server derives from basic authentication (user name and password) that is encrypted over HTTPS. If the vCenter Server system that is being accessed does not have a verified SSL certificate from a certificate authority, you can supply the ``ssl-cert-verify False`` option when creating the source. This option disregards the SSL certificate verification during authentication. The vcenter user does not modify any object in vcenter.  Minimal permissions required are read-only access to all objects included in the scan. For more information about authentication that is related to vcenter scans, see `Working with Sources <working_with_sources.html#vcenter>`_.
 
 Satellite Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^
