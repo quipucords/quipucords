@@ -325,6 +325,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
     def _process_sources(self, details_report):
         """Process facts and convert to fingerprints.
+
         :param details_report: DetailsReport containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
