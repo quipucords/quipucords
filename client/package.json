@@ -68,7 +68,7 @@
     "start": "run-p -l api:dev api:doc start:css start:ui",
     "start:stage": "open https://localhost:5001/login/; npm run build; run-p -l api:stage start:css start:ui-stage",
     "start:prod": "npm run api:prod; open https://localhost:9443/login/",
-    "start:qe": "npm run build; npm run api:qe; open https://localhost:9443/login/",
+    "start:qe": "npm run build; npm run api:qe;",
     "support:create-react-app": "create-react-app",
     "test": "run-s test:lint-js test:ci",
     "test:ci": "CI=true; react-scripts test --env=jsdom --coverage",
