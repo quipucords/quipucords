@@ -91,6 +91,6 @@ def reports(request, pk=None):
     if not insights_report.get('detail'):
         reports_dict['insights_json'] = insights_report
     else:
-        logger.warn('Insights report %s could not be created.',
-                    deployments_data.details_report.id)
+        logger.warning('Insights report %s could not be created.',
+                       deployments_data.details_report.id)
     return Response(reports_dict)
