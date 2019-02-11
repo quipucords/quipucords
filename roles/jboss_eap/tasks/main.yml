@@ -7,33 +7,48 @@
 # Tasks that can locate an EAP_HOME directory
 - name: Gather jboss.eap.running-paths
   raw: for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
-  register: jboss_eap_running_paths
+  register: internal_jboss_eap_running_paths
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_java and jboss_eap'
 
+- name: set jboss_eap_running_paths fact
+  set_fact:
+    jboss_eap_running_paths: '{{ internal_jboss_eap_running_paths }}'
+  ignore_errors: yes
+
 - name: use locate to look for jboss-modules.jar
   raw: locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
-  register: jboss_eap_locate_jboss_modules_jar
+  register: internal_jboss_eap_locate_jboss_modules_jar 
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_locate and jboss_eap'
 
+- name: set jboss_eap_locate_jboss_modules_jar fact
+  set_fact:
+    jboss_eap_locate_jboss_modules_jar: '{{ internal_jboss_eap_locate_jboss_modules_jar }}'
+  ignore_errors: yes
+
 - name: use find to look for jboss-modules.jar
   raw: find {{search_directories}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
-  register: jboss_eap_find_jboss_modules_jar
+  register: internal_jboss_eap_find_jboss_modules_jar
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_eap_ext'
+
+- name: set jboss_eap_find_jboss_modules_jar fact
+  set_fact:
+    jboss_eap_find_jboss_modules_jar: '{{ internal_jboss_eap_find_jboss_modules_jar }}'
+  ignore_errors: yes
 
 # Combine the outputs of the above into a single fact
 
 - name: combine EAP_HOME candidates into single list
   set_fact:
     eap_home_candidates: "{{
-         (jboss_eap_running_paths.get('stdout_lines', []) +
-          jboss_eap_locate_jboss_modules_jar.get('stdout_lines', []) +
-          jboss_eap_find_jboss_modules_jar.get('stdout_lines', []))|difference(['']) | unique }}"
+         (internal_jboss_eap_running_paths.get('stdout_lines', []) +
+          internal_jboss_eap_locate_jboss_modules_jar.get('stdout_lines', []) +
+          internal_jboss_eap_find_jboss_modules_jar.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_eap'
 
@@ -41,27 +56,42 @@
 
 - name: ls EAP_HOME candidates
   raw: ls -1 "{{ item }}" 2>/dev/null
-  register: eap_home_ls
+  register: internal_eap_home_ls
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
+
+- name: set eap_home_ls fact
+  set_fact:
+    eap_home_ls: '{{ internal_eap_home_ls }}'
+  ignore_errors: yes
 
 - name: get version.txt from EAP_HOME candidates
   raw: cat '{{ item }}/version.txt' 2>/dev/null
-  register: eap_home_version_txt
+  register: internal_eap_home_version_txt
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
 
+- name: set eap_home_version_txt fact
+  set_fact:
+    eap_home_version_txt: '{{ internal_eap_home_version_txt }}'
+  ignore_errors: yes
+
 - name: get README.txt from EAP_HOME candidates
   raw: cat '{{ item }}/README.txt' 2>/dev/null
-  register: eap_home_readme_txt
+  register: internal_eap_home_readme_txt
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
+
+- name: set eap_home_readme_txt fact
+  set_fact:
+    eap_home_readme_txt: '{{ internal_eap_home_readme_txt }}'
+  ignore_errors: yes
 
 # The unzip and java -version tasks both get the same information, but
 # one works when the user has unzip installed and the other works when
@@ -69,51 +99,76 @@
 # get the data we need.
 - name: get jboss-modules.jar MANIFEST.MF
   raw: unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF 2>/dev/null
-  register: eap_home_jboss_modules_manifest
+  register: internal_eap_home_jboss_modules_manifest
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap and internal_have_unzip'
 
+- name: set eap_home_jboss_modules_manifest fact
+  set_fact:
+    eap_home_jboss_modules_manifest: '{{ internal_eap_home_jboss_modules_manifest }}'
+  ignore_errors: yes
+
 - name: get jboss-modules.jar version
   raw: java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
-  register: eap_home_jboss_modules_version
+  register: internal_eap_home_jboss_modules_version
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap and internal_have_java'
 
+- name: set eap_home_jboss_modules_version fact
+  set_fact:
+    eap_home_jboss_modules_version: '{{ internal_eap_home_jboss_modules_version }}'
+  ignore_errors: yes
+
 # Look for fuse inside EAP_HOME directories
 
 - name: check JBoss bin directory
   raw: ls -1 "{{ item }}"/bin 2>/dev/null
-  register: eap_home_bin
+  register: internal_eap_home_bin
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
+
+- name: set eap_home_bin fact
+  set_fact:
+    eap_home_bin: '{{ internal_eap_home_bin }}'
+  ignore_errors: yes
 
 - name: check JBoss layers.conf
   raw: cat '{{ item }}/modules/layers.conf' 2>/dev/null
-  register: eap_home_layers_conf
+  register: internal_eap_home_layers_conf
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
 
+- name: set eap_home_layers_conf fact
+  set_fact:
+    eap_home_layers_conf: '{{ internal_eap_home_layers_conf }}'
+  ignore_errors: yes
+
 - name: check JBoss modules/system/layers
   raw: ls -1 "{{ item }}"/modules/system/layers 2>/dev/null
-  register: eap_home_layers
+  register: internal_eap_home_layers
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
+
+- name: set eap_home_layers fact
+  set_fact:
+    eap_home_layers: '{{ internal_eap_home_layers }}'
+  ignore_errors: yes
 
 # Tests that can indicate the presence of EAP, but don't let us
 # automatically locate EAP_HOME
 - name: check for common install files and directories
   raw: test -e "{{ item }}"
-  register: jboss_eap_common_files
+  register: internal_jboss_eap_common_files
   ignore_errors: yes
   become: yes
   with_items:
@@ -138,73 +193,128 @@
     - /etc/init.d/jboss-as-standalone.sh
   when: 'user_has_sudo and jboss_eap'
 
+- name: set jboss_eap_common_files fact
+  set_fact:
+    jboss_eap_common_files: '{{ internal_jboss_eap_common_files }}'
+  ignore_errors: yes
+
 - name: gather jboss.processes
   raw: ps -A -o comm -o args e --columns 10000 | grep java | grep jboss | grep -v "/usr/bin/grep"
-  register: jboss_processes
+  register: internal_jboss_processes
   ignore_errors: yes
   when: 'jboss_eap'
+
+- name: set jboss_processes fact
+  set_fact:
+    jboss_processes: '{{ internal_jboss_processes }}'
+  ignore_errors: yes
 
 - name: check for jboss packages
   raw: rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}\n" | grep -E '(eap7)|(jbossas)' | sort
-  register: jboss_eap_packages
+  register: internal_jboss_eap_packages
   ignore_errors: yes
   when: 'jboss_eap'
+
+- name: set jboss_eap_packages fact
+  set_fact:
+    jboss_eap_packages: '{{ internal_jboss_eap_packages }}'
+  ignore_errors: yes
 
 - name: check for user 'jboss'
   raw: id -u jboss
-  register: jboss_eap_id_jboss
+  register: internal_jboss_eap_id_jboss
   ignore_errors: yes
   when: 'jboss_eap'
 
+- name: set jboss_eap_id_jboss fact
+  set_fact:
+    jboss_eap_id_jboss: '{{ internal_jboss_eap_id_jboss }}'
+  ignore_errors: yes
+
 - name: look for jboss systemd service
   raw: /usr/bin/systemctl list-unit-files --no-pager
-  register: jboss_eap_systemctl_unit_files
+  register: internal_jboss_eap_systemctl_unit_files
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_eap and internal_have_systemctl'
 
+- name: set jboss_eap_systemctl_unit_files fact
+  set_fact:
+    jboss_eap_systemctl_unit_files: '{{ internal_jboss_eap_systemctl_unit_files }}'
+  ignore_errors: yes
+
 - name: look for jboss in chkconfig
   raw: /sbin/chkconfig --list
-  register: jboss_eap_chkconfig
+  register: internal_jboss_eap_chkconfig
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_eap and internal_have_chkconfig'
 
+- name: set jboss_eap_chkconfig fact
+  set_fact:
+    jboss_eap_chkconfig: '{{ internal_jboss_eap_chkconfig }}'
+  ignore_errors: yes
+
 # Scan linux systems for JBoss EAP or Wildfly Installations
 - name: Gather jboss.eap.jar-ver
   raw: FOUND=""; for jar in `find {{search_directories}} -xdev -name 'jboss-modules.jar' 2>/dev/null | grep -v '\.installation/patches'`; do VERSION=$(java -jar ${jar} -version 2> /dev/null | grep version | sed 's/.*version\s//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | grep "/dev" | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**$ctime"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND}
-  register: jboss_eap_jar_ver
+  register: internal_jboss_eap_jar_ver
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_java and jboss_eap_ext'
+
+- name: set jboss_eap_jar_ver fact
+  set_fact:
+    jboss_eap_jar_ver: '{{ internal_jboss_eap_jar_ver }}'
+  ignore_errors: yes
 
 - name: Gather jboss.eap.run-jar-ver
   raw: FOUND=""; for jar in `find {{search_directories}} -xdev -name 'run.jar' 2>/dev/null`; do VERSION=$(java -jar ${jar} --version 2> /dev/null | grep build  | sed 's/.*[CS]V[NS]Tag.//g' | sed 's/\sdate.*//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | tail -1 | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**${ctime}"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND};
-  register: jboss_eap_run_jar_ver
+  register: internal_jboss_eap_run_jar_ver
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_java and jboss_eap_ext'
 
+- name: set jboss_eap_run_jar_ver fact
+  set_fact:
+    jboss_eap_run_jar_ver: '{{ internal_jboss_eap_run_jar_ver }}'
+  ignore_errors: yes
+
 - name: check for activemq version on eap
   raw: ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/activemq/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p' | sed 's/\n//'
-  register: jboss_fuse_on_eap_activemq_ver
+  register: internal_jboss_fuse_on_eap_activemq_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_fuse'
+
+- name: set jboss_fuse_on_eap_activemq_ver fact
+  set_fact:
+    jboss_fuse_on_eap_activemq_ver: '{{ internal_jboss_fuse_on_eap_activemq_ver }}'
+  ignore_errors: yes
 
 - name: check modules/system/layers/fuse/org/apache/camel/core/main/ for camel version
   raw: ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/camel/core/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
-  register: jboss_fuse_on_eap_camel_ver
+  register: internal_jboss_fuse_on_eap_camel_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_fuse'
 
+- name: set jboss_fuse_on_eap_camel_ver fact
+  set_fact:
+    jboss_fuse_on_eap_camel_ver: '{{ internal_jboss_fuse_on_eap_camel_ver }}'
+  ignore_errors: yes
+
 - name: check modules/system/layers/base/org/apache/cxf/impl/main for cxf-rt version
   raw: ls -1 '{{ item }}/modules/system/layers/base/org/apache/cxf/impl/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
-  register: jboss_fuse_on_eap_cxf_ver
+  register: internal_jboss_fuse_on_eap_cxf_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ eap_home_candidates }}"
   when: 'user_has_sudo and jboss_fuse'
+
+- name: set jboss_fuse_on_eap_cxf_ver fact
+  set_fact:
+    jboss_fuse_on_eap_cxf_ver: '{{ internal_jboss_fuse_on_eap_cxf_ver }}'
+  ignore_errors: yes
