@@ -116,7 +116,7 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                          'Status: Populated, Enabled\r\n ' \
                          '\tSocket Designation: CPU #001\r\n\t' \
                          'Status: Unpopulated\r\n'
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result(one_dmi_result)}
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
@@ -129,9 +129,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                         'Status: Unpopulated\r\n ' \
                         '\tSocket Designation: CPU #001\r\n\t' \
                         'Status: Unpopulated\r\n'
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result(no_dmi_result),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                         ansible_result('2')}
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
@@ -140,9 +140,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_dmiresult_contains_nonint_characters(self):
         """Test that we use cpuinfo cmd if dmi cmd can't be changed to int."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('Permission Denied.'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                         ansible_result('2')}
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
@@ -151,9 +151,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_dmiresult_cpuinfo_fails(self):
         """Test that we use cpu count when dmi and cpuinfo cmds fail."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('Permission Denied.'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                         ansible_result(''),
                         'cpu_count': '4'}
         self.assertEqual(
@@ -171,9 +171,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_dmiresult_cpuinfo_failed_tasks(self):
         """Test the sc is the same as cpu count when the deps raise errors."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('Failed', 1),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                         ansible_result('Failed', 1),
                         'cpu_count': '4'}
         self.assertEqual(
@@ -183,9 +183,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_cpuinfo_failed_value_error(self):
         """Test that cpu count is used when other deps rasie value errors."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('Permission Denied.'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('Failure'),
                         'cpu_count': '1'}
         self.assertEqual(
@@ -195,9 +195,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_cpuinfo_failed_return_none(self):
         """Test that none is returned if everything else fails."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('Permission Denied.'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('Failure')}
         self.assertEqual(
             cpu.ProcessCpuSocketCount.process(
@@ -206,9 +206,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_dmiresult_greater_than_8(self):
         """Test that cpu count is used when other deps greater than 8."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('9'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('9'),
                         'cpu_count': '3'}
         self.assertEqual(
@@ -234,9 +234,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
                            'Status: Populated, Enabled\r\n' \
                            '\tSocket Designation: CPU #007\r\n\t' \
                            'Status: Populated, Enabled\r\n'
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result(eight_dmi_result),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('9'),
                         'cpu_count': '3'}
         self.assertEqual(
@@ -246,9 +246,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_cpuinfo_equal_to_8(self):
         """Test that socket count is set to cpuinfo dep when equal to 8."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('10'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('8'),
                         'cpu_count': '3'}
         self.assertEqual(
@@ -258,9 +258,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
 
     def test_cpu_count_greater_than_8(self):
         """Test that the sc is set to cpuinfo even if greater thatn 8."""
-        dependencies = {'internal_cpu_socket_count_dmi_cmd':
+        dependencies = {'internal_cpu_socket_count_dmi':
                         ansible_result('10'),
-                        'internal_cpu_socket_count_cpuinfo_cmd':
+                        'internal_cpu_socket_count_cpuinfo':
                             ansible_result('9'),
                         'cpu_count': '12'}
         self.assertEqual(
