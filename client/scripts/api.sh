@@ -46,29 +46,6 @@ checkContainerRunning()
 }
 #
 #
-# Check then set for first port
-#
-checkSetPort()
-{
-  local PORT=$1
-  local LPORT=3000
-  local UPORT=9000
-
-  if [ -z "$(lsof -Pi :$PORT -sTCP:LISTEN -t)" >/dev/null ]; then
-    echo $PORT
-  else
-    while true; do
-      RPORT=$(($RANDOM % $(($LPORT - $UPORT + 1)) + $LPORT))
-
-      if [ -z "$(lsof -Pi :$RPORT -sTCP:LISTEN -t)" >/dev/null ]; then
-        echo $RPORT
-        exit 0
-      fi
-    done
-  fi
-}
-#
-#
 # Install & Run Quipucords API Mock Container
 #
 devApi()
@@ -111,11 +88,11 @@ startDB()
   local NAME="qpc-db"
   local DATA="$(pwd)/.container"
   local DATA_VOLUME="/var/lib/postgresql/data"
-  local UPDATE=$1
+  local QE=$1
 
   docker stop -t 0 $NAME >/dev/null
 
-  if [ -z "$(docker images -q $CONTAINER)" ] || [ "$UPDATE" = true ]; then
+  if [ -z "$(docker images -q $CONTAINER)" ]; then
     echo "Setting up QPC DB container"
     docker pull $CONTAINER
 
@@ -124,21 +101,20 @@ startDB()
     fi
   fi
 
-  docker run -d --rm -v $DATA:$DATA_VOLUME -e POSTGRES_PASSWORD=password --name $NAME $CONTAINER >/dev/null
-
-  if [ "$UPDATE" = false ]; then
-    checkContainerRunning $NAME $CONTAINER
+  if [ "$QE" = true ]; then
+    docker run -d --rm -e POSTGRES_PASSWORD=password --name $NAME $CONTAINER >/dev/null
+  else
+    docker run -d --rm -v $DATA:$DATA_VOLUME -e POSTGRES_PASSWORD=password --name $NAME $CONTAINER >/dev/null
   fi
 
-  if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
+  checkContainerRunning $NAME $CONTAINER
+
+  if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
     echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
     echo "  QPC DB running:"
     printf "  To stop: $ ${GREEN}docker stop ${NAME}${NOCOLOR}\n"
   fi
 }
-#
-#
-# Install & Run Quipucords API Container
 #
 #
 #
@@ -159,30 +135,28 @@ stageApi()
 
   docker stop -t 0 $NAME >/dev/null
 
-  PORT="$(checkSetPort $PORT)"
-
   if [ -z "$(docker images -q $CONTAINER)" ] || [ "$UPDATE" = true ]; then
     echo "Setting up staging Docker API container"
     (cd ../. && make clean)
     docker build -t $CONTAINER ../.
   fi
 
-  if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
-    startDB $UPDATE
-    printf "\n"
-    echo "Starting staging API..."
-    docker run -d --rm -p $PORT:443 -v $BUILD_DIR:$CLIENT_VOLUME -v $BUILD_DIR:$TEMPLATE_CLIENT_VOLUME -v $TEMPLATE_DIR:$TEMPLATE_REGISTRATION_VOLUME -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
-  fi
-
   if [ "$UPDATE" = false ]; then
-    checkContainerRunning $NAME $CONTAINER
-  fi
+    if [ -z "$(docker ps | grep $CONTAINER)" ]; then
+      startDB
+      printf "\n"
+      echo "Starting staging API..."
+      docker run -d --rm -p $PORT:443 -v $BUILD_DIR:$CLIENT_VOLUME -v $BUILD_DIR:$TEMPLATE_CLIENT_VOLUME -v $TEMPLATE_DIR:$TEMPLATE_REGISTRATION_VOLUME -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
+    fi
 
-  if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
-    echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
-    echo "  QPC Stage API running: https://localhost:${PORT}/"
-    echo "  Connected to local directory: $(basename $BUILD_DIR | cut -c 1-80)"
-    printf "  To stop: $ ${GREEN}docker stop ${NAME}${NOCOLOR}\n"
+    checkContainerRunning $NAME $CONTAINER
+
+    if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
+      echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
+      echo "  QPC Stage API running: https://localhost:${PORT}/"
+      echo "  Connected to local directory: $(basename $BUILD_DIR | cut -c 1-80)"
+      printf "  To stop: $ ${GREEN}docker stop ${NAME}${NOCOLOR}\n"
+    fi
   fi
 }
 #
@@ -205,20 +179,52 @@ prodApi()
     docker build -t $CONTAINER ../.
   fi
 
-  if [ -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
-    startDB $UPDATE
+  if [ "$UPDATE" = false ]; then
+    if [ -z "$(docker ps | grep $CONTAINER)" ]; then
+      startDB
+      printf "\n"
+      echo "Starting QPC production API..."
+      docker run -d --rm -p $PORT:443 -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
+    fi
+
+    checkContainerRunning $NAME $CONTAINER
+
+    if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
+      echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
+      echo "  QPC Production API running: https://localhost:${PORT}/"
+      printf "  To stop: $ ${GREEN}docker stop ${NAME}${NOCOLOR}\n"
+    fi
+  fi
+}
+#
+#
+# Install & Run Quipucords API Container
+#
+qeApi()
+{
+  local CONTAINER="qpc-qe"
+  local NAME="qpc-qe"
+  local DB_NAME="qpc-db"
+  local PORT=$1
+
+  docker stop -t 0 $NAME >/dev/null
+
+  echo "Setting up QPC QE container"
+  (cd ../. && make clean)
+  docker build -t $CONTAINER ../.
+
+  if [ -z "$(docker ps | grep $CONTAINER)" ]; then
+    startDB true
     printf "\n"
-    echo "Starting staging API..."
+    echo "Starting QE API..."
     docker run -d --rm -p $PORT:443 -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
   fi
 
-  if [ "$UPDATE" = false ]; then
-    checkContainerRunning $NAME $CONTAINER
-  fi
+  checkContainerRunning $NAME $CONTAINER
 
-  if [ ! -z "$(docker ps | grep $CONTAINER)" ] && [ "$UPDATE" = false ]; then
+  if [ ! -z "$(docker ps | grep $CONTAINER)" ]; then
     echo "  Container: $(docker ps | grep $CONTAINER | cut -c 1-80)"
-    echo "  QPC Production API running: https://localhost:${PORT}/"
+    echo "  QPC QE API running: https://localhost:${PORT}/"
     printf "  To stop: $ ${GREEN}docker stop ${NAME}${NOCOLOR}\n"
   fi
 }
@@ -241,8 +247,8 @@ prodApi()
         p ) PORT=$OPTARG;;
         f ) FILE="$OPTARG";;
         t ) TYPE="$OPTARG";;
-        c ) CLEAN=$OPTARG;;
-        u ) UPDATE=$OPTARG;;
+        c ) CLEAN=true;;
+        u ) UPDATE=true;;
       esac
   done
 
@@ -258,6 +264,8 @@ prodApi()
   fi
 
   case $TYPE in
+    qe )
+      qeApi $PORT;;
     prod )
       prodApi $PORT $UPDATE;;
     stage )
