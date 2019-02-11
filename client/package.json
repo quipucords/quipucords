@@ -47,6 +47,7 @@
     "api:dev": "sh ./scripts/api.sh -p 5000 -t dev -f \"$(pwd)/../docs/swagger.yml\"",
     "api:stage": "sh ./scripts/api.sh -p 5001 -t stage",
     "api:prod": "sh ./scripts/api.sh -p 9443 -t prod",
+    "api:qe": "sh ./scripts/api.sh -p 9443 -t qe",
     "api:update": "npm run api:dev -- -u; npm run api:stage -- -u; npm run api:prod -- -u",
     "api:doc": "open http://localhost:5050/docs/api & node ./scripts/swagger.js",
     "build:clean": "rm -rf -- \"$(pwd)\"/build; rm -rf -- \"$(pwd)\"/public/assets",
@@ -67,13 +68,14 @@
     "start": "run-p -l api:dev api:doc start:css start:ui",
     "start:stage": "open https://localhost:5001/login/; npm run build; run-p -l api:stage start:css start:ui-stage",
     "start:prod": "npm run api:prod; open https://localhost:9443/login/",
+    "start:qe": "npm run build; npm run api:qe;",
     "support:create-react-app": "create-react-app",
     "test": "run-s test:lint-js test:ci",
     "test:ci": "CI=true; react-scripts test --env=jsdom --coverage",
-    "test:clearCache": "react-scripts test --clearCache",
+    "test:clearCache": "react-scripts test -- --clearCache",
     "test:dev": "run-s test:lint-js test:unit",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
-    "test:unit": "sh -ac '. ./.env.development; react-scripts test --env=jsdom'"
+    "test:unit": "sh -ac '. ./.env.test; react-scripts test --env=jsdom'"
   },
   "dependencies": {
     "axios": "^0.18.0",

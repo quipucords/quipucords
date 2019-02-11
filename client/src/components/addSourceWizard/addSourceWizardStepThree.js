@@ -41,12 +41,18 @@ const AddSourceWizardStepThree = ({ view }) => {
 };
 
 AddSourceWizardStepThree.propTypes = {
-  view: PropTypes.object
+  view: PropTypes.shape({
+    add: PropTypes.bool,
+    error: PropTypes.bool,
+    errorMessage: PropTypes.string,
+    fulfilled: PropTypes.bool,
+    source: PropTypes.shape({
+      name: PropTypes.string
+    })
+  }).isRequired
 };
 
-AddSourceWizardStepThree.defaultProps = {
-  view: {}
-};
+AddSourceWizardStepThree.defaultProps = {};
 
 const mapStateToProps = state => ({ view: state.addSourceWizard.view });
 
