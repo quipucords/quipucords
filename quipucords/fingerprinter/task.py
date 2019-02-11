@@ -15,7 +15,8 @@ import uuid
 from datetime import datetime
 
 from api.common.common_report import create_report_version
-from api.common.util import (convert_to_boolean,
+from api.common.util import (CANONICAL_FACTS,
+                             convert_to_boolean,
                              convert_to_float,
                              convert_to_int,
                              is_boolean,
@@ -45,11 +46,6 @@ from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-# Canonical facts for Insights
-CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
-                   'ip_addresses', 'mac_addresses',
-                   'subscription_manager_id', 'vm_uuid']
 
 # Keys used to de-duplicate against other network sources
 NETWORK_IDENTIFICATION_KEYS = ['subscription_manager_id',

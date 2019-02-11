@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int
+from api.common.util import CANONICAL_FACTS, is_int
 from api.models import (DeploymentsReport)
 
 from django.shortcuts import get_object_or_404
@@ -50,10 +50,6 @@ else:
     auth_classes = ()
     perm_classes = ()
 
-CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
-                   'ip_addresses', 'mac_addresses',
-                   'subscription_manager_id', 'vm_uuid']
-
 
 # pylint: disable=inconsistent-return-statements
 @api_view(['GET'])
@@ -81,51 +77,52 @@ def insights(request, pk=None):
     return Response(report_dict)
 
 
-def verify_report_fingerprints(fingerprints):
-    """Verify that report fingerprints contain canonical facts.
+def verify_report_hosts(hosts):
+    """Verify that report hosts contain canonical facts.
 
-    :param fingerprints: dictionary of fingerprints to verify
-    returns: valid, invalid fingerprints
+    :param hosts: dictionary of hosts to verify
+    returns: valid, invalid hosts
     """
-    valid_fp = []
-    invalid_fp = []
+    valid_hosts = []
+    invalid_hosts = []
     missing_sys_platform_id = 0
-    for fingerprint in fingerprints:
+    for host in hosts:
         found_facts = False
-        if fingerprint.get('system_platform_id'):
+        if host.get('system_platform_id'):
             for fact in CANONICAL_FACTS:
-                if fingerprint.get(fact):
+                if host.get(fact):
                     found_facts = True
                     break
             if found_facts:
-                valid_fp.append(fingerprint)
+                valid_hosts.append(host)
             else:
-                invalid_fp.append(fingerprint.get('system_platform_id'))
+                invalid_hosts.append(host.get('system_platform_id'))
         else:
             missing_sys_platform_id += 1
-    message = '%d of %d fingerprints valid for Insights.' \
-              % (len(valid_fp),
-                 len(valid_fp) + missing_sys_platform_id + len(invalid_fp))
+    message = '%d of %d hosts valid for Insights.' \
+              % (len(valid_hosts),
+                 len(valid_hosts) +
+                 missing_sys_platform_id + len(invalid_hosts))
     logger.info(message)
-    if invalid_fp:
-        logger.warning('The following fingerprints have no canonical '
+    if invalid_hosts:
+        logger.warning('The following hosts have no canonical '
                        'facts and will be excluded from the insights '
-                       'report: %s', str(invalid_fp))
+                       'report: %s', str(invalid_hosts))
     if missing_sys_platform_id > 0:
-        logger.warning('%d fingerprints were missing the required '
-                       '"system_platform_id: field.',
-                       missing_sys_platform_id)
-    return valid_fp
+        logger.error('%d hosts were missing the required '
+                     '"system_platform_id: field.',
+                     missing_sys_platform_id)
+    return valid_hosts
 
 
-def get_hosts_from_fp(report, fingerprint_dicts):
-    """Generate insights report format from the fingerprints.
+def get_hosts_from_fp(report, host_dicts):
+    """Generate insights report format from the hosts.
 
     :param report: the DeploymentsReport
-    :param fingerprint_dicts: the fingerprints for the report
+    :param host_dicts: the hosts for the report
     :returns: json insights report format
     """
-    valid_hosts = verify_report_fingerprints(fingerprint_dicts)
+    valid_hosts = verify_report_hosts(host_dicts)
     insights_hosts = {}
     for host in valid_hosts:
         host_id = host.get('system_platform_id', None)
@@ -141,7 +138,7 @@ def build_cached_insights_json_report(report):
 
     :param report: DeploymentsReport that is used to create insights report
     :returns: json report data
-    :raises: Raises failed dependencies if no fingerprints have canonical facts
+    :raises: Raises failed dependencies if no hosts have canonical facts
     """
     if report.cached_insights:
         insights_hosts = json.loads(report.cached_insights)

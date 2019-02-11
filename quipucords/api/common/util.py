@@ -23,6 +23,10 @@ from rest_framework.serializers import ValidationError
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
+                   'ip_addresses', 'mac_addresses',
+                   'subscription_manager_id', 'vm_uuid']
+
 
 def is_int(value):
     """Check if a value is convertable to int.
