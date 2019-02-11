@@ -7,7 +7,9 @@ import uuid
 # pylint: disable=no-name-in-module,import-error
 from distutils.version import LooseVersion
 
+from api.common.util import CANONICAL_FACTS
 from api.deployments_report.serializer import SystemFingerprintSerializer
+
 
 def add_system_platform_id(apps, schema_editor):
     # Get old deployments reports
@@ -16,10 +18,12 @@ def add_system_platform_id(apps, schema_editor):
     count = 0
     for report in DeploymentsReport.objects.all():
         cached_fingerprints = []
+        insights_hosts = {}
         if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
             print('Migrating deployments report %s' % report.id)
             try:
                 for system_fingerprint in report.system_fingerprints.all():
+                    found_canonical_facts = False
                     count += 1
                     if count % 100 == 0:
                         print('%d fingerprints migrated' % count)
@@ -31,8 +35,19 @@ def add_system_platform_id(apps, schema_editor):
                     serializer = SystemFingerprintSerializer(system_fingerprint)
                     # json dumps/loads changes type of dictionary
                     # removes massive memory growth for cached_fingerprints
-                    cached_fingerprints.append(json.loads(json.dumps(serializer.data)))
+                    system_fingerprint_data = json.loads(json.dumps(serializer.data))
+                    cached_fingerprints.append(system_fingerprint_data)
+                    # Check if fingerprint has canonical facts
+                    for fact in CANONICAL_FACTS:
+                        if system_fingerprint_data.get(fact):
+                            found_canonical_facts = True
+                            break
+                    # If canonical facts, add it to the insights_hosts dict
+                    if found_canonical_facts:
+                        insights_id = system_fingerprint_data.get('system_platform_id')
+                        insights_hosts[insights_id] = system_fingerprint_data
                 report.cached_fingerprints = json.dumps(cached_fingerprints)
+                report.cached_insights = json.dumps(insights_hosts)
                 report.cached_csv = None
                 report.save()
             except Exception:

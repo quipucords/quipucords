@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`unconnected 1`] = `
+<form
+  class="form-horizontal"
+>
+  <div
+    class="form-group"
+  >
+    <label
+      class="col-sm-3 control-label"
+      for="generatedid-"
+    >
+      Name
+    </label>
+    <div
+      class="col-sm-9"
+    >
+      <input
+        class="form-control"
+        id="generatedid-"
+        name="sourceName"
+        placeholder="Enter a name for the  source"
+        type="text"
+        value=""
+      />
+    </div>
+  </div>
+  <div
+    class="form-group"
+  >
+    <label
+      class="col-sm-3 control-label"
+      for="generatedid-"
+    >
+      Credentials
+    </label>
+    <div
+      class="col-sm-9"
+    >
+      <span
+        class="input-group"
+      >
+        <div
+          class="quipucords-dropdownselect"
+        >
+          <div
+            class="form-control dropdown disabled btn-group"
+            title="Add one or more credentials"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="dropdown-toggle btn btn-default"
+              disabled=""
+              id="credential-select"
+              role="button"
+              type="button"
+            >
+              <span>
+                Add one or more credentials
+              </span>
+               
+              <span
+                class="caret"
+              />
+            </button>
+            <ul
+              aria-labelledby="credential-select"
+              class="dropdown-menu"
+              role="menu"
+            >
+              0
+            </ul>
+          </div>
+        </div>
+        <span
+          class="input-group-btn"
+        >
+          <button
+            class="btn btn-default"
+            title="Add a credential"
+            type="button"
+          >
+            <span
+              class="sr-only"
+            >
+              Add
+            </span>
+            <span
+              aria-hidden="true"
+              class="fa fa-plus"
+            />
+          </button>
+        </span>
+      </span>
+    </div>
+  </div>
+</form>
+`;

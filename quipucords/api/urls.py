@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -19,6 +19,7 @@ from api.views import (CredentialViewSet,
                        async_merge_reports,
                        deployments,
                        details,
+                       insights,
                        jobs,
                        reports,
                        status,
@@ -55,6 +56,7 @@ ROUTER.register(r'users',
 urlpatterns = [
     path('reports/<int:pk>/details/', details),
     path('reports/<int:pk>/deployments/', deployments),
+    path('reports/<int:pk>/insights/', insights),
     path('reports/<int:pk>/', reports),
     path('reports/merge/', sync_merge_reports),
     path('reports/merge/jobs/', async_merge_reports),
