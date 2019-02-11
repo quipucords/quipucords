@@ -70,7 +70,7 @@
     "support:create-react-app": "create-react-app",
     "test": "run-s test:lint-js test:ci",
     "test:ci": "CI=true; react-scripts test --env=jsdom --coverage",
-    "test:clearCache": "react-scripts test --clearCache",
+    "test:clearCache": "react-scripts test -- --clearCache",
     "test:dev": "run-s test:lint-js test:unit",
     "test:lint-js": "eslint --ext=js --ext=jsx src",
     "test:unit": "sh -ac '. ./.env.test; react-scripts test --env=jsdom'"

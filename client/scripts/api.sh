@@ -171,7 +171,7 @@ stageApi()
     startDB $UPDATE
     printf "\n"
     echo "Starting staging API..."
-    docker run -d --rm -p $PORT:443 -v $BUILD_DIR:$CLIENT_VOLUME:cached -v $BUILD_DIR:$TEMPLATE_CLIENT_VOLUME:cached -v $TEMPLATE_DIR:$TEMPLATE_REGISTRATION_VOLUME:cached -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
+    docker run -d --rm -p $PORT:443 -v $BUILD_DIR:$CLIENT_VOLUME -v $BUILD_DIR:$TEMPLATE_CLIENT_VOLUME -v $TEMPLATE_DIR:$TEMPLATE_REGISTRATION_VOLUME -e QPC_DBMS_HOST=$DB_NAME --link $DB_NAME:qpc-link --name $NAME $CONTAINER >/dev/null
   fi
 
   if [ "$UPDATE" = false ]; then
