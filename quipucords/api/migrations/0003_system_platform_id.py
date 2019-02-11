@@ -45,7 +45,7 @@ def add_system_platform_id(apps, schema_editor):
                     # If canonical facts, add it to the insights_hosts dict
                     if found_canonical_facts:
                         insights_id = system_fingerprint_data.get('system_platform_id')
-                        insights_hosts[insights_id] = dict(system_fingerprint_data)
+                        insights_hosts[insights_id] = system_fingerprint_data
                 report.cached_fingerprints = json.dumps(cached_fingerprints)
                 report.cached_insights = json.dumps(insights_hosts)
                 report.cached_csv = None
