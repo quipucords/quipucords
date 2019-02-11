@@ -110,7 +110,7 @@ def verify_report_hosts(hosts):
                        'report: %s', str(invalid_hosts))
     if missing_sys_platform_id > 0:
         logger.error('%d hosts were missing the required '
-                     '"system_platform_id: field.',
+                     '"system_platform_id" field.',
                      missing_sys_platform_id)
     return valid_hosts
 
