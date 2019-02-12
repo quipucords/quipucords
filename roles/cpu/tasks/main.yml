@@ -24,7 +24,7 @@
     cpu_model_name: "{{internal_cpu_model_name}}"
   ignore_errors: yes
 
-- name: gather intenal_cpu_bogomips fact
+- name: gather internal_cpu_bogomips fact
   raw: cat /proc/cpuinfo 2>/dev/null | grep '^bogomips\s*.' | sed -n -e 's/^.*bogomips\s*.\s*//p'
   register: internal_cpu_bogomips
   ignore_errors: yes

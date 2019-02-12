@@ -108,7 +108,7 @@
 
 - name: set jboss_brms_manifest_mf fact
   set_fact:
-    jboss_brms_manifest_mf: '{{ internal_jboss_brms_manifest_mf }}'
+    jboss_brms_manifest_mf: "{{ internal_jboss_brms_manifest_mf }}"
   ignore_errors: yes
 
 - name: look for kie-api files inside candidate directories
@@ -121,7 +121,7 @@
 
 - name: set jboss_brms_kie_in_business_central fact
   set_fact:
-    jboss_brms_kie_in_business_central: '{{ internal_jboss_brms_kie_in_business_central }}'
+    jboss_brms_kie_in_business_central: "{{ internal_jboss_brms_kie_in_business_central }}"
   ignore_errors: yes
 
 - name: look for all kie-api files on the system
@@ -133,7 +133,7 @@
 
 - name: set jboss_brms_locate_kie_api fact
   set_fact:
-    jboss_brms_locate_kie_api: '{{ internal_jboss_brms_locate_kie_api }}'
+    jboss_brms_locate_kie_api: "{{ internal_jboss_brms_locate_kie_api }}"
   ignore_errors: yes
 
 # Tasks that do filesystem scans. This will scan linux systems for
@@ -147,7 +147,7 @@
 
 - name: set jboss_brms_kie_api_ver fact
   set_fact:
-    jboss_brms_kie_api_ver: '{{ internal_jboss_brms_kie_api_ver }}'
+    jboss_brms_kie_api_ver: "{{ internal_jboss_brms_kie_api_ver }}"
   ignore_errors: yes
 
 - name: Gather jboss.brms.drools-core-ver
@@ -159,7 +159,7 @@
 
 - name: set jboss_brms_drools_core_ver fact
   set_fact:
-    jboss_brms_drools_core_ver: '{{ internal_jboss_brms_drools_core_ver }}'
+    jboss_brms_drools_core_ver: "{{ internal_jboss_brms_drools_core_ver }}"
   ignore_errors: yes
 
 - name: Gather jboss.brms.kie-war-ver
@@ -171,5 +171,5 @@
 
 - name: set jboss_brms_kie_war_ver fact
   set_fact:
-    jboss_brms_kie_war_ver: '{{ internal_jboss_brms_kie_war_ver }}'
+    jboss_brms_kie_war_ver: "{{ internal_jboss_brms_kie_war_ver }}"
   ignore_errors: yes

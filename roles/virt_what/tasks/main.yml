@@ -18,7 +18,7 @@
 
 - name: extract virt-what error code
   set_fact:
-    internal_virt_what_error: '{{ internal_virt_what_output["stdout_lines"][-1] | int }}'
+    internal_virt_what_error: "{{ internal_virt_what_output["stdout_lines"][-1] | int }}"
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_virt_what and "stdout_lines" in internal_virt_what_output'
 

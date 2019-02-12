@@ -6,4 +6,4 @@
 
 - name: internal_host_done
   set_fact:
-    host_done: 'True'
+    host_done: "True"

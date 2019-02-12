@@ -14,7 +14,7 @@
 
 - name: set jboss_eap_running_paths fact
   set_fact:
-    jboss_eap_running_paths: '{{ internal_jboss_eap_running_paths }}'
+    jboss_eap_running_paths: "{{ internal_jboss_eap_running_paths }}"
   ignore_errors: yes
 
 - name: use locate to look for jboss-modules.jar
@@ -26,7 +26,7 @@
 
 - name: set jboss_eap_locate_jboss_modules_jar fact
   set_fact:
-    jboss_eap_locate_jboss_modules_jar: '{{ internal_jboss_eap_locate_jboss_modules_jar }}'
+    jboss_eap_locate_jboss_modules_jar: "{{ internal_jboss_eap_locate_jboss_modules_jar }}"
   ignore_errors: yes
 
 - name: use find to look for jboss-modules.jar
@@ -38,7 +38,7 @@
 
 - name: set jboss_eap_find_jboss_modules_jar fact
   set_fact:
-    jboss_eap_find_jboss_modules_jar: '{{ internal_jboss_eap_find_jboss_modules_jar }}'
+    jboss_eap_find_jboss_modules_jar: "{{ internal_jboss_eap_find_jboss_modules_jar }}"
   ignore_errors: yes
 
 # Combine the outputs of the above into a single fact
@@ -64,7 +64,7 @@
 
 - name: set eap_home_ls fact
   set_fact:
-    eap_home_ls: '{{ internal_eap_home_ls }}'
+    eap_home_ls: "{{ internal_eap_home_ls }}"
   ignore_errors: yes
 
 - name: get version.txt from EAP_HOME candidates
@@ -77,7 +77,7 @@
 
 - name: set eap_home_version_txt fact
   set_fact:
-    eap_home_version_txt: '{{ internal_eap_home_version_txt }}'
+    eap_home_version_txt: "{{ internal_eap_home_version_txt }}"
   ignore_errors: yes
 
 - name: get README.txt from EAP_HOME candidates
@@ -90,7 +90,7 @@
 
 - name: set eap_home_readme_txt fact
   set_fact:
-    eap_home_readme_txt: '{{ internal_eap_home_readme_txt }}'
+    eap_home_readme_txt: "{{ internal_eap_home_readme_txt }}"
   ignore_errors: yes
 
 # The unzip and java -version tasks both get the same information, but
@@ -107,7 +107,7 @@
 
 - name: set eap_home_jboss_modules_manifest fact
   set_fact:
-    eap_home_jboss_modules_manifest: '{{ internal_eap_home_jboss_modules_manifest }}'
+    eap_home_jboss_modules_manifest: "{{ internal_eap_home_jboss_modules_manifest }}"
   ignore_errors: yes
 
 - name: get jboss-modules.jar version
@@ -120,7 +120,7 @@
 
 - name: set eap_home_jboss_modules_version fact
   set_fact:
-    eap_home_jboss_modules_version: '{{ internal_eap_home_jboss_modules_version }}'
+    eap_home_jboss_modules_version: "{{ internal_eap_home_jboss_modules_version }}"
   ignore_errors: yes
 
 # Look for fuse inside EAP_HOME directories
@@ -135,7 +135,7 @@
 
 - name: set eap_home_bin fact
   set_fact:
-    eap_home_bin: '{{ internal_eap_home_bin }}'
+    eap_home_bin: "{{ internal_eap_home_bin }}"
   ignore_errors: yes
 
 - name: check JBoss layers.conf
@@ -148,7 +148,7 @@
 
 - name: set eap_home_layers_conf fact
   set_fact:
-    eap_home_layers_conf: '{{ internal_eap_home_layers_conf }}'
+    eap_home_layers_conf: "{{ internal_eap_home_layers_conf }}"
   ignore_errors: yes
 
 - name: check JBoss modules/system/layers
@@ -161,7 +161,7 @@
 
 - name: set eap_home_layers fact
   set_fact:
-    eap_home_layers: '{{ internal_eap_home_layers }}'
+    eap_home_layers: "{{ internal_eap_home_layers }}"
   ignore_errors: yes
 
 # Tests that can indicate the presence of EAP, but don't let us
@@ -195,7 +195,7 @@
 
 - name: set jboss_eap_common_files fact
   set_fact:
-    jboss_eap_common_files: '{{ internal_jboss_eap_common_files }}'
+    jboss_eap_common_files: "{{ internal_jboss_eap_common_files }}"
   ignore_errors: yes
 
 - name: gather jboss.processes
@@ -206,7 +206,7 @@
 
 - name: set jboss_processes fact
   set_fact:
-    jboss_processes: '{{ internal_jboss_processes }}'
+    jboss_processes: "{{ internal_jboss_processes }}"
   ignore_errors: yes
 
 - name: check for jboss packages
@@ -217,7 +217,7 @@
 
 - name: set jboss_eap_packages fact
   set_fact:
-    jboss_eap_packages: '{{ internal_jboss_eap_packages }}'
+    jboss_eap_packages: "{{ internal_jboss_eap_packages }}"
   ignore_errors: yes
 
 - name: check for user 'jboss'
@@ -228,7 +228,7 @@
 
 - name: set jboss_eap_id_jboss fact
   set_fact:
-    jboss_eap_id_jboss: '{{ internal_jboss_eap_id_jboss }}'
+    jboss_eap_id_jboss: "{{ internal_jboss_eap_id_jboss }}"
   ignore_errors: yes
 
 - name: look for jboss systemd service
@@ -240,7 +240,7 @@
 
 - name: set jboss_eap_systemctl_unit_files fact
   set_fact:
-    jboss_eap_systemctl_unit_files: '{{ internal_jboss_eap_systemctl_unit_files }}'
+    jboss_eap_systemctl_unit_files: "{{ internal_jboss_eap_systemctl_unit_files }}"
   ignore_errors: yes
 
 - name: look for jboss in chkconfig
@@ -252,7 +252,7 @@
 
 - name: set jboss_eap_chkconfig fact
   set_fact:
-    jboss_eap_chkconfig: '{{ internal_jboss_eap_chkconfig }}'
+    jboss_eap_chkconfig: "{{ internal_jboss_eap_chkconfig }}"
   ignore_errors: yes
 
 # Scan linux systems for JBoss EAP or Wildfly Installations
@@ -265,7 +265,7 @@
 
 - name: set jboss_eap_jar_ver fact
   set_fact:
-    jboss_eap_jar_ver: '{{ internal_jboss_eap_jar_ver }}'
+    jboss_eap_jar_ver: "{{ internal_jboss_eap_jar_ver }}"
   ignore_errors: yes
 
 - name: Gather jboss.eap.run-jar-ver
@@ -277,7 +277,7 @@
 
 - name: set jboss_eap_run_jar_ver fact
   set_fact:
-    jboss_eap_run_jar_ver: '{{ internal_jboss_eap_run_jar_ver }}'
+    jboss_eap_run_jar_ver: "{{ internal_jboss_eap_run_jar_ver }}"
   ignore_errors: yes
 
 - name: check for activemq version on eap
@@ -290,7 +290,7 @@
 
 - name: set jboss_fuse_on_eap_activemq_ver fact
   set_fact:
-    jboss_fuse_on_eap_activemq_ver: '{{ internal_jboss_fuse_on_eap_activemq_ver }}'
+    jboss_fuse_on_eap_activemq_ver: "{{ internal_jboss_fuse_on_eap_activemq_ver }}"
   ignore_errors: yes
 
 - name: check modules/system/layers/fuse/org/apache/camel/core/main/ for camel version
@@ -303,7 +303,7 @@
 
 - name: set jboss_fuse_on_eap_camel_ver fact
   set_fact:
-    jboss_fuse_on_eap_camel_ver: '{{ internal_jboss_fuse_on_eap_camel_ver }}'
+    jboss_fuse_on_eap_camel_ver: "{{ internal_jboss_fuse_on_eap_camel_ver }}"
   ignore_errors: yes
 
 - name: check modules/system/layers/base/org/apache/cxf/impl/main for cxf-rt version
@@ -316,5 +316,5 @@
 
 - name: set jboss_fuse_on_eap_cxf_ver fact
   set_fact:
-    jboss_fuse_on_eap_cxf_ver: '{{ internal_jboss_fuse_on_eap_cxf_ver }}'
+    jboss_fuse_on_eap_cxf_ver: "{{ internal_jboss_fuse_on_eap_cxf_ver }}"
   ignore_errors: yes

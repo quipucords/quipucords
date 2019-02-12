@@ -34,7 +34,7 @@
 
 - name: set karaf_running_process fact 
   set_fact:
-    karaf_running_processes: '{{ internal_karaf_running_processes }}'
+    karaf_running_processes: "{{ internal_karaf_running_processes }}"
   ignore_errors: yes
 
 - name: Use locate to look for karaf.jar
@@ -52,7 +52,7 @@
 
 - name: set karaf_locate_karaf_jar fact 
   set_fact:
-    karaf_locate_karaf_jar: '{{ internal_karaf_locate_karaf_jar }}'
+    karaf_locate_karaf_jar: "{{ internal_karaf_locate_karaf_jar }}"
   ignore_errors: yes
 
 - name: Use find to look for karaf.jar
@@ -64,7 +64,7 @@
 
 - name: set karaf_find_karaf_jar fact 
   set_fact:
-    karaf_find_karaf_jar: '{{ internal_karaf_find_karaf_jar }}'
+    karaf_find_karaf_jar: "{{ internal_karaf_find_karaf_jar }}"
   ignore_errors: yes
 
 # Combine the outputs of the above into a single fact
@@ -73,8 +73,8 @@
   set_fact:
       karaf_homes: "{{
           (internal_karaf_running_processes.get('stdout_lines', []) +
-            internal_karaf_locate_karaf_jar.get('stdout_lines', []) +
-            internal_karaf_find_karaf_jar.get('stdout_lines', []))|difference(['']) | unique }}"
+           internal_karaf_locate_karaf_jar.get('stdout_lines', []) +
+           internal_karaf_find_karaf_jar.get('stdout_lines', []))|difference(['']) | unique }}"
   ignore_errors: yes
   when: 'jboss_fuse'
 
@@ -90,7 +90,7 @@
 
 - name: set karaf_home_bin_fuse fact 
   set_fact:
-    karaf_home_bin_fuse: '{{ internal_karaf_home_bin_fuse }}'
+    karaf_home_bin_fuse: "{{ internal_karaf_home_bin_fuse }}"
   ignore_errors: yes
 
 - name: check system/org/jboss/fuse
@@ -103,7 +103,7 @@
 
 - name: set karaf_home_system_org_jboss fact 
   set_fact:
-    karaf_home_system_org_jboss: '{{ internal_karaf_home_system_org_jboss }}'
+    karaf_home_system_org_jboss: "{{ internal_karaf_home_system_org_jboss }}"
   ignore_errors: yes
 
 # Tests that can indicate the presence of Fuse, but can't tell us the
@@ -118,7 +118,7 @@
 
 - name: set jboss_fuse_systemctl_unit_files fact 
   set_fact:
-    jboss_fuse_systemctl_unit_files: '{{ internal_jboss_fuse_systemctl_unit_files }}'
+    jboss_fuse_systemctl_unit_files: "{{ internal_jboss_fuse_systemctl_unit_files }}"
   ignore_errors: yes
 
 - name: look for fuse in chkconfig
@@ -130,7 +130,7 @@
 
 - name: set jboss_fuse_chkconfig fact 
   set_fact:
-    jboss_fuse_chkconfig: '{{ internal_jboss_fuse_chkconfig }}'
+    jboss_fuse_chkconfig: "{{ internal_jboss_fuse_chkconfig }}"
   ignore_errors: yes
 
 - name: Use locate to look for camel-ver
@@ -142,7 +142,7 @@
 
 - name: set jboss_fuse_camel_ver fact 
   set_fact:
-    jboss_fuse_camel_ver: '{{ internal_jboss_fuse_camel_ver }}'
+    jboss_fuse_camel_ver: "{{ internal_jboss_fuse_camel_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/camel/camel-core for camel-ver
@@ -155,7 +155,7 @@
 
 - name: set jboss_fuse_on_karaf_camel_ver fact 
   set_fact:
-    jboss_fuse_on_karaf_camel_ver: '{{ internal_jboss_fuse_on_karaf_camel_ver }}'
+    jboss_fuse_on_karaf_camel_ver: "{{ internal_jboss_fuse_on_karaf_camel_ver }}"
   ignore_errors: yes
 
 - name: set the camel-ver fact
@@ -175,7 +175,7 @@
 
 - name: set jboss_fuse_activemq_ver fact 
   set_fact:
-    jboss_fuse_activemq_ver: '{{ internal_jboss_fuse_activemq_ver }}'
+    jboss_fuse_activemq_ver: "{{ internal_jboss_fuse_activemq_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/activemq/activemq-camel for activemq-ver
@@ -188,7 +188,7 @@
 
 - name: set jboss_fuse_on_karaf_activemq_ver fact 
   set_fact:
-    jboss_fuse_on_karaf_activemq_ver: '{{ internal_jboss_fuse_on_karaf_activemq_ver }}'
+    jboss_fuse_on_karaf_activemq_ver: "{{ internal_jboss_fuse_on_karaf_activemq_ver }}"
   ignore_errors: yes
 
 - name: set the activemq-version fact
@@ -208,7 +208,7 @@
 
 - name: set jboss_fuse_cxf_ver fact 
   set_fact:
-    jboss_fuse_cxf_ver: '{{ internal_jboss_fuse_cxf_ver }}'
+    jboss_fuse_cxf_ver: "{{ internal_jboss_fuse_cxf_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
@@ -221,7 +221,7 @@
 
 - name: set jboss_fuse_on_karaf_cxf_ver fact 
   set_fact:
-    jboss_fuse_on_karaf_cxf_ver: '{{ internal_jboss_fuse_on_karaf_cxf_ver }}'
+    jboss_fuse_on_karaf_cxf_ver: "{{ internal_jboss_fuse_on_karaf_cxf_ver }}"
   ignore_errors: yes
 
 - name: set the cxf-rt fact
