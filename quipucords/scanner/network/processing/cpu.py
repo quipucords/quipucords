@@ -82,8 +82,8 @@ class ProcessCpuSocketCount(process.Processor):
     """Process the cpu socket count."""
 
     KEY = 'cpu_socket_count'
-    DEPS = ['internal_cpu_socket_count_dmi_cmd',
-            'internal_cpu_socket_count_cpuinfo_cmd',
+    DEPS = ['internal_cpu_socket_count_dmi',
+            'internal_cpu_socket_count_cpuinfo',
             'cpu_count']
     REQUIRE_DEPS = False
 
@@ -92,7 +92,7 @@ class ProcessCpuSocketCount(process.Processor):
         """Return the correct value for cpu_socket_count output."""
         # process the internal dmi cpu socket count result
         dmi_cpu_socket_count = \
-            dependencies.get('internal_cpu_socket_count_dmi_cmd')
+            dependencies.get('internal_cpu_socket_count_dmi')
         if dmi_cpu_socket_count and dmi_cpu_socket_count.get('rc') == 0:
             dmi_status = dmi_cpu_socket_count.get('stdout_lines')
             dmi_count = 0
@@ -104,7 +104,7 @@ class ProcessCpuSocketCount(process.Processor):
 
         # process the cpuinfo socket count as a fallback
         cpuinfo_cpu_socket_count = \
-            dependencies.get('internal_cpu_socket_count_cpuinfo_cmd')
+            dependencies.get('internal_cpu_socket_count_cpuinfo')
         if cpuinfo_cpu_socket_count and \
                 cpuinfo_cpu_socket_count.get('rc') == 0 and \
                 cpuinfo_cpu_socket_count.get('stdout_lines'):

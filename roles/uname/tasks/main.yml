@@ -4,62 +4,62 @@
   set_fact:
     internal_host_started_processing_role: "uname"
 
-- name: gather uname.os fact
+- name: gather internal_uname_os fact
   raw: uname -s
-  register: uname_os
+  register: internal_uname_os
   ignore_errors: yes
 
 - name: add uname.os to dictionary
   set_fact:
-    uname_os: "{{ uname_os | json_query('stdout_lines[0]') | default('') }}"
+    uname_os: "{{ internal_uname_os | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes
 
-- name: gather uname.hostname fact
+- name: gather internal_uname_hostname fact
   raw: uname -n
-  register: uname_hostname
+  register: internal_uname_hostname
   ignore_errors: yes
 
 - name: add uname.hostname to dictionary
   set_fact:
-    uname_hostname: "{{ uname_hostname | json_query('stdout_lines[0]') | default('') }}"
+    uname_hostname: "{{ internal_uname_hostname | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes
 
-- name: gather uname.processor fact
+- name: gather internal_uname_processor fact
   raw: uname -p
-  register: uname_processor
+  register: internal_uname_processor
   ignore_errors: yes
 
-- name: add uname.processor to dictionary
+- name: add uname_processor to dictionary
   set_fact:
-    uname_processor: "{{ uname_processor | json_query('stdout_lines[0]') | default('') }}"
+    uname_processor: "{{ internal_uname_processor | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes
 
-- name: gather uname.kernel fact
+- name: gather internal_uname_kernel fact
   raw: uname -r
-  register: uname_kernel
+  register: internal_uname_kernel
   ignore_errors: yes
 
 - name: add uname.kernel to dictionary
   set_fact:
-    uname_kernel: "{{ uname_kernel | json_query('stdout_lines[0]') | default('') }}"
+    uname_kernel: "{{ internal_uname_kernel | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes
 
-- name: gather uname.all fact
+- name: gather internal_uname_all fact
   raw: uname -a
-  register: uname_all
+  register: internal_uname_all
   ignore_errors: yes
 
 - name: add uname.all to dictionary
   set_fact:
-    uname_all: "{{ uname_all | json_query('stdout_lines[0]') | default('') }}"
+    uname_all: "{{ internal_uname_all | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes
 
-- name: gather uname.hardware_platform fact
+- name: gather internal_uname_hardware_platform fact
   raw: uname -i
-  register: uname_hardware_platform
+  register: internal_uname_hardware_platform
   ignore_errors: yes
 
 - name: add uname.hardware_platform to dictionary
   set_fact:
-    uname_hardware_platform: "{{ uname_hardware_platform | json_query('stdout_lines[0]') | default('') }}"
+    uname_hardware_platform: "{{ internal_uname_hardware_platform | json_query('stdout_lines[0]') | default('') }}"
   ignore_errors: yes

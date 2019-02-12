@@ -48,39 +48,64 @@
 
 - name: get version.txt from EAP_HOME candidates
   raw: cat '{{ item }}/version.txt' 2>/dev/null
-  register: eap5_home_version_txt
+  register: internal_eap5_home_version_txt
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'jboss_eap'
+
+- name: set eap5_home_version_txt fact
+  set_fact:
+    eap5_home_version_txt: "{{ internal_eap5_home_version_txt }}"
+  ignore_errors: yes
 
 - name: get readme.html from EAP_HOME candidates
   raw: cat '{{ item }}/readme.html' 2>/dev/null
-  register: eap5_home_readme_html
+  register: internal_eap5_home_readme_html
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'jboss_eap'
+
+- name: set eap5_home_readme_html fact
+  set_fact:
+    eap5_home_readme_html: "{{ internal_eap5_home_readme_html }}"
+  ignore_errors: yes
 
 - name: ls EAP_HOME/jboss-as
   raw: ls -1 '{{ item }}/jboss-as' 2>/dev/null
-  register: eap5_home_ls_jboss_as
+  register: internal_eap5_home_ls_jboss_as
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'jboss_eap'
 
+- name: set eap5_home_ls_jboss_as fact
+  set_fact:
+    eap5_home_ls_jboss_as: "{{ internal_eap5_home_ls_jboss_as }}"
+  ignore_errors: yes
+
 - name: EAP_HOME/jboss-as/bin/run.jar
   raw: java -jar '{{ item }}/jboss-as/bin/run.jar' --version
-  register: eap5_home_run_jar_version
+  register: internal_eap5_home_run_jar_version
   ignore_errors: yes
   become: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'user_has_sudo and internal_have_java and jboss_eap'
 
+- name: set eap5_home_run_jar_version fact
+  set_fact:
+    eap5_home_run_jar_version: "{{ internal_eap5_home_run_jar_version }}"
+  ignore_errors: yes
+
 # This is similar to the previous command, but works even when the EAP
 # installation is broken.
 - name: run.jar manifest
   raw: unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
-  register: eap5_home_run_jar_manifest
+  register: internal_eap5_home_run_jar_manifest
   ignore_errors: yes
   become: yes
   with_items: "{{ eap5_home_candidates }}"
   when: 'user_has_sudo and jboss_eap'
+
+- name: set eap5_home_run_jar_manifest fact
+  set_fact:
+    eap5_home_run_jar_manifest: "{{ internal_eap5_home_run_jar_manifest }}"
+  ignore_errors: yes

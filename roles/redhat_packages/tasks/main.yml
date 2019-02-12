@@ -21,13 +21,13 @@
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
   raw: rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" 2> /dev/null | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
-  register: redhat_packages_gpg_num_rh_packages
+  register: internal_redhat_packages_gpg_num_rh_packages
   ignore_errors: yes
   when: internal_have_rpm
 
 - name: set fact of number of installed red hat packages filtered by gpg keys
   set_fact:
-    redhat_packages_gpg_num_rh_packages: '{{ redhat_packages_gpg_num_rh_packages | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_num_rh_packages: '{{ internal_redhat_packages_gpg_num_rh_packages | json_query("stdout_lines[0]") }}'
   ignore_errors: yes
 
 - name: gather total number of installed packages
@@ -43,40 +43,50 @@
 
 - name: gather the last installed red hat package filtered by gpg keys
   raw: rpm -qa --qf "%{INSTALLTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
-  register: redhat_packages_gpg_last_installed
+  register: internal_redhat_packages_gpg_last_installed
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: set fact of last installed rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_installed: '{{ redhat_packages_gpg_last_installed | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_last_installed: '{{ internal_redhat_packages_gpg_last_installed | json_query("stdout_lines[0]") }}'
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather the last built red hat package filtered by gpg keys
   raw: rpm -qa --qf "%{BUILDTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
-  register: redhat_packages_gpg_last_built
+  register: internal_redhat_packages_gpg_last_built
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: set fact of last built rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_built: '{{ redhat_packages_gpg_last_built | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_last_built: '{{ internal_redhat_packages_gpg_last_built | json_query("stdout_lines[0]") }}'
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather redhat-packages.certs fact
   raw: ls /etc/pki/product/ /etc/pki/product-default/ 2> /dev/null |grep '.pem' | sort -u | tr '\n' ';'
-  register: redhat_packages_certs
+  register: internal_redhat_packages_certs
+  ignore_errors: yes
+
+- name: set redhat_packages_certs fact
+  set_fact:
+    redhat_packages_certs: "{{ internal_redhat_packages_certs }}"
   ignore_errors: yes
 
 - name: gather enabled repositories
   raw: yum repolist enabled 2> /dev/null
-  register: yum_enabled_repolist
+  register: internal_yum_enabled_repolist
   become: yes
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_yum'
+
+- name: set yum_enabled_repolist fact
+  set_fact:
+    yum_enabled_repolist: "{{ internal_yum_enabled_repolist }}"
+  ignore_errors: yes

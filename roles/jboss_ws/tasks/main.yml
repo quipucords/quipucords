@@ -57,28 +57,48 @@
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
   raw: yum grouplist jws3 jws3plus jws5 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'
-  register: jws_installed_with_rpm
+  register: internal_jws_installed_with_rpm
   ignore_errors: yes
   when: 'jboss_ws'
+
+- name: set jws_installed_with_rpm fact
+  set_fact:
+    jws_installed_with_rpm: "{{internal_jws_installed_with_rpm}}"
+  ignore_errors: yes
 
   # If tomcat was installed with a Redhat product, a 'redhat' string can be found in certain files
 - name: determine if tomcat is installed from upstream or as part of redhat product
   raw: \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo False || echo True
-  register: tomcat_is_part_of_redhat_product
+  register: internal_tomcat_is_part_of_redhat_product
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'
+
+- name: set tomcat_is_part_of_redhat_product fact
+  set_fact:
+    tomcat_is_part_of_redhat_product: "{{internal_tomcat_is_part_of_redhat_product}}"
+  ignore_errors: yes
 
 - name: see if JBossEULA.txt exists
   raw: if [ -f "{{ jws_home }}"/JBossEULA.txt ]; then FOUND="true"; else FOUND="false"; fi; echo ${FOUND}
-  register: jws_has_eula_txt_file
+  register: internal_jws_has_eula_txt_file
   ignore_errors: yes
   when: 'jws_home is defined and jboss_ws'
 
+- name: set jws_has_eula_txt_file fact
+  set_fact:
+    jws_has_eula_txt_file: "{{internal_jws_has_eula_txt_file}}"
+  ignore_errors: yes
+
 - name: check for jws cert
   raw: ls /etc/pki/product/185.pem /etc/pki/product-default/185.pem 2>/dev/null | sort -u 
-  register: jws_has_cert
+  register: internal_jws_has_cert
   ignore_errors: yes
   when: 'jboss_ws'
+
+- name: set jws_has_cert fact
+  set_fact:
+    jws_has_cert: "{{internal_jws_has_cert}}"
+  ignore_errors: yes
 
 # ------------------------------ FIND JWS VERSION -----------------------------
 
