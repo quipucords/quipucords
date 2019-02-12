@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fulfilled types GET_MERGE_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+    },
+    "report": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "reports": Array [],
+    },
+  },
+  "type": "GET_MERGE_REPORT_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "report": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "reports": Object {
+        "test": "success",
+      },
+    },
+  },
+  "type": "GET_REPORT_FULFILLED",
+}
+`;
+
+exports[`pending types GET_MERGE_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+    },
+    "report": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "reports": Array [],
+    },
+  },
+  "type": "GET_MERGE_REPORT_PENDING",
+}
+`;
+
+exports[`pending types GET_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "report": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "reports": Array [],
+    },
+  },
+  "type": "GET_REPORT_PENDING",
+}
+`;
+
+exports[`rejected types GET_MERGE_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "report": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "reports": Array [],
+    },
+  },
+  "type": "GET_MERGE_REPORT_REJECTED",
+}
+`;
+
+exports[`rejected types GET_REPORT 1`] = `
+Object {
+  "result": Object {
+    "merge": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+    },
+    "report": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "reports": Array [],
+    },
+  },
+  "type": "GET_REPORT_REJECTED",
+}
+`;

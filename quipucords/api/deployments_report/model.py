@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -45,8 +45,9 @@ class DeploymentsReport(models.Model):
         default=STATUS_PENDING
     )
     report_id = models.IntegerField(null=True)
-    cached_json = models.TextField(null=True)
+    cached_fingerprints = models.TextField(null=True)
     cached_csv = models.TextField(null=True)
+    cached_insights = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""
@@ -84,6 +85,8 @@ class SystemFingerprint(models.Model):
     # Scan information
     deployment_report = models.ForeignKey(
         DeploymentsReport, models.CASCADE, related_name='system_fingerprints')
+
+    system_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)

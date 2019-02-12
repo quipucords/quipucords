@@ -1,12 +1,18 @@
 import axios from 'axios';
+import serviceConfig from './config';
 
-class StatusService {
-  static getStatus() {
-    return axios({
-      url: process.env.REACT_APP_STATUS_SERVICE,
-      timeout: process.env.REACT_APP_AJAX_TIMEOUT
-    });
-  }
-}
+const getStatus = () =>
+  axios(
+    serviceConfig(
+      {
+        url: process.env.REACT_APP_STATUS_SERVICE
+      },
+      false
+    )
+  );
 
-export default StatusService;
+const statusService = {
+  getStatus
+};
+
+export { statusService as default, statusService, getStatus };

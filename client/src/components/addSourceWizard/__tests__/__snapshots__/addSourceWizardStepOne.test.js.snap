@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`connected 1`] = `
+<Form
+  bsClass="form"
+  componentClass="form"
+  horizontal={true}
+  inline={false}
+>
+  <h3
+    className="right-aligned_basic-form"
+  >
+    Select source type
+  </h3>
+  <FormGroup
+    bsClass="form-group"
+    validationState={null}
+  >
+    <Radio
+      bsClass="radio"
+      checked={true}
+      disabled={false}
+      inline={false}
+      name="sourceType"
+      onChange={[Function]}
+      title=""
+      value="network"
+    >
+      Network Range
+    </Radio>
+    <Radio
+      bsClass="radio"
+      checked={false}
+      disabled={false}
+      inline={false}
+      name="sourceType"
+      onChange={[Function]}
+      title=""
+      value="satellite"
+    >
+      Satellite
+    </Radio>
+    <Radio
+      bsClass="radio"
+      checked={false}
+      disabled={false}
+      inline={false}
+      name="sourceType"
+      onChange={[Function]}
+      title=""
+      value="vcenter"
+    >
+      vCenter Server
+    </Radio>
+  </FormGroup>
+</Form>
+`;

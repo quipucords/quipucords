@@ -103,9 +103,14 @@
   when: 'internal_have_subscription_manager and "stdout" in internal_subman_facts_file_lines'
 
 # subman_consumed fact
-- name: gather subman.consumed fact
+- name: gather internal_subman_consumed
   raw: subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
-  register: subman_consumed
+  register: internal_subman_consumed
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_subscription_manager'
+
+- name: set subman_consumed fact
+  set_fact:
+    subman_consumed: "{{internal_subman_consumed}}"
+  ignore_errors: yes

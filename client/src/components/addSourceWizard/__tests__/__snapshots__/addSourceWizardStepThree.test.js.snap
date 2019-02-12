@@ -1,0 +1,238 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`connected 1`] = `
+<AddSourceWizardStepThree
+  dispatch={[Function]}
+  view={
+    Object {
+      "error": true,
+      "errorMessage": "Lorem ipsum",
+      "source": Object {},
+    }
+  }
+/>
+`;
+
+exports[`error created 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": true,
+      "error": true,
+      "errorMessage": "lorem ipsum",
+    }
+  }
+>
+  <div
+    className="wizard-pf-complete blank-slate-pf"
+  >
+    <div
+      className="wizard-pf-success-icon"
+    >
+      <span
+        className="pficon pficon-error-circle-o"
+      />
+    </div>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      Error 
+      Creating
+       Source
+    </h3>
+    <p
+      className="blank-slate-pf-secondary-action"
+    >
+      lorem ipsum
+    </p>
+  </div>
+</AddSourceWizardStepThree>
+`;
+
+exports[`error updated 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": false,
+      "error": true,
+      "errorMessage": "lorem ipsum",
+    }
+  }
+>
+  <div
+    className="wizard-pf-complete blank-slate-pf"
+  >
+    <div
+      className="wizard-pf-success-icon"
+    >
+      <span
+        className="pficon pficon-error-circle-o"
+      />
+    </div>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      Error 
+      Updating
+       Source
+    </h3>
+    <p
+      className="blank-slate-pf-secondary-action"
+    >
+      lorem ipsum
+    </p>
+  </div>
+</AddSourceWizardStepThree>
+`;
+
+exports[`fulfilled created 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": true,
+      "fulfilled": true,
+      "source": Object {
+        "name": "Lorem",
+      },
+    }
+  }
+>
+  <div
+    className="wizard-pf-complete blank-slate-pf"
+  >
+    <div
+      className="wizard-pf-success-icon"
+    >
+      <span
+        className="glyphicon glyphicon-ok-circle"
+      />
+    </div>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      <strong>
+        Lorem
+      </strong>
+       was 
+      created
+      .
+    </h3>
+  </div>
+</AddSourceWizardStepThree>
+`;
+
+exports[`fulfilled updated 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": false,
+      "fulfilled": true,
+      "source": Object {
+        "name": "Lorem",
+      },
+    }
+  }
+>
+  <div
+    className="wizard-pf-complete blank-slate-pf"
+  >
+    <div
+      className="wizard-pf-success-icon"
+    >
+      <span
+        className="glyphicon glyphicon-ok-circle"
+      />
+    </div>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      <strong>
+        Lorem
+      </strong>
+       was 
+      updated
+      .
+    </h3>
+  </div>
+</AddSourceWizardStepThree>
+`;
+
+exports[`pending created 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": true,
+      "pending": true,
+    }
+  }
+>
+  <div
+    className="wizard-pf-process blank-slate-pf"
+  >
+    <Spinner
+      className="blank-slate-pf-icon"
+      inline={false}
+      inverse={false}
+      loading={true}
+      size="lg"
+    >
+      <div
+        className="blank-slate-pf-icon spinner spinner-lg"
+      />
+    </Spinner>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      Creating
+       Source...
+    </h3>
+    <p
+      className="blank-slate-pf-secondary-action"
+    >
+      Please wait while source is being 
+      created
+      .
+    </p>
+  </div>
+</AddSourceWizardStepThree>
+`;
+
+exports[`pending updated 1`] = `
+<AddSourceWizardStepThree
+  view={
+    Object {
+      "add": false,
+      "pending": true,
+    }
+  }
+>
+  <div
+    className="wizard-pf-process blank-slate-pf"
+  >
+    <Spinner
+      className="blank-slate-pf-icon"
+      inline={false}
+      inverse={false}
+      loading={true}
+      size="lg"
+    >
+      <div
+        className="blank-slate-pf-icon spinner spinner-lg"
+      />
+    </Spinner>
+    <h3
+      className="blank-slate-pf-main-action"
+    >
+      Updating
+       Source...
+    </h3>
+    <p
+      className="blank-slate-pf-secondary-action"
+    >
+      Please wait while source is being 
+      updated
+      .
+    </p>
+  </div>
+</AddSourceWizardStepThree>
+`;

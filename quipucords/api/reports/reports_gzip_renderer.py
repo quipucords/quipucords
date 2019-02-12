@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -44,6 +44,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         # Collect Json Data
         details_json = reports_dict.get('details_json')
         deployments_json = reports_dict.get('deployments_json')
+        insights_json = reports_dict.get('insights_json')
         if any(value is None for value in [report_id,
                                            details_json,
                                            deployments_json]):
@@ -52,6 +53,9 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         files_data[details_name] = details_json
         deployments_name = create_filename('deployments', 'json', report_id)
         files_data[deployments_name] = deployments_json
+        if insights_json:
+            insights_name = create_filename('insights', 'json', report_id)
+            files_data[insights_name] = insights_json
         # Collect CSV Data
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)

@@ -1,0 +1,208 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fulfilled types DELETE_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETE_SOURCE_FULFILLED",
+}
+`;
+
+exports[`fulfilled types DELETES_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETES_SOURCE_FULFILLED",
+}
+`;
+
+exports[`fulfilled types GET_SOURCES 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": true,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "GET_SOURCES_FULFILLED",
+}
+`;
+
+exports[`pending types DELETE_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETE_SOURCE_PENDING",
+}
+`;
+
+exports[`pending types DELETES_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETES_SOURCE_PENDING",
+}
+`;
+
+exports[`pending types GET_SOURCES 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": true,
+      "sources": Array [],
+    },
+  },
+  "type": "GET_SOURCES_PENDING",
+}
+`;
+
+exports[`rejected types DELETE_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETE_SOURCE_REJECTED",
+}
+`;
+
+exports[`rejected types DELETES_SOURCE 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": true,
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "DELETES_SOURCE_REJECTED",
+}
+`;
+
+exports[`rejected types GET_SOURCES 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "delete": false,
+      "error": false,
+      "errorMessage": "",
+      "fulfilled": false,
+      "pending": false,
+      "sourceId": "",
+    },
+    "view": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "fulfilled": false,
+      "pending": false,
+      "sources": Array [],
+    },
+  },
+  "type": "GET_SOURCES_REJECTED",
+}
+`;

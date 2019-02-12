@@ -118,7 +118,7 @@
   become: true
   when: find_qpc_rpm_local.stat.exists == true
 
-- name: Add QPC repository (RHEL/CentOS 7)
+- name: Add QPC repository
   get_url:
     url: "{{ qpc_repo_url }}"
     dest: '/etc/yum.repos.d/{{ qpc_repo_file }}'

@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fulfilled types ADD_FACTS 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "error": false,
+      "errorMessage": "",
+      "facts": Object {
+        "test": "success",
+      },
+      "fulfilled": true,
+      "pending": false,
+    },
+  },
+  "type": "ADD_FACTS_FULFILLED",
+}
+`;
+
+exports[`pending types ADD_FACTS 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "error": false,
+      "errorMessage": "",
+      "facts": Object {},
+      "fulfilled": false,
+      "pending": true,
+    },
+  },
+  "type": "ADD_FACTS_PENDING",
+}
+`;
+
+exports[`rejected types ADD_FACTS 1`] = `
+Object {
+  "result": Object {
+    "update": Object {
+      "error": true,
+      "errorMessage": "ERROR",
+      "facts": Object {},
+      "fulfilled": false,
+      "pending": false,
+    },
+  },
+  "type": "ADD_FACTS_REJECTED",
+}
+`;

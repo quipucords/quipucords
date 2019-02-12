@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -107,7 +107,11 @@ def create_deployments_csv(deployments_report_dict):
 
     headers = csv_helper.generate_headers(
         systems_list,
-        exclude={'id', 'report_id', 'metadata', 'deployment_report'})
+        exclude={'id',
+                 'report_id',
+                 'metadata',
+                 'deployment_report',
+                 'system_platform_id'})
     if SOURCES_KEY in headers:
         headers += source_headers
         headers = sorted(list(set(headers)))
