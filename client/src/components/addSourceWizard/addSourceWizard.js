@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button, Icon, Wizard } from 'patternfly-react';
+import { Button, Icon, Wizard } from 'patternfly-react';
 import { connect } from 'react-redux';
 import Store from '../../redux/store';
 import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
@@ -141,65 +141,56 @@ class AddSourceWizard extends React.Component {
     const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
 
     return (
-      <React.Fragment>
-        <Modal show={show} onHide={this.onCancel} dialogClassName="modal-dialog modal-lg wizard-pf quipucords-wizard">
-          <Wizard>
-            <Modal.Header>
-              <button type="button" className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
-                <Icon type="pf" name="close" />
-              </button>
-              <Modal.Title>{edit ? 'Edit' : 'Add'} Source</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="wizard-pf-body clearfix">
-              <Wizard.Steps steps={this.renderWizardSteps()} />
-              <Wizard.Row>
-                <Wizard.Main>
-                  {wizardSteps.map((step, stepIndex) => (
-                    <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
-                      {wizardSteps[stepIndex].page}
-                    </Wizard.Contents>
-                  ))}
-                </Wizard.Main>
-              </Wizard.Row>
-            </Modal.Body>
-            <Modal.Footer className="wizard-pf-footer">
-              <Button
-                bsStyle="default"
-                className="btn-cancel"
-                disabled={activeStepIndex === wizardSteps.length - 1}
-                onClick={this.onCancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                bsStyle="default"
-                disabled={activeStepIndex === 0 || activeStepIndex === wizardSteps.length - 1}
-                onClick={this.onBack}
-              >
-                <Icon type="fa" name="angle-left" />
-                Back
-              </Button>
-              {activeStepIndex < wizardSteps.length - 2 && (
-                <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
-                  Next
-                  <Icon type="fa" name="angle-right" />
-                </Button>
-              )}
-              {activeStepIndex === wizardSteps.length - 2 && (
-                <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onSubmit}>
-                  Save
-                  <Icon type="fa" name="angle-right" />
-                </Button>
-              )}
-              {activeStepIndex === wizardSteps.length - 1 && (
-                <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onCancel}>
-                  Close
-                </Button>
-              )}
-            </Modal.Footer>
-          </Wizard>
-        </Modal>
-      </React.Fragment>
+      <Wizard show={show}>
+        <Wizard.Header onClose={this.onCancel} title={edit ? 'Edit Source' : 'Add Source'} />
+        <Wizard.Body>
+          <Wizard.Steps steps={this.renderWizardSteps()} />
+          <Wizard.Row>
+            <Wizard.Main>
+              {wizardSteps.map((step, stepIndex) => (
+                <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
+                  {wizardSteps[stepIndex].page}
+                </Wizard.Contents>
+              ))}
+            </Wizard.Main>
+          </Wizard.Row>
+        </Wizard.Body>
+        <Wizard.Footer>
+          <Button
+            bsStyle="default"
+            className="btn-cancel"
+            disabled={activeStepIndex === wizardSteps.length - 1}
+            onClick={this.onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            bsStyle="default"
+            disabled={activeStepIndex === 0 || activeStepIndex === wizardSteps.length - 1}
+            onClick={this.onBack}
+          >
+            <Icon type="fa" name="angle-left" />
+            Back
+          </Button>
+          {activeStepIndex < wizardSteps.length - 2 && (
+            <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
+              Next
+              <Icon type="fa" name="angle-right" />
+            </Button>
+          )}
+          {activeStepIndex === wizardSteps.length - 2 && (
+            <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onSubmit}>
+              Save
+              <Icon type="fa" name="angle-right" />
+            </Button>
+          )}
+          {activeStepIndex === wizardSteps.length - 1 && (
+            <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onCancel}>
+              Close
+            </Button>
+          )}
+        </Wizard.Footer>
+      </Wizard>
     );
   }
 }
