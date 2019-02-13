@@ -314,7 +314,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if invalid_hosts:
             self.scan_task.log_message(
                 'The following hosts have no canonical '
-                'facts and will be excluded from the insights '
+                'facts and will be excluded from the Insights '
                 'report: %s' % str(invalid_hosts))
         if not insights_hosts:
             insights_message = 'FAILED to create Insights report id=%d - '\
