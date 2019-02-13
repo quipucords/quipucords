@@ -309,16 +309,16 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         self.scan_task.log_message('END FINGERPRINT PERSISTENCE')
         self.scan_task.log_message(
-            '%d of %d fingerprints valid for Insights.' %
+            '%d of %d hosts valid for Insights.' %
             (insights_valid, number_valid + number_invalid))
         if invalid_hosts:
             self.scan_task.log_message(
-                'The following fingerprints have no canonical '
-                'facts and will be excluded from the insights '
+                'The following hosts have no canonical '
+                'facts and will be excluded from the Insights '
                 'report: %s' % str(invalid_hosts))
         if not insights_hosts:
             insights_message = 'FAILED to create Insights report id=%d - '\
-                'produced no valid fingerprints ' % (
+                'produced no valid hosts ' % (
                     deployment_report.report_id)
             self.scan_task.log_message(insights_message,
                                        log_level=logging.WARN)
