@@ -4,9 +4,14 @@
   set_fact:
     internal_host_started_processing_role: "date"
 
-- name: gather date.date fact
+- name: gather internal_date_date fact
   raw: date
-  register: date_date
+  register: internal_date_date
+  ignore_errors: yes
+
+- name: set date_date fact
+  set_fact:
+    date_date: "{{internal_date_date}}"
   ignore_errors: yes
 
 - name: gather date.anaconda_log fact
@@ -28,20 +33,35 @@
   ignore_errors: yes
   when: '"stdout" not in internal_date_anaconda_log_cmd'
 
-- name: gather date.machine_id fact
+- name: gather internal_date_machine_id fact
   raw: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi
-  register: date_machine_id
+  register: internal_date_machine_id
   ignore_errors: yes
 
-- name: gather date.filesystem_create fact
+- name: set date_machine_id fact
+  set_fact:
+    date_machine_id: "{{internal_date_machine_id}}"
+  ignore_errors: yes
+
+- name: gather internal_date_filesystem_create fact
   raw: fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') 2>/dev/null | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d "$fs_date"; else echo "" ; fi
-  register: date_filesystem_create
+  register: internal_date_filesystem_create
   ignore_errors: yes
   when: 'internal_have_tune2fs'
 
-- name: gather date.yum_history fact
+- name: set date_filesystem_create fact
+  set_fact:
+    date_filesystem_create: "{{internal_date_filesystem_create}}"
+  ignore_errors: yes
+
+- name: gather internal_date_yum_history fact
   raw: yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
-  register: date_yum_history
+  register: internal_date_yum_history
   become: yes
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_yum'
+
+- name: set date_yum_history fact
+  set_fact:
+    date_yum_history: "{{internal_date_yum_history}}"
+  ignore_errors: yes

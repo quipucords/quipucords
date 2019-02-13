@@ -15,7 +15,8 @@ import uuid
 from datetime import datetime
 
 from api.common.common_report import create_report_version
-from api.common.util import (convert_to_boolean,
+from api.common.util import (CANONICAL_FACTS,
+                             convert_to_boolean,
                              convert_to_float,
                              convert_to_int,
                              is_boolean,
@@ -45,7 +46,6 @@ from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
 
 # Keys used to de-duplicate against other network sources
 NETWORK_IDENTIFICATION_KEYS = ['subscription_manager_id',
@@ -175,6 +175,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
+    # pylint: disable=too-many-branches
     def _process_details_report(self, manager_interrupt, details_report):
         """Process the details report.
 
@@ -200,11 +201,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
         date_field = DateField()
         uuid_field = UUIDField()
         final_fingerprint_list = []
+        insights_hosts = {}
+        insights_valid = 0
+        invalid_hosts = []
 
         valid_fact_attributes = {
             field.name for field in SystemFingerprint._meta.get_fields()}
 
         for fingerprint_dict in fingerprints_list:
+            found_canonical_facts = False
             # Remove keys that are not part of SystemFingerprint model
             fingerprint_attributes = set(fingerprint_dict.keys())
             invalid_attributes = fingerprint_attributes - valid_fact_attributes
@@ -245,6 +250,21 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         uuid_field.to_representation(
                             fingerprint_dict.get('system_platform_id'))
                     final_fingerprint_list.append(fingerprint_dict)
+
+                    # Check if fingerprint has canonical facts
+                    for fact in CANONICAL_FACTS:
+                        if fingerprint_dict.get(fact):
+                            found_canonical_facts = True
+                            break
+                    # If canonical facts, add it to the insights_hosts dict
+                    insights_id = fingerprint_dict.get(
+                        'system_platform_id')
+                    if found_canonical_facts:
+                        insights_hosts[insights_id] = fingerprint_dict
+                        insights_valid += 1
+                    else:
+                        invalid_hosts.append(insights_id)
+
                     number_valid += 1
                 except DataError as error:
                     number_invalid += 1
@@ -280,7 +300,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         deployment_report.cached_fingerprints = json.dumps(
             final_fingerprint_list)
         deployment_report.save()
-
         self.scan_task.log_message('RESULTS (report id=%d) -  '
                                    '(valid fingerprints=%d, '
                                    'invalid fingerprints=%d)' %
@@ -289,6 +308,27 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                     number_invalid))
 
         self.scan_task.log_message('END FINGERPRINT PERSISTENCE')
+        self.scan_task.log_message(
+            '%d of %d hosts valid for Insights.' %
+            (insights_valid, number_valid + number_invalid))
+        if invalid_hosts:
+            self.scan_task.log_message(
+                'The following hosts have no canonical '
+                'facts and will be excluded from the Insights '
+                'report: %s' % str(invalid_hosts))
+        if not insights_hosts:
+            insights_message = 'FAILED to create Insights report id=%d - '\
+                'produced no valid hosts ' % (
+                    deployment_report.report_id)
+            self.scan_task.log_message(insights_message,
+                                       log_level=logging.WARN)
+        else:
+            insights_message = 'Insights report id=%d created ' % \
+                               deployment_report.report_id
+            self.scan_task.log_message(insights_message)
+        deployment_report.cached_insights = json.dumps(
+            insights_hosts)
+        deployment_report.save()
 
         return status_message, status
 

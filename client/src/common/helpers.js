@@ -33,7 +33,8 @@ const downloadData = (data = '', fileName = 'download.txt', fileType = 'text/pla
     }
   });
 
-const generateId = prefix => `${prefix || 'generatedid'}-${Math.ceil(1e5 * Math.random())}`;
+const generateId = prefix =>
+  `${prefix || 'generatedid'}-${(process.env.REACT_APP_ENV !== 'test' && Math.ceil(1e5 * Math.random())) || ''}`;
 
 const noop = Function.prototype;
 

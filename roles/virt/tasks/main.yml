@@ -6,29 +6,54 @@
 
 - name: check if privcmd exists
   raw: if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
-  register: internal_xen_privcmd_found
+  register: internal_xen_privcmd_found_cmd
+  ignore_errors: yes
+
+- name: set internal_xen_privcmd_found fact
+  set_fact:
+    internal_xen_privcmd_found: "{{internal_xen_privcmd_found_cmd}}"
   ignore_errors: yes
 
 - name: check if kvm exists
   raw: if [ -e /dev/kvm ]; then echo "Y"; else echo "N"; fi
-  register: internal_kvm_found
+  register: internal_kvm_found_cmd
+  ignore_errors: yes
+
+- name: set internal_kvm_found fact
+  set_fact:
+    internal_kvm_found: "{{internal_kvm_found_cmd}}"
   ignore_errors: yes
 
 - name: check for xen guests
   raw: ps aux | grep xend | grep -v grep | wc -l
-  register: internal_xen_guest
+  register: internal_xen_guest_cmd
+  ignore_errors: yes
+
+- name: set internal_xen_guest fact
+  set_fact:
+    internal_xen_guest: "{{internal_xen_guest_cmd}}"
   ignore_errors: yes
 
 - name: set system manufacturer
   raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
-  register: internal_sys_manufacturer
+  register: internal_sys_manufacturer_cmd
   become: yes
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_dmidecode'
 
+- name: set internal_sys_manufacturer fact
+  set_fact:
+    internal_sys_manufacturer: "{{internal_sys_manufacturer_cmd}}"
+  ignore_errors: yes
+
 - name: check cpu model name for QEMU
   raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
-  register: internal_cpu_model_name_kvm
+  register: internal_cpu_model_name_kvm_cmd
+  ignore_errors: yes
+
+- name: set internal_cpu_model_name_kvm fact
+  set_fact:
+    internal_cpu_model_name_kvm: "{{internal_cpu_model_name_kvm_cmd}}"
   ignore_errors: yes
 
 - name: initialize virt.type
@@ -41,11 +66,16 @@
     virt_virt: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
 
-- name: gather virt.num_guests fact
+- name: gather internal_virt_num_guests fact
   raw: virsh -c qemu:///system --readonly list --all | wc -l
-  register: virt_num_guests
+  register: internal_virt_num_guests
   ignore_errors: yes
   when: 'internal_have_virsh'
+
+- name: set virt_num_guests fact
+  set_fact:
+    virt_num_guests: "{{internal_virt_num_guests}}"
+  ignore_errors: yes
 
 - name: extract output virt.num_guests fact
   set_fact: virt_num_guests="{{ (virt_num_guests | json_query('stdout_lines[0]')) if internal_have_virsh else None }}"

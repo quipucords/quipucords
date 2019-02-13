@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddSourceWizard Component should shallow render a basic component 1`] = `
+exports[`AddSourceWizard Component should not display a wizard 1`] = `null`;
+
+exports[`connected 1`] = `
 <Fragment>
   <Modal
     animation={true}

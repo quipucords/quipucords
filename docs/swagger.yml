@@ -942,13 +942,36 @@ paths:
         200:
           description: "Deployment report for scanned systems retrieved"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/DeploymentsReport"
+            $ref: "#/definitions/DeploymentsReport"
         401:
           description: "Not authorized"
         404:
           description: "Report for report id not found"
+  /reports/{report_id}/insights/:
+    get:
+      tags:
+        - "Report"
+      summary: "Retrieve an insights report for systems scanned"
+      description: "Get insights report for systems that have been scanned"
+      operationId: "getInsightsReport"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "report_id"
+          in: "path"
+          description: "The Report ID to be queried"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Insights report for scanned systems retrieved"
+          schema:
+              $ref: "#/definitions/InsightsReport"
+        401:
+          description: "Not authorized"
+        404:
+          description: "Report for report id not found or could not be created because there were no canonical facts."
   /reports/merge/:
     put:
       tags:
@@ -1353,6 +1376,216 @@ definitions:
           $ref: "#/definitions/SystemFact"
         description: "The facts associated with this source"
         minItems: 1
+  Host:
+    type: "object"
+    properties:
+        id:
+          type: "integer"
+          format: "int64"
+          description: "Host database identifier"
+          example: 15
+        system_platform_id:
+          type: "string"
+          description: "Globally unique uuid for host"
+          example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+        deployment_report:
+            type: "integer"
+            format: "int64"
+            description: "Deployments report identifier"
+            example: 20
+        name:
+          type: "string"
+          description: "The system name"
+          example: "hostname.com"
+        os_name:
+          type: "string"
+          description: "The operating system name"
+          example: "Red Hat Enterprise Linux Server"
+        os_release:
+          type: "string"
+          description: "The operating system release"
+          example: "Red Hat Enterprise Linux Server release 5.9 (Tikanga)"
+        os_version:
+          type: "string"
+          description: "The operating system version"
+          example: "5.9 (Tikanga)"
+        infrastructure_type:
+          type: "string"
+          enum:
+            - virtualized
+            - bare_metal
+            - hypervisor
+            - unknown
+          description: "The infrastructure type"
+        mac_addresses:
+          type: "array"
+          items:
+            type: "string"
+            description: "MAC addresses of system"
+            example: "0B:AA:CC:44:A8:25"
+          description: "The infrastructure type"
+        ip_addresses:
+          type: "array"
+          items:
+            type: "string"
+            description: "IP addresses of system"
+          example: ["192.168.0.1","192.168.0.2"]
+          description: "The infrastructure type"
+        cpu_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpus"
+          example: 8
+        architecture:
+          type: "string"
+          description: "The system architecture"
+          example: "x86_64"
+        bios_uuid:
+          type: "string"
+          description: "The system bios uuid"
+          example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+        insights_client_id:
+          type: "string"
+          description: "The insights client id"
+          example: "b077190b74f14b3582e57ce8243ae356"
+        system_intent_role:
+          type: "string"
+          description: "The system role"
+          example: "server"
+        system_intent_addons:
+          type: "array"
+          items:
+            type: "string"
+            description: "System addon"
+          example: ["addon1","addon2"]
+          description: "System addons"
+        system_intent_sla:
+          type: "string"
+          description: "The system service level agreement"
+          example: "self-service"
+        system_intent_usage_type:
+          type: "string"
+          description: "The system usage type"
+          example: "dev"
+        etc_machine_id:
+          type: "string"
+          description: "The system machine id"
+          example: "b077190b74f14b3582e57ce8243ae356"
+        subscription_manager_id:
+          type: "string"
+          description: "The subscription manager identitifer"
+          example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+        cpu_socket_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpu sockets"
+          example: 2
+        cpu_core_count:
+          type: "integer"
+          format: "int64"
+          description: "The count of cpu cores"
+          example: 4
+        system_creation_date:
+          type: "string"
+          format: "date"
+          description: "The system creation date"
+          example: "2017-07-25"
+        virtualized_type:
+          type: "string"
+          description: "The type of virtualization system"
+          example: "vmware"
+        vm_state:
+          type: "string"
+          description: "The state of virtual machine"
+          example: "poweredOn"
+        vm_uuid:
+          type: "string"
+          description: "The uuid of virtual machine"
+          example: "9808421e-8426-0dfd-55bd-246c95434e1a"
+        vm_dns_name:
+          type: "string"
+          description: "The DNS name of virtual machine"
+          example: "dns.redhat.com"
+        vm_host:
+          type: "string"
+          description: "The host of virtual machine"
+          example: "host.redhat.com"
+        vm_host_socket_count:
+          type: "string"
+          description: "The socket count for the virtual machine host"
+          example: ""
+        vm_host_core_count:
+          type: "string"
+          description: "The core count for the virtual machine host"
+          example: "8"
+        vm_cluster:
+          type: "string"
+          description: "The cluster of virtual machine"
+          example: "Redhat Cluster"
+        vm_datacenter:
+          type: "string"
+          description: "The data center of virtual machine"
+          example: "RedHat Data center"
+        products:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemProducts"
+        entitlements:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemEntitlements"
+        is_redhat:
+          type: "boolean"
+          description: "Indicates if the system is a RedHat system"
+        redhat_certs:
+            type: "string"
+            description: "RedHat certificates"
+            example: "183.pem"
+        redhat_package_count:
+            type: "integer"
+            format: "int64"
+            description: "RedHat package count"
+            example: 65
+        metadata:
+          type: "object"
+          description: "For each fact, there will be a metadata key describing origin fact"
+          properties:
+            name:
+              $ref: "#/definitions/SystemFactMetadata"
+        sources:
+          type: "array"
+          items:
+            $ref: "#/definitions/SystemFingerprintSource"
+        system_last_checkin_date:
+            type: "string"
+            format: "date"
+            description: "Last time the system was seen.  For VCenter sources, this is the last time the system was powered on.  For Satellite sources, this is the last time the system satellite agent reportd.  For network sources, this is the last time the system was scanned."
+            example: "183.pem"
+  InsightsReport:
+    properties:
+      report_id:
+        type: "integer"
+        format: "int64"
+        description: "The insights report identifier"
+        example: 1
+      report_type:
+        type: "string"
+        description: "The report type"
+        example: "insights"
+      report_version:
+        type: "string"
+        description: "The report version"
+        example: "0.0.47.afdsgev"
+      report_platform_id:
+        type: "string"
+        description: "Globally unique uuid for report"
+        example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+      hosts:
+        type: object
+        properties:
+          system_platform_id:
+            $ref: "#/definitions/Host"
+        description: "The insights report for the systems that were scanned"
   ListPagination:
     type: "object"
     required:
