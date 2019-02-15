@@ -4,18 +4,55 @@ import { MenuItem } from 'patternfly-react';
 import DropdownSelect from '../dropdownSelect';
 
 describe('DropdownSelect Component', () => {
-  it('should render', () => {
+  it('should render a basic component', () => {
     const props = {
-      id: 'testing',
-      title: 'test title'
+      id: 'test',
+      options: [{ title: 'lorem', value: 'ipsum' }, { title: 'hello', value: 'world' }]
     };
 
-    const component = mount(
+    let component = mount(
       <DropdownSelect {...props}>
-        <MenuItem key="one">One</MenuItem>
+        <MenuItem eventKey="ipsum">Lorem ipsum</MenuItem>
       </DropdownSelect>
     );
 
-    expect(component.render()).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot('basic dropdown');
+
+    props.selectValue = ['world', 'ipsum'];
+    props.multiselect = true;
+
+    component = mount(
+      <DropdownSelect {...props}>
+        <MenuItem eventKey="ipsum">Lorem ipsum</MenuItem>
+      </DropdownSelect>
+    );
+
+    expect(component.render()).toMatchSnapshot('multiselect dropdown');
+  });
+
+  it('should allow a alternate array and object options', () => {
+    const props = {
+      id: 'test',
+      options: ['lorem', 'ipsum', 'hello', 'world'],
+      selectValue: ['ipsum']
+    };
+
+    let component = mount(
+      <DropdownSelect {...props}>
+        <MenuItem eventKey="ipsum">Lorem ipsum</MenuItem>
+      </DropdownSelect>
+    );
+
+    expect(component.render()).toMatchSnapshot('string array');
+
+    props.options = { lorem: 'ipsum', hello: 'world' };
+
+    component = mount(
+      <DropdownSelect {...props}>
+        <MenuItem eventKey="ipsum">Lorem ipsum</MenuItem>
+      </DropdownSelect>
+    );
+
+    expect(component.render()).toMatchSnapshot('key value object');
   });
 });
