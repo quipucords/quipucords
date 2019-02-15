@@ -8,7 +8,8 @@ const initialState = {
     errorMessage: '',
     pending: false,
     fulfilled: false,
-    sources: []
+    sources: [],
+    updateSources: false
   },
 
   update: {
@@ -23,6 +24,18 @@ const initialState = {
 
 const sourcesReducer = (state = initialState, action) => {
   switch (action.type) {
+    case sourcesTypes.UPDATE_SOURCES:
+      return helpers.setStateProp(
+        'view',
+        {
+          updateSources: true
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
     case helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCE):
     case helpers.REJECTED_ACTION(sourcesTypes.DELETE_SOURCES):
       return helpers.setStateProp(

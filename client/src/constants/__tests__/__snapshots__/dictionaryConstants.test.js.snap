@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`all exports 1`] = `
+Object {
+  "authDictionary": Object {
+    "sshKey": "SSH Key",
+    "usernamePassword": "Username and Password",
+  },
+  "default": Object {
+    "SSLv23": "SSLv23",
+    "TLSv1": "TLSv1",
+    "TLSv1_1": "TLSv1.1",
+    "TLSv1_2": "TLSv1.2",
+    "canceled": "Canceled",
+    "completed": "Completed",
+    "created": "Created",
+    "failed": "Failed",
+    "network": "Network",
+    "paused": "Paused",
+    "pending": "Pending",
+    "running": "Running",
+    "satellite": "Satellite",
+    "sshKey": "SSH Key",
+    "success": "Successful",
+    "usernamePassword": "Username and Password",
+    "vcenter": "VCenter",
+  },
+  "dictionary": Object {
+    "SSLv23": "SSLv23",
+    "TLSv1": "TLSv1",
+    "TLSv1_1": "TLSv1.1",
+    "TLSv1_2": "TLSv1.2",
+    "canceled": "Canceled",
+    "completed": "Completed",
+    "created": "Created",
+    "failed": "Failed",
+    "network": "Network",
+    "paused": "Paused",
+    "pending": "Pending",
+    "running": "Running",
+    "satellite": "Satellite",
+    "sshKey": "SSH Key",
+    "success": "Successful",
+    "usernamePassword": "Username and Password",
+    "vcenter": "VCenter",
+  },
+  "scanStatusDictionary": Object {
+    "canceled": "Canceled",
+    "completed": "Completed",
+    "created": "Created",
+    "failed": "Failed",
+    "paused": "Paused",
+    "pending": "Pending",
+    "running": "Running",
+    "success": "Successful",
+  },
+  "srcDictionary": Object {
+    "network": "Network",
+    "satellite": "Satellite",
+    "vcenter": "VCenter",
+  },
+  "sslProtocolDictionary": Object {
+    "SSLv23": "SSLv23",
+    "TLSv1": "TLSv1",
+    "TLSv1_1": "TLSv1.1",
+    "TLSv1_2": "TLSv1.2",
+  },
+}
+`;
+
+exports[`default export 1`] = `
+Object {
+  "SSLv23": "SSLv23",
+  "TLSv1": "TLSv1",
+  "TLSv1_1": "TLSv1.1",
+  "TLSv1_2": "TLSv1.2",
+  "canceled": "Canceled",
+  "completed": "Completed",
+  "created": "Created",
+  "failed": "Failed",
+  "network": "Network",
+  "paused": "Paused",
+  "pending": "Pending",
+  "running": "Running",
+  "satellite": "Satellite",
+  "sshKey": "SSH Key",
+  "success": "Successful",
+  "usernamePassword": "Username and Password",
+  "vcenter": "VCenter",
+}
+`;

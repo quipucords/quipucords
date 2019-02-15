@@ -1,31 +1,32 @@
-import { credentialsTypes, sourcesTypes } from '../constants';
+import { sourcesTypes } from '../constants';
 import helpers from '../../common/helpers';
 import apiTypes from '../../constants/apiConstants';
 
 const initialState = {
-  view: {
-    show: false,
-    add: false,
-    edit: false,
-    allCredentials: [],
-    source: {},
-    error: false,
-    errorMessage: null,
-    stepOneValid: false,
-    stepTwoValid: false,
-    fulfilled: false
-  }
+  add: false,
+  availableCredentials: [],
+  edit: false,
+  editSource: null,
+  error: false,
+  errorMessage: null,
+  errorStatus: null,
+  fulfilled: false,
+  pending: false,
+  show: false,
+  source: {},
+  stepOneValid: true,
+  stepTwoValid: false,
+  stepTwoErrorMessages: {}
 };
 
 const addSourceWizardReducer = (state = initialState, action) => {
   switch (action.type) {
     case sourcesTypes.CREATE_SOURCE_SHOW:
       return helpers.setStateProp(
-        'view',
+        null,
         {
-          show: true,
           add: true,
-          allCredentials: state.view.allCredentials
+          show: true
         },
         {
           state,
@@ -35,12 +36,11 @@ const addSourceWizardReducer = (state = initialState, action) => {
 
     case sourcesTypes.EDIT_SOURCE_SHOW:
       return helpers.setStateProp(
-        'view',
+        null,
         {
-          show: true,
           edit: true,
-          source: action.source,
-          stepOneValid: true
+          editSource: action.source,
+          show: true
         },
         {
           state,
@@ -50,7 +50,7 @@ const addSourceWizardReducer = (state = initialState, action) => {
 
     case sourcesTypes.UPDATE_SOURCE_HIDE:
       return helpers.setStateProp(
-        'view',
+        null,
         {
           show: false
         },
@@ -60,9 +60,9 @@ const addSourceWizardReducer = (state = initialState, action) => {
         }
       );
 
-    case sourcesTypes.UPDATE_SOURCE_WIZARD_STEPONE:
+    case sourcesTypes.VALID_SOURCE_WIZARD_STEPONE:
       return helpers.setStateProp(
-        'view',
+        null,
         {
           source: action.source,
           stepOneValid: true
@@ -73,11 +73,11 @@ const addSourceWizardReducer = (state = initialState, action) => {
         }
       );
 
-    case sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO:
+    case sourcesTypes.VALID_SOURCE_WIZARD_STEPTWO:
       return helpers.setStateProp(
-        'view',
+        null,
         {
-          source: action.source,
+          source: { ...state.source, ...action.source },
           stepTwoValid: true
         },
         {
@@ -86,37 +86,50 @@ const addSourceWizardReducer = (state = initialState, action) => {
         }
       );
 
-    case sourcesTypes.INVALID_SOURCE_WIZARD_STEPTWO:
-      return helpers.setStateProp(
-        'view',
-        {
-          stepTwoValid: false
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE):
-      return helpers.setStateProp(
-        'view',
-        {
-          error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
     case helpers.REJECTED_ACTION(sourcesTypes.UPDATE_SOURCE):
+    case helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE):
+      const stepTwoRejectedErrors = helpers.getMessageFromResults(
+        action.payload,
+        [
+          { map: 'credentials', value: apiTypes.API_SUBMIT_SOURCE_CREDENTIALS },
+          { map: 'hosts', value: apiTypes.API_SUBMIT_SOURCE_HOSTS },
+          { map: 'name', value: apiTypes.API_SUBMIT_SOURCE_NAME },
+          { map: 'port', value: apiTypes.API_SUBMIT_SOURCE_PORT },
+          { map: 'options', value: apiTypes.API_SUBMIT_SOURCE_OPTIONS }
+        ],
+        true
+      );
+
+      const messages = {};
+
+      Object.keys(stepTwoRejectedErrors.messages || {}).forEach(key => {
+        helpers.setPropIfTruthy(messages, [key], stepTwoRejectedErrors.messages[key]);
+      });
+
       return helpers.setStateProp(
-        'view',
+        null,
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: Object.values(messages).join(' '),
+          errorStatus: helpers.getStatusFromResults(action.payload),
+          stepTwoValid: false,
+          stepTwoErrorMessages: messages,
+          pending: false
+        },
+        {
+          state,
+          reset: false
+        }
+      );
+
+    case helpers.PENDING_ACTION(sourcesTypes.UPDATE_SOURCE):
+    case helpers.PENDING_ACTION(sourcesTypes.ADD_SOURCE):
+      return helpers.setStateProp(
+        null,
+        {
+          error: false,
+          errorMessage: null,
+          pending: true
         },
         {
           state,
@@ -127,22 +140,13 @@ const addSourceWizardReducer = (state = initialState, action) => {
     case helpers.FULFILLED_ACTION(sourcesTypes.UPDATE_SOURCE):
     case helpers.FULFILLED_ACTION(sourcesTypes.ADD_SOURCE):
       return helpers.setStateProp(
-        'view',
+        null,
         {
-          source: action.payload.data,
-          fulfilled: true
-        },
-        {
-          state,
-          reset: false
-        }
-      );
-
-    case helpers.FULFILLED_ACTION(credentialsTypes.GET_WIZARD_CREDENTIALS):
-      return helpers.setStateProp(
-        'view',
-        {
-          allCredentials: (action.payload.data && action.payload.data[apiTypes.API_RESPONSE_CREDENTIALS_RESULTS]) || []
+          error: false,
+          errorMessage: null,
+          fulfilled: true,
+          pending: false,
+          source: action.payload.data
         },
         {
           state,

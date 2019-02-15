@@ -106,7 +106,7 @@ class CreateCredentialDialog extends React.Component {
   };
 
   onSave = () => {
-    const { addCredential, credential, edit, getWizardCredentials, updateCredential } = this.props;
+    const { addCredential, credential, edit, updateCredential } = this.props;
     const {
       authorizationType,
       becomeMethod,
@@ -151,9 +151,7 @@ class CreateCredentialDialog extends React.Component {
     if (edit) {
       updateCredential(submitCredential.id, submitCredential);
     } else {
-      addCredential(submitCredential).finally(() => {
-        getWizardCredentials();
-      });
+      addCredential(submitCredential);
     }
   };
 
@@ -507,7 +505,6 @@ class CreateCredentialDialog extends React.Component {
 CreateCredentialDialog.propTypes = {
   addCredential: PropTypes.func,
   getCredentials: PropTypes.func,
-  getWizardCredentials: PropTypes.func,
   updateCredential: PropTypes.func,
   credential: PropTypes.object,
   credentialType: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
@@ -522,7 +519,6 @@ CreateCredentialDialog.propTypes = {
 CreateCredentialDialog.defaultProps = {
   addCredential: helpers.noop,
   getCredentials: helpers.noop,
-  getWizardCredentials: helpers.noop,
   updateCredential: helpers.noop,
   credential: {},
   credentialType: null, // eslint-disable-line react/no-unused-prop-types
@@ -536,7 +532,6 @@ CreateCredentialDialog.defaultProps = {
 
 const mapDispatchToProps = dispatch => ({
   getCredentials: queryObj => dispatch(reduxActions.credentials.getCredentials(queryObj)),
-  getWizardCredentials: () => dispatch(reduxActions.credentials.getWizardCredentials()),
   addCredential: data => dispatch(reduxActions.credentials.addCredential(data)),
   updateCredential: (id, data) => dispatch(reduxActions.credentials.updateCredential(id, data))
 });

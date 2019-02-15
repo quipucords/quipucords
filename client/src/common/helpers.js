@@ -1,5 +1,8 @@
-import _ from 'lodash';
 import moment from 'moment';
+import _get from 'lodash/get';
+import _join from 'lodash/join';
+import _map from 'lodash/map';
+import _set from 'lodash/set';
 
 const devModeNormalizeCount = (count, modulus = 100) => Math.abs(count) % modulus;
 
@@ -84,6 +87,10 @@ const scanStatusIcon = scanStatus => {
   }
 };
 
+const setPropIfDefined = (obj, props, value) => (obj && value !== undefined ? _set(obj, props, value) : obj);
+
+const setPropIfTruthy = (obj, props, value) => (obj && value ? _set(obj, props, value) : obj);
+
 const setStateProp = (prop, data, options) => {
   const { state = {}, initialState = {}, reset = true } = options;
   let obj = { ...state };
@@ -154,10 +161,10 @@ const createViewQueryObject = (viewOptions, queryObj) => {
 };
 
 const getMessageFromResults = (results, filterField = null) => {
-  const status = _.get(results, 'response.status', results.status);
-  const statusResponse = _.get(results, 'response.statusText', results.statusText);
-  const messageResponse = _.get(results, 'response.data', results.message);
-  const detailResponse = _.get(results, 'response.data', results.detail);
+  const status = _get(results, 'response.status', results.status);
+  const statusResponse = _get(results, 'response.statusText', results.statusText);
+  const messageResponse = _get(results, 'response.data', results.message);
+  const detailResponse = _get(results, 'response.data', results.detail);
 
   let serverStatus = '';
 
@@ -188,10 +195,10 @@ const getMessageFromResults = (results, filterField = null) => {
   const getMessages = (messageObject, filterKey) => {
     const obj = filterKey ? messageObject[filterKey] : messageObject;
 
-    return _.map(
+    return _map(
       obj,
       next => {
-        if (_.isArray(next)) {
+        if (Array.isArray(next)) {
           return getMessages(next);
         }
 
@@ -201,11 +208,11 @@ const getMessageFromResults = (results, filterField = null) => {
     );
   };
 
-  return `${serverStatus}${_.join(getMessages(messageResponse || detailResponse, filterField), '\n')}`;
+  return `${serverStatus}${_join(getMessages(messageResponse || detailResponse, filterField), '\n')}`;
 };
 
 const getStatusFromResults = results => {
-  let status = _.get(results, 'response.status', results.status);
+  let status = _get(results, 'response.status', results.status);
 
   if (status === undefined) {
     status = 0;
@@ -214,12 +221,12 @@ const getStatusFromResults = results => {
   return status;
 };
 
-const getTimeStampFromResults = results => moment(_.get(results, 'headers.date', Date.now())).format('YYYYMMDD_HHmmss');
+const getTimeStampFromResults = results => moment(_get(results, 'headers.date', Date.now())).format('YYYYMMDD_HHmmss');
 
 const isIpAddress = name => {
   const vals = name.split('.');
   if (vals.length === 4) {
-    return _.find(vals, val => Number.isNaN(val)) === undefined;
+    return vals.find(val => Number.isNaN(val)) === undefined;
   }
   return false;
 };
@@ -241,7 +248,7 @@ const PENDING_ACTION = base => `${base}_PENDING`;
 
 const REJECTED_ACTION = base => `${base}_REJECTED`;
 
-export const helpers = {
+const helpers = {
   devModeNormalizeCount,
   downloadData,
   generateId,
@@ -249,6 +256,8 @@ export const helpers = {
   sourceTypeIcon,
   scanTypeIcon,
   scanStatusIcon,
+  setPropIfDefined,
+  setPropIfTruthy,
   setStateProp,
   viewPropsChanged,
   createViewQueryObject,
@@ -265,4 +274,4 @@ export const helpers = {
   REJECTED_ACTION
 };
 
-export default helpers;
+export { helpers as default, helpers };
