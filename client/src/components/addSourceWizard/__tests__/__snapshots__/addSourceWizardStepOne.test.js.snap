@@ -1,57 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`connected 1`] = `
-<Form
-  bsClass="form"
-  componentClass="form"
-  horizontal={true}
-  inline={false}
+<FormState
+  onReset={[Function]}
+  onSubmit={[Function]}
+  resetUsingSetValues={true}
+  setValues={
+    Object {
+      "sourceType": "network",
+    }
+  }
+  setValuesAssumeBoolIsChecked={true}
+  setValuesOnUpdate={false}
+  validate={[Function]}
+  validateOnMount={true}
+  validateOnUpdate={false}
+>
+  <Component />
+</FormState>
+`;
+
+exports[`non-connected 1`] = `
+<form
+  class="form-horizontal"
 >
   <h3
-    className="right-aligned_basic-form"
+    class="right-aligned_basic-form"
   >
     Select source type
   </h3>
-  <FormGroup
-    bsClass="form-group"
-    validationState={null}
+  <div
+    class="form-group"
   >
-    <Radio
-      bsClass="radio"
-      checked={true}
-      disabled={false}
-      inline={false}
-      name="sourceType"
-      onChange={[Function]}
-      title=""
-      value="network"
+    <div
+      class="radio"
     >
-      Network Range
-    </Radio>
-    <Radio
-      bsClass="radio"
-      checked={false}
-      disabled={false}
-      inline={false}
-      name="sourceType"
-      onChange={[Function]}
-      title=""
-      value="satellite"
+      <label
+        title=""
+      >
+        <input
+          checked=""
+          name="sourceType"
+          type="radio"
+          value="network"
+        />
+        Network Range
+      </label>
+    </div>
+    <div
+      class="radio"
     >
-      Satellite
-    </Radio>
-    <Radio
-      bsClass="radio"
-      checked={false}
-      disabled={false}
-      inline={false}
-      name="sourceType"
-      onChange={[Function]}
-      title=""
-      value="vcenter"
+      <label
+        title=""
+      >
+        <input
+          name="sourceType"
+          type="radio"
+          value="satellite"
+        />
+        Satellite
+      </label>
+    </div>
+    <div
+      class="radio"
     >
-      vCenter Server
-    </Radio>
-  </FormGroup>
-</Form>
+      <label
+        title=""
+      >
+        <input
+          name="sourceType"
+          type="radio"
+          value="vcenter"
+        />
+        vCenter Server
+      </label>
+    </div>
+  </div>
+</form>
 `;
