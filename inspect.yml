@@ -1,0 +1,28 @@
+---
+- hosts: " {{variable_host | default('all')}} "
+  gather_facts: no
+  # update roles structure when we transition off ansible 2.3
+  # https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+  roles:
+    - check_dependencies
+    - connection
+    - virt
+    - cpu
+    - date
+    - dmi
+    - etc_release
+    - file_contents
+    - jboss_eap
+    - jboss_eap5
+    - jboss_brms
+    - jboss_fuse
+    - jboss_ws
+    - jboss_fuse_on_karaf
+    - ifconfig
+    - redhat_packages
+    - subman
+    - uname
+    - virt_what
+    - insights
+    - system_purpose
+    - host_done

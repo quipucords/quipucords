@@ -32,7 +32,8 @@ from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
-from scanner.network.utils import (_construct_vars,
+from scanner.network.utils import (_construct_playbook_error_msg,
+                                   _construct_vars,
                                    expand_hostpattern)
 from scanner.task import ScanTaskRunner
 
@@ -297,38 +298,50 @@ def _connect(manager_interrupt,
             'About to connect to hosts [%s]' % (
                 (idx + 1), len(group_names), group_ip_string)
         scan_task.log_message(log_message)
-        callback = ConnectResultCallback(result_store, credential,
-                                         scan_task.source)
+        call = ConnectResultCallback(result_store, credential,
+                                     scan_task.source)
 
         # Create parameters for ansible runner
-        runner_settings = {'job_timeout':300} #TODO: make an env var
+        runner_settings = {'job_timeout':
+                           int(settings.NETWORK_CONNECT_JOB_TIMEOUT)}
         extra_vars_dict = {'variable_host': group_name}
         playbook_path = os.path.join(settings.BASE_DIR,
                                      'scanner/network/runner/connect.yml')
         cmdline_list = []
-        if hasattr(settings, 'DJANGO_SECRET_PATH'):
+        if os.path.exists(settings.DJANGO_SECRET_PATH):
             vault_file_path = '--vault-password-file=%s' % (
                 settings.DJANGO_SECRET_PATH)
+            cmdline_list.append(vault_file_path)
         else:
-            # ansible runner only accepts the secret key as a file path
-            path = settings.BASE_DIR + '/secret.txt'
-            with open(path, 'w') as dev_file:
-                dev_file.write(settings.SECRET_KEY)
-            vault_file_path = '--vault-password-file=%s' % path
-        cmdline_list.append(vault_file_path)
+            err_msg = 'ERROR: Could not execute connect.yml because '\
+                'secret.txt could not be found.'
+            scan_task.log_message(err_msg)
+            raise AnsibleRunnerException()
         if use_paramiko:
             cmdline_list.append('--connection=paramiko')  # paramiko conn
         all_commands = ' '.join(cmdline_list)
+        if int(settings.ANSIBLE_LOG_LEVEL) == 0:
+            quiet_bool = True
+            verbosity_lvl = 0
+        else:
+            quiet_bool = False
+            verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
         try:
-            ansible_runner.run(quiet=True,
-                               settings=runner_settings,
-                               inventory=inventory_file,
-                               extravars=extra_vars_dict,
-                               event_handler=callback.runner_event,
-                               playbook=playbook_path,
-                               cmdline=all_commands)
+            runner_obj = ansible_runner.run(quiet=quiet_bool,
+                                            settings=runner_settings,
+                                            inventory=inventory_file,
+                                            extravars=extra_vars_dict,
+                                            event_handler=call.runner_event,
+                                            playbook=playbook_path,
+                                            cmdline=all_commands,
+                                            verbosity=verbosity_lvl)
         except Exception as err_msg:
             raise AnsibleRunnerException(err_msg)
+
+        final_status = runner_obj.status
+        if final_status != 'successful':
+            log_message = _construct_playbook_error_msg(final_status)
+            scan_task.log_message(log_message)
 
 
 def _handle_ssh_passphrase(credential):

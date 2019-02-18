@@ -87,9 +87,9 @@ class TestConnectResultCallback(unittest.TestCase):
         callback = ConnectResultCallback(result_store,
                                          credential,
                                          source)
-        callback.v2_runner_on_ok({'host': 'host1', 'res': {'rc': 0}})
-        callback.v2_runner_on_ok({'host': 'host2', 'res': {'rc': 1}})
-        callback.v2_runner_on_ok({'host': 'host2', 'res': {'rc': None}})
+        callback.task_on_ok({'host': 'host1', 'res': {'rc': 0}})
+        callback.task_on_ok({'host': 'host2', 'res': {'rc': 1}})
+        callback.task_on_ok({'host': 'host2', 'res': {'rc': None}})
         self.assertEqual(result_store.succeeded,
                          [('host1', source, credential, 'success')])
         self.assertEqual(result_store.failed, [])

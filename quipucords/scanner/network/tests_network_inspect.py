@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,12 +12,10 @@
 
 # pylint: disable=ungrouped-imports
 import os.path
-import unittest
 from multiprocessing import Value
-from unittest.mock import ANY, Mock, patch
-from types import SimpleNamespace  # noqa: I100
+from unittest.mock import ANY, patch
 
-from ansible.errors import AnsibleError
+from ansible_runner.exceptions import AnsibleRunnerException
 
 from api.models import (Credential,
                         ExtendedProductSearchOptions,
@@ -34,106 +32,12 @@ from django.urls import reverse
 
 import requests_mock
 
-from scanner import scan_data_log
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect import (_construct_scan_inventory)
-from scanner.network.inspect_callback import (ANSIBLE_FACTS,
-                                              InspectResultCallback,
-                                              normalize_result)
+from scanner.network.inspect_callback import InspectResultCallback
 from scanner.test_util import create_scan_job
 
-
-def mock_run_success(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with success."""
-    return 0
-
-
-def mock_run_failed(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with failure."""
-    return 255
-
-
-def mock_scan_error(manager_interrupt, hosts):
-    """Throws error."""
-    # pylint: disable=unused-argument
-    raise AnsibleError('an error')
-
-
-class TestNormalizeResult(unittest.TestCase):
-    """Tests for inspect_callback.normalize_result."""
-
-    RESULT = {'rc': 0,
-              'stdout': 'a',
-              'stdout_lines': ['a']}
-
-    def test_no_register(self):
-        """A task with no register variable."""
-        self.assertEqual(
-            normalize_result(
-                SimpleNamespace(_host=SimpleNamespace(name='hostname'),
-                                _result=self.RESULT,
-                                _task=SimpleNamespace(register=None))),
-            [])
-
-    def test_register_internal(self):
-        """A task that registers an internal variable."""
-        self.assertEqual(
-            normalize_result(
-                SimpleNamespace(
-                    _host=SimpleNamespace(name='hostname'),
-                    _result=self.RESULT,
-                    _task=SimpleNamespace(register='internal_name'))),
-            [('internal_name',
-              {'rc': 0, 'stdout': 'a', 'stdout_lines': ['a']})])
-
-    def test_register_not_internal(self):
-        """A task that registers a non-internal variable."""
-        self.assertEqual(
-            normalize_result(
-                SimpleNamespace(
-                    _host=SimpleNamespace(name='hostname'),
-                    _result=self.RESULT,
-                    _task=SimpleNamespace(register='name'))),
-            [('name', self.RESULT)])
-
-    def test_register_ansible_fact(self):
-        """A set_facts task that registers one fact."""
-        self.assertEqual(
-            normalize_result(
-                SimpleNamespace(
-                    _host=SimpleNamespace(name='hostname'),
-                    _result={ANSIBLE_FACTS:
-                             {'fact': 'fact_result'}},
-                    _task=SimpleNamespace(register='name'))),
-            [('fact', 'fact_result')])
-
-    def test_register_ansible_facts(self):
-        """A set_facts task that registers multiple facts."""
-        self.assertEqual(
-            # Wrap normalize_result in set() to make comparison
-            # independent of order.
-            set(normalize_result(
-                SimpleNamespace(
-                    _host=SimpleNamespace(name='hostname'),
-                    _result={ANSIBLE_FACTS:
-                             {'fact1': 'result1',
-                              'fact2': 'result2',
-                              'fact3': 'result3'}},
-                    _task=SimpleNamespace(register='name')))),
-            {('fact1', 'result1'),
-             ('fact2', 'result2'),
-             ('fact3', 'result3')})
-
-    def test_internal_ansible_fact(self):
-        """A set_facts task that registers an internal fact."""
-        self.assertEqual(
-            normalize_result(
-                SimpleNamespace(
-                    _host=SimpleNamespace(name='hostname'),
-                    _result={ANSIBLE_FACTS:
-                             {'internal_fact': 'fact_result'}},
-                    _task=SimpleNamespace(register='name'))),
-            [('internal_fact', 'fact_result')])
+ANSIBLE_FACTS = 'ansible_facts'
 
 
 class NetworkInspectScannerTest(TestCase):
@@ -195,8 +99,6 @@ class NetworkInspectScannerTest(TestCase):
         self.fact_endpoint = 'http://testserver' + reverse('reports-list')
 
         self.scan_job.save()
-
-        scan_data_log.disable_log_for_test()
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -284,53 +186,36 @@ class NetworkInspectScannerTest(TestCase):
 
         self.assertEqual(inventory_dict[1], expected)
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_failed)
+    @patch('ansible_runner.run')
     def test_inspect_scan_failure(self, mock_run):
         """Test scan flow with mocked manager and failure."""
-        scanner = InspectTaskRunner(
-            self.scan_job, self.scan_task)
-
-        # Init for unit test as run is not called
+        mock_run.side_effect = AnsibleRunnerException()
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scanner.connect_scan_task = self.connect_scan_task
-        with self.assertRaises(AnsibleError):
+        with self.assertRaises(AnsibleRunnerException):
             scanner._inspect_scan(Value('i', ScanJob.JOB_RUN), self.host_list)
             mock_run.assert_called()
 
-    @patch('scanner.network.inspect.InspectTaskRunner._inspect_scan',
-           side_effect=mock_scan_error)
+    @patch('scanner.network.inspect.InspectTaskRunner._inspect_scan')
     def test_inspect_scan_error(self, mock_scan):
         """Test scan flow with mocked manager and failure."""
-        scanner = InspectTaskRunner(
-            self.scan_job, self.scan_task)
+        mock_scan.side_effect = AnsibleRunnerException()
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
         mock_scan.assert_called_with(ANY, self.host_list)
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_inspect_scan_fail_no_facts(self, mock_run):
         """Test running a inspect scan with mocked connection."""
-        expected = ([('1.2.3.4', {'name': 'cred1'})], [])
-        mock_run.return_value = expected
+        mock_run.return_value.status = 'successful'
         with requests_mock.Mocker() as mocker:
             mocker.post(self.fact_endpoint, status_code=201, json={'id': 1})
-            scanner = InspectTaskRunner(
-                self.scan_job, self.scan_task)
+            scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+            scanner.connect_scan_task = self.connect_scan_task
             scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
-            mock_run.assert_called_with(ANY)
+            mock_run.assert_called()
             self.assertEqual(scan_task_status[1], ScanTask.FAILED)
-
-    def test_populate_callback(self):
-        """Test the population of the callback object for inspect scan."""
-        callback = InspectResultCallback(
-            scan_task=self.scan_task)
-        host = Mock()
-        host.name = '1.2.3.4'
-        task = Mock(args={'_raw_params': 'command line'})
-        result = Mock(_host=host, _result={'rc': 3}, _task=task)
-
-        callback.v2_runner_on_unreachable(result)
 
     def test_ssh_crash(self):
         """Simulate an ssh crash."""
@@ -338,12 +223,12 @@ class NetworkInspectScannerTest(TestCase):
             self.scan_job, self.scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
-                         '../../../test_util/crash.py'))
+                         'test_util/crash.py'))
         _, result = scanner._inspect_scan(
             Value('i', ScanJob.JOB_RUN),
             self.host_list,
             base_ssh_executable=path)
-        self.assertEqual(result, ScanTask.COMPLETED)
+        self.assertEqual(result, ScanTask.FAILED)
 
     def test_ssh_hang(self):
         """Simulate an ssh hang."""
@@ -351,16 +236,14 @@ class NetworkInspectScannerTest(TestCase):
             self.scan_job, self.scan_task)
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
-                         '../../../test_util/hang.py'))
+                         'test_util/hang.py'))
         scanner._inspect_scan(
             Value('i', ScanJob.JOB_RUN),
             self.host_list,
-            roles=['redhat_release'],
             base_ssh_executable=path,
             ssh_timeout='0.1s')
 
-    @patch('scanner.network.utils.TaskQueueManager.run',
-           side_effect=mock_run_success)
+    @patch('ansible_runner.run')
     def test_scan_with_options(self, mock_run):
         """Setup second scan with scan and source options."""
         # setup source with paramiko option for scan
@@ -393,4 +276,26 @@ class NetworkInspectScannerTest(TestCase):
 
         scanner.connect_scan_task = self.connect_scan_task
         scanner._inspect_scan(Value('i', ScanJob.JOB_RUN), self.host_list)
-        mock_run.assert_called_with(ANY)
+        mock_run.assert_called()
+
+    def test_populate_callback(self):
+        """Test the population of the callback object for inspect scan."""
+        # What does this test?
+        callback = InspectResultCallback(scan_task=self.scan_task,
+                                         idx=1,
+                                         group_total=1)
+        # cleaned unused variabled from event_dict
+        event_dict = {'runner_ident': 'f2100bac-7d64-43d2-8e6a-022c6f5104ac',
+                      'event': 'runner_on_unreachable',
+                      'event_data':
+                      {'play': 'group_0',
+                       'play_pattern': ' group_0 ',
+                       'task': 'test if user has sudo cmd',
+                       'task_action': 'raw',
+                       'role': 'check_dependencies',
+                       'host': '1.2.3.4',
+                       'res':
+                       {'unreachable': True,
+                        'msg': 'Failed to connect to the host via ssh: ',
+                        'changed': False}, 'pid': 2210}}
+        callback.task_on_unreachable(event_dict)

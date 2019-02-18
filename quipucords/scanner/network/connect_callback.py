@@ -33,7 +33,7 @@ class ConnectResultCallback():
         self.credential = credential
         self.source = source
 
-    def v2_runner_on_ok(self, event_data):
+    def task_on_ok(self, event_data):
         """Print a json representation of the event_data on ok."""
         try:
             host = event_data['host']
@@ -53,7 +53,7 @@ class ConnectResultCallback():
             traceback.print_exc()
             raise error
 
-    def v2_runner_on_unreachable(self, event_data):
+    def task_on_unreachable(self, event_data):
         """Print a json representation of the event_data on unreachable."""
         try:
             host = event_data['host']
@@ -85,7 +85,7 @@ class ConnectResultCallback():
             traceback.print_exc()
             raise error
 
-    def v2_runner_on_failed(self, event_data):
+    def task_on_failed(self, event_data):
         """Print a json representation of the event_data on failed."""
         # pylint: disable=protected-access
         try:
@@ -119,14 +119,15 @@ class ConnectResultCallback():
     def runner_event(self, event_dict=None):
         """Control the event callback for runner."""
         if event_dict:
+            event = event_dict.get('event')
+            event_data = event_dict.get('event_data')
             if 'runner' in event_dict['event']:
-                event_data = event_dict.get('event_data')
-                if event_dict['event'] == 'runner_on_ok':
-                    self.v2_runner_on_ok(event_data)
-                elif event_dict['event'] == 'runner_on_unreachable':
-                    self.v2_runner_on_unreachable(event_data)
-                elif event_dict['event'] == 'runner_on_failed':
-                    self.v2_runner_on_failed(event_data)
+                if event == 'runner_on_ok':
+                    self.task_on_ok(event_data)
+                elif event == 'runner_on_unreachable':
+                    self.task_on_unreachable(event_data)
+                elif event == 'runner_on_failed':
+                    self.task_on_failed(event_data)
                 else:
                     self.result_store.scan_task.log_message(
                         'UNEXPECTED FAILURE in runner_event.'

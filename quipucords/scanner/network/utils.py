@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -10,21 +10,10 @@
 #
 """Scanner used for host connection discovery."""
 
-from collections import namedtuple
-
-from ansible import constants as C
-from ansible.executor.task_queue_manager import TaskQueueManager
-from ansible.inventory import Inventory
 from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
-from ansible.parsing.dataloader import DataLoader
 from ansible.parsing.utils.addresses import parse_address
-from ansible.playbook.play import Play
-from ansible.vars import VariableManager
 
-from api.vault import decrypt_data_as_unicode, write_to_yaml
-
-from django.conf import settings
-
+from api.vault import decrypt_data_as_unicode
 
 ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \
     'Ansible playbook. See logs for further details.'
@@ -37,6 +26,8 @@ ANSIBLE_UNREACHABLE_HOST_ERR_MSG = 'An error occurred while executing the ' \
 ANSIBLE_PLAYBOOK_ERR_MSG = 'An error occurred while executing the ' \
     'Ansible playbook. An issue exists in the playbook being executed.' \
     ' See logs for further details.'
+ANSIBLE_TIMEOUT_ERR_MSG = 'A timeout was reached while executing' \
+    'the Ansible playbook.'
 
 
 def _credential_vars(credential):
@@ -61,7 +52,6 @@ def _credential_vars(credential):
         ansible_dict['ansible_become_method'] = become_method
     if become_user:
         ansible_dict['ansible_become_user'] = become_user
-
     return ansible_dict
 
 
@@ -82,95 +72,14 @@ def _construct_vars(connection_port, credential=None):
     return ansible_vars
 
 
-def write_inventory(inventory):
-    """Write the inventory to a temporary file.
-
-    :param inventory: A ansible inventory dictionary
-    :returns: The path of the temporary failed
-    """
-    return write_to_yaml(inventory)
-
-
-def create_ansible_objects(inventory_file, extra_vars, use_paramiko=None,
-                           forks=50):
-    """Create the default ansible objects needed to run a playbook.
-
-    :param inventory_file: The path to the inventory file
-    :param extra_vars: The dictionary containing
-           the collection status of the optional products.
-    :param use_paramiko: use paramiko instead of ssh for connection
-    :param forks: number of forks to run with, default of 50
-    :returns: tuple of (options, variable_manager, loader, inventory)
-    """
-    named_options = namedtuple('Options', ['connection', 'module_path',
-                                           'forks', 'become', 'become_method',
-                                           'become_user', 'check'])
-    conn = 'ssh'
-    # Change connection method from default ssh to paramiko if needed
-    if use_paramiko:
-        conn = 'paramiko'
-
-    options = named_options(connection=conn,
-                            module_path=C.DEFAULT_MODULE_PATH,
-                            forks=forks, become=False,
-                            become_method='sudo', become_user='root',
-                            check=False)
-
-    variable_manager = VariableManager()
-    loader = DataLoader()
-    loader.set_vault_password(settings.SECRET_KEY)
-
-    # create inventory and extra vars and pass to var manager
-    inventory = Inventory(loader=loader,
-                          variable_manager=variable_manager,
-                          host_list=inventory_file)
-    variable_manager.extra_vars = extra_vars
-    variable_manager.set_inventory(inventory)
-
-    return options, variable_manager, loader, inventory
-
-
-# pylint: disable=too-many-arguments
-def run_playbook(inventory_file, callback, play,
-                 extra_vars, use_paramiko=None, forks=50):
-    """Run an ansible playbook.
-
-    :param inventory_file: The path to the inventory file
-    :param callback: The callback handler
-    :param play: The playbook dictionary to run
-    :param extra_vars: The dictionary containing
-           the collection status of the optional products.
-    :param use_paramiko: use paramiko instead of ssh for connection
-    :param forks: number of forks to run with, default of 50
-    :returns: The result of executing the play (return code)
-    """
-    options, variable_manager, loader, ansible_inventory = \
-        create_ansible_objects(inventory_file, extra_vars, use_paramiko, forks)
-
-    playbook = Play().load(play,
-                           variable_manager=variable_manager,
-                           loader=loader)
-
-    task_manager = TaskQueueManager(
-        inventory=ansible_inventory,
-        variable_manager=variable_manager,
-        loader=loader,
-        options=options,
-        passwords=None,
-        stdout_callback=callback,
-        run_additional_callbacks=C.DEFAULT_LOAD_CALLBACK_PLUGINS)
-
-    return task_manager.run(playbook)
-
-
-def _construct_error_msg(return_code):
+def _construct_playbook_error_msg(status):
     message = ANSIBLE_DEFAULT_ERR_MSG
-    if return_code == TaskQueueManager.RUN_FAILED_HOSTS:
+    if status == 'timeout':
+        message = ANSIBLE_TIMEOUT_ERR_MSG
+    elif status == 'failed':
         message = ANSIBLE_FAILED_HOST_ERR_MSG
-    elif return_code == TaskQueueManager.RUN_UNREACHABLE_HOSTS:
+    elif status == 'unreachable':
         message = ANSIBLE_UNREACHABLE_HOST_ERR_MSG
-    elif return_code == TaskQueueManager.RUN_FAILED_BREAK_PLAY:
-        message = ANSIBLE_PLAYBOOK_ERR_MSG
     return message
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,8 +12,8 @@
 import logging
 import os.path
 
-from ansible.errors import AnsibleError
-from ansible.executor.task_queue_manager import TaskQueueManager
+import ansible_runner
+from ansible_runner.exceptions import AnsibleRunnerException
 
 from api.credential.serializer import CredentialSerializer
 from api.models import (ScanJob,
@@ -21,6 +21,8 @@ from api.models import (ScanJob,
                         ScanTask,
                         SystemConnectionResult,
                         SystemInspectionResult)
+from api.vault import write_to_yaml
+
 
 from quipucords import settings
 
@@ -28,43 +30,14 @@ from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException,
                                         ScannerException)
 from scanner.network.inspect_callback import InspectResultCallback
-from scanner.network.utils import (_construct_error_msg,
+from scanner.network.utils import (_construct_playbook_error_msg,
                                    _construct_vars,
-                                   _credential_vars,
-                                   run_playbook,
-                                   write_inventory)
+                                   _credential_vars)
 from scanner.task import ScanTaskRunner
 
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-DEFAULT_ROLES = [
-    'check_dependencies',
-    'connection',
-    'virt',
-    'cpu',
-    'date',
-    'dmi',
-    'etc_release',
-    'file_contents',
-    'jboss_eap',
-    'jboss_eap5',
-    'jboss_brms',
-    'jboss_fuse',
-    'jboss_ws',
-    'jboss_fuse_on_karaf',
-    'ifconfig',
-    'redhat_packages',
-    'redhat_release',
-    'subman',
-    'uname',
-    'virt_what',
-    'insights',
-    'system_purpose',
-    'host_done',
-]
 
 DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']
 NETWORK_SCAN_IDENTITY_KEY = 'connection_host'
@@ -143,7 +116,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     'No results will be reported to fact endpoint.'
                 return msg, ScanTask.FAILED
 
-        except AnsibleError as ansible_error:
+        except AnsibleRunnerException as ansible_error:
             error_message = 'Scan task encountered error: %s' % \
                 ansible_error
             return error_message, ScanTask.FAILED
@@ -194,8 +167,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 task_inspection_result=self.scan_task.inspection_result)
             sys_result.save()
 
-    # pylint: disable=too-many-locals,W0102,too-many-arguments
-    def _inspect_scan(self, manager_interrupt, connected, roles=DEFAULT_ROLES,
+    # pylint: disable=too-many-locals,W0102,too-many-arguments,R0912,R0915
+    def _inspect_scan(self, manager_interrupt, connected,
                       base_ssh_executable=None,
                       ssh_timeout=None):
         """Execute the host scan with the initialized source.
@@ -211,13 +184,15 @@ class InspectTaskRunner(ScanTaskRunner):
             command. Timeout for individual tasks.
         :returns: An array of dictionaries of facts
 
+        Note: base_ssh_executable & ssh_timeout are parameters that
+        are only used for testing.
         """
         connection_port = self.scan_task.source.port
 
         if self.scan_task.source.options is not None:
             use_paramiko = self.scan_task.source.options.use_paramiko
         else:
-            use_paramiko = None
+            use_paramiko = False
 
         if self.scan_job.options is not None:
             forks = self.scan_job.options.max_concurrency
@@ -236,7 +211,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
         base_ssh_executable = base_ssh_executable or 'ssh'
         ssh_timeout = ssh_timeout or settings.QPC_SSH_INSPECT_TIMEOUT
-
         # pylint: disable=line-too-long
         # the ssh arg is required for become-pass because
         # ansible checks for an exact string match of ssh
@@ -251,9 +225,9 @@ class InspectTaskRunner(ScanTaskRunner):
             connected, connection_port, forks,
             ssh_executable=ssh_executable,
             ssh_args=ssh_args)
-        inventory_file = write_inventory(inventory)
+        inventory_file = write_to_yaml(inventory)
 
-        error_msg = ''
+        error_msg = None
         log_message = 'START INSPECT PROCESSING GROUPS'\
             ' with use_paramiko: %s, '\
             '%d forks and extra_vars=%s' % (use_paramiko,
@@ -261,39 +235,69 @@ class InspectTaskRunner(ScanTaskRunner):
                                             extra_vars)
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
-        scan_message = 'success'
+
+        # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
+            call = InspectResultCallback(scan_task=self.scan_task,
+                                         idx=(idx + 1),
+                                         group_total=len(group_names))
             if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                 raise NetworkCancelException()
-
             if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                 raise NetworkPauseException()
 
-            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
-                (idx + 1), len(group_names))
-            self.scan_task.log_message(log_message)
-            callback =\
-                InspectResultCallback(
-                    scan_task=self.scan_task)
-            playbook = {'name': 'scan systems for product fingerprint facts',
-                        'hosts': group_name,
-                        'gather_facts': False,
-                        'roles': roles}
-            result = run_playbook(
-                inventory_file, callback, playbook,
-                extra_vars, use_paramiko, forks=forks)
+            # Build Ansible Runner Parameters
+            runner_settings = dict()
+            runner_settings['idle_timeout'] = \
+                int(settings.NETWORK_INSPECT_JOB_TIMEOUT)
+            runner_settings['job_timeout'] = \
+                int(settings.NETWORK_INSPECT_JOB_TIMEOUT)
+            runner_settings['pexpect_timeout'] = 5
 
-            if result != TaskQueueManager.RUN_OK:
-                new_error_msg = _construct_error_msg(result)
-                callback.finalize_failed_hosts()
-                if result not in [TaskQueueManager.RUN_UNREACHABLE_HOSTS,
-                                  TaskQueueManager.RUN_FAILED_HOSTS]:
-                    error_msg += '{}\n'.format(new_error_msg)
+            parent_dir = os.path.split(settings.BASE_DIR)[0]
+            playbook_path = os.path.join(parent_dir, 'inspect.yml')
+            extra_vars['variable_host'] = group_name
+            cmdline_list = []
+            if os.path.exists(settings.DJANGO_SECRET_PATH):
+                vault_file_path = '--vault-password-file=%s' % (
+                    settings.DJANGO_SECRET_PATH)
+                cmdline_list.append(vault_file_path)
+            else:
+                err_msg = 'ERROR: Could not execute inspect.yml because ' \
+                          'secret.txt could not be found.'
+                return err_msg, ScanTask.FAILED
+            if use_paramiko:
+                cmdline_list.append('--conection=paramiko')
+            all_commands = ' '.join(cmdline_list)
 
-        if error_msg != '':
-            raise AnsibleError(error_msg)
+            if int(settings.ANSIBLE_LOG_LEVEL) == 0:
+                quiet_bool = True
+                verbosity_lvl = 0
+            else:
+                quiet_bool = False
+                verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
 
-        return scan_message, scan_result
+            try:
+                runner_obj = ansible_runner.run(quiet=quiet_bool,
+                                                settings=runner_settings,
+                                                inventory=inventory_file,
+                                                extravars=extra_vars,
+                                                event_handler=call.event_callback,  # noqa
+                                                status_handler=call.status_callback,  # noqa
+                                                playbook=playbook_path,
+                                                cmdline=all_commands,
+                                                verbosity=verbosity_lvl)
+                # roles_path requres a private_data_dir
+            except Exception as error:
+                error_msg = error
+                raise AnsibleRunnerException(error_msg)
+
+            final_status = runner_obj.status
+            if final_status != 'successful':
+                call.finalize_failed_hosts()
+                error_msg = _construct_playbook_error_msg(final_status)
+                scan_result = ScanTask.FAILED
+        return error_msg, scan_result
 
     def _obtain_discovery_data(self):
         """Obtain discover scan data.  Either via new scan or paused scan.

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -59,23 +59,44 @@ if not is_int(QPC_SSH_CONNECT_TIMEOUT):
                  'Setting to default of 60.', QPC_SSH_CONNECT_TIMEOUT)
     QPC_SSH_CONNECT_TIMEOUT = '60'
 
-# Timeout for individual tasks. Must match format in 'man timeout'
-QPC_SSH_CONNECT_TIMEOUT = '%ss' % (QPC_SSH_CONNECT_TIMEOUT)
-
 QPC_SSH_INSPECT_TIMEOUT = os.environ.get('QPC_SSH_INSPECT_TIMEOUT', '120')
 if not is_int(QPC_SSH_INSPECT_TIMEOUT):
     logger.error('QPC_SSH_INSPECT_TIMEOUT "%s" not an int.'
                  'Setting to default of 120.', QPC_SSH_INSPECT_TIMEOUT)
     QPC_SSH_INSPECT_TIMEOUT = '120'
 
+# Timeout for individual tasks. Must match format in 'man timeout'
+QPC_SSH_CONNECT_TIMEOUT = '%ss' % (QPC_SSH_CONNECT_TIMEOUT)
 QPC_SSH_INSPECT_TIMEOUT = '%ss' % (QPC_SSH_INSPECT_TIMEOUT)
 
+NETWORK_INSPECT_JOB_TIMEOUT = os.getenv('NETWORK_INSPECT_JOB_TIMEOUT',
+                                        '3600')  # 1 hour
+if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
+    logger.error('NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.'
+                 'Setting to default of 3600.',
+                 NETWORK_INSPECT_JOB_TIMEOUT)
+    NETWORK_INSPECT_JOB_TIMEOUT = '3600'
+
+NETWORK_CONNECT_JOB_TIMEOUT = os.getenv('NETWORK_CONNECT_JOB_TIMEOUT',
+                                        '1200')  # 20 minutes
+if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
+    logger.error('NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.'
+                 'Setting to default of 1200.',
+                 NETWORK_CONNECT_JOB_TIMEOUT)
+    NETWORK_CONNECT_JOB_TIMEOUT = '1200'
+
+ANSIBLE_LOG_LEVEL = os.getenv('ANSIBLE_LOG_LEVEL', '0')
+if not is_int(ANSIBLE_LOG_LEVEL):
+    logger.error('ANSIBLE_LOG_LEVEL "%s" not an int.'
+                 'Setting to default of 0.', ANSIBLE_LOG_LEVEL)
+    ANSIBLE_LOG_LEVEL = '0'
+
+DJANGO_SECRET_PATH = os.environ.get('DJANGO_SECRET_PATH',
+                                    os.path.join(BASE_DIR, 'secret.txt'))
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-    DJANGO_SECRET_PATH = os.environ.get('DJANGO_SECRET_PATH',
-                                        os.path.join(BASE_DIR, 'secret.txt'))
     if not os.path.exists(DJANGO_SECRET_PATH):
         import random
         import string
@@ -83,14 +104,16 @@ if PRODUCTION:
             '{}{}{}'.format(string.ascii_letters,
                             string.digits,
                             string.punctuation)) for i in range(50)])
-        with open(DJANGO_SECRET_PATH, 'w') as secret_file:
-            secret_file.write(SECRET_KEY)
-    else:
-        with open(DJANGO_SECRET_PATH, 'r') as secret_file:
-            SECRET_KEY = secret_file.read().splitlines()[0]
 else:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = '79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)'
+
+if not os.path.exists(DJANGO_SECRET_PATH):
+    with open(DJANGO_SECRET_PATH, 'w') as secret_file:
+        secret_file.write(SECRET_KEY)
+else:
+    with open(DJANGO_SECRET_PATH, 'r') as secret_file:
+        SECRET_KEY = secret_file.read().splitlines()[0]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
@@ -272,17 +295,6 @@ LOG_DIRECTORY = os.getenv('LOG_DIRECTORY', BASE_DIR)
 DEFAULT_LOG_FILE = os.path.join(LOG_DIRECTORY, 'app.log')
 LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
 
-DEFAULT_SCAN_DATA_LOG_FILE = os.path.join(LOG_DIRECTORY, 'scan_data.log')
-SCAN_DATA_LOG_FILE = os.getenv('SCAN_DATA_LOG_FILE',
-                               DEFAULT_SCAN_DATA_LOG_FILE)
-# pylint: disable=invalid-envvar-default
-SCAN_DATA_LOG_MAX_BYTES = os.getenv('SCAN_DATA_LOG_MAX_BYTES',
-                                    1 << 30)  # default 1 GB
-DISABLE_SCAN_DATA_LOG = os.getenv('DISABLE_SCAN_DATA_LOG', True)
-if isinstance(DISABLE_SCAN_DATA_LOG, str):
-    DISABLE_SCAN_DATA_LOG = DISABLE_SCAN_DATA_LOG.lower() == 'true'
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -385,6 +397,6 @@ os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
 # Token lifespan
 EXPIRING_TOKEN_LIFESPAN = datetime.timedelta(days=1)
 
-QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', True)
+QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', 'True')
 if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
     QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == 'true'
