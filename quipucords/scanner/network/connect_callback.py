@@ -43,11 +43,6 @@ class ConnectResultCallback():
                                                 self.source,
                                                 self.credential,
                                                 SystemConnectionResult.SUCCESS)
-            else:
-                self.result_store.record_result(host,
-                                                self.source,
-                                                self.credential,
-                                                SystemConnectionResult.FAILED)
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
@@ -80,10 +75,6 @@ class ConnectResultCallback():
                 message = 'PERMISSION DENIED %s could not connect'\
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
-                self.result_store.record_result(host,
-                                                self.source,
-                                                self.credential,
-                                                SystemConnectionResult.FAILED)
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
@@ -116,10 +107,6 @@ class ConnectResultCallback():
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
             logger.debug('%s', {'host': host, 'result': task_result})
-            self.result_store.record_result(host,
-                                            self.source,
-                                            self.credential,
-                                            SystemConnectionResult.FAILED)
         except Exception as error:
             self.result_store.scan_task.log_message(
                 'UNEXPECTED FAILURE in v2_runner_on_failed.'

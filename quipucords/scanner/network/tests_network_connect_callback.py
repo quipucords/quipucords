@@ -83,7 +83,7 @@ class TestConnectResultCallback(TestCase):
             callback.runner_event(event)
         self.assertEqual(callback.result_store.scan_task.systems_count, 3)
         self.assertEqual(callback.result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 2)
+        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
 
     def test_task_on_failed(self):
         """Test the callback on failed."""
@@ -99,7 +99,7 @@ class TestConnectResultCallback(TestCase):
                                   stderr='permission denied'))
         for event in events:
             callback.runner_event(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 2)
+        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
         self.assertEqual(callback.result_store.scan_task.systems_count, 3)
 
     def test_task_on_unreachable(self):
@@ -116,7 +116,7 @@ class TestConnectResultCallback(TestCase):
                                   msg='permission denied'))
         for event in events:
             callback.runner_event(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 1)
+        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
         self.assertEqual(callback.result_store.scan_task.systems_unreachable,
                          1)
         self.assertEqual(callback.result_store.scan_task.systems_count, 3)

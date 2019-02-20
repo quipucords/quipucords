@@ -308,15 +308,9 @@ def _connect(manager_interrupt,
         playbook_path = os.path.join(settings.BASE_DIR,
                                      'scanner/network/runner/connect.yml')
         cmdline_list = []
-        if os.path.exists(settings.DJANGO_SECRET_PATH):
-            vault_file_path = '--vault-password-file=%s' % (
-                settings.DJANGO_SECRET_PATH)
-            cmdline_list.append(vault_file_path)
-        else:
-            err_msg = 'ERROR: Could not execute connect.yml because '\
-                'secret.txt could not be found.'
-            scan_task.log_message(err_msg)
-            raise AnsibleRunnerException()
+        vault_file_path = '--vault-password-file=%s' % (
+            settings.DJANGO_SECRET_PATH)
+        cmdline_list.append(vault_file_path)
         if use_paramiko:
             cmdline_list.append('--connection=paramiko')  # paramiko conn
         all_commands = ' '.join(cmdline_list)

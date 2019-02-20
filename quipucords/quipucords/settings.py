@@ -70,7 +70,7 @@ QPC_SSH_CONNECT_TIMEOUT = '%ss' % (QPC_SSH_CONNECT_TIMEOUT)
 QPC_SSH_INSPECT_TIMEOUT = '%ss' % (QPC_SSH_INSPECT_TIMEOUT)
 
 NETWORK_INSPECT_JOB_TIMEOUT = os.getenv('NETWORK_INSPECT_JOB_TIMEOUT',
-                                        '3600')  # 1 hour
+                                        '10800')  # 3 hours
 if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
     logger.error('NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.'
                  'Setting to default of 3600.',
@@ -78,7 +78,7 @@ if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
     NETWORK_INSPECT_JOB_TIMEOUT = '3600'
 
 NETWORK_CONNECT_JOB_TIMEOUT = os.getenv('NETWORK_CONNECT_JOB_TIMEOUT',
-                                        '1200')  # 20 minutes
+                                        '600')  # 10 minutes
 if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
     logger.error('NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.'
                  'Setting to default of 1200.',

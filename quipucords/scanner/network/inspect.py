@@ -253,21 +253,15 @@ class InspectTaskRunner(ScanTaskRunner):
             runner_settings['job_timeout'] = \
                 int(settings.NETWORK_INSPECT_JOB_TIMEOUT)
             runner_settings['pexpect_timeout'] = 5
-
-            parent_dir = os.path.split(settings.BASE_DIR)[0]
-            playbook_path = os.path.join(parent_dir, 'inspect.yml')
+            playbook_path = os.path.join(settings.BASE_DIR,
+                                         'scanner/network/runner/inspect.yml')
             extra_vars['variable_host'] = group_name
             cmdline_list = []
-            if os.path.exists(settings.DJANGO_SECRET_PATH):
-                vault_file_path = '--vault-password-file=%s' % (
-                    settings.DJANGO_SECRET_PATH)
-                cmdline_list.append(vault_file_path)
-            else:
-                err_msg = 'ERROR: Could not execute inspect.yml because ' \
-                          'secret.txt could not be found.'
-                return err_msg, ScanTask.FAILED
+            vault_file_path = '--vault-password-file=%s' % (
+                settings.DJANGO_SECRET_PATH)
+            cmdline_list.append(vault_file_path)
             if use_paramiko:
-                cmdline_list.append('--conection=paramiko')
+                cmdline_list.append('--connection=paramiko')
             all_commands = ' '.join(cmdline_list)
 
             if int(settings.ANSIBLE_LOG_LEVEL) == 0:

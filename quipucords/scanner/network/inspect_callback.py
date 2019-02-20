@@ -31,8 +31,7 @@ STARTED_PROCESSING_ROLE = 'internal_host_started_processing_role'
 HOST_DONE = 'host_done'
 INTERNAL_ = 'internal_'
 TIMEOUT_RC = 124  # 'timeout's return code when it times out.
-UNEXPECTED_FAILURE = 'UNEXPECTED FAILURE in runner_event' \
-                     '   Error Unknown State: %s\nAnsible result: %s'
+UNKNOWN = 'unknown_host'
 
 
 class InspectResultCallback():
@@ -55,6 +54,7 @@ class InspectResultCallback():
 
     def process_task_facts(self, task_facts, host):
         """Collect, process, and save task facts."""
+        host_facts = {}
         for key, value in task_facts.items():
             if key == HOST_DONE:
                 self._finalize_host(host, SystemInspectionResult.SUCCESS)
@@ -62,16 +62,17 @@ class InspectResultCallback():
                 processed_value = process.process(
                     self.scan_task, self._ansible_facts.get(host, {}),
                     key, value, host)
-                host_facts = {key: processed_value}
-                if host in self._ansible_facts:
-                    self._ansible_facts[host].update(host_facts)
-                else:
-                    self._ansible_facts[host] = host_facts
+                host_facts[key] = processed_value
+        if bool(host_facts) and host != UNKNOWN:
+            if host in self._ansible_facts:
+                self._ansible_facts[host].update(host_facts)
+            else:
+                self._ansible_facts[host] = host_facts
 
     def task_on_ok(self, event_dict):
         """Print a json representation of the event_data on ok."""
         event_data = event_dict.get('event_data')
-        host = event_data.get('host')
+        host = event_data.get('host', UNKNOWN)
         result = event_data.get('res')
         task_action = event_data.get('task_action')
         task = event_data.get('task')
@@ -87,7 +88,7 @@ class InspectResultCallback():
     def task_on_failed(self, event_dict):
         """Print a json representation of the event_data on failed."""
         event_data = event_dict.get('event_data')
-        host = event_data.get('host', 'unknown host')
+        host = event_data.get('host', UNKNOWN)
         result = event_data.get('res')
         if result.get('rc') == TIMEOUT_RC:
             logger.warning('Task %s timed out', event_data['task'])
@@ -170,7 +171,7 @@ class InspectResultCallback():
     def task_on_unreachable(self, event_dict):
         """Print a json representation of the event_data on unreachable."""
         event_data = event_dict.get('event_data')
-        host = event_data.get('host')
+        host = event_data.get('host', UNKNOWN)
         result_message = event_data.get(
             'msg',
             'No information given on unreachable warning.')
@@ -199,9 +200,11 @@ class InspectResultCallback():
                         self.task_on_unreachable(event_dict)
                     else:
                         if event not in runner_ignore:
-                            self.scan_task.log_message(UNEXPECTED_FAILURE %
-                                                       (event, event_dict),
-                                                       log_level=logging.ERROR)
+                            self.scan_task.log_message(
+                                'UNEXPECTED FAILURE in runner_event.'
+                                '   Error Unknown State: %s\nAnsible '
+                                'result: %s' % (event, event_dict),
+                                log_level=logging.ERROR)
                 # Save last role for task logging later
                 if event == 'playbook_on_task_start':
                     if event_data:

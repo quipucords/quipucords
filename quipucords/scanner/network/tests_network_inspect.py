@@ -280,7 +280,6 @@ class NetworkInspectScannerTest(TestCase):
 
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
-        # What does this test?
         callback = InspectResultCallback(scan_task=self.scan_task,
                                          idx=1,
                                          group_total=1)
@@ -299,3 +298,18 @@ class NetworkInspectScannerTest(TestCase):
                         'msg': 'Failed to connect to the host via ssh: ',
                         'changed': False}, 'pid': 2210}}
         callback.task_on_unreachable(event_dict)
+
+    def test_run_manager_interupt(self):
+        """Test manager interupt for inspect run method."""
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        terminate = Value('i', ScanJob.JOB_TERMINATE_CANCEL)
+        scan_task_status = scanner.run(terminate)
+        self.assertEqual(scan_task_status[1], ScanTask.CANCELED)
+
+    @patch('scanner.network.inspect.InspectTaskRunner._obtain_discovery_data')
+    def test_no_reachable_host(self, discovery):
+        """Test no reachable host."""
+        discovery.return_value = [], [], [], []
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
+        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
