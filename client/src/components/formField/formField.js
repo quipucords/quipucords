@@ -24,18 +24,27 @@ const FormField = ({
       </Grid.Col>
       <Grid.Col className={colFieldClassName} sm={colField}>
         {children}
-        {error && <Form.HelpBlock>{errorMessage}</Form.HelpBlock>}
+        {error && (
+          <Form.HelpBlock>
+            {(typeof errorMessage === 'string' && errorMessage) ||
+              (React.isValidElement(errorMessage) && errorMessage) ||
+              (errorMessage && 'Error') ||
+              ''}
+          </Form.HelpBlock>
+        )}
       </Grid.Col>
     </Form.FormGroup>
   );
 };
 
 const doesntHaveMinimumCharacters = (value, characters = 5) => typeof value === 'string' && value.length < characters;
-const isEmpty = value => !value || value === '';
+const isEmpty = value => !value || value === '' || (Array.isArray(value) && !value.length);
+const isPortValid = value => /^\d{1,5}$/.test(value) && value <= 65535;
 
 const fieldValidation = {
   doesntHaveMinimumCharacters,
-  isEmpty
+  isEmpty,
+  isPortValid
 };
 
 FormField.propTypes = {
@@ -45,7 +54,7 @@ FormField.propTypes = {
   colField: PropTypes.number,
   colFieldClassName: PropTypes.string,
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  errorMessage: PropTypes.string,
+  errorMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.node, PropTypes.bool]),
   id: PropTypes.string,
   label: PropTypes.node
 };

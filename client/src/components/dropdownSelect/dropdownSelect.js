@@ -10,7 +10,7 @@ class DropdownSelect extends React.Component {
     const title = [];
 
     for (let i = 0; i < options.length; i++) {
-      if (options[i].active === true && options[i].title) {
+      if (options[i].selected === true && options[i].title) {
         title.push(options[i].title);
       }
 
@@ -38,17 +38,17 @@ class DropdownSelect extends React.Component {
 
   onSelect = value => {
     const { options } = this.state;
-    const { multiselect, onSelect } = this.props;
+    const { id, name, multiselect, onSelect } = this.props;
     const updatedOptions = _cloneDeep(options);
 
     const optionsIndex = updatedOptions.findIndex(option => option.value === value);
 
-    updatedOptions[optionsIndex].active = !multiselect ? true : !updatedOptions[optionsIndex].active;
+    updatedOptions[optionsIndex].selected = !multiselect ? true : !updatedOptions[optionsIndex].selected;
 
     if (!multiselect) {
       updatedOptions.forEach((option, index) => {
         if (optionsIndex !== index) {
-          updatedOptions[index].active = false;
+          updatedOptions[index].selected = false;
         }
       });
     }
@@ -61,7 +61,22 @@ class DropdownSelect extends React.Component {
         options: updatedOptions
       },
       () => {
-        onSelect(updatedOptions[optionsIndex], optionsIndex, updatedOptions);
+        const mockTarget = {
+          id,
+          name: name || id,
+          value: updatedOptions[optionsIndex].value,
+          selectedIndex: optionsIndex,
+          type: `select-${(multiselect && 'multiple') || 'one'}`,
+          options: updatedOptions
+        };
+        const mockEvent = {
+          ...mockTarget,
+          target: { ...mockTarget },
+          currentTarget: { ...mockTarget },
+          persist: helpers.noop
+        };
+
+        onSelect({ ...mockEvent }, optionsIndex, updatedOptions);
       }
     );
   };
@@ -81,7 +96,8 @@ class DropdownSelect extends React.Component {
       : _cloneDeep(options);
 
     const updatedTitle = [];
-    const activateValues = selectValue && typeof selectValue === 'string' ? [selectValue] : selectValue;
+    const activateValues =
+      (selectValue && typeof selectValue === 'string') || typeof selectValue === 'number' ? [selectValue] : selectValue;
 
     updatedOptions.forEach((option, index) => {
       let convertedOption = option;
@@ -95,13 +111,17 @@ class DropdownSelect extends React.Component {
         updatedOptions[index] = convertedOption;
       }
 
+      convertedOption.text = convertedOption.text || convertedOption.title;
+      convertedOption.textContent = convertedOption.textContent || convertedOption.title;
+      convertedOption.label = convertedOption.label || convertedOption.title;
+
       if (activateValues) {
-        updatedOptions[index].active = activateValues.includes(convertedOption.value);
+        updatedOptions[index].selected = activateValues.includes(convertedOption.value);
       }
 
-      if (convertedOption.active === true) {
+      if (convertedOption.selected === true) {
         if (!multiselect && updatedTitle.length) {
-          updatedOptions[index].active = false;
+          updatedOptions[index].selected = false;
         }
 
         if (multiselect || (!multiselect && !updatedTitle.length)) {
@@ -118,30 +138,31 @@ class DropdownSelect extends React.Component {
 
   render() {
     const { isOpen, options, selectedTitle } = this.state;
-    const { className, id, multiselect, pullRight, title } = this.props;
-    const multiselectProps = {};
+    const { className, id, name, multiselect, pullRight, title } = this.props;
+    const additionalProps = {};
 
     if (multiselect) {
-      multiselectProps.onToggle = this.onToggleDropDown;
-      multiselectProps.open = isOpen;
+      additionalProps.onToggle = this.onToggleDropDown;
+      additionalProps.open = isOpen;
     }
 
     return (
       <Dropdown
         id={id}
+        name={name || id}
         disabled={!options || !options.length}
         className={`quipucords-dropdownselect ${className}`}
         onSelect={this.onSelect}
         pullRight={pullRight}
-        {...multiselectProps}
+        {...additionalProps}
       >
-        <Dropdown.Toggle>
+        <Dropdown.Toggle className="form-control">
           <span>{selectedTitle || title}</span>
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {options &&
             options.map(option => (
-              <MenuItem key={option.value} eventKey={option.value} active={!multiselect && option.active}>
+              <MenuItem key={option.value} eventKey={option.value} active={!multiselect && option.selected}>
                 {!multiselect && option.title}
                 {multiselect && (
                   <Grid.Row className="quipucords-dropdownselect-menuitem">
@@ -149,7 +170,7 @@ class DropdownSelect extends React.Component {
                       {option.title}
                     </Grid.Col>
                     <Grid.Col xs={2} className="quipucords-dropdownselect-menuitemcheck">
-                      {option.active && <Icon type="fa" name="check" />}
+                      {option.selected && <Icon type="fa" name="check" />}
                     </Grid.Col>
                   </Grid.Row>
                 )}
@@ -165,10 +186,11 @@ DropdownSelect.propTypes = {
   className: PropTypes.string,
   id: PropTypes.string,
   multiselect: PropTypes.bool,
+  name: PropTypes.string,
   onSelect: PropTypes.func,
   options: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   pullRight: PropTypes.bool,
-  selectValue: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  selectValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.array]),
   title: PropTypes.string
 };
 
@@ -176,6 +198,7 @@ DropdownSelect.defaultProps = {
   className: '',
   id: helpers.generateId(),
   multiselect: false,
+  name: null,
   onSelect: helpers.noop,
   options: [],
   pullRight: false,
