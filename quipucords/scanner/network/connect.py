@@ -221,7 +221,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-# pylint: disable=too-many-arguments, too-many-locals
+# pylint: disable=too-many-arguments, too-many-locals, too-many-statements
 def _connect(manager_interrupt,
              scan_task,
              hosts,
@@ -342,6 +342,8 @@ def _connect(manager_interrupt,
         if final_status != 'successful':
             log_message = _construct_playbook_error_msg(final_status)
             scan_task.log_message(log_message)
+            if final_status not in ['unreachable', 'failed']:
+                raise AnsibleRunnerException(final_status)
 
 
 def _handle_ssh_passphrase(credential):

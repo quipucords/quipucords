@@ -36,13 +36,18 @@ class ConnectResultCallback():
     def task_on_ok(self, event_data):
         """Print a json representation of the event_data on ok."""
         try:
-            host = event_data['host']
-            task_result = event_data['res']
+            host = event_data.get('host')
+            task_result = event_data.get('res')
             if 'rc' in task_result and task_result['rc'] == 0:
                 self.result_store.record_result(host,
                                                 self.source,
                                                 self.credential,
                                                 SystemConnectionResult.SUCCESS)
+            else:
+                self.result_store.record_result(host,
+                                                self.source,
+                                                self.credential,
+                                                SystemConnectionResult.FAILED)
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
@@ -75,6 +80,10 @@ class ConnectResultCallback():
                 message = 'PERMISSION DENIED %s could not connect'\
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
+                self.result_store.record_result(host,
+                                                self.source,
+                                                self.credential,
+                                                SystemConnectionResult.FAILED)
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
@@ -107,6 +116,10 @@ class ConnectResultCallback():
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
             logger.debug('%s', {'host': host, 'result': task_result})
+            self.result_store.record_result(host,
+                                            self.source,
+                                            self.credential,
+                                            SystemConnectionResult.FAILED)
         except Exception as error:
             self.result_store.scan_task.log_message(
                 'UNEXPECTED FAILURE in v2_runner_on_failed.'

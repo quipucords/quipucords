@@ -12,7 +12,6 @@
 
 # pylint: disable=ungrouped-imports
 import os.path
-import unittest
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
@@ -21,8 +20,10 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from api.connresult.model import SystemConnectionResult
 from api.models import (Credential,
                         ScanJob,
+                        ScanOptions,
                         ScanTask,
-                        Source)
+                        Source,
+                        SourceOptions)
 from api.serializers import CredentialSerializer, SourceSerializer
 
 from django.test import TestCase
@@ -31,19 +32,10 @@ from scanner.network import ConnectTaskRunner
 from scanner.network.connect import (ConnectResultStore,
                                      _connect,
                                      _construct_connect_inventory)
-from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.exceptions import (NetworkCancelException,
+                                        NetworkPauseException)
 from scanner.network.utils import _construct_vars
 from scanner.test_util import create_scan_job
-
-
-def mock_run_success(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with success."""
-    return 0
-
-
-def mock_run_failed(play):  # pylint: disable=unused-argument
-    """Mock for TaskQueueManager run method with failure."""
-    return 255
 
 
 def mock_handle_ssh(cred):  # pylint: disable=unused-argument
@@ -76,25 +68,7 @@ class MockResultStore():
         return list(self._remaining_hosts)
 
 
-class TestConnectResultCallback(unittest.TestCase):
-    """Test ConnectResultCallback."""
-
-    def test_callback_on_ok(self):
-        """Test the callback."""
-        result_store = MockResultStore(['host1', 'host2', 'host3'])
-        credential = Mock(name='credential')
-        source = Mock(name='source')
-        callback = ConnectResultCallback(result_store,
-                                         credential,
-                                         source)
-        callback.task_on_ok({'host': 'host1', 'res': {'rc': 0}})
-        callback.task_on_ok({'host': 'host2', 'res': {'rc': 1}})
-        callback.task_on_ok({'host': 'host2', 'res': {'rc': None}})
-        self.assertEqual(result_store.succeeded,
-                         [('host1', source, credential, 'success')])
-        self.assertEqual(result_store.failed, [])
-
-
+# pylint: disable=too-many-instance-attributes
 class NetworkConnectTaskRunnerTest(TestCase):
     """Tests against the ConnectTaskRunner class and functions."""
 
@@ -137,9 +111,29 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.source2.save()
 
         self.scan_job2, self.scan_task2 = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_CONNECT, 'source2')
+            self.source2, ScanTask.SCAN_TYPE_CONNECT, 'source2',)
 
         self.scan_task2.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
+
+        # Scans with options & no excluded hosts
+        source_options = SourceOptions(use_paramiko=True)
+        source_options.save()
+        self.source3 = Source(
+            name='source3',
+            hosts='["1.2.3.4","1.2.3.5","1.2.3.6"]',
+            source_type='network',
+            port=22,
+            options=source_options)
+        self.source3.save()
+        self.source3.credentials.add(self.cred)
+        self.source3.save()
+
+        scan_options = ScanOptions(max_concurrency=2)
+        scan_options.save()
+
+        self.scan_job3, self.scan_task3 = create_scan_job(
+            self.source3, ScanTask.SCAN_TYPE_CONNECT, 'source3', scan_options)
+        self.scan_task3.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -158,7 +152,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     def test_get_exclude_host(self):
         """Test get_exclude_hosts() method."""
         assert self.source.get_exclude_hosts() != []
-        assert self.source2.get_exclude_hosts() == []
+        assert self.source3.get_exclude_hosts() == []
 
     # Tests for source1 (has hosts and excluded host)
     def test_result_store(self):
@@ -171,12 +165,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.assertEqual(result_store.scan_task.systems_failed, 0)
 
         result_store.record_result('1.2.3.4', self.source, self.cred,
-                                   SystemConnectionResult.SUCCESS)
+                                   SystemConnectionResult.UNREACHABLE)
 
         self.assertEqual(result_store.remaining_hosts(), [])
         self.assertEqual(result_store.scan_task.systems_count, 1)
-        self.assertEqual(result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(result_store.scan_task.systems_failed, 0)
+        self.assertEqual(result_store.scan_task.systems_scanned, 0)
+        self.assertEqual(result_store.scan_task.systems_unreachable, 1)
 
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -239,7 +233,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('ansible_runner.run')
     def test_connect(self, mock_run):
         """Test connect flow with mocked manager."""
-        mock_run.side_effect = None
+        mock_run.return_value.status = 'successful'
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
@@ -253,7 +247,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('ansible_runner.run')
     def test_connect_ssh_crash(self, mock_run):
         """Simulate an ssh crash."""
-        mock_run.side_effect = None
+        mock_run.return_value.status = 'successful'
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
@@ -261,7 +255,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
-                         '../../../test_util/crash.py'))
+                         'test_util/crash.py'))
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
                  hosts, Mock(), self.cred, connection_port,
                  exclude_hosts, base_ssh_executable=path)
@@ -270,6 +264,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('ansible_runner.run')
     def test_connect_ssh_hang(self, mock_run):
         """Simulate an ssh hang."""
+        mock_run.return_value.status = 'successful'
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source['hosts']
@@ -277,7 +272,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
-                         '../../../test_util/hang.py'))
+                         'test_util/hang.py'))
         _connect(
             Value('i', ScanJob.JOB_RUN),
             self.scan_task,
@@ -295,27 +290,48 @@ class NetworkConnectTaskRunnerTest(TestCase):
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(
             Value('i', ScanJob.JOB_RUN), result_store)
-        mock_connect.assert_called_with(
-            ANY, self.scan_task, ANY, ANY, ANY, 22, False, forks=50)
+        mock_connect.assert_called_with(ANY, self.scan_task,
+                                        ANY, ANY,
+                                        ANY, 22,
+                                        False, forks=50)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
     def test_result_store_src2(self):
         """Test ConnectResultStore."""
-        result_store = ConnectResultStore(self.scan_task2)
-
-        self.assertEqual(result_store.remaining_hosts(), ['1.2.3.4'])
-        self.assertEqual(result_store.scan_task.systems_count, 1)
+        result_store = ConnectResultStore(self.scan_task3)
+        hosts = ['1.2.3.4', '1.2.3.5', '1.2.3.6']
+        self.assertCountEqual(result_store.remaining_hosts(), hosts)
+        self.assertEqual(result_store.scan_task.systems_count, 3)
         self.assertEqual(result_store.scan_task.systems_scanned, 0)
         self.assertEqual(result_store.scan_task.systems_failed, 0)
 
-        result_store.record_result('1.2.3.4', self.source2, self.cred,
+        host = hosts.pop()
+        result_store.record_result(host, self.source2, self.cred,
                                    SystemConnectionResult.SUCCESS)
 
-        self.assertEqual(result_store.remaining_hosts(), [])
-        self.assertEqual(result_store.scan_task.systems_count, 1)
+        self.assertCountEqual(result_store.remaining_hosts(), hosts)
+        self.assertEqual(result_store.scan_task.systems_count, 3)
         self.assertEqual(result_store.scan_task.systems_scanned, 1)
         self.assertEqual(result_store.scan_task.systems_failed, 0)
+
+        host = hosts.pop()
+        # Check failure without cred
+        result_store.record_result(host, self.source2, None,
+                                   SystemConnectionResult.FAILED)
+        self.assertCountEqual(result_store.remaining_hosts(), hosts)
+        self.assertEqual(result_store.scan_task.systems_count, 3)
+        self.assertEqual(result_store.scan_task.systems_scanned, 1)
+        self.assertEqual(result_store.scan_task.systems_failed, 1)
+
+        host = hosts.pop()
+        # Check failure with cred
+        result_store.record_result(host, self.source2, self.cred,
+                                   SystemConnectionResult.FAILED)
+        self.assertCountEqual(result_store.remaining_hosts(), hosts)
+        self.assertEqual(result_store.scan_task.systems_count, 3)
+        self.assertEqual(result_store.scan_task.systems_scanned, 1)
+        self.assertEqual(result_store.scan_task.systems_failed, 2)
 
     def test_connect_inventory_src2(self):
         """Test construct ansible inventory dictionary."""
@@ -362,7 +378,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     @patch('ansible_runner.run')
     def test_connect_src2(self, mock_run):
         """Test connect flow with mocked manager."""
-        mock_run.side_effect = None
+        mock_run.return_value.status = 'successful'
         serializer = SourceSerializer(self.source2)
         source = serializer.data
         hosts = source['hosts']
@@ -371,13 +387,123 @@ class NetworkConnectTaskRunnerTest(TestCase):
                  hosts, Mock(), self.cred, connection_port)
         mock_run.assert_called()
 
+    @patch('ansible_runner.run')
+    def test_connect_runner_error(self, mock_run):
+        """Test connect flow with mocked manager."""
+        mock_run.side_effect = AnsibleRunnerException('Fail')
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        with self.assertRaises(AnsibleRunnerException):
+            _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
+                     hosts, Mock(), self.cred, connection_port)
+            mock_run.assert_called()
+
     @patch('scanner.network.connect._connect')
     def test_connect_runner_src2(self, mock_connect):
         """Test running a connect scan with mocked connection."""
-        scanner = ConnectTaskRunner(self.scan_job2, self.scan_task2)
+        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         result_store = MockResultStore(['1.2.3.4'])
         conn_dict = scanner.run_with_result_store(
             Value('i', ScanJob.JOB_RUN), result_store)
         mock_connect.assert_called_with(
-            ANY, self.scan_task2, ANY, ANY, ANY, 22, False, forks=50)
+            ANY, self.scan_task3, ANY, ANY, ANY, 22, True, forks=2)
         self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+
+    @patch('ansible_runner.run')
+    def test_connect_paramiko(self, mock_run):
+        """Test connect with paramiko."""
+        mock_run.return_value.status = 'successful'
+        serializer = SourceSerializer(self.source3)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        _connect(Value('i', ScanJob.JOB_RUN),
+                 self.scan_task, hosts, Mock(), self.cred,
+                 connection_port)
+        mock_run.assert_called()
+
+    @patch('ansible_runner.run')
+    @patch('scanner.network.connect.settings.ANSIBLE_LOG_LEVEL', '1')
+    def test_modifying_log_level(self, mock_run):
+        """Test modifying the log level."""
+        mock_run.return_value.status = 'successful'
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        _connect(Value('i', ScanJob.JOB_RUN),
+                 self.scan_task, hosts, Mock(), self.cred,
+                 connection_port)
+        mock_run.assert_called()
+        calls = mock_run.mock_calls
+        # Check to see if the parameter was passed into the runner.run()
+        self.assertIn('verbosity=1', str(calls[0]))
+
+    @patch('ansible_runner.run')
+    @patch('scanner.network.connect.settings.DJANGO_SECRET_PATH', 'None')
+    def test_secret_file_fail(self, mock_run):
+        """Test modifying the log level."""
+        mock_run.side_effect = AnsibleRunnerException()
+        serializer = SourceSerializer(self.source2)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        with self.assertRaises(AnsibleRunnerException):
+            _connect(Value('i', ScanJob.JOB_RUN),
+                     self.scan_task, hosts, Mock(), self.cred,
+                     connection_port)
+            mock_run.assert_called()
+
+    @patch('ansible_runner.run')
+    def test_unexpected_runner_response(self, mock_run):
+        """Test unexpected runner response."""
+        mock_run.return_value.status = 'unknown'
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
+        result_store = MockResultStore(['1.2.3.4'])
+        conn_dict = scanner.run_with_result_store(
+            Value('i', ScanJob.JOB_RUN), result_store)
+        self.assertEqual(conn_dict[1], ScanTask.FAILED)
+
+    @patch('scanner.network.connect.ConnectTaskRunner.run_with_result_store')
+    def test_cancel_connect(self, mock_run):
+        """Test cancel of connect."""
+        # Test cancel at _connect level
+        serializer = SourceSerializer(self.source3)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        with self.assertRaises(NetworkCancelException):
+            _connect(Value('i', ScanJob.JOB_TERMINATE_CANCEL),
+                     self.scan_task, hosts, Mock(), self.cred,
+                     connection_port)
+        # Test cancel at run() level
+        mock_run.side_effect = NetworkCancelException()
+        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
+        _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
+        self.assertEqual(scan_result, ScanTask.CANCELED)
+
+    @patch('scanner.network.connect.ConnectTaskRunner.run_with_result_store')
+    def test_pause_connect(self, mock_run):
+        """Test pause of connect."""
+        # Test cancel at _connect level
+        serializer = SourceSerializer(self.source3)
+        source = serializer.data
+        hosts = source['hosts']
+        connection_port = source['port']
+        with self.assertRaises(NetworkPauseException):
+            _connect(Value('i', ScanJob.JOB_TERMINATE_PAUSE),
+                     self.scan_task, hosts, Mock(), self.cred,
+                     connection_port)
+        # Test cancel at run() level
+        mock_run.side_effect = NetworkPauseException()
+        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
+        _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
+        self.assertEqual(scan_result, ScanTask.PAUSED)
+
+    def test_run_manager_interupt(self):
+        """Test manager interupt for run method."""
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
+        conn_dict = scanner.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
+        self.assertEqual(conn_dict[1], ScanTask.CANCELED)
