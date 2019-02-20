@@ -33,6 +33,8 @@ from django.urls import reverse
 import requests_mock
 
 from scanner.network import InspectTaskRunner
+from scanner.network.exceptions import (NetworkCancelException,
+                                        NetworkPauseException)
 from scanner.network.inspect import (_construct_scan_inventory)
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.test_util import create_scan_job
@@ -313,3 +315,31 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value('i', ScanJob.JOB_RUN))
         self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+
+    def test_cancel_inspect(self):
+        """Test cancel of inspect."""
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        with self.assertRaises(NetworkCancelException):
+            scanner.connect_scan_task = self.connect_scan_task
+            scanner._inspect_scan(Value('i', ScanJob.JOB_TERMINATE_CANCEL),
+                                  self.host_list)
+
+    def test_pause_inspect(self):
+        """Test pause of inspect."""
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        with self.assertRaises(NetworkPauseException):
+            scanner.connect_scan_task = self.connect_scan_task
+            scanner._inspect_scan(Value('i', ScanJob.JOB_TERMINATE_PAUSE),
+                                  self.host_list)
+
+    @patch('ansible_runner.run')
+    @patch('scanner.network.inspect.settings.ANSIBLE_LOG_LEVEL', '1')
+    def test_modifying_log_level(self, mock_run):
+        """Test modifying the log level."""
+        mock_run.return_value.status = 'successful'
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        scanner._inspect_scan(Value('i', ScanJob.JOB_RUN), self.host_list)
+        mock_run.assert_called()
+        calls = mock_run.mock_calls
+        # Check to see if the parameter was passed into the runner.run()
+        self.assertIn('verbosity=1', str(calls[0]))
