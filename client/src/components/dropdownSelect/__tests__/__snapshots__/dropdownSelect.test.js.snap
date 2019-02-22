@@ -1,20 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DropdownSelect Component should render 1`] = `
+exports[`basic dropdown 1`] = `
 <div
-  class="dropdown btn-group"
-  title="test title"
+  class="quipucords-dropdownselect  dropdown btn-group"
 >
   <button
     aria-expanded="false"
     aria-haspopup="true"
     class="dropdown-toggle btn btn-default"
-    id="testing"
+    id="test"
     role="button"
     type="button"
   >
     <span>
-      test title
+      Select option
     </span>
      
     <span
@@ -22,7 +21,7 @@ exports[`DropdownSelect Component should render 1`] = `
     />
   </button>
   <ul
-    aria-labelledby="testing"
+    aria-labelledby="test"
     class="dropdown-menu"
     role="menu"
   >
@@ -35,7 +34,234 @@ exports[`DropdownSelect Component should render 1`] = `
         role="menuitem"
         tabindex="-1"
       >
-        One
+        lorem
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        hello
+      </a>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`key value object 1`] = `
+<div
+  class="quipucords-dropdownselect  dropdown btn-group"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="dropdown-toggle btn btn-default"
+    id="test"
+    role="button"
+    type="button"
+  >
+    <span>
+      Select option
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="test"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        ipsum
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        world
+      </a>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`multiselect dropdown 1`] = `
+<div
+  class="quipucords-dropdownselect  dropdown btn-group"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="dropdown-toggle btn btn-default"
+    id="test"
+    role="button"
+    type="button"
+  >
+    <span>
+      lorem,hello
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="test"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        <div
+          class="quipucords-dropdownselect-menuitem row"
+        >
+          <div
+            class="quipucords-dropdownselect-menuitemname col-xs-10"
+          >
+            lorem
+          </div>
+          <div
+            class="quipucords-dropdownselect-menuitemcheck col-xs-2"
+          >
+            <span
+              aria-hidden="true"
+              class="fa fa-check"
+            />
+          </div>
+        </div>
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        <div
+          class="quipucords-dropdownselect-menuitem row"
+        >
+          <div
+            class="quipucords-dropdownselect-menuitemname col-xs-10"
+          >
+            hello
+          </div>
+          <div
+            class="quipucords-dropdownselect-menuitemcheck col-xs-2"
+          >
+            <span
+              aria-hidden="true"
+              class="fa fa-check"
+            />
+          </div>
+        </div>
+      </a>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`string array 1`] = `
+<div
+  class="quipucords-dropdownselect  dropdown btn-group"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="dropdown-toggle btn btn-default"
+    id="test"
+    role="button"
+    type="button"
+  >
+    <span>
+      ipsum
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="test"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        lorem
+      </a>
+    </li>
+    <li
+      class="active"
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        ipsum
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        hello
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        world
       </a>
     </li>
   </ul>

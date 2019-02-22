@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormField Component should render 1`] = `
+<div
+  class="form-group"
+>
+  <label
+    class="col-sm-3 control-label"
+    for="test"
+  />
+  <div
+    class="col-sm-9"
+  >
+    <input
+      id="test"
+      readonly=""
+      type="text"
+      value=""
+    />
+  </div>
+</div>
+`;
+
+exports[`FormField Component should render 2`] = `
+<label
+  class="col-sm-3 control-label"
+  for="test"
+/>
+`;

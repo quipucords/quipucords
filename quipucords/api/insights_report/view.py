@@ -105,7 +105,7 @@ def verify_report_hosts(hosts):
     logger.info(message)
     if invalid_hosts:
         logger.warning('The following hosts have no canonical '
-                       'facts and will be excluded from the insights '
+                       'facts and will be excluded from the Insights '
                        'report: %s', str(invalid_hosts))
     if missing_sys_platform_id > 0:
         logger.error('%d hosts were missing the required '

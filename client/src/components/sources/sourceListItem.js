@@ -6,6 +6,7 @@ import { Button, Checkbox, Grid, Icon, ListView, OverlayTrigger, Popover } from 
 import _ from 'lodash';
 import * as moment from 'moment';
 import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
 import SourceCredentialsList from './sourceCredentialsList';
@@ -88,7 +89,7 @@ class SourceListItem extends React.Component {
     const typeIcon = helpers.sourceTypeIcon(item.source_type);
 
     return (
-      <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(item.source_type)}>
+      <SimpleTooltip id="sourceTypeTip" tooltip={dictionary[item.source_type]}>
         <ListView.Icon type={typeIcon.type} name={typeIcon.name} />
       </SimpleTooltip>
     );
@@ -258,7 +259,7 @@ class SourceListItem extends React.Component {
         {item.hosts && item.hosts.length > 1 && (
           <ul className="quipucords-popover-list">
             {item.hosts.map(host => (
-              <li>{host}</li>
+              <li key={host}>{host}</li>
             ))}
           </ul>
         )}
