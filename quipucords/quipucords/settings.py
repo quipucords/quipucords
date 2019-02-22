@@ -73,17 +73,17 @@ NETWORK_INSPECT_JOB_TIMEOUT = os.getenv('NETWORK_INSPECT_JOB_TIMEOUT',
                                         '10800')  # 3 hours
 if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
     logger.error('NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.'
-                 'Setting to default of 3600.',
+                 'Settin to default of 10800.',
                  NETWORK_INSPECT_JOB_TIMEOUT)
-    NETWORK_INSPECT_JOB_TIMEOUT = '3600'
+    NETWORK_INSPECT_JOB_TIMEOUT = '10800'
 
 NETWORK_CONNECT_JOB_TIMEOUT = os.getenv('NETWORK_CONNECT_JOB_TIMEOUT',
                                         '600')  # 10 minutes
 if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
     logger.error('NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.'
-                 'Setting to default of 1200.',
+                 'Setting to default of 600.',
                  NETWORK_CONNECT_JOB_TIMEOUT)
-    NETWORK_CONNECT_JOB_TIMEOUT = '1200'
+    NETWORK_CONNECT_JOB_TIMEOUT = '600'
 
 ANSIBLE_LOG_LEVEL = os.getenv('ANSIBLE_LOG_LEVEL', '0')
 if not is_int(ANSIBLE_LOG_LEVEL):
