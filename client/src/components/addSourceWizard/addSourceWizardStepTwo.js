@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { MenuItem, Button, Icon, Form, Grid, Checkbox } from 'patternfly-react';
+import { Button, Icon, Form, Checkbox } from 'patternfly-react';
 import _ from 'lodash';
 import Store from '../../redux/store';
-import helpers from '../../common/helpers';
+import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
 import { AddSourceWizardField as FieldGroup } from './addSourceWizardField';
 import { apiTypes } from '../../constants';
@@ -171,7 +172,7 @@ class AddSourceWizardStepTwo extends React.Component {
     );
   };
 
-  onChangeCredential = (event, value) => {
+  onChangeCredential = credential => {
     const { credentials } = this.state;
     const { source } = this.props;
 
@@ -179,13 +180,13 @@ class AddSourceWizardStepTwo extends React.Component {
     let submitCreds = [];
 
     if (sourceType === 'vcenter' || sourceType === 'satellite') {
-      submitCreds = [value.id];
+      submitCreds = [credential.value];
     } else {
       submitCreds = [...credentials];
-      const credentialIndex = submitCreds.indexOf(value.id);
+      const credentialIndex = submitCreds.indexOf(credential.value);
 
       if (credentialIndex < 0) {
-        submitCreds.push(value.id);
+        submitCreds.push(credential.value);
       } else {
         submitCreds.splice(credentialIndex, 1);
       }
@@ -408,14 +409,12 @@ class AddSourceWizardStepTwo extends React.Component {
     const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
     const hasSingleCredential = sourceType === 'vcenter' || sourceType === 'satellite';
 
-    const availableCredentials = allCredentials.filter(credential => credential.cred_type === sourceType);
+    const availableCredentials = allCredentials
+      .filter(credential => credential.cred_type === sourceType)
+      .map(credential => ({ title: credential.name, value: credential.id }));
 
     let titleAddSelect;
     let title;
-
-    if (credentials.length) {
-      title = credentials.map(credential => this.credentialInfo(credential).name).join(', ');
-    }
 
     if (!title || !credentials.length) {
       titleAddSelect = availableCredentials.length ? 'Select' : 'Add';
@@ -425,37 +424,16 @@ class AddSourceWizardStepTwo extends React.Component {
     return (
       <FieldGroup label="Credentials" error={credentialsError} errorMessage={credentialsError}>
         <Form.InputGroup>
-          <div className="quipucords-dropdownselect">
-            <DropdownSelect
-              title={title}
-              id="credential-select"
-              disabled={!availableCredentials.length}
-              className="form-control"
-              multiselect={!hasSingleCredential}
-            >
-              {availableCredentials.length &&
-                availableCredentials.map((value, index) => (
-                  <MenuItem
-                    key={value.id}
-                    eventKey={index}
-                    className={{ 'quipucords-dropdownselect-menuitem-selected': credentials.indexOf(value.id) > -1 }}
-                    onSelect={e => this.onChangeCredential(e, value)}
-                  >
-                    {!hasSingleCredential && (
-                      <Grid.Row className="quipucords-dropdownselect-menuitem">
-                        <Grid.Col xs={10} className="quipucords-dropdownselect-menuitemname">
-                          {value.name}
-                        </Grid.Col>
-                        <Grid.Col xs={2} className="quipucords-dropdownselect-menuitemcheck">
-                          {credentials.indexOf(value.id) > -1 && <Icon type="fa" name="check" />}
-                        </Grid.Col>
-                      </Grid.Row>
-                    )}
-                    {hasSingleCredential && value.name}
-                  </MenuItem>
-                ))}
-            </DropdownSelect>
-          </div>
+          <DropdownSelect
+            title={(!credentials.length && title) || ''}
+            id="credential-select"
+            disabled={!availableCredentials.length}
+            multiselect={!hasSingleCredential}
+            onSelect={this.onChangeCredential}
+            options={availableCredentials}
+            selectValue={credentials}
+            key={`dropdown-update-${availableCredentials.length}`}
+          />
           <Form.InputGroup.Button>
             <Button onClick={this.onClickCredential} title="Add a credential">
               <span className="sr-only">Add</span>
@@ -494,8 +472,6 @@ class AddSourceWizardStepTwo extends React.Component {
     const { sourceName, sourceNameError } = this.state;
     const { source } = this.props;
 
-    const sourceTypeString = helpers.sourceTypeString(_.get(source, apiTypes.API_SOURCE_TYPE));
-
     return (
       <Form horizontal>
         <FieldGroup label="Name" error={sourceNameError} errorMessage={sourceNameError}>
@@ -503,7 +479,7 @@ class AddSourceWizardStepTwo extends React.Component {
             type="text"
             name="sourceName"
             value={sourceName}
-            placeholder={`Enter a name for the ${sourceTypeString} source`}
+            placeholder={`Enter a name for the ${dictionary[_.get(source, apiTypes.API_SOURCE_TYPE)] || ''} source`}
             onChange={this.onChangeSourceName}
           />
         </FieldGroup>

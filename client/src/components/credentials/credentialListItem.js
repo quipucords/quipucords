@@ -5,6 +5,7 @@ import cx from 'classnames';
 import { ListView, Button, Grid, Icon, Checkbox } from 'patternfly-react';
 import _ from 'lodash';
 import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import SimpleTooltip from '../simpleTooltIp/simpleTooltip';
 import Store from '../../redux/store';
 import { viewTypes } from '../../redux/constants';
@@ -130,7 +131,7 @@ class CredentialListItem extends React.Component {
                 <Grid.Row key={source.name}>
                   <Grid.Col xs={12} sm={4}>
                     <span>
-                      <SimpleTooltip id="sourceTypeTip" tooltip={helpers.sourceTypeString(source.source_type)}>
+                      <SimpleTooltip id="sourceTypeTip" tooltip={dictionary[source.source_type]}>
                         <Icon type={typeIcon.type} name={typeIcon.name} />
                       </SimpleTooltip>
                       &nbsp; {source.name}
@@ -156,7 +157,7 @@ class CredentialListItem extends React.Component {
     });
 
     const leftContent = (
-      <SimpleTooltip id="credentialTypeTip" tooltip={helpers.sourceTypeString(item.cred_type)}>
+      <SimpleTooltip id="credentialTypeTip" tooltip={dictionary[item.cred_type]}>
         <ListView.Icon type={sourceTypeIcon.type} name={sourceTypeIcon.name} />
       </SimpleTooltip>
     );
@@ -168,7 +169,7 @@ class CredentialListItem extends React.Component {
         </span>
         <span className="quipucords-description-right">
           <SimpleTooltip id="methodTip" tooltip="Authorization Type">
-            {helpers.authorizationTypeString(CredentialListItem.authType(item))}
+            {dictionary[CredentialListItem.authType(item)]}
           </SimpleTooltip>
         </span>
       </div>

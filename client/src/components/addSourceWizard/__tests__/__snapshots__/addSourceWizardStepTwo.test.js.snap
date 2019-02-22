@@ -42,37 +42,30 @@ exports[`unconnected 1`] = `
         class="input-group"
       >
         <div
-          class="quipucords-dropdownselect"
+          class="quipucords-dropdownselect  dropdown disabled btn-group"
         >
-          <div
-            class="form-control dropdown disabled btn-group"
-            title="Add one or more credentials"
+          <button
+            aria-expanded="false"
+            aria-haspopup="true"
+            class="dropdown-toggle btn btn-default"
+            disabled=""
+            id="credential-select"
+            role="button"
+            type="button"
           >
-            <button
-              aria-expanded="false"
-              aria-haspopup="true"
-              class="dropdown-toggle btn btn-default"
-              disabled=""
-              id="credential-select"
-              role="button"
-              type="button"
-            >
-              <span>
-                Add one or more credentials
-              </span>
-               
-              <span
-                class="caret"
-              />
-            </button>
-            <ul
-              aria-labelledby="credential-select"
-              class="dropdown-menu"
-              role="menu"
-            >
-              0
-            </ul>
-          </div>
+            <span>
+              Add one or more credentials
+            </span>
+             
+            <span
+              class="caret"
+            />
+          </button>
+          <ul
+            aria-labelledby="credential-select"
+            class="dropdown-menu"
+            role="menu"
+          />
         </div>
         <span
           class="input-group-btn"

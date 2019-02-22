@@ -44,6 +44,7 @@
     ],
     "no-console": 0,
     "no-debugger": 1,
+    "no-plusplus": 0,
     "no-case-declarations": 0,
     "prettier/prettier": [
       "error",

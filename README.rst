@@ -1,17 +1,8 @@
-.. image:: https://travis-ci.org/quipucords/quipucords.svg?branch=master
-    :target: https://travis-ci.org/quipucords/quipucords
-.. image:: https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/quipucords/quipucords
-.. image:: https://landscape.io/github/quipucords/quipucords/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/quipucords/quipucords/master
-   :alt: Code Health
-.. image:: https://requires.io/github/quipucords/quipucords/requirements.svg?branch=master
-    :target: https://requires.io/github/quipucords/quipucords/requirements/?branch=master
-    :alt: Requirements Status
-.. image:: https://readthedocs.org/projects/quipucords/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: https://quipucords.readthedocs.io/en/latest/?badge=latest
+=================
+Quipucords README
+=================
+
+|travis| |codecov| |license| |updates| |python 3|
 
 quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment
 ===================================================================================================================
@@ -275,3 +266,12 @@ Copyright and License
 Copyright 2017-2018, Red Hat, Inc.
 
 quipucords is released under the `GNU Public License version 3 <LICENSE>`_
+
+.. |travis| image:: https://travis-ci.org/quipucords/quipucords.svg?branch=master
+    :target: https://travis-ci.org/quipucords/quipucords
+.. |codecov| image:: https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/quipucords/quipucords
+.. |license| image:: https://img.shields.io/github/license/quipucords/yupana.svg
+.. |updates| image:: https://pyup.io/repos/github/quipucords/quipucords/shield.svg
+   :target: https://pyup.io/repos/github/quipucords/quipucords/
+.. |python 3| image:: https://pyup.io/repos/github/quipucords/quipucords/python-3-shield.svg

@@ -5,7 +5,8 @@ import { Dropdown, EmptyState, Grid, Icon, MenuItem, Pager } from 'patternfly-re
 import _ from 'lodash';
 import * as moment from 'moment/moment';
 import { connect, reduxActions } from '../../redux';
-import helpers from '../../common/helpers';
+import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 
 class ScanJobsList extends React.Component {
   constructor() {
@@ -87,7 +88,7 @@ class ScanJobsList extends React.Component {
       return null;
     }
 
-    const scanDescription = helpers.scanStatusString(job.status);
+    const scanDescription = dictionary[job.status] || '';
     const statusIconInfo = helpers.scanStatusIcon(job.status);
     const classes = cx('scan-job-status-icon', ...statusIconInfo.classNames);
     const icon = <Icon className={classes} type={statusIconInfo.type} name={statusIconInfo.name} />;

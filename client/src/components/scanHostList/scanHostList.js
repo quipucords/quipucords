@@ -4,7 +4,8 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { connect } from 'react-redux';
 import { EmptyState, Grid } from 'patternfly-react';
 import _ from 'lodash';
-import helpers from '../../common/helpers';
+import { helpers } from '../../common/helpers';
+import { dictionary } from '../../constants/dictionaryConstants';
 import { reduxActions } from '../../redux/actions';
 
 class ScanHostList extends React.Component {
@@ -247,7 +248,7 @@ class ScanHostList extends React.Component {
         <EmptyState>
           <EmptyState.Icon name="warning-triangle-o" />
           <EmptyState.Title>
-            {`${helpers.scanStatusString(status)} systems were not available, please refresh.`}
+            {`${dictionary[status] || ''} systems were not available, please refresh.`}
           </EmptyState.Title>
         </EmptyState>
       );
