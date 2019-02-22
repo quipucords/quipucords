@@ -20,13 +20,6 @@ pylint-django==2.0.5
 pylint-plugin-utils==0.4
 pyflakes==2.1.0
 
-
-# Doc
-pandoc==1.0.2
-sphinx==1.8.4
-sphinx-autobuild==0.7.1
-sphinx-rtd-theme==0.4.2
-
 # Editor
 autopep8==1.4.3
 
