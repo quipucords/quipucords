@@ -24,7 +24,6 @@ help:
 	@echo "  server-init         to run server initializion steps"
 	@echo "  serve               to run the server with default db"
 	@echo "  manpage             to build the manpage"
-	@echo "  html                to build the docs"
 	@echo "  build-ui       to build ui and place result in django server"
 
 all: lint test-coverage
@@ -78,6 +77,3 @@ serve:
 
 build-ui:
 	cd client;npm install;npm run build
-
-html:
-	@cd docs; $(MAKE) html
