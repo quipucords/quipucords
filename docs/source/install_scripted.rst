@@ -137,4 +137,3 @@ Options:
     - (Optional) Specifies the database user for postgres. Defaults to ``postgres``.
  - **QPC_DBMS_PASSWORD**
     - (Optional) Specifies the database password for postgres. Defaults to ``password``.
-
