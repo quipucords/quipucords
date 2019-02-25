@@ -9,13 +9,7 @@ requirements:
       # update all dependencies and pin them
       update: all
       pin: True
-  - dev-locked-requirements.txt:
-      # do not update locked dependencies
-      update: False
   - requirements.txt:
       # update all dependencies and pin them
       update: all
       pin: True
-  - locked-requirements.txt:
-      # do not update locked dependencies
-      update: False
