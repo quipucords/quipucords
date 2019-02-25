@@ -43,7 +43,7 @@ VOLUME /var/data
 
 # Create /etc/ansible/roles/
 RUN mkdir -p /etc/ansible/roles/
-COPY roles/ /etc/ansible/roles/
+COPY quipucords/scanner/network/runner/roles/ /etc/ansible/roles/
 VOLUME /etc/ansible/roles/
 
 # Copy server code
