@@ -167,7 +167,6 @@ class InspectTaskRunner(ScanTaskRunner):
                 task_inspection_result=self.scan_task.inspection_result)
             sys_result.save()
 
-    # pylint: disable=too-many-locals,W0102,too-many-arguments,R0912,R0915
     def _inspect_scan(self, manager_interrupt, connected,
                       base_ssh_executable=None,
                       ssh_timeout=None):
@@ -187,6 +186,8 @@ class InspectTaskRunner(ScanTaskRunner):
         Note: base_ssh_executable & ssh_timeout are parameters that
         are only used for testing.
         """
+        # pylint: disable=too-many-locals,too-many-arguments
+        # pylint: disable=too-many-branches,too-many-statements
         connection_port = self.scan_task.source.port
 
         if self.scan_task.source.options is not None:
