@@ -1,5 +1,5 @@
 ---
-- hosts: " {{variable_host | default('all') }}"
+- hosts: " {{ variable_host | default('all') }}"
   gather_facts: no
   tasks:
   - name: attempt connection to the systems

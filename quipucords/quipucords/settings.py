@@ -73,7 +73,7 @@ NETWORK_INSPECT_JOB_TIMEOUT = os.getenv('NETWORK_INSPECT_JOB_TIMEOUT',
                                         '10800')  # 3 hours
 if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
     logger.error('NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.'
-                 'Settin to default of 10800.',
+                 'Setting to default of 10800.',
                  NETWORK_INSPECT_JOB_TIMEOUT)
     NETWORK_INSPECT_JOB_TIMEOUT = '10800'
 

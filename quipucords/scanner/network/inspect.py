@@ -247,12 +247,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 raise NetworkPauseException()
 
             # Build Ansible Runner Parameters
-            runner_settings = dict()
-            runner_settings['idle_timeout'] = \
-                int(settings.NETWORK_INSPECT_JOB_TIMEOUT)
-            runner_settings['job_timeout'] = \
-                int(settings.NETWORK_INSPECT_JOB_TIMEOUT)
-            runner_settings['pexpect_timeout'] = 5
+            runner_settings = {
+                'idle_timeout': int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
+                'job_timeout': int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
+                'pexpect_timeout': 5
+            }
             playbook_path = os.path.join(settings.BASE_DIR,
                                          'scanner/network/runner/inspect.yml')
             extra_vars['variable_host'] = group_name

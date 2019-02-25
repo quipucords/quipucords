@@ -1,5 +1,5 @@
 ---
-- hosts: " {{variable_host | default('all')}} "
+- hosts: " {{ variable_host | default('all') }} "
   gather_facts: no
   # update roles structure when we transition off ansible 2.3
   # https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html

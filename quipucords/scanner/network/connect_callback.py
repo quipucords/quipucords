@@ -33,11 +33,9 @@ class ConnectResultCallback():
         self.credential = credential
         self.source = source
 
-    def task_on_ok(self, event_data):
+    def task_on_ok(self, event_data, host, task_result):
         """Print a json representation of the event_data on ok."""
         try:
-            host = event_data.get('host')
-            task_result = event_data.get('res')
             if 'rc' in task_result and task_result['rc'] == 0:
                 self.result_store.record_result(host,
                                                 self.source,
@@ -53,11 +51,9 @@ class ConnectResultCallback():
             traceback.print_exc()
             raise error
 
-    def task_on_unreachable(self, event_data):
+    def task_on_unreachable(self, event_data, host, task_result):
         """Print a json representation of the event_data on unreachable."""
         try:
-            host = event_data['host']
-            task_result = event_data['res']
             result_message = task_result.get(
                 'msg',
                 'No information given on unreachable warning.')
@@ -85,12 +81,10 @@ class ConnectResultCallback():
             traceback.print_exc()
             raise error
 
-    def task_on_failed(self, event_data):
+    def task_on_failed(self, event_data, host, task_result):
         """Print a json representation of the event_data on failed."""
         # pylint: disable=protected-access
         try:
-            host = event_data['host']
-            task_result = event_data['res']
             result_message = task_result.get(
                 'stderr',
                 'No information given on failure.')
@@ -121,13 +115,15 @@ class ConnectResultCallback():
         if event_dict:
             event = event_dict.get('event')
             event_data = event_dict.get('event_data')
+            host = event_data['host']
+            task_result = event_data['res']
             if 'runner' in event_dict['event']:
                 if event == 'runner_on_ok':
-                    self.task_on_ok(event_data)
+                    self.task_on_ok(event_data, host, task_result)
                 elif event == 'runner_on_unreachable':
-                    self.task_on_unreachable(event_data)
+                    self.task_on_unreachable(event_data, host, task_result)
                 elif event == 'runner_on_failed':
-                    self.task_on_failed(event_data)
+                    self.task_on_failed(event_data, host, task_result)
                 else:
                     self.result_store.scan_task.log_message(
                         'UNEXPECTED FAILURE in runner_event.'

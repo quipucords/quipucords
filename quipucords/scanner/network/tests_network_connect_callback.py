@@ -25,18 +25,13 @@ from scanner.test_util import create_scan_job
 def build_event(host, return_code=0,
                 stderr=False, msg=False, event=False):
     """Build event dictionary matching ansible runner response."""
-    event_dict = dict()
-    event_data = dict()
-    res_dict = dict()
-    event_dict['event'] = event
-    event_data['host'] = host
-    res_dict['rc'] = return_code
+    res_dict = {'rc': return_code}
     if stderr:
         res_dict['stderr'] = stderr
     if msg:
         res_dict['msg'] = msg
-    event_data['res'] = res_dict
-    event_dict['event_data'] = event_data
+    event_data = {'host': host, 'res': res_dict}
+    event_dict = {'event': event, 'event_data': event_data}
     return event_dict
 
 
