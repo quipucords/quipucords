@@ -10,6 +10,7 @@
 #
 """Scanner used for host connection discovery."""
 
+# ANSIBLE API DEPENDENCY
 from ansible.inventory.expand_hosts import detect_range, expand_hostname_range
 from ansible.parsing.utils.addresses import parse_address
 

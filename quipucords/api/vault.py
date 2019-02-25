@@ -83,6 +83,7 @@ class Vault():
         """Create a vault."""
         self.password = password
         try:
+            # ANSIBLE API DEPENDENCY
             from ansible.parsing.vault import VaultSecret
             from ansible.module_utils._text import to_bytes
             pass_bytes = to_bytes(password, encoding='utf-8', errors='strict')
