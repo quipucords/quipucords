@@ -311,6 +311,8 @@ def _connect(manager_interrupt,
         vault_file_path = '--vault-password-file=%s' % (
             settings.DJANGO_SECRET_PATH)
         cmdline_list.append(vault_file_path)
+        forks_cmd = '--forks=%s' % (forks)
+        cmdline_list.append(forks_cmd)
         if use_paramiko:
             cmdline_list.append('--connection=paramiko')  # paramiko conn
         all_commands = ' '.join(cmdline_list)
