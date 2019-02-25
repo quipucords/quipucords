@@ -337,8 +337,8 @@ def _connect(manager_interrupt,
         final_status = runner_obj.status
         if final_status != 'successful':
             log_message = _construct_playbook_error_msg(final_status)
-            scan_task.log_message(log_message)
             if final_status not in ['unreachable', 'failed']:
+                scan_task.log_message(log_message)
                 raise AnsibleRunnerException(final_status)
 
 

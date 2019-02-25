@@ -115,18 +115,30 @@ class ConnectResultCallback():
         if event_dict:
             event = event_dict.get('event')
             event_data = event_dict.get('event_data')
-            host = event_data.get('host')
-            task_result = event_data.get('res')
-            if 'runner' in event_dict['event']:
-                if event == 'runner_on_ok':
-                    self.task_on_ok(event_data, host, task_result)
-                elif event == 'runner_on_unreachable':
-                    self.task_on_unreachable(event_data, host, task_result)
-                elif event == 'runner_on_failed':
-                    self.task_on_failed(event_data, host, task_result)
+            unexpected_error = False
+            if 'runner' in event:
+                host = event_data.get('host')
+                task_result = event_data.get('res')
+                if None not in (host, task_result):
+                    if event == 'runner_on_ok':
+                        self.task_on_ok(event_data,
+                                        host,
+                                        task_result)
+                    elif event == 'runner_on_unreachable':
+                        self.task_on_unreachable(event_data,
+                                                 host,
+                                                 task_result)
+                    elif event == 'runner_on_failed':
+                        self.task_on_failed(event_data,
+                                            host,
+                                            task_result)
+                    else:
+                        unexpected_error = True
                 else:
+                    unexpected_error = True
+                if unexpected_error:
                     self.result_store.scan_task.log_message(
                         'UNEXPECTED FAILURE in runner_event.'
                         '   Error Unknown State: %s\nAnsible result: %s' % (
-                            event_dict['event'],
+                            event,
                             event_dict), log_level=logging.ERROR)
