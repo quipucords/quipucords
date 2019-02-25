@@ -59,6 +59,12 @@ usage() {
          -e QPC_SERVER_TIMEOUT=120
     * Specify if installing offline
          -e install_offline=true
+    * Specify the playbook timeout for network inspect scans in seconds (defaults to 10800) ~ 3 hours
+          -e NETWORK_INSPECT_JOB_TIMEOUT=10800
+    * Specify the playbook timeout for network connect scans in seconds (defaults to 600) ~ 10 minutes
+          -e NETWORK_CONNECT_JOB_TIMEOUT=600
+    * Specify the ansible log level (defaults to 0)
+          -e ANSIBLE_LOG_LEVEL=1
 EOM
     exit 0
 }

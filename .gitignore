@@ -57,6 +57,7 @@ coverage.xml
 *.log
 local_settings.py
 logs
+secret.txt
 
 # Flask stuff:
 instance/

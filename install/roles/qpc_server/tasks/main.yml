@@ -209,9 +209,24 @@
 
 - name: Set QPC_DBMS_PASSWORD
   set_fact:
-    QPC_DBMS_PASSWORD: "{{ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
+    QPC_DBMS_PASSWORD: "{{ ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
   when:
     - QPC_DBMS_PASSWORD is not defined
+
+- name: Set NETWORK_INSPECT_JOB_TIMEOUT
+  set_fact:
+    NETWORK_INSPECT_JOB_TIMEOUT: "{{ ansible_env['NETWORK_INSPECT_JOB_TIMEOUT'] | default('10800') }}"
+  when: NETWORK_INSPECT_JOB_TIMEOUT is not defined
+
+- name: Set NETWORK_CONNECT_JOB_TIMEOUT
+  set_fact:
+    NETWORK_CONNECT_JOB_TIMEOUT: "{{ ansible_env['NETWORK_CONNECT_JOB_TIMEOUT'] | default('600') }}"
+  when: NETWORK_CONNECT_JOB_TIMEOUT is not defined
+
+- name: Set ANSIBLE_LOG_LEVEL
+  set_fact:
+    ANSIBLE_LOG_LEVEL: "{{ ansible_env['ANSIBLE_LOG_LEVEL'] | default('0') }}"
+  when: ANSIBLE_LOG_LEVEL is not defined
 
 - name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
@@ -230,5 +245,5 @@
     seconds: 30
 
 - name: Start QPC server using linked Postgres Docker container
-  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e USE_SUPERVISORD="{{ use_supervisord }}" -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
+  shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e USE_SUPERVISORD="{{ use_supervisord }}" -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -e ANSIBLE_LOG_LEVEL="{{ ANSIBLE_LOG_LEVEL }}" -e NETWORK_CONNECT_JOB_TIMEOUT="{{ NETWORK_CONNECT_JOB_TIMEOUT }}" -e NETWORK_INSPECT_JOB_TIMEOUT="{{ NETWORK_INSPECT_JOB_TIMEOUT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true

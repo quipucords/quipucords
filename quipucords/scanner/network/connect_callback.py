@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -13,22 +13,13 @@
 import logging
 import traceback
 
-from ansible.plugins.callback import CallbackBase
-
 from api.connresult.model import SystemConnectionResult
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-def _construct_result(result):
-    """Construct result object."""
-    # pylint: disable=protected-access
-    host = result._host
-    return {'host': host.name, 'result': result._result}
-
-
-class ConnectResultCallback(CallbackBase):
+class ConnectResultCallback():
     """Record connection results.
 
     SystemConnectionResult objects are created for every machine we
@@ -36,42 +27,36 @@ class ConnectResultCallback(CallbackBase):
     """
 
     # pylint: disable=protected-access
-    def __init__(self, result_store, credential, source, display=None):
+    def __init__(self, result_store, credential, source):
         """Create result callback."""
-        super().__init__(display=display)
         self.result_store = result_store
         self.credential = credential
         self.source = source
 
-    def v2_runner_on_ok(self, result):
-        """Print a json representation of the result."""
+    def task_on_ok(self, event_data, host, task_result):
+        """Print a json representation of the event_data on ok."""
         try:
-            host = result._host.name      # pylint: disable=protected-access
-            task_result = result._result  # pylint: disable=protected-access
             if 'rc' in task_result and task_result['rc'] == 0:
                 self.result_store.record_result(host,
                                                 self.source,
                                                 self.credential,
                                                 SystemConnectionResult.SUCCESS)
-
-            result_obj = _construct_result(result)
-            logger.debug('%s', result_obj)
+            logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
                 'UNEXPECTED FAILURE in v2_runner_on_ok.'
                 '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
+                    error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
 
-    def v2_runner_on_unreachable(self, result):
-        """Print a json representation of the result."""
+    def task_on_unreachable(self, event_data, host, task_result):
+        """Print a json representation of the event_data on unreachable."""
         try:
-            host = result._host.name
-            result_message = result._result.get(
-                'msg', 'No information given on unreachable warning.  '
-                'Missing msg attribute.')
+            result_message = task_result.get(
+                'msg',
+                'No information given on unreachable warning.')
             ssl_ansible_auth_error = result_message is not None and \
                 'permission denied' in result_message.lower()
             if not ssl_ansible_auth_error:
@@ -86,26 +71,23 @@ class ConnectResultCallback(CallbackBase):
                 message = 'PERMISSION DENIED %s could not connect'\
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
-
-            result_obj = _construct_result(result)
-            logger.debug('%s', result_obj)
+            logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
                 'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
                 '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
+                    error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
 
-    def v2_runner_on_failed(self, result, ignore_errors=False):
-        """Print a json representation of the result."""
+    def task_on_failed(self, event_data, host, task_result):
+        """Print a json representation of the event_data on failed."""
         # pylint: disable=protected-access
         try:
-            host = result._host.name
-            result_message = result._result.get(
-                'stderr', 'No information given on failure.  '
-                'Missing stderr attribute.')
+            result_message = task_result.get(
+                'stderr',
+                'No information given on failure.')
             authentication_error = result_message is not None and \
                 'permission denied' in result_message.lower()
             if not authentication_error:
@@ -118,14 +100,45 @@ class ConnectResultCallback(CallbackBase):
                 message = 'PERMISSION DENIED %s could not connect'\
                     ' with cred %s.' % (host, self.credential.name)
                 self.result_store.scan_task.log_message(message)
-
-            result_obj = _construct_result(result)
-            logger.debug('%s', result_obj)
+            logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
                 'UNEXPECTED FAILURE in v2_runner_on_failed.'
                 '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
+                    error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
+
+    def runner_event(self, event_dict=None):
+        """Control the event callback for runner."""
+        if event_dict:
+            event = event_dict.get('event')
+            event_data = event_dict.get('event_data')
+            unexpected_error = False
+            if 'runner' in event:
+                host = event_data.get('host')
+                task_result = event_data.get('res')
+                if None not in (host, task_result):
+                    if event == 'runner_on_ok':
+                        self.task_on_ok(event_data,
+                                        host,
+                                        task_result)
+                    elif event == 'runner_on_unreachable':
+                        self.task_on_unreachable(event_data,
+                                                 host,
+                                                 task_result)
+                    elif event == 'runner_on_failed':
+                        self.task_on_failed(event_data,
+                                            host,
+                                            task_result)
+                    else:
+                        unexpected_error = True
+                else:
+                    unexpected_error = True
+                if unexpected_error:
+                    self.result_store.scan_task.log_message(
+                        'UNEXPECTED FAILURE in runner_event.'
+                        '   Error Unknown State: %s\nAnsible result: %s' % (
+                            event,
+                            event_dict), log_level=logging.ERROR)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,9 +12,8 @@
 
 import json
 import logging
-import traceback
 
-from ansible.plugins.callback import CallbackBase
+from ansible_runner.exceptions import AnsibleRunnerException
 
 from api.models import (RawFact,
                         SystemInspectionResult)
@@ -23,69 +22,19 @@ from django.db import transaction
 
 from quipucords import settings
 
-from scanner import scan_data_log
 from scanner.network.processing import process
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-ANSIBLE_FACTS = 'ansible_facts'
 STARTED_PROCESSING_ROLE = 'internal_host_started_processing_role'
-FAILED = 'failed'
-HOST = 'host'
 HOST_DONE = 'host_done'
 INTERNAL_ = 'internal_'
-KEY = 'key'
-NO_KEY = 'no_key'
-RC = 'rc'
-RESULT = 'result'
-
 TIMEOUT_RC = 124  # 'timeout's return code when it times out.
+UNKNOWN = 'unknown_host'
 
 
-def _construct_result(result):
-    """Construct result object."""
-    # pylint: disable=protected-access
-    host = result._host
-    if host is not None:
-        hostname = host.name
-    else:
-        hostname = 'unknown host'
-
-    if result._task is not None and \
-            result._task.register is not None:
-        key = result._task.register
-    else:
-        key = NO_KEY
-    return {HOST: hostname, RESULT: result._result, KEY: key}
-
-
-def normalize_result(result):
-    """Normalize the representation of an Ansible result.
-
-    We see Ansible results in three forms:
-      1) raw task with register variable whose name starts with 'internal_'
-      2) raw task with register variable whose name does not start
-         with 'internal_'
-      3) set_facts task with member called 'ansible_facts'
-
-    :param result: Ansible result dictionary
-    :returns: [] for case 1, and a list of key, value tuples for
-        cases 2 and 3.
-    """
-    # pylint: disable=protected-access
-    if result._result is not None and isinstance(result._result, dict):
-        # pylint: disable=no-else-return
-        if ANSIBLE_FACTS in result._result:
-            return [(key, value)
-                    for key, value in result._result[ANSIBLE_FACTS].items()]
-        elif isinstance(result._task.register, str):
-            return [(result._task.register, result._result)]
-
-    return []
-
-
-class InspectResultCallback(CallbackBase):
+class InspectResultCallback():
     """A sample callback plugin used for performing an action.
 
     If you want to collect all results into a single object for processing at
@@ -94,82 +43,19 @@ class InspectResultCallback(CallbackBase):
     """
 
     # pylint: disable=protected-access
-    def __init__(self, scan_task, display=None):
+    def __init__(self, scan_task, idx, group_total):
         """Create result callback."""
-        super().__init__(display=display)
         self.scan_task = scan_task
         self.source = scan_task.source
-        self.results = []
         self._ansible_facts = {}
+        self.last_role = None
+        self.idx = idx
+        self.group_total = group_total
 
-    # Ansible considers tasks failed when their return code is
-    # nonzero, even if we set ignore_errors=True. We want to be able
-    # to process those task results, so we need to handle failed
-    # results the same way we treat ok ones.
-    def v2_runner_on_ok(self, result):
-        """Print a json representation of the result."""
-        try:
-            self.handle_result(result)
-        except Exception as error:
-            self.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_ok.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
-                log_level=logging.ERROR)
-            traceback.print_exc()
-            raise error
-
-    def v2_runner_on_failed(self, result, ignore_errors=False):
-        """Print a json representation of the result."""
-        # pylint: disable=protected-access
-        try:
-            with_items = result._result.get('results') is not None
-            if not with_items and result._result.get('msg') is not None:
-                result_obj = _construct_result(result)
-                if result_obj.get('key') != 'internal_user_has_sudo_cmd':
-                    host = result._host
-                    if host is not None:
-                        hostname = host.name
-                    else:
-                        hostname = 'unknown host'
-
-                    self.scan_task.log_message(
-                        'FAILING HOST %s - Unexpected ansible error:  %s' % (
-                            hostname, result._result),
-                        log_level=logging.ERROR)
-            self.handle_result(result)
-        except Exception as error:
-            self.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_failed.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
-                log_level=logging.ERROR)
-            traceback.print_exc()
-            raise error
-
-    def handle_result(self, result):
-        """Handle an incoming result object."""
-        scan_data_log.safe_log_ansible_result(result, self.scan_task)
-        # pylint: disable=protected-access
-        result_obj = _construct_result(result)
-        self.results.append(result_obj)
-        logger.debug('%s', result_obj)
-
-        # 'timeout' returns 124 on timeouts
-        if result_obj[RESULT].get(FAILED) and \
-           result_obj[RESULT].get(RC) == TIMEOUT_RC:
-            logger.warning('Task %s timed out', result_obj[KEY])
-
-        host = result_obj[HOST]
-        results_to_store = normalize_result(result)
+    def process_task_facts(self, task_facts, host):
+        """Collect, process, and save task facts."""
         host_facts = {}
-        if result._task_fields.get('action') == 'set_fact' and \
-                result.task_name == 'internal_host_started_processing_role':
-            role_name = result._result.get(
-                ANSIBLE_FACTS).get(STARTED_PROCESSING_ROLE)
-            log_message = 'PROCESSING %s - ANSIBLE ROLE %s' % (host, role_name)
-            self.scan_task.log_message(log_message)
-        for key, value in results_to_store:
+        for key, value in task_facts.items():
             if key == HOST_DONE:
                 self._finalize_host(host, SystemInspectionResult.SUCCESS)
             else:
@@ -177,30 +63,69 @@ class InspectResultCallback(CallbackBase):
                     self.scan_task, self._ansible_facts.get(host, {}),
                     key, value, host)
                 host_facts[key] = processed_value
-
-        if bool(host_facts):
+        if bool(host_facts) and host != UNKNOWN:
             if host in self._ansible_facts:
                 self._ansible_facts[host].update(host_facts)
             else:
                 self._ansible_facts[host] = host_facts
 
-    # Called after all details report is complete for host. Writing
-    # results needs to be atomic so that the host won't be marked
-    # as complete unless we actually save its results.
+    def task_on_ok(self, event_dict):
+        """Print a json representation of the event_data on ok."""
+        event_data = event_dict.get('event_data')
+        host = event_data.get('host', UNKNOWN)
+        result = event_data.get('res')
+        task_action = event_data.get('task_action')
+        task = event_data.get('task')
+        # Print Role started for each host
+        if task_action == 'set_fact' and task == STARTED_PROCESSING_ROLE:
+            log_message = 'PROCESSING %s - ANSIBLE ROLE %s' % (
+                host, self.last_role)
+            self.scan_task.log_message(log_message)
+        task_facts = result.get('ansible_facts')
+        if task_facts:
+            self.process_task_facts(task_facts, host)
+
+    def task_on_failed(self, event_dict):
+        """Print a json representation of the event_data on failed."""
+        event_data = event_dict.get('event_data')
+        host = event_data.get('host', UNKNOWN)
+        result = event_data.get('res')
+        if result.get('rc') == TIMEOUT_RC:
+            logger.warning('Task %s timed out', event_data['task'])
+
+        # Only log an error when ignore errors is false
+        if event_dict.get('ignore_errors', False):
+            err_reason = result.get('msg', event_data)
+            err_msg = 'FAILING HOST %s - Unexpected ansible error:  %s'
+            self.scan_task.log_message(err_msg % (host, err_reason),
+                                       log_level=logging.ERROR)
+        task_facts = result.get('ansible_facts')
+        if task_facts:
+            self.process_task_facts(task_facts, host)
+
+    # NOTE: that @transaction.atomic functions will only modify the database if
+    # a response without errors is produced. These are called after all details
+    # for a report is complete for a host. Writing results need to be atomic so
+    # that host won't be marked as complete unless we actually save its results
+
     @transaction.atomic
     def finalize_failed_hosts(self):
-        """Finalize failed host."""
+        """
+        Finalize failed host.
+
+        This method labels the hosts as failed to keep the
+        system counter for logging correct.
+        """
+        # Label all host as failed so that the system counter for
+        # logging is correct.
         host_list = list(self._ansible_facts.keys())
         for host in host_list:
             self._finalize_host(host, SystemInspectionResult.FAILED)
 
-    # Called after all details report is complete for host. Writing
-    # results needs to be atomic so that the host won't be marked
-    # as complete unless we actually save its results.
     @transaction.atomic
     def _finalize_host(self, host, host_status):
+        """Save facts collected and update the scan counts."""
         results = self._ansible_facts.pop(host, {})
-
         if settings.QPC_EXCLUDE_INTERNAL_FACTS:
             # remove internal facts before saving result
             results = {fact_key: fact_value
@@ -242,33 +167,57 @@ class InspectResultCallback(CallbackBase):
                                   system_inspection_result=sys_result)
             stored_fact.save()
 
-    # Make this atomic for the same reason as _finalize_host.
     @transaction.atomic
-    def v2_runner_on_unreachable(self, result):
-        """Print a json representation of the result."""
+    def task_on_unreachable(self, event_dict):
+        """Print a json representation of the event_data on unreachable."""
+        event_data = event_dict.get('event_data')
+        host = event_data.get('host', UNKNOWN)
+        result_message = event_data.get(
+            'msg',
+            'No information given on unreachable warning.')
+        message = 'UNREACHABLE %s. %s' % (host, result_message)
+        self.scan_task.log_message(message, log_level=logging.ERROR)
+        self._finalize_host(host, SystemInspectionResult.UNREACHABLE)
+
+    def event_callback(self, event_dict=None):
+        """Control the event callback for Ansible Runner."""
         try:
-            scan_data_log.safe_log_ansible_result(result, self.scan_task)
-            result_obj = _construct_result(result)
-            self.results.append(result_obj)
-            logger.warning('%s', result_obj)
+            okay = ['runner_on_ok', 'runner_item_on_ok']
+            failed = ['runner_on_failed', 'runner_item_on_failed']
+            unreachable = ['runner_on_unreachable']
+            runner_ignore = ['runner_on_skipped',
+                             'runner_item_on_skipped']
+            event = event_dict.get('event')
+            event_data = event_dict.get('event_data')
+            if event_dict:
+                # Check if it is a task event
+                if 'runner' in event:
+                    if event in okay:
+                        self.task_on_ok(event_dict)
+                    elif event in failed:
+                        self.task_on_failed(event_dict)
+                    elif event in unreachable:
+                        self.task_on_unreachable(event_dict)
+                    else:
+                        if event not in runner_ignore:
+                            self.scan_task.log_message(
+                                'UNEXPECTED FAILURE in runner_event.'
+                                '   Error Unknown State: %s\nAnsible '
+                                'result: %s' % (event, event_dict),
+                                log_level=logging.ERROR)
+                # Save last role for task logging later
+                if event == 'playbook_on_task_start':
+                    if event_data:
+                        event_role = event_data.get('role')
+                        if event_role != self.last_role:
+                            self.last_role = event_role
+        except Exception as err_msg:
+            raise AnsibleRunnerException(err_msg)
 
-            # pylint: disable=protected-access
-            unreachable_host = result._host.name
-            result_message = result._result.get(
-                'msg', 'No information given on unreachable warning.  '
-                'Missing msg attribute.')
-            message = 'UNREACHABLE %s. %s' % (unreachable_host,
-                                              result_message)
-            self.scan_task.log_message(
-                message, log_level=logging.ERROR)
-
-            self._finalize_host(
-                unreachable_host, SystemInspectionResult.UNREACHABLE)
-        except Exception as error:
-            self.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, result._result),
-                log_level=logging.ERROR)
-            traceback.print_exc()
-            raise error
+    def status_callback(self, status_dict=None):
+        """Control the status callback for Ansible Runner."""
+        job_status = status_dict.get('status')
+        if job_status == 'starting':
+            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
+                self.idx, self.group_total)
+            self.scan_task.log_message(log_message)

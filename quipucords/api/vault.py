@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -12,7 +12,9 @@
 
 import tempfile
 
-
+# ANSIBLE API DEPENDENCY
+# There is work we can do to allow vaultlib to be used on Ansible >= 2.4
+# https://stackoverflow.com/questions/44142208/how-to-view-decrypt-ansible-vault-credentials-files-from-within-a-python-script
 from ansible.parsing.vault import VaultLib
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
@@ -81,6 +83,7 @@ class Vault():
         """Create a vault."""
         self.password = password
         try:
+            # ANSIBLE API DEPENDENCY
             from ansible.parsing.vault import VaultSecret
             from ansible.module_utils._text import to_bytes
             pass_bytes = to_bytes(password, encoding='utf-8', errors='strict')
