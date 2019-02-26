@@ -340,14 +340,15 @@ def _connect(manager_interrupt,
             if final_status not in ['unreachable', 'failed']:
                 if not scan_task.systems_scanned:
                     log_message = 'Unexpected ansible status %s.  '\
-                        'No systems_scanned so failing.  Ansible error: %s' % (
+                        'Failing scan because there were no successful '\
+                        'system connections.  Ansible error: %s' % (
                             final_status, message)
                     scan_task.log_message(log_message, log_level=logging.ERROR)
                     raise AnsibleRunnerException(final_status)
                 else:
                     log_message = 'Unexpected ansible status %s.  '\
-                        '%s systems_scanned so continuing.  '\
-                        'Ansible error: %s' % (
+                        'Continuing scan because there were %s successful'\
+                        ' system connections.  Ansible error: %s' % (
                             final_status,
                             str(scan_task.systems_scanned),
                             message)
