@@ -283,7 +283,6 @@ class InspectTaskRunner(ScanTaskRunner):
                                                 playbook=playbook_path,
                                                 cmdline=all_commands,
                                                 verbosity=verbosity_lvl)
-                # roles_path requres a private_data_dir
             except Exception as error:
                 error_msg = error
                 raise AnsibleRunnerException(error_msg)
@@ -291,8 +290,9 @@ class InspectTaskRunner(ScanTaskRunner):
             final_status = runner_obj.status
             if final_status != 'successful':
                 call.finalize_failed_hosts()
-                error_msg = _construct_playbook_error_msg(final_status)
-                scan_result = ScanTask.FAILED
+                if final_status not in ['unreachable', 'failed']:
+                    error_msg = _construct_playbook_error_msg(final_status)
+                    scan_result = ScanTask.FAILED
         return error_msg, scan_result
 
     def _obtain_discovery_data(self):
