@@ -350,7 +350,7 @@ def _connect(manager_interrupt,
                         'Ansible error: %s' % (
                             final_status,
                             str(scan_task.systems_scanned),
-                            log_message)
+                            message)
                     scan_task.log_message(log_message, log_level=logging.ERROR)
 
 
