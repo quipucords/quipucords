@@ -9,10 +9,6 @@ describe('Helpers', () => {
     expect(helpers.generateId()).toBe('generatedid-');
     expect(helpers.generateId('lorem')).toBe('lorem-');
 
-    expect(helpers.DEV_MODE).toBe(false);
-    expect(helpers.TEST_MODE).toBe(true);
-    expect(helpers.RH_BRAND).toBe(false);
-
     expect(helpers.FULFILLED_ACTION('lorem')).toBe(`lorem_FULFILLED`);
     expect(helpers.PENDING_ACTION('lorem')).toBe(`lorem_PENDING`);
     expect(helpers.REJECTED_ACTION('lorem')).toBe(`lorem_REJECTED`);
@@ -100,13 +96,31 @@ describe('Helpers', () => {
       detail: 'XXX Request success'
     };
 
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('200 message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('200 message');
 
     payload.status = 399;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('399 message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('399 message');
 
     payload.status = 400;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('400 message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('400 message');
+  });
+
+  it('should handle an undefined http status', () => {
+    const payload = {
+      message: 'MESSAGE',
+      response: {
+        status: 0,
+        statusText: 'ERROR TEST',
+        data: {
+          detail: 'ERROR'
+        }
+      }
+    };
+
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('0 message');
+
+    delete payload.response.status;
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('undefined message');
   });
 
   it('should handle http status 400 level error messages from response', () => {
@@ -122,21 +136,23 @@ describe('Helpers', () => {
         request: {}
       },
       message: 'Request failed with status code XXX',
-      detail: 'XXX Request failed',
-      stack:
-        'Error: Request failed with status code XXX\n    at createError (https://localhost/lorem.js:2144:15)\n    at settle (https://localhost/lorem.js:2310:12)\n    at XMLHttpRequest.handleLoad (https://localhost/lorem.js:1670:7)'
+      detail: 'XXX Request failed'
     };
 
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('400 error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('400 error message');
+
+    expect(helpers.getMessageFromResults(payload, 'lorem').message).toMatchSnapshot('400 filtered message');
+
+    expect(helpers.getMessageFromResults(payload, 'dolor').message).toMatchSnapshot('400 filtered blank message');
 
     delete payload.response.data.lorem;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('400 fallback error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('400 fallback error message');
 
     delete payload.response.data;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('400 fallback again error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('400 fallback again error message');
 
     delete payload.message;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('400 fallback yet again error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('400 fallback yet again error message');
   });
 
   it('should handle http status 500 level error messages from response', () => {
@@ -152,21 +168,21 @@ describe('Helpers', () => {
         request: {}
       },
       message: 'Request failed with status code XXX',
-      detail: 'XXX Request failed',
-      stack:
-        'Error: Request failed with status code XXX\n    at createError (https://localhost/lorem.js:2144:15)\n    at settle (https://localhost/lorem.js:2310:12)\n    at XMLHttpRequest.handleLoad (https://localhost/lorem.js:1670:7)'
+      detail: 'XXX Request failed'
     };
 
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('500 level error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('500 level error message');
 
     delete payload.response.data.lorem;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('500 level fallback error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('500 level fallback error message');
 
     delete payload.response.data;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('500 level fallback again error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot('500 level fallback again error message');
 
     delete payload.message;
-    expect(helpers.getMessageFromResults(payload)).toMatchSnapshot('500 level fallback yet again error message');
+    expect(helpers.getMessageFromResults(payload).message).toMatchSnapshot(
+      '500 level fallback yet again error message'
+    );
   });
 
   it('should return http status from a response', () => {

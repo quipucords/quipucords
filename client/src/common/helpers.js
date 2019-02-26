@@ -1,7 +1,5 @@
 import moment from 'moment';
 import _get from 'lodash/get';
-import _join from 'lodash/join';
-import _map from 'lodash/map';
 import _set from 'lodash/set';
 
 const devModeNormalizeCount = (count, modulus = 100) => Math.abs(count) % modulus;
@@ -160,55 +158,77 @@ const createViewQueryObject = (viewOptions, queryObj) => {
   return queryObject;
 };
 
-const getMessageFromResults = (results, filterField = null) => {
+const getMessageFromResults = (results, filter = null) => {
   const status = _get(results, 'response.status', results.status);
   const statusResponse = _get(results, 'response.statusText', results.statusText);
   const messageResponse = _get(results, 'response.data', results.message);
   const detailResponse = _get(results, 'response.data', results.detail);
 
-  let serverStatus = '';
+  const messages = {
+    status: status || 0,
+    messages: {},
+    message: null
+  };
 
-  if (status < 400 && !messageResponse && !detailResponse) {
-    return statusResponse;
-  }
+  const displayStatus = status >= 500 ? `${status} ` : '';
 
-  if ((status >= 500 || status === undefined) && !messageResponse && !detailResponse) {
-    return `${status || ''} Server is currently unable to handle this request.`;
+  if (!messageResponse && !detailResponse) {
+    if (status < 400) {
+      messages.message = statusResponse;
+      return messages;
+    }
+
+    if (status >= 500 || status === undefined) {
+      messages.message = `${status || ''} Server is currently unable to handle this request.`;
+      return messages;
+    }
   }
 
   if (status >= 500 && /Request\sURL:/.test(messageResponse)) {
-    return `${status} ${messageResponse.split(/Request\sURL:/)[0]}`;
-  }
-
-  if (status >= 500 || status === undefined) {
-    serverStatus = status ? `${status} ` : '';
+    messages.message = `${status} ${messageResponse.split(/Request\sURL:/)[0]}`;
+    return messages;
   }
 
   if (typeof messageResponse === 'string') {
-    return `${serverStatus}${messageResponse}`;
+    messages.message = `${displayStatus}${messageResponse}`;
+    return messages;
   }
 
   if (typeof detailResponse === 'string') {
-    return `${serverStatus}${detailResponse}`;
+    messages.message = `${displayStatus}${detailResponse}`;
+    return messages;
   }
 
-  const getMessages = (messageObject, filterKey) => {
-    const obj = filterKey ? messageObject[filterKey] : messageObject;
+  const getMessages = (messageObjectArrayString, filterField) => {
+    const parsed = {};
+    const parsedFiltered = {};
+    const filterFields = (Array.isArray(filterField) && filterField) || (filterField && [filterField]) || [];
 
-    return _map(
-      obj,
-      next => {
-        if (Array.isArray(next)) {
-          return getMessages(next);
-        }
+    if (messageObjectArrayString && typeof messageObjectArrayString === 'string') {
+      return messageObjectArrayString.replace(/\[object\sObject\]/g, '');
+    }
 
-        return next;
-      },
-      null
-    );
+    if (Array.isArray(messageObjectArrayString)) {
+      return getMessages(messageObjectArrayString.join('\n'));
+    }
+
+    Object.keys(messageObjectArrayString).forEach(key => {
+      const message = getMessages(messageObjectArrayString[key]);
+
+      if (filterFields.length && filterFields.includes(key)) {
+        parsedFiltered[key] = message;
+      }
+
+      parsed[key] = message;
+    });
+
+    return filterFields.length ? parsedFiltered : parsed;
   };
 
-  return `${serverStatus}${_join(getMessages(messageResponse || detailResponse, filterField), '\n')}`;
+  messages.messages = getMessages(messageResponse || detailResponse, filter);
+  messages.message = `${displayStatus}${Object.values(messages.messages).join('\n')}`;
+
+  return messages;
 };
 
 const getStatusFromResults = results => {

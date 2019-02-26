@@ -15,7 +15,7 @@ const statusReducer = (state = initialState, action) => {
       return {
         ...initialState,
         error: action.error,
-        errorMessage: helpers.getMessageFromResults(action.payload)
+        errorMessage: helpers.getMessageFromResults(action.payload).message
       };
 
     case helpers.PENDING_ACTION(statusTypes.STATUS_INFO):

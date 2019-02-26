@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`0 message 1`] = `"ERROR"`;
+
 exports[`200 message 1`] = `"Request success XXX"`;
 
 exports[`399 message 1`] = `"Request success XXX"`;
@@ -11,6 +13,10 @@ exports[`400 fallback again error message 1`] = `"Request failed with status cod
 exports[`400 fallback error message 1`] = `""`;
 
 exports[`400 fallback yet again error message 1`] = `"XXX Request failed"`;
+
+exports[`400 filtered blank message 1`] = `""`;
+
+exports[`400 filtered message 1`] = `"Lorem ipsum dolor sit"`;
 
 exports[`400 message 1`] = `"Request success XXX"`;
 
@@ -114,3 +120,5 @@ Object {
   "type": "pf",
 }
 `;
+
+exports[`undefined message 1`] = `"ERROR"`;

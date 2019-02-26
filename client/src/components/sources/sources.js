@@ -28,7 +28,7 @@ class Sources extends React.Component {
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'error',
           header: 'Error',
-          message: helpers.getMessageFromResults(results)
+          message: helpers.getMessageFromResults(results).message
         });
       } else {
         Store.dispatch({
