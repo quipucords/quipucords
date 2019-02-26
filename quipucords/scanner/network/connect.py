@@ -336,10 +336,22 @@ def _connect(manager_interrupt,
 
         final_status = runner_obj.status
         if final_status != 'successful':
-            log_message = _construct_playbook_error_msg(final_status)
+            message = _construct_playbook_error_msg(final_status)
             if final_status not in ['unreachable', 'failed']:
-                scan_task.log_message(log_message)
-                raise AnsibleRunnerException(final_status)
+                if not scan_task.systems_scanned:
+                    log_message = 'Unexpected ansible status %s.  '\
+                        'No systems_scanned so failing.  Ansible error: %s' % (
+                            final_status, message)
+                    scan_task.log_message(log_message, log_level=logging.ERROR)
+                    raise AnsibleRunnerException(final_status)
+                else:
+                    log_message = 'Unexpected ansible status %s.  '\
+                        '%s systems_scanned so continuing.  '\
+                        'Ansible error: %s' % (
+                            final_status,
+                            str(scan_task.systems_scanned),
+                            log_message)
+                    scan_task.log_message(log_message, log_level=logging.ERROR)
 
 
 def _handle_ssh_passphrase(credential):
