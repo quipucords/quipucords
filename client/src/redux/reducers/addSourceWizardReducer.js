@@ -4,7 +4,6 @@ import apiTypes from '../../constants/apiConstants';
 
 const initialState = {
   add: false,
-  availableCredentials: [],
   edit: false,
   editSource: null,
   error: false,
@@ -64,12 +63,16 @@ const addSourceWizardReducer = (state = initialState, action) => {
       return helpers.setStateProp(
         null,
         {
+          add: state.add,
+          edit: state.edit,
+          editSource: state.editSource,
+          show: true,
           source: action.source,
           stepOneValid: true
         },
         {
           state,
-          reset: false
+          initialState
         }
       );
 
@@ -77,41 +80,61 @@ const addSourceWizardReducer = (state = initialState, action) => {
       return helpers.setStateProp(
         null,
         {
+          add: state.add,
+          edit: state.edit,
+          editSource: state.editSource,
+          show: true,
           source: { ...state.source, ...action.source },
           stepTwoValid: true
         },
         {
           state,
-          reset: false
+          initialState
         }
       );
 
     case helpers.REJECTED_ACTION(sourcesTypes.UPDATE_SOURCE):
     case helpers.REJECTED_ACTION(sourcesTypes.ADD_SOURCE):
-      const stepTwoRejectedErrors = helpers.getMessageFromResults(
-        action.payload,
-        [
-          { map: 'credentials', value: apiTypes.API_SUBMIT_SOURCE_CREDENTIALS },
-          { map: 'hosts', value: apiTypes.API_SUBMIT_SOURCE_HOSTS },
-          { map: 'name', value: apiTypes.API_SUBMIT_SOURCE_NAME },
-          { map: 'port', value: apiTypes.API_SUBMIT_SOURCE_PORT },
-          { map: 'options', value: apiTypes.API_SUBMIT_SOURCE_OPTIONS }
-        ],
-        true
-      );
+      const filterProperties = [
+        apiTypes.API_SUBMIT_SOURCE_CREDENTIALS,
+        apiTypes.API_SUBMIT_SOURCE_HOSTS,
+        apiTypes.API_SUBMIT_SOURCE_NAME,
+        apiTypes.API_SUBMIT_SOURCE_PORT,
+        apiTypes.API_SUBMIT_SOURCE_OPTIONS
+      ];
+
+      const stepTwoRejectedErrors = helpers.getMessageFromResults(action.payload, filterProperties);
 
       const messages = {};
 
       Object.keys(stepTwoRejectedErrors.messages || {}).forEach(key => {
-        helpers.setPropIfTruthy(messages, [key], stepTwoRejectedErrors.messages[key]);
+        if (apiTypes.API_SUBMIT_SOURCE_CREDENTIALS === key) {
+          messages.credentials = stepTwoRejectedErrors.messages[key];
+        }
+
+        if (apiTypes.API_SUBMIT_SOURCE_HOSTS === key) {
+          messages.hosts = stepTwoRejectedErrors.messages[key];
+        }
+
+        if (apiTypes.API_SUBMIT_SOURCE_NAME === key) {
+          messages.name = stepTwoRejectedErrors.messages[key];
+        }
+
+        if (apiTypes.API_SUBMIT_SOURCE_PORT === key) {
+          messages.port = stepTwoRejectedErrors.messages[key];
+        }
+
+        if (apiTypes.API_SUBMIT_SOURCE_OPTIONS === key) {
+          messages.options = stepTwoRejectedErrors.messages[key];
+        }
       });
 
       return helpers.setStateProp(
         null,
         {
           error: action.error,
-          errorMessage: Object.values(messages).join(' '),
-          errorStatus: helpers.getStatusFromResults(action.payload),
+          errorMessage: stepTwoRejectedErrors.message,
+          errorStatus: stepTwoRejectedErrors.status,
           stepTwoValid: false,
           stepTwoErrorMessages: messages,
           pending: false
@@ -142,15 +165,15 @@ const addSourceWizardReducer = (state = initialState, action) => {
       return helpers.setStateProp(
         null,
         {
-          error: false,
-          errorMessage: null,
+          add: state.add,
+          edit: state.edit,
           fulfilled: true,
-          pending: false,
+          show: true,
           source: action.payload.data
         },
         {
           state,
-          reset: false
+          initialState
         }
       );
 

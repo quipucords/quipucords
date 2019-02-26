@@ -4,7 +4,6 @@ exports[`defined type CREATE_SOURCE_SHOW 1`] = `
 Object {
   "result": Object {
     "add": true,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -26,7 +25,6 @@ exports[`defined type EDIT_SOURCE_SHOW 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": true,
     "editSource": Object {},
     "error": false,
@@ -48,7 +46,6 @@ exports[`defined type UPDATE_SOURCE_HIDE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -70,7 +67,6 @@ exports[`defined type VALID_SOURCE_WIZARD_STEPONE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -78,7 +74,7 @@ Object {
     "errorStatus": null,
     "fulfilled": false,
     "pending": false,
-    "show": false,
+    "show": true,
     "source": Object {},
     "stepOneValid": true,
     "stepTwoErrorMessages": Object {},
@@ -92,7 +88,6 @@ exports[`defined type VALID_SOURCE_WIZARD_STEPTWO 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -100,7 +95,7 @@ Object {
     "errorStatus": null,
     "fulfilled": false,
     "pending": false,
-    "show": false,
+    "show": true,
     "source": Object {},
     "stepOneValid": true,
     "stepTwoErrorMessages": Object {},
@@ -114,7 +109,6 @@ exports[`fulfilled types ADD_SOURCE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -122,7 +116,7 @@ Object {
     "errorStatus": null,
     "fulfilled": true,
     "pending": false,
-    "show": false,
+    "show": true,
     "source": Object {
       "test": "success",
     },
@@ -138,7 +132,6 @@ exports[`fulfilled types GET_WIZARD_CREDENTIALS 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -160,7 +153,6 @@ exports[`fulfilled types UPDATE_SOURCE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": false,
@@ -168,7 +160,7 @@ Object {
     "errorStatus": null,
     "fulfilled": true,
     "pending": false,
-    "show": false,
+    "show": true,
     "source": Object {
       "test": "success",
     },
@@ -184,7 +176,6 @@ exports[`rejected types ADD_SOURCE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": true,
@@ -206,7 +197,6 @@ exports[`rejected types UPDATE_SOURCE 1`] = `
 Object {
   "result": Object {
     "add": false,
-    "availableCredentials": Array [],
     "edit": false,
     "editSource": null,
     "error": true,
