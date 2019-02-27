@@ -182,7 +182,7 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_list and '[' in hosts_list[0]:
+            if hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -197,7 +197,7 @@ class SourceSerializer(NotEmptySerializer):
                     'credentials': [_(messages.VC_ONE_CRED)]
                 }
                 raise ValidationError(error)
-            elif credentials and len(credentials) == 1:
+            if credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
@@ -208,7 +208,7 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_list and '[' in hosts_list[0]:
+            if hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -223,7 +223,7 @@ class SourceSerializer(NotEmptySerializer):
                     'credentials': [_(messages.SAT_ONE_CRED)]
                 }
                 raise ValidationError(error)
-            elif credentials and len(credentials) == 1:
+            if credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
 
@@ -289,7 +289,7 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_list and '[' in hosts_list[0]:
+            if hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -304,7 +304,7 @@ class SourceSerializer(NotEmptySerializer):
                     'credentials': [_(messages.VC_ONE_CRED)]
                 }
                 raise ValidationError(error)
-            elif credentials and len(credentials) == 1:
+            if credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
@@ -313,7 +313,7 @@ class SourceSerializer(NotEmptySerializer):
                     'hosts': [_(messages.SAT_ONE_HOST)]
                 }
                 raise ValidationError(error)
-            elif hosts_list and '[' in hosts_list[0]:
+            if hosts_list and '[' in hosts_list[0]:
                 error = {
                     'hosts': [_(messages.VC_ONE_HOST)]
                 }
@@ -328,7 +328,7 @@ class SourceSerializer(NotEmptySerializer):
                     'credentials': [_(messages.SAT_ONE_CRED)]
                 }
                 raise ValidationError(error)
-            elif credentials and len(credentials) == 1:
+            if credentials and len(credentials) == 1:
                 SourceSerializer.check_credential_type(source_type,
                                                        credentials[0])
 
