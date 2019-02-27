@@ -137,8 +137,16 @@ class TestConnectResultCallback(TestCase):
         callback = ConnectResultCallback(results_store,
                                          self.cred,
                                          self.source)
-        events = []
-        events.append(build_event(host='1.2.3.4',
-                                  event='runner_on_unknown_event'))
-        for event in events:
-            callback.runner_event(event)
+        event = build_event(host='1.2.3.4',
+                            event='runner_on_unknown_event')
+        callback.runner_event(event)
+
+    def test_empty_host(self):
+        """Test unknown event response."""
+        results_store = ConnectResultStore(self.scan_task)
+        callback = ConnectResultCallback(results_store,
+                                         self.cred,
+                                         self.source)
+        event = build_event(host=None,
+                            event='runner_on_ok')
+        callback.runner_event(event)
