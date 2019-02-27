@@ -146,8 +146,7 @@ class CredentialSerializer(NotEmptySerializer):
                                       % (ssh_keyfile))]
                 }
                 raise ValidationError(error)
-            else:
-                attrs['ssh_keyfile'] = keyfile
+            attrs['ssh_keyfile'] = keyfile
 
         if ssh_passphrase and not ssh_keyfile and not self.partial:
             error = {
