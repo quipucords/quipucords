@@ -175,8 +175,7 @@ def _status5(scan_task):
         invalid_auth = 'Either the password or username is incorrect.'
         if invalid_auth in str(xml_error):
             raise SatelliteAuthException(str(xml_error))
-        else:
-            raise SatelliteException(str(xml_error))
+        raise SatelliteException(str(xml_error))
     except xmlrpc.client.ProtocolError as protocol_error:
         if protocol_error.errcode == codes.HTTP_404_NOT_FOUND:
             raise protocol_error
