@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, Grid } from 'patternfly-react';
+import _size from 'lodash/size';
 import helpers from '../../common/helpers';
 
 const FormField = ({
@@ -38,7 +39,7 @@ const FormField = ({
 };
 
 const doesntHaveMinimumCharacters = (value, characters = 5) => typeof value === 'string' && value.length < characters;
-const isEmpty = value => !value || value === '' || (Array.isArray(value) && !value.length);
+const isEmpty = value => (typeof value !== 'number' && _size(value) < 1) || false;
 const isPortValid = value => /^\d{1,5}$/.test(value) && value <= 65535;
 
 const fieldValidation = {

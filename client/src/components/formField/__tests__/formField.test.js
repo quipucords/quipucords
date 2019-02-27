@@ -58,8 +58,14 @@ describe('FormField Component', () => {
   });
 
   it('should have isEmpty validation', () => {
+    expect(fieldValidation.isEmpty(undefined)).toBe(true);
+    expect(fieldValidation.isEmpty(null)).toBe(true);
     expect(fieldValidation.isEmpty('')).toBe(true);
     expect(fieldValidation.isEmpty('lorem')).toBe(false);
+    expect(fieldValidation.isEmpty([])).toBe(true);
+    expect(fieldValidation.isEmpty(['lorem'])).toBe(false);
+    expect(fieldValidation.isEmpty({})).toBe(true);
+    expect(fieldValidation.isEmpty({ lorem: 'ipsum' })).toBe(false);
   });
 
   it('should have doesntHaveMinimumCharacters validation', () => {
