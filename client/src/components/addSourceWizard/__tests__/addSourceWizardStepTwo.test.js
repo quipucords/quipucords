@@ -77,7 +77,15 @@ describe('AddSourceWizardStepTwo Component', () => {
     expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.[12:24]'])).toBe(true);
     expect(AddSourceWizardStepTwo.hostValid(['0.0.0.[12:a]'])).toBe(false);
 
-    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/23'])).toBe(false);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/15'])).toBe(false);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/16'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/17'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/18'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/19'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/20'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/21'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/22'])).toBe(true);
+    expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/23'])).toBe(true);
     expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/24'])).toBe(true);
     expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/25'])).toBe(true);
     expect(AddSourceWizardStepTwo.hostsValid(['0.0.0.12/26'])).toBe(true);
