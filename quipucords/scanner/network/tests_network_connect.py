@@ -508,7 +508,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     def test_run_success_return_connect(self, mock_run):
         """Test pause of connect."""
         # Test cancel at run() level
-        mock_run.side_effect= [[None, ScanTask.COMPLETED]]
+        mock_run.side_effect = [[None, ScanTask.COMPLETED]]
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
         self.assertEqual(scan_result, ScanTask.COMPLETED)
@@ -517,7 +517,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
     def test_connect_exception(self, mock_run):
         """Test pause of connect."""
         # Test cancel at run() level
-        mock_run.side_effect= AnsibleRunnerException('fail')
+        mock_run.side_effect = AnsibleRunnerException('fail')
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
         self.assertEqual(scan_result, ScanTask.FAILED)
