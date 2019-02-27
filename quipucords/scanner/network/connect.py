@@ -193,14 +193,16 @@ class ConnectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(message)
 
             try:
-                _connect(manager_interrupt,
-                         self.scan_task,
-                         remaining_hosts,
-                         result_store,
-                         credential,
-                         connection_port,
-                         use_paramiko,
-                         forks=forks)
+                scan_message, scan_result = _connect(manager_interrupt,
+                                                     self.scan_task,
+                                                     remaining_hosts,
+                                                     result_store,
+                                                     credential,
+                                                     connection_port,
+                                                     use_paramiko,
+                                                     forks=forks)
+                if scan_result == ScanTask.FAILED:
+                    return scan_message, scan_result
             except AnsibleRunnerException as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
                 error_message = 'Connect scan task failed with credential %s.'\
@@ -338,14 +340,7 @@ def _connect(manager_interrupt,
         if final_status != 'successful':
             message = _construct_playbook_error_msg(final_status)
             if final_status not in ['unreachable', 'failed']:
-                if not scan_task.systems_scanned:
-                    log_message = 'Unexpected ansible status %s.  '\
-                        'Failing scan because there were no successful '\
-                        'system connections.  Ansible error: %s' % (
-                            final_status, message)
-                    scan_task.log_message(log_message, log_level=logging.ERROR)
-                    raise AnsibleRunnerException(final_status)
-                else:
+                if scan_task.systems_scanned:
                     log_message = 'Unexpected ansible status %s.  '\
                         'Continuing scan because there were %s successful'\
                         ' system connections.  Ansible error: %s' % (
@@ -353,6 +348,13 @@ def _connect(manager_interrupt,
                             str(scan_task.systems_scanned),
                             message)
                     scan_task.log_message(log_message, log_level=logging.ERROR)
+                else:
+                    log_message = 'Unexpected ansible status %s.  '\
+                        'Failing scan because there were no successful '\
+                        'system connections.  Ansible error: %s' % (
+                            final_status, message)
+                    return log_message, scan_task.FAILED
+    return None, scan_task.COMPLETED
 
 
 def _handle_ssh_passphrase(credential):
