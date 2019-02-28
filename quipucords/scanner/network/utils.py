@@ -16,20 +16,6 @@ from ansible.plugins.inventory import detect_range, expand_hostname_range
 
 from api.vault import decrypt_data_as_unicode
 
-ANSIBLE_DEFAULT_ERR_MSG = 'An error occurred while executing the ' \
-    'Ansible playbook. See logs for further details.'
-ANSIBLE_FAILED_HOST_ERR_MSG = 'An error occurred while executing the ' \
-    'Ansible playbook. A task failed to execute properly on a remote host.' \
-    ' See logs for further details.'
-ANSIBLE_UNREACHABLE_HOST_ERR_MSG = 'An error occurred while executing the ' \
-    'Ansible playbook. Connection could not be made to the remote hosts.' \
-    ' See logs for further details.'
-ANSIBLE_PLAYBOOK_ERR_MSG = 'An error occurred while executing the ' \
-    'Ansible playbook. An issue exists in the playbook being executed.' \
-    ' See logs for further details.'
-ANSIBLE_TIMEOUT_ERR_MSG = 'A timeout was reached while executing' \
-    'the Ansible playbook.'
-
 
 def _credential_vars(credential):
     ansible_dict = {}
@@ -71,17 +57,6 @@ def _construct_vars(connection_port, credential=None):
         ansible_vars.update(ansible_dict)
 
     return ansible_vars
-
-
-def _construct_playbook_error_msg(status):
-    message = ANSIBLE_DEFAULT_ERR_MSG
-    if status == 'timeout':
-        message = ANSIBLE_TIMEOUT_ERR_MSG
-    elif status == 'failed':
-        message = ANSIBLE_FAILED_HOST_ERR_MSG
-    elif status == 'unreachable':
-        message = ANSIBLE_UNREACHABLE_HOST_ERR_MSG
-    return message
 
 
 def expand_hostpattern(hostpattern):

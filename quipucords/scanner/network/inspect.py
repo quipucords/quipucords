@@ -23,6 +23,7 @@ from api.models import (ScanJob,
                         SystemInspectionResult)
 from api.vault import write_to_yaml
 
+import messages
 
 from quipucords import settings
 
@@ -30,8 +31,7 @@ from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException,
                                         ScannerException)
 from scanner.network.inspect_callback import InspectResultCallback
-from scanner.network.utils import (_construct_playbook_error_msg,
-                                   _construct_vars,
+from scanner.network.utils import (_construct_vars,
                                    _credential_vars)
 from scanner.task import ScanTaskRunner
 
@@ -291,7 +291,10 @@ class InspectTaskRunner(ScanTaskRunner):
             if final_status != 'successful':
                 call.finalize_failed_hosts()
                 if final_status not in ['unreachable', 'failed']:
-                    error_msg = _construct_playbook_error_msg(final_status)
+                    if final_status == 'timeout':
+                        error_msg = messages.NETWORK_TIMEOUT_ERR
+                    else:
+                        error_msg = messages.NETWORK_UNKNOWN_ERR
                     scan_result = ScanTask.FAILED
         return error_msg, scan_result
 

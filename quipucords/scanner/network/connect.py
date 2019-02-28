@@ -25,6 +25,8 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 
 from django.db import transaction
 
+import messages
+
 import pexpect
 
 from quipucords import settings
@@ -32,8 +34,7 @@ from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
-from scanner.network.utils import (_construct_playbook_error_msg,
-                                   _construct_vars,
+from scanner.network.utils import (_construct_vars,
                                    expand_hostpattern)
 from scanner.task import ScanTaskRunner
 
@@ -223,7 +224,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-# pylint: disable=too-many-arguments, too-many-locals, too-many-statements
+# pylint: disable=too-many-arguments, too-many-locals,
+# pylint: disable=too-many-statements, too-many-branches
 def _connect(manager_interrupt,
              scan_task,
              hosts,
@@ -338,22 +340,21 @@ def _connect(manager_interrupt,
 
         final_status = runner_obj.status
         if final_status != 'successful':
-            message = _construct_playbook_error_msg(final_status)
             if final_status not in ['unreachable', 'failed']:
-                if scan_task.systems_scanned:
-                    log_message = 'Unexpected ansible status %s.  '\
-                        'Continuing scan because there were %s successful'\
-                        ' system connections.  Ansible error: %s' % (
-                            final_status,
-                            str(scan_task.systems_scanned),
-                            message)
-                    scan_task.log_message(log_message, log_level=logging.ERROR)
+                if final_status == 'timeout':
+                    error = messages.NETWORK_TIMEOUT_ERR
                 else:
-                    log_message = 'Unexpected ansible status %s.  '\
-                        'Failing scan because there were no successful '\
-                        'system connections.  Ansible error: %s' % (
-                            final_status, message)
-                    return log_message, scan_task.FAILED
+                    error = messages.NETWORK_UNKNOWN_ERR
+                if scan_task.systems_scanned:
+                    msg = messages.NETWORK_CONNECT_CONTINUE % (
+                        final_status,
+                        str(scan_task.systems_scanned),
+                        error)
+                    scan_task.log_message(msg, log_level=logging.ERROR)
+                else:
+                    msg = messages.NETWORK_CONNECT_FAIL % (final_status,
+                                                           error)
+                    return msg, scan_task.FAILED
     return None, scan_task.COMPLETED
 
 
