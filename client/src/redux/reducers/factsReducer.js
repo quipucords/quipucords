@@ -18,7 +18,7 @@ const factsReducer = (state = initialState, action) => {
         'update',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,

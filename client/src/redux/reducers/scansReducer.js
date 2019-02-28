@@ -79,7 +79,7 @@ const scansReducer = (state = initialState, action) => {
         'view',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload).message,
           lastRefresh: state.view.lastRefresh
         },
         {
@@ -122,7 +122,7 @@ const scansReducer = (state = initialState, action) => {
         'detail',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -161,7 +161,7 @@ const scansReducer = (state = initialState, action) => {
         'connectionResults',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -200,7 +200,7 @@ const scansReducer = (state = initialState, action) => {
         'inspectionResults',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -239,7 +239,7 @@ const scansReducer = (state = initialState, action) => {
         'jobs',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -280,7 +280,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           add: true,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -336,7 +336,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           start: true,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -378,7 +378,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           cancel: true,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -420,7 +420,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           pause: true,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -462,7 +462,7 @@ const scansReducer = (state = initialState, action) => {
           pending: false,
           restart: true,
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -514,7 +514,7 @@ const scansReducer = (state = initialState, action) => {
         'update',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload).message,
           delete: true
         },
         {

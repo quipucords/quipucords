@@ -27,7 +27,7 @@ const userReducer = (state = initialState, action) => {
         'user',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -65,7 +65,7 @@ const userReducer = (state = initialState, action) => {
         'session',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload).message,
           wasLoggedIn: state.session.wasLoggedIn
         },
         {
@@ -107,7 +107,7 @@ const userReducer = (state = initialState, action) => {
         'session',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload),
+          errorMessage: helpers.getMessageFromResults(action.payload).message,
           wasLoggedIn: state.session.wasLoggedIn
         },
         {

@@ -25,7 +25,7 @@ const reportsReducer = (state = initialState, action) => {
         'report',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,
@@ -38,7 +38,7 @@ const reportsReducer = (state = initialState, action) => {
         'merge',
         {
           error: action.error,
-          errorMessage: helpers.getMessageFromResults(action.payload)
+          errorMessage: helpers.getMessageFromResults(action.payload).message
         },
         {
           state,

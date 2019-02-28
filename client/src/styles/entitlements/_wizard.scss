@@ -1,7 +1,11 @@
-.quipucords-wizard {
-  .wizard-pf-complete.blank-slate-pf {
-    padding-top: 40px;
-    padding-bottom: 0;
+/* _wizard.scss */
+.quipucords-wizard, .wizard-pf {
+  .wizard-pf-main {
+    overflow: inherit;
+  }
+
+  abbr {
+    border-bottom: none;
   }
 
   .form-horizontal .form-group {
@@ -27,11 +31,12 @@
 
   @media (min-width: $screen-sm-min) {
     margin: 30px auto;
-    padding: inherit;
+    padding: 0;
     width: 600px;
 
     .wizard-pf-row {
-      height: 400px;
+      min-height: 450px;
+      height: auto;
     }
   }
 }

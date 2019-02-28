@@ -1,9 +1,9 @@
-import apiTypes, * as allApiTypes from '../apiConstants';
+import apiTypes, * as allTypes from '../apiConstants';
 
 describe('ApiTypes', () => {
   it('Should have specific API properties', () => {
-    expect(apiTypes).toMatchSnapshot('specific types');
+    expect(apiTypes).toMatchSnapshot('default export');
 
-    expect(allApiTypes).toMatchSnapshot('all api types');
+    expect(allTypes).toMatchSnapshot('all exports');
   });
 });
