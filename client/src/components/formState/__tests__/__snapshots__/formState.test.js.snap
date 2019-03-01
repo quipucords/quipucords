@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic render 1`] = `
+<form>
+  <label>
+    Lorem
+    <input
+      name="lorem"
+      readonly=""
+      type="text"
+      value="ipsum"
+    />
+  </label>
+</form>
+`;
+
+exports[`basic validation 1`] = `
+Object {
+  "lorem": "required",
+}
+`;
+
+exports[`initial errors 1`] = `Object {}`;
+
+exports[`initial props 1`] = `
+Object {
+  "children": [Function],
+  "onReset": [Function],
+  "onSubmit": [Function],
+  "resetUsingSetValues": true,
+  "setValues": Object {
+    "lorem": "ipsum",
+  },
+  "setValuesAssumeBoolIsChecked": true,
+  "setValuesOnUpdate": false,
+  "validate": [Function],
+  "validateOnMount": false,
+  "validateOnUpdate": false,
+}
+`;
+
+exports[`initial state 1`] = `
+Object {
+  "isSubmitting": false,
+  "isUpdating": false,
+  "isValid": null,
+  "isValidating": false,
+  "submitCount": 0,
+}
+`;
+
+exports[`multiple custom events 1`] = `
+Object {
+  "dolor": "sit",
+  "lorem": "woot again",
+}
+`;
+
+exports[`not mutated 1`] = `
+Object {
+  "lorem": "ipsum",
+}
+`;
+
+exports[`onevent 1`] = `
+Object {
+  "isSubmitting": false,
+  "isUpdating": false,
+  "isValid": true,
+  "isValidating": false,
+  "submitCount": 0,
+}
+`;
+
+exports[`onevent values updated 1`] = `
+Object {
+  "lorem": "dolor",
+}
+`;
+
+exports[`onreset 1`] = `
+Object {
+  "isSubmitting": false,
+  "isUpdating": false,
+  "isValid": null,
+  "isValidating": false,
+  "submitCount": 0,
+}
+`;
+
+exports[`onsubmit 1`] = `
+Object {
+  "isSubmitting": false,
+  "isUpdating": false,
+  "isValid": true,
+  "isValidating": false,
+  "submitCount": 1,
+}
+`;
+
+exports[`reset values updated 1`] = `
+Object {
+  "lorem": "ipsum",
+}
+`;
+
+exports[`single custom event 1`] = `
+Object {
+  "dolor": "",
+  "lorem": "woot",
+}
+`;

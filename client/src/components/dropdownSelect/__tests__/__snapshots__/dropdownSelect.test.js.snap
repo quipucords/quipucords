@@ -3,11 +3,193 @@
 exports[`basic dropdown 1`] = `
 <div
   class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
 >
   <button
     aria-expanded="false"
     aria-haspopup="true"
-    class="dropdown-toggle btn btn-default"
+    class="form-control dropdown-toggle btn btn-default"
+    id="test"
+    role="button"
+    type="button"
+  >
+    <span>
+      hello
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="test"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        lorem
+      </a>
+    </li>
+    <li
+      class="active"
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        hello
+      </a>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`emulated event 1`] = `
+Object {
+  "currentTarget": Object {
+    "id": "test",
+    "name": "test",
+    "options": Array [
+      Object {
+        "label": "lorem",
+        "selected": false,
+        "text": "lorem",
+        "textContent": "lorem",
+        "title": "lorem",
+        "value": "lorem",
+      },
+      Object {
+        "label": "ipsum",
+        "selected": false,
+        "text": "ipsum",
+        "textContent": "ipsum",
+        "title": "ipsum",
+        "value": "ipsum",
+      },
+      Object {
+        "label": "hello",
+        "selected": true,
+        "text": "hello",
+        "textContent": "hello",
+        "title": "hello",
+        "value": "hello",
+      },
+      Object {
+        "label": "world",
+        "selected": false,
+        "text": "world",
+        "textContent": "world",
+        "title": "world",
+        "value": "world",
+      },
+    ],
+    "selectedIndex": 2,
+    "type": "select-one",
+    "value": "hello",
+  },
+  "id": "test",
+  "name": "test",
+  "options": Array [
+    Object {
+      "label": "lorem",
+      "selected": false,
+      "text": "lorem",
+      "textContent": "lorem",
+      "title": "lorem",
+      "value": "lorem",
+    },
+    Object {
+      "label": "ipsum",
+      "selected": false,
+      "text": "ipsum",
+      "textContent": "ipsum",
+      "title": "ipsum",
+      "value": "ipsum",
+    },
+    Object {
+      "label": "hello",
+      "selected": true,
+      "text": "hello",
+      "textContent": "hello",
+      "title": "hello",
+      "value": "hello",
+    },
+    Object {
+      "label": "world",
+      "selected": false,
+      "text": "world",
+      "textContent": "world",
+      "title": "world",
+      "value": "world",
+    },
+  ],
+  "persist": [Function],
+  "selectedIndex": 2,
+  "target": Object {
+    "id": "test",
+    "name": "test",
+    "options": Array [
+      Object {
+        "label": "lorem",
+        "selected": false,
+        "text": "lorem",
+        "textContent": "lorem",
+        "title": "lorem",
+        "value": "lorem",
+      },
+      Object {
+        "label": "ipsum",
+        "selected": false,
+        "text": "ipsum",
+        "textContent": "ipsum",
+        "title": "ipsum",
+        "value": "ipsum",
+      },
+      Object {
+        "label": "hello",
+        "selected": true,
+        "text": "hello",
+        "textContent": "hello",
+        "title": "hello",
+        "value": "hello",
+      },
+      Object {
+        "label": "world",
+        "selected": false,
+        "text": "world",
+        "textContent": "world",
+        "title": "world",
+        "value": "world",
+      },
+    ],
+    "selectedIndex": 2,
+    "type": "select-one",
+    "value": "hello",
+  },
+  "type": "select-one",
+  "value": "hello",
+}
+`;
+
+exports[`key value object 1`] = `
+<div
+  class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="form-control dropdown-toggle btn btn-default"
     id="test"
     role="button"
     type="button"
@@ -34,7 +216,7 @@ exports[`basic dropdown 1`] = `
         role="menuitem"
         tabindex="-1"
       >
-        lorem
+        ipsum
       </a>
     </li>
     <li
@@ -46,21 +228,22 @@ exports[`basic dropdown 1`] = `
         role="menuitem"
         tabindex="-1"
       >
-        hello
+        world
       </a>
     </li>
   </ul>
 </div>
 `;
 
-exports[`key value object 1`] = `
+exports[`key value object 2`] = `
 <div
   class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
 >
   <button
     aria-expanded="false"
     aria-haspopup="true"
-    class="dropdown-toggle btn btn-default"
+    class="form-control dropdown-toggle btn btn-default"
     id="test"
     role="button"
     type="button"
@@ -109,11 +292,12 @@ exports[`key value object 1`] = `
 exports[`multiselect dropdown 1`] = `
 <div
   class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
 >
   <button
     aria-expanded="false"
     aria-haspopup="true"
-    class="dropdown-toggle btn btn-default"
+    class="form-control dropdown-toggle btn btn-default"
     id="test"
     role="button"
     type="button"
@@ -194,11 +378,12 @@ exports[`multiselect dropdown 1`] = `
 exports[`string array 1`] = `
 <div
   class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
 >
   <button
     aria-expanded="false"
     aria-haspopup="true"
-    class="dropdown-toggle btn btn-default"
+    class="form-control dropdown-toggle btn btn-default"
     id="test"
     role="button"
     type="button"
@@ -242,6 +427,84 @@ exports[`string array 1`] = `
     </li>
     <li
       class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        hello
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        world
+      </a>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`string array 2`] = `
+<div
+  class="quipucords-dropdownselect  dropdown btn-group"
+  name="test"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="true"
+    class="form-control dropdown-toggle btn btn-default"
+    id="test"
+    role="button"
+    type="button"
+  >
+    <span>
+      hello
+    </span>
+     
+    <span
+      class="caret"
+    />
+  </button>
+  <ul
+    aria-labelledby="test"
+    class="dropdown-menu"
+    role="menu"
+  >
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        lorem
+      </a>
+    </li>
+    <li
+      class=""
+      role="presentation"
+    >
+      <a
+        href="#"
+        role="menuitem"
+        tabindex="-1"
+      >
+        ipsum
+      </a>
+    </li>
+    <li
+      class="active"
       role="presentation"
     >
       <a

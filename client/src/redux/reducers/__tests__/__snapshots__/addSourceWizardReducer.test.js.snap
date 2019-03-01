@@ -3,18 +3,19 @@
 exports[`defined type CREATE_SOURCE_SHOW 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": true,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": true,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
+    "add": true,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": true,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "CREATE_SOURCE_SHOW",
 }
@@ -23,120 +24,105 @@ Object {
 exports[`defined type EDIT_SOURCE_SHOW 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": true,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": true,
-      "source": undefined,
-      "stepOneValid": true,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": true,
+    "editSource": Object {},
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": true,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "EDIT_SOURCE_SHOW",
-}
-`;
-
-exports[`defined type INVALID_SOURCE_WIZARD_STEPTWO 1`] = `
-Object {
-  "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": false,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
-  },
-  "type": "INVALID_SOURCE_WIZARD_STEPTWO",
 }
 `;
 
 exports[`defined type UPDATE_SOURCE_HIDE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": false,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": false,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "UPDATE_SOURCE_HIDE",
 }
 `;
 
-exports[`defined type UPDATE_SOURCE_WIZARD_STEPONE 1`] = `
+exports[`defined type VALID_SOURCE_WIZARD_STEPONE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": false,
-      "source": undefined,
-      "stepOneValid": true,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": true,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
-  "type": "UPDATE_SOURCE_WIZARD_STEPONE",
+  "type": "VALID_SOURCE_WIZARD_STEPONE",
 }
 `;
 
-exports[`defined type UPDATE_SOURCE_WIZARD_STEPTWO 1`] = `
+exports[`defined type VALID_SOURCE_WIZARD_STEPTWO 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": false,
-      "source": undefined,
-      "stepOneValid": false,
-      "stepTwoValid": true,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": true,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": true,
   },
-  "type": "UPDATE_SOURCE_WIZARD_STEPTWO",
+  "type": "VALID_SOURCE_WIZARD_STEPTWO",
 }
 `;
 
 exports[`fulfilled types ADD_SOURCE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": true,
-      "show": false,
-      "source": Object {
-        "test": "success",
-      },
-      "stepOneValid": false,
-      "stepTwoValid": false,
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": true,
+    "pending": false,
+    "show": true,
+    "source": Object {
+      "test": "success",
     },
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "ADD_SOURCE_FULFILLED",
 }
@@ -145,18 +131,19 @@ Object {
 exports[`fulfilled types GET_WIZARD_CREDENTIALS 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": false,
-      "show": false,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": false,
+    "pending": false,
+    "show": false,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "GET_WIZARD_CREDENTIALS_FULFILLED",
 }
@@ -165,20 +152,21 @@ Object {
 exports[`fulfilled types UPDATE_SOURCE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": false,
-      "errorMessage": null,
-      "fulfilled": true,
-      "show": false,
-      "source": Object {
-        "test": "success",
-      },
-      "stepOneValid": false,
-      "stepTwoValid": false,
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": false,
+    "errorMessage": null,
+    "errorStatus": null,
+    "fulfilled": true,
+    "pending": false,
+    "show": true,
+    "source": Object {
+      "test": "success",
     },
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "UPDATE_SOURCE_FULFILLED",
 }
@@ -187,18 +175,19 @@ Object {
 exports[`rejected types ADD_SOURCE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": true,
-      "errorMessage": "ERROR",
-      "fulfilled": false,
-      "show": false,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": true,
+    "errorMessage": "",
+    "errorStatus": 0,
+    "fulfilled": false,
+    "pending": false,
+    "show": false,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "ADD_SOURCE_REJECTED",
 }
@@ -207,18 +196,19 @@ Object {
 exports[`rejected types UPDATE_SOURCE 1`] = `
 Object {
   "result": Object {
-    "view": Object {
-      "add": false,
-      "allCredentials": Array [],
-      "edit": false,
-      "error": true,
-      "errorMessage": "ERROR",
-      "fulfilled": false,
-      "show": false,
-      "source": Object {},
-      "stepOneValid": false,
-      "stepTwoValid": false,
-    },
+    "add": false,
+    "edit": false,
+    "editSource": null,
+    "error": true,
+    "errorMessage": "",
+    "errorStatus": 0,
+    "fulfilled": false,
+    "pending": false,
+    "show": false,
+    "source": Object {},
+    "stepOneValid": true,
+    "stepTwoErrorMessages": Object {},
+    "stepTwoValid": false,
   },
   "type": "UPDATE_SOURCE_REJECTED",
 }

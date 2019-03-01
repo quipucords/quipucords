@@ -28,7 +28,7 @@ class Sources extends React.Component {
           type: toastNotificationTypes.TOAST_ADD,
           alertType: 'error',
           header: 'Error',
-          message: helpers.getMessageFromResults(results)
+          message: helpers.getMessageFromResults(results).message
         });
       } else {
         Store.dispatch({
@@ -68,14 +68,14 @@ class Sources extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { viewOptions, updated, deleted, fulfilled } = this.props;
+    const { viewOptions, updateSources, deleted, fulfilled } = this.props;
 
     // Check for changes resulting in a fetch
     if (helpers.viewPropsChanged(nextProps.viewOptions, viewOptions)) {
       this.onRefresh(nextProps);
     }
 
-    if ((nextProps.updated && !updated) || (nextProps.deleted && !deleted)) {
+    if ((nextProps.updateSources && !updateSources) || (nextProps.deleted && !deleted)) {
       this.onRefresh();
     }
 
@@ -293,7 +293,7 @@ Sources.propTypes = {
   lastRefresh: PropTypes.object,
   viewOptions: PropTypes.object,
   fulfilled: PropTypes.bool,
-  updated: PropTypes.bool,
+  updateSources: PropTypes.bool,
   deleted: PropTypes.bool
 };
 
@@ -307,7 +307,7 @@ Sources.defaultProps = {
   lastRefresh: {},
   viewOptions: {},
   fulfilled: false,
-  updated: false,
+  updateSources: false,
   deleted: false
 };
 
@@ -321,7 +321,6 @@ const mapStateToProps = state =>
     {},
     state.sources.view,
     { viewOptions: state.viewOptions[viewTypes.SOURCES_VIEW] },
-    { updated: state.addSourceWizard.view.fulfilled },
     { deleted: state.sources.update.fulfilled }
   );
 

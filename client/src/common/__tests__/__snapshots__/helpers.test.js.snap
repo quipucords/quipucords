@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`0 message 1`] = `"ERROR"`;
+
+exports[`200 message 1`] = `"Request success XXX"`;
+
+exports[`399 message 1`] = `"Request success XXX"`;
+
+exports[`400 error message 1`] = `"Lorem ipsum dolor sit"`;
+
+exports[`400 fallback again error message 1`] = `"Request failed with status code XXX"`;
+
+exports[`400 fallback error message 1`] = `""`;
+
+exports[`400 fallback yet again error message 1`] = `"XXX Request failed"`;
+
+exports[`400 filtered blank message 1`] = `""`;
+
+exports[`400 filtered message 1`] = `"Lorem ipsum dolor sit"`;
+
+exports[`400 message 1`] = `"Request success XXX"`;
+
+exports[`500 level error message 1`] = `"500 Lorem ipsum dolor sit"`;
+
+exports[`500 level fallback again error message 1`] = `"500 Request failed with status code XXX"`;
+
+exports[`500 level fallback error message 1`] = `"500 "`;
+
+exports[`500 level fallback yet again error message 1`] = `"500 XXX Request failed"`;
+
+exports[`createViewQueryObject 1`] = `
+Object {
+  "page": 1,
+  "page_size": 10,
+}
+`;
+
+exports[`dont reset state object 1`] = `
+Object {
+  "ipsum": false,
+  "lorem": true,
+}
+`;
+
+exports[`helpers 1`] = `
+Object {
+  "DEV_MODE": false,
+  "FULFILLED_ACTION": [Function],
+  "PENDING_ACTION": [Function],
+  "REJECTED_ACTION": [Function],
+  "RH_BRAND": false,
+  "TEST_MODE": true,
+  "createViewQueryObject": [Function],
+  "devModeNormalizeCount": [Function],
+  "downloadData": [Function],
+  "generateId": [Function],
+  "getMessageFromResults": [Function],
+  "getStatusFromResults": [Function],
+  "getTimeStampFromResults": [Function],
+  "ipAddressValue": [Function],
+  "isIpAddress": [Function],
+  "noop": [Function],
+  "scanStatusIcon": [Function],
+  "scanTypeIcon": [Function],
+  "setPropIfDefined": [Function],
+  "setPropIfTruthy": [Function],
+  "setStateProp": [Function],
+  "sourceTypeIcon": [Function],
+  "viewPropsChanged": [Function],
+}
+`;
+
+exports[`reset state object 1`] = `
+Object {
+  "ipsum": true,
+  "lorem": true,
+}
+`;
+
+exports[`scanStatusIcon 1`] = `
+Object {
+  "classNames": Array [],
+  "name": "ok",
+  "type": "pf",
+}
+`;
+
+exports[`scanTypeIcon 1`] = `
+Object {
+  "name": "connected",
+  "type": "pf",
+}
+`;
+
+exports[`setPropIfDefined 1`] = `
+Object {
+  "lorem": "ipsum",
+}
+`;
+
+exports[`setPropIfDefined undefined 1`] = `Object {}`;
+
+exports[`setPropIfTruthy bool 1`] = `
+Object {
+  "lorem": true,
+}
+`;
+
+exports[`setPropIfTruthy number 1`] = `Object {}`;
+
+exports[`setPropIfTruthy string 1`] = `
+Object {
+  "lorem": true,
+}
+`;
+
+exports[`sourceTypeIcon 1`] = `
+Object {
+  "name": "vcenter",
+  "type": "pf",
+}
+`;
+
+exports[`undefined message 1`] = `"ERROR"`;

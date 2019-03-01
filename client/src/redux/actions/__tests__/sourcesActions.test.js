@@ -43,7 +43,7 @@ describe('SourcesActions', () => {
     dispatcher(store.dispatch).then(() => {
       const response = store.getState().addSourceWizard;
 
-      expect(response.view.source.test).toEqual('success');
+      expect(response.source.test).toEqual('success');
       done();
     });
   });
@@ -109,7 +109,7 @@ describe('SourcesActions', () => {
     dispatcher(store.dispatch).then(() => {
       const response = store.getState().addSourceWizard;
 
-      expect(response.view.source.test).toEqual('success');
+      expect(response.source.test).toEqual('success');
       done();
     });
   });

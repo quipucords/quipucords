@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`selectors 1`] = `
+Object {
+  "makeSourceDetail": [Function],
+  "sourceDetail": [Function],
+}
+`;
+
+exports[`sourceDetail 1`] = `
+Object {
+  "credentials": Array [
+    15,
+  ],
+  "hosts": Array [
+    "192.168.0.1",
+  ],
+  "hostsMultiple": "192.168.0.1",
+  "hostsSingle": "192.168.0.1:22",
+  "id": 1,
+  "name": "lorem",
+  "optionDisableSsl": false,
+  "optionParamiko": false,
+  "optionSslCert": false,
+  "optionSslProtocol": false,
+  "port": 22,
+  "type": "network",
+}
+`;
+
+exports[`sourceDetail properties undefined 1`] = `
+Object {
+  "credentials": Array [],
+}
+`;
+
+exports[`sourceDetail undefined 1`] = `
+Object {
+  "credentials": Array [],
+}
+`;
+
+exports[`sourceDetail updated 1`] = `
+Object {
+  "credentials": Array [
+    10,
+  ],
+  "hosts": Array [
+    "192.168.0.1",
+  ],
+  "hostsMultiple": "192.168.0.1",
+  "hostsSingle": "192.168.0.1:22",
+  "id": 1,
+  "name": "lorem",
+  "optionDisableSsl": false,
+  "optionParamiko": false,
+  "optionSslCert": false,
+  "optionSslProtocol": false,
+  "port": 22,
+  "type": "network",
+}
+`;
