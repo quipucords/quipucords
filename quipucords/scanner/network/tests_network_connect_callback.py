@@ -11,7 +11,7 @@
 """Test the connect callback capabilities."""
 
 # pylint: disable=ungrouped-imports
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from api.models import (Credential,
                         ScanJob,
@@ -164,8 +164,8 @@ class TestConnectResultCallback(TestCase):
         for state in self.stop_states:
             self.interrupt = Mock(value=state)
             callback = ConnectResultCallback(results_store, self.cred,
-                                            self.source, self.interrupt,
-                                            self.stop_states)
+                                             self.source, self.interrupt,
+                                             self.stop_states)
             self.assertEqual(callback.interrupt.value, state)
             result = callback.runner_cancel()
             self.assertEqual(result, True)
