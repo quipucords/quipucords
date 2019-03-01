@@ -23,7 +23,7 @@ from api.models import (ScanJob,
                         SystemInspectionResult)
 from api.vault import write_to_yaml
 
-import messages
+import log_messages
 
 from quipucords import settings
 
@@ -292,9 +292,9 @@ class InspectTaskRunner(ScanTaskRunner):
                 call.finalize_failed_hosts()
                 if final_status not in ['unreachable', 'failed']:
                     if final_status == 'timeout':
-                        error_msg = messages.NETWORK_TIMEOUT_ERR
+                        error_msg = log_messages.NETWORK_TIMEOUT_ERR
                     else:
-                        error_msg = messages.NETWORK_UNKNOWN_ERR
+                        error_msg = log_messages.NETWORK_UNKNOWN_ERR
                     scan_result = ScanTask.FAILED
         return error_msg, scan_result
 

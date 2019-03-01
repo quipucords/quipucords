@@ -25,7 +25,7 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 
 from django.db import transaction
 
-import messages
+import log_messages
 
 import pexpect
 
@@ -342,17 +342,17 @@ def _connect(manager_interrupt,
         if final_status != 'successful':
             if final_status not in ['unreachable', 'failed']:
                 if final_status == 'timeout':
-                    error = messages.NETWORK_TIMEOUT_ERR
+                    error = log_messages.NETWORK_TIMEOUT_ERR
                 else:
-                    error = messages.NETWORK_UNKNOWN_ERR
+                    error = log_messages.NETWORK_UNKNOWN_ERR
                 if scan_task.systems_scanned:
-                    msg = messages.NETWORK_CONNECT_CONTINUE % (
+                    msg = log_messages.NETWORK_CONNECT_CONTINUE % (
                         final_status,
                         str(scan_task.systems_scanned),
                         error)
                     scan_task.log_message(msg, log_level=logging.ERROR)
                 else:
-                    msg = messages.NETWORK_CONNECT_FAIL % (final_status,
+                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status,
                                                            error)
                     return msg, scan_task.FAILED
     return None, scan_task.COMPLETED
