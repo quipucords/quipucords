@@ -13,9 +13,9 @@
 import tempfile
 
 # ANSIBLE API DEPENDENCY
-# There is work we can do to allow vaultlib to be used on Ansible >= 2.4
-# https://stackoverflow.com/questions/44142208/how-to-view-decrypt-ansible-vault-credentials-files-from-within-a-python-script
+from ansible.module_utils._text import to_bytes
 from ansible.parsing.vault import VaultLib
+from ansible.parsing.vault import VaultSecret
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
 from django.conf import settings
@@ -82,16 +82,10 @@ class Vault():
     def __init__(self, password):
         """Create a vault."""
         self.password = password
-        try:
-            # ANSIBLE API DEPENDENCY
-            from ansible.parsing.vault import VaultSecret
-            from ansible.module_utils._text import to_bytes
-            pass_bytes = to_bytes(password, encoding='utf-8', errors='strict')
-            secrets = [('password', VaultSecret(_bytes=pass_bytes))]
-            # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-            self.vault = VaultLib(secrets=secrets)
-        except ImportError:
-            self.vault = VaultLib(password)
+        pass_bytes = to_bytes(password, encoding='utf-8', errors='strict')
+        secrets = [('password', VaultSecret(_bytes=pass_bytes))]
+        # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
+        self.vault = VaultLib(secrets=secrets)
 
     # pylint: disable=inconsistent-return-statements
     def dump(self, data, stream=None):

@@ -13,7 +13,7 @@
 # pylint: disable=ungrouped-imports
 import os.path
 from multiprocessing import Value
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 from ansible_runner.exceptions import AnsibleRunnerException
 
@@ -283,18 +283,15 @@ class NetworkConnectTaskRunnerTest(TestCase):
             ssh_timeout='0.1s')
         mock_run.assert_called()
 
-    @patch('scanner.network.connect._connect')
-    def test_connect_runner(self, mock_connect):
+    @patch('ansible_runner.run')
+    def test_connect_runner(self, mock_run):
         """Test running a connect scan with mocked connection."""
+        mock_run.return_value.status = 'successful'
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(['1.2.3.4'])
-        conn_dict = scanner.run_with_result_store(
+        _, result = scanner.run_with_result_store(
             Value('i', ScanJob.JOB_RUN), result_store)
-        mock_connect.assert_called_with(ANY, self.scan_task,
-                                        ANY, ANY,
-                                        ANY, 22,
-                                        False, forks=50)
-        self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+        self.assertEqual(result, ScanTask.COMPLETED)
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
     def test_result_store_src2(self):
@@ -400,16 +397,15 @@ class NetworkConnectTaskRunnerTest(TestCase):
                      hosts, Mock(), self.cred, connection_port)
             mock_run.assert_called()
 
-    @patch('scanner.network.connect._connect')
-    def test_connect_runner_src2(self, mock_connect):
+    @patch('ansible_runner.run')
+    def test_connect_runner_src2(self, mock_run):
         """Test running a connect scan with mocked connection."""
+        mock_run.return_value.status = 'successful'
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         result_store = MockResultStore(['1.2.3.4'])
-        conn_dict = scanner.run_with_result_store(
+        _, result = scanner.run_with_result_store(
             Value('i', ScanJob.JOB_RUN), result_store)
-        mock_connect.assert_called_with(
-            ANY, self.scan_task3, ANY, ANY, ANY, 22, True, forks=2)
-        self.assertEqual(conn_dict[1], ScanTask.COMPLETED)
+        self.assertEqual(result, ScanTask.COMPLETED)
 
     @patch('ansible_runner.run')
     def test_connect_paramiko(self, mock_run):
@@ -507,3 +503,31 @@ class NetworkConnectTaskRunnerTest(TestCase):
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         conn_dict = scanner.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
         self.assertEqual(conn_dict[1], ScanTask.CANCELED)
+
+    @patch('scanner.network.connect.ConnectTaskRunner.run_with_result_store')
+    def test_run_success_return_connect(self, mock_run):
+        """Test pause of connect."""
+        # Test cancel at run() level
+        mock_run.side_effect = [[None, ScanTask.COMPLETED]]
+        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
+        _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
+        self.assertEqual(scan_result, ScanTask.COMPLETED)
+
+    @patch('scanner.network.connect._connect')
+    def test_connect_exception(self, mock_run):
+        """Test pause of connect."""
+        # Test cancel at run() level
+        mock_run.side_effect = AnsibleRunnerException('fail')
+        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
+        _, scan_result = scanner.run(Value('i', ScanJob.JOB_RUN))
+        self.assertEqual(scan_result, ScanTask.FAILED)
+
+    @patch('ansible_runner.run')
+    def test_empty_hosts(self, mock_run):
+        """Test running a connect scan with mocked connection."""
+        mock_run.return_value.status = 'successful'
+        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
+        result_store = MockResultStore([])
+        _, result = scanner.run_with_result_store(
+            Value('i', ScanJob.JOB_RUN), result_store)
+        self.assertEqual(result, ScanTask.COMPLETED)

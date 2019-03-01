@@ -25,6 +25,8 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 
 from django.db import transaction
 
+import log_messages
+
 import pexpect
 
 from quipucords import settings
@@ -32,8 +34,7 @@ from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
-from scanner.network.utils import (_construct_playbook_error_msg,
-                                   _construct_vars,
+from scanner.network.utils import (_construct_vars,
                                    expand_hostpattern)
 from scanner.task import ScanTaskRunner
 
@@ -193,14 +194,16 @@ class ConnectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(message)
 
             try:
-                _connect(manager_interrupt,
-                         self.scan_task,
-                         remaining_hosts,
-                         result_store,
-                         credential,
-                         connection_port,
-                         use_paramiko,
-                         forks=forks)
+                scan_message, scan_result = _connect(manager_interrupt,
+                                                     self.scan_task,
+                                                     remaining_hosts,
+                                                     result_store,
+                                                     credential,
+                                                     connection_port,
+                                                     use_paramiko,
+                                                     forks=forks)
+                if scan_result == ScanTask.FAILED:
+                    return scan_message, scan_result
             except AnsibleRunnerException as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
                 error_message = 'Connect scan task failed with credential %s.'\
@@ -221,7 +224,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-# pylint: disable=too-many-arguments, too-many-locals, too-many-statements
+# pylint: disable=too-many-arguments, too-many-locals,
+# pylint: disable=too-many-statements, too-many-branches
 def _connect(manager_interrupt,
              scan_task,
              hosts,
@@ -336,10 +340,22 @@ def _connect(manager_interrupt,
 
         final_status = runner_obj.status
         if final_status != 'successful':
-            log_message = _construct_playbook_error_msg(final_status)
             if final_status not in ['unreachable', 'failed']:
-                scan_task.log_message(log_message)
-                raise AnsibleRunnerException(final_status)
+                if final_status == 'timeout':
+                    error = log_messages.NETWORK_TIMEOUT_ERR
+                else:
+                    error = log_messages.NETWORK_UNKNOWN_ERR
+                if scan_task.systems_scanned:
+                    msg = log_messages.NETWORK_CONNECT_CONTINUE % (
+                        final_status,
+                        str(scan_task.systems_scanned),
+                        error)
+                    scan_task.log_message(msg, log_level=logging.ERROR)
+                else:
+                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status,
+                                                               error)
+                    return msg, scan_task.FAILED
+    return None, scan_task.COMPLETED
 
 
 def _handle_ssh_passphrase(credential):
