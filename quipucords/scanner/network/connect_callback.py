@@ -15,6 +15,8 @@ import traceback
 
 from api.connresult.model import SystemConnectionResult
 
+import log_messages
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -26,12 +28,16 @@ class ConnectResultCallback():
     scan, as we scan it.
     """
 
-    # pylint: disable=protected-access
-    def __init__(self, result_store, credential, source):
+    # pylint: disable=protected-access,too-many-arguments
+    def __init__(self, result_store, credential, source,
+                 manager_interrupt, stop_states):
         """Create result callback."""
         self.result_store = result_store
         self.credential = credential
         self.source = source
+        self.interrupt = manager_interrupt
+        self.stop_states = stop_states
+        self.stop = False
 
     def task_on_ok(self, event_data, host, task_result):
         """Print a json representation of the event_data on ok."""
@@ -44,7 +50,7 @@ class ConnectResultCallback():
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_ok.'
+                'UNEXPECTED FAILURE in runner_on_ok.'
                 '  Error: %s\nAnsible result: %s' % (
                     error, event_data),
                 log_level=logging.ERROR)
@@ -74,7 +80,7 @@ class ConnectResultCallback():
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
+                'UNEXPECTED FAILURE in runner_on_unreachable.'
                 '  Error: %s\nAnsible result: %s' % (
                     error, event_data),
                 log_level=logging.ERROR)
@@ -103,7 +109,7 @@ class ConnectResultCallback():
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_failed.'
+                'UNEXPECTED FAILURE in runner_on_failed.'
                 '  Error: %s\nAnsible result: %s' % (
                     error, event_data),
                 log_level=logging.ERROR)
@@ -142,3 +148,14 @@ class ConnectResultCallback():
                         '   Error Unknown State: %s\nAnsible result: %s' % (
                             event,
                             event_dict), log_level=logging.ERROR)
+
+    def runner_cancel(self):
+        """Control the cancel callback for runner."""
+        if self.interrupt.value in self.stop_states:
+            if not self.stop:
+                self.result_store.scan_task.log_message(
+                    log_messages.NETWORK_CONNECT_CALLBACK_ACK_CANCEL,
+                    log_level=logging.INFO)
+                self.stop = True
+            return True
+        return False

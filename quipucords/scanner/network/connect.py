@@ -35,6 +35,7 @@ from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
 from scanner.network.utils import (_construct_vars,
+                                   check_manager_iterrupt,
                                    expand_hostpattern)
 from scanner.task import ScanTaskRunner
 
@@ -183,6 +184,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         remaining_hosts = result_store.remaining_hosts()
 
         for cred_id in credentials:
+            check_manager_iterrupt(manager_interrupt.value)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
                 message = 'Skipping credential %s.  No remaining hosts.' % \
@@ -289,11 +291,7 @@ def _connect(manager_interrupt,
     scan_task.log_message(log_message)
 
     for idx, group_name in enumerate(group_names):
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            raise NetworkCancelException()
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            raise NetworkPauseException()
-
+        check_manager_iterrupt(manager_interrupt.value)
         group_ips = inventory.get('all').get(
             'children').get(group_name).get('hosts').keys()
         group_ips = ["'%s'" % ip for ip in group_ips]
@@ -302,8 +300,11 @@ def _connect(manager_interrupt,
             'About to connect to hosts [%s]' % (
                 (idx + 1), len(group_names), group_ip_string)
         scan_task.log_message(log_message)
+        stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
+                       ScanJob.JOB_TERMINATE_PAUSE]
         call = ConnectResultCallback(result_store, credential,
-                                     scan_task.source)
+                                     scan_task.source, manager_interrupt,
+                                     stop_states)
 
         # Create parameters for ansible runner
         runner_settings = {'job_timeout':
@@ -332,6 +333,7 @@ def _connect(manager_interrupt,
                                             inventory=inventory_file,
                                             extravars=extra_vars_dict,
                                             event_handler=call.runner_event,
+                                            cancel_callback=call.runner_cancel,
                                             playbook=playbook_path,
                                             cmdline=all_commands,
                                             verbosity=verbosity_lvl)
@@ -340,6 +342,8 @@ def _connect(manager_interrupt,
 
         final_status = runner_obj.status
         if final_status != 'successful':
+            if final_status == 'canceled':
+                return log_messages.NETWORK_CONNECT_CANCELED, scan_task.FAILED
             if final_status not in ['unreachable', 'failed']:
                 if final_status == 'timeout':
                     error = log_messages.NETWORK_TIMEOUT_ERR

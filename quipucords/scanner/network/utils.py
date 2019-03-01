@@ -14,10 +14,23 @@
 from ansible.parsing.utils.addresses import parse_address
 from ansible.plugins.inventory import detect_range, expand_hostname_range
 
+from api.models import ScanJob
 from api.vault import decrypt_data_as_unicode
+
+from scanner.network.exceptions import (NetworkCancelException,
+                                        NetworkPauseException)
+
+
+def check_manager_iterrupt(interrupt_value):
+    """Check if cancel & pause exception should be raised."""
+    if interrupt_value == ScanJob.JOB_TERMINATE_CANCEL:
+        raise NetworkCancelException()
+    if interrupt_value == ScanJob.JOB_TERMINATE_PAUSE:
+        raise NetworkPauseException()
 
 
 def _credential_vars(credential):
+    """Build a dictionary containing cred information."""
     ansible_dict = {}
     username = credential.get('username')
     password = credential.get('password')

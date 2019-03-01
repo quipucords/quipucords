@@ -21,3 +21,7 @@ NETWORK_CONNECT_CONTINUE = 'Unexpected ansible status %s.  '\
 NETWORK_CONNECT_FAIL = 'Unexpected ansible status %s. Failing ' \
     'scan because there were no successful system connections.' \
     ' Ansible error: %s'
+NETWORK_CONNECT_CALLBACK_ACK_CANCEL = 'NETWORK CONNECT CALLBACK: '\
+    'Acknowledged request to terminate but still processing.'
+NETWORK_CONNECT_CANCELED = 'NETWORK CONNECT: Playbook status has '\
+    'been reported as canceled.'

@@ -11,7 +11,10 @@
 """Test the connect callback capabilities."""
 
 # pylint: disable=ungrouped-imports
+from unittest.mock import Mock, patch
+
 from api.models import (Credential,
+                        ScanJob,
                         ScanTask,
                         Source)
 
@@ -62,11 +65,16 @@ class TestConnectResultCallback(TestCase):
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_CONNECT)
+        self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
+                            ScanJob.JOB_TERMINATE_PAUSE]
+        self.interrupt = Mock(value=ScanJob.JOB_RUN)
 
     def test_task_on_ok(self):
         """Test the callback on ok."""
         results_store = ConnectResultStore(self.scan_task)
-        callback = ConnectResultCallback(results_store, self.cred, self.source)
+        self.interrupt.return_value.value = ScanJob.JOB_RUN
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_ok'))
@@ -83,9 +91,8 @@ class TestConnectResultCallback(TestCase):
     def test_task_on_failed(self):
         """Test the callback on failed."""
         results_store = ConnectResultStore(self.scan_task)
-        callback = ConnectResultCallback(results_store,
-                                         self.cred,
-                                         self.source)
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_failed'))
@@ -100,9 +107,8 @@ class TestConnectResultCallback(TestCase):
     def test_task_on_unreachable(self):
         """Test the callback on unreachable."""
         results_store = ConnectResultStore(self.scan_task)
-        callback = ConnectResultCallback(results_store,
-                                         self.cred,
-                                         self.source)
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_unreachable'))
@@ -119,12 +125,11 @@ class TestConnectResultCallback(TestCase):
     def test_exceptions_for_tasks(self):
         """Test exception for each task."""
         results_store = None
-        callback = ConnectResultCallback(results_store, self.cred, self.source)
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
         events = []
-        events.append(build_event(host='1.2.3.4',
-                                  event='runner_on_ok'))
-        events.append(build_event(host='1.2.3.4',
-                                  event='runner_on_failed'))
+        events.append(build_event(host='1.2.3.4', event='runner_on_ok'))
+        events.append(build_event(host='1.2.3.4', event='runner_on_failed'))
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_unreachable'))
         for event in events:
@@ -134,19 +139,33 @@ class TestConnectResultCallback(TestCase):
     def test_unknown_event_response(self):
         """Test unknown event response."""
         results_store = ConnectResultStore(self.scan_task)
-        callback = ConnectResultCallback(results_store,
-                                         self.cred,
-                                         self.source)
-        event = build_event(host='1.2.3.4',
-                            event='runner_on_unknown_event')
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
+        event = build_event(host='1.2.3.4', event='runner_on_unknown_event')
         callback.runner_event(event)
 
     def test_empty_host(self):
         """Test unknown event response."""
         results_store = ConnectResultStore(self.scan_task)
-        callback = ConnectResultCallback(results_store,
-                                         self.cred,
-                                         self.source)
-        event = build_event(host=None,
-                            event='runner_on_ok')
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
+        event = build_event(host=None, event='runner_on_ok')
         callback.runner_event(event)
+
+    def test_cancel_event(self):
+        """Test cancel event response."""
+        # Test continue state
+        results_store = ConnectResultStore(self.scan_task)
+        callback = ConnectResultCallback(results_store, self.cred, self.source,
+                                         self.interrupt, self.stop_states)
+        result = callback.runner_cancel()
+        self.assertEqual(result, False)
+        # Test cancel state
+        for state in self.stop_states:
+            self.interrupt = Mock(value=state)
+            callback = ConnectResultCallback(results_store, self.cred,
+                                            self.source, self.interrupt,
+                                            self.stop_states)
+            self.assertEqual(callback.interrupt.value, state)
+            result = callback.runner_cancel()
+            self.assertEqual(result, True)
