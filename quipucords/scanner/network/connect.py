@@ -353,7 +353,7 @@ def _connect(manager_interrupt,
                     scan_task.log_message(msg, log_level=logging.ERROR)
                 else:
                     msg = log_messages.NETWORK_CONNECT_FAIL % (final_status,
-                                                           error)
+                                                               error)
                     return msg, scan_task.FAILED
     return None, scan_task.COMPLETED
 
