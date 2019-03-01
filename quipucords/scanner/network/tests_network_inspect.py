@@ -13,7 +13,7 @@
 # pylint: disable=ungrouped-imports
 import os.path
 from multiprocessing import Value
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 from ansible_runner.exceptions import AnsibleRunnerException
 
@@ -101,6 +101,9 @@ class NetworkInspectScannerTest(TestCase):
         self.fact_endpoint = 'http://testserver' + reverse('reports-list')
 
         self.scan_job.save()
+        self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
+                            ScanJob.JOB_TERMINATE_PAUSE]
+        self.interrupt = Mock(value=ScanJob.JOB_RUN)
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -283,8 +286,8 @@ class NetworkInspectScannerTest(TestCase):
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
         callback = InspectResultCallback(scan_task=self.scan_task,
-                                         idx=1,
-                                         group_total=1)
+                                         stop_states=self.stop_states,
+                                         manager_interrupt=self.interrupt)
         # cleaned unused variabled from event_dict
         event_dict = {'runner_ident': 'f2100bac-7d64-43d2-8e6a-022c6f5104ac',
                       'event': 'runner_on_unreachable',

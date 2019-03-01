@@ -289,7 +289,8 @@ def _connect(manager_interrupt,
     log_message = 'START CONNECT PROCESSING GROUPS'\
         ' with use_paramiko: %s and %d forks' % (use_paramiko, forks)
     scan_task.log_message(log_message)
-
+    stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
+                   ScanJob.JOB_TERMINATE_PAUSE]
     for idx, group_name in enumerate(group_names):
         check_manager_iterrupt(manager_interrupt.value)
         group_ips = inventory.get('all').get(
@@ -300,8 +301,6 @@ def _connect(manager_interrupt,
             'About to connect to hosts [%s]' % (
                 (idx + 1), len(group_names), group_ip_string)
         scan_task.log_message(log_message)
-        stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
-                       ScanJob.JOB_TERMINATE_PAUSE]
         call = ConnectResultCallback(result_store, credential,
                                      scan_task.source, manager_interrupt,
                                      stop_states)
@@ -332,8 +331,8 @@ def _connect(manager_interrupt,
                                             settings=runner_settings,
                                             inventory=inventory_file,
                                             extravars=extra_vars_dict,
-                                            event_handler=call.runner_event,
-                                            cancel_callback=call.runner_cancel,
+                                            event_handler=call.event_callback,  # noqa
+                                            cancel_callback=call.cancel_callback,  # noqa
                                             playbook=playbook_path,
                                             cmdline=all_commands,
                                             verbosity=verbosity_lvl)
@@ -343,7 +342,8 @@ def _connect(manager_interrupt,
         final_status = runner_obj.status
         if final_status != 'successful':
             if final_status == 'canceled':
-                return log_messages.NETWORK_CONNECT_CANCELED, scan_task.FAILED
+                msg = log_messages.NETWORK_PLAYBOOK_CANCELED % ('CONNECT')
+                return msg, scan_task.FAILED
             if final_status not in ['unreachable', 'failed']:
                 if final_status == 'timeout':
                     error = log_messages.NETWORK_TIMEOUT_ERR

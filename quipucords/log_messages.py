@@ -21,7 +21,11 @@ NETWORK_CONNECT_CONTINUE = 'Unexpected ansible status %s.  '\
 NETWORK_CONNECT_FAIL = 'Unexpected ansible status %s. Failing ' \
     'scan because there were no successful system connections.' \
     ' Ansible error: %s'
-NETWORK_CONNECT_CALLBACK_ACK_CANCEL = 'NETWORK CONNECT CALLBACK: '\
+NETWORK_CALLBACK_ACK_CANCEL = 'NETWORK %s CALLBACK: '\
     'Acknowledged request to terminate but still processing.'
-NETWORK_CONNECT_CANCELED = 'NETWORK CONNECT: Playbook status has '\
+NETWORK_PLAYBOOK_CANCELED = 'NETWORK %s: Playbook status has '\
     'been reported as canceled.'
+TASK_UNEXPECTED_FAILURE = 'UNEXPECTED FAILURE in %s.' \
+    '  Error: %s\nAnsible result: %s'
+TASK_PERMISSION_DENIED = 'PERMISSION DENIED %s could not connect'\
+    ' with cred %s.'

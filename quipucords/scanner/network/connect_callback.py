@@ -50,9 +50,8 @@ class ConnectResultCallback():
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in runner_on_ok.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_ok', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
@@ -74,15 +73,14 @@ class ConnectResultCallback():
                     SystemConnectionResult.UNREACHABLE)
             else:
                 # invalid creds
-                message = 'PERMISSION DENIED %s could not connect'\
-                    ' with cred %s.' % (host, self.credential.name)
-                self.result_store.scan_task.log_message(message)
+                self.result_store.scan_task.log_message(
+                    log_messages.TASK_PERMISSION_DENIED % (
+                        host, self.credential.name))
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in runner_on_unreachable.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_unreachable', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
@@ -103,20 +101,19 @@ class ConnectResultCallback():
                     message, log_level=logging.ERROR)
             else:
                 # invalid creds
-                message = 'PERMISSION DENIED %s could not connect'\
-                    ' with cred %s.' % (host, self.credential.name)
-                self.result_store.scan_task.log_message(message)
+                self.result_store.scan_task.log_message(
+                    log_messages.TASK_PERMISSION_DENIED % (
+                        host, self.credential.name))
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in runner_on_failed.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_failed', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
 
-    def runner_event(self, event_dict=None):
+    def event_callback(self, event_dict=None):
         """Control the event callback for runner."""
         if event_dict:
             event = event_dict.get('event')
@@ -144,17 +141,18 @@ class ConnectResultCallback():
                     unexpected_error = True
                 if unexpected_error:
                     self.result_store.scan_task.log_message(
-                        'UNEXPECTED FAILURE in runner_event.'
-                        '   Error Unknown State: %s\nAnsible result: %s' % (
-                            event,
+                        log_messages.TASK_UNEXPECTED_FAILURE % (
+                            'runner_event',
+                            'Unknown State (%s)' % event,
                             event_dict), log_level=logging.ERROR)
 
-    def runner_cancel(self):
+    def cancel_callback(self):
         """Control the cancel callback for runner."""
         if self.interrupt.value in self.stop_states:
             if not self.stop:
                 self.result_store.scan_task.log_message(
-                    log_messages.NETWORK_CONNECT_CALLBACK_ACK_CANCEL,
+                    log_messages.NETWORK_CALLBACK_ACK_CANCEL % (
+                        'CONNECT'),
                     log_level=logging.INFO)
                 self.stop = True
             return True

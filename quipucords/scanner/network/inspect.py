@@ -32,7 +32,8 @@ from scanner.network.exceptions import (NetworkCancelException,
                                         ScannerException)
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (_construct_vars,
-                                   _credential_vars)
+                                   _credential_vars,
+                                   check_manager_iterrupt)
 from scanner.task import ScanTaskRunner
 
 
@@ -238,14 +239,16 @@ class InspectTaskRunner(ScanTaskRunner):
         scan_result = ScanTask.COMPLETED
 
         # Build Ansible Runner Dependencies
+        stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
+                       ScanJob.JOB_TERMINATE_PAUSE]
         for idx, group_name in enumerate(group_names):
-            call = InspectResultCallback(scan_task=self.scan_task,
-                                         idx=(idx + 1),
-                                         group_total=len(group_names))
-            if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                raise NetworkCancelException()
-            if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                raise NetworkPauseException()
+            check_manager_iterrupt(manager_interrupt.value)
+            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
+                (idx + 1), len(group_names))
+            self.scan_task.log_message(log_message)
+            call = InspectResultCallback(self.scan_task,
+                                         manager_interrupt,
+                                         stop_states)
 
             # Build Ansible Runner Parameters
             runner_settings = {
@@ -279,7 +282,7 @@ class InspectTaskRunner(ScanTaskRunner):
                                                 inventory=inventory_file,
                                                 extravars=extra_vars,
                                                 event_handler=call.event_callback,  # noqa
-                                                status_handler=call.status_callback,  # noqa
+                                                cancel_callback=call.cancel_callback, # noqa
                                                 playbook=playbook_path,
                                                 cmdline=all_commands,
                                                 verbosity=verbosity_lvl)
@@ -289,13 +292,17 @@ class InspectTaskRunner(ScanTaskRunner):
 
             final_status = runner_obj.status
             if final_status != 'successful':
-                call.finalize_failed_hosts()
+                if final_status == 'canceled':
+                    msg = log_messages.NETWORK_PLAYBOOK_CANCELED % ('INSPECT')
+                    self.scan_task.log_message(msg)
+                    check_manager_iterrupt(manager_interrupt.value)
                 if final_status not in ['unreachable', 'failed']:
                     if final_status == 'timeout':
                         error_msg = log_messages.NETWORK_TIMEOUT_ERR
                     else:
                         error_msg = log_messages.NETWORK_UNKNOWN_ERR
                     scan_result = ScanTask.FAILED
+                call.finalize_failed_hosts()
         return error_msg, scan_result
 
     def _obtain_discovery_data(self):

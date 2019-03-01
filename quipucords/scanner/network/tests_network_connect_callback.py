@@ -83,7 +83,7 @@ class TestConnectResultCallback(TestCase):
         events.append(build_event(host='1.2.3.6',
                                   return_code=None, event='runner_on_ok'))
         for event in events:
-            callback.runner_event(event)
+            callback.event_callback(event)
         self.assertEqual(callback.result_store.scan_task.systems_count, 3)
         self.assertEqual(callback.result_store.scan_task.systems_scanned, 1)
         self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
@@ -100,7 +100,7 @@ class TestConnectResultCallback(TestCase):
                                   event='runner_on_failed',
                                   stderr='permission denied'))
         for event in events:
-            callback.runner_event(event)
+            callback.event_callback(event)
         self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
         self.assertEqual(callback.result_store.scan_task.systems_count, 3)
 
@@ -116,7 +116,7 @@ class TestConnectResultCallback(TestCase):
                                   event='runner_on_unreachable',
                                   msg='permission denied'))
         for event in events:
-            callback.runner_event(event)
+            callback.event_callback(event)
         self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
         self.assertEqual(callback.result_store.scan_task.systems_unreachable,
                          1)
@@ -134,7 +134,7 @@ class TestConnectResultCallback(TestCase):
                                   event='runner_on_unreachable'))
         for event in events:
             with self.assertRaises(Exception):
-                callback.runner_event(event)
+                callback.event_callback(event)
 
     def test_unknown_event_response(self):
         """Test unknown event response."""
@@ -142,7 +142,7 @@ class TestConnectResultCallback(TestCase):
         callback = ConnectResultCallback(results_store, self.cred, self.source,
                                          self.interrupt, self.stop_states)
         event = build_event(host='1.2.3.4', event='runner_on_unknown_event')
-        callback.runner_event(event)
+        callback.event_callback(event)
 
     def test_empty_host(self):
         """Test unknown event response."""
@@ -150,7 +150,7 @@ class TestConnectResultCallback(TestCase):
         callback = ConnectResultCallback(results_store, self.cred, self.source,
                                          self.interrupt, self.stop_states)
         event = build_event(host=None, event='runner_on_ok')
-        callback.runner_event(event)
+        callback.event_callback(event)
 
     def test_cancel_event(self):
         """Test cancel event response."""
@@ -158,7 +158,7 @@ class TestConnectResultCallback(TestCase):
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
                                          self.interrupt, self.stop_states)
-        result = callback.runner_cancel()
+        result = callback.cancel_callback()
         self.assertEqual(result, False)
         # Test cancel state
         for state in self.stop_states:
@@ -167,5 +167,5 @@ class TestConnectResultCallback(TestCase):
                                              self.source, self.interrupt,
                                              self.stop_states)
             self.assertEqual(callback.interrupt.value, state)
-            result = callback.runner_cancel()
+            result = callback.cancel_callback()
             self.assertEqual(result, True)
