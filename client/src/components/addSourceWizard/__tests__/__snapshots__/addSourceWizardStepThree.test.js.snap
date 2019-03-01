@@ -2,26 +2,25 @@
 
 exports[`connected 1`] = `
 <AddSourceWizardStepThree
+  add={false}
+  credentials={Array []}
   dispatch={[Function]}
-  view={
-    Object {
-      "error": true,
-      "errorMessage": "Lorem ipsum",
-      "source": Object {},
-    }
-  }
+  error={true}
+  errorMessage="Lorem ipsum"
+  fulfilled={false}
+  name={null}
+  pending={false}
 />
 `;
 
 exports[`error created 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": true,
-      "error": true,
-      "errorMessage": "lorem ipsum",
-    }
-  }
+  add={true}
+  error={true}
+  errorMessage="lorem ipsum"
+  fulfilled={false}
+  name={null}
+  pending={false}
 >
   <div
     className="wizard-pf-complete blank-slate-pf"
@@ -29,9 +28,20 @@ exports[`error created 1`] = `
     <div
       className="wizard-pf-success-icon"
     >
-      <span
-        className="pficon pficon-error-circle-o"
-      />
+      <Icon
+        name="error-circle-o"
+        type="pf"
+      >
+        <PatternflyIcon
+          className=""
+          name="error-circle-o"
+        >
+          <span
+            aria-hidden="true"
+            className="pficon pficon-error-circle-o"
+          />
+        </PatternflyIcon>
+      </Icon>
     </div>
     <h3
       className="blank-slate-pf-main-action"
@@ -43,7 +53,7 @@ exports[`error created 1`] = `
     <p
       className="blank-slate-pf-secondary-action"
     >
-      lorem ipsum
+      There are errors on the previous step
     </p>
   </div>
 </AddSourceWizardStepThree>
@@ -51,13 +61,12 @@ exports[`error created 1`] = `
 
 exports[`error updated 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": false,
-      "error": true,
-      "errorMessage": "lorem ipsum",
-    }
-  }
+  add={false}
+  error={true}
+  errorMessage="lorem ipsum"
+  fulfilled={false}
+  name={null}
+  pending={false}
 >
   <div
     className="wizard-pf-complete blank-slate-pf"
@@ -65,9 +74,20 @@ exports[`error updated 1`] = `
     <div
       className="wizard-pf-success-icon"
     >
-      <span
-        className="pficon pficon-error-circle-o"
-      />
+      <Icon
+        name="error-circle-o"
+        type="pf"
+      >
+        <PatternflyIcon
+          className=""
+          name="error-circle-o"
+        >
+          <span
+            aria-hidden="true"
+            className="pficon pficon-error-circle-o"
+          />
+        </PatternflyIcon>
+      </Icon>
     </div>
     <h3
       className="blank-slate-pf-main-action"
@@ -79,7 +99,7 @@ exports[`error updated 1`] = `
     <p
       className="blank-slate-pf-secondary-action"
     >
-      lorem ipsum
+      There are errors on the previous step
     </p>
   </div>
 </AddSourceWizardStepThree>
@@ -87,15 +107,11 @@ exports[`error updated 1`] = `
 
 exports[`fulfilled created 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": true,
-      "fulfilled": true,
-      "source": Object {
-        "name": "Lorem",
-      },
-    }
-  }
+  add={true}
+  error={false}
+  fulfilled={true}
+  name="Dolor"
+  pending={false}
 >
   <div
     className="wizard-pf-complete blank-slate-pf"
@@ -103,15 +119,26 @@ exports[`fulfilled created 1`] = `
     <div
       className="wizard-pf-success-icon"
     >
-      <span
-        className="glyphicon glyphicon-ok-circle"
-      />
+      <Icon
+        name="ok"
+        type="pf"
+      >
+        <PatternflyIcon
+          className=""
+          name="ok"
+        >
+          <span
+            aria-hidden="true"
+            className="pficon pficon-ok"
+          />
+        </PatternflyIcon>
+      </Icon>
     </div>
     <h3
       className="blank-slate-pf-main-action"
     >
       <strong>
-        Lorem
+        Dolor
       </strong>
        was 
       created
@@ -123,15 +150,11 @@ exports[`fulfilled created 1`] = `
 
 exports[`fulfilled updated 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": false,
-      "fulfilled": true,
-      "source": Object {
-        "name": "Lorem",
-      },
-    }
-  }
+  add={false}
+  error={false}
+  fulfilled={true}
+  name="Dolor"
+  pending={false}
 >
   <div
     className="wizard-pf-complete blank-slate-pf"
@@ -139,15 +162,26 @@ exports[`fulfilled updated 1`] = `
     <div
       className="wizard-pf-success-icon"
     >
-      <span
-        className="glyphicon glyphicon-ok-circle"
-      />
+      <Icon
+        name="ok"
+        type="pf"
+      >
+        <PatternflyIcon
+          className=""
+          name="ok"
+        >
+          <span
+            aria-hidden="true"
+            className="pficon pficon-ok"
+          />
+        </PatternflyIcon>
+      </Icon>
     </div>
     <h3
       className="blank-slate-pf-main-action"
     >
       <strong>
-        Lorem
+        Dolor
       </strong>
        was 
       updated
@@ -159,12 +193,11 @@ exports[`fulfilled updated 1`] = `
 
 exports[`pending created 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": true,
-      "pending": true,
-    }
-  }
+  add={true}
+  error={false}
+  fulfilled={false}
+  name="Dolor"
+  pending={true}
 >
   <div
     className="wizard-pf-process blank-slate-pf"
@@ -189,7 +222,11 @@ exports[`pending created 1`] = `
     <p
       className="blank-slate-pf-secondary-action"
     >
-      Please wait while source is being 
+      Please wait while source 
+      <strong>
+        Dolor
+      </strong>
+       is being 
       created
       .
     </p>
@@ -199,12 +236,11 @@ exports[`pending created 1`] = `
 
 exports[`pending updated 1`] = `
 <AddSourceWizardStepThree
-  view={
-    Object {
-      "add": false,
-      "pending": true,
-    }
-  }
+  add={false}
+  error={false}
+  fulfilled={false}
+  name="Dolor"
+  pending={true}
 >
   <div
     className="wizard-pf-process blank-slate-pf"
@@ -229,7 +265,11 @@ exports[`pending updated 1`] = `
     <p
       className="blank-slate-pf-secondary-action"
     >
-      Please wait while source is being 
+      Please wait while source 
+      <strong>
+        Dolor
+      </strong>
+       is being 
       updated
       .
     </p>

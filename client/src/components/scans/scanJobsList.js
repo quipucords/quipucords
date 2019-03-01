@@ -75,7 +75,7 @@ class ScanJobsList extends React.Component {
         .catch(error => {
           this.setState({
             scanJobsPending: false,
-            scanJobsError: helpers.getMessageFromResults(error)
+            scanJobsError: helpers.getMessageFromResults(error).message
           });
         });
     }

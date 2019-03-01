@@ -7,10 +7,17 @@ describe('AddSourceWizard Component', () => {
   const generateEmptyStore = (obj = {}) => configureMockStore()(obj);
 
   it('should render a connected component', () => {
-    const store = generateEmptyStore({ addSourceWizard: { view: { show: true } } });
+    const store = generateEmptyStore({ addSourceWizard: { show: true } });
     const component = shallow(<ConnectedAddSourceWizard />, { context: { store } });
 
     expect(component.dive()).toMatchSnapshot('connected');
+  });
+
+  it('should display update steps', () => {
+    const store = generateEmptyStore({ addSourceWizard: { show: true, edit: true } });
+    const component = shallow(<ConnectedAddSourceWizard />, { context: { store } });
+
+    expect(component.dive()).toMatchSnapshot('connected update');
   });
 
   it('should not display a wizard', () => {

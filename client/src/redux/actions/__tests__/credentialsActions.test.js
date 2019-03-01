@@ -1,7 +1,7 @@
 import moxios from 'moxios';
 import promiseMiddleware from 'redux-promise-middleware';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { credentialsReducer, addSourceWizardReducer } from '../../reducers';
+import { credentialsReducer } from '../../reducers';
 import { credentialsActions } from '..';
 import apiTypes from '../../../constants/apiConstants';
 
@@ -10,8 +10,7 @@ describe('CredentialsActions', () => {
   const generateStore = () =>
     createStore(
       combineReducers({
-        credentials: credentialsReducer,
-        addSourceWizard: addSourceWizardReducer
+        credentials: credentialsReducer
       }),
       applyMiddleware(...middleware)
     );
@@ -61,18 +60,6 @@ describe('CredentialsActions', () => {
       const response = store.getState().credentials;
 
       expect(response.view.credentials[0]).toEqual('success');
-      done();
-    });
-  });
-
-  it('Should return response content for getWizardCredentials method', done => {
-    const store = generateStore();
-    const dispatcher = credentialsActions.getWizardCredentials();
-
-    dispatcher(store.dispatch).then(() => {
-      const response = store.getState().addSourceWizard;
-
-      expect(response.view.allCredentials[0]).toEqual('success');
       done();
     });
   });

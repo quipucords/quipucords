@@ -20,7 +20,7 @@ class Scans extends React.Component {
         type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: helpers.getMessageFromResults(results)
+        message: helpers.getMessageFromResults(results).message
       });
     } else {
       store.dispatch({
@@ -238,7 +238,7 @@ class Scans extends React.Component {
         type: reduxTypes.toastNotifications.TOAST_ADD,
         alertType: 'error',
         header: 'Error',
-        message: helpers.getMessageFromResults(results)
+        message: helpers.getMessageFromResults(results).message
       });
     } else {
       store.dispatch({

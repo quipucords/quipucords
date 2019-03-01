@@ -1,399 +1,271 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { Button, Icon, Form, Checkbox } from 'patternfly-react';
-import _ from 'lodash';
-import Store from '../../redux/store';
+import { Button, Form, Icon } from 'patternfly-react';
+import { connect, store, reduxActions, reduxSelectors, reduxTypes } from '../../redux';
 import { helpers } from '../../common/helpers';
-import { dictionary } from '../../constants/dictionaryConstants';
+import apiTypes from '../../constants/apiConstants';
+import { dictionary, sslProtocolDictionary } from '../../constants/dictionaryConstants';
+import { FormField, fieldValidation } from '../formField/formField';
+import { FormState } from '../formState/formState';
 import DropdownSelect from '../dropdownSelect/dropdownSelect';
-import { AddSourceWizardField as FieldGroup } from './addSourceWizardField';
-import { apiTypes } from '../../constants';
-import { sourcesTypes, credentialsTypes } from '../../redux/constants';
-import { reduxActions } from '../../redux/actions';
 
 class AddSourceWizardStepTwo extends React.Component {
-  static initializeState(nextProps) {
-    if (nextProps.source) {
-      const credentials = _.get(nextProps.source, apiTypes.API_SOURCE_CREDENTIALS, []);
-      let singlePort;
-      let singleHostPortDisplay;
-      let sslCertVerify;
-
-      if (nextProps.source.sourceType !== 'network' && _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).length) {
-        singlePort = _.get(nextProps.source, apiTypes.API_SOURCE_PORT, '');
-        singleHostPortDisplay = _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, '');
-
-        singlePort = singlePort ? `:${singlePort}` : '';
-        singleHostPortDisplay = singleHostPortDisplay
-          ? `${nextProps.source[apiTypes.API_SOURCE_HOSTS][0]}${singlePort}`
-          : '';
-      }
-
-      if (nextProps.source.sourceType === 'vcenter' || nextProps.source.sourceType === 'satellite') {
-        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
-      }
-
-      return {
-        sourceName: _.get(nextProps.source, apiTypes.API_SOURCE_NAME, ''),
-        multiHostDisplay: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []).join(',\n'),
-        hosts: _.get(nextProps.source, apiTypes.API_SOURCE_HOSTS, []),
-        port: _.get(nextProps.source, apiTypes.API_SOURCE_PORT, ''),
-        singleHostPortDisplay: singleHostPortDisplay || '',
-        credentials: credentials.map(val => val.id),
-        sslCertVerify: sslCertVerify || ''
-      };
-    }
-
-    return {};
-  }
-
-  static invalidateStep() {
-    Store.dispatch({
-      type: sourcesTypes.INVALID_SOURCE_WIZARD_STEPTWO
-    });
-  }
-
-  static validateSourceName(value) {
-    if (value === '') {
-      return 'You must enter a source name';
-    }
-
-    return null;
-  }
-
-  static validateCredentials(value) {
-    if (!value.length) {
-      return 'You must add a credential';
-    }
-
-    return null;
-  }
-
-  static validateHosts(value) {
-    let validation = null;
-
-    if (value.length) {
-      _.each(value, host => {
-        if (
-          host !== '' &&
-          (!new RegExp(
-            '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31|32))$'
-          ).test(host) &&
-            !new RegExp(
-              '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$',
-              'i'
-            ).test(host))
-        ) {
-          validation = 'You must enter a valid IP address or hostname';
-          return false;
-        }
-
-        return true;
-      });
-    }
-
-    return validation;
-  }
-
-  static validateHost(value) {
-    if (
-      !new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(value) &&
-      !new RegExp('^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$', 'i').test(
+  static hostValid(value) {
+    return (
+      new RegExp('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$').test(value) ||
+      new RegExp('^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$', 'i').test(
         value
       )
-    ) {
-      return 'You must enter an IP address or hostname';
-    }
-
-    return null;
+    );
   }
 
-  static validatePort(value) {
-    if (value && value.length && !/^\d{1,4}$/.test(value)) {
-      return 'Port must be valid';
+  static hostsValid(hosts = []) {
+    if (!hosts.length) {
+      return false;
     }
 
-    return null;
-  }
+    for (let i = 0; i < hosts.length; i++) {
+      const host = hosts[i];
 
-  constructor(props) {
-    super(props);
+      if (
+        host !== '' &&
+        (!new RegExp(
+          '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.(\\d{1,3}|\\[\\d{1,3}:\\d{1,3}\\]|\\d{1,3}\\/([2][4-9]|30|31|32))$'
+        ).test(host) &&
+          !new RegExp(
+            '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])$',
+            'i'
+          ).test(host))
+      ) {
+        return false;
+      }
+    }
 
-    this.initialState = {
-      sourceName: '',
-      sourceNameError: null,
-      multiHostDisplay: '',
-      hosts: [],
-      hostsError: null,
-      credentials: [],
-      credentialsError: null,
-      port: '',
-      portError: null,
-      singleHostPortDisplay: '',
-      sslCertVerify: ''
-    };
-
-    this.state = { ...this.initialState };
+    return true;
   }
 
   componentDidMount() {
-    const { getWizardCredentials } = this.props;
+    const { getCredentials } = this.props;
 
-    this.setState({ ...AddSourceWizardStepTwo.initializeState(this.props) }, () => {
-      getWizardCredentials();
-      this.validateStep();
-    });
+    getCredentials();
   }
 
-  componentWillReceiveProps(nextProps) {
-    const nextSourceType = _.get(nextProps, ['source', apiTypes.API_SOURCE_TYPE]);
+  onAddCredential = () => {
+    const { type } = this.props;
 
-    if (nextSourceType !== _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE])) {
-      let sslCertVerify = '';
-
-      if (nextSourceType === 'vcenter' || nextSourceType === 'satellite') {
-        sslCertVerify = _.get(nextProps.source, ['options', apiTypes.API_SOURCE_SSL_CERT], true);
-      }
-
-      this.setState(Object.assign({ ...this.initialState }, { sslCertVerify }), () => {
-        AddSourceWizardStepTwo.invalidateStep();
-      });
-    }
-  }
-
-  onChangeSourceName = event => {
-    this.setState(
-      {
-        sourceName: event.target.value,
-        sourceNameError: AddSourceWizardStepTwo.validateSourceName(event.target.value)
-      },
-      () => this.validateStep()
-    );
-  };
-
-  onChangeCredential = credential => {
-    const { credentials } = this.state;
-    const { source } = this.props;
-
-    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
-    let submitCreds = [];
-
-    if (sourceType === 'vcenter' || sourceType === 'satellite') {
-      submitCreds = [credential.value];
-    } else {
-      submitCreds = [...credentials];
-      const credentialIndex = submitCreds.indexOf(credential.value);
-
-      if (credentialIndex < 0) {
-        submitCreds.push(credential.value);
-      } else {
-        submitCreds.splice(credentialIndex, 1);
-      }
-    }
-
-    this.setState(
-      { credentials: submitCreds, credentialsError: AddSourceWizardStepTwo.validateCredentials(submitCreds) },
-      () => this.validateStep()
-    );
-  };
-
-  onClickCredential = () => {
-    const { source } = this.props;
-
-    Store.dispatch({
-      type: credentialsTypes.CREATE_CREDENTIAL_SHOW,
-      credentialType: _.get(source, apiTypes.API_SOURCE_TYPE)
+    store.dispatch({
+      type: reduxTypes.credentials.CREATE_CREDENTIAL_SHOW,
+      credentialType: type
     });
   };
 
-  onChangePort = targetValue => {
-    const { source } = this.props;
-    let value = targetValue;
-    let defaultPort;
+  isStepValid = ({ checked = {}, values = {}, touched = {} }) => {
+    const { add, edit, type } = this.props;
+    const errors = {};
 
-    switch (_.get(source, apiTypes.API_SOURCE_TYPE)) {
-      case 'network':
-        defaultPort = 22;
-        break;
-      case 'satellite':
-      case 'vcenter':
-        defaultPort = 443;
-        break;
-      default:
-        defaultPort = '';
-        break;
-    }
+    errors.credentials = fieldValidation.isEmpty(values.credentials);
+    errors.name = fieldValidation.isEmpty(values.name);
 
-    if (value === '') {
-      value = defaultPort;
-    }
-
-    this.setState(
-      {
-        port: value,
-        portError: AddSourceWizardStepTwo.validatePort(value)
-      },
-      () => this.validateStep()
-    );
-  };
-
-  onChangeSslCertVerify = event => {
-    this.setState(
-      {
-        sslCertVerify: event.target.checked || false
-      },
-      () => this.validateStep()
-    );
-  };
-
-  onChangeHost = event => {
-    const { value } = event.target;
-    let host = [];
-    let port;
-
-    if (value !== '') {
-      [host, port] = value.split(':');
-      host = [host];
-    }
-
-    const validateHost = AddSourceWizardStepTwo.validateHost(host);
-    this.onChangePort(port || '');
-
-    this.setState(
-      {
-        singleHostPortDisplay: value,
-        hosts: host,
-        hostsError: validateHost
-      },
-      () => this.validateStep()
-    );
-  };
-
-  onChangeHosts = event => {
-    const { value } = event.target;
-    let hosts = [];
-
-    if (value !== '') {
-      hosts = value.replace(/\\n|\\r|\s/g, '').split(',');
-      hosts = hosts.filter(host => host !== '');
-    }
-
-    this.setState(
-      {
-        multiHostDisplay: value,
-        hosts,
-        hostsError: AddSourceWizardStepTwo.validateHosts(hosts)
-      },
-      () => this.validateStep()
-    );
-  };
-
-  validateStep() {
-    const {
-      sourceName,
-      sourceNameError,
-      hosts,
-      hostsError,
-      port,
-      portError,
-      credentials,
-      credentialsError,
-      sslCertVerify
-    } = this.state;
-    const { source } = this.props;
-
-    if (
-      sourceName !== '' &&
-      !sourceNameError &&
-      hosts.length &&
-      !hostsError &&
-      !portError &&
-      credentials.length &&
-      !credentialsError
-    ) {
-      const updatedSource = {};
-
-      _.set(updatedSource, apiTypes.API_SOURCE_NAME, sourceName);
-      _.set(updatedSource, apiTypes.API_SOURCE_HOSTS, hosts);
-      _.set(updatedSource, apiTypes.API_SOURCE_CREDENTIALS, credentials.map(value => parseInt(value, 10)));
-
-      if (port !== '') {
-        _.set(updatedSource, apiTypes.API_SOURCE_PORT, port);
-      }
-
-      if (sslCertVerify !== '') {
-        _.set(updatedSource, ['options', apiTypes.API_SOURCE_SSL_CERT], sslCertVerify);
-      }
-
-      Store.dispatch({
-        type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPTWO,
-        source: Object.assign({ ...source }, updatedSource)
-      });
+    if (type === 'network') {
+      errors.hosts = fieldValidation.isEmpty(values.hosts) || !AddSourceWizardStepTwo.hostsValid(values.hosts);
     } else {
-      AddSourceWizardStepTwo.invalidateStep();
+      errors.hosts = fieldValidation.isEmpty(values.hosts) || !AddSourceWizardStepTwo.hostValid(values.hosts[0]);
     }
+
+    errors.port = !fieldValidation.isEmpty(values.port) && !fieldValidation.isPortValid(values.port);
+
+    const isNotErrors = !Object.values(errors).filter(val => val === true).length;
+
+    if ((add && isNotErrors) || (edit && isNotErrors && Object.keys(touched).length)) {
+      this.submitStep({
+        checked,
+        values
+      });
+    }
+
+    return errors;
+  };
+
+  submitStep({ checked = {}, values = {} }) {
+    const { id, type } = this.props;
+
+    const source = {
+      [apiTypes.API_SUBMIT_SOURCE_CREDENTIALS]: values.credentials,
+      [apiTypes.API_SUBMIT_SOURCE_HOSTS]: values.hosts,
+      [apiTypes.API_SUBMIT_SOURCE_NAME]: values.name,
+      [apiTypes.API_SUBMIT_SOURCE_PORT]: values.port || (type === 'network' && 22) || (type !== 'network' && 443)
+    };
+
+    helpers.setPropIfTruthy(source, [apiTypes.API_SUBMIT_SOURCE_ID], id);
+
+    helpers.setPropIfDefined(
+      source,
+      [apiTypes.API_SUBMIT_SOURCE_OPTIONS, apiTypes.API_SUBMIT_SOURCE_OPTIONS_PARAMIKO],
+      checked.optionParamiko
+    );
+
+    if (type !== 'network') {
+      helpers.setPropIfDefined(
+        source,
+        [apiTypes.API_SUBMIT_SOURCE_OPTIONS, apiTypes.API_SUBMIT_SOURCE_OPTIONS_SSL_CERT],
+        checked.optionSslCert
+      );
+
+      helpers.setPropIfTruthy(
+        source,
+        [apiTypes.API_SUBMIT_SOURCE_OPTIONS, apiTypes.API_SUBMIT_SOURCE_OPTIONS_SSL_PROTOCOL],
+        values.optionSslProtocol
+      );
+
+      helpers.setPropIfDefined(
+        source,
+        [apiTypes.API_SUBMIT_SOURCE_OPTIONS, apiTypes.API_SUBMIT_SOURCE_OPTIONS_DISABLE_SSL],
+        checked.optionDisableSsl
+      );
+    }
+
+    store.dispatch({
+      type: reduxTypes.sources.VALID_SOURCE_WIZARD_STEPTWO,
+      source
+    });
   }
 
-  credentialInfo(id) {
-    const { allCredentials } = this.props;
+  renderName({ values, errors, touched, handleOnEvent }) {
+    const { stepTwoErrorMessages, type } = this.props;
 
-    return _.find(allCredentials, { id }) || {};
+    return (
+      <FormField
+        label="Name"
+        error={(touched.name && errors.name) || stepTwoErrorMessages.name}
+        errorMessage={stepTwoErrorMessages.name || 'You must enter a source name '}
+      >
+        <Form.FormControl
+          type="text"
+          name="name"
+          value={values.name}
+          placeholder={`Enter a name for the ${dictionary[type] || ''} source`}
+          onChange={handleOnEvent}
+        />
+      </FormField>
+    );
   }
 
-  renderHosts() {
-    const { hostsError, port, portError, multiHostDisplay, singleHostPortDisplay } = this.state;
-    const { source } = this.props;
+  renderHosts({ values, errors, touched, handleOnEventCustom, handleOnEvent }) {
+    const { stepTwoErrorMessages, type } = this.props;
 
-    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
+    const onChangeMultipleHost = event => {
+      const { value } = event.target;
 
-    switch (sourceType) {
+      let updatedHosts = (value || '').replace(/\\n|\\r|\s/g, ',').split(',');
+      updatedHosts = updatedHosts.filter(host => host !== '');
+
+      handleOnEventCustom([
+        {
+          name: 'hosts',
+          value: updatedHosts
+        },
+        {
+          name: 'hostsMultiple',
+          value
+        }
+      ]);
+    };
+
+    const onChangeSingleHost = event => {
+      const { value } = event.target;
+      const updatedHosts = [];
+      const [host, port] = (value || '').split(':');
+
+      updatedHosts.push(host);
+
+      handleOnEventCustom([
+        {
+          name: 'hosts',
+          value: updatedHosts
+        },
+        {
+          name: 'port',
+          value: port
+        },
+        {
+          name: 'hostsSingle',
+          value
+        }
+      ]);
+    };
+
+    switch (type) {
       case 'network':
         return (
           <React.Fragment>
-            <FieldGroup label="Search Addresses" error={hostsError} errorMessage={hostsError}>
+            <FormField
+              label="Search addresses"
+              error={(touched.hostsMultiple && errors.hosts) || stepTwoErrorMessages.hosts}
+              errorMessage="You must enter a valid IP address or hostname"
+            >
               <Form.FormControl
                 componentClass="textarea"
-                name="hosts"
-                value={multiHostDisplay}
+                name="hostsMultiple"
+                value={values.hostsMultiple}
                 rows={5}
                 placeholder="Enter values separated by commas"
-                onChange={this.onChangeHosts}
+                onChange={onChangeMultipleHost}
               />
               <Form.HelpBlock>
                 IP addresses, IP ranges, DNS host names, and wildcards are valid. Use CIDR or Ansible notation for
                 ranges.
               </Form.HelpBlock>
-            </FieldGroup>
-            <FieldGroup label="Port" error={portError} errorMessage={portError}>
+            </FormField>
+            <FormField
+              label="Port"
+              error={(touched.port && errors.port) || stepTwoErrorMessages.port}
+              errorMessage="Port must be valid"
+            >
               <Form.FormControl
                 name="port"
                 type="text"
-                value={port}
+                value={values.port}
+                maxLength={5}
                 placeholder="Default port is 22"
-                onChange={e => this.onChangePort(e.target.value)}
+                onChange={handleOnEvent}
               />
-            </FieldGroup>
+            </FormField>
           </React.Fragment>
         );
 
       case 'vcenter':
       case 'satellite':
+        const hostPortError = (
+          <React.Fragment>
+            {touched.hostsSingle && errors.hosts && 'You must enter a valid IP address or hostname '}
+            {errors.port && 'Port must be valid'}
+          </React.Fragment>
+        );
+
         return (
           <React.Fragment>
-            <FieldGroup
-              label="IP Address or Hostname"
-              error={hostsError || portError}
-              errorMessage={hostsError || portError}
+            <FormField
+              label="IP address or hostname"
+              error={
+                (touched.hostsSingle && errors.hosts) ||
+                errors.port ||
+                stepTwoErrorMessages.hosts ||
+                stepTwoErrorMessages.port
+              }
+              errorMessage={
+                (stepTwoErrorMessages.hosts && 'You must enter a valid IP address or hostname') ||
+                (stepTwoErrorMessages.port && 'Port must be valid') ||
+                hostPortError
+              }
             >
               <Form.FormControl
-                name="hosts"
+                name="hostsSingle"
                 type="text"
-                value={singleHostPortDisplay}
+                value={values.hostsSingle}
                 placeholder="Enter an IP address or hostname (default port is 443)"
-                onChange={this.onChangeHost}
+                onChange={onChangeSingleHost}
               />
-            </FieldGroup>
+            </FormField>
           </React.Fragment>
         );
 
@@ -402,66 +274,113 @@ class AddSourceWizardStepTwo extends React.Component {
     }
   }
 
-  renderCredentials() {
-    const { credentials, credentialsError } = this.state;
-    const { source, allCredentials } = this.props;
+  renderCredentials({ errors, touched, handleOnEventCustom }) {
+    const { availableCredentials, credentials, stepTwoErrorMessages, type } = this.props;
 
-    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
-    const hasSingleCredential = sourceType === 'vcenter' || sourceType === 'satellite';
+    const multiselectCredentials = type === 'network';
+    const sourceCredentials = availableCredentials.filter(cred => cred.type === type);
 
-    const availableCredentials = allCredentials
-      .filter(credential => credential.cred_type === sourceType)
-      .map(credential => ({ title: credential.name, value: credential.id }));
+    const titleAddSelect = availableCredentials.length ? 'Select' : 'Add';
+    const title = multiselectCredentials
+      ? `${titleAddSelect} one or more credentials`
+      : `${titleAddSelect} a credential`;
 
-    let titleAddSelect;
-    let title;
-
-    if (!title || !credentials.length) {
-      titleAddSelect = availableCredentials.length ? 'Select' : 'Add';
-      title = hasSingleCredential ? `${titleAddSelect} a credential` : `${titleAddSelect} one or more credentials`;
-    }
+    const onChangeCredential = event => {
+      handleOnEventCustom({
+        name: 'credentials',
+        value: event.options.filter(opt => opt.selected === true).map(opt => opt.value)
+      });
+    };
 
     return (
-      <FieldGroup label="Credentials" error={credentialsError} errorMessage={credentialsError}>
+      <FormField
+        label="Credentials"
+        error={(touched.credentials && errors.credentials) || stepTwoErrorMessages.credentials}
+        errorMessage={stepTwoErrorMessages.credentials || 'You must add a credential'}
+      >
         <Form.InputGroup>
           <DropdownSelect
-            title={(!credentials.length && title) || ''}
-            id="credential-select"
-            disabled={!availableCredentials.length}
-            multiselect={!hasSingleCredential}
-            onSelect={this.onChangeCredential}
-            options={availableCredentials}
+            title={title}
+            id="credentials"
+            disabled={!sourceCredentials.length}
+            multiselect={multiselectCredentials}
+            onSelect={onChangeCredential}
+            options={sourceCredentials}
             selectValue={credentials}
-            key={`dropdown-update-${availableCredentials.length}`}
+            key={`dropdown-update-${sourceCredentials.length}`}
           />
           <Form.InputGroup.Button>
-            <Button onClick={this.onClickCredential} title="Add a credential">
+            <Button className="form-control" onClick={this.onAddCredential} title="Add a credential">
               <span className="sr-only">Add</span>
               <Icon type="fa" name="plus" />
             </Button>
           </Form.InputGroup.Button>
         </Form.InputGroup>
-      </FieldGroup>
+      </FormField>
     );
   }
 
-  renderOptions() {
-    const { sslCertVerify } = this.state;
-    const { source } = this.props;
+  renderOptions({ checked, values, handleOnEvent, handleOnEventCustom }) {
+    const { type, stepTwoErrorMessages } = this.props;
 
-    const sourceType = _.get(source, apiTypes.API_SOURCE_TYPE);
+    const onChangeSslProtocol = event => {
+      const { value } = event;
+      const isDisabledSsl = value === 'disableSsl';
 
-    switch (sourceType) {
+      handleOnEventCustom([
+        {
+          name: 'optionSslProtocol',
+          value: isDisabledSsl ? undefined : value
+        },
+        {
+          name: 'optionDisableSsl',
+          checked: isDisabledSsl
+        },
+        {
+          name: 'optionSslCert',
+          checked: isDisabledSsl ? false : checked.optionSslCert
+        }
+      ]);
+    };
+
+    switch (type) {
+      case 'network':
+        return (
+          <FormField error={stepTwoErrorMessages.options} errorMessage={stepTwoErrorMessages.options}>
+            <Form.Checkbox
+              name="optionParamiko"
+              checked={checked.optionParamiko || false}
+              inline
+              onChange={handleOnEvent}
+            >
+              Connect using Paramiko instead of Open <abbr title="Secure Shell">SSH</abbr>
+            </Form.Checkbox>
+          </FormField>
+        );
       case 'vcenter':
       case 'satellite':
         return (
-          <FieldGroup label="Options">
-            <div className="quipucords-checkbox">
-              <Checkbox checked={sslCertVerify} bsClass="" onChange={this.onChangeSslCertVerify}>
-                &nbsp; Verify SSL Certificate
-              </Checkbox>
-            </div>
-          </FieldGroup>
+          <React.Fragment>
+            <FormField label="Connection">
+              <DropdownSelect
+                id="optionSslProtocol"
+                onSelect={onChangeSslProtocol}
+                options={{ ...sslProtocolDictionary, disableSsl: 'Disable SSL' }}
+                selectValue={[(checked.optionDisableSsl && 'disableSsl') || values.optionSslProtocol]}
+              />
+            </FormField>
+            <FormField error={stepTwoErrorMessages.options} errorMessage={stepTwoErrorMessages.options}>
+              <Form.Checkbox
+                name="optionSslCert"
+                checked={checked.optionSslCert || false}
+                disabled={checked.optionDisableSsl}
+                inline
+                onChange={handleOnEvent}
+              >
+                Verify SSL Certificate
+              </Form.Checkbox>
+            </FormField>
+          </React.Fragment>
         );
       default:
         return null;
@@ -469,48 +388,114 @@ class AddSourceWizardStepTwo extends React.Component {
   }
 
   render() {
-    const { sourceName, sourceNameError } = this.state;
-    const { source } = this.props;
+    const {
+      credentials,
+      edit,
+      hosts,
+      hostsMultiple,
+      hostsSingle,
+      name,
+      optionSslCert,
+      optionSslProtocol,
+      optionDisableSsl,
+      optionParamiko,
+      port,
+      type
+    } = this.props;
+
+    const formValues = {
+      name,
+      hosts,
+      hostsMultiple,
+      hostsSingle,
+      optionSslCert,
+      optionSslProtocol,
+      optionDisableSsl,
+      optionParamiko,
+      port,
+      credentials
+    };
 
     return (
-      <Form horizontal>
-        <FieldGroup label="Name" error={sourceNameError} errorMessage={sourceNameError}>
-          <Form.FormControl
-            type="text"
-            name="sourceName"
-            value={sourceName}
-            placeholder={`Enter a name for the ${dictionary[_.get(source, apiTypes.API_SOURCE_TYPE)] || ''} source`}
-            onChange={this.onChangeSourceName}
-          />
-        </FieldGroup>
-        {this.renderHosts()}
-        {this.renderCredentials()}
-        {this.renderOptions()}
-      </Form>
+      <FormState key={type} setValues={formValues} validateOnMount={edit} validate={this.isStepValid}>
+        {({ handleOnSubmit, ...options }) => (
+          <Form horizontal onSubmit={handleOnSubmit}>
+            {this.renderName(options)}
+            {this.renderHosts(options)}
+            {this.renderCredentials(options)}
+            {this.renderOptions(options)}
+          </Form>
+        )}
+      </FormState>
     );
   }
 }
 
 AddSourceWizardStepTwo.propTypes = {
-  getWizardCredentials: PropTypes.func,
-  source: PropTypes.object,
-  allCredentials: PropTypes.array
+  add: PropTypes.bool,
+  availableCredentials: PropTypes.array,
+  credentials: PropTypes.array,
+  edit: PropTypes.bool,
+  getCredentials: PropTypes.func,
+  hosts: PropTypes.array,
+  hostsMultiple: PropTypes.string,
+  hostsSingle: PropTypes.string,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  name: PropTypes.string,
+  optionSslCert: PropTypes.bool,
+  optionSslProtocol: PropTypes.string,
+  optionDisableSsl: PropTypes.bool,
+  optionParamiko: PropTypes.bool,
+  port: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  stepTwoErrorMessages: PropTypes.shape({
+    credentials: PropTypes.string,
+    hosts: PropTypes.string,
+    name: PropTypes.string,
+    options: PropTypes.string,
+    port: PropTypes.string
+  }),
+  type: PropTypes.string
 };
 
 AddSourceWizardStepTwo.defaultProps = {
-  getWizardCredentials: helpers.noop,
-  source: {},
-  allCredentials: []
+  add: true,
+  availableCredentials: [],
+  credentials: [],
+  edit: false,
+  getCredentials: helpers.noop,
+  hosts: [],
+  hostsMultiple: '',
+  hostsSingle: '',
+  id: null,
+  name: '',
+  optionSslCert: null,
+  optionSslProtocol: 'SSLv23',
+  optionDisableSsl: null,
+  optionParamiko: null,
+  port: '',
+  stepTwoErrorMessages: {},
+  type: null
 };
 
 const mapDispatchToProps = dispatch => ({
-  getWizardCredentials: () => dispatch(reduxActions.credentials.getWizardCredentials())
+  getCredentials: () => dispatch(reduxActions.credentials.getCredentials())
 });
 
-const mapStateToProps = state => ({ ...state.addSourceWizard.view });
+const makeMapStateToProps = () => {
+  const mapSource = reduxSelectors.sources.makeSourceDetail();
+  const mapCredentials = reduxSelectors.credentials.makeCredentialsDropdown();
+
+  return (state, props) => ({
+    add: state.addSourceWizard.add,
+    edit: state.addSourceWizard.edit,
+    stepTwoErrorMessages: state.addSourceWizard.stepTwoErrorMessages,
+    ...mapSource(state, props),
+    availableCredentials: mapCredentials(state, props)
+  });
+};
 
 const ConnectedAddSourceWizardStepTwo = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   mapDispatchToProps
 )(AddSourceWizardStepTwo);
 

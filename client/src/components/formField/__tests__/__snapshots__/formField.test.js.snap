@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FormField Component should render 1`] = `
+exports[`basic formfield 1`] = `
 <div
   class="form-group"
 >
@@ -21,9 +21,89 @@ exports[`FormField Component should render 1`] = `
 </div>
 `;
 
-exports[`FormField Component should render 2`] = `
+exports[`basic label 1`] = `
 <label
   class="col-sm-3 control-label"
   for="test"
 />
+`;
+
+exports[`boolean error message 1`] = `
+<div
+  class="form-group has-error"
+>
+  <label
+    class="col-sm-3 control-label"
+    for="test"
+  />
+  <div
+    class="col-sm-9"
+  >
+    <input
+      id="test"
+      readonly=""
+      type="text"
+      value=""
+    />
+    <span
+      class="help-block"
+    >
+      Error
+    </span>
+  </div>
+</div>
+`;
+
+exports[`node error message 1`] = `
+<div
+  class="form-group has-error"
+>
+  <label
+    class="col-sm-3 control-label"
+    for="test"
+  />
+  <div
+    class="col-sm-9"
+  >
+    <input
+      id="test"
+      readonly=""
+      type="text"
+      value=""
+    />
+    <span
+      class="help-block"
+    >
+      <span>
+        lorem ipsum
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`string error message 1`] = `
+<div
+  class="form-group has-error"
+>
+  <label
+    class="col-sm-3 control-label"
+    for="test"
+  />
+  <div
+    class="col-sm-9"
+  >
+    <input
+      id="test"
+      readonly=""
+      type="text"
+      value=""
+    />
+    <span
+      class="help-block"
+    >
+      lorem ipsum
+    </span>
+  </div>
+</div>
 `;

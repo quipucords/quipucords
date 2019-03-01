@@ -1,59 +1,54 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button, Icon, Wizard } from 'patternfly-react';
-import { connect } from 'react-redux';
-import Store from '../../redux/store';
-import { confirmationModalTypes, sourcesTypes } from '../../redux/constants';
+import { Button, Icon, Wizard } from 'patternfly-react';
+import { connect, reduxActions, reduxTypes, store } from '../../redux';
 import { addSourceWizardSteps, editSourceWizardSteps } from './addSourceWizardConstants';
-import { reduxActions } from '../../redux/actions';
 import helpers from '../../common/helpers';
+import apiTypes from '../../constants/apiConstants';
 
 class AddSourceWizard extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.initialState = {
-      activeStepIndex: 0,
-      stepOneValid: false,
-      stepTwoValid: false
-    };
-
-    this.state = { ...this.initialState };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { show } = this.props;
-
-    if (!show && nextProps.show) {
-      this.resetInitialState(nextProps);
-    }
-
-    this.setState({
-      stepOneValid: nextProps.stepOneValid || false,
-      stepTwoValid: nextProps.stepTwoValid || false
-    });
-  }
+  state = {
+    activeStepIndex: 0
+  };
 
   onCancel = () => {
-    const { fulfilled, error } = this.props;
+    const { edit, errorStatus, fulfilled, pending } = this.props;
 
     const closeWizard = () => {
-      Store.dispatch({
-        type: confirmationModalTypes.CONFIRMATION_MODAL_HIDE
-      });
+      this.setState({ activeStepIndex: 0 }, () => {
+        store.dispatch({
+          type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_HIDE
+        });
 
-      Store.dispatch({
-        type: sourcesTypes.UPDATE_SOURCE_HIDE
+        store.dispatch({
+          type: reduxTypes.sources.UPDATE_SOURCE_HIDE
+        });
+
+        if (fulfilled) {
+          store.dispatch({
+            type: reduxTypes.sources.UPDATE_SOURCES
+          });
+        }
       });
     };
 
-    if (fulfilled || error) {
+    if (fulfilled || errorStatus >= 500 || errorStatus === 0) {
       closeWizard();
+    } else if (pending) {
+      store.dispatch({
+        type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_SHOW,
+        title: `Exit Wizard`,
+        heading: 'Are you sure you want to exit this wizard?',
+        body: `The wizard is in a pending state and will continue ${edit ? 'updating' : 'adding'} this source.`,
+        cancelButtonText: 'No',
+        confirmButtonText: 'Yes',
+        onConfirm: closeWizard
+      });
     } else {
-      Store.dispatch({
-        type: confirmationModalTypes.CONFIRMATION_MODAL_SHOW,
+      store.dispatch({
+        type: reduxTypes.confirmationModal.CONFIRMATION_MODAL_SHOW,
         title: 'Cancel Add Source',
-        heading: 'Are you sure you want to cancel adding this source?',
+        heading: `Are you sure you want to cancel ${edit ? 'updating' : 'adding'} this source?`,
         cancelButtonText: 'No',
         confirmButtonText: 'Yes',
         onConfirm: closeWizard
@@ -61,16 +56,12 @@ class AddSourceWizard extends React.Component {
     }
   };
 
-  onStep = () => {
-    // ToDo: wizard step map/breadcrumb/trail click, or leave disabled
-  };
-
   onNext = () => {
     const { activeStepIndex } = this.state;
-    const { edit } = this.props;
-    const numberSteps = edit ? editSourceWizardSteps.length : addSourceWizardSteps.length;
+    const { addSteps, edit, editSteps } = this.props;
+    const wizardStepsLength = edit ? editSteps.length : addSteps.length;
 
-    if (activeStepIndex < numberSteps - 1) {
+    if (activeStepIndex < wizardStepsLength - 1) {
       this.setState({ activeStepIndex: activeStepIndex + 1 });
     }
   };
@@ -84,42 +75,57 @@ class AddSourceWizard extends React.Component {
   };
 
   onSubmit = () => {
-    const { addSource, updateSource, source, edit } = this.props;
-    const { stepOneValid, stepTwoValid } = this.state;
+    const { addSource, edit, source, stepOneValid, stepTwoValid, updateSource } = this.props;
+    const { activeStepIndex } = this.state;
 
     if (stepOneValid && stepTwoValid) {
-      if (edit) {
-        const update = {
-          name: source.name,
-          hosts: source.hosts,
-          port: source.port,
-          credentials: source.credentials,
-          options: source.options
-        };
+      this.setState({ activeStepIndex: activeStepIndex + 1 }, () => {
+        let addUpdateSourcePromise;
 
-        updateSource(source.id, update).finally(() => {
-          this.setState({ activeStepIndex: 1 });
-        });
-      } else {
-        addSource(source, { scan: true }).finally(() => {
-          this.setState({ activeStepIndex: 2 });
-        });
-      }
+        if (edit) {
+          addUpdateSourcePromise = updateSource(source[apiTypes.API_SUBMIT_SOURCE_ID], source);
+        } else {
+          addUpdateSourcePromise = addSource(source, { scan: true });
+        }
+
+        addUpdateSourcePromise.then(
+          () => {
+            const { props } = this;
+
+            if (!props.show) {
+              store.dispatch({
+                type: reduxTypes.toastNotifications.TOAST_ADD,
+                alertType: 'success',
+                message: `Source ${source[apiTypes.API_SUBMIT_SOURCE_NAME]} was ${(props.edit && 'updated') ||
+                  'created'}`
+              });
+            }
+          },
+          () => {
+            const { props } = this;
+
+            if (!props.show) {
+              store.dispatch({
+                type: reduxTypes.toastNotifications.TOAST_ADD,
+                alertType: 'error',
+                header: `Error ${(props.edit && 'updating') || 'creating'} source`,
+                message: props.errorMessage
+              });
+            }
+          }
+        );
+      });
     }
   };
 
-  resetInitialState(nextProps) {
-    if (nextProps && nextProps.edit && nextProps.source) {
-      this.setState(Object.assign({ ...this.initialState }, { source: nextProps.source }));
-    } else {
-      this.setState(Object.assign({ ...this.initialState }));
-    }
-  }
+  onStep = () => {
+    // ToDo: wizard step map/breadcrumb/trail click, or leave disabled
+  };
 
   renderWizardSteps() {
     const { activeStepIndex } = this.state;
-    const { edit } = this.props;
-    const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
+    const { addSteps, edit, editSteps } = this.props;
+    const wizardSteps = edit ? editSteps : addSteps;
     const activeStep = wizardSteps[activeStepIndex];
 
     return wizardSteps.map((step, stepIndex) => (
@@ -130,101 +136,111 @@ class AddSourceWizard extends React.Component {
         label={step.label}
         title={step.title}
         activeStep={activeStep && activeStep.step}
-        onClick={() => this.onStep(activeStep && activeStep.step)}
       />
     ));
   }
 
   render() {
-    const { show, edit } = this.props;
-    const { activeStepIndex, stepOneValid, stepTwoValid } = this.state;
-    const wizardSteps = edit ? editSourceWizardSteps : addSourceWizardSteps;
+    const {
+      addSteps,
+      edit,
+      editSteps,
+      error,
+      errorStatus,
+      fulfilled,
+      pending,
+      show,
+      stepOneValid,
+      stepTwoValid
+    } = this.props;
+    const { activeStepIndex } = this.state;
+    const wizardSteps = edit ? editSteps : addSteps;
+
+    if (!show) {
+      return null;
+    }
 
     return (
-      <React.Fragment>
-        <Modal show={show} onHide={this.onCancel} dialogClassName="modal-dialog modal-lg wizard-pf quipucords-wizard">
-          <Wizard>
-            <Modal.Header>
-              <button type="button" className="close" onClick={this.onCancel} aria-hidden="true" aria-label="Close">
-                <Icon type="pf" name="close" />
-              </button>
-              <Modal.Title>{edit ? 'Edit' : 'Add'} Source</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="wizard-pf-body clearfix">
-              <Wizard.Steps steps={this.renderWizardSteps()} />
-              <Wizard.Row>
-                <Wizard.Main>
-                  {wizardSteps.map((step, stepIndex) => (
-                    <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
-                      {wizardSteps[stepIndex].page}
-                    </Wizard.Contents>
-                  ))}
-                </Wizard.Main>
-              </Wizard.Row>
-            </Modal.Body>
-            <Modal.Footer className="wizard-pf-footer">
-              <Button
-                bsStyle="default"
-                className="btn-cancel"
-                disabled={activeStepIndex === wizardSteps.length - 1}
-                onClick={this.onCancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                bsStyle="default"
-                disabled={activeStepIndex === 0 || activeStepIndex === wizardSteps.length - 1}
-                onClick={this.onBack}
-              >
-                <Icon type="fa" name="angle-left" />
-                Back
-              </Button>
-              {activeStepIndex < wizardSteps.length - 2 && (
-                <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
-                  Next
-                  <Icon type="fa" name="angle-right" />
-                </Button>
-              )}
-              {activeStepIndex === wizardSteps.length - 2 && (
-                <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onSubmit}>
-                  Save
-                  <Icon type="fa" name="angle-right" />
-                </Button>
-              )}
-              {activeStepIndex === wizardSteps.length - 1 && (
-                <Button bsStyle="primary" disabled={!stepTwoValid} onClick={this.onCancel}>
-                  Close
-                </Button>
-              )}
-            </Modal.Footer>
-          </Wizard>
-        </Modal>
-      </React.Fragment>
+      <Wizard show={show}>
+        <Wizard.Header onClose={this.onCancel} title={edit ? 'Edit Source' : 'Add Source'} />
+        <Wizard.Body>
+          <Wizard.Steps steps={this.renderWizardSteps()} />
+          <Wizard.Row>
+            <Wizard.Main>
+              {wizardSteps.map((step, stepIndex) => (
+                <Wizard.Contents key={step.title} stepIndex={stepIndex} activeStepIndex={activeStepIndex}>
+                  {wizardSteps[stepIndex].page}
+                </Wizard.Contents>
+              ))}
+            </Wizard.Main>
+          </Wizard.Row>
+        </Wizard.Body>
+        <Wizard.Footer>
+          <Button bsStyle="default" className="btn-cancel" disabled={fulfilled} onClick={this.onCancel}>
+            Cancel
+          </Button>
+          <Button
+            bsStyle="default"
+            disabled={activeStepIndex === 0 || errorStatus >= 500 || errorStatus === 0 || pending || fulfilled}
+            onClick={this.onBack}
+          >
+            <Icon type="fa" name="angle-left" />
+            Back
+          </Button>
+          {activeStepIndex < wizardSteps.length - 2 && (
+            <Button bsStyle="primary" disabled={!stepOneValid} onClick={this.onNext}>
+              Next
+              <Icon type="fa" name="angle-right" />
+            </Button>
+          )}
+          {activeStepIndex === wizardSteps.length - 2 && (
+            <Button bsStyle="primary" disabled={!stepTwoValid || pending} onClick={this.onSubmit}>
+              Save
+              <Icon type="fa" name="angle-right" />
+            </Button>
+          )}
+          {activeStepIndex === wizardSteps.length - 1 && (
+            <Button bsStyle="primary" disabled={error || pending} onClick={this.onCancel}>
+              Close
+            </Button>
+          )}
+        </Wizard.Footer>
+      </Wizard>
     );
   }
 }
 
 AddSourceWizard.propTypes = {
   addSource: PropTypes.func,
+  addSteps: PropTypes.array,
   updateSource: PropTypes.func,
   show: PropTypes.bool.isRequired,
   edit: PropTypes.bool,
+  editSteps: PropTypes.array,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string, // eslint-disable-line
+  errorStatus: PropTypes.number,
+  fulfilled: PropTypes.bool,
+  pending: PropTypes.bool,
   source: PropTypes.object,
   stepOneValid: PropTypes.bool,
-  stepTwoValid: PropTypes.bool,
-  fulfilled: PropTypes.bool,
-  error: PropTypes.bool
+  stepTwoValid: PropTypes.bool
 };
 
 AddSourceWizard.defaultProps = {
   addSource: helpers.noop,
+  addSteps: addSourceWizardSteps,
   updateSource: helpers.noop,
   edit: false,
+  editSteps: editSourceWizardSteps,
+  error: false,
+  errorMessage: null,
+  errorStatus: null,
+  fulfilled: false,
+  pending: false,
   source: {},
   stepOneValid: false,
-  stepTwoValid: false,
-  fulfilled: false,
-  error: false
+  stepTwoValid: false
 };
 
 const mapDispatchToProps = dispatch => ({
@@ -232,7 +248,7 @@ const mapDispatchToProps = dispatch => ({
   updateSource: (id, data) => dispatch(reduxActions.sources.updateSource(id, data))
 });
 
-const mapStateToProps = state => ({ ...state.addSourceWizard.view });
+const mapStateToProps = state => ({ ...state.addSourceWizard });
 
 const ConnectedAddSourceWizard = connect(
   mapStateToProps,

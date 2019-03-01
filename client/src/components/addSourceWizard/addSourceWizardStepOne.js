@@ -1,100 +1,77 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { Form, Radio } from 'patternfly-react';
-import _ from 'lodash';
-import Store from '../../redux/store';
-import { apiTypes } from '../../constants';
-import { sourcesTypes } from '../../redux/constants';
+import { connect, store, reduxSelectors, reduxTypes } from '../../redux';
+import { FormState } from '../formState/formState';
+import apiTypes from '../../constants/apiConstants';
 
 class AddSourceWizardStepOne extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.initialState = {
-      sourceType: '',
-      sourceTypeError: null
-    };
-
-    this.state = { ...this.initialState };
-  }
-
-  componentDidMount() {
-    const sourceType = _.get(this.props, ['source', apiTypes.API_SOURCE_TYPE], 'network');
-
-    this.setState({ sourceType }, () => {
-      this.validateStep();
+  isStepValid = ({ values }) => {
+    store.dispatch({
+      type: reduxTypes.sources.VALID_SOURCE_WIZARD_STEPONE,
+      source: {
+        [apiTypes.API_SUBMIT_SOURCE_SOURCE_TYPE]: values.sourceType
+      }
     });
-  }
-
-  onChangeSourceType = event => {
-    this.setState(
-      {
-        sourceType: event.target.value
-      },
-      () => this.validateStep()
-    );
   };
 
-  validateStep() {
-    const { sourceType } = this.state;
-    const { source } = this.props;
-
-    if (sourceType !== '') {
-      Store.dispatch({
-        type: sourcesTypes.UPDATE_SOURCE_WIZARD_STEPONE,
-        source: _.merge({}, source, { [apiTypes.API_SOURCE_TYPE]: sourceType })
-      });
-    }
-  }
-
   render() {
-    const { sourceType, sourceTypeError } = this.state;
+    const { type } = this.props;
 
     return (
-      <Form horizontal>
-        <h3 className="right-aligned_basic-form">Select source type</h3>
-        <Form.FormGroup validationState={sourceTypeError ? 'error' : null}>
-          <Radio
-            name="sourceType"
-            value="network"
-            checked={sourceType === 'network'}
-            onChange={this.onChangeSourceType}
-          >
-            Network Range
-          </Radio>
-          <Radio
-            name="sourceType"
-            value="satellite"
-            checked={sourceType === 'satellite'}
-            onChange={this.onChangeSourceType}
-          >
-            Satellite
-          </Radio>
-          <Radio
-            name="sourceType"
-            value="vcenter"
-            checked={sourceType === 'vcenter'}
-            onChange={this.onChangeSourceType}
-          >
-            vCenter Server
-          </Radio>
-        </Form.FormGroup>
-      </Form>
+      <FormState validateOnMount setValues={{ sourceType: type }} validate={this.isStepValid}>
+        {({ values, handleOnEvent, handleOnSubmit }) => (
+          <Form horizontal onSubmit={handleOnSubmit}>
+            <h3 className="right-aligned_basic-form">Select source type</h3>
+            <Form.FormGroup>
+              <Radio
+                name="sourceType"
+                value="network"
+                checked={values.sourceType === 'network'}
+                onChange={handleOnEvent}
+              >
+                Network Range
+              </Radio>
+              <Radio
+                name="sourceType"
+                value="satellite"
+                checked={values.sourceType === 'satellite'}
+                onChange={handleOnEvent}
+              >
+                Satellite
+              </Radio>
+              <Radio
+                name="sourceType"
+                value="vcenter"
+                checked={values.sourceType === 'vcenter'}
+                onChange={handleOnEvent}
+              >
+                vCenter Server
+              </Radio>
+            </Form.FormGroup>
+          </Form>
+        )}
+      </FormState>
     );
   }
 }
 
 AddSourceWizardStepOne.propTypes = {
-  source: PropTypes.object
+  type: PropTypes.string
 };
 
 AddSourceWizardStepOne.defaultProps = {
-  source: {}
+  type: 'network'
 };
 
-const mapStateToProps = state => ({ ...state.addSourceWizard.view });
+const makeMapStateToProps = () => {
+  const mapSource = reduxSelectors.sources.makeSourceDetail();
 
-const ConnectedAddSourceWizardStepOne = connect(mapStateToProps)(AddSourceWizardStepOne);
+  return (state, props) => ({
+    ...mapSource(state, props)
+  });
+};
+
+const ConnectedAddSourceWizardStepOne = connect(makeMapStateToProps)(AddSourceWizardStepOne);
 
 export { ConnectedAddSourceWizardStepOne as default, ConnectedAddSourceWizardStepOne, AddSourceWizardStepOne };
