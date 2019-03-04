@@ -32,13 +32,12 @@ node('f28-os') {
         sh "sudo docker -v"
         sh "sudo setenforce 0"
     }
-    stage('Build Client') {
+    stage('Copy UI into Server') {
         copyArtifacts filter: 'quipucords-ui.*.tar.gz', fingerprintArtifacts: true, projectName: 'qpc_master_ui_distribution', selector: lastCompleted()
         sh "tar -xvf quipucords-ui.*.tar.gz"
-        sh "mkdir -p quipucords/client"
-        sh "cp -rf dist/client quipucords/client"
-        sh "mkdir -p quipucords/quipucords/templates"
-    	sh "cp -rf dist/templates quipucords/quipucords/templates"
+        sh "cp -rf dist/client quipucords/"
+    	sh "cp -rf dist/templates quipucords/quipucords/"
+        sh "rm -rf dist"
     }
     stage('Build Docker Image') {
         sh "ls -lta"
