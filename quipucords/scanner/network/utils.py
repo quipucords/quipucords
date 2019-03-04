@@ -20,8 +20,12 @@ from api.vault import decrypt_data_as_unicode
 from scanner.network.exceptions import (NetworkCancelException,
                                         NetworkPauseException)
 
+# key is stop_type, value is manager_interrupt.value
+STOP_STATES = {'cancel': ScanJob.JOB_TERMINATE_CANCEL,
+               'pause': ScanJob.JOB_TERMINATE_PAUSE}
 
-def check_manager_iterrupt(interrupt_value):
+
+def check_manager_interrupt(interrupt_value):
     """Check if cancel & pause exception should be raised."""
     if interrupt_value == ScanJob.JOB_TERMINATE_CANCEL:
         raise NetworkCancelException()

@@ -22,6 +22,7 @@ from django.test import TestCase
 
 from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.utils import STOP_STATES
 from scanner.test_util import create_scan_job
 
 
@@ -65,8 +66,6 @@ class TestConnectResultCallback(TestCase):
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_CONNECT)
-        self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL,
-                            ScanJob.JOB_TERMINATE_PAUSE]
         self.interrupt = Mock(value=ScanJob.JOB_RUN)
 
     def test_task_on_ok(self):
@@ -74,7 +73,7 @@ class TestConnectResultCallback(TestCase):
         results_store = ConnectResultStore(self.scan_task)
         self.interrupt.return_value.value = ScanJob.JOB_RUN
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_ok'))
@@ -92,7 +91,7 @@ class TestConnectResultCallback(TestCase):
         """Test the callback on failed."""
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_failed'))
@@ -108,7 +107,7 @@ class TestConnectResultCallback(TestCase):
         """Test the callback on unreachable."""
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         events = []
         events.append(build_event(host='1.2.3.4',
                                   event='runner_on_unreachable'))
@@ -126,7 +125,7 @@ class TestConnectResultCallback(TestCase):
         """Test exception for each task."""
         results_store = None
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         events = []
         events.append(build_event(host='1.2.3.4', event='runner_on_ok'))
         events.append(build_event(host='1.2.3.4', event='runner_on_failed'))
@@ -140,7 +139,7 @@ class TestConnectResultCallback(TestCase):
         """Test unknown event response."""
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         event = build_event(host='1.2.3.4', event='runner_on_unknown_event')
         callback.event_callback(event)
 
@@ -148,7 +147,7 @@ class TestConnectResultCallback(TestCase):
         """Test unknown event response."""
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         event = build_event(host=None, event='runner_on_ok')
         callback.event_callback(event)
 
@@ -157,15 +156,14 @@ class TestConnectResultCallback(TestCase):
         # Test continue state
         results_store = ConnectResultStore(self.scan_task)
         callback = ConnectResultCallback(results_store, self.cred, self.source,
-                                         self.interrupt, self.stop_states)
+                                         self.interrupt)
         result = callback.cancel_callback()
         self.assertEqual(result, False)
         # Test cancel state
-        for state in self.stop_states:
-            self.interrupt = Mock(value=state)
+        for stop_value in STOP_STATES.values():
+            self.interrupt = Mock(value=stop_value)
             callback = ConnectResultCallback(results_store, self.cred,
-                                             self.source, self.interrupt,
-                                             self.stop_states)
-            self.assertEqual(callback.interrupt.value, state)
+                                             self.source, self.interrupt)
+            self.assertEqual(callback.interrupt.value, stop_value)
             result = callback.cancel_callback()
             self.assertEqual(result, True)

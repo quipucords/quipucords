@@ -286,7 +286,6 @@ class NetworkInspectScannerTest(TestCase):
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
         callback = InspectResultCallback(scan_task=self.scan_task,
-                                         stop_states=self.stop_states,
                                          manager_interrupt=self.interrupt)
         # cleaned unused variabled from event_dict
         event_dict = {'runner_ident': 'f2100bac-7d64-43d2-8e6a-022c6f5104ac',

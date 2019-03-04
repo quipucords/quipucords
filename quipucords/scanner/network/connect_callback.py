@@ -17,6 +17,8 @@ from api.connresult.model import SystemConnectionResult
 
 import log_messages
 
+from scanner.network.utils import STOP_STATES
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -30,13 +32,12 @@ class ConnectResultCallback():
 
     # pylint: disable=protected-access,too-many-arguments
     def __init__(self, result_store, credential, source,
-                 manager_interrupt, stop_states):
+                 manager_interrupt):
         """Create result callback."""
         self.result_store = result_store
         self.credential = credential
         self.source = source
         self.interrupt = manager_interrupt
-        self.stop_states = stop_states
         self.stop = False
 
     def task_on_ok(self, event_data, host, task_result):
@@ -148,12 +149,15 @@ class ConnectResultCallback():
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""
-        if self.interrupt.value in self.stop_states:
-            if not self.stop:
+        if self.stop:
+            return True
+        for stop_type, stop_value in STOP_STATES.items():
+            if self.interrupt.value == stop_value:
                 self.result_store.scan_task.log_message(
-                    log_messages.NETWORK_CALLBACK_ACK_CANCEL % (
-                        'CONNECT'),
+                    log_messages.NETWORK_CALLBACK_ACK_STOP % (
+                        'CONNECT',
+                        stop_type),
                     log_level=logging.INFO)
                 self.stop = True
-            return True
+                return True
         return False

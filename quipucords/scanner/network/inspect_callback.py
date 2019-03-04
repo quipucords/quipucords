@@ -25,6 +25,7 @@ import log_messages
 from quipucords import settings
 
 from scanner.network.processing import process
+from scanner.network.utils import STOP_STATES
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -45,14 +46,13 @@ class InspectResultCallback():
     """
 
     # pylint: disable=protected-access
-    def __init__(self, scan_task, manager_interrupt, stop_states):
+    def __init__(self, scan_task, manager_interrupt):
         """Create result callback."""
         self.scan_task = scan_task
         self.source = scan_task.source
         self._ansible_facts = {}
         self.last_role = None
         self.stop = False
-        self.stop_states = stop_states
         self.interrupt = manager_interrupt
 
     def process_task_facts(self, task_facts, host):
@@ -219,12 +219,15 @@ class InspectResultCallback():
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""
-        if self.interrupt.value in self.stop_states:
-            if not self.stop:
+        if self.stop:
+            return True
+        for stop_type, stop_value in STOP_STATES.items():
+            if self.interrupt.value == stop_value:
                 self.scan_task.log_message(
-                    log_messages.NETWORK_CALLBACK_ACK_CANCEL % (
-                        'INSPECT'),
+                    log_messages.NETWORK_CALLBACK_ACK_STOP % (
+                        'INSPECT',
+                        stop_type),
                     log_level=logging.INFO)
                 self.stop = True
-            return True
+                return True
         return False
