@@ -1,5 +1,0 @@
-const USER_AUTH = 'USER_AUTH';
-const USER_INFO = 'USER_INFO';
-const USER_LOGOUT = 'USER_LOGOUT';
-
-export { USER_AUTH, USER_INFO, USER_LOGOUT };
