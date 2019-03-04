@@ -1,7 +1,7 @@
 ansible==2.7.8
 Django==2.1.7
 django-filter==2.1.0
-djangorestframework==3.9.1
+djangorestframework==3.9.2
 djangorestframework-expiring-authtoken==0.1.4
 drf-generators==0.3.0
 drf-url-filters==0.5.1
