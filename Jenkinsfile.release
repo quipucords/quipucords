@@ -14,7 +14,7 @@ def rename_license = "${postgres_dir}/license.txt"
 
 node('f28-os') {
     stage('Install') {
-        sh "sudo dnf -y install origin-clients nodejs"
+        sh "sudo dnf -y install origin-clients"
         sh "which oc"
         sh "oc login --insecure-skip-tls-verify --token $OPENSHIFT_TOKEN $OPENSHIFT_LOGIN_URL"
         sh "oc project quipucords"
@@ -33,17 +33,12 @@ node('f28-os') {
         sh "sudo setenforce 0"
     }
     stage('Build Client') {
-        dir('client') {
-          sh "node -v"
-          sh "npm -v"
-          sh "sudo npm install -g n"
-          sh "sudo n lts"
-          sh "node -v"
-          sh "npm -v"
-          sh "npm install"
-          sh "npm rebuild node-sass --force"
-          sh "npm run build"
-        }
+        copyArtifacts filter: 'quipucords-ui.*.tar.gz', fingerprintArtifacts: true, projectName: 'qpc_master_ui_distribution', selector: lastCompleted()
+        sh "tar -xvf quipucords-ui.*.tar.gz"
+        sh "mkdir -p quipucords/client"
+        sh "cp -rf dist/client quipucords/client"
+        sh "mkdir -p quipucords/quipucords/templates"
+    	sh "cp -rf dist/templates quipucords/quipucords/templates"
     }
     stage('Build Docker Image') {
         sh "ls -lta"
