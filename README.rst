@@ -164,6 +164,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 1. Clone the repository::
 
     git clone git@github.com:quipucords/quipucords.git
+    git clone git@github.com:quipucords/quipucords-ui.git
 
 2. *Optional* - Build UI.::
 
