@@ -274,15 +274,16 @@ class InspectTaskRunner(ScanTaskRunner):
                 verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
 
             try:
-                runner_obj = ansible_runner.run(quiet=quiet_bool,
-                                                settings=runner_settings,
-                                                inventory=inventory_file,
-                                                extravars=extra_vars,
-                                                event_handler=call.event_callback,  # noqa
-                                                cancel_callback=call.cancel_callback, # noqa
-                                                playbook=playbook_path,
-                                                cmdline=all_commands,
-                                                verbosity=verbosity_lvl)
+                runner_obj = ansible_runner.run(
+                    quiet=quiet_bool,
+                    settings=runner_settings,
+                    inventory=inventory_file,
+                    extravars=extra_vars,
+                    event_handler=call.event_callback,
+                    cancel_callback=call.cancel_callback,
+                    playbook=playbook_path,
+                    cmdline=all_commands,
+                    verbosity=verbosity_lvl)
             except Exception as error:
                 error_msg = error
                 raise AnsibleRunnerException(error_msg)

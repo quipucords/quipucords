@@ -324,15 +324,16 @@ def _connect(manager_interrupt,
             quiet_bool = False
             verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
         try:
-            runner_obj = ansible_runner.run(quiet=quiet_bool,
-                                            settings=runner_settings,
-                                            inventory=inventory_file,
-                                            extravars=extra_vars_dict,
-                                            event_handler=call.event_callback,  # noqa
-                                            cancel_callback=call.cancel_callback,  # noqa
-                                            playbook=playbook_path,
-                                            cmdline=all_commands,
-                                            verbosity=verbosity_lvl)
+            runner_obj = ansible_runner.run(
+                quiet=quiet_bool,
+                settings=runner_settings,
+                inventory=inventory_file,
+                extravars=extra_vars_dict,
+                event_handler=call.event_callback,
+                cancel_callback=call.cancel_callback,
+                playbook=playbook_path,
+                cmdline=all_commands,
+                verbosity=verbosity_lvl)
         except Exception as err_msg:
             raise AnsibleRunnerException(err_msg)
 

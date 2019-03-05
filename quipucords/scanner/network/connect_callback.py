@@ -38,7 +38,7 @@ class ConnectResultCallback():
         self.credential = credential
         self.source = source
         self.interrupt = manager_interrupt
-        self.stop = False
+        self.stopped = False
 
     def task_on_ok(self, event_data, host, task_result):
         """Print a json representation of the event_data on ok."""
@@ -149,7 +149,7 @@ class ConnectResultCallback():
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""
-        if self.stop:
+        if self.stopped:
             return True
         for stop_type, stop_value in STOP_STATES.items():
             if self.interrupt.value == stop_value:
@@ -158,6 +158,6 @@ class ConnectResultCallback():
                         'CONNECT',
                         stop_type),
                     log_level=logging.INFO)
-                self.stop = True
+                self.stopped = True
                 return True
         return False

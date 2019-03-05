@@ -52,7 +52,7 @@ class InspectResultCallback():
         self.source = scan_task.source
         self._ansible_facts = {}
         self.last_role = None
-        self.stop = False
+        self.stopped = False
         self.interrupt = manager_interrupt
 
     def process_task_facts(self, task_facts, host):
@@ -219,7 +219,7 @@ class InspectResultCallback():
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""
-        if self.stop:
+        if self.stopped:
             return True
         for stop_type, stop_value in STOP_STATES.items():
             if self.interrupt.value == stop_value:
@@ -228,6 +228,6 @@ class InspectResultCallback():
                         'INSPECT',
                         stop_type),
                     log_level=logging.INFO)
-                self.stop = True
+                self.stopped = True
                 return True
         return False
