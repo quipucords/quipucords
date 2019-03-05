@@ -69,7 +69,6 @@ setup-postgres:
 	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6.10
 
 server-static:
-	mkdir -p quipucords/client
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
