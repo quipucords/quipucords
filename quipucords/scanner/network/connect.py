@@ -204,7 +204,7 @@ class ConnectTaskRunner(ScanTaskRunner):
                                                      connection_port,
                                                      use_paramiko,
                                                      forks=forks)
-                if scan_result == ScanTask.FAILED:
+                if scan_result != ScanTask.COMPLETED:
                     return scan_message, scan_result
             except AnsibleRunnerException as ansible_error:
                 remaining_hosts_str = ', '.join(result_store.remaining_hosts())
@@ -343,10 +343,9 @@ def _connect(manager_interrupt,
                     msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                         'CONNECT', 'canceled')
                     return msg, scan_task.CANCELED
-                else:
-                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                        'CONNECT', 'paused')
-                    return msg, scan_task.PAUSED
+                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                    'CONNECT', 'paused')
+                return msg, scan_task.PAUSED
             if final_status not in ['unreachable', 'failed', 'canceled']:
                 if final_status == 'timeout':
                     error = log_messages.NETWORK_TIMEOUT_ERR
