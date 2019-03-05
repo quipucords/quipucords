@@ -342,11 +342,12 @@ def _connect(manager_interrupt,
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                         'CONNECT', 'canceled')
+                    return msg, scan_task.CANCELED
                 else:
                     msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                         'CONNECT', 'paused')
-                return msg, scan_task.FAILED
-            if final_status not in ['unreachable', 'failed']:
+                    return msg, scan_task.PAUSED
+            if final_status not in ['unreachable', 'failed', 'canceled']:
                 if final_status == 'timeout':
                     error = log_messages.NETWORK_TIMEOUT_ERR
                 else:
