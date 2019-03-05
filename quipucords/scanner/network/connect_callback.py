@@ -15,6 +15,10 @@ import traceback
 
 from api.connresult.model import SystemConnectionResult
 
+import log_messages
+
+from scanner.network.utils import STOP_STATES
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -26,12 +30,15 @@ class ConnectResultCallback():
     scan, as we scan it.
     """
 
-    # pylint: disable=protected-access
-    def __init__(self, result_store, credential, source):
+    # pylint: disable=protected-access,too-many-arguments
+    def __init__(self, result_store, credential, source,
+                 manager_interrupt):
         """Create result callback."""
         self.result_store = result_store
         self.credential = credential
         self.source = source
+        self.interrupt = manager_interrupt
+        self.stopped = False
 
     def task_on_ok(self, event_data, host, task_result):
         """Print a json representation of the event_data on ok."""
@@ -44,9 +51,8 @@ class ConnectResultCallback():
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_ok.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_ok', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
@@ -68,15 +74,14 @@ class ConnectResultCallback():
                     SystemConnectionResult.UNREACHABLE)
             else:
                 # invalid creds
-                message = 'PERMISSION DENIED %s could not connect'\
-                    ' with cred %s.' % (host, self.credential.name)
-                self.result_store.scan_task.log_message(message)
+                self.result_store.scan_task.log_message(
+                    log_messages.TASK_PERMISSION_DENIED % (
+                        host, self.credential.name))
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_unreachable.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_unreachable', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
@@ -97,20 +102,19 @@ class ConnectResultCallback():
                     message, log_level=logging.ERROR)
             else:
                 # invalid creds
-                message = 'PERMISSION DENIED %s could not connect'\
-                    ' with cred %s.' % (host, self.credential.name)
-                self.result_store.scan_task.log_message(message)
+                self.result_store.scan_task.log_message(
+                    log_messages.TASK_PERMISSION_DENIED % (
+                        host, self.credential.name))
             logger.debug('%s', {'host': host, 'result': task_result})
         except Exception as error:
             self.result_store.scan_task.log_message(
-                'UNEXPECTED FAILURE in v2_runner_on_failed.'
-                '  Error: %s\nAnsible result: %s' % (
-                    error, event_data),
+                log_messages.TASK_UNEXPECTED_FAILURE % (
+                    'task_on_failed', error, event_data),
                 log_level=logging.ERROR)
             traceback.print_exc()
             raise error
 
-    def runner_event(self, event_dict=None):
+    def event_callback(self, event_dict=None):
         """Control the event callback for runner."""
         if event_dict:
             event = event_dict.get('event')
@@ -138,7 +142,22 @@ class ConnectResultCallback():
                     unexpected_error = True
                 if unexpected_error:
                     self.result_store.scan_task.log_message(
-                        'UNEXPECTED FAILURE in runner_event.'
-                        '   Error Unknown State: %s\nAnsible result: %s' % (
-                            event,
+                        log_messages.TASK_UNEXPECTED_FAILURE % (
+                            'runner_event',
+                            'Unknown State (%s)' % event,
                             event_dict), log_level=logging.ERROR)
+
+    def cancel_callback(self):
+        """Control the cancel callback for runner."""
+        if self.stopped:
+            return True
+        for stop_type, stop_value in STOP_STATES.items():
+            if self.interrupt.value == stop_value:
+                self.result_store.scan_task.log_message(
+                    log_messages.NETWORK_CALLBACK_ACK_STOP % (
+                        'CONNECT',
+                        stop_type),
+                    log_level=logging.INFO)
+                self.stopped = True
+                return True
+        return False
