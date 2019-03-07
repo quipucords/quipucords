@@ -20,9 +20,12 @@ from api.models import (RawFact,
 
 from django.db import transaction
 
+import log_messages
+
 from quipucords import settings
 
 from scanner.network.processing import process
+from scanner.network.utils import STOP_STATES
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -43,14 +46,14 @@ class InspectResultCallback():
     """
 
     # pylint: disable=protected-access
-    def __init__(self, scan_task, idx, group_total):
+    def __init__(self, scan_task, manager_interrupt):
         """Create result callback."""
         self.scan_task = scan_task
         self.source = scan_task.source
         self._ansible_facts = {}
         self.last_role = None
-        self.idx = idx
-        self.group_total = group_total
+        self.stopped = False
+        self.interrupt = manager_interrupt
 
     def process_task_facts(self, task_facts, host):
         """Collect, process, and save task facts."""
@@ -201,9 +204,9 @@ class InspectResultCallback():
                     else:
                         if event not in runner_ignore:
                             self.scan_task.log_message(
-                                'UNEXPECTED FAILURE in runner_event.'
-                                '   Error Unknown State: %s\nAnsible '
-                                'result: %s' % (event, event_dict),
+                                log_messages.TASK_UNEXPECTED_FAILURE % (
+                                    'event_callback', event,
+                                    event_dict),
                                 log_level=logging.ERROR)
                 # Save last role for task logging later
                 if event == 'playbook_on_task_start':
@@ -214,10 +217,17 @@ class InspectResultCallback():
         except Exception as err_msg:
             raise AnsibleRunnerException(err_msg)
 
-    def status_callback(self, status_dict=None):
-        """Control the status callback for Ansible Runner."""
-        job_status = status_dict.get('status')
-        if job_status == 'starting':
-            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
-                self.idx, self.group_total)
-            self.scan_task.log_message(log_message)
+    def cancel_callback(self):
+        """Control the cancel callback for runner."""
+        if self.stopped:
+            return True
+        for stop_type, stop_value in STOP_STATES.items():
+            if self.interrupt.value == stop_value:
+                self.scan_task.log_message(
+                    log_messages.NETWORK_CALLBACK_ACK_STOP % (
+                        'INSPECT',
+                        stop_type),
+                    log_level=logging.INFO)
+                self.stopped = True
+                return True
+        return False
