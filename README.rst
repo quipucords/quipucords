@@ -274,7 +274,7 @@ quipucords is released under the `GNU Public License version 3 <LICENSE>`_
     :target: https://travis-ci.org/quipucords/quipucords
 .. |codecov| image:: https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/quipucords/quipucords
-.. |license| image:: https://img.shields.io/github/license/quipucords/yupana.svg
+.. |license| image:: https://img.shields.io/github/license/quipucords/quipucords.svg
 .. |updates| image:: https://pyup.io/repos/github/quipucords/quipucords/shield.svg
    :target: https://pyup.io/repos/github/quipucords/quipucords/
 .. |python 3| image:: https://pyup.io/repos/github/quipucords/quipucords/python-3-shield.svg

@@ -31,6 +31,8 @@ all: lint test-coverage
 clean:
 	rm -rf quipucords/db.sqlite3
 	docker rm -f qpc-db
+	rm -rf quipucords/client
+	rm -rf quipucords/quipucords/templates
 
 test:
 	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/
