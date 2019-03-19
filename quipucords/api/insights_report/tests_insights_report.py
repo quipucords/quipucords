@@ -69,26 +69,10 @@ class InsightsReportTest(TestCase):
         expected_hosts = {
             self.sys_platform_id: {
                 'system_platform_id': self.sys_platform_id,
-                'connection_host': '1.2.3.4',
-                'connection_port': 22,
-                'connection_uuid': self.connection_uuid,
                 'cpu_count': 2,
                 'cpu_core_per_socket': 1,
-                'cpu_siblings': 1,
-                'cpu_hyperthreading': False,
                 'cpu_socket_count': 2,
                 'cpu_core_count': 2,
-                'date_anaconda_log': '2017-07-18',
-                'date_yum_history': '2017-07-18',
-                'etc_release_name': '',
-                'etc_release_version': '',
-                'etc_release_release': '',
-                'uname_hostname': '1.2.3.4',
-                'virt_virt': 'virt-guest',
-                'virt_type': 'vmware',
-                'virt_num_guests': 1,
-                'virt_num_running_guests': 1,
-                'virt_what_type': 'vt',
                 'ip_addresses': ['1.2.3.4']}}
 
         with patch('api.insights_report.view.get_object_or_404',
@@ -163,6 +147,7 @@ class InsightsReportTest(TestCase):
                    return_value=self.deployments_report):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(expected_hosts, response.json().get('hosts'))
 
     def test_get_insights_report_404_no_canonical(self):
@@ -202,7 +187,7 @@ class InsightsReportTest(TestCase):
     def test_get_insights_report_404_missing_sys_id(self):
         """Check that system fingerprints missing system platform id fail."""
         url = '/api/v1/reports/1/insights/'
-        no_canonical = \
+        fingerprints = \
             [{'connection_host': '1.2.3.4',
               'connection_port': 22,
               'connection_uuid': self.connection_uuid,
@@ -250,29 +235,13 @@ class InsightsReportTest(TestCase):
         expected_hosts = {
             self.sys_platform_id:
                 {'system_platform_id': self.sys_platform_id,
-                 'connection_host': '1.2.3.4',
-                 'connection_port': 22,
-                 'connection_uuid': self.connection_uuid,
                  'cpu_count': 2,
                  'cpu_core_per_socket': 1,
-                 'cpu_siblings': 1,
-                 'cpu_hyperthreading': False,
                  'cpu_socket_count': 2,
                  'cpu_core_count': 2,
-                 'date_anaconda_log': '2017-07-18',
-                 'date_yum_history': '2017-07-18',
-                 'etc_release_name': '',
-                 'etc_release_version': '',
-                 'etc_release_release': '',
-                 'uname_hostname': '1.2.3.4',
-                 'virt_virt': 'virt-guest',
-                 'virt_type': 'vmware',
-                 'virt_num_guests': 1,
-                 'virt_num_running_guests': 1,
-                 'virt_what_type': 'vt',
                  'mac_addresses': ['1.2.3.4']}}
         self.deployments_report.cached_insights = None
-        self.deployments_report.cached_fingerprints = json.dumps(no_canonical)
+        self.deployments_report.cached_fingerprints = json.dumps(fingerprints)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):

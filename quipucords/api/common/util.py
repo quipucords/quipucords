@@ -27,6 +27,14 @@ CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'ip_addresses', 'mac_addresses',
                    'subscription_manager_id', 'vm_uuid']
 
+INSIGHTS_FACTS = [
+    'system_platform_id', 'name', 'os_release', 'os_version',
+    'infrastructure_type', 'mac_addresses', 'ip_addresses',
+    'cpu_count', 'architecture', 'bios_uuid', 'subscription_manager_id',
+    'cpu_socket_count', 'cpu_core_count', 'insights_client_id',
+    'vm_uuid', 'vm_host', 'is_redhat', 'redhat_certs', 'etc_machine_id',
+    'cpu_core_per_socket', 'products', 'entitlements']
+
 
 def is_int(value):
     """Check if a value is convertable to int.

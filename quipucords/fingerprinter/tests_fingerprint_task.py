@@ -1133,11 +1133,18 @@ class EngineTest(TestCase):
             status_message, status = \
                 self.fp_task_runner._process_details_report('',
                                                             details_report)
+            system_platform_id = \
+                json.loads(deployments_report.cached_fingerprints)[
+                    0].get('system_platform_id')
+            expected_insights = {system_platform_id:
+                                 {'system_platform_id': system_platform_id,
+                                  'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                                  'ip_addresses': ['1.2.3.4']}}
 
             self.assertIn('success', status_message.lower())
             self.assertEqual(status, 'completed')
-            self.assertIn(json.dumps(fact_collection),
-                          deployments_report.cached_insights)
+            self.assertEqual(json.loads(deployments_report.cached_insights),
+                             expected_insights)
 
     def test_process_details_report_exception(self):
         """Test processing a details report with an exception."""
