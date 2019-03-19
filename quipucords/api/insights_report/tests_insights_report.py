@@ -147,7 +147,6 @@ class InsightsReportTest(TestCase):
                    return_value=self.deployments_report):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
         self.assertEqual(expected_hosts, response.json().get('hosts'))
 
     def test_get_insights_report_404_no_canonical(self):
