@@ -13,7 +13,3 @@ requirements:
       # update all dependencies and pin them
       update: all
       pin: True
-
-  - rcm-requirements.txt:
-      # do not update locked dependencies
-      update: False
