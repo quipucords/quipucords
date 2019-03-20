@@ -33,7 +33,8 @@ INSIGHTS_FACTS = [
     'cpu_count', 'architecture', 'bios_uuid', 'subscription_manager_id',
     'cpu_socket_count', 'cpu_core_count', 'insights_client_id',
     'vm_uuid', 'vm_host', 'is_redhat', 'redhat_certs', 'etc_machine_id',
-    'cpu_core_per_socket', 'products', 'entitlements']
+    'cpu_core_per_socket', 'products', 'entitlements', 'vm_host_socket_count',
+    'vm_host_core_count']
 
 
 def is_int(value):
