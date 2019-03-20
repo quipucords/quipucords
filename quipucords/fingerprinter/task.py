@@ -16,6 +16,7 @@ from datetime import datetime
 
 from api.common.common_report import create_report_version
 from api.common.util import (CANONICAL_FACTS,
+                             INSIGHTS_FACTS,
                              convert_to_boolean,
                              convert_to_float,
                              convert_to_int,
@@ -175,7 +176,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 error.__class__.__name__, error), log_level=logging.ERROR)
             raise error
 
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches, too-many-nested-blocks
     def _process_details_report(self, manager_interrupt, details_report):
         """Process the details report.
 
@@ -260,7 +261,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     insights_id = fingerprint_dict.get(
                         'system_platform_id')
                     if found_canonical_facts:
-                        insights_hosts[insights_id] = fingerprint_dict
+                        insights_host = {}
+                        for fact in INSIGHTS_FACTS:
+                            if fingerprint_dict.get(fact):
+                                insights_host[fact] = \
+                                    fingerprint_dict.get(fact)
+                        insights_hosts[insights_id] = insights_host
                         insights_valid += 1
                     else:
                         invalid_hosts.append(insights_id)
@@ -1069,6 +1075,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fact, 'cpu_socket_count', fingerprint)
         self._add_fact_to_fingerprint(source, 'cpu_core_count',
                                       fact, 'cpu_core_count', fingerprint)
+        self._add_fact_to_fingerprint(source, 'cpu_core_per_socket',
+                                      fact, 'cpu_core_per_socket', fingerprint)
 
         # Determine system_creation_date
         self._add_fact_to_fingerprint(source, 'date_machine_id',

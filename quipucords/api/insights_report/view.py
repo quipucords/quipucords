@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import CANONICAL_FACTS, is_int
+from api.common.util import CANONICAL_FACTS, INSIGHTS_FACTS, is_int
 from api.models import (DeploymentsReport)
 
 from django.shortcuts import get_object_or_404
@@ -124,9 +124,13 @@ def get_hosts_from_fp(report, host_dicts):
     valid_hosts = verify_report_hosts(host_dicts)
     insights_hosts = {}
     for host in valid_hosts:
+        insights_host = {}
+        for fact in INSIGHTS_FACTS:
+            if host.get(fact):
+                insights_host[fact] = host.get(fact)
         host_id = host.get('system_platform_id', None)
         if host_id:
-            insights_hosts[host_id] = host
+            insights_hosts[host_id] = insights_host
     # save the insights format after generating
     report.cached_insights = json.dumps(insights_hosts)
     return insights_hosts
