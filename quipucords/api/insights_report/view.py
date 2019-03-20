@@ -128,9 +128,6 @@ def get_hosts_from_fp(report, host_dicts):
         for fact in INSIGHTS_FACTS:
             if host.get(fact):
                 insights_host[fact] = host.get(fact)
-        # for fact in facts_to_remove:
-        #     host.pop(fact, None)
-        #     print('Removing fact: %s' % fact)
         host_id = host.get('system_platform_id', None)
         if host_id:
             insights_hosts[host_id] = insights_host
