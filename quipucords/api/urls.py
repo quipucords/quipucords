@@ -27,9 +27,8 @@ from api.views import (CredentialViewSet,
 
 from django.urls import path
 
-from rest_framework.routers import SimpleRouter
-
 from rest_framework.authtoken import views
+from rest_framework.routers import SimpleRouter
 
 ROUTER = SimpleRouter()
 
