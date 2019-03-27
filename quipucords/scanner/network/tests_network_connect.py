@@ -226,7 +226,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port, exclude_hosts)
+                     connection_port, 25, exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -241,7 +241,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port, exclude_hosts)
+                 connection_port, 25, exclude_hosts)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -257,7 +257,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             os.path.join(os.path.dirname(__file__),
                          'test_util/crash.py'))
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                 hosts, Mock(), self.cred, connection_port,
+                 hosts, Mock(), self.cred, connection_port, 25,
                  exclude_hosts, base_ssh_executable=path)
         mock_run.assert_called()
 
@@ -278,6 +278,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             self.scan_task,
             hosts,
             Mock(), self.cred, connection_port,
+            25,
             exclude_hosts,
             base_ssh_executable=path,
             ssh_timeout='0.1s')
@@ -368,7 +369,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                     hosts, Mock(), self.cred, connection_port)
+                     hosts, Mock(), self.cred, connection_port, 25)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -381,7 +382,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                 hosts, Mock(), self.cred, connection_port)
+                 hosts, Mock(), self.cred, connection_port, 25)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -394,7 +395,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                     hosts, Mock(), self.cred, connection_port)
+                     hosts, Mock(), self.cred, connection_port, 25)
             mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -417,7 +418,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port)
+                 connection_port, 25)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -431,7 +432,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port)
+                 connection_port, 25)
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
@@ -449,7 +450,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port)
+                     connection_port, 25)
             mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -473,7 +474,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(NetworkCancelException):
             _connect(Value('i', ScanJob.JOB_TERMINATE_CANCEL),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port)
+                     connection_port, 25)
         # Test cancel at run() level
         mock_run.side_effect = NetworkCancelException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
@@ -491,7 +492,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(NetworkPauseException):
             _connect(Value('i', ScanJob.JOB_TERMINATE_PAUSE),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port)
+                     connection_port, 25)
         # Test cancel at run() level
         mock_run.side_effect = NetworkPauseException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)

@@ -202,8 +202,8 @@ class ConnectTaskRunner(ScanTaskRunner):
                                                      result_store,
                                                      credential,
                                                      connection_port,
-                                                     use_paramiko,
-                                                     forks=forks)
+                                                     forks,
+                                                     use_paramiko)
                 if scan_result != ScanTask.COMPLETED:
                     return scan_message, scan_result
             except AnsibleRunnerException as ansible_error:
@@ -234,8 +234,8 @@ def _connect(manager_interrupt,
              result_store,
              credential,
              connection_port,
+             forks,
              use_paramiko=False,
-             forks=25,
              exclude_hosts=None,
              base_ssh_executable=None,
              ssh_timeout=None):
