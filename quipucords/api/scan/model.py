@@ -116,7 +116,7 @@ class ScanOptions(models.Model):
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
     JBOSS_WS_EXT = 'jboss_ws_ext'
 
-    max_concurrency = models.PositiveIntegerField(default=50)
+    max_concurrency = models.PositiveIntegerField(default=25)
     disabled_optional_products = \
         models.OneToOneField(DisabledOptionalProductsOptions,
                              on_delete=models.CASCADE,
@@ -140,7 +140,7 @@ class ScanOptions(models.Model):
     @staticmethod
     def get_default_forks():
         """Create the default number of forks."""
-        return 50
+        return 25
 
     @staticmethod
     def get_default_extra_vars():

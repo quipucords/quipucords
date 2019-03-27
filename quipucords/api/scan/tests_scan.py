@@ -354,7 +354,7 @@ class ScanTest(TestCase):
                     'jboss_fuse': True,
                     'jboss_brms': True,
                     'jboss_ws': True},
-                   'max_concurrency': 50,
+                   'max_concurrency': 25,
                    'enabled_extended_product_search':
                    {'jboss_eap': False,
                     'jboss_fuse': False,
@@ -427,7 +427,7 @@ class ScanTest(TestCase):
                                      content_type='application/json',
                                      format='json')
         response_json = response.json()
-        options = {'max_concurrency': 50,
+        options = {'max_concurrency': 25,
                    'enabled_extended_product_search':
                    {'jboss_eap': False,
                     'jboss_fuse': False,

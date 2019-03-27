@@ -105,7 +105,8 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
 class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
-    max_concurrency = IntegerField(required=False, min_value=1, default=50)
+    max_concurrency = IntegerField(required=False, min_value=1,
+                                   max_value=200, default=25)
     disabled_optional_products = DisableOptionalProductsOptionsSerializer(
         required=False)
     enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
