@@ -29,7 +29,7 @@ from django.urls import path
 
 from rest_framework.routers import SimpleRouter
 
-from rest_framework_expiring_authtoken import views
+from rest_framework.authtoken import views
 
 ROUTER = SimpleRouter()
 
@@ -65,7 +65,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('token/', views.obtain_expiring_auth_token)
+    path('token/', views.obtain_auth_token)
 ]
 
 urlpatterns += [

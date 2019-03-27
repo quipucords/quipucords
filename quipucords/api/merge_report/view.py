@@ -28,7 +28,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import (SessionAuthentication,
+                                           TokenAuthentication)
 from rest_framework.decorators import (api_view,
                                        authentication_classes,
                                        permission_classes)
@@ -36,8 +37,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
 
 from scanner.job import ScanJobRunner
 
@@ -47,7 +46,7 @@ logger = logging.getLogger(__name__)
 authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
 
 if authentication_enabled:
-    auth_classes = (ExpiringTokenAuthentication,
+    auth_classes = (TokenAuthentication,
                     SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
