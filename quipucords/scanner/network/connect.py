@@ -248,7 +248,7 @@ def _connect(manager_interrupt,
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param use_paramiko: use paramiko instead of ssh for connection
-    :param forks: number of forks to run with, default of 25
+    :param forks: number of forks to run with
     :param exclude_hosts: Optional. Hosts to exclude from test connections
     :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
