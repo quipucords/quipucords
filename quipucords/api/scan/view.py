@@ -34,7 +34,8 @@ from django_filters.rest_framework import (CharFilter,
 
 
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import (SessionAuthentication,
+                                           TokenAuthentication)
 from rest_framework.decorators import (api_view,
                                        authentication_classes,
                                        permission_classes)
@@ -43,9 +44,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
-
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
 
 
 # Get an instance of a logger
@@ -81,7 +79,7 @@ JOB_VALID_STATUS = [ScanTask.CREATED,
 authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
 
 if authentication_enabled:
-    auth_classes = (ExpiringTokenAuthentication,
+    auth_classes = (TokenAuthentication,
                     SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
@@ -191,7 +189,7 @@ class ScanViewSet(ModelViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (ExpiringTokenAuthentication,
+        authentication_classes = (TokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 

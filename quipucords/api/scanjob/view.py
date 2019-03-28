@@ -37,15 +37,14 @@ from django.utils.translation import ugettext as _
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 
 from rest_framework import mixins, viewsets
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import (SessionAuthentication,
+                                           TokenAuthentication)
 from rest_framework.decorators import detail_route
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-from rest_framework_expiring_authtoken.authentication import \
-    ExpiringTokenAuthentication
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -115,7 +114,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (ExpiringTokenAuthentication,
+        authentication_classes = (TokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
