@@ -1909,7 +1909,7 @@ definitions:
         format: "int64"
         description: "The maximum concurrent host scans"
         example: 50
-        default: 50
+        default: 25
       disabled_optional_products:
         $ref: "#/definitions/ScanDisableOptionalProducts"
       enabled_extended_product_search:

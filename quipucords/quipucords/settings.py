@@ -20,7 +20,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import datetime
 import logging
 import os
 
@@ -134,7 +133,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_expiring_authtoken',
     'filters',
     'django_filters',
     'drf_generators',
@@ -393,9 +391,6 @@ LOGGING = {
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
 
-
-# Token lifespan
-EXPIRING_TOKEN_LIFESPAN = datetime.timedelta(days=1)
 
 QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', 'True')
 if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
