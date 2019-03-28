@@ -134,6 +134,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         self.scan_job3, self.scan_task3 = create_scan_job(
             self.source3, ScanTask.SCAN_TYPE_CONNECT, 'source3', scan_options)
         self.scan_task3.update_stats('TEST NETWORK CONNECT.', sys_failed=0)
+        self.concurrency = ScanOptions.get_default_forks()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
@@ -226,7 +227,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port, 25, exclude_hosts)
+                     connection_port, self.concurrency,
+                     exclude_hosts)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -241,7 +243,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port, 25, exclude_hosts)
+                 connection_port, self.concurrency,
+                 exclude_hosts)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -257,8 +260,9 @@ class NetworkConnectTaskRunnerTest(TestCase):
             os.path.join(os.path.dirname(__file__),
                          'test_util/crash.py'))
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                 hosts, Mock(), self.cred, connection_port, 25,
-                 exclude_hosts, base_ssh_executable=path)
+                 hosts, Mock(), self.cred, connection_port,
+                 self.concurrency, exclude_hosts,
+                 base_ssh_executable=path)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -278,7 +282,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             self.scan_task,
             hosts,
             Mock(), self.cred, connection_port,
-            25,
+            self.concurrency,
             exclude_hosts,
             base_ssh_executable=path,
             ssh_timeout='0.1s')
@@ -369,7 +373,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                     hosts, Mock(), self.cred, connection_port, 25)
+                     hosts, Mock(), self.cred, connection_port,
+                     self.concurrency)
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
 
@@ -382,7 +387,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source['hosts']
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                 hosts, Mock(), self.cred, connection_port, 25)
+                 hosts, Mock(), self.cred, connection_port,
+                 self.concurrency)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -395,7 +401,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN), self.scan_task,
-                     hosts, Mock(), self.cred, connection_port, 25)
+                     hosts, Mock(), self.cred, connection_port,
+                     self.concurrency)
             mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -418,7 +425,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port, 25)
+                 connection_port, self.concurrency)
         mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -432,7 +439,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source['port']
         _connect(Value('i', ScanJob.JOB_RUN),
                  self.scan_task, hosts, Mock(), self.cred,
-                 connection_port, 25)
+                 connection_port, self.concurrency)
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
@@ -450,7 +457,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(AnsibleRunnerException):
             _connect(Value('i', ScanJob.JOB_RUN),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port, 25)
+                     connection_port, self.concurrency)
             mock_run.assert_called()
 
     @patch('ansible_runner.run')
@@ -474,7 +481,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(NetworkCancelException):
             _connect(Value('i', ScanJob.JOB_TERMINATE_CANCEL),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port, 25)
+                     connection_port, self.concurrency)
         # Test cancel at run() level
         mock_run.side_effect = NetworkCancelException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
@@ -492,7 +499,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         with self.assertRaises(NetworkPauseException):
             _connect(Value('i', ScanJob.JOB_TERMINATE_PAUSE),
                      self.scan_task, hosts, Mock(), self.cred,
-                     connection_port, 25)
+                     connection_port, self.concurrency)
         # Test cancel at run() level
         mock_run.side_effect = NetworkPauseException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)

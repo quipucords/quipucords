@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -58,6 +58,7 @@ class ScanTest(TestCase):
             port=22)
         self.source2.save()
         self.source2.credentials.add(self.cred)
+        self.concurrency = ScanOptions.get_default_forks()
 
     def create(self, data):
         """Call the create endpoint."""
@@ -354,7 +355,7 @@ class ScanTest(TestCase):
                     'jboss_fuse': True,
                     'jboss_brms': True,
                     'jboss_ws': True},
-                   'max_concurrency': 25,
+                   'max_concurrency': self.concurrency,
                    'enabled_extended_product_search':
                    {'jboss_eap': False,
                     'jboss_fuse': False,
@@ -427,7 +428,7 @@ class ScanTest(TestCase):
                                      content_type='application/json',
                                      format='json')
         response_json = response.json()
-        options = {'max_concurrency': 25,
+        options = {'max_concurrency': self.concurrency,
                    'enabled_extended_product_search':
                    {'jboss_eap': False,
                     'jboss_fuse': False,

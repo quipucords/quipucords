@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -25,6 +25,7 @@ from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+DEFAULT_MAX_CONCURRENCY = 25
 
 
 class ExtendedProductSearchOptions(models.Model):
@@ -116,7 +117,8 @@ class ScanOptions(models.Model):
     JBOSS_BRMS_EXT = 'jboss_brms_ext'
     JBOSS_WS_EXT = 'jboss_ws_ext'
 
-    max_concurrency = models.PositiveIntegerField(default=25)
+    max_concurrency = models.PositiveIntegerField(
+        default=DEFAULT_MAX_CONCURRENCY)
     disabled_optional_products = \
         models.OneToOneField(DisabledOptionalProductsOptions,
                              on_delete=models.CASCADE,
@@ -140,7 +142,7 @@ class ScanOptions(models.Model):
     @staticmethod
     def get_default_forks():
         """Create the default number of forks."""
-        return 25
+        return DEFAULT_MAX_CONCURRENCY
 
     @staticmethod
     def get_default_extra_vars():

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -106,7 +106,8 @@ class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
     max_concurrency = IntegerField(required=False, min_value=1,
-                                   max_value=200, default=25)
+                                   max_value=200,
+                                   default=ScanOptions.get_default_forks())
     disabled_optional_products = DisableOptionalProductsOptionsSerializer(
         required=False)
     enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
