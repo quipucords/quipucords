@@ -42,3 +42,23 @@
     selinux_on: true
   when:
     - have_selinux_raw.rc == 0
+
+- name: Install server setting
+  set_fact:
+    install_server: "{{ install_server | bool | default(true) }}"
+  when: install_server is defined
+
+- name: Defaulting server install setting
+  set_fact:
+    install_server: true
+  when: install_server is not defined
+
+- name: Install CLI setting
+  set_fact:
+    install_cli: "{{ install_cli | bool | default(true) }}"
+  when: install_cli is defined
+
+- name: Defaulting CLI install setting
+  set_fact:
+    install_cli: true
+  when: install_cli is not defined
