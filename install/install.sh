@@ -80,12 +80,8 @@ if [ ! -f /etc/redhat-release ]; then
 fi
 
 if dnf --version > /dev/null 2>&1; then
-  PKG_MGR=dnf
-  if grep -q -i "27" /etc/redhat-release; then
-    rpm_version="fc27"
-  else
-    rpm_version="fc28"
-  fi
+  echo "Installation on Fedora not supported."
+  exit 1
 else
   PKG_MGR=yum
   if grep -q -i "release 7" /etc/redhat-release; then

@@ -6,22 +6,10 @@
     is_rhel7: "{{ (ansible_distribution == 'RedHat') and (ansible_distribution_major_version == '7') }}"
     is_centos_7: "{{ (ansible_distribution == 'CentOS') and (ansible_distribution_major_version == '7') }}"
     is_rhel_centos_7: "{{ ((ansible_distribution == 'RedHat') or (ansible_distribution == 'CentOS')) and (ansible_distribution_major_version == '7') }}"
-    is_fedora_27: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '27') }}"
-    is_fedora_28: "{{ (ansible_distribution == 'Fedora') and (ansible_distribution_major_version == '28') }}"
-
-- name: Set is_fedora to true
-  set_fact:
-    is_fedora: true
-  when: is_fedora_28 or is_fedora_27
-
-- name: Set is_fedora to false
-  set_fact:
-    is_fedora: false
-  when: not (is_fedora_28 or is_fedora_27)
 
 - fail:
-    msg: "This is not a supported system for installation. Must be RHEL 6/7, CentOS 6/7, or Fedora 27/28."
-  when: not (is_rhel_centos_6 or is_rhel_centos_7 or is_fedora)
+    msg: "This is not a supported system for installation. Must be RHEL 6/7, CentOS 6/7."
+  when: not (is_rhel_centos_6 or is_rhel_centos_7)
 
 - name: Get local package directory
   set_fact:

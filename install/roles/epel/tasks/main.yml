@@ -24,21 +24,18 @@
   become: true
   ignore_errors: yes
   when:
-    - not is_fedora
     - have_rpm
 
 - name: Set have_epel_rpm (RHEL/Centos)
   set_fact:
     have_epel_rpm: "{{ have_epel_rpm_raw['stdout_lines']| length > 0 }}"
   when:
-    - not is_fedora
     - "'stdout_lines' in have_epel_rpm_raw"
 
 - name: Default have_epel_rpm (RHEL/Centos)
   set_fact:
     have_epel_rpm: false
   when:
-    - not is_fedora
     - have_epel_rpm is not defined
 
 - name: Find installable local epel rpm (RHEL/Centos)
@@ -47,14 +44,12 @@
     patterns: 'epel*.rpm'
   register: find_epel_rpm_local_raw
   when:
-    - not is_fedora
     - not have_epel_rpm
 
 - name: Set find_epel_rpm_local (RHEL/Centos)
   set_fact:
     find_epel_rpm_local: "{{ find_epel_rpm_local_raw['matched'] == 1 }}"
   when:
-    - not is_fedora
     - find_epel_rpm_local_raw is defined
     - "'matched' in find_epel_rpm_local_raw"
 
@@ -62,7 +57,6 @@
   set_fact:
     find_epel_rpm_local_path: "{{ find_epel_rpm_local_raw['files'][0]['path'] }}"
   when:
-    - not is_fedora
     - find_epel_rpm_local is defined
     - find_epel_rpm_local
 
@@ -70,7 +64,6 @@
   shell: rpm -Uvh --force "{{find_epel_rpm_local_path}}"
   become: true
   when:
-    - not is_fedora
     - not have_epel_rpm
     - find_epel_rpm_local
 
@@ -78,12 +71,10 @@
   shell: rpm -Uvh  --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   become: true
   when:
-    - is_rhel_centos_6
     - not have_epel_rpm
 
 - name: Install EPEL for RHEL 7 from internet (RHEL/Centos 7)
   shell: rpm -Uvh --force https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   become: true
   when:
-    - is_rhel_centos_7
     - not have_epel_rpm
