@@ -17,7 +17,7 @@ import os
 import tarfile
 import time
 
-from quipucords.environment import commit
+from quipucords.environment import server_version
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -31,7 +31,7 @@ REPORT_TYPE_CHOICES = ((REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
 
 def create_report_version():
     """Create the report version string."""
-    return '0.0.47.%s' % commit()
+    return server_version
 
 
 def sanitize_row(row):

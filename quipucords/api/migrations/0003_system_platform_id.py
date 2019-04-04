@@ -8,6 +8,7 @@ import uuid
 from distutils.version import LooseVersion
 
 from api.common.util import CANONICAL_FACTS
+from quipucords.release import VERSION
 from api.deployments_report.serializer import SystemFingerprintSerializer
 
 
@@ -19,7 +20,7 @@ def add_system_platform_id(apps, schema_editor):
     for report in DeploymentsReport.objects.all():
         cached_fingerprints = []
         insights_hosts = {}
-        if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
+        if LooseVersion(report.report_version) < LooseVersion(VERSION):
             print('Migrating deployments report %s' % report.id)
             try:
                 for system_fingerprint in report.system_fingerprints.all():
