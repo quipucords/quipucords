@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -31,7 +31,7 @@ REPORT_TYPE_CHOICES = ((REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
 
 def create_report_version():
     """Create the report version string."""
-    return server_version
+    return server_version()
 
 
 def sanitize_row(row):
