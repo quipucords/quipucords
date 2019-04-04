@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -16,6 +16,8 @@ import os
 import platform
 import subprocess
 import sys
+
+from quipucords.release import VERSION
 
 # pylint: disable=invalid-name
 # Get an instance of a logger
@@ -41,7 +43,7 @@ def commit():
 
 def server_version():
     """Return server version."""
-    return '0.0.47.%s' % commit()
+    return '%s.%s' % (VERSION, commit())
 
 
 def platform_info():
