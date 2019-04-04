@@ -1,15 +1,5 @@
 ---
 
-- name: Install CLI setting
-  set_fact:
-    install_cli: "{{ install_cli | bool | default(true) }}"
-  when: install_cli is defined
-
-- name: Defaulting CLI install setting
-  set_fact:
-    install_cli: true
-  when: install_cli is not defined
-
 - name: Set qpc repo url (RHEL/CentOS 7)
   set_fact:
     qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo') }}"
@@ -103,15 +93,11 @@
 - name: set qpc_rpm_local_path
   set_fact:
     qpc_rpm_local_path: "{{ pkg_install_dir }}{{ qpc_version }}.noarch.rpm"
-  when:
-    - install_cli
 
 - name: Check if local qpc rpm exists
   stat:
     path: "{{ qpc_rpm_local_path }}"
   register: find_qpc_rpm_local
-  when:
-    - install_cli
 
 - name: Install QPC from local path
   shell: rpm -Uvh --force "{{qpc_rpm_local_path}}"
@@ -126,7 +112,6 @@
     force: yes
   become: true
   when:
-    - install_cli
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Install the latest version (QPC RHEL/Centos)
@@ -136,7 +121,6 @@
   become: true
   when:
     - not is_fedora
-    - install_cli
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Install the latest version (QPC Fedora)
@@ -146,9 +130,9 @@
   become: true
   when:
     - is_fedora
-    - install_cli
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Configure QPC to talk to server
   shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"
-  when: install_cli
+  when:
+    - install_server

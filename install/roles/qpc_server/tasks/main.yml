@@ -1,15 +1,5 @@
 ---
 
-- name: Install server setting
-  set_fact:
-    install_server: "{{ install_server | bool | default(true) }}"
-  when: install_server is defined
-
-- name: Defaulting server install setting
-  set_fact:
-    install_server: true
-  when: install_server is not defined
-
 - name: Set server directory
   set_fact:
     server_install_dir: "{{ ansible_env['SERVER_DIR'] | default(ansible_env['HOME'] + '/quipucords') }}"
@@ -74,7 +64,6 @@
   become: true
   register: quipucords_docker_image_raw
   ignore_errors: yes
-  when: install_server
 
 - name: Check for postgres image presence
   shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
@@ -132,7 +121,6 @@
 - name: Ensure packages directory exists
   shell: mkdir -p "{{ pkg_install_dir }}"
   when:
-    - install_server
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
@@ -143,7 +131,6 @@
     mode: 0644
     timeout: 300
   when:
-    - install_server
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
@@ -151,7 +138,6 @@
   shell: docker load -i "{{qpc_server_local_path}}"
   become: true
   when:
-    - install_server
     - not quipucords_docker_image_present
 
 - name: Load postgres image into local Docker registry
@@ -163,22 +149,18 @@
 
 - name: Make server home directory
   shell: mkdir -p "{{server_install_dir}}"
-  when: install_server
 
 - name: Make server log directory
   shell: mkdir -p "{{server_install_dir}}/log"
-  when: install_server
 
 - name: Make server sshkeys directory
   shell: mkdir -p "{{server_install_dir}}/sshkeys"
-  when: install_server
 
 - name: Check for QPC server already running
   shell: docker ps -a -f name="{{ server_name }}" | grep "{{server_name}}"
   become: true
   register: qpc_ps_raw
   ignore_errors: yes
-  when: install_server
 
 - name: Remove running QPC server
   shell: docker rm -f "{{server_name}}"
@@ -192,7 +174,6 @@
   become: true
   register: postgres_ps_raw
   ignore_errors: yes
-  when: install_server
 
 - name: Remove running postgres server
   shell: docker rm -f qpc-db
