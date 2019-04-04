@@ -215,11 +215,11 @@
   when:
     - is_rhel_centos_6
 
-- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7, Fedora)
+- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
   become: true
   when:
-    - is_rhel_centos_7 or is_fedora
+    - is_rhel_centos_7
 
 - name: Waiting for Postgres to spin up
   pause:

@@ -34,7 +34,7 @@ Requirements and Assumptions
 ----------------------------
 Before installing quipucords on a system, review the following guidelines about installing and running quipucords:
 
- * quipucords is written to run on RHEL or Fedora servers.
+ * quipucords is written to run on RHEL or Centos servers.
  * The system that quipucords is installed on must have access to the systems to be discovered and inspected.
  * The target systems must be running SSH.
  * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain files, such as privilege escalation required for the ``systemctl`` command.
@@ -90,7 +90,7 @@ On Mac run the following command to set up a virtual environment::
 
 On Linux run the following command to set up a virtual environment::
 
-    sudo yum install python-tools (or dnf for Fedora)
+    sudo yum install python-tools
     pip3 install pipenv
     pipenv shell
     pip install -r dev-requirements.txt

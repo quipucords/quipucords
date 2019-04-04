@@ -28,53 +28,11 @@
     - qpc_repo_file is not defined
     - is_rhel_centos_6
 
-- name: Set qpc repo url (Fedora 27)
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-27/group_quipucords-qpc-fedora-27.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_fedora_27
-
-- name: Set qpc repo file (Fedora 27)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-27.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_fedora_27
-
-- name: Set qpc repo url for Fedora 28
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora-28.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_fedora_28
-
-- name: Set qpc repo file (Fedora 28)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-28.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_fedora_28
-
 - name: Set default qpc_version if CLI_PACKAGE_VERSION is not defined
   set_fact:
     qpc_version: "qpc"
   when:
     - CLI_PACKAGE_VERSION is not defined
-
-- name: Set qpc version (Fedora 27)
-  set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc27"
-  when:
-    - qpc_version is not defined
-    - is_fedora_27
-
-- name: Set qpc version (Fedora 28)
-  set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc28"
-  when:
-    - qpc_version is not defined
-    - is_fedora_28
 
 - name: Set qpc version (RHEL/CentOS 6)
   set_fact:
@@ -120,16 +78,6 @@
     state: present
   become: true
   when:
-    - not is_fedora
-    - find_qpc_rpm_local.stat.exists == false
-
-- name: Install the latest version (QPC Fedora)
-  dnf:
-    name: '{{ qpc_version }}'
-    state: present
-  become: true
-  when:
-    - is_fedora
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Configure QPC to talk to server
