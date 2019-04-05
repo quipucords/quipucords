@@ -174,7 +174,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 3. Build the Docker image::
 
-    docker -D build . -t quipucords:0.0.47
+    docker -D build . -t quipucords:1.0.0
 
   **NOTE:** The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
@@ -185,20 +185,20 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
        docker run --name qpc-db -e POSTGRES_PASSWORD=password -d postgres:9.6.10
        export QPC_VAR_DATA=$PWD/var/data
        mkdir -p $QPC_VAR_DATA
-       docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p 9443:443 -v $QPC_VAR_DATA:/var/data -i quipucords:0.0.47
+       docker run --name quipucords --link qpc-db:qpc-link -d -e QPC_DBMS_HOST=qpc-db -p 9443:443 -v $QPC_VAR_DATA:/var/data -i quipucords:1.0.0
 
    B. Run the Docker image with external Postgres container::
 
        ifconfig (get your computer's external IP if Postgres is local)
-       docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p 9443:443 -i quipucords:0.0.47
+       docker run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" -e"QPC_DBMS_HOST=EXTERNAL_IP" -p 9443:443 -i quipucords:1.0.0
 
    C. Run the Docker image with SQLite::
 
-       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quipucords:0.0.47
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quipucords:1.0.0
 
    D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory. Mapping the /app directory allows you to rapidly change server code without having to rebuild the container. Mapping the logs to /tmp allows you to tail a local copy without having to exec into the container.::
 
-       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:0.0.47
+       docker run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -v /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords:1.0.0
 
 5. Configure the CLI by using the following commands::
 
