@@ -16,6 +16,7 @@ from api.views import (CredentialViewSet,
                        ScanViewSet,
                        SourceViewSet,
                        UserViewSet,
+                       QUIPUCORDS_EXPIRING_AUTH_TOKEN_VIEW,
                        async_merge_reports,
                        deployments,
                        details,
@@ -64,7 +65,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('token/', views.obtain_auth_token)
+    path('token/', QUIPUCORDS_EXPIRING_AUTH_TOKEN_VIEW)
 ]
 
 urlpatterns += [

@@ -29,6 +29,7 @@ from api.serializers import (ScanJobSerializer,
 from api.signal.scanjob_signal import (cancel_scan,
                                        pause_scan,
                                        restart_scan)
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -37,8 +38,7 @@ from django.utils.translation import ugettext as _
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 
 from rest_framework import mixins, viewsets
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.decorators import detail_route
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
@@ -114,7 +114,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication,
+        authentication_classes = (QuipucordsExpiringTokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 

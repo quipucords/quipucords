@@ -17,6 +17,7 @@ from api.common.util import is_int
 from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.db import transaction
 from django.http import Http404
@@ -30,8 +31,7 @@ from django_filters.rest_framework import (CharFilter,
 from filters import mixins
 
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -101,7 +101,7 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication,
+        authentication_classes = (QuipucordsExpiringTokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 

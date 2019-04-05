@@ -21,6 +21,7 @@ from api.models import (Scan, ScanJob, ScanTask, Source)
 from api.scanjob.serializer import expand_scanjob
 from api.serializers import (ScanJobSerializer, ScanSerializer)
 from api.signal.scanjob_signal import (cancel_scan, start_scan)
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.db import transaction
 from django.db.models import Q
@@ -34,8 +35,7 @@ from django_filters.rest_framework import (CharFilter,
 
 
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.decorators import (api_view,
                                        authentication_classes,
                                        permission_classes)
@@ -79,7 +79,7 @@ JOB_VALID_STATUS = [ScanTask.CREATED,
 authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
 
 if authentication_enabled:
-    auth_classes = (TokenAuthentication,
+    auth_classes = (QuipucordsExpiringTokenAuthentication,
                     SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
@@ -189,7 +189,7 @@ class ScanViewSet(ModelViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication,
+        authentication_classes = (QuipucordsExpiringTokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 

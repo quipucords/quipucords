@@ -25,6 +25,7 @@ from api.models import (Scan,
 from api.serializers import SourceSerializer
 from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.db import transaction
 from django.http import Http404
@@ -36,8 +37,7 @@ from django_filters.rest_framework import (CharFilter,
                                            FilterSet)
 
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -118,7 +118,7 @@ class SourceViewSet(ModelViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication,
+        authentication_classes = (QuipucordsExpiringTokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
