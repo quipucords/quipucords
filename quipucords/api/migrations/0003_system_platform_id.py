@@ -19,7 +19,7 @@ def add_system_platform_id(apps, schema_editor):
     for report in DeploymentsReport.objects.all():
         cached_fingerprints = []
         insights_hosts = {}
-        if LooseVersion(report.report_version) < LooseVersion('0.0.47'):
+        if LooseVersion(report.report_version) < LooseVersion('1.0.0'):
             print('Migrating deployments report %s' % report.id)
             try:
                 for system_fingerprint in report.system_fingerprints.all():
