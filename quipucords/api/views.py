@@ -23,5 +23,6 @@ from api.merge_report.view import (async_merge_reports,
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
 from api.user.view import UserViewSet
+from api.user.token_view import QuipucordsExpiringAuthTokenView
 from api.status.view import status
 from api.reports.view import reports
