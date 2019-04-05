@@ -46,6 +46,9 @@ class UserViewSet(viewsets.GenericViewSet):
     @list_route(methods=['put'])
     def logout(self, request):  # pylint: disable=R0201
         """Log out the current authenticated user."""
+        authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+        if not authentication_enabled:
+            return Response()
         instance = request.user
         logout(request)
         token = Token.objects.filter(user=instance).first()
