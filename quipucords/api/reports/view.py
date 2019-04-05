@@ -22,13 +22,13 @@ from api.insights_report.view import build_cached_insights_json_report
 from api.models import DeploymentsReport, DetailsReport
 from api.reports.reports_gzip_renderer import (ReportsGzipRenderer)
 from api.serializers import DetailsReportSerializer
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.decorators import (api_view,
                                        authentication_classes,
                                        permission_classes,
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
 
 if authentication_enabled:
-    auth_classes = (TokenAuthentication,
+    auth_classes = (QuipucordsExpiringTokenAuthentication,
                     SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
