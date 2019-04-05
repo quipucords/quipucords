@@ -12,9 +12,10 @@
 """Expiring authorization token."""
 import datetime
 
-import pytz
 
 from django.conf import settings
+
+import pytz
 
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -29,7 +30,6 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
         """Create and retrieve token."""
-
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -51,4 +51,5 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
         return Response({'token': auth_token.key})
 
 
-QUIPUCORDS_EXPIRING_AUTH_TOKEN_VIEW = QuipucordsExpiringAuthToken.as_view()
+# pylint: disable=invalid-name
+QuipucordsExpiringAuthTokenView = QuipucordsExpiringAuthToken.as_view()

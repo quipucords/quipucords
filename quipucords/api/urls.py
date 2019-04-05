@@ -12,11 +12,11 @@
 
 from api.views import (CredentialViewSet,
                        DetailsReportsViewSet,
+                       QuipucordsExpiringAuthTokenView,
                        ScanJobViewSet,
                        ScanViewSet,
                        SourceViewSet,
                        UserViewSet,
-                       QUIPUCORDS_EXPIRING_AUTH_TOKEN_VIEW,
                        async_merge_reports,
                        deployments,
                        details,
@@ -28,7 +28,6 @@ from api.views import (CredentialViewSet,
 
 from django.urls import path
 
-from rest_framework.authtoken import views
 from rest_framework.routers import SimpleRouter
 
 ROUTER = SimpleRouter()
@@ -65,7 +64,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('token/', QUIPUCORDS_EXPIRING_AUTH_TOKEN_VIEW)
+    path('token/', QuipucordsExpiringAuthTokenView)
 ]
 
 urlpatterns += [

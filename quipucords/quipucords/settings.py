@@ -186,9 +186,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS':
         ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS,
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'api.user.authentication.QuipucordsExpiringTokenAuthentication',
-    )
+    'DEFAULT_AUTHENTICATION_CLASSES':
+        ('api.user.authentication.QuipucordsExpiringTokenAuthentication',)
 }
 
 # Database

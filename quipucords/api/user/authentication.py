@@ -11,19 +11,24 @@
 
 """Expiring token authorization."""
 
-import os
 import datetime
+import os
+
 from django.conf import settings
-from rest_framework.authentication import TokenAuthentication
+
 from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
 
 TOKEN_TTL_HOURS = getattr(settings, 'REST_FRAMEWORK_TOKEN_EXPIRE_HOURS', 24)
+
 
 class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
     """Expiring token authorization."""
 
     def authenticate_credentials(self, key):
-        authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+        """Authenticate token."""
+        authentication_enabled = os.getenv(
+            'QPC_DISABLE_AUTHENTICATION') != 'True'
         if not authentication_enabled:
             # skip this without authentication
             return None
