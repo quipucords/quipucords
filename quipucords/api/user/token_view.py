@@ -15,8 +15,6 @@ import datetime
 
 from django.conf import settings
 
-import pytz
-
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -37,7 +35,7 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
         user = serializer.validated_data['user']
         auth_token, created = Token.objects.get_or_create(user=user)
 
-        utc_now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+        utc_now = datetime.datetime.utcnow()
         valid_token_window = \
             utc_now - datetime.timedelta(hours=TOKEN_TTL_HOURS)
         if not created and \
