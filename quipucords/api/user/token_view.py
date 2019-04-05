@@ -20,9 +20,6 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 
 
-TOKEN_TTL_HOURS = getattr(settings, 'REST_FRAMEWORK_TOKEN_EXPIRE_HOURS', 24)
-
-
 class QuipucordsExpiringAuthToken(ObtainAuthToken):
     """Expiring token implementation."""
 
@@ -37,7 +34,7 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
 
         utc_now = datetime.datetime.utcnow()
         valid_token_window = \
-            utc_now - datetime.timedelta(hours=TOKEN_TTL_HOURS)
+            utc_now - datetime.timedelta(hours=settings.QPC_TOKEN_EXPIRE_HOURS)
         if not created and \
                 auth_token.created < valid_token_window:
             # refresh the token

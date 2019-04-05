@@ -19,8 +19,6 @@ from django.conf import settings
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 
-TOKEN_TTL_HOURS = getattr(settings, 'REST_FRAMEWORK_TOKEN_EXPIRE_HOURS', 24)
-
 
 class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
     """Expiring token authorization."""
@@ -42,7 +40,7 @@ class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
 
         utc_now = datetime.datetime.utcnow()
 
-        if token.created < utc_now - datetime.timedelta(hours=TOKEN_TTL_HOURS):
+        if token.created < utc_now - datetime.timedelta(hours=settings.QPC_TOKEN_EXPIRE_HOURS):
             raise exceptions.AuthenticationFailed('Token has expired')
 
         return (token.user, token)
