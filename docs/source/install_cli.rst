@@ -40,16 +40,16 @@ Install the QPC Package:
 
   - For Red Hat Enterprise Linux 7 or CentOS 7, enter the following command::
 
-      # yum -y install qpc-0.0.46-1.git.31.2c63673.el7
+      # yum -y install qpc-0.0.46-2.git.32.29f7529.el7
 
   - For Red Hat Enterprise Linux 6 or CentOS 6, enter the following command::
 
-      # yum -y install qpc-0.0.46-1.git.31.2c63673.el6
+      # yum -y install qpc-0.0.46-2.git.32.29f7529.el6
 
   - For Fedora 27, enter the following command::
 
-      # yum -y install qpc-0.0.46-1.git.31.2c63673.fc27
+      # yum -y install qpc-0.0.46-2.git.32.29f7529.fc27
 
   - For Fedora 28, enter the following command::
 
-      # yum -y install qpc-0.0.46-1.git.31.2c63673.fc28
+      # yum -y install qpc-0.0.46-2.git.32.29f7529.fc28
