@@ -58,10 +58,10 @@ The Quipucords server requires a Postgres Docker image.  You must build the Dock
 
 **Command Line Tool RPM Package:**
 
-- RHEL & Centos 6 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-1.git.31.2c63673.el6.noarch.rpm>`_)
-- RHEL & Centos 7 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-1.git.31.2c63673.el7.noarch.rpm>`_)
-- Fedora 27 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-1.git.31.2c63673.fc27.noarch.rpm>`_)
-- Fedora 28 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-1.git.31.2c63673.fc28.noarch.rpm>`_)
+- RHEL & Centos 6 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-2.git.32.29f7529.el6.noarch.rpm>`_)
+- RHEL & Centos 7 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-2.git.32.29f7529.el7.noarch.rpm>`_)
+- Fedora 27 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-2.git.32.29f7529.fc27.noarch.rpm>`_)
+- Fedora 28 (`Download <https://github.com/quipucords/qpc/releases/download/0.0.46/qpc-0.0.46-2.git.32.29f7529.fc28.noarch.rpm>`_)
 
 **Transfer Packages**
 
