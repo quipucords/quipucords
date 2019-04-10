@@ -127,6 +127,8 @@ To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and pr
 After logging in, you can change the password and also go to some of the browsable APIs such as http://127.0.0.1:8000/api/v1/credentials/.
 To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
 
+macOS Dependencies
+^^^^^^^^^^^^^^^^^^
 If you intend to run on Mac OS, there are several more steps that are required.
 
 - Increase the maxfile limit as described `here <https://github.com/ansible/ansible/issues/12259#issuecomment-173371493>`_.
@@ -136,6 +138,15 @@ If you intend to run on Mac OS, there are several more steps that are required.
   set the environment variable ``OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`` before starting the server.
   See the explanation for this step `here <https://github.com/ansible/ansible/issues/31869#issuecomment-337769174>`_.
 - Install gtimeout using ``brew install coreutils``
+- If installing dependencies fails involving openssl::
+
+    brew install openssl
+    pip uninstall pycurl
+    PYCURL_SSL_LIBRARY=openssl pip --no-cache-dir install --install-option="--with-openssl" --install-option="--openssl-dir=$(brew --prefix)/opt/openssl" pycurl
+
+    export LDFLAGS=-L/usr/local/opt/openssl/lib
+    export CPPFLAGS=-I/usr/local/opt/openssl/include
+    export PYCURL_SSL_LIBRARY=openssl
 
 Linting
 ^^^^^^^
