@@ -19,7 +19,6 @@ node('f28-os') {
         sh "which docker"
         sh "echo OPTIONS=\\'--log-driver=journald\\' > /tmp/docker.conf"
         sh "echo DOCKER_CERT_PATH=/etc/docker >> /tmp/docker.conf"
-        sh "echo INSECURE_REGISTRY=\\'--insecure-registry $DOCKER_REGISTRY\\' >> /tmp/docker.conf"
         sh "sudo cp /tmp/docker.conf /etc/sysconfig/docker"
         sh "cat /etc/sysconfig/docker"
         sh "sudo systemctl start docker"
@@ -51,12 +50,6 @@ node('f28-os') {
         def commitHash = readFile('GIT_COMMIT').trim()
 
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
-        sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/$image_name"
-        sh "sudo docker tag $image_name $DOCKER_REGISTRY/quipucords/quipucords:latest"
-        sh "sudo docker login -p $OPENSHIFT_TOKEN -u unused $DOCKER_REGISTRY"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/$image_name"
-        sh "sudo docker push $DOCKER_REGISTRY/quipucords/quipucords:latest"
-
         sh "sudo docker save -o $tarfile $image_name"
         sh "sudo chmod 755 $tarfile"
         sh "sudo gzip -f --best $tarfile"
