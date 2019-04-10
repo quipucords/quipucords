@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 Red Hat, Inc.
+# Copyright (c) 2017-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -23,13 +23,13 @@ from api.models import (DetailsReport,
 from api.serializers import (DetailsReportSerializer,
                              ScanJobSerializer)
 from api.signal.scanjob_signal import (start_scan)
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.decorators import (api_view,
                                        authentication_classes,
                                        permission_classes)
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
 
 if authentication_enabled:
-    auth_classes = (TokenAuthentication,
+    auth_classes = (QuipucordsExpiringTokenAuthentication,
                     SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:

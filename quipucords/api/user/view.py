@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -13,11 +13,12 @@
 import logging
 import os
 
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
+
 from django.contrib.auth import logout
 
 from rest_framework import viewsets
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAuthenticated
@@ -33,7 +34,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:
-        authentication_classes = (TokenAuthentication,
+        authentication_classes = (QuipucordsExpiringTokenAuthentication,
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
@@ -45,6 +46,10 @@ class UserViewSet(viewsets.GenericViewSet):
     @list_route(methods=['put'])
     def logout(self, request):  # pylint: disable=R0201
         """Log out the current authenticated user."""
+        authentication_enabled = os.getenv(
+            'QPC_DISABLE_AUTHENTICATION') != 'True'
+        if not authentication_enabled:
+            return Response()
         instance = request.user
         logout(request)
         token = Token.objects.filter(user=instance).first()

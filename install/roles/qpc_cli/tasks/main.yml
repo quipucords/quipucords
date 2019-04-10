@@ -1,15 +1,5 @@
 ---
 
-- name: Install CLI setting
-  set_fact:
-    install_cli: "{{ install_cli | bool | default(true) }}"
-  when: install_cli is defined
-
-- name: Defaulting CLI install setting
-  set_fact:
-    install_cli: true
-  when: install_cli is not defined
-
 - name: Set qpc repo url (RHEL/CentOS 7)
   set_fact:
     qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo') }}"
@@ -38,53 +28,11 @@
     - qpc_repo_file is not defined
     - is_rhel_centos_6
 
-- name: Set qpc repo url (Fedora 27)
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-27/group_quipucords-qpc-fedora-27.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_fedora_27
-
-- name: Set qpc repo file (Fedora 27)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-27.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_fedora_27
-
-- name: Set qpc repo url for Fedora 28
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/fedora-28/group_quipucords-qpc-fedora-28.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_fedora_28
-
-- name: Set qpc repo file (Fedora 28)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-fedora-28.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_fedora_28
-
 - name: Set default qpc_version if CLI_PACKAGE_VERSION is not defined
   set_fact:
     qpc_version: "qpc"
   when:
     - CLI_PACKAGE_VERSION is not defined
-
-- name: Set qpc version (Fedora 27)
-  set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc27"
-  when:
-    - qpc_version is not defined
-    - is_fedora_27
-
-- name: Set qpc version (Fedora 28)
-  set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.fc28"
-  when:
-    - qpc_version is not defined
-    - is_fedora_28
 
 - name: Set qpc version (RHEL/CentOS 6)
   set_fact:
@@ -103,15 +51,11 @@
 - name: set qpc_rpm_local_path
   set_fact:
     qpc_rpm_local_path: "{{ pkg_install_dir }}{{ qpc_version }}.noarch.rpm"
-  when:
-    - install_cli
 
 - name: Check if local qpc rpm exists
   stat:
     path: "{{ qpc_rpm_local_path }}"
   register: find_qpc_rpm_local
-  when:
-    - install_cli
 
 - name: Install QPC from local path
   shell: rpm -Uvh --force "{{qpc_rpm_local_path}}"
@@ -126,7 +70,6 @@
     force: yes
   become: true
   when:
-    - install_cli
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Install the latest version (QPC RHEL/Centos)
@@ -135,20 +78,9 @@
     state: present
   become: true
   when:
-    - not is_fedora
-    - install_cli
-    - find_qpc_rpm_local.stat.exists == false
-
-- name: Install the latest version (QPC Fedora)
-  dnf:
-    name: '{{ qpc_version }}'
-    state: present
-  become: true
-  when:
-    - is_fedora
-    - install_cli
     - find_qpc_rpm_local.stat.exists == false
 
 - name: Configure QPC to talk to server
   shell: qpc server config --host 127.0.0.1 --port "{{ server_port }}"
-  when: install_cli
+  when:
+    - install_server

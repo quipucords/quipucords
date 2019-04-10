@@ -13,10 +13,10 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-RELEASE_TAG='-e RELEASE_TAG=0.0.47'
+RELEASE_TAG='-e RELEASE_TAG=1.0.0'
 POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
 #TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
-#CLI_PACKAGE_VERSION="-e CLI_PACKAGE_VERSION=0.0.47-ACTUAL_COPR_GIT_COMMIT"
+#CLI_PACKAGE_VERSION="-e CLI_PACKAGE_VERSION=1.0.0-ACTUAL_COPR_GIT_COMMIT"
 
 
 declare -a args
@@ -80,12 +80,8 @@ if [ ! -f /etc/redhat-release ]; then
 fi
 
 if dnf --version > /dev/null 2>&1; then
-  PKG_MGR=dnf
-  if grep -q -i "27" /etc/redhat-release; then
-    rpm_version="fc27"
-  else
-    rpm_version="fc28"
-  fi
+  echo "Installation on Fedora not supported."
+  exit 1
 else
   PKG_MGR=yum
   if grep -q -i "release 7" /etc/redhat-release; then

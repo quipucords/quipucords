@@ -185,7 +185,9 @@ DEFAULT_PAGINATION_CLASS = 'api.common.pagination.StandardResultsSetPagination'
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS':
         ('django_filters.rest_framework.DjangoFilterBackend',),
-    'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS
+    'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS,
+    'DEFAULT_AUTHENTICATION_CLASSES':
+        ('api.user.authentication.QuipucordsExpiringTokenAuthentication',)
 }
 
 # Database
@@ -395,3 +397,7 @@ os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
 QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', 'True')
 if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
     QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == 'true'
+
+QPC_TOKEN_EXPIRE_HOURS = os.getenv('QPC_TOKEN_EXPIRE_HOURS', '24')
+if is_int(QPC_TOKEN_EXPIRE_HOURS):
+    QPC_TOKEN_EXPIRE_HOURS = int(QPC_TOKEN_EXPIRE_HOURS)
