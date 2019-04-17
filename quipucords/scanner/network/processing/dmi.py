@@ -12,6 +12,7 @@
 from scanner.network.processing import process
 
 
+# pylint: disable=too-few-public-methods
 class ProcessDmiSystemUuid(process.Processor):
     """Process the dmi system uuid."""
 
