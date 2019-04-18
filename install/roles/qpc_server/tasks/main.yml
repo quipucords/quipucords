@@ -10,13 +10,26 @@
     server_port: "{{ ansible_env['SERVER_PORT'] | default('9443') }}"
   when: server_port is not defined
 
+- name: Set open port
+  set_fact:
+    open_port: "{{ ansible_env['OPEN_PORT'] | bool | default(true) }}"
+  when: open_port is defined
+
+- name: Defaulting open port setting
+  set_fact:
+    open_port: true
+  when: open_port is not defined
+
 - name: open port in firewall
   iptables:
     chain: INPUT
     destination_port: "{{server_port}}"
     protocol: tcp
     jump: ACCEPT
+  become: true
   ignore_errors: yes
+  when:
+    - open_port
 
 - name: Determine if supervisord should be used
   set_fact:
