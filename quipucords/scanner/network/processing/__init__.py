@@ -24,3 +24,4 @@ from . import system_purpose
 from . import yum
 from . import virt
 from . import redhat_packages
+from . import dmi

@@ -207,7 +207,7 @@ class ScanSerializer(NotEmptySerializer):
 
     @staticmethod
     def _do_full_update(instance, validated_data):
-        """Peform full update of source."""
+        """Peform full update of scan."""
         # pylint: disable=no-self-use
         name = validated_data.pop('name', None)
         scan_type = validated_data.pop('scan_type', None)
@@ -248,7 +248,7 @@ class ScanSerializer(NotEmptySerializer):
 
     @staticmethod
     def _do_partial_update(instance, validated_data):
-        """Peform partial update of source."""
+        """Peform partial update of a scan."""
         # pylint: disable=too-many-branches,too-many-statements
         name = validated_data.pop('name', None)
         scan_type = validated_data.pop('scan_type', None)
@@ -288,6 +288,7 @@ class ScanSerializer(NotEmptySerializer):
                     options_instance.save()
 
             if not optional_products and not extended_search:
+                instance.save()
                 return instance
         # Update disable optional products
         if optional_products:
@@ -368,6 +369,7 @@ class ScanSerializer(NotEmptySerializer):
                             'search_directories', None)
                 extended_search_instance.save()
 
+        instance.save()
         return instance
 
     @staticmethod

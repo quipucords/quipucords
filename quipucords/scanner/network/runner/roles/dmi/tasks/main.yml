@@ -87,14 +87,12 @@
   become: yes
   when: 'user_has_sudo and internal_have_dmidecode'
 
-- name: extract result value for dmi.system-uuid
+- name: set internal_dmi_system_uuid fact
   set_fact:
-    dmi_system_uuid: "{{  internal_dmi_system_uuid_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+    internal_dmi_system_uuid: "{{ internal_dmi_system_uuid_cmd}}"
   ignore_errors: yes
-  when: '"stdout" in internal_dmi_system_uuid_cmd'
 
-- name: handle failure value for dmi.system-uuid
+- name: initialize dmi_system_uuid
   set_fact:
-    dmi_system_uuid: ""
+    dmi_system_uuid: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
-  when: '"stdout" not in internal_dmi_system_uuid_cmd'
