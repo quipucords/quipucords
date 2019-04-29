@@ -1,7 +1,7 @@
 ansible==2.7.10
 Django==2.2
 django-filter==2.1.0
-djangorestframework==3.9.2
+djangorestframework==3.9.3
 drf-generators==0.4.0
 drf-url-filters==0.5.1
 jmespath==0.9.4
