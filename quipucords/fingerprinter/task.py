@@ -1410,7 +1410,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(
                 'Fingerprinter (%s, %s) - '
                 'Could not parse date for %s. '
-                'Unsupported date format: \'%s\'. Error: %s' %
+                "Unsupported date format: '%s'. Error: %s" %
                 (source['source_type'],
                  source['source_name'],
                  raw_fact_key,
