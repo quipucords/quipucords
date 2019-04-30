@@ -47,7 +47,7 @@ usage() {
          -e install_server=false
     * Skipping install for CLI:
          -e install_cli=false
-    * Skipping opening the server port in the firewall (if not specified the default value is 'true'):
+    * Optionally open the server port in the firewall (defaults to true):
          -e open_port=false
     * Specify server port (defaults to 9443):
          -e server_port=8443
