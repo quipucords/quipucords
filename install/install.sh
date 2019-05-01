@@ -47,6 +47,8 @@ usage() {
          -e install_server=false
     * Skipping install for CLI:
          -e install_cli=false
+    * Optionally open the server port in the firewall (defaults to true):
+         -e open_port=false
     * Specify server port (defaults to 9443):
          -e server_port=8443
     * Specify server container name (defaults to quipucords):
