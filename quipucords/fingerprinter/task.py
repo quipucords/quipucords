@@ -332,8 +332,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             insights_message = 'Insights report id=%d created ' % \
                                deployment_report.report_id
             self.scan_task.log_message(insights_message)
-        deployment_report.cached_insights = json.dumps(
-            insights_hosts)
+        deployment_report.cached_insights = json.dumps(insights_hosts)
         deployment_report.save()
 
         return status_message, status

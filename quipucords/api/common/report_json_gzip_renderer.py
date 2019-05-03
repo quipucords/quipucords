@@ -29,11 +29,12 @@ class ReportJsonGzipRenderer(renderers.BaseRenderer):
     format = 'tar.gz'
     render_style = 'binary'
 
-    def render(self, report_dict, media_type=None, renderer_context=None):
+    def render(self,
+               data,
+               accepted_media_type=None,
+               renderer_context=None):
         """Render report as json gzip."""
-        # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        # pylint: disable=too-many-branches,too-many-statements
-
+        report_dict = data
         if not bool(report_dict):
             return None
 

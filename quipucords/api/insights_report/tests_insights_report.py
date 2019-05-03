@@ -14,7 +14,8 @@ import json
 import uuid
 from unittest.mock import patch
 
-from api.common.common_report import create_report_version
+from api.common.common_report import (create_filename,
+                                      create_report_version)
 from api.models import DeploymentsReport
 
 from django.core import management
@@ -63,24 +64,6 @@ class InsightsReportTest(TestCase):
             cached_insights=None,
             cached_fingerprints=json.dumps(self.fingerprints))
 
-    def test_get_insights_report_200_generate(self):
-        """Retrieve insights report."""
-        url = '/api/v1/reports/1/insights/'
-        expected_hosts = {
-            self.sys_platform_id: {
-                'system_platform_id': self.sys_platform_id,
-                'cpu_count': 2,
-                'cpu_core_per_socket': 1,
-                'cpu_socket_count': 2,
-                'cpu_core_count': 2,
-                'ip_addresses': ['1.2.3.4']}}
-
-        with patch('api.insights_report.view.get_object_or_404',
-                   return_value=self.deployments_report):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(expected_hosts, response.json().get('hosts'))
-
     def test_get_insights_report_200_exists(self):
         """Retrieve insights report."""
         url = '/api/v1/reports/1/insights/'
@@ -107,13 +90,18 @@ class InsightsReportTest(TestCase):
                  'virt_num_running_guests': 1,
                  'virt_what_type': 'vt',
                  'ip_addresses': ['4.3.2.1']}}
-        self.deployments_report.cached_insights = json.dumps(expected_hosts)
+        self.deployments_report.cached_insights = \
+            json.dumps(expected_hosts)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(expected_hosts, response.json().get('hosts'))
+        response_json = response.json()
+        self.assertIn(create_filename('metadata', 'json', 1),
+                      response_json.keys())
+        for key in response_json:
+            self.assertIn('report_id_1/', key)
 
     def test_get_insights_report_200_generate_exists(self):
         """Retrieve insights report."""
@@ -141,13 +129,19 @@ class InsightsReportTest(TestCase):
                  'virt_num_running_guests': 1,
                  'virt_what_type': 'vt',
                  'ip_addresses': ['4.3.2.1']}}
-        self.deployments_report.cached_insights = json.dumps(expected_hosts)
+        self.deployments_report.cached_insights = json.dumps(
+            expected_hosts)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(expected_hosts, response.json().get('hosts'))
+        response_json = response.json()
+
+        self.assertIn(create_filename('metadata', 'json', 1),
+                      response_json.keys())
+        for key in response_json:
+            self.assertIn('report_id_1/', key)
 
     def test_get_insights_report_404_no_canonical(self):
         """Retrieve insights report."""
@@ -183,70 +177,60 @@ class InsightsReportTest(TestCase):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_insights_report_404_missing_sys_id(self):
-        """Check that system fingerprints missing system platform id fail."""
+    def test_get_insights_report_404_missing(self):
+        """Check that legacy report without insights returns 404."""
         url = '/api/v1/reports/1/insights/'
-        fingerprints = \
-            [{'connection_host': '1.2.3.4',
-              'connection_port': 22,
-              'connection_uuid': self.connection_uuid,
-              'cpu_count': 2,
-              'cpu_core_per_socket': 1,
-              'cpu_siblings': 1,
-              'cpu_hyperthreading': False,
-              'cpu_socket_count': 2,
-              'cpu_core_count': 2,
-              'date_anaconda_log': '2017-07-18',
-              'date_yum_history': '2017-07-18',
-              'etc_release_name': '',
-              'etc_release_version': '',
-              'etc_release_release': '',
-              'uname_hostname': '1.2.3.4',
-              'virt_virt': 'virt-guest',
-              'virt_type': 'vmware',
-              'virt_num_guests': 1,
-              'virt_num_running_guests': 1,
-              'virt_what_type': 'vt',
-              'mac_addresses': ['1.2.3.4']},
-             {'connection_host': '1.2.3.4',
-              'connection_port': 22,
-              'connection_uuid': self.connection_uuid,
-              'cpu_count': 2,
-              'cpu_core_per_socket': 1,
-              'cpu_siblings': 1,
-              'cpu_hyperthreading': False,
-              'cpu_socket_count': 2,
-              'cpu_core_count': 2,
-              'date_anaconda_log': '2017-07-18',
-              'date_yum_history': '2017-07-18',
-              'etc_release_name': '',
-              'etc_release_version': '',
-              'etc_release_release': '',
-              'uname_hostname': '1.2.3.4',
-              'virt_virt': 'virt-guest',
-              'virt_type': 'vmware',
-              'virt_num_guests': 1,
-              'virt_num_running_guests': 1,
-              'virt_what_type': 'vt',
-              'mac_addresses': ['1.2.3.4'],
-              'system_platform_id': self.sys_platform_id}]
+        fingerprints = [{'connection_host': '1.2.3.4',
+                         'connection_port': 22,
+                         'connection_uuid': self.connection_uuid,
+                         'cpu_count': 2,
+                         'cpu_core_per_socket': 1,
+                         'cpu_siblings': 1,
+                         'cpu_hyperthreading': False,
+                         'cpu_socket_count': 2,
+                         'cpu_core_count': 2,
+                         'date_anaconda_log': '2017-07-18',
+                         'date_yum_history': '2017-07-18',
+                         'etc_release_name': '',
+                         'etc_release_version': '',
+                         'etc_release_release': '',
+                         'uname_hostname': '1.2.3.4',
+                         'virt_virt': 'virt-guest',
+                         'virt_type': 'vmware',
+                         'virt_num_guests': 1,
+                         'virt_num_running_guests': 1,
+                         'virt_what_type': 'vt',
+                         'mac_addresses': ['1.2.3.4']},
+                        {'connection_host': '1.2.3.4',
+                         'connection_port': 22,
+                         'connection_uuid': self.connection_uuid,
+                         'cpu_count': 2,
+                         'cpu_core_per_socket': 1,
+                         'cpu_siblings': 1,
+                         'cpu_hyperthreading': False,
+                         'cpu_socket_count': 2,
+                         'cpu_core_count': 2,
+                         'date_anaconda_log': '2017-07-18',
+                         'date_yum_history': '2017-07-18',
+                         'etc_release_name': '',
+                         'etc_release_version': '',
+                         'etc_release_release': '',
+                         'uname_hostname': '1.2.3.4',
+                         'virt_virt': 'virt-guest',
+                         'virt_type': 'vmware',
+                         'virt_num_guests': 1,
+                         'virt_num_running_guests': 1,
+                         'virt_what_type': 'vt',
+                         'mac_addresses': ['1.2.3.4'],
+                         'system_platform_id': self.sys_platform_id}]
 
-        expected_hosts = {
-            self.sys_platform_id:
-                {'system_platform_id': self.sys_platform_id,
-                 'cpu_count': 2,
-                 'cpu_core_per_socket': 1,
-                 'cpu_socket_count': 2,
-                 'cpu_core_count': 2,
-                 'mac_addresses': ['1.2.3.4']}}
         self.deployments_report.cached_insights = None
         self.deployments_report.cached_fingerprints = json.dumps(fingerprints)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(expected_hosts, response.json().get('hosts'))
+        self.assertEqual(response.status_code, 404)
 
     def test_get_insights_report_bad_id(self):
         """Fail to get a report for bad id."""

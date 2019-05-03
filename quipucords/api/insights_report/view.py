@@ -13,15 +13,19 @@
 import json
 import logging
 import os
+import uuid
 
 import api.messages as messages
-from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import CANONICAL_FACTS, INSIGHTS_FACTS, is_int
+from api.common.common_report import create_filename
+from api.common.util import is_int
+from api.insights_report.insights_gzip_renderer import (InsightsGzipRenderer)
 from api.models import (DeploymentsReport)
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+
+from quipucords import settings
 
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication)
@@ -30,10 +34,10 @@ from rest_framework.decorators import (api_view,
                                        permission_classes,
                                        renderer_classes)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import (BrowsableAPIRenderer,
-                                      JSONRenderer)
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
+
 
 # pylint: disable=invalid-name
 # Get an instance of a logger
@@ -52,8 +56,7 @@ else:
 @api_view(['GET'])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-@renderer_classes((JSONRenderer, BrowsableAPIRenderer,
-                   ReportJsonGzipRenderer))
+@renderer_classes((JSONRenderer, InsightsGzipRenderer))
 def insights(request, pk=None):
     """Lookup and return a insights system report."""
     if not is_int(pk):
@@ -68,96 +71,70 @@ def insights(request, pk=None):
             {'detail': 'Insights report %s could not be created. '
                        'See server logs.' % report.details_report.id},
             status=status.HTTP_424_FAILED_DEPENDENCY)
-    report_dict = build_cached_insights_json_report(report)
-    if report_dict.get('detail'):
-        return Response(report_dict, status=404)
-    return Response(report_dict)
-
-
-def verify_report_hosts(hosts):
-    """Verify that report hosts contain canonical facts.
-
-    :param hosts: dictionary of hosts to verify
-    returns: valid, invalid hosts
-    """
-    valid_hosts = []
-    invalid_hosts = []
-    missing_sys_platform_id = 0
-    for host in hosts:
-        found_facts = False
-        if host.get('system_platform_id'):
-            for fact in CANONICAL_FACTS:
-                if host.get(fact):
-                    found_facts = True
-                    break
-            if found_facts:
-                valid_hosts.append(host)
-            else:
-                invalid_hosts.append(host.get('system_platform_id'))
-        else:
-            missing_sys_platform_id += 1
-    message = '%d of %d hosts valid for Insights.' \
-              % (len(valid_hosts),
-                 len(valid_hosts) +
-                 missing_sys_platform_id + len(invalid_hosts))
-    logger.info(message)
-    if invalid_hosts:
-        logger.warning('The following hosts have no canonical '
-                       'facts and will be excluded from the Insights '
-                       'report: %s', str(invalid_hosts))
-    if missing_sys_platform_id > 0:
-        logger.error('%d hosts were missing the required '
-                     '"system_platform_id" field.',
-                     missing_sys_platform_id)
-    return valid_hosts
-
-
-def get_hosts_from_fp(report, host_dicts):
-    """Generate insights report format from the hosts.
-
-    :param report: the DeploymentsReport
-    :param host_dicts: the hosts for the report
-    :returns: json insights report format
-    """
-    valid_hosts = verify_report_hosts(host_dicts)
-    insights_hosts = {}
-    for host in valid_hosts:
-        insights_host = {}
-        for fact in INSIGHTS_FACTS:
-            if host.get(fact):
-                insights_host[fact] = host.get(fact)
-        host_id = host.get('system_platform_id', None)
-        if host_id:
-            insights_hosts[host_id] = insights_host
-    # save the insights format after generating
-    report.cached_insights = json.dumps(insights_hosts)
-    return insights_hosts
-
-
-def build_cached_insights_json_report(report):
-    """Create an insights report based on a deployments report.
-
-    :param report: DeploymentsReport that is used to create insights report
-    :returns: json report data
-    :raises: Raises failed dependencies if no hosts have canonical facts
-    """
     if report.cached_insights:
-        insights_hosts = json.loads(report.cached_insights)
-    else:
-        insights_hosts = get_hosts_from_fp(
-            report, json.loads(report.cached_fingerprints))
-    if not insights_hosts:
-        error_json = {
-            'detail': 'Insights report could not be generated because '
-                      'deployments report %s contained no hosts with '
-                      'canonical facts' % str(report.id)
-        }
-        return error_json
-    report_dict = {'report_id': report.id,
-                   'status': report.status,
-                   'report_type': 'insights',
-                   'report_version': report.report_version,
-                   'report_platform_id': str(report.report_platform_id),
-                   'hosts': insights_hosts}
+        return _create_report_slices(
+            report, json.loads(report.cached_insights))
 
-    return report_dict
+    error = {'detail':
+             'Insights report %s was not generated. Report version %s.'
+             'See server logs.' % (report.id,
+                                   report.report_version)}
+    return Response(error, status=404)
+
+
+def slice_it(host_key_list, hosts_per_slice):
+    """Create slices from host_key_list."""
+    for i in range(0, len(host_key_list), hosts_per_slice):
+        yield host_key_list[i:i + hosts_per_slice]
+
+
+def _create_report_slices(report, insights_hosts):
+    """Process facts and convert to fingerprints.
+
+    :param report: DeploymentReport used to create slices
+    :param insights_hosts: insights host JSON objects
+    :returns: list containing report meta-data and report slices
+    """
+    # pylint: disable=too-many-locals
+    slice_size_limit = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
+    host_keys = list(insights_hosts.keys())
+    number_hosts = len(host_keys)
+
+    if number_hosts % slice_size_limit:
+        number_of_slices = number_hosts // slice_size_limit + 1
+        hosts_per_slice = number_hosts // number_of_slices + 1
+    else:
+        number_of_slices = number_hosts // slice_size_limit
+        hosts_per_slice = number_hosts // number_of_slices
+
+    key_slices = list(slice_it(host_keys, hosts_per_slice))
+    insights_report_pieces = {}
+    metadata_report_slices = {}
+    metadata = {
+        'report_id': report.id,
+        'report_platform_id': str(report.report_platform_id),
+        'report_type': 'insights',
+        'report_version': report.report_version,
+        'report_slices': metadata_report_slices
+    }
+    insights_report_pieces[create_filename(
+        'metadata', 'json', report.id)] = metadata
+    for key_slice in key_slices:
+        hosts = {}
+        for key in key_slice:
+            host = insights_hosts.get(key)
+            if host:
+                hosts[key] = host
+        report_slice_id = str(uuid.uuid4())
+        report_slice_filename = create_filename(
+            report_slice_id, 'json', report.id)
+        metadata_report_slices[report_slice_id] = {
+            'number_hosts': len(key_slice)
+        }
+        report_slice = {
+            'report_slice_id': report_slice_id,
+            'report_platform_id': str(report.report_platform_id),
+            'hosts': hosts
+        }
+        insights_report_pieces[report_slice_filename] = report_slice
+    return Response(insights_report_pieces)
