@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018-2019 Red Hat, Inc.
+# Copyright (c) 2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -8,7 +8,7 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
-"""tar.gz renderer for reports."""
+"""tar.gz renderer for insights reports."""
 
 import logging
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class InsightsGzipRenderer(renderers.BaseRenderer):
-    """Class to render all reports as tar.gz."""
+    """Class to render insights reports as tar.gz."""
 
     # pylint: disable=too-few-public-methods
     media_type = 'application/gzip'
