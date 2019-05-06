@@ -955,6 +955,7 @@ paths:
       description: "Get insights report for systems that have been scanned"
       operationId: "getInsightsReport"
       produces:
+      - "application/gzip"
       - "application/json"
       parameters:
         - name: "report_id"
@@ -1505,29 +1506,58 @@ definitions:
             example: 65
   InsightsReport:
     properties:
-      report_id:
-        type: "integer"
-        format: "int64"
-        description: "The insights report identifier"
-        example: 1
-      report_type:
-        type: "string"
-        description: "The report type"
-        example: "insights"
-      report_version:
-        type: "string"
-        description: "The report version"
-        example: "1.0.0.afdsgev"
-      report_platform_id:
-        type: "string"
-        description: "Globally unique uuid for report"
-        example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
-      hosts:
+      metadata_tar_path:
         type: object
         properties:
-          system_platform_id:
-            $ref: "#/definitions/Host"
-        description: "The insights report for the systems that were scanned"
+          report_id:
+            type: "integer"
+            format: "int64"
+            description: "The insights report identifier"
+            example: 1
+          report_type:
+            type: "string"
+            description: "The report type"
+            example: "insights"
+          report_version:
+            type: "string"
+            description: "The report version"
+            example: "1.0.0.afdsgev"
+          report_platform_id:
+            type: "string"
+            description: "Globally unique uuid for report"
+            example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+          report_slices:
+            type: object
+            properties:
+              report_slice_id:
+                $ref: "#/definitions/InsightsReportSliceMetadata"
+            description: "Metadata for each report slice"
+        description: "Metadata describing report contents"
+      report_slice_tar_path:
+        type: object
+        properties:
+          report_slice_id:
+            type: "string"
+            description: "The Insights report slice identifier"
+            example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
+          report_platform_id:
+            type: "string"
+            description: "Globally unique uuid for report"
+            example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+          hosts:
+            type: object
+            properties:
+              system_platform_id:
+                $ref: "#/definitions/Host"
+            description: "The hosts that were scanned"  
+        description: "Slices of the Insights report"
+  InsightsReportSliceMetadata:
+    properties:
+      number_hosts:
+        type: "integer"
+        format: "int64"
+        description: "The number of hosts in this slice"
+        example: 116
   ListPagination:
     type: "object"
     required:
