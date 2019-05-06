@@ -1554,10 +1554,9 @@ definitions:
   InsightsReportSlice:
     properties:
       report_slice_id:
-        type: "integer"
-        format: "int64"
+        type: "string"
         description: "The Insights report slice identifier"
-        example: 1
+        example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
       report_platform_id:
         type: "string"
         description: "Globally unique uuid for report"
