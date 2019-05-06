@@ -76,10 +76,10 @@ def extract_tar_gz(file_like_obj):
     return file_data_list
 
 
-def create_filename(report_type, file_ext, report_id):
+def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
     file_name = 'report_id_%s/%s.%s' % (report_id,
-                                        report_type,
+                                        file_name,
                                         file_ext)
     return file_name
 

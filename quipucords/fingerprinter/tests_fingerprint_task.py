@@ -1143,8 +1143,9 @@ class EngineTest(TestCase):
 
             self.assertIn('success', status_message.lower())
             self.assertEqual(status, 'completed')
-            self.assertEqual(json.loads(deployments_report.cached_insights),
-                             expected_insights)
+            self.assertEqual(
+                json.loads(deployments_report.cached_insights),
+                expected_insights)
 
     def test_process_details_report_exception(self):
         """Test processing a details report with an exception."""
@@ -1167,4 +1168,5 @@ class EngineTest(TestCase):
                 self.assertIn('failed', status_message.lower())
                 self.assertEqual(status, 'failed')
                 self.assertEqual(
-                    json.dumps(deployments_report.cached_insights), '"{}"')
+                    json.dumps(
+                        deployments_report.cached_insights), '"{}"')

@@ -31,10 +31,13 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
     format = 'tar.gz'
     render_style = 'binary'
 
-    def render(self, reports_dict, media_type=None, renderer_context=None):
+    def render(self,
+               data,
+               accepted_media_type=None,
+               renderer_context=None):
         """Render all reports as gzip."""
-        # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-locals
+        reports_dict = data
         if not bool(reports_dict):
             return None
 
@@ -44,7 +47,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         # Collect Json Data
         details_json = reports_dict.get('details_json')
         deployments_json = reports_dict.get('deployments_json')
-        insights_json = reports_dict.get('insights_json')
         if any(value is None for value in [report_id,
                                            details_json,
                                            deployments_json]):
@@ -53,9 +55,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         files_data[details_name] = details_json
         deployments_name = create_filename('deployments', 'json', report_id)
         files_data[deployments_name] = deployments_json
-        if insights_json:
-            insights_name = create_filename('insights', 'json', report_id)
-            files_data[insights_name] = insights_json
+
         # Collect CSV Data
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)

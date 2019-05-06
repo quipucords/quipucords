@@ -23,9 +23,8 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
     format = 'csv'
 
     def render(self,
-               report_dict,
-               media_type=None,
+               data,
+               accepted_media_type=None,
                renderer_context=None):
         """Render report as CSV."""
-        # pylint: disable=arguments-differ,unused-argument,too-many-locals
-        return create_deployments_csv(report_dict)
+        return create_deployments_csv(data)
