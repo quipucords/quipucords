@@ -1506,43 +1506,51 @@ definitions:
             example: 65
   InsightsReport:
     properties:
-      metadata:
+      metadata_tar_path:
         type: object
         properties:
-          system_platform_id:
-            $ref: "#/definitions/InsightsReportMetadata"
+          report_id:
+            type: "integer"
+            format: "int64"
+            description: "The insights report identifier"
+            example: 1
+          report_type:
+            type: "string"
+            description: "The report type"
+            example: "insights"
+          report_version:
+            type: "string"
+            description: "The report version"
+            example: "1.0.0.afdsgev"
+          report_platform_id:
+            type: "string"
+            description: "Globally unique uuid for report"
+            example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+          report_slices:
+            type: object
+            properties:
+              system_platform_id:
+                $ref: "#/definitions/InsightsReportSliceMetadata"
+            description: "Metadata for each report slice"
         description: "Metadata describing report contents"
-      report_slice:
+      report_slice_tar_path:
         type: object
         properties:
-          system_platform_id:
-            $ref: "#/definitions/InsightsReportSlice"
+          report_slice_id:
+            type: "string"
+            description: "The Insights report slice identifier"
+            example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
+          report_platform_id:
+            type: "string"
+            description: "Globally unique uuid for report"
+            example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+          hosts:
+            type: object
+            properties:
+              system_platform_id:
+                $ref: "#/definitions/Host"
+            description: "The hosts that were scanned"  
         description: "Slices of the Insights report"
-  InsightsReportMetadata:
-    properties:
-      report_id:
-        type: "integer"
-        format: "int64"
-        description: "The insights report identifier"
-        example: 1
-      report_type:
-        type: "string"
-        description: "The report type"
-        example: "insights"
-      report_version:
-        type: "string"
-        description: "The report version"
-        example: "1.0.0.afdsgev"
-      report_platform_id:
-        type: "string"
-        description: "Globally unique uuid for report"
-        example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
-      report_slices:
-        type: object
-        properties:
-          system_platform_id:
-            $ref: "#/definitions/InsightsReportSliceMetadata"
-        description: "Metadata for each report slice"
   InsightsReportSliceMetadata:
     properties:
       number_hosts:
@@ -1550,23 +1558,6 @@ definitions:
         format: "int64"
         description: "The number of hosts in this slice"
         example: 116
-
-  InsightsReportSlice:
-    properties:
-      report_slice_id:
-        type: "string"
-        description: "The Insights report slice identifier"
-        example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
-      report_platform_id:
-        type: "string"
-        description: "Globally unique uuid for report"
-        example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
-      hosts:
-        type: object
-        properties:
-          system_platform_id:
-            $ref: "#/definitions/Host"
-        description: "The hosts that were scanned"  
   ListPagination:
     type: "object"
     required:
