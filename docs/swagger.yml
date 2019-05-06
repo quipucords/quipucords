@@ -1529,7 +1529,7 @@ definitions:
           report_slices:
             type: object
             properties:
-              system_platform_id:
+              report_slice_id:
                 $ref: "#/definitions/InsightsReportSliceMetadata"
             description: "Metadata for each report slice"
         description: "Metadata describing report contents"
