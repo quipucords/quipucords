@@ -121,6 +121,7 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param options: A dictionary containing the values for ssl_cert_verify,
         host, port, user, and password.
     :returns: The response object
+    :throws: Timeout
     """
     if options:
         ssl_verify = options.get('ssl_cert_verify')
@@ -137,6 +138,7 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     url = construct_url(url, host, port, org_id, host_id)
     connect_timeout = int(settings.QPC_SSH_CONNECT_TIMEOUT[:-1])
     inspect_timeout = int(settings.QPC_SSH_INSPECT_TIMEOUT[:-1])
+
     response = requests.get(url, auth=(user, password),
                             timeout=(connect_timeout, inspect_timeout),
                             params=query_params, verify=ssl_verify)

@@ -16,6 +16,7 @@ from multiprocessing import Pool
 from api.models import (ScanJob, SystemInspectionResult)
 
 import requests
+from requests.exceptions import Timeout
 
 from scanner.satellite import utils
 from scanner.satellite.api import (SatelliteCancelException,
@@ -340,8 +341,13 @@ def request_host_details(scan_task, logging_options,
         host_fields_json = host_fields_response.json()
         host_subscriptions_json = host_subscriptions_response.json()
     except SatelliteException as sat_error:
-        error_message = 'Satellite unknown 6v2 error encountered: %s\n' \
+        error_message = 'Satellite 6 unknown error encountered: %s\n' \
             % sat_error
+        logger.error(error_message)
+        system_inspection_result = SystemInspectionResult.FAILED
+    except Timeout as timeout_error:
+        error_message = 'Satellite 6 timeout error encountered: %s\n' \
+            % timeout_error
         logger.error(error_message)
         system_inspection_result = SystemInspectionResult.FAILED
     results['unique_name'] = unique_name
