@@ -16,14 +16,18 @@ import xmlrpc.client
 
 from api.vault import decrypt_data_as_unicode
 
+from quipucords import settings
+
 import requests
 
 from rest_framework import status as codes
+
 
 from scanner.satellite.api import (SATELLITE_VERSION_5,
                                    SATELLITE_VERSION_6,
                                    SatelliteAuthException,
                                    SatelliteException)
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -117,6 +121,7 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :param options: A dictionary containing the values for ssl_cert_verify,
         host, port, user, and password.
     :returns: The response object
+    :throws: Timeout
     """
     if options:
         ssl_verify = options.get('ssl_cert_verify')
@@ -131,7 +136,13 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
             ssl_verify = source_options.ssl_cert_verify
         host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
+
+    # Remove the 's' from the times (e.g. 60s becomes 60)
+    connect_timeout = int(settings.QPC_SSH_CONNECT_TIMEOUT[:-1])
+    inspect_timeout = int(settings.QPC_SSH_INSPECT_TIMEOUT[:-1])
+
     response = requests.get(url, auth=(user, password),
+                            timeout=(connect_timeout, inspect_timeout),
                             params=query_params, verify=ssl_verify)
     return response, url
 
