@@ -41,14 +41,31 @@
     use_supervisord: true
   when: use_supervisord is not defined
 
-- name: Set default server url
+- name: Set the default server version to install
   set_fact:
-    default_server_url: "https://github.com/quipucords/quipucords/releases/download/{{RELEASE_TAG}}/quipucords.{{RELEASE_TAG}}.tar.gz"
+    server_version: "{{ RELEASE_TAG }}"
+  when:
+    - version is not defined
 
-- name: Set server url
+- name: Set the server version to install
   set_fact:
-    server_url: "{{ ansible_env['SERVER_URL'] |  default(default_server_url)}}"
-  when: server_url is not defined
+    server_version: "{{ version }}"
+  when:
+    - version is defined
+
+- name: Set the default base URL for the quipucords server dockerfile
+  set_fact:
+    server_github_release_url: "https://github.com/quipucords/quipucords/releases/download/{{ server_version }}"
+  when:
+    - server_version is defined
+
+- name: Set default server container image download URL
+  set_fact:
+    quipucords_server_container_image_filename: "quipucords.{{ server_version }}.tar.gz"
+
+- name: Set default server container image download URL
+  set_fact:
+    quipucords_server_container_image_url: "{{ server_github_release_url }}/{{ quipucords_server_container_image_filename }}"
 
 - name: Set server image name
   set_fact:
@@ -57,7 +74,7 @@
 
 - name: Set server_image_and_tag
   set_fact:
-    server_image_and_tag: "{{image}}:{{RELEASE_TAG}}"
+    server_image_and_tag: "{{image}}:{{server_version}}"
   when: server_image_and_tag is not defined
 
 - name: Set server name
@@ -80,7 +97,7 @@
   when: selinux_on
 
 - name: Check for quipucords image presence
-  shell: docker images | grep "{{ image }}" | grep "{{ RELEASE_TAG }}"
+  shell: docker images | grep "{{ image }}" | grep "{{ server_version }}"
   become: true
   register: quipucords_docker_image_raw
   ignore_errors: yes
@@ -119,7 +136,7 @@
 
 - name: Set qpc_local_server_path
   set_fact:
-    qpc_server_local_path: "{{ pkg_install_dir }}quipucords.{{RELEASE_TAG}}.tar.gz"
+    qpc_server_local_path: "{{ pkg_install_dir }}{{ quipucords_server_container_image_filename }}"
   when: qpc_server_local_path is not defined
 
 - name: Set postgres_image_path
@@ -146,7 +163,7 @@
 
 - name: Obtain Quipucords server container image
   get_url:
-    url: "{{ server_url }}"
+    url: "{{ quipucords_server_container_image_url }}"
     dest: "{{ pkg_install_dir }}"
     mode: 0644
     timeout: 300

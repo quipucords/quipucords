@@ -15,14 +15,9 @@ export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
 RELEASE_TAG='-e RELEASE_TAG=1.0.0'
 POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
-#TODO: Uncomment CLI_PACKAGE_VERSION when cutting a release
-#CLI_PACKAGE_VERSION="-e CLI_PACKAGE_VERSION=1.0.0-ACTUAL_COPR_GIT_COMMIT"
-
 
 declare -a args
 args=("$*")
-#TODO: you will need to make sure that the package_version is in args
-#args+=("$RELEASE_TAG" "$POSTGRES_VERSION" "$CLI_PACKAGE_VERSION")
 args+=("$RELEASE_TAG" "$POSTGRES_VERSION")
 set -- ${args[@]}
 
@@ -39,6 +34,10 @@ usage() {
 
 
     Extra Variables:
+    * Specify the version of the quipucords server to install.   (defaults to the latest release):
+         -e version=0.0.46
+    * Specify the version of the qpc cli to install.   (defaults to the latest release):
+         -e cli_version=0.0.46
     * Specify if quipucords docker container should run the server without supervisord(defaults to true):
          -e use_supervisord=false
     * Specify fully-qualified directory path for local install packages (defaults to `pwd`/packages/):
@@ -115,7 +114,7 @@ offline_check() {
     fi
   done
   unset required_images
-  cli_rpm_path="$pkg_dir/qpc-$(cut -d'=' -f2 <<<"$CLI_PACKAGE_VERSION").$rpm_version.noarch.rpm"
+  cli_rpm_path="$pkg_dir/qpc.$rpm_version.noarch.rpm"
   if [ ! -f "$cli_rpm_path" ]; then
     echo "WARNING: $cli_rpm_path was not found, but could be configured through satellite."
   fi
