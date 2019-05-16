@@ -29,17 +29,24 @@
 
 - name: Set the default base URL for the qpc cli yum install
   set_fact:
-    cli_github_release_url: "https://github.com/quipucords/qpc/releases/download/{{ cli_version }}"
+    install_flag_cli_version: "{{ cli_version }}"
   when:
     - find_qpc_rpm_local.stat.exists == false
     - cli_version is defined
 
 - name: Set the default base URL for the qpc cli yum install
   set_fact:
+    cli_github_release_url: "https://github.com/quipucords/qpc/releases/download/{{ install_flag_cli_version }}"
+  when:
+    - find_qpc_rpm_local.stat.exists == false
+    - install_flag_cli_version is defined
+
+- name: Set the default base URL for the qpc cli yum install
+  set_fact:
     cli_github_release_url: "https://github.com/quipucords/qpc/releases/latest/download"
   when:
     - find_qpc_rpm_local.stat.exists == false
-    - cli_version is not defined
+    - install_flag_cli_version is not defined
 
 - name: Install the latest version (QPC RHEL/Centos)
   yum:

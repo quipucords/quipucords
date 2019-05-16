@@ -13,12 +13,11 @@
 
 export PATH=$PATH:$ANSIBLE_HOME/bin
 PLAYBOOKFILE="qpc_playbook.yml"
-RELEASE_TAG='-e RELEASE_TAG=1.0.0'
 POSTGRES_VERSION='-e POSTGRES_VERSION=9.6.10'
 
 declare -a args
 args=("$*")
-args+=("$RELEASE_TAG" "$POSTGRES_VERSION")
+args+=("$POSTGRES_VERSION")
 set -- ${args[@]}
 
 usage() {
@@ -35,7 +34,7 @@ usage() {
 
     Extra Variables:
     * Specify the version of the quipucords server to install.   (defaults to the latest release):
-         -e version=0.0.46
+         -e server_version=0.0.46
     * Specify the version of the qpc cli to install.   (defaults to the latest release):
          -e cli_version=0.0.46
     * Specify if quipucords docker container should run the server without supervisord(defaults to true):
@@ -103,7 +102,7 @@ offline_check() {
       pkg_dir="$(cut -d'=' -f2 <<<"$i")"
     fi
   done
-  server_image_path="$pkg_dir/quipucords.$(cut -d'=' -f2 <<<"$RELEASE_TAG").tar.gz"
+  server_image_path="$pkg_dir/quipucords_server_image.tar.gz"
   postgres_image_path="$pkg_dir/postgres.$(cut -d'=' -f2 <<<"$POSTGRES_VERSION").tar"
   declare -a required_images=($server_image_path $postgres_image_path)
   for i in "${required_images[@]}"; do

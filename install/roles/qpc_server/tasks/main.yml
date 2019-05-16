@@ -10,17 +10,17 @@
     server_port: "{{ ansible_env['SERVER_PORT'] | default('9443') }}"
   when: server_port is not defined
 
-- name: Set open port
+- name: Set whether installer should open port on host machine
   set_fact:
     open_port: "{{ ansible_env['OPEN_PORT'] | bool | default(true) }}"
   when: open_port is defined
 
-- name: Defaulting open port setting
+- name: Defaulting open port setting to true
   set_fact:
     open_port: true
   when: open_port is not defined
 
-- name: open port in firewall
+- name: Open port in firewall on host machine for Quipucords server
   iptables:
     chain: INPUT
     destination_port: "{{server_port}}"
@@ -31,58 +31,89 @@
   when:
     - open_port
 
-- name: Determine if supervisord should be used
+- name: Determine if supervisord should be used inside of Docker container
   set_fact:
     use_supervisord: "{{ use_supervisord | bool | default(true) }}"
   when: use_supervisord is defined
 
-- name: Defaulting server install setting
+- name: Defaulting server supervisord setting to true
   set_fact:
     use_supervisord: true
   when: use_supervisord is not defined
 
-- name: Set the default server version to install
+- name: Set the server version to install using user argument
   set_fact:
-    server_version: "{{ RELEASE_TAG }}"
-  when:
-    - version is not defined
-
-- name: Set the server version to install
-  set_fact:
-    server_version: "{{ version }}"
-  when:
-    - version is defined
-
-- name: Set the default base URL for the quipucords server dockerfile
-  set_fact:
-    server_github_release_url: "https://github.com/quipucords/quipucords/releases/download/{{ server_version }}"
+    install_flag_server_version: "{{ server_version }}"
   when:
     - server_version is defined
 
-- name: Set default server container image download URL
+- name: Set the server docker image tag to user specified version
   set_fact:
-    quipucords_server_container_image_filename: "quipucords.{{ server_version }}.tar.gz"
+    server_image_tag: "{{ install_flag_server_version }}"
+  when:
+    - install_flag_server_version is defined
 
-- name: Set default server container image download URL
+- name: Default the server docker tag to unknown
   set_fact:
-    quipucords_server_container_image_url: "{{ server_github_release_url }}/{{ quipucords_server_container_image_filename }}"
+    server_image_tag: "unknown"
+  when:
+    - install_flag_server_version is not defined
 
-- name: Set server image name
-  set_fact:
-    image: "{{ ansible_env['SERVER_IMAGE'] | default('quipucords') }}"
-  when: image is not defined
+- name: Query GitHub for the latest release information
+  uri:
+    url: https://api.github.com/repos/quipucords/quipucords/releases/latest
+    validate_certs: no
+    return_content: yes
+    headers:
+      Content-Type: "application/json"
+    body_format: json
+  retries: 5
+  delay: 5
+  register: github_release_info
+  until: github_release_info.status == 200 or github_release_info.status == 401
+  changed_when: false
+  when:
+    - install_flag_server_version is not defined
 
-- name: Set server_image_and_tag
+- name: Parse release tag from github JSON
+  set_fact: 
+    github_release: "{{ github_release_info.json.tag_name }}"
+  when: 
+    - install_flag_server_version is not defined
+    - github_release_info is defined
+    - github_release_info.json is defined
+    - github_release_info.json.tag_name is defined
+
+- name: Override default server_image_tag value with release value
   set_fact:
-    server_image_and_tag: "{{image}}:{{server_version}}"
+    server_image_tag: "{{ github_release }}"
+  when:
+    - install_flag_server_version is not defined
+    - github_release is defined
+
+- name: Set the quipucords release server image file name
+  set_fact:
+    github_server_filename: "quipucords_server_image.tar.gz"
+
+- name: Set the quipucords release server image file name
+  set_fact:
+    release_cache_server_filename: "quipucords.{{ server_image_tag }}.tar.gz"
+
+- name: Set server docker image name
+  set_fact:
+    server_docker_image_name: "quipucords"
+
+- name: Set Quipucords docker image and tag
+  set_fact:
+    server_image_and_tag: "{{server_docker_image_name}}:{{server_image_tag}}"
   when: server_image_and_tag is not defined
 
-- name: Set server name
+- name: Set docker container name
   set_fact:
     server_name: "{{ ansible_env['SERVER_NAME'] | default('quipucords') }}"
   when: server_name is not defined
 
-- name: Set server timeout
+- name: Set Quipucords HTTP server timeout
   set_fact:
     QPC_SERVER_TIMEOUT: "{{ ansible_env['QPC_SERVER_TIMEOUT'] | default('120') }}"
   when: QPC_SERVER_TIMEOUT is not defined
@@ -96,77 +127,107 @@
     dir_mount_selinux: ":z"
   when: selinux_on
 
-- name: Check for quipucords image presence
-  shell: docker images | grep "{{ image }}" | grep "{{ server_version }}"
+- name: Check for quipucords server docker image presence
+  shell: docker images | grep "{{ server_docker_image_name }}" | grep "{{ server_image_tag }}"
   become: true
   register: quipucords_docker_image_raw
   ignore_errors: yes
 
-- name: Check for postgres image presence
+- name: Check for postgres docker image presence
   shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
   become: true
   register: postgres_docker_image_raw
   ignore_errors: yes
 
-- name: Set quipucords_docker_image_present false
+- name: Set Quipucords docker image presence to false
   set_fact:
     quipucords_docker_image_present: false
   when:
     - quipucords_docker_image_raw.rc != 0
 
-- name: Set postgres_docker_image_present false
+- name: Set Postgres docker image presence to false
   set_fact:
     postgres_docker_image_present: false
   when:
     - postgres_docker_image_raw.rc != 0
 
-- name: Set quipucords_docker_image_present true
+- name: Set Quipucords docker image presence to true if output is not empty
   set_fact:
     quipucords_docker_image_present: "{{ quipucords_docker_image_raw['stdout_lines']|length > 0 }}"
   when:
+    - server_image_tag != 'unknown'
     - quipucords_docker_image_raw.rc == 0
     - "'stdout_lines' in quipucords_docker_image_raw"
 
-- name: Set postgres_docker_image_present true
+- name: Set Postgres docker image presence to true if output is not empty
   set_fact:
     postgres_docker_image_present: "{{ postgres_docker_image_raw['stdout_lines']|length > 0 }}"
   when:
     - postgres_docker_image_raw.rc == 0
     - "'stdout_lines' in postgres_docker_image_raw"
 
-- name: Set qpc_local_server_path
+- name: Set path to local Quipucords docker image tar.gz
   set_fact:
-    qpc_server_local_path: "{{ pkg_install_dir }}{{ quipucords_server_container_image_filename }}"
+    qpc_server_local_path: "{{ pkg_install_dir }}{{ release_cache_server_filename }}"
   when: qpc_server_local_path is not defined
 
-- name: Set postgres_image_path
+- name: Set path to local Postgres docker image tar
   set_fact:
     postgres_image_local_path: "{{ pkg_install_dir }}postgres.{{POSTGRES_VERSION}}.tar"
   when:
     - postgres_image_local_path is not defined
 
-- name: Check if local server release exists
+- name: Check if local server docker image tar.gz exists
   stat:
     path: "{{qpc_server_local_path}}"
   register: find_qpc_server_local
 
-- name: Check if postgres image exists
+- name: Check if local Postgres docker image tar exists
   stat:
     path: "{{postgres_image_local_path}}"
   register: find_postgres_local_image
 
-- name: Ensure packages directory exists
+- name: Create local packages directory if it does not exist
   shell: mkdir -p "{{ pkg_install_dir }}"
   when:
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
-- name: Obtain Quipucords server container image
+- name: Set the version specific GitHub base URL for the quipucords server image tar.gz
+  set_fact:
+    server_github_release_url: "https://github.com/quipucords/quipucords/releases/download/{{ install_flag_server_version }}"
+  when:
+    - find_qpc_server_local.stat.exists == false
+    - not quipucords_docker_image_present
+    - install_flag_server_version is defined
+
+- name: Set the default GitHub base URL for the quipucords server image tar.gz
+  set_fact:
+    server_github_release_url: "https://github.com/quipucords/quipucords/releases/latest/download"
+  when:
+    - find_qpc_server_local.stat.exists == false
+    - not quipucords_docker_image_present
+    - install_flag_server_version is not defined
+
+- name: Set server container image tar.gz download URL
+  set_fact:
+    quipucords_server_container_image_url: "{{ server_github_release_url }}/{{ github_server_filename }}"
+  when:
+    - find_qpc_server_local.stat.exists == false
+    - not quipucords_docker_image_present
+
+- name: Obtain Quipucords server container image from GitHub
   get_url:
     url: "{{ quipucords_server_container_image_url }}"
     dest: "{{ pkg_install_dir }}"
     mode: 0644
     timeout: 300
+  when:
+    - find_qpc_server_local.stat.exists == false
+    - not quipucords_docker_image_present
+
+- name: Rename quipucords server docker image to version specific cache name
+  command: mv "{{ pkg_install_dir }}{{ github_server_filename }}" "{{qpc_server_local_path}}"
   when:
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
@@ -177,7 +238,7 @@
   when:
     - not quipucords_docker_image_present
 
-- name: Load postgres image into local Docker registry
+- name: Load Postgres image into local Docker registry
   shell: docker load -i "{{postgres_image_local_path}}"
   become: true
   when:
@@ -193,13 +254,13 @@
 - name: Make server sshkeys directory
   shell: mkdir -p "{{server_install_dir}}/sshkeys"
 
-- name: Check for QPC server already running
+- name: Check for QPC server is already running
   shell: docker ps -a -f name="{{ server_name }}" | grep "{{server_name}}"
   become: true
   register: qpc_ps_raw
   ignore_errors: yes
 
-- name: Remove running QPC server
+- name: Remove running QPC server container
   shell: docker rm -f "{{server_name}}"
   become: true
   ignore_errors: yes
@@ -212,47 +273,47 @@
   register: postgres_ps_raw
   ignore_errors: yes
 
-- name: Remove running postgres server
+- name: Remove running postgres server container
   shell: docker rm -f qpc-db
   become: true
   ignore_errors: yes
   when:
     - postgres_ps_raw['stdout_lines'] | length > 0
 
-- name: Set QPC_DBMS_USER
+- name: Set Postgres username
   set_fact:
     QPC_DBMS_USER: "{{ ansible_env['QPC_DBMS_USER'] | default('postgres') }}"
   when:
     - QPC_DBMS_USER is not defined
 
-- name: Set QPC_DBMS_PASSWORD
+- name: Set Postgres password
   set_fact:
     QPC_DBMS_PASSWORD: "{{ ansible_env['QPC_DBMS_PASSWORD'] | default('password') }}"
   when:
     - QPC_DBMS_PASSWORD is not defined
 
-- name: Set NETWORK_INSPECT_JOB_TIMEOUT
+- name: Set Quipucords Ansible SSH timeout for network inspection jobs
   set_fact:
     NETWORK_INSPECT_JOB_TIMEOUT: "{{ ansible_env['NETWORK_INSPECT_JOB_TIMEOUT'] | default('10800') }}"
   when: NETWORK_INSPECT_JOB_TIMEOUT is not defined
 
-- name: Set NETWORK_CONNECT_JOB_TIMEOUT
+- name: Set Quipucords Ansible SSH timeout for network connection
   set_fact:
     NETWORK_CONNECT_JOB_TIMEOUT: "{{ ansible_env['NETWORK_CONNECT_JOB_TIMEOUT'] | default('600') }}"
   when: NETWORK_CONNECT_JOB_TIMEOUT is not defined
 
-- name: Set ANSIBLE_LOG_LEVEL
+- name: Set Ansible logging verbosity 
   set_fact:
     ANSIBLE_LOG_LEVEL: "{{ ansible_env['ANSIBLE_LOG_LEVEL'] | default('0') }}"
   when: ANSIBLE_LOG_LEVEL is not defined
 
-- name: Create internal Postgres container & docker volume (RHEL 6 & Centos 6)
+- name: Start Postgres container with docker volume (RHEL 6 & Centos 6)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v /var/lib/docker/volumes/qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
   become: true
   when:
     - is_rhel_centos_6
 
-- name: Create internal Postgres container & docker volume (RHEL 7, Centos 7)
+- name: Start Postgres container with docker volume (RHEL 7, Centos 7)
   shell: docker run --name qpc-db  -e POSTGRES_USER="{{QPC_DBMS_USER}}" -e POSTGRES_PASSWORD="{{QPC_DBMS_PASSWORD}}" -v qpc-data:/var/lib/postgresql/data -d postgres:"{{POSTGRES_VERSION}}"
   become: true
   when:
@@ -262,6 +323,6 @@
   pause:
     seconds: 30
 
-- name: Start QPC server using linked Postgres Docker container
+- name: Start Quipucords server linked to Postgres Docker container
   shell: docker run --name "{{ server_name }}" --link qpc-db:qpc-link -d -e USE_SUPERVISORD="{{ use_supervisord }}" -e QPC_SERVER_TIMEOUT="{{ QPC_SERVER_TIMEOUT }}" -e QPC_DBMS_USER="{{ QPC_DBMS_USER }}" -e QPC_DBMS_PASSWORD="{{ QPC_DBMS_PASSWORD }}" -e QPC_DBMS_HOST="qpc-db" -e ANSIBLE_LOG_LEVEL="{{ ANSIBLE_LOG_LEVEL }}" -e NETWORK_CONNECT_JOB_TIMEOUT="{{ NETWORK_CONNECT_JOB_TIMEOUT }}" -e NETWORK_INSPECT_JOB_TIMEOUT="{{ NETWORK_INSPECT_JOB_TIMEOUT }}" -p "{{ server_port }}":443 -v "{{ server_install_dir }}"/sshkeys:/sshkeys"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/data:/var/data"{{ dir_mount_selinux }}" -v "{{ server_install_dir }}"/log:/var/log"{{ dir_mount_selinux }}" -i "{{ server_image_and_tag }}"
   become: true
