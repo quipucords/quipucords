@@ -1,5 +1,10 @@
 ---
 
+- name: Checking if server_version is defined when install_offline is true
+  fail:
+  when:
+    - install_offline is defined and server_version is not defined
+
 - name: Set operating system information
   set_fact:
     is_rhel_centos_6: "{{ ((ansible_distribution == 'RedHat') or (ansible_distribution == 'CentOS')) and (ansible_distribution_major_version == '6') }}"

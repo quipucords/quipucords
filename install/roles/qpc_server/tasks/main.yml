@@ -177,6 +177,13 @@
   when:
     - postgres_image_local_path is not defined
 
+- name: Rename quipucords server docker image to version specific cache name (offline install)
+  command: cp -f "{{ pkg_install_dir }}{{ github_server_filename }}" "{{qpc_server_local_path}}"
+  when:
+    - install_offline is defined
+    - install_offline == 'true'
+    - not quipucords_docker_image_present
+
 - name: Check if local server docker image tar.gz exists
   stat:
     path: "{{qpc_server_local_path}}"
@@ -232,6 +239,26 @@
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
+- name: Default that docker load was not attempted for quipucords server
+  set_fact: 
+    load_quipucords_docker_server_attempted: false
+
+- name: Default that docker load was not attempted for postgres
+  set_fact: 
+    load_docker_postgres_attempted: false
+
+- name: Docker load was attempted for quipucords server
+  set_fact: 
+    load_quipucords_docker_server_attempted: true
+  when: 
+    - not quipucords_docker_image_present
+
+- name: Docker load was attempted for postgres
+  set_fact: 
+    load_docker_postgres_attempted: true
+  when:
+    - not postgres_docker_image_present
+
 - name: Load Quipucords image into local Docker registry
   shell: docker load -i "{{qpc_server_local_path}}"
   become: true
@@ -244,6 +271,65 @@
   when:
     - not postgres_docker_image_present
     - find_postgres_local_image.stat.exists == true
+
+- name: Check for quipucords server docker image presence
+  shell: docker images | grep "{{ server_docker_image_name }}" | grep "{{ server_image_tag }}"
+  become: true
+  register: quipucords_docker_image_raw
+  ignore_errors: yes
+  when:
+    load_quipucords_docker_server_attempted
+
+- name: Check for postgres docker image presence
+  shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
+  become: true
+  register: postgres_docker_image_raw
+  ignore_errors: yes
+  when:
+    load_docker_postgres_attempted
+
+- name: Set Quipucords docker image presence to false
+  set_fact:
+    quipucords_docker_image_present: false
+  when:
+    - load_quipucords_docker_server_attempted
+    - quipucords_docker_image_raw.rc != 0
+
+- name: Set Postgres docker image presence to false
+  set_fact:
+    postgres_docker_image_present: false
+  when:
+    - load_docker_postgres_attempted
+    - postgres_docker_image_raw.rc != 0
+
+- name: Set Quipucords docker image presence to true if output is not empty
+  set_fact:
+    quipucords_docker_image_present: "{{ quipucords_docker_image_raw['stdout_lines']|length > 0 }}"
+  when:
+    - load_quipucords_docker_server_attempted
+    - server_image_tag != 'unknown'
+    - quipucords_docker_image_raw.rc == 0
+    - "'stdout_lines' in quipucords_docker_image_raw"
+
+- name: Set Postgres docker image presence to true if output is not empty
+  set_fact:
+    postgres_docker_image_present: "{{ postgres_docker_image_raw['stdout_lines']|length > 0 }}"
+  when:
+    - load_docker_postgres_attempted
+    - postgres_docker_image_raw.rc == 0
+    - "'stdout_lines' in postgres_docker_image_raw"
+
+- name: Make sure Quipucords server docker image loaded (it successfully loaded if skipped)
+  fail:
+  when:
+    - load_quipucords_docker_server_attempted
+    - not quipucords_docker_image_present
+
+- name: Make sure Postgres docker image loaded (it successfully loaded if skipped)
+  fail:
+  when:
+    - load_docker_postgres_attempted
+    - not postgres_docker_image_present
 
 - name: Make server home directory
   shell: mkdir -p "{{server_install_dir}}"
