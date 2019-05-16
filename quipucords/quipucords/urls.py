@@ -46,6 +46,12 @@ urlpatterns = [
             TemplateView.as_view(template_name='client/index.html'),
             name='client'),
 
+    # docs files
+    re_path(
+        r'^client/docs(/|)(index.html|)$',
+        RedirectView.as_view(url='/client/docs/index.html', permanent=False),
+        name='docs'),
+
     # static files (*.css, *.js, *.jpg etc.)
     re_path(r'^(?!/?client/)(?P<path>.*\..*)$',
             RedirectView.as_view(url='/client/%(path)s', permanent=False),
