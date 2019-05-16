@@ -91,11 +91,11 @@
     - install_flag_server_version is not defined
     - github_release is defined
 
-- name: Set the quipucords release server image file name
+- name: Set the Quipucords release server image file name
   set_fact:
     github_server_filename: "quipucords_server_image.tar.gz"
 
-- name: Set the quipucords release server image file name
+- name: Set the Quipucords release server image file name
   set_fact:
     release_cache_server_filename: "quipucords.{{ server_image_tag }}.tar.gz"
 
@@ -127,13 +127,13 @@
     dir_mount_selinux: ":z"
   when: selinux_on
 
-- name: Check for quipucords server docker image presence
+- name: Check for Quipucords server docker image presence
   shell: docker images | grep "{{ server_docker_image_name }}" | grep "{{ server_image_tag }}"
   become: true
   register: quipucords_docker_image_raw
   ignore_errors: yes
 
-- name: Check for postgres docker image presence
+- name: Check for Postgres docker image presence
   shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
   become: true
   register: postgres_docker_image_raw
@@ -177,7 +177,7 @@
   when:
     - postgres_image_local_path is not defined
 
-- name: Rename quipucords server docker image to version specific cache name (offline install)
+- name: Rename Quipucords server docker image to version specific cache name (offline install)
   command: cp -f "{{ pkg_install_dir }}{{ github_server_filename }}" "{{qpc_server_local_path}}"
   when:
     - install_offline is defined
@@ -200,7 +200,7 @@
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
-- name: Set the version specific GitHub base URL for the quipucords server image tar.gz
+- name: Set the version specific GitHub base URL for the Quipucords server image tar.gz
   set_fact:
     server_github_release_url: "https://github.com/quipucords/quipucords/releases/download/{{ install_flag_server_version }}"
   when:
@@ -208,7 +208,7 @@
     - not quipucords_docker_image_present
     - install_flag_server_version is defined
 
-- name: Set the default GitHub base URL for the quipucords server image tar.gz
+- name: Set the default GitHub base URL for the Quipucords server image tar.gz
   set_fact:
     server_github_release_url: "https://github.com/quipucords/quipucords/releases/latest/download"
   when:
@@ -233,27 +233,27 @@
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
-- name: Rename quipucords server docker image to version specific cache name
+- name: Rename Quipucords server docker image to version specific cache name
   command: mv "{{ pkg_install_dir }}{{ github_server_filename }}" "{{qpc_server_local_path}}"
   when:
     - find_qpc_server_local.stat.exists == false
     - not quipucords_docker_image_present
 
-- name: Default that docker load was not attempted for quipucords server
+- name: Default that docker load was not attempted for Quipucords server
   set_fact: 
     load_quipucords_docker_server_attempted: false
 
-- name: Default that docker load was not attempted for postgres
+- name: Default that docker load was not attempted for Postgres
   set_fact: 
     load_docker_postgres_attempted: false
 
-- name: Docker load was attempted for quipucords server
+- name: Docker load was attempted for Quipucords server
   set_fact: 
     load_quipucords_docker_server_attempted: true
   when: 
     - not quipucords_docker_image_present
 
-- name: Docker load was attempted for postgres
+- name: Docker load was attempted for Postgres
   set_fact: 
     load_docker_postgres_attempted: true
   when:
@@ -272,7 +272,7 @@
     - not postgres_docker_image_present
     - find_postgres_local_image.stat.exists == true
 
-- name: Check for quipucords server docker image presence
+- name: Check for Quipucords server docker image presence
   shell: docker images | grep "{{ server_docker_image_name }}" | grep "{{ server_image_tag }}"
   become: true
   register: quipucords_docker_image_raw
@@ -280,7 +280,7 @@
   when:
     load_quipucords_docker_server_attempted
 
-- name: Check for postgres docker image presence
+- name: Check for Postgres docker image presence
   shell: docker images | grep postgres | grep "{{ POSTGRES_VERSION }}"
   become: true
   register: postgres_docker_image_raw
@@ -353,13 +353,13 @@
   when:
     - qpc_ps_raw['stdout_lines'] | length > 0
 
-- name: Check if postgres server already running
+- name: Check if Postgres server already running
   shell: docker ps -a -f name="qpc-db" | grep "qpc-db"
   become: true
   register: postgres_ps_raw
   ignore_errors: yes
 
-- name: Remove running postgres server container
+- name: Remove running Postgres server container
   shell: docker rm -f qpc-db
   become: true
   ignore_errors: yes

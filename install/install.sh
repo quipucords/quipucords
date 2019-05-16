@@ -33,9 +33,9 @@ usage() {
 
 
     Extra Variables:
-    * Specify the version of the quipucords server to install.   (defaults to the latest release):
+    * Specify the version of the quipucords server to install (defaults to the latest release):
          -e server_version=0.0.46
-    * Specify the version of the qpc cli to install.   (defaults to the latest release):
+    * Specify the version of the qpc cli to install (defaults to the latest release):
          -e cli_version=0.0.46
     * Specify if quipucords docker container should run the server without supervisord(defaults to true):
          -e use_supervisord=false
