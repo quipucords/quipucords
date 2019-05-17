@@ -1,56 +1,21 @@
 ---
 
-- name: Set qpc repo url (RHEL/CentOS 7)
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-7/group_quipucords-qpc-epel-7.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_rhel_centos_7
-
-- name: Set qpc repo file (RHEL/CentOS 7)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-epel-7.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_rhel_centos_7
-
-- name: Set qpc repo url (RHEL/CentOS 6)
-  set_fact:
-    qpc_repo_url: "{{ ansible_env['QPC_URL'] | default('https://copr.fedorainfracloud.org/coprs/g/quipucords/qpc/repo/epel-6/group_quipucords-qpc-epel-6.repo') }}"
-  when:
-    - qpc_repo_url is not defined
-    - is_rhel_centos_6
-
-- name: Set qpc repo file (RHEL/CentOS 6)
-  set_fact:
-    qpc_repo_file: "{{ ansible_env['QPC_FILE'] | default('group_quipucords-qpc-epel-6.repo') }}"
-  when:
-    - qpc_repo_file is not defined
-    - is_rhel_centos_6
-
-- name: Set default qpc_version if CLI_PACKAGE_VERSION is not defined
-  set_fact:
-    qpc_version: "qpc"
-  when:
-    - CLI_PACKAGE_VERSION is not defined
-
 - name: Set qpc version (RHEL/CentOS 6)
   set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.el6"
+    qpc_package_name: "qpc.el6.noarch.rpm"
   when:
-    - qpc_version is not defined
+    - qpc_package_name is not defined
     - is_rhel_centos_6
 
 - name: Set qpc version (RHEL/CentOS 7)
   set_fact:
-    qpc_version: "qpc-{{CLI_PACKAGE_VERSION}}.el7"
+    qpc_package_name: "qpc.el7.noarch.rpm"
   when:
-    - qpc_version is not defined
     - is_rhel_centos_7
 
 - name: set qpc_rpm_local_path
   set_fact:
-    qpc_rpm_local_path: "{{ pkg_install_dir }}{{ qpc_version }}.noarch.rpm"
+    qpc_rpm_local_path: "{{ pkg_install_dir }}{{ qpc_package_name }}"
 
 - name: Check if local qpc rpm exists
   stat:
@@ -62,19 +27,30 @@
   become: true
   when: find_qpc_rpm_local.stat.exists == true
 
-- name: Add QPC repository
-  get_url:
-    url: "{{ qpc_repo_url }}"
-    dest: '/etc/yum.repos.d/{{ qpc_repo_file }}'
-    mode: 0644
-    force: yes
-  become: true
+- name: Set the default base URL for the qpc cli yum install
+  set_fact:
+    install_flag_cli_version: "{{ cli_version }}"
   when:
     - find_qpc_rpm_local.stat.exists == false
+    - cli_version is defined
+
+- name: Set the default base URL for the qpc cli yum install
+  set_fact:
+    cli_github_release_url: "https://github.com/quipucords/qpc/releases/download/{{ install_flag_cli_version }}"
+  when:
+    - find_qpc_rpm_local.stat.exists == false
+    - install_flag_cli_version is defined
+
+- name: Set the default base URL for the qpc cli yum install
+  set_fact:
+    cli_github_release_url: "https://github.com/quipucords/qpc/releases/latest/download"
+  when:
+    - find_qpc_rpm_local.stat.exists == false
+    - install_flag_cli_version is not defined
 
 - name: Install the latest version (QPC RHEL/Centos)
   yum:
-    name: '{{ qpc_version }}'
+    name: '{{ cli_github_release_url }}/{{ qpc_package_name }}'
     state: present
   become: true
   when:

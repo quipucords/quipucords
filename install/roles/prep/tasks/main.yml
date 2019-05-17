@@ -1,5 +1,23 @@
 ---
 
+- name: Check if install_offline flag is defined and true
+  set_fact:
+    install_flag_install_offline: true 
+  when: 
+    - install_offline is defined
+    - install_offline == 'true'
+    
+- name: Set install_offline flag to false it was not defined or was not true
+  set_fact:
+    install_flag_install_offline: false 
+  when: 
+    - install_flag_install_offline is not defined
+
+- name: Checking if server_version is defined when install_offline is true
+  fail:
+  when:
+    - install_flag_install_offline and server_version is not defined
+
 - name: Set operating system information
   set_fact:
     is_rhel_centos_6: "{{ ((ansible_distribution == 'RedHat') or (ansible_distribution == 'CentOS')) and (ansible_distribution_major_version == '6') }}"
