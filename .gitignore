@@ -36,7 +36,6 @@ quipucords/quipucords/templates/
 # Installer
 pip-log.txt
 pip-delete-this-directory.txt
-install/packages/*
 
 # Unit test / coverage reports
 htmlcov/

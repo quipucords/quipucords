@@ -2,8 +2,6 @@ def qpc_version = "1.0.0"
 def image_name = "quipucords:${qpc_version}"
 def tarfile = "quipucords.${qpc_version}.tar"
 def targzfile = "${tarfile}.gz"
-def install_tar = "quipucords.${qpc_version}.install.tar"
-def install_targzfile = "${install_tar}.gz"
 def postgres_version = "9.6.10"
 def postgres_image_name = "postgres:${postgres_version}"
 def postgres_tarfile = "postgres.${postgres_version}.tar"
@@ -59,13 +57,7 @@ node('f28-os') {
         sh "tar -zcvf $postgres_targzfile $postgres_dir"
         sh "sudo chmod 775 $postgres_targzfile"
 
-        sh "sudo tar -cvf $install_tar install/*"
-        sh "sudo chmod 755 $install_tar"
-        sh "sudo gzip -f --best $install_tar"
-        sh "sudo chmod 755 $install_targzfile"
-
         archiveArtifacts postgres_targzfile
         archiveArtifacts targzfile
-        archiveArtifacts install_targzfile
     }
 }
