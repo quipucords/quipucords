@@ -13,8 +13,6 @@
   when: 
     - install_flag_install_offline is not defined
 
-
-
 - name: Checking if server_version is defined when install_offline is true
   fail:
   when:
