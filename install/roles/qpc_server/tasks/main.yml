@@ -180,8 +180,7 @@
 - name: Rename Quipucords server docker image to version specific cache name (offline install)
   command: cp -f "{{ pkg_install_dir }}{{ github_server_filename }}" "{{qpc_server_local_path}}"
   when:
-    - install_offline is defined
-    - install_offline == 'true'
+    - install_flag_install_offline
     - not quipucords_docker_image_present
 
 - name: Check if local server docker image tar.gz exists

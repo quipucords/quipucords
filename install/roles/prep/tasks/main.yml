@@ -1,9 +1,24 @@
 ---
 
+- name: Check if install_offline flag is defined and true
+  set_fact:
+    install_flag_install_offline: true 
+  when: 
+    - install_offline is defined
+    - install_offline == 'true'
+    
+- name: Set install_offline flag to false it was not defined or was not true
+  set_fact:
+    install_flag_install_offline: false 
+  when: 
+    - install_flag_install_offline is not defined
+
+
+
 - name: Checking if server_version is defined when install_offline is true
   fail:
   when:
-    - install_offline is defined and server_version is not defined
+    - install_flag_install_offline and server_version is not defined
 
 - name: Set operating system information
   set_fact:
