@@ -1,6 +1,6 @@
 def qpc_version = "1.0.0"
 def image_name = "quipucords:${qpc_version}"
-def tarfile = "quipucords.${qpc_version}.tar"
+def tarfile = "quipucords_server_image.tar"
 def targzfile = "${tarfile}.gz"
 def postgres_version = "9.6.10"
 def postgres_image_name = "postgres:${postgres_version}"
