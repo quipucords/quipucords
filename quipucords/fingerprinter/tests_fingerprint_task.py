@@ -1133,16 +1133,29 @@ class EngineTest(TestCase):
             status_message, status = \
                 self.fp_task_runner._process_details_report('',
                                                             details_report)
-            system_platform_id = \
-                json.loads(deployments_report.cached_fingerprints)[
-                    0].get('system_platform_id')
-            expected_insights = {system_platform_id:
-                                 {'system_platform_id': system_platform_id,
-                                  'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
-                                  'ip_addresses': ['1.2.3.4']}}
-
+            expected_insights = [
+                {
+                    'display_name':
+                    'dhcp181-3.gsslab.rdu2.redhat.com',
+                    'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                    'facts': [
+                        {
+                            'namespace': 'qpc',
+                            'facts':
+                                {
+                                    'ip_addresses': ['1.2.3.4'],
+                                    'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
+                                },
+                            'rh_product_certs': [],
+                            'rh_products_installed': []
+                        }
+                    ],
+                    'system_profile': {}
+                }
+            ]
             self.assertIn('success', status_message.lower())
             self.assertEqual(status, 'completed')
+            print(repr(json.loads(deployments_report.cached_insights)))
             self.assertEqual(
                 json.loads(deployments_report.cached_insights),
                 expected_insights)
@@ -1169,4 +1182,42 @@ class EngineTest(TestCase):
                 self.assertEqual(status, 'failed')
                 self.assertEqual(
                     json.dumps(
-                        deployments_report.cached_insights), '"{}"')
+                        deployments_report.cached_insights), '"[]"')
+
+    def test_format_certs(self):
+        """Testing the format_certs function."""
+        certs = ['69.pem', '67.pem', '']
+        formatted_certs = FingerprintTaskRunner.format_certs(certs)
+        self.assertEqual([69, 67], formatted_certs)
+        # assert empty list stays empty
+        certs = []
+        formatted_certs = FingerprintTaskRunner.format_certs(certs)
+        self.assertEqual([], formatted_certs)
+        # assert exception returns empty
+        certs = ['notint.pem']
+        formatted_certs = FingerprintTaskRunner.format_certs(certs)
+        self.assertEqual([], formatted_certs)
+
+    def test_format_products(self):
+        """Testing the format_products function."""
+        products = [
+            {'name': 'JBoss EAP',
+             'presence': 'present'},
+            {'name': 'JBoss Fuse',
+             'presence': 'present'},
+            {'name': 'JBoss BRMS',
+             'presence': 'absent'},
+            {'name': 'JBoss Web Server',
+             'presence': 'absent'}
+        ]
+        is_rhel = True
+        formatted_products = FingerprintTaskRunner.format_products(products,
+                                                                   is_rhel)
+        expected = ['RHEL', 'EAP', 'FUSE']
+        self.assertEqual(expected, formatted_products)
+        # test no products
+        products = []
+        is_rhel = None
+        formatted_products = FingerprintTaskRunner.format_products(products,
+                                                                   is_rhel)
+        self.assertEqual([], formatted_products)

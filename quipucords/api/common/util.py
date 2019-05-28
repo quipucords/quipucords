@@ -27,7 +27,7 @@ CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'ip_addresses', 'mac_addresses',
                    'subscription_manager_id', 'vm_uuid']
 
-NONCANONICAL_FACTS = ['system_platform_id', 'name', 'os_release', 'os_version',
+NONCANONICAL_FACTS = ['name', 'os_release', 'os_version',
                       'infrastructure_type', 'cpu_count', 'architecture',
                       'vm_host', 'vm_host_socket_count', 'vm_host_core_count',
                       'is_redhat', 'redhat_certs', 'cpu_core_per_socket',
