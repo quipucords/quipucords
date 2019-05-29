@@ -132,10 +132,10 @@ def _create_report_slices(report, insights_hosts):
         for index in index_slice:
             try:
                 host = insights_hosts[index]
+                if host:
+                    hosts.append(host)
             except KeyError as e:
                 print(e)
-            if host:
-                hosts.append(host)
         report_slice_id = str(uuid.uuid4())
         report_slice_filename = create_filename(
             report_slice_id, 'json', report.id)
