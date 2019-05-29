@@ -115,11 +115,12 @@ def _create_report_slices(report, insights_hosts):
         'report_platform_id': str(report.report_platform_id),
         'report_type': 'insights',
         'report_version': report.report_version,
+        'qpc_server_report_id': report.id,
         'qpc_server_version': server_version(),
-        'server_id': ServerInformation.create_or_retreive_server_id()
+        'qpc_server_id': ServerInformation.create_or_retreive_server_id()
     }
     metadata = {
-        'report_id': report.id,
+        'report_id': str(report.report_platform_id),
         'host_inventory_api_version': '1.0',
         'source': 'qpc',
         'source_metadata': source_metadata,
